@@ -22,6 +22,9 @@ __pycache__
 # Installer logs
 pip-log.txt
 
+# Django
+default.db
+
 # Unit test / coverage reports
 .coverage
 .tox
@@ -50,7 +53,7 @@ override.cfg
 # JetBrains
 .idea
 
-
+# OS X
 .DS_Store
 
 *.trace
