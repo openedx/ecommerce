@@ -4,5 +4,4 @@ django-appconf==0.6
 django_compressor==1.4	        # MIT
 django-libsass==0.2             # BSD
 django-model-utils==1.5.0 	# BSD
-django-waffle==0.10             # BSD
 logutils==0.3.3	                # BSD
