@@ -183,6 +183,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'waffle.middleware.WaffleMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -211,6 +212,11 @@ DJANGO_APPS = (
 
     # Admin panel and documentation
     'django.contrib.admin',
+
+    # Feature gating
+    'waffle',
+
+    # Static file compression
     'compressor',
 )
 
