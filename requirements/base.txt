@@ -1,8 +1,9 @@
 # Base Requirements for the E-Commerce Service. 
-Django==1.7.1               # BSD License
+Django==1.7.4               # BSD License
 django-appconf==0.6
 django_compressor==1.4      # MIT
 django-libsass==0.2         # BSD
 django-model-utils==1.5.0   # BSD
+django-waffle==0.10         # BSD
 djangorestframework==3.0.5  # MIT
 logutils==0.3.3             # BSD

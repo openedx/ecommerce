@@ -1,21 +1,21 @@
 edx-ecommerce
 =============
 
-The edX E-Commerce Front End Service. This repository is the new home for all 
-front-end code related to products, purchasing, upsell, and marketing. 
+The edX E-Commerce Front End Service. This repository is the new home for all
+front-end code related to products, purchasing, upsell, and marketing.
 
-This project is new and under active development. 
+This project is new and under active development.
 
 Overview
 --------
 
-This service contains the front end for all views related to products and 
-purchasable services offered by edX. All business logic and underlying 
-applications are invoked separately from other edX projects, such as 
-edx-platform. The e-commerce solution responsible for all purchases and 
+This service contains the front end for all views related to products and
+purchasable services offered by edX. All business logic and underlying
+applications are invoked separately from other edX projects, such as
+edx-platform. The e-commerce solution responsible for all purchases and
 transactions is `django-oscar <https://github.com/edx/django-oscar>`_.
 
-Each top level application in this repository is an isolated set of views 
+Each top level application in this repository is an isolated set of views
 specific to one aspect of edX's e-commerce solution.
 
 Getting Started
