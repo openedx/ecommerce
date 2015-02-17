@@ -5,18 +5,19 @@ import os
 from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
+
 ########## PATH CONFIGURATION
-# Absolute filesystem path to the Django project directory:
+# Absolute filesystem path to the Django project directory
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))
 
-# Absolute filesystem path to the top-level project folder:
+# Absolute filesystem path to the top-level project folder
 SITE_ROOT = dirname(DJANGO_ROOT)
 
-# Site name:
+# Site name
 SITE_NAME = basename(DJANGO_ROOT)
 
-# Add our project to our pythonpath, this way we don't need to type our project
-# name in our dotted import paths:
+# Add our project to our pythonpath; this way, we don't need to type our project
+# name in our dotted import paths
 path.append(DJANGO_ROOT)
 ########## END PATH CONFIGURATION
 
@@ -119,6 +120,13 @@ COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
 ########## END STATIC FILE CONFIGURATION
 
 
+########## SECRET CONFIGURATION
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
+# Note: This key should only be used for development and testing.
+SECRET_KEY = os.environ.get("ECOMMERCE_SECRET_KEY", "insecure-secret-key")
+########## END SECRET CONFIGURATION
+
+
 ########## SITE CONFIGURATION
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -175,7 +183,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'waffle.middleware.WaffleMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -188,7 +195,7 @@ ROOT_URLCONF = '%s.urls' % SITE_NAME
 
 ########## APP CONFIGURATION
 DJANGO_APPS = (
-    # Default Django apps:
+    # Default Django apps
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -196,17 +203,20 @@ DJANGO_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Useful template tags:
+    # Useful template tags
     'django.contrib.humanize',
 
-    # Admin panel and documentation:
+    # Django REST framework
+    'rest_framework',
+
+    # Admin panel and documentation
     'django.contrib.admin',
-    'waffle',
     'compressor',
 )
 
 # Apps specific for this project go here.
 LOCAL_APPS = (
+    'health',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -249,12 +259,12 @@ LOGGING = {
 
 ########## WSGI CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
-WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
+WSGI_APPLICATION = 'wsgi.application'
 ########## END WSGI CONFIGURATION
 
 ########## SEGMENT.IO
-# 'None' disables tracking.  This will be turned on for test and production.
-SEGMENT_IO_KEY = None
+# 'None' disables tracking. This will be turned on for test and production.
+SEGMENT_KEY = None
 
 # Regular expression used to identify users that should be ignored in reporting.
 # This value will be compiled and should be either a string (e.g. when importing with YAML) or
@@ -290,9 +300,9 @@ PLATFORM_NAME = 'Your Platform Name Here'
 DOCS_ROOT = join(dirname(SITE_ROOT), 'docs')
 
 # Load the docs config into memory when the server starts
-with open(join(DOCS_ROOT, "config.ini")) as config_file:
-    DOCS_CONFIG = ConfigParser.ConfigParser()
-    DOCS_CONFIG.readfp(config_file)
+# with open(join(DOCS_ROOT, "config.ini")) as config_file:
+#     DOCS_CONFIG = ConfigParser.ConfigParser()
+#     DOCS_CONFIG.readfp(config_file)
 ########## END DOCS/HELP CONFIGURATION
 
 ########## THEME CONFIGURATION

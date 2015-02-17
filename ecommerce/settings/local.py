@@ -80,7 +80,7 @@ PLATFORM_NAME = 'edX'
 
 ########## SEGMENT.IO
 # 'None' disables tracking.  This will be turned on for test and production.
-SEGMENT_IO_KEY = os.environ.get('SEGMENT_WRITE_KEY')
+SEGMENT_KEY = os.environ.get('SEGMENT_WRITE_KEY')
 ########## END SEGMENT.IO
 
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')

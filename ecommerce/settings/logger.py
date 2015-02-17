@@ -1,5 +1,4 @@
 """Logging configuration"""
-
 import os
 import platform
 import sys
@@ -15,7 +14,6 @@ def get_logger_config(log_dir='/var/tmp',
                       service_variant='edx-ecommerce'):
 
     """
-
     Return the appropriate logging config dictionary. You should assign the
     result of this to the LOGGING var in your settings.
 
@@ -23,7 +21,6 @@ def get_logger_config(log_dir='/var/tmp',
     instead, application logs will be dropped in log_dir.
 
     "edx_filename" is ignored unless dev_env is set to true since otherwise logging is handled by rsyslogd.
-
     """
 
     # Revert to INFO if an invalid string is passed in

@@ -1,11 +1,11 @@
 # Pro-tip: Try not to put anything here. There should be no dependency in
-#	production that isn't in development.
+# production that isn't in development.
 -r base.txt
 
 # TODO: Determine production requirements, keep this file as a template - Steve
-#MySQL-python==1.2.5		# GPL License
-#PyYAML==3.11			# MIT License
-#gunicorn==0.17.4		# MIT
-#path.py==5.2			# MIT
+#MySQL-python==1.2.5     # GPL License
+#PyYAML==3.11            # MIT License
+#gunicorn==0.17.4        # MIT
+#path.py==5.2            # MIT
 #python-memcached==1.53
 #nodeenv==0.11.1
