@@ -6,6 +6,8 @@ from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from oscar.defaults import *
+from oscar import get_core_apps
+from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 
 ########## PATH CONFIGURATION
@@ -168,7 +170,6 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 
-from oscar import OSCAR_MAIN_TEMPLATE_DIR
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
     normpath(join(SITE_ROOT, 'templates')),
@@ -238,7 +239,6 @@ LOCAL_APPS = [
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-from oscar import get_core_apps
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + get_core_apps()
 ########## END APP CONFIGURATION
 
@@ -372,5 +372,4 @@ AUTHENTICATION_BACKENDS = (
     'oscar.apps.customer.auth_backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-
 ########## END OSCAR SETTINGS

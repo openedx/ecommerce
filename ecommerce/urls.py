@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     # Heartbeat page
     url(r'^health$', include('health.urls')),
 
+    # TODO: Override default Oscar URLs from our django-oscar-extensions
     # Oscar URLs
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'', include(application.urls)),
