@@ -5,6 +5,8 @@ import os
 from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
+from oscar.defaults import *
+
 
 ########## PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory
@@ -153,6 +155,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
+    'oscar.apps.search.context_processors.search_form',
+    'oscar.apps.promotions.context_processors.promotions',
+    'oscar.apps.checkout.context_processors.checkout',
+    'oscar.apps.customer.notifications.context_processors.notifications',
+    'oscar.core.context_processors.metadata',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
@@ -161,9 +168,11 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 
+from oscar import OSCAR_MAIN_TEMPLATE_DIR
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
     normpath(join(SITE_ROOT, 'templates')),
+    OSCAR_MAIN_TEMPLATE_DIR,
 )
 
 ALLOWED_INCLUDE_ROOTS = (
@@ -184,6 +193,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'oscar.apps.basket.middleware.BasketMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -195,7 +206,7 @@ ROOT_URLCONF = '%s.urls' % SITE_NAME
 
 
 ########## APP CONFIGURATION
-DJANGO_APPS = (
+DJANGO_APPS = [
     # Default Django apps
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -203,6 +214,7 @@ DJANGO_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.flatpages',
 
     # Useful template tags
     'django.contrib.humanize',
@@ -218,15 +230,16 @@ DJANGO_APPS = (
 
     # Static file compression
     'compressor',
-)
+]
 
 # Apps specific for this project go here.
-LOCAL_APPS = (
+LOCAL_APPS = [
     'health',
-)
+]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
+from oscar import get_core_apps
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + get_core_apps()
 ########## END APP CONFIGURATION
 
 
@@ -315,3 +328,49 @@ DOCS_ROOT = join(dirname(SITE_ROOT), 'docs')
 # Path of the SCSS file to use for the site's theme
 THEME_SCSS = 'sass/themes/open-edx.scss'
 ########## END THEME CONFIGURATION
+
+
+########## OSCAR SETTINGS
+
+# Order processing
+# ================
+
+# The initial status for an order, or an order line.
+OSCAR_INITIAL_ORDER_STATUS = 'Open'
+OSCAR_INITIAL_LINE_STATUS = 'Open'
+
+# This dict defines the new order statuses than an order can move to
+OSCAR_ORDER_STATUS_PIPELINE = {
+    'Open': ('Being Processed', 'Order Cancelled',),
+    'Order Cancelled': (),
+    'Being Processed': ('Paid', 'Payment Cancelled',),
+    'Payment Cancelled': (),
+    'Paid': ('Complete', 'Fulfillment Error',),
+    'Fulfillment Error': ('Complete', 'Refunded',),
+    'Complete': ('Refunded',),
+    'Refunded': (),
+}
+
+# This dict defines the line statuses that will be set when an order's status
+# is changed
+OSCAR_ORDER_STATUS_CASCADE = {
+    'Being Processed': 'Being Processed',
+    'Paid': 'Paid',
+    'Cancelled': 'Cancelled',
+    'Complete': 'Fulfilled',
+    'Refunded': 'Refunded',
+}
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+    },
+}
+
+# TODO: Replace with new Authentication backend
+AUTHENTICATION_BACKENDS = (
+    'oscar.apps.customer.auth_backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+########## END OSCAR SETTINGS
