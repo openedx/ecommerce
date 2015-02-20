@@ -8,6 +8,7 @@ from sys import path
 from oscar.defaults import *
 from oscar import get_core_apps
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
+from settings.edx_oscar import *
 
 
 ########## PATH CONFIGURATION
