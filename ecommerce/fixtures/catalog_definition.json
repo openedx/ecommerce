@@ -1,0 +1,200 @@
+[
+{
+    "pk": 1,
+    "model": "catalogue.productclass",
+    "fields": {
+        "track_stock": false,
+        "options": [],
+        "requires_shipping": false,
+        "name": "Course",
+        "slug": "course"
+    }
+},
+{
+    "pk": 2,
+    "model": "catalogue.productclass",
+    "fields": {
+        "track_stock": false,
+        "options": [],
+        "requires_shipping": false,
+        "name": "Seat",
+        "slug": "seat"
+    }
+},
+{
+    "pk": 3,
+    "model": "catalogue.productclass",
+    "fields": {
+        "track_stock": false,
+        "options": [],
+        "requires_shipping": false,
+        "name": "Addon",
+        "slug": "addon"
+    }
+},
+{
+    "pk": 1,
+    "model": "catalogue.productattribute",
+    "fields": {
+        "product_class": 1,
+        "name": "course_key",
+        "code": "course_key",
+        "type": "text",
+        "required": true
+    }
+},
+{
+    "pk": 2,
+    "model": "catalogue.productattribute",
+    "fields": {
+        "product_class": 2,
+        "name": "id_verification_required",
+        "code": "id_verification_required",
+        "type": "boolean",
+        "required": false
+    }
+},
+{
+    "pk": 3,
+    "model": "catalogue.productattribute",
+    "fields": {
+        "product_class": 2,
+        "name": "certificate_type",
+        "code": "certificate_type",
+        "type": "text",
+        "required": true
+    }
+},
+{
+    "pk": 1,
+    "model": "catalogue.category",
+    "fields": {
+        "description": "All Course Offerings.",
+        "numchild": 1,
+        "slug": "courses",
+        "depth": 1,
+        "full_name": "Courses",
+        "path": "0001",
+        "image": "",
+        "name": "Courses"
+    }
+},
+{
+    "pk": 2,
+    "model": "catalogue.category",
+    "fields": {
+        "description": "All Course Seats.",
+        "numchild": 1,
+        "slug": "seats",
+        "depth": 1,
+        "full_name": "Course Seats",
+        "path": "0002",
+        "image": "",
+        "name": "Seats"
+    }
+},
+{
+    "pk": 1,
+    "model": "catalogue.productcategory",
+    "fields": {
+        "category": 1,
+        "product": 1
+    }
+},
+{
+    "pk": 2,
+    "model": "catalogue.productcategory",
+    "fields": {
+        "category": 2,
+        "product": 2
+    }
+},
+{
+    "pk": 1,
+    "model": "catalogue.product",
+    "fields": {
+        "rating": null,
+        "description": "",
+        "parent": null,
+        "title": "EdX DemoX Course",
+        "date_updated": "2015-02-19T12:23:50.102Z",
+        "upc": "000000000001",
+        "is_discountable": true,
+        "date_created": "2015-02-19T12:23:29.804Z",
+        "product_options": [],
+        "slug": "edx-demox-course",
+        "product_class": 1
+    }
+},
+{
+    "pk": 1,
+    "model": "catalogue.productattributevalue",
+    "fields": {
+        "attribute": 1,
+        "product": 1,
+        "value_text": "edX/demoX/2015T3"
+    }
+},
+{
+    "pk": 2,
+    "model": "catalogue.productattributevalue",
+    "fields": {
+        "attribute": 2,
+        "product": 2,
+        "value_boolean": false
+    }
+},
+{
+    "pk": 3,
+    "model": "catalogue.productattributevalue",
+    "fields": {
+        "attribute": 3,
+        "product": 2,
+        "value_text": "honor"
+    }
+},
+{
+    "pk": 2,
+    "model": "catalogue.product",
+    "fields": {
+        "rating": null,
+        "description": "",
+        "parent": 1,
+        "title": "Seat in edX DemoX Course with Honor Certificate",
+        "date_updated": "2013-07-18T14:35:52.484Z",
+        "upc": "000000000002",
+        "is_discountable": true,
+        "date_created": "2015-02-19T14:35:52.484Z",
+        "product_options": [],
+        "slug": "edx-demox-course-seat-honor",
+        "product_class": 2
+    }
+},
+{
+    "pk": 1,
+    "model": "partner.partner",
+    "fields": {
+        "code": "edX",
+        "name": "edX",
+        "users": []
+    }
+},
+{
+    "pk": 1,
+    "model": "partner.stockrecord",
+    "fields": {
+        "price_currency": "USD",
+        "product": 2,
+        "partner_sku": "SEAT-HONOR-EDX-DEMOX-2015T2",
+        "price_retail": "0",
+        "date_updated": "2015-02-19T12:25:41.107Z",
+        "num_in_stock": null,
+        "num_allocated": null,
+        "low_stock_threshold": null,
+        "date_created": "2015-02-19T12:25:41.107Z",
+        "partner": 1,
+        "price_excl_tax": "0",
+        "cost_price": "0"
+    }
+}
+]
