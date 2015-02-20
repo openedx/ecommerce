@@ -7,3 +7,9 @@ django-model-utils==1.5.0   # BSD
 django-waffle==0.10         # BSD
 djangorestframework==3.0.5  # MIT
 logutils==0.3.3             # BSD
+
+# Our Django Oscar Requirements
+-e git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
+# TODO: Enable django-oscar-extensions once there is a setup.py and some actual extensions.
+#-e git+https://github.com/edx/django-oscar-extensions.git@7a2b870bab90a58c8177cbffa81b8caddfabef14#egg=django-oscar-extensions
+-e git+https://github.com/edx/django-oscar-api.git@27d1d3e731cf370e018ea613aa56ce40ca3aab5e#egg=django-oscar-api

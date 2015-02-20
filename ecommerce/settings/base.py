@@ -5,6 +5,11 @@ import os
 from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
+from oscar.defaults import *
+from oscar import get_core_apps
+from oscar import OSCAR_MAIN_TEMPLATE_DIR
+from settings.edx_oscar import *
+
 
 ########## PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory
@@ -153,6 +158,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
+    'oscar.apps.search.context_processors.search_form',
+    'oscar.apps.promotions.context_processors.promotions',
+    'oscar.apps.checkout.context_processors.checkout',
+    'oscar.apps.customer.notifications.context_processors.notifications',
+    'oscar.core.context_processors.metadata',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
@@ -164,6 +174,7 @@ TEMPLATE_LOADERS = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
     normpath(join(SITE_ROOT, 'templates')),
+    OSCAR_MAIN_TEMPLATE_DIR,
 )
 
 ALLOWED_INCLUDE_ROOTS = (
@@ -184,6 +195,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'oscar.apps.basket.middleware.BasketMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -195,7 +208,7 @@ ROOT_URLCONF = '%s.urls' % SITE_NAME
 
 
 ########## APP CONFIGURATION
-DJANGO_APPS = (
+DJANGO_APPS = [
     # Default Django apps
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -203,6 +216,7 @@ DJANGO_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.flatpages',
 
     # Useful template tags
     'django.contrib.humanize',
@@ -218,15 +232,15 @@ DJANGO_APPS = (
 
     # Static file compression
     'compressor',
-)
+]
 
 # Apps specific for this project go here.
-LOCAL_APPS = (
+LOCAL_APPS = [
     'health',
-)
+]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + get_core_apps()
 ########## END APP CONFIGURATION
 
 
