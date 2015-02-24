@@ -1,0 +1,12 @@
+language: python
+python:
+    - "2.7"
+install:
+    - make test_requirements
+    - pip install coveralls
+script: make test_python
+branches:
+    only:
+        - master
+after_success:
+    coveralls
