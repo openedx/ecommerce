@@ -5,10 +5,7 @@ import os
 from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
-from oscar.defaults import *
-from oscar import get_core_apps
-from oscar import OSCAR_MAIN_TEMPLATE_DIR
-from extensions.settings.oscar import *
+from extensions.settings._oscar import *
 
 
 ########## PATH CONFIGURATION
@@ -240,13 +237,7 @@ LOCAL_APPS = [
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + get_core_apps(
-    [
-        'extensions.catalogue',
-        'extensions.partner',
-        'extensions.orders'
-    ]
-)
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + OSCAR_APPS
 ########## END APP CONFIGURATION
 
 

@@ -67,20 +67,15 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
 INTERNAL_IPS = ('127.0.0.1',)
 ########## END TOOLBAR CONFIGURATION
 
-INSTALLED_APPS += (
-    'django_nose',
-)
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 LMS_COURSE_SHORTCUT_BASE_URL = 'https://courses.edx.org/courses'
 
 ########## BRANDING
 PLATFORM_NAME = 'edX'
 ########## END BRANDING
 
-########## SEGMENT.IO
+########## SEGMENT
 # 'None' disables tracking.  This will be turned on for test and production.
 SEGMENT_KEY = os.environ.get('SEGMENT_WRITE_KEY')
-########## END SEGMENT.IO
+########## END SEGMENT
 
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')

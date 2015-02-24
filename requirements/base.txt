@@ -1,4 +1,4 @@
-# Base Requirements for the E-Commerce Service. 
+# Base requirements for the e-commerce service
 Django==1.7.4               # BSD License
 django-appconf==0.6
 django_compressor==1.4      # MIT
@@ -8,7 +8,7 @@ django-waffle==0.10         # BSD
 djangorestframework==3.0.5  # MIT
 logutils==0.3.3             # BSD
 
-# Our Django Oscar Requirements
+# Oscar requirements
+-e git+https://github.com/edx/django-oscar-extensions.git@53d9b8bea8c3a546178fd323b78970f92e9520ca#egg=django-oscar-extensions
 -e git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
--e git+https://github.com/edx/django-oscar-extensions.git@2ba35b63ff082b1a996011e61e04f8798562b509#egg=django-oscar-extensions
 -e git+https://github.com/edx/django-oscar-api.git@27d1d3e731cf370e018ea613aa56ce40ca3aab5e#egg=django-oscar-api
