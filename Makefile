@@ -19,6 +19,9 @@ requirements:
 test_requirements:
 	pip install -qr requirements/test.txt --exists-action w
 
+super:
+	python ecommerce/manage.py createsuperuser
+
 migrate:
 	python ecommerce/manage.py migrate
 
@@ -39,4 +42,4 @@ quality:
 validate_python: test_requirements test_python quality
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
-.PHONY: help requirements test_requirements migrate serve clean test_python quality validate_python
+.PHONY: help requirements test_requirements super migrate serve clean test_python quality validate_python

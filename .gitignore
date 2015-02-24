@@ -25,6 +25,9 @@ pip-log.txt
 # Django
 default.db
 
+# Oscar
+media/cache/
+
 # Unit test / coverage reports
 .coverage
 .tox
