@@ -10,5 +10,5 @@ logutils==0.3.3             # BSD
 
 # Our Django Oscar Requirements
 -e git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
--e git+https://github.com/edx/django-oscar-extensions.git@3700d57eff3eb37379c33771b50c6f2cf179ba01#egg=django-oscar-extensions
+-e git+https://github.com/edx/django-oscar-extensions.git@2ba35b63ff082b1a996011e61e04f8798562b509#egg=django-oscar-extensions
 -e git+https://github.com/edx/django-oscar-api.git@27d1d3e731cf370e018ea613aa56ce40ca3aab5e#egg=django-oscar-api
