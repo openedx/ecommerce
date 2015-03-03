@@ -9,6 +9,6 @@ djangorestframework==3.0.5  # MIT
 logutils==0.3.3             # BSD
 
 # Oscar requirements
--e git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
--e git+https://github.com/edx/django-oscar-extensions.git@38538f45607f385eb5938294dc92ccbc95800675#egg=django-oscar-extensions
--e git+https://github.com/edx/django-oscar-api.git@27d1d3e731cf370e018ea613aa56ce40ca3aab5e#egg=django-oscar-api
+git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
+git+https://github.com/edx/django-oscar-extensions.git@38538f45607f385eb5938294dc92ccbc95800675#egg=django-oscar-extensions
+git+https://github.com/edx/django-oscar-api.git@27d1d3e731cf370e018ea613aa56ce40ca3aab5e#egg=django-oscar-api
