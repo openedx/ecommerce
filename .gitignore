@@ -27,9 +27,11 @@ default.db
 
 # Oscar
 media/cache/
+assets
 
 # Unit test / coverage reports
 .coverage
+htmlcov
 .tox
 nosetests.xml
 unittests.xml

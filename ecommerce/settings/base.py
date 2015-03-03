@@ -233,6 +233,7 @@ DJANGO_APPS = [
 
 # Apps specific for this project go here.
 LOCAL_APPS = [
+    'user',
     'health',
 ]
 
@@ -279,7 +280,7 @@ LOGGING = {
 WSGI_APPLICATION = 'wsgi.application'
 ########## END WSGI CONFIGURATION
 
-########## SEGMENT.IO
+########## SEGMENT
 # 'None' disables tracking. This will be turned on for test and production.
 SEGMENT_KEY = None
 
@@ -287,7 +288,57 @@ SEGMENT_KEY = None
 # This value will be compiled and should be either a string (e.g. when importing with YAML) or
 # a Python regex type.
 SEGMENT_IGNORE_EMAIL_REGEX = None
-########## END SEGMENT.IO
+########## END SEGMENT
+
+########## AUTHENTICATION
+"""
+AUTH_USER_MODEL = 'user.User'
+
+INSTALLED_APPS += ['social.apps.django_app.default']
+
+AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOpenIdConnect',) + AUTHENTICATION_BACKENDS
+
+# Set to true if using SSL and running behind a proxy
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'email']
+
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+
+    # By default python-social-auth will simply create a new user/username if the username
+    # from the provider conflicts with an existing username in this system. This custom pipeline function
+    # loads existing users instead of creating new ones.
+    'auth_backends.pipeline.get_user_if_exists',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
+
+SOCIAL_AUTH_USER_FIELDS = ['username', 'email', 'first_name', 'last_name']
+
+# Always raise auth exceptions so that they are properly logged. Otherwise, the PSA middleware will redirect to an
+# auth error page and attempt to display the error message to the user (via Django's message framework). We do not
+# want the uer to see the message; but, we do want our downstream exception handlers to log the message.
+SOCIAL_AUTH_RAISE_EXCEPTIONS = True
+
+# Set these to the correct values for your OAuth2/OpenID Connect provider
+SOCIAL_AUTH_EDX_OIDC_KEY = None
+SOCIAL_AUTH_EDX_OIDC_SECRET = None
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = None
+
+# This value should be the same as SOCIAL_AUTH_EDX_OIDC_SECRET
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
+
+LOGIN_REDIRECT_URL = ''
+"""
+########## END AUTHENTICATION
 
 ########## FEEDBACK AND SUPPORT -- These values should be overridden for production deployments.
 FEEDBACK_EMAIL = 'override.this.email@example.com'

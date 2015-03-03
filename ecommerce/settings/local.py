@@ -5,8 +5,8 @@ from __future__ import absolute_import
 import os
 from os.path import join, normpath
 
-from settings.base import *
-from settings.logger import get_logger_config
+from ecommerce.settings.base import *
+from ecommerce.settings.logger import get_logger_config
 
 
 ########## DEBUG CONFIGURATION
@@ -67,15 +67,29 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
 INTERNAL_IPS = ('127.0.0.1',)
 ########## END TOOLBAR CONFIGURATION
 
+
+########## AUTHENTICATION/AUTHORIZATION
+# Set these to the correct values for your OAuth2/OpenID Connect provider
+"""
+SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
+"""
+########## END AUTHENTICATION/AUTHORIZATION
+
+
 LMS_COURSE_SHORTCUT_BASE_URL = 'https://courses.edx.org/courses'
+
 
 ########## BRANDING
 PLATFORM_NAME = 'edX'
 ########## END BRANDING
 
+
 ########## SEGMENT
 # 'None' disables tracking.  This will be turned on for test and production.
 SEGMENT_KEY = os.environ.get('SEGMENT_WRITE_KEY')
 ########## END SEGMENT
+
 
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')

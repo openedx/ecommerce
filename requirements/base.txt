@@ -7,8 +7,10 @@ django-model-utils==1.5.0   # BSD
 django-waffle==0.10         # BSD
 djangorestframework==3.0.5  # MIT
 logutils==0.3.3             # BSD
+requests==2.5.3             # Apache2
+edx-auth-backends==0.1.2    # AGPL
 
 # Oscar requirements
 git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
-git+https://github.com/edx/django-oscar-extensions.git@38538f45607f385eb5938294dc92ccbc95800675#egg=django-oscar-extensions
+git+https://github.com/edx/django-oscar-extensions.git@93d3286ecf68039fc360aa92fddd81bf456f532e#egg=django-oscar-extensions
 git+https://github.com/edx/django-oscar-api.git@27d1d3e731cf370e018ea613aa56ce40ca3aab5e#egg=django-oscar-api
