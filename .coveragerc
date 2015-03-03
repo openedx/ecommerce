@@ -1,14 +1,9 @@
 # .coveragerc for edx-ecommerce
 [run]
 data_file = .coverage
-source = edx/edx-ecommerce
-
-[report]
-ignore_errors = True
-
-[html]
-title = EdX E-Commerce Front End Python Test Coverage Report
-directory = report
-
-[xml]
-output = coverage.xml
+omit = ecommerce/settings*
+    *wsgi.py
+    *migrations*
+    *test*
+    *static*
+    *templates*

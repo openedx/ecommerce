@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.conf.urls.static import static
 from oscar.app import application
+from extensions.urls import urlpatterns as extensions_patterns
 
 
 # Uncomment the next two lines to enable the admin
@@ -16,14 +17,12 @@ urlpatterns = patterns('',
 
     # Heartbeat page
     url(r'^health$', include('health.urls')),
-
-    # TODO: Override default Oscar URLs from our django-oscar-extensions
-    # Oscar URLs
-    url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'', include(application.urls)),
 )
 
-if settings.DEBUG and settings.MEDIA_ROOT:
+# Install Oscar extension URLs
+urlpatterns += extensions_patterns
+
+if settings.DEBUG and settings.MEDIA_ROOT:  # pragma: no cover
     urlpatterns += static(settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT)
 

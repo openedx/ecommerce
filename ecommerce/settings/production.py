@@ -8,8 +8,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 import yaml
 
-from settings.base import *
-from settings.logger import get_logger_config
+from ecommerce.settings.base import *
+from ecommerce.settings.logger import get_logger_config
 
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
