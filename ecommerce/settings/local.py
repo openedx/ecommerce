@@ -1,5 +1,4 @@
 """Development settings and globals."""
-
 from __future__ import absolute_import
 
 import os
@@ -68,14 +67,15 @@ INTERNAL_IPS = ('127.0.0.1',)
 ########## END TOOLBAR CONFIGURATION
 
 
-########## AUTHENTICATION/AUTHORIZATION
-# Set these to the correct values for your OAuth2/OpenID Connect provider
-"""
+########## AUTHENTICATION
+# Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
 SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
-"""
-########## END AUTHENTICATION/AUTHORIZATION
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
+
+EDX_API_KEY = 'replace-me'
+########## END AUTHENTICATION
 
 
 LMS_COURSE_SHORTCUT_BASE_URL = 'https://courses.edx.org/courses'

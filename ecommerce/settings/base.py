@@ -177,7 +177,6 @@ TEMPLATE_DIRS = (
 ALLOWED_INCLUDE_ROOTS = (
     normpath(join(SITE_ROOT, 'templates')),
 )
-
 ########## END TEMPLATE CONFIGURATION
 
 
@@ -194,6 +193,7 @@ MIDDLEWARE_CLASSES = (
     'waffle.middleware.WaffleMiddleware',
     'oscar.apps.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -233,8 +233,8 @@ DJANGO_APPS = [
 
 # Apps specific for this project go here.
 LOCAL_APPS = [
-    'user',
-    'health',
+    'ecommerce.user',
+    'ecommerce.health',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -280,6 +280,7 @@ LOGGING = {
 WSGI_APPLICATION = 'wsgi.application'
 ########## END WSGI CONFIGURATION
 
+
 ########## SEGMENT
 # 'None' disables tracking. This will be turned on for test and production.
 SEGMENT_KEY = None
@@ -290,8 +291,8 @@ SEGMENT_KEY = None
 SEGMENT_IGNORE_EMAIL_REGEX = None
 ########## END SEGMENT
 
+
 ########## AUTHENTICATION
-"""
 AUTH_USER_MODEL = 'user.User'
 
 INSTALLED_APPS += ['social.apps.django_app.default']
@@ -301,8 +302,8 @@ AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOpenIdConnect',) + AUTHENT
 # Set to true if using SSL and running behind a proxy
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
+# https://github.com/omab/python-social-auth/blob/master/docs/configuration/django.rst#django-admin
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'email']
-
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
@@ -321,6 +322,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.user_details'
 )
 
+# Fields passed to the custom ecommerce user model when creating a new user
 SOCIAL_AUTH_USER_FIELDS = ['username', 'email', 'first_name', 'last_name']
 
 # Always raise auth exceptions so that they are properly logged. Otherwise, the PSA middleware will redirect to an
@@ -336,33 +338,44 @@ SOCIAL_AUTH_EDX_OIDC_URL_ROOT = None
 # This value should be the same as SOCIAL_AUTH_EDX_OIDC_SECRET
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
-LOGIN_REDIRECT_URL = ''
-"""
+LOGIN_REDIRECT_URL = '/dashboard/'
+
+EXTRA_SCOPE = ['permissions']
+
+# Set this to the same value used by the LMS
+EDX_API_KEY = None
 ########## END AUTHENTICATION
 
-########## FEEDBACK AND SUPPORT -- These values should be overridden for production deployments.
+
+########## FEEDBACK AND SUPPORT
+# These values should be overridden for production deployments.
 FEEDBACK_EMAIL = 'override.this.email@example.com'
 SUPPORT_URL = 'http://example.com/'
 PRIVACY_POLICY_URL = 'http://example.com/'
 TERMS_OF_SERVICE_URL = 'http://example.com/'
 HELP_URL = None
-########## END FEEDBACK
+########## END FEEDBACK AND SUPPORT
 
-########## LANDING PAGE -- URLs should be overridden for production deployments.
+
+########## LANDING PAGE
+# URLs should be overridden for production deployments.
 SHOW_LANDING_RESEARCH = True
 RESEARCH_URL = 'http://example.com/'
 OPEN_SOURCE_URL = 'http://example.com/'
-########## END FEEDBACK
+########## END LANDING PAGE
 
-########## DOCUMENTATION LINKS -- These values should be overridden for production deployments.
+
+########## DOCUMENTATION LINKS
+# These values should be overridden for production deployments.
 DOCUMENTATION_LOAD_ERROR_URL = 'http://example.com/'
 # evaluated again at the end of production setting after DOCUMENTATION_LOAD_ERROR_URL has been set
 DOCUMENTATION_LOAD_ERROR_MESSAGE = '<a href="{error_documentation_link}" target="_blank">Read more</a>.'.format(error_documentation_link=DOCUMENTATION_LOAD_ERROR_URL)
+########## END DOCUMENTATION LINKS
 
-########## END FEEDBACK
 
 # The application and platform display names to be used in templates, emails, etc.
 PLATFORM_NAME = 'Your Platform Name Here'
+
 
 ########## DOCS/HELP CONFIGURATION
 DOCS_ROOT = join(dirname(SITE_ROOT), 'docs')
@@ -372,6 +385,7 @@ DOCS_ROOT = join(dirname(SITE_ROOT), 'docs')
 #     DOCS_CONFIG = ConfigParser.ConfigParser()
 #     DOCS_CONFIG.readfp(config_file)
 ########## END DOCS/HELP CONFIGURATION
+
 
 ########## THEME CONFIGURATION
 # Path of the SCSS file to use for the site's theme

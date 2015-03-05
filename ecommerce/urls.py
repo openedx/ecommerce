@@ -3,6 +3,8 @@ import os
 from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.conf.urls.static import static
+from django.core.urlresolvers import reverse_lazy
+from django.views.generic import RedirectView
 from oscar.app import application
 from extensions.urls import urlpatterns as extensions_patterns
 
@@ -17,6 +19,18 @@ urlpatterns = patterns('',
 
     # Heartbeat page
     url(r'^health$', include('health.urls')),
+
+    # Social auth
+    url('', include('social.apps.django_app.urls', namespace='social')),
+    url(
+        r'^accounts/login/$',
+        RedirectView.as_view(
+            url=reverse_lazy('social:begin', args=['edx-oidc']),
+            permanent=False,
+            query_string=True
+        ),
+        name='login'
+    ),
 )
 
 # Install Oscar extension URLs
