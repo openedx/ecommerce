@@ -1,5 +1,4 @@
 """Production settings and globals."""
-
 from os import environ
 
 # Normally you should not import ANYTHING from Django directly
@@ -10,6 +9,7 @@ import yaml
 
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
+
 
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
@@ -30,6 +30,7 @@ def get_env_setting(setting):
     except KeyError:
         error_msg = "Set the %s env variable" % setting
         raise ImproperlyConfigured(error_msg)
+
 
 # ######### HOST CONFIGURATION
 # See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
