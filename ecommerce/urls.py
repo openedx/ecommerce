@@ -5,7 +5,6 @@ from django.conf.urls import patterns, url, include
 from django.conf.urls.static import static
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
-from oscar.app import application
 from extensions.urls import urlpatterns as extensions_patterns
 
 

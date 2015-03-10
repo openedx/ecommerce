@@ -1,14 +1,8 @@
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-
-from oscar.apps.customer.abstract_models import AbstractUser
+from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""
-    # The Enrollment API expects a username, which it uses when performing enrollments
-    username = models.CharField(_('username'), max_length=30, unique=True)
-
     @property
     def access_token(self):
         try:

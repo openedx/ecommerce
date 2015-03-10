@@ -73,12 +73,14 @@ SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
-
-EDX_API_KEY = 'replace-me'
 ########## END AUTHENTICATION
 
 
-LMS_COURSE_SHORTCUT_BASE_URL = 'https://courses.edx.org/courses'
+########## ORDER PROCESSING
+ENROLLMENT_API_URL = 'http://localhost:8000/api/enrollment/v1/enrollment'
+
+EDX_API_KEY = 'replace-me'
+########## END ORDER PROCESSING
 
 
 ########## BRANDING
