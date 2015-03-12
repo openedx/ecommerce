@@ -3,7 +3,7 @@ ecommerce  |Travis|_ |Coveralls|_
 .. |Travis| image:: https://travis-ci.org/edx/ecommerce.svg?branch=master
 .. _Travis: https://travis-ci.org/edx/ecommerce
 
-.. |Coveralls| image:: https://img.shields.io/coveralls/edx/ecommerce.svg
+.. |Coveralls| image:: https://coveralls.io/repos/edx/ecommerce/badge.svg?branch=master
 .. _Coveralls: https://coveralls.io/r/edx/ecommerce?branch=master
 
 The edX E-Commerce Front End Service. This repository is the new home for all
