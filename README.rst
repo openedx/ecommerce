@@ -1,5 +1,10 @@
-edx-ecommerce
-=============
+ecommerce  |Travis|_ |Coveralls|_
+=================================
+.. |Travis| image:: https://travis-ci.org/edx/ecommerce.svg?branch=master
+.. _Travis: https://travis-ci.org/edx/ecommerce
+
+.. |Coveralls| image:: https://img.shields.io/coveralls/edx/ecommerce.svg
+.. _Coveralls: https://coveralls.io/r/edx/ecommerce?branch=master
 
 The edX E-Commerce Front End Service. This repository is the new home for all
 front-end code related to products, purchasing, upsell, and marketing.

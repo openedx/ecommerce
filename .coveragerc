@@ -1,7 +1,10 @@
-# .coveragerc for edx-ecommerce
 [run]
 data_file = .coverage
 omit = ecommerce/settings*
+    # Custom code in the user app is covered, but something about the way Django 1.7
+    # loads models causes the rest of the app to appear uncovered. The result is
+    # skewed coverage stats, which is why the app is omitted from coverage reports.
+    ecommerce/user*
     *wsgi.py
     *migrations*
     *test*

@@ -125,7 +125,7 @@ COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
 ########## SECRET CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 # Note: This key should only be used for development and testing.
-SECRET_KEY = os.environ.get("ECOMMERCE_SECRET_KEY", "insecure-secret-key")
+SECRET_KEY = os.environ.get('ECOMMERCE_SECRET_KEY', 'insecure-secret-key')
 ########## END SECRET CONFIGURATION
 
 
@@ -293,6 +293,7 @@ SEGMENT_IGNORE_EMAIL_REGEX = None
 
 
 ########## AUTHENTICATION
+# Overrides user model used by extensions (auth.User)
 AUTH_USER_MODEL = 'user.User'
 
 INSTALLED_APPS += ['social.apps.django_app.default']
@@ -341,9 +342,6 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 LOGIN_REDIRECT_URL = '/dashboard/'
 
 EXTRA_SCOPE = ['permissions']
-
-# Set this to the same value used by the LMS
-EDX_API_KEY = None
 ########## END AUTHENTICATION
 
 
