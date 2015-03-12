@@ -6,6 +6,6 @@ MySQL-python==1.2.5     # GPL License
 PyYAML==3.11            # MIT License
 gunicorn==19.2.1        # MIT
 
-#path.py==5.2            # MIT
-#python-memcached==1.53
-#nodeenv==0.11.1
+# Oscar requirements
+git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
+git+https://github.com/edx/django-oscar-extensions.git@93d3286ecf68039fc360aa92fddd81bf456f532e#egg=django-oscar-extensions
