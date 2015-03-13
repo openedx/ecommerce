@@ -1,11 +1,8 @@
 # Pro-tip: Try not to put anything here. There should be no dependency in
 # production that isn't in development.
 -r base.txt
+-r not_editable.txt
 
 MySQL-python==1.2.5     # GPL License
 PyYAML==3.11            # MIT License
 gunicorn==19.2.1        # MIT
-
-# Oscar requirements
-git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
-git+https://github.com/edx/django-oscar-extensions.git@93d3286ecf68039fc360aa92fddd81bf456f532e#egg=django-oscar-extensions
