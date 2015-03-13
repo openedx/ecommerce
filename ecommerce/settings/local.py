@@ -67,11 +67,20 @@ INTERNAL_IPS = ('127.0.0.1',)
 ########## END TOOLBAR CONFIGURATION
 
 
+########## URL CONFIGURATION
+# Used to construct LMS URLs; must include a trailing slash
+LMS_URL_ROOT = 'http://127.0.0.1:8000/'
+
+# The location of the LMS student dashboard
+LMS_DASHBOARD_URL = LMS_URL_ROOT + 'dashboard'
+########## END URL CONFIGURATION
+
+
 ########## AUTHENTICATION
 # Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
 SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = LMS_URL_ROOT + 'oauth2'
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 ########## END AUTHENTICATION
 

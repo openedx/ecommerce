@@ -5,6 +5,15 @@ import os
 from ecommerce.settings.base import *
 
 
+########## URL CONFIGURATION
+# Used to construct LMS URLs; must include a trailing slash
+LMS_URL_ROOT = 'http://127.0.0.1:8000/'
+
+# The location of the LMS student dashboard
+LMS_DASHBOARD_URL = LMS_URL_ROOT + 'dashboard'
+########## END URL CONFIGURATION
+
+
 ########## TEST SETTINGS
 INSTALLED_APPS += (
     'django_nose',

@@ -201,6 +201,12 @@ MIDDLEWARE_CLASSES = (
 ########## URL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '%s.urls' % SITE_NAME
+
+# Used to construct LMS URLs; must include a trailing slash
+LMS_URL_ROOT = None
+
+# The location of the LMS student dashboard
+LMS_DASHBOARD_URL = None
 ########## END URL CONFIGURATION
 
 
@@ -339,7 +345,8 @@ SOCIAL_AUTH_EDX_OIDC_URL_ROOT = None
 # This value should be the same as SOCIAL_AUTH_EDX_OIDC_SECRET
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
-LOGIN_REDIRECT_URL = '/dashboard/'
+# Redirect successfully authenticated users to the Oscar dashboard, located at the root
+LOGIN_REDIRECT_URL = ''
 
 EXTRA_SCOPE = ['permissions']
 ########## END AUTHENTICATION
