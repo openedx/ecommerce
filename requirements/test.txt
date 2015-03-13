@@ -1,5 +1,6 @@
 # Test dependencies go here.
 -r base.txt
+-r not_editable.txt
 
 coverage==3.7.1
 ddt==1.0.0

@@ -9,7 +9,3 @@ djangorestframework==3.1.0  # MIT
 logutils==0.3.3             # BSD
 requests==2.5.3             # Apache2
 edx-auth-backends==0.1.2    # AGPL
-
-# Oscar requirements
-git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
-git+https://github.com/edx/django-oscar-extensions.git@e770e3f9066f0c27953256e04204a57f22488e70#egg=django-oscar-extensions
