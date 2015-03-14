@@ -35,9 +35,9 @@ Alternatively, you can launch the server using::
 Requirements
 ------------
 
-The default requirements file(requirements.txt) will install the requirements needed for production. The requirements used for local development can be found in `requirements/local.txt`. This requirements file assumes a local checkout of the django-oscar and django-oscar-extensions repos in a folder called `depends` adjacent to the checkout of this repo.
+``requirements/production.txt`` will install the requirements needed for production. The requirements used for local development can be found in ``requirements/local.txt``. This requirements file assumes a local checkout of the django-oscar and django-oscar-extensions repos in a folder called ``depends`` adjacent to the checkout of this repo.
 
-The expectation is that when developing on the ecommerce application you may need to make changes on these other two projects that are closely related.
+The assumption is that when developing on the ecommerce application, you may need to make changes to these other two closely-related projects.
 
 Documentation
 -------------
