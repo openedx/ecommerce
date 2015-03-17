@@ -11,7 +11,7 @@ def get_logger_config(log_dir='/var/tmp',
                       dev_env=False,
                       debug=False,
                       local_loglevel='INFO',
-                      service_variant='edx-ecommerce'):
+                      service_variant='ecommerce'):
 
     """
     Return the appropriate logging config dictionary. You should assign the
