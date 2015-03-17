@@ -199,6 +199,9 @@ ROOT_URLCONF = '%s.urls' % SITE_NAME
 # Used to construct LMS URLs; must include a trailing slash
 LMS_URL_ROOT = None
 
+# The location of the LMS heartbeat page
+LMS_HEARTBEAT_URL = None
+
 # The location of the LMS student dashboard
 LMS_DASHBOARD_URL = None
 ########## END URL CONFIGURATION

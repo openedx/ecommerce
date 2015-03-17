@@ -68,11 +68,14 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 
 ########## URL CONFIGURATION
-# Used to construct LMS URLs; must include a trailing slash
-LMS_URL_ROOT = 'http://127.0.0.1:8000/'
+# Do not include a trailing slash.
+LMS_URL_ROOT = 'http://127.0.0.1:8000'
+
+# The location of the LMS heartbeat page
+LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
 
 # The location of the LMS student dashboard
-LMS_DASHBOARD_URL = LMS_URL_ROOT + 'dashboard'
+LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
 ########## END URL CONFIGURATION
 
 

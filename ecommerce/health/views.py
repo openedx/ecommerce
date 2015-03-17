@@ -3,6 +3,7 @@ import logging
 
 import requests
 from rest_framework import status
+from django.conf import settings
 from django.db import connection, DatabaseError
 from django.http import JsonResponse
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 OK = u'OK'
 UNAVAILABLE = u'UNAVAILABLE'
-LMS_HEALTH_PAGE = 'https://courses.edx.org/heartbeat'
+LMS_HEALTH_PAGE = getattr(settings, 'LMS_HEARTBEAT_URL')
 
 
 def health(request):
