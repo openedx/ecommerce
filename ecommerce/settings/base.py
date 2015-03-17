@@ -66,10 +66,6 @@ TIME_ZONE = 'America/New_York'
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = 'en-us'
 
-LOCALE_PATHS = (
-    join(SITE_ROOT, 'conf', 'locale'),
-)
-
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#site-id
 SITE_ID = 1
 
@@ -81,8 +77,6 @@ USE_L10N = True
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
 USE_TZ = True
-
-FORMAT_MODULE_PATH = 'formats'
 ########## END GENERAL CONFIGURATION
 
 
@@ -287,17 +281,6 @@ WSGI_APPLICATION = 'wsgi.application'
 ########## END WSGI CONFIGURATION
 
 
-########## SEGMENT
-# 'None' disables tracking. This will be turned on for test and production.
-SEGMENT_KEY = None
-
-# Regular expression used to identify users that should be ignored in reporting.
-# This value will be compiled and should be either a string (e.g. when importing with YAML) or
-# a Python regex type.
-SEGMENT_IGNORE_EMAIL_REGEX = None
-########## END SEGMENT
-
-
 ########## AUTHENTICATION
 # Overrides user model used by extensions (auth.User)
 AUTH_USER_MODEL = 'user.User'
@@ -350,49 +333,3 @@ LOGIN_REDIRECT_URL = ''
 
 EXTRA_SCOPE = ['permissions']
 ########## END AUTHENTICATION
-
-
-########## FEEDBACK AND SUPPORT
-# These values should be overridden for production deployments.
-FEEDBACK_EMAIL = 'override.this.email@example.com'
-SUPPORT_URL = 'http://example.com/'
-PRIVACY_POLICY_URL = 'http://example.com/'
-TERMS_OF_SERVICE_URL = 'http://example.com/'
-HELP_URL = None
-########## END FEEDBACK AND SUPPORT
-
-
-########## LANDING PAGE
-# URLs should be overridden for production deployments.
-SHOW_LANDING_RESEARCH = True
-RESEARCH_URL = 'http://example.com/'
-OPEN_SOURCE_URL = 'http://example.com/'
-########## END LANDING PAGE
-
-
-########## DOCUMENTATION LINKS
-# These values should be overridden for production deployments.
-DOCUMENTATION_LOAD_ERROR_URL = 'http://example.com/'
-# evaluated again at the end of production setting after DOCUMENTATION_LOAD_ERROR_URL has been set
-DOCUMENTATION_LOAD_ERROR_MESSAGE = '<a href="{error_documentation_link}" target="_blank">Read more</a>.'.format(error_documentation_link=DOCUMENTATION_LOAD_ERROR_URL)
-########## END DOCUMENTATION LINKS
-
-
-# The application and platform display names to be used in templates, emails, etc.
-PLATFORM_NAME = 'Your Platform Name Here'
-
-
-########## DOCS/HELP CONFIGURATION
-DOCS_ROOT = join(dirname(SITE_ROOT), 'docs')
-
-# Load the docs config into memory when the server starts
-# with open(join(DOCS_ROOT, "config.ini")) as config_file:
-#     DOCS_CONFIG = ConfigParser.ConfigParser()
-#     DOCS_CONFIG.readfp(config_file)
-########## END DOCS/HELP CONFIGURATION
-
-
-########## THEME CONFIGURATION
-# Path of the SCSS file to use for the site's theme
-THEME_SCSS = 'sass/themes/open-edx.scss'
-########## END THEME CONFIGURATION

@@ -38,11 +38,11 @@ class DisableMigrations(object):
     def __contains__(self, item):
         """Make it appear as if all apps are contained in the dictionary."""
         return True
- 
+
     def __getitem__(self, item):
         """Force Django to look for migrations in a nonexistent package."""
         return 'notmigrations'
- 
+
 if str(os.environ.get('DISABLE_MIGRATIONS')) == 'True':
     MIGRATION_MODULES = DisableMigrations()
 ########## END TEST SETTINGS

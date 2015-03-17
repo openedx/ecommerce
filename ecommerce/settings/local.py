@@ -86,21 +86,10 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
 
 ########## ORDER PROCESSING
-ENROLLMENT_API_URL = 'http://localhost:8000/api/enrollment/v1/enrollment'
+ENROLLMENT_API_URL = LMS_URL_ROOT + 'api/enrollment/v1/enrollment'
 
 EDX_API_KEY = 'replace-me'
 ########## END ORDER PROCESSING
-
-
-########## BRANDING
-PLATFORM_NAME = 'edX'
-########## END BRANDING
-
-
-########## SEGMENT
-# 'None' disables tracking.  This will be turned on for test and production.
-SEGMENT_KEY = os.environ.get('SEGMENT_WRITE_KEY')
-########## END SEGMENT
 
 
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
