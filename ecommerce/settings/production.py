@@ -55,7 +55,3 @@ DB_OVERRIDES = dict(
 
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
-
-# Depends on DOCUMENTATION_LOAD_ERROR_URL, so evaluate at the end
-DOCUMENTATION_LOAD_ERROR_MESSAGE = 'This data may not be available for your course. ' \
-                                   '<a href="{error_documentation_link}" target="_blank">Read more</a>.'.format(error_documentation_link=DOCUMENTATION_LOAD_ERROR_URL)
