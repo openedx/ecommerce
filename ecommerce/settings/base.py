@@ -8,7 +8,7 @@ from sys import path
 from extensions.settings._oscar import *
 
 
-########## PATH CONFIGURATION
+# PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))
 
@@ -21,19 +21,19 @@ SITE_NAME = basename(DJANGO_ROOT)
 # Add our project to our pythonpath; this way, we don't need to type our project
 # name in our dotted import paths
 path.append(DJANGO_ROOT)
-########## END PATH CONFIGURATION
+# END PATH CONFIGURATION
 
 
-########## DEBUG CONFIGURATION
+# DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = False
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-debug
 TEMPLATE_DEBUG = DEBUG
-########## END DEBUG CONFIGURATION
+# END DEBUG CONFIGURATION
 
 
-########## MANAGER CONFIGURATION
+# MANAGER CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = (
     ('Your Name', 'your_email@example.com'),
@@ -41,10 +41,10 @@ ADMINS = (
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
-########## END MANAGER CONFIGURATION
+# END MANAGER CONFIGURATION
 
 
-########## DATABASE CONFIGURATION
+# DATABASE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
     'default': {
@@ -56,10 +56,10 @@ DATABASES = {
         'PORT': '',
     }
 }
-########## END DATABASE CONFIGURATION
+# END DATABASE CONFIGURATION
 
 
-########## GENERAL CONFIGURATION
+# GENERAL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
 TIME_ZONE = 'America/New_York'
 
@@ -77,19 +77,19 @@ USE_L10N = True
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
 USE_TZ = True
-########## END GENERAL CONFIGURATION
+# END GENERAL CONFIGURATION
 
 
-########## MEDIA CONFIGURATION
+# MEDIA CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-root
 MEDIA_ROOT = normpath(join(SITE_ROOT, 'media'))
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = '/media/'
-########## END MEDIA CONFIGURATION
+# END MEDIA CONFIGURATION
 
 
-########## STATIC FILE CONFIGURATION
+# STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = normpath(join(SITE_ROOT, 'assets'))
 
@@ -113,32 +113,32 @@ COMPRESS_PRECOMPILERS = (
 )
 
 COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
-########## END STATIC FILE CONFIGURATION
+# END STATIC FILE CONFIGURATION
 
 
-########## SECRET CONFIGURATION
+# SECRET CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 # Note: This key should only be used for development and testing.
 SECRET_KEY = os.environ.get('ECOMMERCE_SECRET_KEY', 'insecure-secret-key')
-########## END SECRET CONFIGURATION
+# END SECRET CONFIGURATION
 
 
-########## SITE CONFIGURATION
+# SITE CONFIGURATION
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
-########## END SITE CONFIGURATION
+# END SITE CONFIGURATION
 
 
-########## FIXTURE CONFIGURATION
+# FIXTURE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-FIXTURE_DIRS
 FIXTURE_DIRS = (
     normpath(join(SITE_ROOT, 'fixtures')),
 )
-########## END FIXTURE CONFIGURATION
+# END FIXTURE CONFIGURATION
 
 
-########## TEMPLATE CONFIGURATION
+# TEMPLATE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-context-processors
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -171,10 +171,10 @@ TEMPLATE_DIRS = (
 ALLOWED_INCLUDE_ROOTS = (
     normpath(join(SITE_ROOT, 'templates')),
 )
-########## END TEMPLATE CONFIGURATION
+# END TEMPLATE CONFIGURATION
 
 
-########## MIDDLEWARE CONFIGURATION
+# MIDDLEWARE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -189,10 +189,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
-########## END MIDDLEWARE CONFIGURATION
+# END MIDDLEWARE CONFIGURATION
 
 
-########## URL CONFIGURATION
+# URL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '%s.urls' % SITE_NAME
 
@@ -204,10 +204,10 @@ LMS_HEARTBEAT_URL = None
 
 # The location of the LMS student dashboard
 LMS_DASHBOARD_URL = None
-########## END URL CONFIGURATION
+# END URL CONFIGURATION
 
 
-########## APP CONFIGURATION
+# APP CONFIGURATION
 DJANGO_APPS = [
     # Default Django apps
     'django.contrib.auth',
@@ -242,10 +242,10 @@ LOCAL_APPS = [
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + OSCAR_APPS
-########## END APP CONFIGURATION
+# END APP CONFIGURATION
 
 
-########## LOGGING CONFIGURATION
+# LOGGING CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -275,16 +275,16 @@ LOGGING = {
         },
     }
 }
-########## END LOGGING CONFIGURATION
+# END LOGGING CONFIGURATION
 
 
-########## WSGI CONFIGURATION
+# WSGI CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = 'wsgi.application'
-########## END WSGI CONFIGURATION
+# END WSGI CONFIGURATION
 
 
-########## AUTHENTICATION
+# AUTHENTICATION
 # Overrides user model used by extensions (auth.User)
 AUTH_USER_MODEL = 'user.User'
 
@@ -335,4 +335,4 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 LOGIN_REDIRECT_URL = ''
 
 EXTRA_SCOPE = ['permissions']
-########## END AUTHENTICATION
+# END AUTHENTICATION

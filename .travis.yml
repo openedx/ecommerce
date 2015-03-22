@@ -4,7 +4,7 @@ python:
 install:
     - make test_requirements
     - pip install coveralls
-script: make test_python
+script: make validate
 branches:
     only:
         - master

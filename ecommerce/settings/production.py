@@ -32,10 +32,10 @@ def get_env_setting(setting):
         raise ImproperlyConfigured(error_msg)
 
 
-# ######### HOST CONFIGURATION
+# HOST CONFIGURATION
 # See: https://docs.djangoproject.com/en/1.5/releases/1.5/#allowed-hosts-required-in-production
 ALLOWED_HOSTS = ['*']
-########## END HOST CONFIGURATION
+# END HOST CONFIGURATION
 
 CONFIG_FILE = get_env_setting('ECOMMERCE_CFG')
 

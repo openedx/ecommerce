@@ -11,7 +11,7 @@ help:
 	@echo '    make test_python                          run unit tests with migrations disabled        '
 	@echo '    make html_coverage                        generate and view HTML coverage report         '
 	@echo '    make quality                              run pep8 and pylint                            '
-	@echo '    make validate_python                      run unit tests, followed by quality checks     '
+	@echo '    make validate                             run unit tests, followed by quality checks     '
 	@echo '                                                                                             '
 
 dev_requirements:
@@ -41,10 +41,10 @@ html_coverage:
 
 quality:
 	pep8 --config=.pep8 ecommerce
-	PYTHONPATH=".:./ecommerce:$PYTHONPATH" pylint --rcfile=pylintrc ecommerce
+	pylint --rcfile=pylintrc ecommerce
 
-validate_python: test_requirements test_python quality
+validate: test_python quality
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements test_requirements super migrate serve clean test_python html_coverage \
-	quality validate_python
+	quality validate

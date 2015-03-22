@@ -28,18 +28,20 @@ def get_logger_config(log_dir='/var/tmp',
         local_loglevel = 'INFO'
 
     hostname = platform.node().split(".")[0]
-    syslog_format = ("[service_variant={service_variant}]"
-                     "[%(name)s][env:{logging_env}] %(levelname)s "
-                     "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] "
-                     "- %(message)s").format(
-                        service_variant=service_variant,
-                        logging_env=logging_env, hostname=hostname)
+    syslog_format = (
+        "[service_variant={service_variant}]"
+        "[%(name)s][env:{logging_env}] %(levelname)s "
+        "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] "
+        "- %(message)s"
+    ).format(
+        service_variant=service_variant,
+        logging_env=logging_env, hostname=hostname
+    )
 
     if debug:
         handlers = ['console']
     else:
         handlers = ['local']
-
 
     logger_config = {
         'version': 1,

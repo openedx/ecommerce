@@ -15,14 +15,11 @@ UNAVAILABLE = u'UNAVAILABLE'
 LMS_HEALTH_PAGE = getattr(settings, 'LMS_HEARTBEAT_URL')
 
 
-def health(request):
+def health(_):
     """Allows a load balancer to verify that the ecommerce front-end service is up.
 
     Checks the status of the database connection and the LMS, the two services
     on which the ecommerce front-end currently depends.
-
-    Arguments:
-        request (HttpRequest)
 
     Returns:
         HttpResponse: 200 if the ecommerce front-end is available, with JSON data
