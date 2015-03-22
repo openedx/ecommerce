@@ -9,7 +9,7 @@ from django.test import TestCase
 from django.db import DatabaseError
 from django.core.urlresolvers import reverse
 
-from health.views import OK, UNAVAILABLE
+from ecommerce.health.views import OK, UNAVAILABLE
 
 
 @mock.patch('requests.get')

@@ -5,7 +5,7 @@ import os
 from ecommerce.settings.base import *
 
 
-########## URL CONFIGURATION
+# URL CONFIGURATION
 # Do not include a trailing slash.
 LMS_URL_ROOT = 'http://127.0.0.1:8000'
 
@@ -14,15 +14,16 @@ LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
 
 # The location of the LMS student dashboard
 LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
-########## END URL CONFIGURATION
+# END URL CONFIGURATION
 
 
-########## TEST SETTINGS
+# TEST SETTINGS
 INSTALLED_APPS += (
     'django_nose',
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
 
 class DisableMigrations(object):
     """Override method calls on the MIGRATION_MODULES dictionary.
@@ -48,9 +49,10 @@ class DisableMigrations(object):
 
 if str(os.environ.get('DISABLE_MIGRATIONS')) == 'True':
     MIGRATION_MODULES = DisableMigrations()
-########## END TEST SETTINGS
+# END TEST SETTINGS
 
-########## IN-MEMORY TEST DATABASE
+
+# IN-MEMORY TEST DATABASE
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -61,4 +63,4 @@ DATABASES = {
         "PORT": "",
     },
 }
-########## END IN-MEMORY TEST DATABASE
+# END IN-MEMORY TEST DATABASE

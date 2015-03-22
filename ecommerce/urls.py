@@ -9,7 +9,7 @@ from django.views.generic import RedirectView
 from extensions.urls import urlpatterns as extensions_patterns
 
 
-def handler403(request):
+def handler403(_):
     """Redirect unauthorized users to the LMS student dashboard.
 
     Removing URLs isn't the most elegant way to hide Oscar's front-end from
@@ -56,8 +56,10 @@ urlpatterns = patterns(
 urlpatterns += extensions_patterns
 
 if settings.DEBUG and settings.MEDIA_ROOT:  # pragma: no cover
-    urlpatterns += static(settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
 
 if settings.DEBUG:  # pragma: no cover
     # Allow error pages to be tested
