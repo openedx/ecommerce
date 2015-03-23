@@ -68,6 +68,16 @@ def get_logger_config(log_dir='/var/tmp',
                 'propagate': True,
                 'level': 'INFO'
             },
+            'requests': {
+                'handlers': handlers,
+                'propagate': True,
+                'level': 'WARNING'
+            },
+            'django.request': {
+                'handlers': handlers,
+                'propagate': True,
+                'level': 'WARNING'
+            },
             '': {
                 'handlers': handlers,
                 'level': 'DEBUG',
