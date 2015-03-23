@@ -83,13 +83,13 @@ LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
 # Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
 SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = LMS_URL_ROOT + 'oauth2'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = LMS_URL_ROOT + '/oauth2'
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 # END AUTHENTICATION
 
 
 # ORDER PROCESSING
-ENROLLMENT_API_URL = LMS_URL_ROOT + 'api/enrollment/v1/enrollment'
+ENROLLMENT_API_URL = LMS_URL_ROOT + '/api/enrollment/v1/enrollment'
 
 EDX_API_KEY = 'replace-me'
 # END ORDER PROCESSING
