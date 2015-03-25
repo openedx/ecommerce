@@ -1,11 +1,11 @@
 """Common settings and globals."""
-import ConfigParser
 
 import os
-from os.path import abspath, basename, dirname, join, normpath
+from os.path import basename, normpath
 from sys import path
 
 from extensions.settings._oscar import *
+from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 
 # PATH CONFIGURATION
@@ -99,6 +99,7 @@ STATIC_URL = '/static/'
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = (
     normpath(join(DJANGO_ROOT, 'static')),
+    OSCAR_EXTENSIONS_STATIC_DIR,
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
@@ -165,6 +166,7 @@ TEMPLATE_LOADERS = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
     normpath(join(SITE_ROOT, 'templates')),
+    OSCAR_EXTENSIONS_TEMPLATE_DIR,
     OSCAR_MAIN_TEMPLATE_DIR,
 )
 
