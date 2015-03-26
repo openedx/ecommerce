@@ -54,13 +54,14 @@ if str(os.environ.get('DISABLE_MIGRATIONS')) == 'True':
 
 # IN-MEMORY TEST DATABASE
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
-        "USER": "",
-        "PASSWORD": "",
-        "HOST": "",
-        "PORT": "",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'ATOMIC_REQUESTS': True,
     },
 }
 # END IN-MEMORY TEST DATABASE
