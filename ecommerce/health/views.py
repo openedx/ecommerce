@@ -5,7 +5,7 @@ import requests
 from requests.exceptions import RequestException
 from rest_framework import status
 from django.conf import settings
-from django.db import connection, DatabaseError
+from django.db import transaction, connection, DatabaseError
 from django.http import JsonResponse
 
 from ecommerce.health.constants import Status, UnavailabilityMessage
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 LMS_HEALTH_PAGE = getattr(settings, 'LMS_HEARTBEAT_URL')
 
 
+@transaction.non_atomic_requests
 def health(_):
     """Allows a load balancer to verify that the ecommerce front-end service is up.
 
@@ -44,7 +45,6 @@ def health(_):
         cursor.close()
         database_status = Status.OK
     except DatabaseError:
-
         database_status = Status.UNAVAILABLE
 
     try:

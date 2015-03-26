@@ -46,6 +46,8 @@ MANAGERS = ADMINS
 
 # DATABASE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
+# Note that we use connection pooling/persistent connections (CONN_MAX_AGE)
+# in production, but the Django docs discourage its use in development.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.',
@@ -54,6 +56,7 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+        'ATOMIC_REQUESTS': True,
     }
 }
 # END DATABASE CONFIGURATION
