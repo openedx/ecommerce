@@ -6,3 +6,4 @@
 MySQL-python==1.2.5     # GPL License
 PyYAML==3.11            # MIT License
 gunicorn==19.2.1        # MIT
+gevent==1.0.1           # MIT
