@@ -12,9 +12,10 @@ help:
 	@echo '    make html_coverage                        generate and view HTML coverage report         '
 	@echo '    make quality                              run pep8 and pylint                            '
 	@echo '    make validate                             run unit tests, followed by quality checks     '
+	@echo '    make accept                               run acceptance tests                           '
 	@echo '                                                                                             '
 
-dev_requirements:
+dev_requirements: test_requirements
 	pip install -qr requirements/local.txt --exists-action w
 
 test_requirements:
@@ -40,11 +41,14 @@ html_coverage:
 	coverage html && open htmlcov/index.html
 
 quality:
-	pep8 --config=.pep8 ecommerce
-	pylint --rcfile=pylintrc ecommerce
+	pep8 --config=.pep8 ecommerce acceptance_tests
+	pylint --rcfile=pylintrc ecommerce acceptance_tests
 
 validate: test_python quality
 
+accept:
+	nosetests --with-ignore-docstrings -v acceptance_tests
+
 # Targets in a Makefile which do not produce an output file with the same name as the target name
-.PHONY: help requirements test_requirements super migrate serve clean test_python html_coverage \
-	quality validate
+.PHONY: help requirements test_requirements migrate serve clean test_python html_coverage \
+	quality validate accept

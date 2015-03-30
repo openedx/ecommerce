@@ -32,6 +32,19 @@ Alternatively, you can launch the server using::
 
     $ ENABLE_DJANGO_TOOLBAR=1 ./manage.py runserver
 
+
+Testing
+-------
+Unit tests can be run with the following command:
+
+    $ make validate
+
+Acceptance tests require a valid LMS configuration and a user with a known username, email address, password, and access token. The following command will run the acceptance tests:
+
+    $ APP_SERVER_URL="<ECOMMERCE-URL>" LMS_URL="<LMS-URL>" LMS_USERNAME="<USERNAME>" LMS_EMAIL="<EMAIL>" LMS_PASSWORD="<PASSWORD>" ACCESS_TOKEN="<ACCESS-TOKEN>" make accept
+
+Note: Access tokens can be generated/obtained from the LMS admin portal (http://127.0.0.1:8000/admin/oauth2/accesstoken/).
+
 Requirements
 ------------
 

@@ -9,4 +9,5 @@ django_dynamic_fixture==1.8.1
 mock==1.0.1
 pep8==1.6.2
 pylint==1.4.1
-bok-choy==0.3.2
+bok-choy==0.3.3
+nose-ignore-docstring==0.2
