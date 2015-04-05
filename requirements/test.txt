@@ -1,13 +1,14 @@
-# Test dependencies go here.
+# Packages required for testing
 -r base.txt
--r not_editable.txt
 
+bok-choy==0.3.3
 coverage==3.7.1
 ddt==1.0.0
 django-nose==1.3
 django_dynamic_fixture==1.8.1
+httpretty==0.8.8
 mock==1.0.1
+nose-ignore-docstring==0.2
 pep8==1.6.2
 pylint==1.4.1
-bok-choy==0.3.3
-nose-ignore-docstring==0.2
+selenium==2.45.0

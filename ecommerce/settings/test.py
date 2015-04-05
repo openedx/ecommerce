@@ -5,18 +5,6 @@ import os
 from ecommerce.settings.base import *
 
 
-# URL CONFIGURATION
-# Do not include a trailing slash.
-LMS_URL_ROOT = 'http://127.0.0.1:8000'
-
-# The location of the LMS heartbeat page
-LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
-
-# The location of the LMS student dashboard
-LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
-# END URL CONFIGURATION
-
-
 # TEST SETTINGS
 INSTALLED_APPS += (
     'django_nose',
@@ -65,3 +53,41 @@ DATABASES = {
     },
 }
 # END IN-MEMORY TEST DATABASE
+
+
+# URL CONFIGURATION
+# Do not include a trailing slash.
+LMS_URL_ROOT = 'http://127.0.0.1:8000'
+
+# The location of the LMS heartbeat page
+LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
+
+# The location of the LMS student dashboard
+LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
+# END URL CONFIGURATION
+
+
+# AUTHENTICATION
+ENABLE_AUTO_AUTH = True
+
+JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-jwt-secret'
+# END AUTHENTICATION
+
+
+# ORDER PROCESSING
+ENROLLMENT_API_URL = LMS_URL_ROOT + '/api/enrollment/v1/enrollment'
+
+EDX_API_KEY = 'replace-me'
+# END ORDER PROCESSING
+
+
+# PAYMENT PROCESSING
+PAYMENT_PROCESSOR_CONFIG = {
+    'cybersource': {
+        'profile_id': 'fake-profile-id',
+        'access_key': 'fake-access-key',
+        'secret_key': 'fake-secret-key',
+        'pay_endpoint': 'https://replace-me/',
+    }
+}
+# END PAYMENT PROCESSING

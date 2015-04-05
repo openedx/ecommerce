@@ -51,7 +51,6 @@ CACHES = {
 
 # TOOLBAR CONFIGURATION
 # See: http://django-debug-toolbar.readthedocs.org/en/latest/installation.html#explicit-setup
-
 if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
     INSTALLED_APPS += (
         'debug_toolbar',
@@ -78,7 +77,7 @@ LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
 # The location of the LMS student dashboard
 LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
 
-OAUTH2_PROVIDER_URL = '{}/oauth2'.format(LMS_URL_ROOT)
+OAUTH2_PROVIDER_URL = LMS_URL_ROOT + '/oauth2'
 # END URL CONFIGURATION
 
 
@@ -88,6 +87,8 @@ SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_URL_ROOT = OAUTH2_PROVIDER_URL
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
+
+JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-jwt-secret'
 # END AUTHENTICATION
 
 
@@ -96,6 +97,18 @@ ENROLLMENT_API_URL = LMS_URL_ROOT + '/api/enrollment/v1/enrollment'
 
 EDX_API_KEY = 'replace-me'
 # END ORDER PROCESSING
+
+
+# PAYMENT PROCESSING
+PAYMENT_PROCESSOR_CONFIG = {
+    'cybersource': {
+        'profile_id': 'fake-profile-id',
+        'access_key': 'fake-access-key',
+        'secret_key': 'fake-secret-key',
+        'pay_endpoint': 'https://replace-me/',
+    }
+}
+# END PAYMENT PROCESSING
 
 
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
