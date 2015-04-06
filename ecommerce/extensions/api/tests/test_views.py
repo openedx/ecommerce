@@ -282,7 +282,7 @@ class CreateOrderViewTests(TestCase):
 
         # Verify that the order data in the response is valid
         response_serializer = OrderSerializer(data=response.data)
-        self.assertTrue(response_serializer.is_valid())
+        self.assertTrue(response_serializer.is_valid(), msg=response_serializer.errors)
 
         # Verify that the returned order metadata lines up with the order in the system
         expected_serializer = OrderSerializer(Order.objects.get())

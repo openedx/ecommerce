@@ -78,23 +78,6 @@ class FulfillmentModule(object):
         """
         raise NotImplementedError("Revoke method not implemented!")
 
-    @staticmethod
-    def get_product_type(product):
-        """Check for the product type.
-
-        Oscar Products all have a type, and Fulfillment Modules will often be directly associated with them. This
-        function will pull the type from the product, or the parent product. By design, Oscar Child Products do not have
-        a product type, but inherit from their parents.
-
-        Args:
-            product (Product): A product this module may fulfill.
-
-        Returns:
-            ProductClass representing the type of this product or its parent.
-
-        """
-        return product.product_class if product.product_class is not None else product.parent.product_class
-
 
 class EnrollmentFulfillmentModule(FulfillmentModule):
     """ Fulfillment Module for enrolling students after a product purchase.
@@ -121,7 +104,7 @@ class EnrollmentFulfillmentModule(FulfillmentModule):
         """
         supported_lines = []
         for line in lines:
-            if self.get_product_type(line.product).name == 'Seat':
+            if line.product.get_product_class().name == 'Seat':
                 supported_lines.append(line)
         return supported_lines
 
