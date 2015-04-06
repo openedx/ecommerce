@@ -71,8 +71,7 @@ def create_catalog(apps, schema_editor):
         upc="000000000002",
         is_discountable=True,
         slug="edx-demox-course-seat-honor",
-        structure='child',
-        product_class=seat
+        structure='child'
     )
     honor_seat.save()
 
