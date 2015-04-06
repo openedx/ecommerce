@@ -1,9 +1,7 @@
-# Pro-tip: Try not to put anything here. There should be no dependency in
-# production that isn't in development.
+# Packages required in a production environment
 -r base.txt
--r not_editable.txt
 
-MySQL-python==1.2.5     # GPL License
-PyYAML==3.11            # MIT License
-gunicorn==19.2.1        # MIT
-gevent==1.0.1           # MIT
+MySQL-python==1.2.5
+PyYAML==3.11
+gunicorn==19.2.1
+gevent==1.0.1

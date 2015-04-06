@@ -1,11 +1,11 @@
 """Common settings and globals."""
-
 import os
 from os.path import basename, normpath
 from sys import path
 
-from extensions.settings._oscar import *
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
+
+from ecommerce.settings._oscar import *
 
 
 # PATH CONFIGURATION
@@ -102,7 +102,6 @@ STATIC_URL = '/static/'
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = (
     normpath(join(DJANGO_ROOT, 'static')),
-    OSCAR_EXTENSIONS_STATIC_DIR,
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
@@ -169,7 +168,8 @@ TEMPLATE_LOADERS = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
     normpath(join(SITE_ROOT, 'templates')),
-    OSCAR_EXTENSIONS_TEMPLATE_DIR,
+    # Templates which override default Oscar templates
+    normpath(join(DJANGO_ROOT, 'templates/oscar')),
     OSCAR_MAIN_TEMPLATE_DIR,
 )
 
@@ -199,7 +199,10 @@ MIDDLEWARE_CLASSES = (
 
 # URL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
-ROOT_URLCONF = '%s.urls' % SITE_NAME
+ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
+
+# See: https://docs.djangoproject.com/en/1.7/ref/settings/#append-slash
+APPEND_SLASH = False
 
 # Used to construct LMS URLs; must include a trailing slash
 LMS_URL_ROOT = None
@@ -209,6 +212,12 @@ LMS_HEARTBEAT_URL = None
 
 # The location of the LMS student dashboard
 LMS_DASHBOARD_URL = None
+
+# URL to which enrollment requests should be made
+ENROLLMENT_API_URL = None
+
+# OAuth2 provider URL used for OAuth2 transactions (e.g. validating access tokens)
+OAUTH2_PROVIDER_URL = None
 # END URL CONFIGURATION
 
 
@@ -239,7 +248,7 @@ DJANGO_APPS = [
     'compressor',
 ]
 
-# Apps specific for this project go here.
+# Apps specific to this project go here.
 LOCAL_APPS = [
     'ecommerce.user',
     'ecommerce.health',
@@ -290,8 +299,29 @@ WSGI_APPLICATION = 'wsgi.application'
 
 
 # AUTHENTICATION
-# Overrides user model used by extensions (auth.User)
+# Overrides user model used by Oscar. Oscar's default user model doesn't
+# include a username field, instead using email addresses to uniquely identify
+# users. In order to pair with the LMS, we need our users to have usernames,
+# and since we don't need Oscar's custom logic for transferring user notifications,
+# we can rely on a user model which subclasses Django's AbstractUser.
 AUTH_USER_MODEL = 'user.User'
+
+# See: http://getblimp.github.io/django-rest-framework-jwt/#additional-settings
+JWT_AUTH = {
+    'JWT_SECRET_KEY': None,
+    'JWT_ALGORITHM': 'HS256',
+}
+
+# Used to access the Enrollment API. Set this to the same value used by the LMS.
+EDX_API_KEY = None
+
+# Enables a special view that, when accessed, creates and logs in a new user.
+# This should NOT be enabled for production deployments.
+ENABLE_AUTO_AUTH = False
+
+# Prefix for auto auth usernames. This value must be set in order for auto-auth to function.
+# If it were not set, we would be unable to automatically remove all auto-auth users.
+AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
 INSTALLED_APPS += ['social.apps.django_app.default']
 
@@ -341,3 +371,23 @@ LOGIN_REDIRECT_URL = ''
 
 EXTRA_SCOPE = ['permissions']
 # END AUTHENTICATION
+
+
+# ANALYTICS
+# Specify a key to emit events to the corresponding Segment project. `None` disables tracking.
+# See: https://segment.com/docs/libraries/python/
+SEGMENT_KEY = None
+# END ANALYTICS
+
+
+# DJANGO REST FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'ecommerce.extensions.api.authentication.JwtAuthentication',
+        'ecommerce.extensions.api.authentication.BearerAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20
+}
+# END DJANGO REST FRAMEWORK

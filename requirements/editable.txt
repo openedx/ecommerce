@@ -1,3 +1,0 @@
-# Local editable sources of django-oscar and django-oscar-extensions
--e ../depends/django-oscar
--e ../depends/django-oscar-extensions

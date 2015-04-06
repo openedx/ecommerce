@@ -6,7 +6,9 @@ from django.conf.urls.static import static
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
-from extensions.urls import urlpatterns as extensions_patterns
+
+from ecommerce.extensions.urls import urlpatterns as extensions_patterns
+from ecommerce.user import views as user_views
 
 
 def handler403(_):
@@ -50,6 +52,8 @@ urlpatterns = patterns(
         ),
         name='login'
     ),
+    # Auto auth
+    url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
 )
 
 # Install Oscar extension URLs

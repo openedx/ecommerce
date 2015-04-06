@@ -1,10 +1,10 @@
-.. edX E-Commerce documentation master file, created by
+.. eommerce documentation master file, created by
    sphinx-quickstart on Fri Feb 13 11:47:02 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to edX E-Commerce's documentation!
-==========================================
+Documentation for the edX Ecommerce Service
+===========================================
 
 Contents:
 
