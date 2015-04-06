@@ -85,7 +85,7 @@ class RetrieveOrderView(RetrieveAPIView):
 
         """
         order = super(RetrieveOrderView, self).get_object()
-        if order and order.is_paid and order.user == self.request.user:
+        if order and order.is_paid and order.user.username == self.request.user.username:
             return order
         else:
             raise Http404
@@ -141,7 +141,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
 
             >>> url = 'http://localhost:8002/api/v1/orders/'
             >>> data = {'sku': 'SEAT-HONOR-EDX-DEMOX-DEMO-COURSE'}
-            >>> token = jwt.encode({'username': 'Saul', 'email': 'saul@bettercallsaul.com'}, 'insecure-jwt-secret')
+            >>> token = jwt.encode({'username': 'Saul', 'email': 'saul@bettercallsaul.com'}, 'insecure-secret-key')
             >>> headers = {
                 'content-type': 'application/json',
                 'Authorization': 'JWT ' + token
@@ -161,7 +161,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
                         "unit_price_excl_tax": 0.0
                     }
                 ],
-                "number": "100021",
+                "number": "OSCR-100021",
                 "status": "Complete",
                 "total_excl_tax": 0.0
             }'

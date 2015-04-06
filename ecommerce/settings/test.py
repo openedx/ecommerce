@@ -70,7 +70,7 @@ LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
 # AUTHENTICATION
 ENABLE_AUTO_AUTH = True
 
-JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-jwt-secret'
+JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-secret-key'
 # END AUTHENTICATION
 
 
