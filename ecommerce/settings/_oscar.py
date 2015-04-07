@@ -117,7 +117,7 @@ ORDERS_ENDPOINT_RATE_LIMIT = '40/minute'
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
-    'ecommerce.extensions.payment.processors.Cybersource',
+    'ecommerce.extensions.payment.processors.SingleSeatCybersource',
 )
 
 PAYMENT_PROCESSOR_CONFIG = {
@@ -126,6 +126,10 @@ PAYMENT_PROCESSOR_CONFIG = {
         'access_key': 'set-me-please',
         'secret_key': 'set-me-please',
         'pay_endpoint': 'https://replace-me/',
+        # TODO: XCOM-202 must be completed before any other receipt page is used.
+        # By design this specific receipt page is expected.
+        'receipt_page_url': 'https://replace-me/verify_student/payment-confirmation/',
+        'cancel_page_url': 'https://replace-me/',
     }
 }
 # END PAYMENT PROCESSING

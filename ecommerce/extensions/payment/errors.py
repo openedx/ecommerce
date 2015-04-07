@@ -39,3 +39,8 @@ class UserCancelled(CybersourceError):
 class PaymentDeclined(CybersourceError):
     """Payment declined."""
     pass
+
+
+class UnsupportedProductError(CybersourceError):
+    """Cannot generate a receipt for the given product type in this order. """
+    pass

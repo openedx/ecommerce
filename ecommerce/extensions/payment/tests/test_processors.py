@@ -8,15 +8,15 @@ import logging
 import ddt
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 import mock
 from nose.tools import raises
 from oscar.test import factories
 
 import ecommerce.extensions.payment.processors as processors
 from ecommerce.extensions.order.models import Order
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, Cybersource
-from ecommerce.extensions.payment.errors import ExcessiveMerchantDefinedData
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, Cybersource, SingleSeatCybersource
+from ecommerce.extensions.payment.errors import ExcessiveMerchantDefinedData, UnsupportedProductError
 from ecommerce.extensions.payment.constants import CybersourceConstants as CS
 from ecommerce.extensions.payment.constants import ProcessorConstants as PC
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -37,23 +37,44 @@ class PaymentProcessorTestCase(TestCase):
             username='Gus', email='gustavo@lospolloshermanos.com', password='the-chicken-man'
         )
 
-        product_class = factories.ProductClassFactory(
-            name=u'𝕽𝖊𝖘𝖙𝖆𝖚𝖗𝖆𝖓𝖙',
+        self.product_class = factories.ProductClassFactory(
+            name='Seat',
             requires_shipping=False,
             track_stock=False
         )
+
+        product_attribute = factories.ProductAttributeFactory(
+            name='course_key',
+            code='course_key',
+            product_class=self.product_class,
+            type='text'
+        )
+
         fried_chicken = factories.ProductFactory(
             structure='parent',
             title=u'𝑭𝒓𝒊𝒆𝒅 𝑪𝒉𝒊𝒄𝒌𝒆𝒏',
-            product_class=product_class,
+            product_class=self.product_class,
             stockrecords=None,
         )
+
+        factories.ProductAttributeValueFactory(
+            attribute=product_attribute,
+            product=fried_chicken,
+            value_text='pollos/chickenX/2015'
+        )
+
         pollos_hermanos = factories.ProductFactory(
             structure='child',
             parent=fried_chicken,
             title=u'𝕃𝕠𝕤 ℙ𝕠𝕝𝕝𝕠𝕤 ℍ𝕖𝕣𝕞𝕒𝕟𝕠𝕤',
             stockrecords__partner_sku=u'ṠÖṀЁṪḦЇṄĠ⸚ḊЁḶЇĊЇÖÜṠ',
             stockrecords__price_excl_tax=D('9.99'),
+        )
+
+        self.attribute_value = factories.ProductAttributeValueFactory(
+            attribute=product_attribute,
+            product=pollos_hermanos,
+            value_text='pollos/hermanosX/2015'
         )
 
         basket = factories.create_basket(empty=True)
@@ -142,17 +163,38 @@ class CybersourceParameterGenerationTests(CybersourceTests):
             merchant_defined_data=self.MERCHANT_DEFINED_DATA
         )
 
+    @raises(UnsupportedProductError)
+    def test_receipt_error(self):
+        """Test that a single seat CyberSource processor will not construct a receipt for an unknown product. """
+        self.product_class.name = 'Not A Seat'
+        self.product_class.save()
+        self._assert_order_parameters(
+            self.order
+        )
+
     @raises(ExcessiveMerchantDefinedData)
     def test_excessive_merchant_defined_data(self):
         """Test that excessive merchant-defined data is not accepted."""
         # Generate a list of strings with a number of elements exceeding the maximum number
         # of optional fields allowed by CyberSource
         excessive_data = [unicode(i) for i in xrange(CS.MAX_OPTIONAL_FIELDS + 1)]
-        Cybersource().get_transaction_parameters(self.order, merchant_defined_data=excessive_data)
+        SingleSeatCybersource().get_transaction_parameters(self.order, merchant_defined_data=excessive_data)
 
     def _assert_order_parameters(self, order, receipt_page_url=None, cancel_page_url=None, merchant_defined_data=None):
         """Verify that returned transaction parameters match expectations."""
-        returned_parameters = Cybersource().get_transaction_parameters(
+
+        expected_receipt_page_url = receipt_page_url
+        if not receipt_page_url:
+            expected_receipt_page_url = '{receipt_url}{course_key}/?payment-order-num={order_number}'.format(
+                receipt_url=settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['receipt_page_url'],
+                course_key=self.attribute_value.value,
+                order_number=self.order.number
+            )
+
+        if not cancel_page_url:
+            cancel_page_url = settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['cancel_page_url']
+
+        returned_parameters = SingleSeatCybersource().get_transaction_parameters(
             order,
             receipt_page_url=receipt_page_url,
             cancel_page_url=cancel_page_url,
@@ -172,8 +214,7 @@ class CybersourceParameterGenerationTests(CybersourceTests):
             (CS.FIELD_NAMES.LOCALE, getattr(settings, 'LANGUAGE_CODE')),
         ])
 
-        if receipt_page_url:
-            expected_parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = receipt_page_url
+        expected_parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = expected_receipt_page_url
 
         if cancel_page_url:
             expected_parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_CANCEL_PAGE] = cancel_page_url
@@ -191,11 +232,12 @@ class CybersourceParameterGenerationTests(CybersourceTests):
         # Generate a comma-separated list of keys and values to be signed. CyberSource refers to this
         # as a 'Version 1' signature in their documentation.
         # pylint: disable=protected-access
-        expected_parameters[CS.FIELD_NAMES.SIGNATURE] = Cybersource()._generate_signature(expected_parameters)
+        expected_parameters[CS.FIELD_NAMES.SIGNATURE] = SingleSeatCybersource()._generate_signature(expected_parameters)
 
         self.assertEqual(returned_parameters, expected_parameters)
 
 
+@override_settings(PAYMENT_PROCESSORS=('ecommerce.extensions.payment.processors.SingleSeatCybersource',))
 @ddt.ddt
 class CybersourcePaymentAcceptanceTests(CybersourceTests):
     """Tests of the CyberSource processor class related to checking response."""
