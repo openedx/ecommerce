@@ -12,7 +12,7 @@ from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.errors import (
     ExcessiveMerchantDefinedData, UserCancelled, PaymentDeclined, SignatureException,
-    CybersourceError, WrongAmountException, DataException
+    CybersourceError, WrongAmountException, DataException, UnsupportedProductError
 )
 from ecommerce.extensions.payment.constants import CybersourceConstants as CS
 from ecommerce.extensions.payment.constants import ProcessorConstants as PC
@@ -74,6 +74,8 @@ class Cybersource(BasePaymentProcessor):
         self.profile_id = configuration['profile_id']
         self.access_key = configuration['access_key']
         self.secret_key = configuration['secret_key']
+        self.receipt_page_url = configuration['receipt_page_url']
+        self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
 
     def get_transaction_parameters(
@@ -219,9 +221,13 @@ class Cybersource(BasePaymentProcessor):
 
         if receipt_page_url:
             parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = receipt_page_url
+        elif self.receipt_page_url:
+            parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = self._generate_receipt_url(order)
 
         if cancel_page_url:
             parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_CANCEL_PAGE] = cancel_page_url
+        elif self.cancel_page_url:
+            parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_CANCEL_PAGE] = self.cancel_page_url
 
         if merchant_defined_data:
             if len(merchant_defined_data) > CS.MAX_OPTIONAL_FIELDS:
@@ -243,6 +249,22 @@ class Cybersource(BasePaymentProcessor):
         logger.info(u"Generated unsigned CyberSource transaction parameters for order [%s]", order.number)
 
         return parameters
+
+    def _generate_receipt_url(self, order):
+        """Generate the full receipt URL based off the order.
+
+        Takes the receipt page URL and modifies it to display a single order.
+
+        Args:
+            order (Order): The order the receipt represents
+
+        Returns:
+            string: The string representation of the receipt URL for this order.
+
+        """
+        return "{base_url}?payment-order-num={order_number}".format(
+            base_url=self.receipt_page_url, order_number=order.number
+        )
 
     def _generate_signature(self, parameters):
         """Sign the contents of the provided transaction parameters dictionary.
@@ -391,3 +413,38 @@ class Cybersource(BasePaymentProcessor):
                 "The payment processor accepted an order with number [{number}] that is not in our system."
                 .format(number=order_num)
             )
+
+
+class SingleSeatCybersource(Cybersource):
+    """Payment Processor limited to supporting a single seat. """
+
+    def _generate_receipt_url(self, order):
+        """Generate the full receipt URL based off the order.
+
+        Takes the receipt page URL and modifies it to display a single order.
+
+        Args:
+            order (Order): The order the receipt represents
+
+        Returns:
+            string: The string representation of the receipt URL for this order.
+
+        """
+        # TODO: Right now, our receipt page only supports the purchase of Course Seats, and assumes that an order
+        # is relative to a single course. This function will try and get a course ID to construct the URL. Once our
+        # receipt page supports donations, cohorts, and other products, we will need a generic URL that can be
+        # constructed simply from the order number.
+        # This issue should be resolved by completing JIRA Ticket XCOM-202
+        line = order.lines.all()[0]
+        if line and line.product.get_product_class().name == 'Seat':
+            course_key = line.product.attribute_values.get(attribute__name="course_key").value
+            return "{base_url}{course_key}/?payment-order-num={order_number}".format(
+                base_url=self.receipt_page_url, course_key=course_key, order_number=order.number
+            )
+        else:
+            msg = (
+                u'Cannot construct a receipt URL for order [{order_number}]. Receipt page only supports Seat products.'
+                .format(order_number=order.number)
+            )
+            logger.error(msg)
+            raise UnsupportedProductError(msg)
