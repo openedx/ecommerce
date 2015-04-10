@@ -3,6 +3,14 @@
 from rest_framework import serializers
 
 
+class ProcessorSerializer(serializers.Serializer):
+    """ Serializer to use with instances of processors.BasePaymentProcessor """
+
+    def to_representation(self, instance):
+        """ Serialize instances as a string instead of a mapping object. """
+        return instance.NAME
+
+
 class TransactionSerializer(serializers.Serializer):
     """Serializes a transaction. """
     txn_type = serializers.CharField(max_length=128)

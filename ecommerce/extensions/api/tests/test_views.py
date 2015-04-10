@@ -26,6 +26,7 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin,
 from ecommerce.extensions.api.views import OrdersThrottle, FulfillmentMixin, OrderListCreateAPIView
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.order.utils import OrderNumberGenerator
+from ecommerce.tests.mixins import UserMixin
 
 
 Order = get_model('order', 'Order')
@@ -39,21 +40,6 @@ class ThrottlingMixin(object):
 
         # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
         cache.clear()
-
-
-class UserMixin(object):
-    password = 'test'
-
-    def create_user(self, **kwargs):
-        return factories.UserFactory(password=self.password, **kwargs)
-
-    def generate_jwt_token_header(self, user, secret=None):
-        secret = secret or getattr(settings, 'JWT_AUTH')['JWT_SECRET_KEY']
-        payload = {
-            'username': user.username,
-            'email': user.email,
-        }
-        return "JWT {token}".format(token=jwt.encode(payload, secret))
 
 
 @ddt.ddt
