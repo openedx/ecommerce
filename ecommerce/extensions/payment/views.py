@@ -4,12 +4,26 @@ from django.http import HttpResponse
 from django.views.generic import View
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.apps.payment.models import SourceType
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 
 from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.payment.constants import ProcessorConstants as PC
 from ecommerce.extensions.payment.helpers import get_processor_class
+from ecommerce.extensions.payment.serializers import ProcessorSerializer
+
+
+class ProcessorListView(ListAPIView):
+    """ View that lists the available payment processors. """
+    pagination_class = None
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ProcessorSerializer
+
+    def get_queryset(self):
+        """ Fetch the list of payment processor classes based on django settings."""
+        return [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
 
 
 class CybersourceResponseView(View, OrderPlacementMixin, FulfillmentMixin):
