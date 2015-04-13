@@ -10,37 +10,28 @@ import httpretty
 import jwt
 import mock
 from django.contrib.auth.models import Permission
-from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from nose.tools import raises
 from oscar.test import factories
 from oscar.core.loading import get_model
 from rest_framework import status
+from rest_framework.throttling import UserRateThrottle
 
-from ecommerce.extensions.api import errors, data
+from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
-from ecommerce.extensions.api.views import OrdersThrottle, FulfillmentMixin, OrderListCreateAPIView
+from ecommerce.extensions.api.v1.views import OrderListCreateAPIView
+from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.order.utils import OrderNumberGenerator
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
 
 
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
 ShippingEventType = get_model('order', 'ShippingEventType')
-
-
-class ThrottlingMixin(object):
-    def setUp(self):
-        super(ThrottlingMixin, self).setUp()
-
-        # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
-        cache.clear()
 
 
 @ddt.ddt
@@ -58,10 +49,7 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         self.order.save()
 
         self.token = self.generate_jwt_token_header(user)
-
-    @property
-    def url(self):
-        return reverse('orders:retrieve', kwargs={'number': self.order.number})
+        self.url = reverse('api:v1:orders:retrieve', kwargs={'number': self.order.number})
 
     @ddt.data(ORDER.PAID, ORDER.COMPLETE, ORDER.REFUNDED, ORDER.FULFILLMENT_ERROR)
     def test_get_order(self, order_status):
@@ -88,16 +76,7 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-@ddt.ddt
-class RetrieveOrderByBasketViewTests(RetrieveOrderViewTests):
-    """Test cases for getting orders using the basket id. """
-
-    @property
-    def url(self):
-        return reverse('order_by_basket', kwargs={'basket_id': self.basket.id})
-
-
-class CreateOrderViewTests(TestCase):
+class CreateOrderViewTests(ThrottlingMixin, TestCase):
     USER_DATA = {
         'username': 'sgoodman',
         'email': 'saul@bettercallsaul.com',
@@ -107,10 +86,12 @@ class CreateOrderViewTests(TestCase):
     SHIPPING_EVENT_NAME = OrderListCreateAPIView.SHIPPING_EVENT_NAME
     NONEXISTENT_SHIPPING_EVENT_NAME = 'Not Shipping'
     UNAVAILABLE = False
-    UNAVAILABLE_MESSAGE = 'Unavailable'
+    AVAILABILITY_MESSAGE = 'Unavailable'
     JWT_SECRET_KEY = getattr(settings, 'JWT_AUTH')['JWT_SECRET_KEY']
 
     def setUp(self):
+        super(CreateOrderViewTests, self).setUp()
+
         # Override all loggers, suppressing logging calls of severity CRITICAL and below
         logging.disable(logging.CRITICAL)
 
@@ -141,7 +122,7 @@ class CreateOrderViewTests(TestCase):
         """Test that products with a non-zero price can be ordered successfully."""
         self._create_and_verify_order(self.EXPENSIVE_TRIAL_SKU, self.SHIPPING_EVENT_NAME)
 
-    @mock.patch.object(OrderListCreateAPIView, '_fulfill_order', mock.Mock(side_effect=lambda order: order))
+    @mock.patch.object(OrderListCreateAPIView, 'fulfill_order', mock.Mock(side_effect=lambda order: order))
     def test_order_free_product(self):
         """Test that free products can be ordered successfully."""
         factories.ProductFactory(
@@ -170,18 +151,13 @@ class CreateOrderViewTests(TestCase):
         # Verify that a new order can be created successfully
         self._create_and_verify_order(self.EXPENSIVE_TRIAL_SKU, self.SHIPPING_EVENT_NAME)
 
-    @raises(errors.ShippingEventNotFoundError)
-    def test_create_bad_shipping_event(self):
-        """Test that attempts to create a non-existent shipping event fail."""
-        data.get_shipping_event_type(self.NONEXISTENT_SHIPPING_EVENT_NAME)
-
     @mock.patch('oscar.apps.partner.strategy.Structured.fetch_for_product')
     def test_order_unavailable_product(self, mock_fetch_for_product):
         """Test that orders for unavailable products fail with appropriate messaging."""
         OrderInfo = namedtuple('OrderInfo', 'availability')
         Availability = namedtuple('Availability', ['is_available_to_buy', 'message'])
 
-        order_info = OrderInfo(Availability(self.UNAVAILABLE, self.UNAVAILABLE_MESSAGE))
+        order_info = OrderInfo(Availability(self.UNAVAILABLE, self.AVAILABILITY_MESSAGE))
         mock_fetch_for_product.return_value = order_info
 
         response = self._order(sku=self.EXPENSIVE_TRIAL_SKU)
@@ -190,8 +166,11 @@ class CreateOrderViewTests(TestCase):
         self.assertEqual(
             response.data,
             self._bad_request_dict(
-                self.UNAVAILABLE_MESSAGE,
-                errors.PRODUCT_UNAVAILABLE_USER_MESSAGE
+                exceptions.PRODUCT_UNAVAILABLE_DEVELOPER_MESSAGE.format(
+                    sku=self.EXPENSIVE_TRIAL_SKU,
+                    availability=self.AVAILABILITY_MESSAGE
+                ),
+                exceptions.PRODUCT_UNAVAILABLE_USER_MESSAGE
             )
         )
 
@@ -203,8 +182,8 @@ class CreateOrderViewTests(TestCase):
         self.assertEqual(
             response.data,
             self._bad_request_dict(
-                errors.SKU_NOT_FOUND_DEVELOPER_MESSAGE,
-                errors.SKU_NOT_FOUND_USER_MESSAGE
+                exceptions.SKU_NOT_FOUND_DEVELOPER_MESSAGE,
+                exceptions.SKU_NOT_FOUND_USER_MESSAGE
             )
         )
 
@@ -216,14 +195,14 @@ class CreateOrderViewTests(TestCase):
         self.assertEqual(
             response.data,
             self._bad_request_dict(
-                errors.PRODUCT_NOT_FOUND_DEVELOPER_MESSAGE.format(sku=self.FREE_TRIAL_SKU),
-                errors.PRODUCT_NOT_FOUND_USER_MESSAGE
+                exceptions.PRODUCT_NOT_FOUND_DEVELOPER_MESSAGE.format(sku=self.FREE_TRIAL_SKU),
+                exceptions.PRODUCT_NOT_FOUND_USER_MESSAGE
             )
         )
 
     def test_throttling(self):
         """Test that the rate of requests to the orders endpoint is throttled."""
-        request_limit = OrdersThrottle().num_requests
+        request_limit = UserRateThrottle().num_requests
         # Make a number of requests equal to the number of allowed requests
         for _ in xrange(request_limit):
             self._order(sku=self.EXPENSIVE_TRIAL_SKU)
@@ -263,9 +242,13 @@ class CreateOrderViewTests(TestCase):
 
         if auth:
             token = token or self._generate_token(self.USER_DATA)
-            response = self.client.post(reverse('orders:create_list'), order_data, HTTP_AUTHORIZATION='JWT ' + token)
+            response = self.client.post(
+                reverse('api:v1:orders:create_list'),
+                order_data,
+                HTTP_AUTHORIZATION='JWT ' + token
+            )
         else:
-            response = self.client.post(reverse('orders:create_list'), order_data)
+            response = self.client.post(reverse('api:v1:orders:create_list'), order_data)
 
         return response
 
@@ -295,9 +278,9 @@ class CreateOrderViewTests(TestCase):
 
 
 @ddt.ddt
-class FulfillOrderViewTests(UserMixin, TestCase):
+class OrderFulfillViewTests(UserMixin, TestCase):
     def setUp(self):
-        super(FulfillOrderViewTests, self).setUp()
+        super(OrderFulfillViewTests, self).setUp()
         ShippingEventType.objects.create(code='shipped', name=FulfillmentMixin.SHIPPING_EVENT_NAME)
 
         self.user = self.create_user(is_superuser=True)
@@ -308,7 +291,7 @@ class FulfillOrderViewTests(UserMixin, TestCase):
         self.order.save()
         self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)
 
-        self.url = reverse('orders:fulfill', kwargs={'number': self.order.number})
+        self.url = reverse('api:v1:orders:fulfill', kwargs={'number': self.order.number})
 
     def _put_to_view(self):
         """
@@ -385,7 +368,7 @@ class FulfillOrderViewTests(UserMixin, TestCase):
 class ListOrderViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase):
     def setUp(self):
         super(ListOrderViewTests, self).setUp()
-        self.path = reverse('orders:create_list')
+        self.path = reverse('api:v1:orders:create_list')
         self.user = self.create_user()
         self.token = self.generate_jwt_token_header(self.user)
 
@@ -444,42 +427,3 @@ class ListOrderViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
         factories.create_order(user=other_user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assert_empty_result_response(response)
-
-
-class DummyProcessor1(BasePaymentProcessor):  # pylint: disable=abstract-method
-    NAME = "dummy-1"
-
-
-class DummyProcessor2(BasePaymentProcessor):  # pylint: disable=abstract-method
-    NAME = "dummy-2"
-
-
-class PaymentProcessorsViewTestCase(TestCase, UserMixin):
-    """ Ensures correct behavior of the payment processors list view."""
-
-    def setUp(self):
-        self.token = self.generate_jwt_token_header(self.create_user())
-
-    def assert_processor_list_matches(self, expected):
-        """ DRY helper. """
-        response = self.client.get(reverse('payment_processors'), HTTP_AUTHORIZATION=self.token)
-        self.assertEqual(response.status_code, 200)
-        self.assertSetEqual(set(json.loads(response.content)), set(expected))
-
-    def test_permission(self):
-        """Ensure authentication is required to access the view. """
-        response = self.client.get(reverse('payment_processors'))
-        self.assertEqual(response.status_code, 401)
-
-    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.api.tests.test_views.DummyProcessor1'])
-    def test_get_one(self):
-        """Ensure a single payment processor in settings is handled correctly."""
-        self.assert_processor_list_matches(['dummy-1'])
-
-    @override_settings(PAYMENT_PROCESSORS=[
-        'ecommerce.extensions.api.tests.test_views.DummyProcessor1',
-        'ecommerce.extensions.api.tests.test_views.DummyProcessor2',
-    ])
-    def test_get_many(self):
-        """Ensure multiple processors in settings are handled correctly."""
-        self.assert_processor_list_matches(['dummy-1', 'dummy-2'])

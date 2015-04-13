@@ -12,6 +12,8 @@ omit = ecommerce/settings*
     # The fulfillment app's status module only contains constants, which don't require
     # test coverage.
     ecommerce/extensions/fulfillment/status*
+    # Temporary exclusion, while tests that excercise this code are developed.
+    ecommerce/extensions/checkout/mixins*
     *wsgi.py
     *migrations*
     *admin.py

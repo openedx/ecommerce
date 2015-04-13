@@ -110,11 +110,6 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 # END ORDER PROCESSING
 
 
-# RATE LIMITING
-ORDERS_ENDPOINT_RATE_LIMIT = '40/minute'
-# END RATE LIMITING
-
-
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.SingleSeatCybersource',
@@ -125,7 +120,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'profile_id': 'set-me-please',
         'access_key': 'set-me-please',
         'secret_key': 'set-me-please',
-        'pay_endpoint': 'https://replace-me/',
+        'payment_page_url': 'https://replace-me/',
         # TODO: XCOM-202 must be completed before any other receipt page is used.
         # By design this specific receipt page is expected.
         'receipt_page_url': 'https://replace-me/verify_student/payment-confirmation/',

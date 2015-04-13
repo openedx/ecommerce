@@ -6,6 +6,7 @@ class ProcessorConstants(object):
     ORDER_NUMBER = 'order_number'
     SUCCESS = 'success'
     PAID_EVENT_NAME = 'Paid'
+    SETTLEMENT = u'settlement'
 
 
 class CybersourceFieldNames(object):

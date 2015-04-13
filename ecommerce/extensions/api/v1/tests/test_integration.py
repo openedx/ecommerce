@@ -68,7 +68,7 @@ class OrdersIntegrationTests(TestCase):
         data = {'sku': sku}
         token = jwt.encode(self.USER_DATA, self.JWT_SECRET_KEY)
 
-        response = self.client.post(reverse('orders:create_list'), data, HTTP_AUTHORIZATION='JWT ' + token)
+        response = self.client.post(reverse('api:v1:orders:create_list'), data, HTTP_AUTHORIZATION='JWT ' + token)
 
         return response
 

@@ -10,7 +10,7 @@ import logging
 from django.conf import settings
 from django.utils import importlib
 
-from ecommerce.extensions.fulfillment import errors
+from ecommerce.extensions.fulfillment import exceptions
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 
 
@@ -39,7 +39,7 @@ def fulfill_order(order, lines):
     if ORDER.COMPLETE not in order.available_statuses():
         error_msg = "Order has a current status of [{status}] which cannot be fulfilled.".format(status=order.status)
         logger.error(error_msg)
-        raise errors.IncorrectOrderStatusError(error_msg)
+        raise exceptions.IncorrectOrderStatusError(error_msg)
     modules = getattr(settings, 'FULFILLMENT_MODULES', {})
 
     # Construct a dict of lines by their product type.

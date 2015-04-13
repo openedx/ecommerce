@@ -1,8 +1,8 @@
 import json
 from django.conf import settings
 
-from django.test import TestCase, override_settings, RequestFactory
 import httpretty
+from django.test import TestCase, override_settings, RequestFactory
 from oscar.test import factories
 from rest_framework.exceptions import AuthenticationFailed
 

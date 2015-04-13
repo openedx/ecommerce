@@ -27,7 +27,7 @@ User = get_user_model()
 
 class PaymentProcessorTestCase(TestCase):
     """Base test class for payment processor classes."""
-    ORDER_NUMBER = '001'
+    ORDER_NUMBER = '1'
 
     def setUp(self):
         # Override all loggers, suppressing logging calls of severity CRITICAL and below
@@ -77,11 +77,11 @@ class PaymentProcessorTestCase(TestCase):
             value_text='pollos/hermanosX/2015'
         )
 
-        basket = factories.create_basket(empty=True)
-        basket.add_product(pollos_hermanos, 1)
+        self.basket = factories.create_basket(empty=True)
+        self.basket.add_product(pollos_hermanos, 1)
 
         self.order = factories.create_order(
-            number=self.ORDER_NUMBER, basket=basket, user=user, status=ORDER.BEING_PROCESSED
+            number=self.ORDER_NUMBER, basket=self.basket, user=user, status=ORDER.BEING_PROCESSED
         )
         # the processor will pass through a string representation of this
         self.order_total = unicode(self.order.total_excl_tax)
@@ -146,12 +146,12 @@ class CybersourceParameterGenerationTests(CybersourceTests):
 
     def test_transaction_parameter_generation(self):
         """Test that transaction parameter generation produces the correct output for a test order."""
-        self._assert_order_parameters(self.order)
+        self._assert_order_parameters(self.basket)
 
     def test_override_receipt_and_cancel_pages(self):
         """Test that receipt and cancel page override parameters are included when necessary."""
         self._assert_order_parameters(
-            self.order,
+            self.basket,
             receipt_page_url=self.RECEIPT_PAGE_URL,
             cancel_page_url=self.CANCEL_PAGE_URL
         )
@@ -159,7 +159,7 @@ class CybersourceParameterGenerationTests(CybersourceTests):
     def test_merchant_defined_data(self):
         """Test that merchant-defined data parameters are included when necessary."""
         self._assert_order_parameters(
-            self.order,
+            self.basket,
             merchant_defined_data=self.MERCHANT_DEFINED_DATA
         )
 
@@ -169,7 +169,7 @@ class CybersourceParameterGenerationTests(CybersourceTests):
         self.product_class.name = 'Not A Seat'
         self.product_class.save()
         self._assert_order_parameters(
-            self.order
+            self.basket
         )
 
     @raises(ExcessiveMerchantDefinedData)
@@ -178,9 +178,9 @@ class CybersourceParameterGenerationTests(CybersourceTests):
         # Generate a list of strings with a number of elements exceeding the maximum number
         # of optional fields allowed by CyberSource
         excessive_data = [unicode(i) for i in xrange(CS.MAX_OPTIONAL_FIELDS + 1)]
-        SingleSeatCybersource().get_transaction_parameters(self.order, merchant_defined_data=excessive_data)
+        SingleSeatCybersource().get_transaction_parameters(self.basket, merchant_defined_data=excessive_data)
 
-    def _assert_order_parameters(self, order, receipt_page_url=None, cancel_page_url=None, merchant_defined_data=None):
+    def _assert_order_parameters(self, basket, receipt_page_url=None, cancel_page_url=None, merchant_defined_data=None):
         """Verify that returned transaction parameters match expectations."""
 
         expected_receipt_page_url = receipt_page_url
@@ -188,14 +188,14 @@ class CybersourceParameterGenerationTests(CybersourceTests):
             expected_receipt_page_url = '{receipt_url}{course_key}/?payment-order-num={order_number}'.format(
                 receipt_url=settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['receipt_page_url'],
                 course_key=self.attribute_value.value,
-                order_number=self.order.number
+                order_number=self.basket.id
             )
 
         if not cancel_page_url:
             cancel_page_url = settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['cancel_page_url']
 
         returned_parameters = SingleSeatCybersource().get_transaction_parameters(
-            order,
+            basket,
             receipt_page_url=receipt_page_url,
             cancel_page_url=cancel_page_url,
             merchant_defined_data=merchant_defined_data
@@ -205,12 +205,12 @@ class CybersourceParameterGenerationTests(CybersourceTests):
         expected_parameters = OrderedDict([
             (CS.FIELD_NAMES.ACCESS_KEY, cybersource_settings['access_key']),
             (CS.FIELD_NAMES.PROFILE_ID, cybersource_settings['profile_id']),
-            (CS.FIELD_NAMES.REFERENCE_NUMBER, order.number),
+            (CS.FIELD_NAMES.REFERENCE_NUMBER, basket.id),
             (CS.FIELD_NAMES.TRANSACTION_UUID, self.UUID_HEX),
             (CS.FIELD_NAMES.TRANSACTION_TYPE, CS.TRANSACTION_TYPE),
             (CS.FIELD_NAMES.PAYMENT_METHOD, CS.PAYMENT_METHOD),
-            (CS.FIELD_NAMES.CURRENCY, order.currency),
-            (CS.FIELD_NAMES.AMOUNT, unicode(order.total_excl_tax)),
+            (CS.FIELD_NAMES.CURRENCY, basket.currency),
+            (CS.FIELD_NAMES.AMOUNT, unicode(basket.total_excl_tax)),
             (CS.FIELD_NAMES.LOCALE, getattr(settings, 'LANGUAGE_CODE')),
         ])
 

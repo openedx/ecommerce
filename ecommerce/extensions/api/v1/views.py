@@ -5,12 +5,11 @@ from django.conf import settings
 from django.http import Http404
 from oscar.core.loading import get_class, get_classes, get_model
 from rest_framework import status
-from rest_framework.generics import UpdateAPIView, RetrieveAPIView, ListCreateAPIView, ListAPIView
+from rest_framework.generics import UpdateAPIView, RetrieveAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
-from ecommerce.extensions.api import data, errors, serializers
-from ecommerce.extensions.api.throttling import OrdersThrottle
+from ecommerce.extensions.api import data, exceptions, serializers
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
@@ -64,7 +63,6 @@ class RetrieveOrderView(RetrieveAPIView):
             "total_excl_tax": 0.0
         }'
     """
-    throttle_classes = (OrdersThrottle,)
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.OrderSerializer
     lookup_field = 'number'
@@ -91,22 +89,12 @@ class RetrieveOrderView(RetrieveAPIView):
             raise Http404
 
 
-class RetrieveOrderByBasketView(RetrieveOrderView):
-    """ Allow the viewing of Orders by Basket.
-
-    Works exactly the same as RetrieveOrderView, except that orders are looked
-    up via the id of the related basket.
-    """
-    lookup_field = 'basket_id'
-
-
 class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
     """
     Endpoint for listing or creating orders.
 
     When listing orders, results are ordered with the newest order being the first in the list of results.
     """
-    throttle_classes = (OrdersThrottle,)
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.OrderSerializer
 
@@ -179,12 +167,12 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
         if sku:
             try:
                 product = data.get_product(sku)
-            except errors.ProductNotFoundError as error:
-                return self._report_bad_request(error.message, errors.PRODUCT_NOT_FOUND_USER_MESSAGE)
+            except exceptions.ProductNotFoundError as error:
+                return self._report_bad_request(error.message, exceptions.PRODUCT_NOT_FOUND_USER_MESSAGE)
         else:
             return self._report_bad_request(
-                errors.SKU_NOT_FOUND_DEVELOPER_MESSAGE,
-                errors.SKU_NOT_FOUND_USER_MESSAGE
+                exceptions.SKU_NOT_FOUND_DEVELOPER_MESSAGE,
+                exceptions.SKU_NOT_FOUND_USER_MESSAGE
             )
 
         basket = data.get_basket(request.user)
@@ -195,7 +183,13 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
         # user attempts to order again, the `get_basket` utility will merge all old
         # baskets with a new one, returning a fresh basket.
         if not availability.is_available_to_buy:
-            return self._report_bad_request(availability.message, errors.PRODUCT_UNAVAILABLE_USER_MESSAGE)
+            return self._report_bad_request(
+                exceptions.PRODUCT_UNAVAILABLE_DEVELOPER_MESSAGE.format(
+                    sku=sku,
+                    availability=availability.message
+                ),
+                exceptions.PRODUCT_UNAVAILABLE_USER_MESSAGE
+            )
 
         payment_processor = get_processor_class(settings.PAYMENT_PROCESSORS[0])
 
@@ -208,7 +202,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
                 order.currency,
             )
 
-            order = self._fulfill_order(order)
+            order = self.fulfill_order(order)
 
         order_data = self._assemble_order_data(order, payment_processor)
 
@@ -253,8 +247,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
             shipping_charge,
             user=basket.owner,
             order_number=OrderNumberGenerator.order_number(basket),
-            status=ORDER.OPEN,
-            payment_processor=payment_processor.NAME
+            status=ORDER.OPEN
         )
 
         logger.info(
@@ -289,7 +282,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
         return order_data
 
 
-class FulfillOrderView(FulfillmentMixin, UpdateAPIView):
+class OrderFulfillView(FulfillmentMixin, UpdateAPIView):
     permission_classes = (IsAuthenticated, DjangoModelPermissions,)
     lookup_field = 'number'
     queryset = Order.objects.all()
@@ -302,7 +295,7 @@ class FulfillOrderView(FulfillmentMixin, UpdateAPIView):
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
         logger.info('Retrying fulfillment of order [%s]...', order.number)
-        order = self._fulfill_order(order)
+        order = self.fulfill_order(order)
 
         if order.can_retry_fulfillment:
             logger.warning('Fulfillment of order [%s] failed!', order.number)
@@ -310,14 +303,3 @@ class FulfillOrderView(FulfillmentMixin, UpdateAPIView):
 
         serializer = self.get_serializer(order)
         return Response(serializer.data)
-
-
-class PaymentProcessorsView(ListAPIView):
-    """ View that lists the available payment processors. """
-    pagination_class = None
-    permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.PaymentProcessorSerializer
-
-    def get_queryset(self):
-        """ Fetch the list of payment processor classes based on django settings."""
-        return [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
