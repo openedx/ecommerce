@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import Http404
 from oscar.core.loading import get_class, get_classes, get_model
 from rest_framework import status
-from rest_framework.generics import UpdateAPIView, RetrieveAPIView, ListCreateAPIView
+from rest_framework.generics import UpdateAPIView, RetrieveAPIView, ListCreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
@@ -301,3 +301,14 @@ class FulfillOrderView(FulfillmentMixin, UpdateAPIView):
 
         serializer = self.get_serializer(order)
         return Response(serializer.data)
+
+
+class PaymentProcessorsView(ListAPIView):
+    """ View that lists the available payment processors. """
+    pagination_class = None
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.PaymentProcessorSerializer
+
+    def get_queryset(self):
+        """ Fetch the list of payment processor classes based on django settings."""
+        return [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]

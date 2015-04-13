@@ -1,6 +1,4 @@
 """ Tests of the Payment Views. """
-import json
-
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -10,7 +8,6 @@ from oscar.core.loading import get_model
 from ecommerce.extensions.payment.constants import ProcessorConstants as PC
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.tests.mixins import UserMixin
 
 
 ShippingEventType = get_model('order', 'ShippingEventType')
@@ -82,34 +79,6 @@ class DummySuccessProcessor(BasePaymentProcessor):
     def handle_processor_response(self, params):
         """ Return the expected output. """
         return {PC.SUCCESS: True, PC.ORDER_NUMBER: ORDER_NUMBER}
-
-
-class ProcessorListViewTestCase(TestCase, UserMixin):
-    """ Ensures correct behavior of the payment processors list view."""
-
-    def setUp(self):
-        self.token = self.generate_jwt_token_header(self.create_user())
-
-    def assert_processor_list_matches(self, expected):
-        """ DRY helper. """
-        response = self.client.get(reverse('processor_list'), HTTP_AUTHORIZATION=self.token)
-        self.assertEqual(response.status_code, 200)
-        self.assertSetEqual(set(json.loads(response.content)), set(expected))
-
-    def test_permission(self):
-        """Ensure authentication is required to access the view. """
-        response = self.client.get(reverse('processor_list'))
-        self.assertEqual(response.status_code, 401)
-
-    @override_settings(PAYMENT_PROCESSORS=[SUCCESS_PROCESSOR])
-    def test_get_one(self):
-        """Ensure a single payment processor in settings is handled correctly."""
-        self.assert_processor_list_matches(['DummySuccessProcessor'])
-
-    @override_settings(PAYMENT_PROCESSORS=[SUCCESS_PROCESSOR, FAILURE_PROCESSOR])
-    def test_get_many(self):
-        """Ensure multiple processors in settings are handled correctly."""
-        self.assert_processor_list_matches(['DummySuccessProcessor', 'DummyFailureProcessor'])
 
 
 # Reuse the fake fulfillment module provided by the test_api tests
