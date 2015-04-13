@@ -391,3 +391,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 # END DJANGO REST FRAMEWORK
+
+# Resolving deprecation warning
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
