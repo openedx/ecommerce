@@ -50,15 +50,18 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
     def setUp(self):
         super(RetrieveOrderViewTests, self).setUp()
         user = self.create_user()
-        basket = factories.create_basket()
-        order_number = OrderNumberGenerator.order_number(basket)
-        self.order = factories.create_order(number=order_number)
+        self.basket = factories.create_basket()
+        order_number = OrderNumberGenerator.order_number(self.basket)
+        self.order = factories.create_order(number=order_number, basket=self.basket)
         self.order.status = ORDER.PAID
         self.order.user = user
         self.order.save()
 
         self.token = self.generate_jwt_token_header(user)
-        self.url = reverse('orders:retrieve', kwargs={'number': self.order.number})
+
+    @property
+    def url(self):
+        return reverse('orders:retrieve', kwargs={'number': self.order.number})
 
     @ddt.data(ORDER.PAID, ORDER.COMPLETE, ORDER.REFUNDED, ORDER.FULFILLMENT_ERROR)
     def test_get_order(self, order_status):
@@ -67,8 +70,7 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         self.order.save()
         response = self.client.get(self.url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        result_order = json.loads(response.content)
-        self.assertEqual(OrderSerializer(self.order).data, result_order)
+        self.assertEqual(response.data, OrderSerializer(self.order).data)
 
     @ddt.data(ORDER.OPEN, ORDER.BEING_PROCESSED, ORDER.ORDER_CANCELLED, ORDER.PAYMENT_CANCELLED)
     def test_order_not_found(self, order_status):
@@ -84,6 +86,15 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         other_token = self.generate_jwt_token_header(other_user)
         response = self.client.get(self.url, HTTP_AUTHORIZATION=other_token)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+@ddt.ddt
+class RetrieveOrderByBasketViewTests(RetrieveOrderViewTests):
+    """Test cases for getting orders using the basket id. """
+
+    @property
+    def url(self):
+        return reverse('order_by_basket', kwargs={'basket_id': self.basket.id})
 
 
 class CreateOrderViewTests(TestCase):

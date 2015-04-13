@@ -4,6 +4,7 @@ from ecommerce.extensions.api import views
 
 
 ORDER_NUMBER_PATTERN = r"(?P<number>[-\w]+)"
+BASKET_ID_PATTERN = r"(?P<basket_id>[\w]+)"
 
 ORDER_URLS = patterns(
     '',
@@ -23,5 +24,10 @@ ORDER_URLS = patterns(
 urlpatterns = patterns(
     '',
     url(r'^processors/$', views.PaymentProcessorsView.as_view(), name='payment_processors'),
-    url(r'^orders/', include(ORDER_URLS, namespace='orders'))
+    url(r'^orders/', include(ORDER_URLS, namespace='orders')),
+    url(
+        r'^baskets/{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
+        views.RetrieveOrderByBasketView.as_view(),
+        name='order_by_basket'
+    ),
 )

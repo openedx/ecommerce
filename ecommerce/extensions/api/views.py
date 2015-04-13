@@ -91,6 +91,15 @@ class RetrieveOrderView(RetrieveAPIView):
             raise Http404
 
 
+class RetrieveOrderByBasketView(RetrieveOrderView):
+    """ Allow the viewing of Orders by Basket.
+
+    Works exactly the same as RetrieveOrderView, except that orders are looked
+    up via the id of the related basket.
+    """
+    lookup_field = 'basket_id'
+
+
 class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
     """
     Endpoint for listing or creating orders.
