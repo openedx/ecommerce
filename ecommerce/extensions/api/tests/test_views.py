@@ -26,6 +26,7 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin,
 from ecommerce.extensions.api.views import OrdersThrottle, FulfillmentMixin, OrderListCreateAPIView
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.order.utils import OrderNumberGenerator
+from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.tests.mixins import UserMixin
 
 
@@ -432,3 +433,42 @@ class ListOrderViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
         factories.create_order(user=other_user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assert_empty_result_response(response)
+
+
+class DummyProcessor1(BasePaymentProcessor):  # pylint: disable=abstract-method
+    NAME = "dummy-1"
+
+
+class DummyProcessor2(BasePaymentProcessor):  # pylint: disable=abstract-method
+    NAME = "dummy-2"
+
+
+class PaymentProcessorsViewTestCase(TestCase, UserMixin):
+    """ Ensures correct behavior of the payment processors list view."""
+
+    def setUp(self):
+        self.token = self.generate_jwt_token_header(self.create_user())
+
+    def assert_processor_list_matches(self, expected):
+        """ DRY helper. """
+        response = self.client.get(reverse('payment_processors'), HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 200)
+        self.assertSetEqual(set(json.loads(response.content)), set(expected))
+
+    def test_permission(self):
+        """Ensure authentication is required to access the view. """
+        response = self.client.get(reverse('payment_processors'))
+        self.assertEqual(response.status_code, 401)
+
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.api.tests.test_views.DummyProcessor1'])
+    def test_get_one(self):
+        """Ensure a single payment processor in settings is handled correctly."""
+        self.assert_processor_list_matches(['dummy-1'])
+
+    @override_settings(PAYMENT_PROCESSORS=[
+        'ecommerce.extensions.api.tests.test_views.DummyProcessor1',
+        'ecommerce.extensions.api.tests.test_views.DummyProcessor2',
+    ])
+    def test_get_many(self):
+        """Ensure multiple processors in settings are handled correctly."""
+        self.assert_processor_list_matches(['dummy-1', 'dummy-2'])

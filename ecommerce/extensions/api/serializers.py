@@ -64,3 +64,11 @@ class OrderSerializer(serializers.Serializer):
     lines = LinesSerializer(many=True)
     billing_address = BillingAddressSerializer(allow_null=True)
     payment_processor = serializers.CharField(max_length=32)
+
+
+class PaymentProcessorSerializer(serializers.Serializer):
+    """ Serializer to use with instances of processors.BasePaymentProcessor """
+
+    def to_representation(self, instance):
+        """ Serialize instances as a string instead of a mapping object. """
+        return instance.NAME

@@ -22,5 +22,6 @@ ORDER_URLS = patterns(
 
 urlpatterns = patterns(
     '',
+    url(r'^processors/$', views.PaymentProcessorsView.as_view(), name='payment_processors'),
     url(r'^orders/', include(ORDER_URLS, namespace='orders'))
 )
