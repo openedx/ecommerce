@@ -29,7 +29,7 @@ class CybersourceResponseView(View, OrderPlacementMixin, FulfillmentMixin):
             # register the money in Oscar
             self._register_payment(order, payment_processor.NAME)
             # fulfill the order
-            self._fulfill_order(order)
+            self.fulfill_order(order)
 
         # It doesn't matter how we respond to the payment processor if the
         # payment failed.

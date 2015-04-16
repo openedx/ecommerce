@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
 """Unit tests for the analytics app."""
 from django.apps import apps
-from django.test.utils import override_settings
+from django.test import TestCase, override_settings
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.api.tests.test_integration import OrdersIntegrationTests
+from ecommerce.tests.mixins import BasketCreationMixin
 
 
 ProductRecord = get_model('analytics', 'ProductRecord')
 
 
-class AnalyticsTests(OrdersIntegrationTests):
+class AnalyticsTests(BasketCreationMixin, TestCase):
     """Test analytics behavior in controlled scenarios."""
+    def setUp(self):
+        super(AnalyticsTests, self).setUp()
+
     @override_settings(INSTALL_DEFAULT_ANALYTICS_RECEIVERS=False)
     def test_order_receiver_disabled(self):
         """Verify that Oscar's Analytics order receiver can be disabled."""
         self._initialize()
-        self._create_and_verify_order(self.FREE_TRIAL_SKU)
+
+        self.assert_successful_basket_creation(skus=[self.FREE_SKU], checkout=True)
 
         # Verify that no product records are kept
         self.assertFalse(ProductRecord.objects.all().exists())
@@ -25,10 +29,11 @@ class AnalyticsTests(OrdersIntegrationTests):
     def test_order_receiver_enabled(self):
         """Verify that Oscar's Analytics order receiver can be re-enabled."""
         self._initialize()
-        self._create_and_verify_order(self.FREE_TRIAL_SKU)
+
+        self.assert_successful_basket_creation(skus=[self.FREE_SKU], checkout=True)
 
         # Verify that product order counts are recorded
-        product = ProductRecord.objects.get(product=self.free_trial)
+        product = ProductRecord.objects.get(product=self.free_product)
         self.assertEqual(product.num_purchases, 1)
 
     def _initialize(self):

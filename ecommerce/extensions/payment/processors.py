@@ -28,7 +28,7 @@ class BasePaymentProcessor(object):
 
     def get_transaction_parameters(
             self,
-            order,
+            basket,
             receipt_page_url=None,
             cancel_page_url=None,
             merchant_defined_data=None
@@ -74,13 +74,14 @@ class Cybersource(BasePaymentProcessor):
         self.profile_id = configuration['profile_id']
         self.access_key = configuration['access_key']
         self.secret_key = configuration['secret_key']
+        self.payment_page_url = configuration['payment_page_url']
         self.receipt_page_url = configuration['receipt_page_url']
         self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
 
     def get_transaction_parameters(
             self,
-            order,
+            basket,
             receipt_page_url=None,
             cancel_page_url=None,
             merchant_defined_data=None
@@ -88,7 +89,7 @@ class Cybersource(BasePaymentProcessor):
         """Generate a dictionary of signed parameters CyberSource requires to complete a transaction.
 
         Arguments:
-            order (Order): The order whose line items are to be purchased as part of the transaction.
+            basket (Basket): The basket whose line items are to be purchased as part of the transaction.
 
         Keyword Arguments:
             receipt_page_url (unicode): If provided, overrides the receipt page URL on the Secure Acceptance
@@ -104,7 +105,7 @@ class Cybersource(BasePaymentProcessor):
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
         transaction_parameters = self._get_raw_transaction_parameters(
-            order,
+            basket,
             receipt_page_url,
             cancel_page_url,
             merchant_defined_data
@@ -157,7 +158,7 @@ class Cybersource(BasePaymentProcessor):
         finally:
             return result  # pylint: disable=lost-exception
 
-    def _get_raw_transaction_parameters(self, order, receipt_page_url, cancel_page_url, merchant_defined_data):
+    def _get_raw_transaction_parameters(self, basket, receipt_page_url, cancel_page_url, merchant_defined_data):
         """Generate a dictionary of unsigned parameters CyberSource requires to complete a transaction.
 
         The 'signed_field_names' parameter should be a string containing a comma-separated list of all keys in
@@ -165,7 +166,7 @@ class Cybersource(BasePaymentProcessor):
         to determine which parameters to sign, although the signing itself occurs separately.
 
         Arguments:
-            order (Order): The order whose line items are to be purchased as part of the transaction.
+            basket (Basket): The basket whose line items are to be purchased as part of the transaction.
             receipt_page_url (unicode): Overrides the receipt page URL on the Secure Acceptance profile
                 in use for this transaction.
             cancel_page_url (unicode): Overrides the cancellation page URL on the Secure Acceptance profile
@@ -199,7 +200,7 @@ class Cybersource(BasePaymentProcessor):
         # authorize through Secure Acceptance, then later process the settlement. Although they
         # are two separate transactions, when taken together the authorization and the settlement
         # constitute one charge. As such, they would be assigned the same reference number.
-        parameters[CS.FIELD_NAMES.REFERENCE_NUMBER] = order.number
+        parameters[CS.FIELD_NAMES.REFERENCE_NUMBER] = basket.id
 
         # Unique identifier associated with this transaction; must be a string.
         parameters[CS.FIELD_NAMES.TRANSACTION_UUID] = uuid.uuid4().hex
@@ -211,10 +212,10 @@ class Cybersource(BasePaymentProcessor):
         parameters[CS.FIELD_NAMES.PAYMENT_METHOD] = CS.PAYMENT_METHOD
 
         # ISO currency code representing the currency in which to conduct the transaction.
-        parameters[CS.FIELD_NAMES.CURRENCY] = order.currency
+        parameters[CS.FIELD_NAMES.CURRENCY] = basket.currency
 
         # Total amount to be charged. May contain numeric characters and a decimal point; must be a string.
-        parameters[CS.FIELD_NAMES.AMOUNT] = unicode(order.total_excl_tax)
+        parameters[CS.FIELD_NAMES.AMOUNT] = unicode(basket.total_excl_tax)
 
         # IETF language tag representing the language to use for customer-facing content.
         parameters[CS.FIELD_NAMES.LOCALE] = self.language_code
@@ -222,7 +223,7 @@ class Cybersource(BasePaymentProcessor):
         if receipt_page_url:
             parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = receipt_page_url
         elif self.receipt_page_url:
-            parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = self._generate_receipt_url(order)
+            parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = self._generate_receipt_url(basket)
 
         if cancel_page_url:
             parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_CANCEL_PAGE] = cancel_page_url
@@ -246,7 +247,7 @@ class Cybersource(BasePaymentProcessor):
         # the parameters dictionary before returning it.
         parameters[CS.FIELD_NAMES.SIGNED_FIELD_NAMES] = CS.SEPARATOR.join(parameters.keys())
 
-        logger.info(u"Generated unsigned CyberSource transaction parameters for order [%s]", order.number)
+        logger.info(u"Generated unsigned CyberSource transaction parameters for basket [%s]", basket.id)
 
         return parameters
 
@@ -263,7 +264,7 @@ class Cybersource(BasePaymentProcessor):
 
         """
         return "{base_url}?payment-order-num={order_number}".format(
-            base_url=self.receipt_page_url, order_number=order.number
+            base_url=self.receipt_page_url, order_number=order.id
         )
 
     def _generate_signature(self, parameters):
@@ -439,12 +440,12 @@ class SingleSeatCybersource(Cybersource):
         if line and line.product.get_product_class().name == 'Seat':
             course_key = line.product.attribute_values.get(attribute__name="course_key").value
             return "{base_url}{course_key}/?payment-order-num={order_number}".format(
-                base_url=self.receipt_page_url, course_key=course_key, order_number=order.number
+                base_url=self.receipt_page_url, course_key=course_key, order_number=order.id
             )
         else:
             msg = (
                 u'Cannot construct a receipt URL for order [{order_number}]. Receipt page only supports Seat products.'
-                .format(order_number=order.number)
+                .format(order_number=order.id)
             )
             logger.error(msg)
             raise UnsupportedProductError(msg)

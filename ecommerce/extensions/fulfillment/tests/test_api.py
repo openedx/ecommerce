@@ -9,7 +9,7 @@ from oscar.test import factories
 
 from ecommerce.extensions.fulfillment.modules import FulfillmentModule
 from ecommerce.extensions.fulfillment import api as fulfillment_api
-from ecommerce.extensions.fulfillment import errors
+from ecommerce.extensions.fulfillment import exceptions
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 
 
@@ -78,7 +78,7 @@ class FulfillmentTest(TestCase):
         self.assertEquals(LINE.COMPLETE, self.order.lines.all()[0].status)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.test_api.FakeFulfillmentModule', ])
-    @raises(errors.IncorrectOrderStatusError)
+    @raises(exceptions.IncorrectOrderStatusError)
     def test_bad_fulfillment_state(self):
         """Test a basic fulfillment of a Course Seat."""
         # Set the order to Refunded, which cannot be fulfilled.
