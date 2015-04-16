@@ -14,7 +14,7 @@ This repository contains the edX ecommerce service, which relies heavily on `dja
 Getting Started
 ---------------
 
-Most commands necessary to run and develope the ecommerce service can be found in the included Makefile.
+Most commands necessary to run and develop the ecommerce service can be found in the included Makefile.
 
 To install requirements necessary for local development, run::
 
@@ -30,7 +30,7 @@ To stand up the development server, run::
 
     $ make serve
 
-By default, the Django Debug Toolbar is disabled. To enable it, set the environmental variable ENABLE_DJANGO_TOOLBAR.
+By default, the Django Debug Toolbar is disabled. To enable it, set the ENABLE_DJANGO_TOOLBAR environment variable.
 
 Testing
 -------
