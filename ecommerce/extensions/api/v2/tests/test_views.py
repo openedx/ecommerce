@@ -321,10 +321,12 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
 
 class DummyProcessor1(BasePaymentProcessor):  # pylint: disable=abstract-method
     NAME = "dummy-1"
+    DISPLAY_NAME = "dummy-1-custom-name"
 
 
 class DummyProcessor2(BasePaymentProcessor):  # pylint: disable=abstract-method
     NAME = "dummy-2"
+    DISPLAY_NAME = None  # in order to verify sane behavior when the value is omitted
 
 
 class PaymentProcessorListViewTests(TestCase, UserMixin):
@@ -332,11 +334,11 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
     def setUp(self):
         self.token = self.generate_jwt_token_header(self.create_user())
 
-    def assert_processor_list_matches(self, expected):
+    def assert_processor_response_matches(self, expected):
         """ DRY helper. """
         response = self.client.get(reverse('api:v2:payment:list_processors'), HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        self.assertSetEqual(set(json.loads(response.content)), set(expected))
+        self.assertEqual(json.loads(response.content), expected)
 
     def test_permission(self):
         """Ensure authentication is required to access the view. """
@@ -346,7 +348,7 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.api.v2.tests.test_views.DummyProcessor1'])
     def test_get_one(self):
         """Ensure a single payment processor in settings is handled correctly."""
-        self.assert_processor_list_matches(['dummy-1'])
+        self.assert_processor_response_matches([{'name': 'dummy-1', 'display_name': 'dummy-1-custom-name'}])
 
     @override_settings(PAYMENT_PROCESSORS=[
         'ecommerce.extensions.api.v2.tests.test_views.DummyProcessor1',
@@ -354,4 +356,7 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
     ])
     def test_get_many(self):
         """Ensure multiple processors in settings are handled correctly."""
-        self.assert_processor_list_matches(['dummy-1', 'dummy-2'])
+        self.assert_processor_response_matches([
+            {'name': 'dummy-1', 'display_name': 'dummy-1-custom-name'},
+            {'name': 'dummy-2', 'display_name': 'dummy-2'}
+        ])

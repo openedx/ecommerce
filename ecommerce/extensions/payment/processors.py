@@ -7,6 +7,7 @@ import datetime
 from collections import OrderedDict
 
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.errors import (
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 class BasePaymentProcessor(object):  # pragma no cover
     """Base payment processor class."""
     NAME = None
+    DISPLAY_NAME = None
 
     def get_transaction_parameters(
             self,
@@ -57,6 +59,7 @@ class Cybersource(BasePaymentProcessor):
     http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
     """
     NAME = CS.NAME
+    DISPLAY_NAME = _(u'Credit Card')
 
     def __init__(self):
         """

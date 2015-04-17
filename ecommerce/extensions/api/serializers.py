@@ -92,6 +92,6 @@ class OrderSerializer(serializers.Serializer):
 
 class PaymentProcessorSerializer(serializers.Serializer):
     """ Serializer to use with instances of processors.BasePaymentProcessor """
-    def to_representation(self, instance):
-        """ Serialize instances as a string instead of a mapping object. """
-        return instance.NAME
+    def to_representation(self, cls):
+        """ Custom read-only serialization for class objects. """
+        return {'name': cls.NAME, 'display_name': cls.DISPLAY_NAME or cls.NAME}
