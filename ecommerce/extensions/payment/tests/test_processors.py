@@ -1,352 +1,208 @@
 # -*- coding: utf-8 -*-
 """Unit tests of payment processor implementations."""
-from collections import OrderedDict
+from uuid import UUID
 import datetime
-from decimal import Decimal as D
-import logging
 
 import ddt
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import TestCase
 import mock
-from nose.tools import raises
+from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
+from oscar.core.loading import get_model
 from oscar.test import factories
 
-import ecommerce.extensions.payment.processors as processors
-from ecommerce.extensions.payment.processors import Cybersource, SingleSeatCybersource
-from ecommerce.extensions.payment.errors import ExcessiveMerchantDefinedData, UnsupportedProductError
-from ecommerce.extensions.payment.constants import CybersourceConstants as CS
+from ecommerce.extensions.payment import processors
+from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
+from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
+                                                     PartialAuthorizationError)
+from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin
 
 
-User = get_user_model()
+PaymentEventType = get_model('order', 'PaymentEventType')
+SourceType = get_model('payment', 'SourceType')
 
 
-class PaymentProcessorTestCase(TestCase):
-    """Base test class for payment processor classes."""
-    ORDER_NUMBER = '1'
+class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
+    """ Mixin for payment processor tests. """
+
+    # Subclasses should set this value. It will be used to instantiate the processor in setUp.
+    processor_class = None
+
+    # This value is used to test the NAME attribute on the processor.
+    processor_name = None
 
     def setUp(self):
-        # Override all loggers, suppressing logging calls of severity CRITICAL and below
-        logging.disable(logging.CRITICAL)
-
-        user = User.objects.create_user(
-            username='Gus', email='gustavo@lospolloshermanos.com', password='the-chicken-man'
-        )
-
-        self.product_class = factories.ProductClassFactory(
-            name='Seat',
-            requires_shipping=False,
-            track_stock=False
-        )
-
-        product_attribute = factories.ProductAttributeFactory(
-            name='course_key',
-            code='course_key',
-            product_class=self.product_class,
-            type='text'
-        )
-
-        fried_chicken = factories.ProductFactory(
-            structure='parent',
-            title=u'𝑭𝒓𝒊𝒆𝒅 𝑪𝒉𝒊𝒄𝒌𝒆𝒏',
-            product_class=self.product_class,
-            stockrecords=None,
-        )
-
-        factories.ProductAttributeValueFactory(
-            attribute=product_attribute,
-            product=fried_chicken,
-            value_text='pollos/chickenX/2015'
-        )
-
-        pollos_hermanos = factories.ProductFactory(
-            structure='child',
-            parent=fried_chicken,
-            title=u'𝕃𝕠𝕤 ℙ𝕠𝕝𝕝𝕠𝕤 ℍ𝕖𝕣𝕞𝕒𝕟𝕠𝕤',
-            stockrecords__partner_sku=u'ṠÖṀЁṪḦЇṄĠ⸚ḊЁḶЇĊЇÖÜṠ',
-            stockrecords__price_excl_tax=D('9.99'),
-        )
-
-        self.attribute_value = factories.ProductAttributeValueFactory(
-            attribute=product_attribute,
-            product=pollos_hermanos,
-            value_text='pollos/hermanosX/2015'
-        )
-
-        self.basket = factories.create_basket(empty=True)
-        self.basket.add_product(pollos_hermanos, 1)
-
-        self.order = factories.create_order(
-            number=self.ORDER_NUMBER, basket=self.basket, user=user
-        )
-        # the processor will pass through a string representation of this
-        self.order_total = unicode(self.order.total_excl_tax)
-
-        # Remove logger override
-        self.addCleanup(logging.disable, logging.NOTSET)
-
-
-class CybersourceTests(PaymentProcessorTestCase):
-    """ Abstract test class for Cybersource tests. """
+        super(PaymentProcessorTestCaseMixin, self).setUp()
+        self.processor = self.processor_class()  # pylint: disable=not-callable
+        self.basket = factories.create_basket()
+        self.basket.owner = factories.UserFactory()
+        self.basket.save()
 
     def test_configuration(self):
         """ Verifies configuration is read from settings. """
-        self.assertDictEqual(Cybersource().configuration, settings.PAYMENT_PROCESSOR_CONFIG[Cybersource.NAME])
+        self.assertDictEqual(self.processor.configuration, settings.PAYMENT_PROCESSOR_CONFIG[self.processor.NAME])
 
-
-class CybersourceParameterGenerationTests(CybersourceTests):
-    """Tests of the CyberSource processor class related to generating parameters."""
-    UUID_HEX = 'madrigal'
-    PI_DAY = datetime.datetime(2015, 3, 14, 9, 26, 53)
-    RECEIPT_PAGE_URL = CANCEL_PAGE_URL = 'http://www.lospolloshermanos.com'
-    MERCHANT_DEFINED_DATA = [u'ℂ𝕙𝕚𝕝𝕖', u'𝕄𝕖𝕩𝕚𝕔𝕠', u'ℕ𝕖𝕨 𝕄𝕖𝕩𝕚𝕔𝕠']
-
-    def setUp(self):
-        super(CybersourceParameterGenerationTests, self).setUp()
-
-        uuid_patcher = mock.patch.object(
-            processors.uuid.UUID,
-            'hex',
-            new_callable=mock.PropertyMock(return_value=self.UUID_HEX)
-        )
-        uuid_patcher.start()
-        self.addCleanup(uuid_patcher.stop)
-
-        datetime_patcher = mock.patch.object(
-            processors.datetime,
-            'datetime',
-            mock.Mock(wraps=datetime.datetime)
-        )
-        mocked_datetime = datetime_patcher.start()
-        mocked_datetime.utcnow.return_value = self.PI_DAY
-        self.addCleanup(datetime_patcher.stop)
-
-    def test_processor_name(self):
+    def test_name(self):
         """Test that the name constant on the processor class is correct."""
-        self.assertEqual(Cybersource.NAME, CS.NAME)
+        self.assertEqual(self.processor.NAME, self.processor_name)
 
-    def test_transaction_parameter_generation(self):
-        """Test that transaction parameter generation produces the correct output for a test order."""
-        self._assert_order_parameters(self.basket)
+    def test_get_transaction_parameters(self):
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
+        raise NotImplementedError
 
-    def test_override_receipt_and_cancel_pages(self):
-        """Test that receipt and cancel page override parameters are included when necessary."""
-        self._assert_order_parameters(
-            self.basket,
-            receipt_page_url=self.RECEIPT_PAGE_URL,
-            cancel_page_url=self.CANCEL_PAGE_URL
-        )
+    def test_handle_processor_response(self):
+        """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
+        raise NotImplementedError
 
-    def test_merchant_defined_data(self):
-        """Test that merchant-defined data parameters are included when necessary."""
-        self._assert_order_parameters(
-            self.basket,
-            merchant_defined_data=self.MERCHANT_DEFINED_DATA
-        )
-
-    @raises(UnsupportedProductError)
-    def test_receipt_error(self):
-        """Test that a single seat CyberSource processor will not construct a receipt for an unknown product. """
-        self.product_class.name = 'Not A Seat'
-        self.product_class.save()
-        self._assert_order_parameters(
-            self.basket
-        )
-
-    @raises(ExcessiveMerchantDefinedData)
-    def test_excessive_merchant_defined_data(self):
-        """Test that excessive merchant-defined data is not accepted."""
-        # Generate a list of strings with a number of elements exceeding the maximum number
-        # of optional fields allowed by CyberSource
-        excessive_data = [unicode(i) for i in xrange(CS.MAX_OPTIONAL_FIELDS + 1)]
-        SingleSeatCybersource().get_transaction_parameters(self.basket, merchant_defined_data=excessive_data)
-
-    def _assert_order_parameters(self, basket, receipt_page_url=None, cancel_page_url=None, merchant_defined_data=None):
-        """Verify that returned transaction parameters match expectations."""
-
-        expected_receipt_page_url = receipt_page_url
-        if not receipt_page_url:
-            expected_receipt_page_url = '{receipt_url}{course_key}/?payment-order-num={order_number}'.format(
-                receipt_url=settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['receipt_page_url'],
-                course_key=self.attribute_value.value,
-                order_number=self.basket.id
-            )
-
-        if not cancel_page_url:
-            cancel_page_url = settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['cancel_page_url']
-
-        returned_parameters = SingleSeatCybersource().get_transaction_parameters(
-            basket,
-            receipt_page_url=receipt_page_url,
-            cancel_page_url=cancel_page_url,
-            merchant_defined_data=merchant_defined_data
-        )
-
-        cybersource_settings = settings.PAYMENT_PROCESSOR_CONFIG[CS.NAME]
-        expected_parameters = OrderedDict([
-            (CS.FIELD_NAMES.ACCESS_KEY, cybersource_settings['access_key']),
-            (CS.FIELD_NAMES.PROFILE_ID, cybersource_settings['profile_id']),
-            (CS.FIELD_NAMES.REFERENCE_NUMBER, basket.id),
-            (CS.FIELD_NAMES.TRANSACTION_UUID, self.UUID_HEX),
-            (CS.FIELD_NAMES.TRANSACTION_TYPE, CS.TRANSACTION_TYPE),
-            (CS.FIELD_NAMES.PAYMENT_METHOD, CS.PAYMENT_METHOD),
-            (CS.FIELD_NAMES.CURRENCY, basket.currency),
-            (CS.FIELD_NAMES.AMOUNT, unicode(basket.total_excl_tax)),
-            (CS.FIELD_NAMES.LOCALE, getattr(settings, 'LANGUAGE_CODE')),
-        ])
-
-        expected_parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_RECEIPT_PAGE] = expected_receipt_page_url
-
-        if cancel_page_url:
-            expected_parameters[CS.FIELD_NAMES.OVERRIDE_CUSTOM_CANCEL_PAGE] = cancel_page_url
-
-        if merchant_defined_data:
-            for n, data in enumerate(merchant_defined_data, start=1):
-                expected_parameters[CS.FIELD_NAMES.MERCHANT_DEFINED_DATA_BASE + unicode(n)] = data
-
-        expected_parameters[CS.FIELD_NAMES.SIGNED_DATE_TIME] = self.PI_DAY.strftime(CS.ISO_8601_FORMAT)
-
-        expected_parameters[CS.FIELD_NAMES.UNSIGNED_FIELD_NAMES] = CS.UNSIGNED_FIELD_NAMES
-        expected_parameters[CS.FIELD_NAMES.SIGNED_FIELD_NAMES] = CS.UNSIGNED_FIELD_NAMES
-        expected_parameters[CS.FIELD_NAMES.SIGNED_FIELD_NAMES] = CS.SEPARATOR.join(expected_parameters.keys())
-
-        # Generate a comma-separated list of keys and values to be signed. CyberSource refers to this
-        # as a 'Version 1' signature in their documentation.
-        # pylint: disable=protected-access
-        expected_parameters[CS.FIELD_NAMES.SIGNATURE] = SingleSeatCybersource()._generate_signature(expected_parameters)
-
-        self.assertEqual(returned_parameters, expected_parameters)
+    def test_is_signature_valid(self):
+        """ Verify that the is_signature_valid method properly validates the response's signature. """
+        raise NotImplementedError
 
 
-@override_settings(PAYMENT_PROCESSORS=('ecommerce.extensions.payment.processors.SingleSeatCybersource',))
 @ddt.ddt
-class CybersourcePaymentAcceptanceTests(CybersourceTests):
-    """Tests of the CyberSource processor class related to checking response."""
-    FAILED_DECISIONS = ["DECLINE", "CANCEL", "ERROR"]
+class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase):
+    """ Tests for CyberSource payment processor. """
+    UUID = u'UUID'
+    PI_DAY = datetime.datetime(2015, 3, 14, 9, 26, 53)
 
-    def _signed_callback_params(
-            self, order_id, order_amount, paid_amount,
-            decision=CS.ACCEPT, signature=None, card_number='xxxxxxxxxxxx1111',
-            first_name='John', currency='usd',
-    ):
-        """
-        Construct parameters that could be returned from CyberSource
-        to our payment callback.
+    processor_class = processors.Cybersource
+    processor_name = 'cybersource'
 
-        Some values can be overridden to simulate different test scenarios,
-        but most are fake values captured from interactions with
-        a CyberSource test account.
+    def assert_valid_transaction_parameters(self, cancel_page_url=None, receipt_page_url=None):
+        """ Validates the transaction parameters returned by get_transaction_parameters(). """
 
-        Args:
-            order_id (string or int): The ID of the `Order` model.
-            order_amount (string): The cost of the order.
-            paid_amount (string): The amount the user paid using CyberSource.
+        # Patch the datetime object so that we can validate the signed_date_time field
+        with mock.patch.object(processors.datetime, u'datetime', mock.Mock(wraps=datetime.datetime)) as mocked_datetime:
+            mocked_datetime.utcnow.return_value = self.PI_DAY
+            actual = self.processor.get_transaction_parameters(self.basket,
+                                                               cancel_page_url=cancel_page_url,
+                                                               receipt_page_url=receipt_page_url)
 
-        Keyword Args:
+        configuration = settings.PAYMENT_PROCESSOR_CONFIG[self.processor_name]
+        access_key = configuration[u'access_key']
+        profile_id = configuration[u'profile_id']
 
-            decision (string): Whether the payment was accepted or rejected or declined.
-            signature (string): If provided, use this value instead of calculating the signature.
-            card_numer (string): If provided, use this value instead of the default credit card number.
-            first_name (string): If provided, the first name of the user.
-
-        Returns:
-            dict
-
-        """
-        # Parameters sent from CyberSource to our callback implementation
-        # These were captured from the CC test server.
-
-        signed_field_names = ['transaction_id',
-                              'decision',
-                              'req_access_key',
-                              'req_profile_id',
-                              'req_transaction_uuid',
-                              'req_transaction_type',
-                              'req_reference_number',
-                              'req_amount',
-                              'req_currency',
-                              'req_locale',
-                              'req_payment_method',
-                              'req_override_custom_receipt_page',
-                              'req_bill_to_forename',
-                              'req_bill_to_surname',
-                              'req_bill_to_email',
-                              'req_bill_to_address_line1',
-                              'req_bill_to_address_city',
-                              'req_bill_to_address_state',
-                              'req_bill_to_address_country',
-                              'req_bill_to_address_postal_code',
-                              'req_card_number',
-                              'req_card_type',
-                              'req_card_expiry_date',
-                              'message',
-                              'reason_code',
-                              'auth_avs_code',
-                              'auth_avs_code_raw',
-                              'auth_response',
-                              'auth_amount',
-                              'auth_code',
-                              'auth_trans_ref_no',
-                              'auth_time',
-                              'bill_trans_ref_no',
-                              'signed_field_names',
-                              'signed_date_time']
-
-        # if decision is in FAILED_DECISIONS list then remove  auth_amount from
-        # signed_field_names list.
-        if decision in self.FAILED_DECISIONS:
-            signed_field_names.remove(CS.FIELD_NAMES.AUTH_AMOUNT)
-
-        params = {
-            # Parameters that change based on the test
-            'decision': decision,
-            'req_reference_number': order_id,
-            'req_amount': order_amount,
-            'auth_amount': paid_amount,
-            'req_card_number': card_number,
-            'req_currency': currency,
-            'req_bill_to_forename': first_name,
-
-            # Stub values
-            'utf8': u'✓',
-            'req_bill_to_address_country': 'US',
-            'auth_avs_code': 'X',
-            'req_card_expiry_date': '01-2018',
-            'bill_trans_ref_no': '85080648RYI23S6I',
-            'req_bill_to_address_state': 'MA',
-            'signed_field_names': ','.join(signed_field_names),
-            'req_payment_method': 'card',
-            'req_transaction_type': 'sale',
-            'auth_code': '888888',
-            'req_locale': 'en',
-            'reason_code': '100',
-            'req_bill_to_address_postal_code': '02139',
-            'req_bill_to_address_line1': '123 Fake Street',
-            'req_card_type': '001',
-            'req_bill_to_address_city': 'Boston',
-            'signed_date_time': '2014-08-18T14:07:10Z',
-            'auth_avs_code_raw': 'I1',
-            'transaction_id': '4083708299660176195663',
-            'auth_time': '2014-08-18T140710Z',
-            'message': 'Request was processed successfully.',
-            'auth_response': '100',
-            'req_profile_id': '0000001',
-            'req_transaction_uuid': 'ddd9935b82dd403f9aa4ba6ecf021b1f',
-            'auth_trans_ref_no': '85080648RYI23S6I',
-            'req_bill_to_surname': 'Doe',
-            'req_bill_to_email': 'john@example.com',
-            'req_override_custom_receipt_page': 'http://localhost:8000/shoppingcart/postpay_callback/',
-            'req_access_key': 'abcd12345',
+        expected = {
+            u'access_key': access_key,
+            u'profile_id': profile_id,
+            u'signed_field_names': u'',
+            u'unsigned_field_names': u'',
+            u'signed_date_time': self.PI_DAY.strftime(ISO_8601_FORMAT),
+            u'locale': settings.LANGUAGE_CODE,
+            u'transaction_type': u'sale',
+            u'reference_number': unicode(self.basket.id),
+            u'amount': unicode(self.basket.total_incl_tax),
+            u'currency': self.basket.currency,
+            u'consumer_id': self.basket.owner.username
         }
 
-        # if decision is in FAILED_DECISIONS list then remove the auth_amount from params dict
+        cancel_page_url = cancel_page_url or self.processor.cancel_page_url
+        if cancel_page_url:
+            expected[u'override_custom_cancel_page'] = cancel_page_url
 
-        if decision in self.FAILED_DECISIONS:
-            del params[CS.FIELD_NAMES.AUTH_AMOUNT]
+        if self.processor.receipt_page_url and not receipt_page_url:
+            receipt_page_url = u'{}?basket_id={}'.format(self.processor.receipt_page_url, self.basket.id)
 
-        # Calculate the signature
-        # pylint: disable=protected-access
-        generated_signature = Cybersource()._generate_signature(params)
-        params[CS.FIELD_NAMES.SIGNATURE] = signature if signature is not None else generated_signature
-        return params
+        if receipt_page_url:
+            expected[u'override_custom_receipt_page'] = receipt_page_url
+
+        signed_field_names = expected.keys() + [u'transaction_uuid']
+        expected[u'signed_field_names'] = u','.join(sorted(signed_field_names))
+
+        # Copy the UUID value so that we can properly generate the signature. We will validate the UUID below.
+        expected[u'transaction_uuid'] = actual[u'transaction_uuid']
+        expected[u'signature'] = self.generate_signature(self.processor.secret_key, expected)
+        self.assertDictContainsSubset(expected, actual)
+
+        # If this raises an exception, the value is not a valid UUID4.
+        UUID(actual[u'transaction_uuid'], version=4)
+
+    def test_is_signature_valid(self):
+        """ Verify that the is_signature_valid method properly validates the response's signature. """
+
+        # Empty data should never be valid
+        self.assertFalse(self.processor.is_signature_valid({}))
+
+        # The method should return False for responses with invalid signatures.
+        response = {
+            u'signed_field_names': u'field_1,field_2,signed_field_names',
+            u'field_2': u'abc',
+            u'field_1': u'123',
+            u'signature': u'abc123=='
+        }
+        self.assertFalse(self.processor.is_signature_valid(response))
+
+        # The method should return True if the signature is valid.
+        del response[u'signature']
+        response[u'signature'] = self.generate_signature(self.processor.secret_key, response)
+        self.assertTrue(self.processor.is_signature_valid(response))
+
+    def test_handle_processor_response(self):
+        """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
+
+        response = self.generate_notification(self.processor.secret_key, self.basket)
+        reference = response[u'transaction_id']
+        source, payment_event = self.processor.handle_processor_response(response, basket=self.basket)
+
+        # Validate the Source
+        source_type = SourceType.objects.get(code=self.processor.NAME)
+        label = response[u'req_card_number']
+        self.assert_basket_matches_source(self.basket, source, source_type, reference, label)
+
+        # Validate PaymentEvent
+        paid_type = PaymentEventType.objects.get(code=u'paid')
+        amount = self.basket.total_incl_tax
+        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
+
+    def test_handle_processor_response_invalid_signature(self):
+        """
+        The handle_processor_response method should raise an InvalidSignatureError if the response's
+        signature is not valid.
+        """
+        response = self.generate_notification(self.processor.secret_key, self.basket)
+        response[u'signature'] = u'Tampered.'
+        self.assertRaises(InvalidSignatureError, self.processor.handle_processor_response, response, basket=self.basket)
+
+    @ddt.data(
+        (u'CANCEL', UserCancelled),
+        (u'DECLINE', TransactionDeclined),
+        (u'ERROR', GatewayError),
+        (u'huh?', InvalidCybersourceDecision))
+    @ddt.unpack
+    def test_handle_processor_response_not_accepted(self, decision, exception):
+        """ The handle_processor_response method should raise an exception if payment was not accepted. """
+
+        response = self.generate_notification(self.processor.secret_key, self.basket, decision=decision)
+        self.assertRaises(exception, self.processor.handle_processor_response, response, basket=self.basket)
+
+    def test_handle_processor_response_invalid_auth_amount(self):
+        """
+        The handle_processor_response method should raise PartialAuthorizationError if the authorized amount
+        differs from the requested amount.
+        """
+        response = self.generate_notification(self.processor.secret_key, self.basket, auth_amount=u'0.00')
+        self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
+                          basket=self.basket)
+
+    def test_get_transaction_parameters(self):
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
+
+        # Test with settings overrides
+        self.processor.receipt_page_url = u'http://example.com/receipt/'
+        self.processor.cancel_page_url = u'http://example.com/cancel/'
+        self.assert_valid_transaction_parameters()
+
+        # Test with receipt page override
+        self.assert_valid_transaction_parameters(receipt_page_url=u'http://example.com/receipt/')
+
+        # Test with cancel page override
+        self.assert_valid_transaction_parameters(cancel_page_url=u'http://example.com/cancel/')
+
+        # Test with both overrides
+        self.assert_valid_transaction_parameters(cancel_page_url=u'http://example.com/cancel/',
+                                                 receipt_page_url=u'http://example.com/receipt/')
+
+        # Test without overrides
+        self.processor.receipt_page_url = None
+        self.processor.cancel_page_url = None
+        self.assert_valid_transaction_parameters()

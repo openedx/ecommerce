@@ -201,7 +201,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
 
         response_data = self._generate_basic_response(basket)
 
-        if basket.total_excl_tax == AC.FREE:
+        if basket.total_incl_tax == AC.FREE:
             order_metadata = data.get_order_metadata(basket)
 
             logger.info(

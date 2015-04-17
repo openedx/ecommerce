@@ -5,15 +5,21 @@ omit = ecommerce/settings*
     # loads models causes the rest of the app to appear uncovered. The result is
     # skewed coverage stats, which is why the app is omitted from coverage reports.
     ecommerce/user*
+
     # Custom code in the order models app is covered, but the same issue described
     # above causes all other code in the model to appear uncovered, resulting in
     # skewed coverage stats.
     ecommerce/extensions/order/models*
+    ecommerce/extensions/payment/models*
+
     # The fulfillment app's status module only contains constants, which don't require
     # test coverage.
-    ecommerce/extensions/fulfillment/status*
-    # Temporary exclusion, while tests that excercise this code are developed.
-    ecommerce/extensions/checkout/mixins*
+    ecommerce/extensions/fulfillment/status.py
+
+    # These files are loaded before coverage, thus they are falsely marked as not covered.
+    ecommerce/extensions/fulfillment/apps.py
+    ecommerce/extensions/fulfillment/signals.py
+
     *wsgi.py
     *migrations*
     *admin.py
