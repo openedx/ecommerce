@@ -21,7 +21,8 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.payment import exceptions as payment_exceptions
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, Cybersource
+from ecommerce.extensions.payment.processors import Cybersource
+from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMixin
 
 
@@ -223,6 +224,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
 
 class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
     """Test cases for getting existing orders. """
+
     def setUp(self):
         super(RetrieveOrderViewTests, self).setUp()
 
@@ -250,6 +252,7 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
 
 class OrderByBasketRetrieveViewTests(RetrieveOrderViewTests):
     """Test cases for getting orders using the basket id. """
+
     @property
     def url(self):
         return reverse('api:v2:baskets:retrieve_order', kwargs={'basket_id': self.order.basket.id})
@@ -319,16 +322,9 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
         self.assert_empty_result_response(response)
 
 
-class DummyProcessor1(BasePaymentProcessor):  # pylint: disable=abstract-method
-    NAME = "dummy-1"
-
-
-class DummyProcessor2(BasePaymentProcessor):  # pylint: disable=abstract-method
-    NAME = "dummy-2"
-
-
 class PaymentProcessorListViewTests(TestCase, UserMixin):
     """ Ensures correct behavior of the payment processors list view."""
+
     def setUp(self):
         self.token = self.generate_jwt_token_header(self.create_user())
 
@@ -343,15 +339,15 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
         response = self.client.get(reverse('api:v2:payment:list_processors'))
         self.assertEqual(response.status_code, 401)
 
-    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.api.v2.tests.test_views.DummyProcessor1'])
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_get_one(self):
         """Ensure a single payment processor in settings is handled correctly."""
-        self.assert_processor_list_matches(['dummy-1'])
+        self.assert_processor_list_matches([DummyProcessor.NAME])
 
     @override_settings(PAYMENT_PROCESSORS=[
-        'ecommerce.extensions.api.v2.tests.test_views.DummyProcessor1',
-        'ecommerce.extensions.api.v2.tests.test_views.DummyProcessor2',
+        'ecommerce.extensions.payment.tests.processors.DummyProcessor',
+        'ecommerce.extensions.payment.tests.processors.AnotherDummyProcessor',
     ])
     def test_get_many(self):
         """Ensure multiple processors in settings are handled correctly."""
-        self.assert_processor_list_matches(['dummy-1', 'dummy-2'])
+        self.assert_processor_list_matches([DummyProcessor.NAME, AnotherDummyProcessor.NAME])
