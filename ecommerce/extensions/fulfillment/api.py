@@ -77,20 +77,3 @@ def fulfill_order(order, lines):
         order.set_status(order_status)
         logger.info("Finished fulfilling order [%s] with status [%s]", order.number, order.status)
         return order  # pylint: disable=lost-exception
-
-
-def revoke_order(order, lines):  # pylint: disable=unused-argument
-    """ Revokes line items an Order.
-
-    Attempts to revoke the products in the specified order. This logically may only work for digital products, where
-    we can revoke access. How revoking works per product will have to be carefully defined when this function is used.
-
-    Args:
-        order (Order): The Order associated with this line item. The status of the Order may be altered based on
-            revoking the line items.
-        lines (List of Lines): A list of Line items in the Order that should be revoked.
-
-    Returns:
-        The modified Order and Lines.
-    """
-    pass  # pragma: no cover

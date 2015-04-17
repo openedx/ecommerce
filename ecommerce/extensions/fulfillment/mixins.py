@@ -16,6 +16,6 @@ class FulfillmentMixin(object):
         order_lines = order.lines.all()
         line_quantities = [line.quantity for line in order_lines]
 
-        shipping_event = ShippingEventType.objects.get(name=self.SHIPPING_EVENT_NAME)
+        shipping_event, __ = ShippingEventType.objects.get_or_create(name=self.SHIPPING_EVENT_NAME)
         fulfilled_order = EventHandler().handle_shipping_event(order, shipping_event, order_lines, line_quantities)
         return fulfilled_order

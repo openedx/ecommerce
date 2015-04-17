@@ -3,7 +3,7 @@ from oscar.apps.checkout.mixins import OrderPlacementMixin
 
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.payment.constants import ProcessorConstants as PC
+from ecommerce.extensions.order.constants import PaymentEventTypeName
 
 
 Source = get_model('payment', 'Source')
@@ -50,7 +50,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, FulfillmentMixin):
 
         # Record payment event
         self.add_payment_event(
-            PC.SETTLEMENT,
+            PaymentEventTypeName.PAID,
             total.excl_tax,
             reference=reference
         )

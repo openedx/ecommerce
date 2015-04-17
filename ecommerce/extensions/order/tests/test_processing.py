@@ -13,7 +13,7 @@ ShippingEvent = get_model('order', 'ShippingEvent')
 class EventHandlerTests(TestCase):
     def setUp(self):
         super(EventHandlerTests, self).setUp()
-        self.shipping_event_type = ShippingEventType.objects.create(code='shipped', name='shipped')
+        self.shipping_event_type = ShippingEventType.objects.create(name='Shipped')
         self.order = factories.create_order()
 
     def test_create_shipping_event_all_lines_complete(self):

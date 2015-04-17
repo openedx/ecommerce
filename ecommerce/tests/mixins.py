@@ -121,7 +121,7 @@ class BasketCreationMixin(object):
     ):
         """Verify that basket creation succeeded."""
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
-        ShippingEventType.objects.create(code='shipped', name=self.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.create(name=self.SHIPPING_EVENT_NAME)
 
         response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
 

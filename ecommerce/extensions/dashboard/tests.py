@@ -37,7 +37,7 @@ class OrderListTests(LiveServerTestCase):
         self.order.save()
         self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)
 
-        ShippingEventType.objects.get_or_create(code='shipped', name=FulfillmentMixin.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.get_or_create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
 
     def _login(self):
         """ Log into the service and navigate to the order list view. """
@@ -60,7 +60,7 @@ class OrderListTests(LiveServerTestCase):
         self.assertIn(alert_class, classes, )
         self.assertEqual(alert.find_element_by_css_selector('.message').text, text)
 
-    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.test_api.FakeFulfillmentModule', ])
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
     def test_retry_fulfillment(self):
         """
         The order list should display a "Retry Fulfillment" button beside orders in the Fulfillment Error state.

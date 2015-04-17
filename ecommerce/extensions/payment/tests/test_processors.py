@@ -14,12 +14,9 @@ from nose.tools import raises
 from oscar.test import factories
 
 import ecommerce.extensions.payment.processors as processors
-from ecommerce.extensions.order.models import Order
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, Cybersource, SingleSeatCybersource
+from ecommerce.extensions.payment.processors import Cybersource, SingleSeatCybersource
 from ecommerce.extensions.payment.errors import ExcessiveMerchantDefinedData, UnsupportedProductError
 from ecommerce.extensions.payment.constants import CybersourceConstants as CS
-from ecommerce.extensions.payment.constants import ProcessorConstants as PC
-from ecommerce.extensions.fulfillment.status import ORDER
 
 
 User = get_user_model()
@@ -81,28 +78,13 @@ class PaymentProcessorTestCase(TestCase):
         self.basket.add_product(pollos_hermanos, 1)
 
         self.order = factories.create_order(
-            number=self.ORDER_NUMBER, basket=self.basket, user=user, status=ORDER.BEING_PROCESSED
+            number=self.ORDER_NUMBER, basket=self.basket, user=user
         )
         # the processor will pass through a string representation of this
         self.order_total = unicode(self.order.total_excl_tax)
 
         # Remove logger override
         self.addCleanup(logging.disable, logging.NOTSET)
-
-
-class BasePaymentProcessorTests(PaymentProcessorTestCase):
-    """Tests of the base payment processor class."""
-
-    @raises(NotImplementedError)
-    def test_base_processor_get_parameters_unusable(self):
-        """Test that use of the get_transaction_parameters base payment processor class fails."""
-        BasePaymentProcessor().get_transaction_parameters(self.order)
-
-    @raises(NotImplementedError)
-    def test_processor_reponse_unusable(self):
-        """ Test that we can't use the base processor_response. """
-        params = {}
-        BasePaymentProcessor().handle_processor_response(params)
 
 
 class CybersourceTests(PaymentProcessorTestCase):
@@ -242,153 +224,6 @@ class CybersourceParameterGenerationTests(CybersourceTests):
 class CybersourcePaymentAcceptanceTests(CybersourceTests):
     """Tests of the CyberSource processor class related to checking response."""
     FAILED_DECISIONS = ["DECLINE", "CANCEL", "ERROR"]
-
-    def setUp(self):
-        super(CybersourcePaymentAcceptanceTests, self).setUp()
-
-    def test_process_payment_success(self):
-        """ Test that we processed the params successfully """
-        # Simulate a callback from CyberSource indicating that payment was successful
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total, currency=self.order.currency
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect that we processed the payment successfully
-        self.assertTrue(result[PC.SUCCESS])
-        self.assertEqual(result[PC.ORDER_NUMBER], self.order.number)
-
-    def test_process_payment_invalid_signature(self):
-        """ Simulate a callback from CyberSource indicating that the payment has an invalid signature """
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total, signature="invalid!", currency=self.order.currency
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect that we get an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_payment_invalid_order(self):
-        """ Use an invalid order ID """
-        params = self._signed_callback_params(
-            "98272", self.order_total, self.order_total, currency=self.order.currency
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_invalid_payment_amount(self):
-        """ Change the payment amount (no longer matches the database order record) """
-        params = self._signed_callback_params(
-            self.order.number, "145.00", "145.00", currency=self.order.currency
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_amount_paid_not_decimal(self):
-        """ Change the payment amount to a non-decimal """
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, "abcd", currency=self.order.currency
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_user_cancelled(self):
-        """ Simulate a user cancelling the transaction """
-        # set the order status to what we expect after being sent out to CyberSource
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total, currency=self.order.currency, decision=CS.CANCEL
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-        # verify that the order has been updated
-        order = Order.objects.get(number=self.order.number)
-        self.assertEquals(order.status, ORDER.PAYMENT_CANCELLED)
-
-    def test_process_user_cancelled_invalid_order(self):
-        """ Simulate a user cancelling the transaction """
-        # set the order status to what we expect after being sent out to CyberSource
-        params = self._signed_callback_params(
-            'fake', self.order_total, self.order_total, currency=self.order.currency, decision=CS.CANCEL
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_payment_declined(self):
-        """ Simulate the processor declining the transaction """
-        # set the order status to what we expect after being sent out to CyberSource
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total, currency=self.order.currency, decision=CS.DECLINE
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-        # verify that the order has been updated
-        order = Order.objects.get(number=self.order.number)
-        self.assertEquals(order.status, ORDER.PAYMENT_ERROR)
-
-    def test_process_payment_declined_invalid_order(self):
-        """ Simulate the processor declining a transaction to an invalid order. """
-        # set the order status to what we expect after being sent out to CyberSource
-        params = self._signed_callback_params(
-            'fake', self.order_total, self.order_total, currency=self.order.currency, decision=CS.DECLINE
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_no_credit_card_digits(self):
-        """ Simulate a credit card number with no digits provided """
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total,
-            card_number='nodigits', currency=self.order.currency
-        )
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect that we processed the payment successfully
-        self.assertTrue(
-            result[PC.SUCCESS],
-        )
-
-    @ddt.data('req_reference_number', 'req_currency', 'decision', 'auth_amount')
-    def test_process_missing_parameters(self, missing_param):
-        """ Test removing a required parameter """
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total, currency=self.order.currency
-        )
-        del params[missing_param]
-
-        # Recalculate the signature with no signed fields so we can get past
-        # signature validation.
-        params[CS.FIELD_NAMES.SIGNED_FIELD_NAMES] = 'reason_code,message'
-        # pylint: disable=protected-access
-        params[CS.FIELD_NAMES.SIGNATURE] = Cybersource()._generate_signature(params)
-
-        result = Cybersource().handle_processor_response(params)
-
-        # Expect an error
-        self.assertFalse(result[PC.SUCCESS])
-
-    def test_process_error_parameters(self):
-        """ Test when CyberSource returns an ERROR decision, the order status is updated. """
-        params = self._signed_callback_params(
-            self.order.number, self.order_total, self.order_total, currency=self.order.currency, decision=CS.ERROR
-        )
-        result = Cybersource().handle_processor_response(params)
-        self.assertFalse(result[PC.SUCCESS])
-        order = Order.objects.get(number=self.order.number)
-        self.assertEquals(order.status, ORDER.PAYMENT_ERROR)
 
     def _signed_callback_params(
             self, order_id, order_amount, paid_amount,
