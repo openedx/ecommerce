@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.order.abstract_models import AbstractOrder
@@ -6,11 +7,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 
 
 class Order(AbstractOrder):
-    payment_processor = models.CharField(_("Payment Processor"), max_length=32, blank=True)
-
-    @property
-    def is_paid(self):
-        return self.status in [ORDER.PAID, ORDER.REFUNDED, ORDER.COMPLETE, ORDER.FULFILLMENT_ERROR]
+    payment_processor = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)
 
     @property
     def can_retry_fulfillment(self):

@@ -3,21 +3,20 @@ import logging
 
 from django.conf import settings
 from django.http import Http404
+from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from oscar.core.loading import get_model
 
 from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
+# noinspection PyUnresolvedReferences
 from ecommerce.extensions.api.v1.views import OrderFulfillView  # pylint: disable=unused-import
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment.helpers import (
-    get_processor_class, get_default_processor_class, get_processor_class_by_name
-)
 from ecommerce.extensions.payment import exceptions as payment_exceptions
-from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.payment.helpers import (get_processor_class, get_default_processor_class,
+                                                  get_processor_class_by_name)
 
 
 logger = logging.getLogger(__name__)
@@ -221,11 +220,6 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
                 shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
                 billing_address=None,
                 order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
-                # Note: Setting the status of new orders to PAID is a temporary measure in place until
-                # v1 is deprecated and the order status pipeline can be shortened. The EdxOrderPlacementMixin
-                # correctly sets the status of new orders to OPEN, so this kwarg won't be necessary once the
-                # order status pipeline allows OPEN orders to be fulfilled.
-                status=ORDER.PAID
             )
 
             # Note: Our order serializer could be used here, but in an effort to pare down the information

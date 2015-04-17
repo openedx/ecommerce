@@ -2,7 +2,7 @@
 """Unit tests of ecommerce API views."""
 import json
 import logging
-from decimal import Decimal as D
+from decimal import Decimal
 from collections import namedtuple
 
 import ddt
@@ -20,11 +20,8 @@ from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
-from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.order.utils import OrderNumberGenerator
 from ecommerce.extensions.payment import exceptions as payment_exceptions
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
-from ecommerce.extensions.payment.constants import CybersourceConstants as CS
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, Cybersource
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMixin
 
 
@@ -33,7 +30,7 @@ Basket = get_model('basket', 'Basket')
 
 @ddt.ddt
 @override_settings(
-    FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.test_api.FakeFulfillmentModule']
+    FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule']
 )
 class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
     FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
@@ -56,21 +53,21 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             parent=self.base_product,
             title=u'𝐋𝐏 𝟓𝟔𝟎-𝟒',
             stockrecords__partner_sku=self.PAID_SKU,
-            stockrecords__price_excl_tax=D('180000.00'),
+            stockrecords__price_excl_tax=Decimal('180000.00'),
         )
         factories.ProductFactory(
             structure='child',
             parent=self.base_product,
             title=u'Papier-mâché',
             stockrecords__partner_sku=self.ALTERNATE_FREE_SKU,
-            stockrecords__price_excl_tax=D('0.00'),
+            stockrecords__price_excl_tax=Decimal('0.00'),
         )
         factories.ProductFactory(
             structure='child',
             parent=self.base_product,
             title=u'𝐋𝐏 𝟓𝟕𝟎-𝟒 𝐒𝐮𝐩𝐞𝐫𝐥𝐞𝐠𝐠𝐞𝐫𝐚',
             stockrecords__partner_sku=self.ALTERNATE_PAID_SKU,
-            stockrecords__price_excl_tax=D('240000.00'),
+            stockrecords__price_excl_tax=Decimal('240000.00'),
         )
 
         # Remove logger override
@@ -82,7 +79,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
         ([FREE_SKU, ALTERNATE_FREE_SKU], True, None, False),
         ([PAID_SKU], False, None, True),
         ([PAID_SKU], True, None, True),
-        ([PAID_SKU], True, CS.NAME, True),
+        ([PAID_SKU], True, Cybersource.NAME, True),
         ([PAID_SKU, ALTERNATE_PAID_SKU], True, None, True),
         ([FREE_SKU, PAID_SKU], True, None, True),
     )
@@ -230,15 +227,7 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         super(RetrieveOrderViewTests, self).setUp()
 
         user = self.create_user()
-
-        self.basket = factories.create_basket()
-
-        order_number = OrderNumberGenerator.order_number(self.basket)
-        self.order = factories.create_order(number=order_number, basket=self.basket)
-        self.order.status = ORDER.PAID
-        self.order.user = user
-        self.order.save()
-
+        self.order = factories.create_order(user=user)
         self.token = self.generate_jwt_token_header(user)
 
     @property
@@ -263,7 +252,7 @@ class OrderByBasketRetrieveViewTests(RetrieveOrderViewTests):
     """Test cases for getting orders using the basket id. """
     @property
     def url(self):
-        return reverse('api:v2:baskets:retrieve_order', kwargs={'basket_id': self.basket.id})
+        return reverse('api:v2:baskets:retrieve_order', kwargs={'basket_id': self.order.basket.id})
 
 
 class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase):

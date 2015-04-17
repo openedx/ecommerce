@@ -10,7 +10,6 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import data, exceptions, serializers
-from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
 
@@ -83,7 +82,7 @@ class RetrieveOrderView(RetrieveAPIView):
 
         """
         order = super(RetrieveOrderView, self).get_object()
-        if order and order.is_paid and order.user.username == self.request.user.username:
+        if order and order.user.username == self.request.user.username:
             return order
         else:
             raise Http404
@@ -194,7 +193,8 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
         payment_processor = get_processor_class(settings.PAYMENT_PROCESSORS[0])
 
         order = self._prepare_order(basket, product, sku, payment_processor)
-        if order.status == ORDER.PAID:
+
+        if order.total_excl_tax == self.FREE:
             logger.info(
                 u"Attempting to immediately fulfill order [%s] totaling [%.2f %s]",
                 order.number,
@@ -246,8 +246,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
             shipping_method,
             shipping_charge,
             user=basket.owner,
-            order_number=OrderNumberGenerator.order_number(basket),
-            status=ORDER.OPEN
+            order_number=OrderNumberGenerator.order_number(basket)
         )
 
         logger.info(
@@ -259,16 +258,6 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
             payment_processor.NAME
         )
 
-        # Update the order to BEING_PROCESSED for all orders
-        order.set_status(ORDER.BEING_PROCESSED)
-
-        # If the product constituting the order is free, we mark the order
-        # as paid (as dictated by the order status pipeline) so that the
-        # fulfillment API will agree to fulfill it.
-        if order.total_excl_tax == self.FREE:
-            order.set_status(ORDER.PAID)
-            logger.info(u"Marked order [%s] as [%s]", order.number, ORDER.PAID)
-
         # Mark the basket as submitted
         basket.submit()
 
@@ -277,7 +266,7 @@ class OrderListCreateAPIView(FulfillmentMixin, ListCreateAPIView):
     def _assemble_order_data(self, order, payment_processor):
         """Assemble a dictionary of metadata for the provided order."""
         order_data = serializers.OrderSerializer(order).data
-        order_data['payment_parameters'] = payment_processor().get_transaction_parameters(order)
+        order_data['payment_parameters'] = payment_processor().get_transaction_parameters(order.basket)
 
         return order_data
 

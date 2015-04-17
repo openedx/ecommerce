@@ -17,8 +17,7 @@ class OrderTests(TestCase):
         self.order.save()
         self.assertTrue(self.order.can_retry_fulfillment)
 
-    @ddt.data(ORDER.OPEN, ORDER.ORDER_CANCELLED, ORDER.BEING_PROCESSED, ORDER.PAYMENT_CANCELLED, ORDER.PAID,
-              ORDER.COMPLETE, ORDER.REFUNDED)
+    @ddt.data(ORDER.OPEN)
     def test_can_retry_fulfillment_without_fulfillment_error(self, status):
         """ Order.can_retry_fulfillment should return False if the order's status is *not* ORDER.FULFILLMENT_ERROR. """
         self.order.status = status

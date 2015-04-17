@@ -59,7 +59,7 @@ class OrdersIntegrationTests(TestCase):
         # Remove logger override
         self.addCleanup(logging.disable, logging.NOTSET)
 
-    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.test_api.FakeFulfillmentModule'])
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule'])
     def test_order_free_product(self):
         """Test that a free product can be ordered and fulfilled successfully."""
         self._create_and_verify_order(self.FREE_TRIAL_SKU)

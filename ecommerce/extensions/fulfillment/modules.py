@@ -3,15 +3,15 @@
 Fulfillment Modules are designed to allow specific fulfillment logic based on the type (or types) of products
 in an Order.
 """
-# pylint: disable=abstract-method
+import abc
 import json
 import logging
 
+from django.conf import settings
+from oscar.apps.catalogue.models import ProductAttributeValue
+from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
-from django.conf import settings
-from rest_framework import status
-from oscar.apps.catalogue.models import ProductAttributeValue
 
 from ecommerce.extensions.fulfillment.status import LINE
 
@@ -19,13 +19,15 @@ from ecommerce.extensions.fulfillment.status import LINE
 logger = logging.getLogger(__name__)
 
 
-class FulfillmentModule(object):
-    """ Base FulfillmentModule class for containing Product specific fulfillment logic.
+class BaseFulfillmentModule(object):  # pragma: no cover
+    """
+    Base FulfillmentModule class for containing Product specific fulfillment logic.
 
     All modules should extend the FulfillmentModule and adhere to the defined contract.
-
     """
+    __metaclass__ = abc.ABCMeta
 
+    @abc.abstractmethod
     def get_supported_lines(self, order, lines):
         """ Return a list of supported lines in the order
 
@@ -45,6 +47,7 @@ class FulfillmentModule(object):
         """
         raise NotImplementedError("Line support method not implemented!")
 
+    @abc.abstractmethod
     def fulfill_product(self, order, lines):
         """ Fulfills the specified lines in the order.
 
@@ -62,6 +65,7 @@ class FulfillmentModule(object):
         """
         raise NotImplementedError("Fulfillment method not implemented!")
 
+    @abc.abstractmethod
     def revoke_product(self, order, lines):
         """ Revokes the specified lines in the order.
 
@@ -79,12 +83,13 @@ class FulfillmentModule(object):
         raise NotImplementedError("Revoke method not implemented!")
 
 
-class EnrollmentFulfillmentModule(FulfillmentModule):
+class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     """ Fulfillment Module for enrolling students after a product purchase.
 
     Allows the enrollment of a student via purchase of a 'seat'.
 
     """
+
     REQUEST_TIMEOUT = 5
 
     def get_supported_lines(self, order, lines):
@@ -136,7 +141,6 @@ class EnrollmentFulfillmentModule(FulfillmentModule):
             for line in lines:
                 line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
 
-        student = order.user.username
         for line in lines:
             try:
                 certificate_type = line.product.attribute_values.get(attribute__name="certificate_type").value
@@ -147,7 +151,7 @@ class EnrollmentFulfillmentModule(FulfillmentModule):
                 continue
 
             data = {
-                'user': student,
+                'user': order.user.username,
                 'mode': certificate_type,
                 'course_details': {
                     'course_id': course_key
@@ -174,7 +178,7 @@ class EnrollmentFulfillmentModule(FulfillmentModule):
                     try:
                         data = response.json()
                         reason = data.get('message')
-                    except Exception:   # pylint: disable=broad-except
+                    except Exception:  # pylint: disable=broad-except
                         reason = '(No detail provided.)'
 
                     logger.error(
@@ -194,3 +198,6 @@ class EnrollmentFulfillmentModule(FulfillmentModule):
                 line.set_status(LINE.FULFILLMENT_TIMEOUT_ERROR)
         logger.info("Finished fulfilling 'Seat' product types for order [%s]", order.number)
         return order, lines
+
+    def revoke_product(self, order, lines):
+        raise NotImplementedError

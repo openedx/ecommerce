@@ -1,16 +1,18 @@
 """Tests of the Fulfillment API's fulfillment modules."""
 import ddt
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from oscar.test.newfactories import UserFactory, BasketFactory
 import mock
 from nose.tools import raises
-from django.test import TestCase, override_settings
-from django.contrib.auth import get_user_model
+from oscar.test import factories
 from requests import Response
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
-from oscar.test import factories
 
-from ecommerce.extensions.fulfillment.modules import FulfillmentModule, EnrollmentFulfillmentModule
-from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
+from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 
 
 User = get_user_model()
@@ -18,12 +20,11 @@ User = get_user_model()
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class FulfillmentModuleTest(TestCase):
+class EnrollmentFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='Fry', email='fry@planetexpress.com', password='top_secret'
-        )
+        user = UserFactory()
         self.product_class = factories.ProductClassFactory(
             name='Seat', requires_shipping=False, track_stock=False
         )
@@ -42,28 +43,9 @@ class FulfillmentModuleTest(TestCase):
             stock_record.price_currency = 'USD'
             stock_record.save()
 
-        basket = factories.create_basket(empty=True)
+        basket = BasketFactory()
         basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=1, basket=basket, user=self.user)
-
-        # Move the order from 'Open' to 'Paid' so fulfillment can be completed.
-        self.order.set_status(ORDER.BEING_PROCESSED)
-        self.order.set_status(ORDER.PAID)
-
-    @raises(NotImplementedError)
-    def test_interface_support_error(self):
-        """Test that use of the abstract class fails due to "not implemented" error."""
-        FulfillmentModule().get_supported_lines(self.order, list(self.order.lines.all()))
-
-    @raises(NotImplementedError)
-    def test_interface_fulfill_error(self):
-        """Test that use of the abstract class fails due to "not implemented" error."""
-        FulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
-
-    @raises(NotImplementedError)
-    def test_interface_revoke_error(self):
-        """Test that use of the abstract class fails due to "not implemented" error."""
-        FulfillmentModule().revoke_product(self.order, list(self.order.lines.all()))
+        self.order = factories.create_order(number=1, basket=basket, user=user)
 
     def test_enrollment_module_support(self):
         """Test that we get the correct values back for supported product lines."""

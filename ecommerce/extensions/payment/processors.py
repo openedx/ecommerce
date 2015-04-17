@@ -1,28 +1,24 @@
 """Payment processing classes containing logic specific to particular payment processors."""
+# pylint: disable=abstract-method
+
 import uuid
-import json
 import logging
 import datetime
 from collections import OrderedDict
-from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 
-from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.errors import (
-    ExcessiveMerchantDefinedData, UserCancelled, PaymentDeclined, SignatureException,
-    CybersourceError, WrongAmountException, DataException, UnsupportedProductError
+    ExcessiveMerchantDefinedData, UnsupportedProductError
 )
 from ecommerce.extensions.payment.constants import CybersourceConstants as CS
-from ecommerce.extensions.payment.constants import ProcessorConstants as PC
-from ecommerce.extensions.fulfillment.status import ORDER
 
 
 logger = logging.getLogger(__name__)
 
 
-class BasePaymentProcessor(object):
+class BasePaymentProcessor(object):  # pragma no cover
     """Base payment processor class."""
     NAME = None
 
@@ -119,44 +115,6 @@ class Cybersource(BasePaymentProcessor):
         )
 
         return transaction_parameters
-
-    def handle_processor_response(self, params):
-        """
-        Handle a response from the payment processor.
-
-        1) Verifies the parameters and determine if the payment was successful.
-        2) If successful, mark the order as purchased and send order to fulfillment
-        3) If unsuccessful, try to figure out why and log a helpful error message.
-        4) Return a dictionary of the form:
-            {'success': bool, 'order': unicode}
-
-        Args:
-            params (dict): Dictionary of parameters received from the payment processor.
-
-        Keyword Args:
-            Can be used to provide additional information to concrete implementations.
-
-        Returns:
-            dict
-
-        """
-        result = {PC.SUCCESS: False, PC.ORDER_NUMBER: None}
-        try:
-            valid_params = self._verify_signatures(params)
-            result[PC.ORDER_NUMBER] = valid_params[CS.FIELD_NAMES.REQ_REFERENCE_NUMBER]
-            if valid_params[CS.FIELD_NAMES.DECISION] == CS.ACCEPT:
-                # make sure the auth amount and currency is what we expect from Cybersource
-                self._check_payment_consistency(
-                    valid_params[CS.FIELD_NAMES.REQ_REFERENCE_NUMBER],
-                    valid_params[CS.FIELD_NAMES.AUTH_AMOUNT],
-                    valid_params[CS.FIELD_NAMES.REQ_CURRENCY]
-                )
-                result[PC.SUCCESS] = True
-        except CybersourceError:
-            logger.exception(u"Error handling CyberSource response.")
-            logger.info(json.dumps(params))
-        finally:
-            return result  # pylint: disable=lost-exception
 
     def _get_raw_transaction_parameters(self, basket, receipt_page_url, cancel_page_url, merchant_defined_data):
         """Generate a dictionary of unsigned parameters CyberSource requires to complete a transaction.
@@ -294,126 +252,6 @@ class Cybersource(BasePaymentProcessor):
         )
 
         return sign(message, self.secret_key)
-
-    def _check_payment_consistency(self, order_num, auth_amount, currency):
-        """
-        After the payment has successfully been completed, we need to verify that the authorized amount and the currency
-        match what we expect based on the order number.
-
-        Args:
-            order_num (str): order number of the order being processed
-            auth_amount (num): the amount being paid
-
-        Raises:
-            ProcessorWrongAmountException: indicates that the processor has passed us the wrong amount
-                compared to what we expect from our own DB
-
-        Returns:
-            None
-        """
-        try:
-            if not Order.check_order_total(order_num, auth_amount, currency):
-                raise WrongAmountException(
-                    u"The amount charged by the processor [{charged_amount}] [{charged_amount_currency}] is different "
-                    u"than the total cost of the order for order [{order_number}].".format(
-                        charged_amount=auth_amount,
-                        charged_amount_currency=currency,
-                        order_number=order_num
-                    )
-                )
-
-        except Order.DoesNotExist:
-            raise DataException(
-                "The payment processor accepted an order with number [{number}] that is not in our system."
-                .format(number=order_num)
-            )
-
-    def _verify_signatures(self, params):
-        """
-        Use the signature we receive in the POST back from CyberSource to verify
-        the identity of the sender (CyberSource) and that the contents of the message
-        have not been tampered with.
-
-        Args:
-            params (dictionary): The POST parameters we received from CyberSource.
-
-        Returns:
-            dict: Contains the parameters we will use elsewhere, converted to the
-                appropriate types
-
-        Raises:
-            ProcessorSignatureException: The calculated signature does not match
-                the signature we received.
-
-            ProcessorDataException: The parameters we received from CyberSource were not valid
-                (missing keys, wrong types)
-
-            ProcessorUserCancelled: The user cancelled the transaction.
-
-            ProcessorUserDeclined: The payment was declined by the user.
-
-        """
-
-        # If the user cancels the transaction, the auth_amount will not be
-        # passed back, so we can't yet verify signatures.
-        if params.get(CS.FIELD_NAMES.DECISION) == CS.CANCEL:
-            self._mark_status(params.get(CS.FIELD_NAMES.REQ_REFERENCE_NUMBER), ORDER.PAYMENT_CANCELLED)
-            raise UserCancelled()
-
-        # If the processor declines the transaction, the auth_amount will
-        # not be passed back so we can't yet verify signatures.
-        elif params.get(CS.FIELD_NAMES.DECISION) == CS.DECLINE:
-            self._mark_status(params.get(CS.FIELD_NAMES.REQ_REFERENCE_NUMBER), ORDER.PAYMENT_ERROR)
-            raise PaymentDeclined()
-
-        # If the processor tells us there's an error, update the status of the order.
-        elif params.get(CS.FIELD_NAMES.DECISION) == CS.ERROR:
-            self._mark_status(params.get(CS.FIELD_NAMES.REQ_REFERENCE_NUMBER), ORDER.PAYMENT_ERROR)
-
-        # Validate the signature to ensure that the message is from CyberSource
-        # and has not been tampered with.
-        returned_sig = params.get(CS.FIELD_NAMES.SIGNATURE, '')
-        if self._generate_signature(params) != returned_sig:
-            raise SignatureException()
-
-        # Validate that we have the parameters we expect and can convert them
-        # to the appropriate types.
-        # Usually validating the signature is sufficient to validate that these
-        # fields exist, but since we're relying on CyberSource to tell us
-        # which fields they included in the signature, we need to be careful.
-        valid_params = {}
-        required_params = [
-            (CS.FIELD_NAMES.REQ_REFERENCE_NUMBER, unicode),
-            (CS.FIELD_NAMES.REQ_CURRENCY, unicode),
-            (CS.FIELD_NAMES.DECISION, unicode),
-            (CS.FIELD_NAMES.AUTH_AMOUNT, Decimal),
-        ]
-        for key, key_type in required_params:
-            if key not in params:
-                raise DataException(
-                    u"The payment processor did not return a required parameter: [{parameter}]".format(parameter=key)
-                )
-            try:
-                valid_params[key] = key_type(params[key])
-            except (ValueError, TypeError, InvalidOperation):
-                raise DataException(
-                    u"The payment processor returned a badly-typed value [{value}] for parameter [{parameter}].".format(
-                        value=params[key], parameter=key
-                    )
-                )
-
-        return valid_params
-
-    def _mark_status(self, order_num, status):
-        """ Mark a change in the status of an order. """
-        try:
-            order = Order.objects.get(number=order_num)
-            order.set_status(status)
-        except Order.DoesNotExist:
-            raise DataException(
-                "The payment processor accepted an order with number [{number}] that is not in our system."
-                .format(number=order_num)
-            )
 
 
 class SingleSeatCybersource(Cybersource):

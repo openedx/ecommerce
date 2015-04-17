@@ -43,15 +43,12 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         user = self.create_user()
         self.basket = factories.create_basket()
         order_number = OrderNumberGenerator.order_number(self.basket)
-        self.order = factories.create_order(number=order_number, basket=self.basket)
-        self.order.status = ORDER.PAID
-        self.order.user = user
-        self.order.save()
+        self.order = factories.create_order(number=order_number, basket=self.basket, user=user)
 
         self.token = self.generate_jwt_token_header(user)
         self.url = reverse('api:v1:orders:retrieve', kwargs={'number': self.order.number})
 
-    @ddt.data(ORDER.PAID, ORDER.COMPLETE, ORDER.REFUNDED, ORDER.FULFILLMENT_ERROR)
+    @ddt.data(ORDER.COMPLETE, ORDER.FULFILLMENT_ERROR)
     def test_get_order(self, order_status):
         """Test all scenarios where an order should be successfully retrieved. """
         self.order.status = order_status
@@ -59,14 +56,6 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
         response = self.client.get(self.url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, OrderSerializer(self.order).data)
-
-    @ddt.data(ORDER.OPEN, ORDER.BEING_PROCESSED, ORDER.ORDER_CANCELLED, ORDER.PAYMENT_CANCELLED)
-    def test_order_not_found(self, order_status):
-        """Test all scenarios where an order should return a 404 due to unpaid state. """
-        self.order.status = order_status
-        self.order.save()
-        response = self.client.get(self.url, HTTP_AUTHORIZATION=self.token)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_order_wrong_user(self):
         """Test all scenarios where an order should return a 404 due to the wrong user. """
@@ -254,7 +243,7 @@ class CreateOrderViewTests(ThrottlingMixin, TestCase):
 
     def _create_and_verify_order(self, sku, shipping_event_name):
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
-        ShippingEventType.objects.create(code='shipped', name=shipping_event_name)
+        ShippingEventType.objects.create(name=shipping_event_name)
 
         response = self._order(sku=sku)
 
@@ -281,7 +270,7 @@ class CreateOrderViewTests(ThrottlingMixin, TestCase):
 class OrderFulfillViewTests(UserMixin, TestCase):
     def setUp(self):
         super(OrderFulfillViewTests, self).setUp()
-        ShippingEventType.objects.create(code='shipped', name=FulfillmentMixin.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
 
         self.user = self.create_user(is_superuser=True)
         self.client.login(username=self.user.username, password=self.password)
@@ -326,8 +315,7 @@ class OrderFulfillViewTests(UserMixin, TestCase):
         self.user.user_permissions.add(permission)
         self.assertNotEqual(403, self._put_to_view().status_code)
 
-    @ddt.data(ORDER.OPEN, ORDER.ORDER_CANCELLED, ORDER.BEING_PROCESSED, ORDER.PAYMENT_CANCELLED, ORDER.PAID,
-              ORDER.COMPLETE, ORDER.REFUNDED)
+    @ddt.data(ORDER.OPEN, ORDER.COMPLETE)
     def test_order_fulfillment_error_state_required(self, order_status):
         """ If the order is not in the Fulfillment Error state, the view must return an HTTP 406. """
         self.order.status = order_status
