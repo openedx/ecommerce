@@ -3,6 +3,7 @@ import os
 from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
@@ -28,18 +29,14 @@ def handler403(_):
     """
     return redirect(settings.LMS_DASHBOARD_URL)
 
-
-# Uncomment the next two lines to enable the admin
-# from django.contrib import admin
-# admin.autodiscover()
+admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    # Uncomment the next line to enable the admin
-    # url(r'^admin/', include(admin.site.urls)),
-
-    # Heartbeat page
-    url(r'^health$', include('health.urls')),
+    url(r'^i18n/', include('django.conf.urls.i18n')),
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
+    url(r'^health/$', include('health.urls')),
 
     # Social auth
     url('', include('social.apps.django_app.urls', namespace='social')),
@@ -52,8 +49,7 @@ urlpatterns = patterns(
         ),
         name='login'
     ),
-    # Auto auth
-    url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
+
 )
 
 # Install Oscar extension URLs

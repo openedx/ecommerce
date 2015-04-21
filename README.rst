@@ -26,6 +26,10 @@ To apply migrations, run::
     
     $ make migrations
 
+Setup countries (for addresses) using the following command::
+
+    $ python manage.py oscar_populate_countries
+
 To stand up the development server, run::
 
     $ make serve

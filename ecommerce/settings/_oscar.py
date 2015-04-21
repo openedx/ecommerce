@@ -22,8 +22,10 @@ OSCAR_APPS = [
 ] + get_core_apps([
     'ecommerce.extensions.analytics',
     'ecommerce.extensions.catalogue',
+    'ecommerce.extensions.checkout',
     'ecommerce.extensions.order',
     'ecommerce.extensions.partner',
+    'ecommerce.extensions.payment',
 ])
 # END APP CONFIGURATION
 
@@ -88,7 +90,7 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
-    'ecommerce.extensions.payment.processors.SingleSeatCybersource',
+    'ecommerce.extensions.payment.processors.Cybersource',
 )
 
 PAYMENT_PROCESSOR_CONFIG = {
