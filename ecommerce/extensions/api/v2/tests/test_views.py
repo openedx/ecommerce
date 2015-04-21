@@ -13,6 +13,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 from oscar.test import factories
 from oscar.core.loading import get_model
+from oscar.test.newfactories import ProductAttributeValueFactory
 from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
 
@@ -230,6 +231,10 @@ class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
 
         user = self.create_user()
         self.order = factories.create_order(user=user)
+
+        # Add a product attribute to one of the order items
+        ProductAttributeValueFactory(product=self.order.lines.first().product)
+
         self.token = self.generate_jwt_token_header(user)
 
     @property
