@@ -73,15 +73,10 @@ class OrdersIntegrationTests(TestCase):
         return response
 
     def _create_and_verify_order(self, sku):
-        response = self._order(sku)
+        response = self._order(sku=sku)
 
         # Verify that the orders endpoint has successfully created the order
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Verify that the order data in the response is valid
-        response_serializer = OrderSerializer(data=response.data)
-        self.assertTrue(response_serializer.is_valid(), msg=response_serializer.errors)
-
-        # Verify that the returned order metadata lines up with the order in the system
-        expected_serializer = OrderSerializer(Order.objects.get())
-        self.assertEqual(response_serializer.data, expected_serializer.data)
+        # Verify that the response data is valid
+        self.assertDictContainsSubset(OrderSerializer(Order.objects.get()).data, response.data)
