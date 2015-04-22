@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 """Unit tests of ecommerce API views."""
+from collections import namedtuple
+from decimal import Decimal
 import json
 import logging
-from decimal import Decimal
-from collections import namedtuple
 
 import ddt
-import httpretty
-import mock
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
-from oscar.test import factories
+import httpretty
+import mock
 from oscar.core.loading import get_model
+from oscar.test import factories
 from oscar.test.newfactories import ProductAttributeValueFactory
 from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
 
 from ecommerce.extensions.api import exceptions as api_exceptions
-from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors import Cybersource
@@ -332,6 +333,9 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
 
     def setUp(self):
         self.token = self.generate_jwt_token_header(self.create_user())
+
+        # Clear the view cache
+        cache.clear()
 
     def assert_processor_list_matches(self, expected):
         """ DRY helper. """
