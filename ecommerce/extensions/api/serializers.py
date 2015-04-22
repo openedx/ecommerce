@@ -53,24 +53,14 @@ class BillingAddressSerializer(serializers.Serializer):
     country = CountrySerializer()
 
 
-class LinesSerializer(serializers.Serializer):
+class LineSerializer(serializers.Serializer):
     """Serializer for parsing line item data."""
     title = serializers.CharField(max_length=255)
     quantity = serializers.IntegerField(min_value=0)
     description = serializers.CharField()
     status = serializers.CharField(max_length=255)
-    line_price_excl_tax = serializers.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        coerce_to_string=False,
-        min_value=D('0.00')
-    )
-    unit_price_excl_tax = serializers.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        coerce_to_string=False,
-        min_value=D('0.00')
-    )
+    line_price_excl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=D('0.00'))
+    unit_price_excl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=D('0.00'))
 
 
 class OrderSerializer(serializers.Serializer):
@@ -79,14 +69,9 @@ class OrderSerializer(serializers.Serializer):
     date_placed = serializers.DateTimeField()
     status = serializers.CharField(max_length=100)
     sources = SourceSerializer(many=True)
-    currency = serializers.CharField(min_length=3, max_length=3)
-    total_excl_tax = serializers.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        coerce_to_string=False,
-        min_value=D('0.00')
-    )
-    lines = LinesSerializer(many=True)
+    currency = serializers.CharField()
+    total_excl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=D('0.00'))
+    lines = LineSerializer(many=True)
     billing_address = BillingAddressSerializer(allow_null=True)
 
 
