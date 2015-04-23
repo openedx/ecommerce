@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url, include
+from django.views.decorators.cache import cache_page
 
 from ecommerce.extensions.api.v2 import views
 
@@ -33,9 +34,8 @@ ORDER_URLS = patterns(
 
 PAYMENT_URLS = patterns(
     '',
-    url(r'^processors/$', views.PaymentProcessorListView.as_view(), name='list_processors'),
+    url(r'^processors/$', cache_page(60 * 30)(views.PaymentProcessorListView.as_view()), name='list_processors'),
 )
-
 
 urlpatterns = patterns(
     '',
