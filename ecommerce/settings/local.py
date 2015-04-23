@@ -71,13 +71,17 @@ INTERNAL_IPS = ('127.0.0.1',)
 # Do not include a trailing slash.
 LMS_URL_ROOT = 'http://127.0.0.1:8000'
 
+
+def get_lms_url(path):
+    return LMS_URL_ROOT + path
+
 # The location of the LMS heartbeat page
-LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
+LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
 
 # The location of the LMS student dashboard
-LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
+LMS_DASHBOARD_URL = get_lms_url('/dashboard')
 
-OAUTH2_PROVIDER_URL = LMS_URL_ROOT + '/oauth2'
+OAUTH2_PROVIDER_URL = get_lms_url('/oauth2')
 # END URL CONFIGURATION
 
 
@@ -93,7 +97,8 @@ JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-secret-key'
 
 
 # ORDER PROCESSING
-ENROLLMENT_API_URL = LMS_URL_ROOT + '/api/enrollment/v1/enrollment'
+ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
+ENROLLMENT_FULFILLMENT_TIMEOUT = 15     # devstack is slow!
 
 EDX_API_KEY = 'replace-me'
 # END ORDER PROCESSING
@@ -106,10 +111,8 @@ PAYMENT_PROCESSOR_CONFIG = {
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',
         'payment_page_url': 'https://replace-me/',
-        # TODO: XCOM-202 must be completed before any other receipt page is used.
-        # By design this specific receipt page is expected.
-        'receipt_page_url': 'https://replace-me/verify_student/payment-confirmation/',
-        'cancel_page_url': 'https://replace-me/',
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/')
     }
 }
 # END PAYMENT PROCESSING
