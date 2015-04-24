@@ -1,13 +1,15 @@
 # noinspection PyUnresolvedReferences
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.order.abstract_models import AbstractOrder, AbstractPaymentEvent
+from oscar.apps.order.abstract_models import AbstractOrder, AbstractPaymentEvent, AbstractLine
+from simple_history.models import HistoricalRecords
 
 from ecommerce.extensions.fulfillment.status import ORDER
 
 
 class Order(AbstractOrder):
     payment_processor = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)
+    history = HistoricalRecords()
 
     @property
     def can_retry_fulfillment(self):
@@ -45,6 +47,10 @@ class Order(AbstractOrder):
 
 class PaymentEvent(AbstractPaymentEvent):
     processor_name = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)
+
+
+class Line(AbstractLine):
+    history = HistoricalRecords()
 
 # If two models with the same name are declared within an app, Django will only use the first one.
 # noinspection PyUnresolvedReferences
