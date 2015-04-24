@@ -10,8 +10,7 @@ from oscar.apps.payment.exceptions import UserCancelled, GatewayError, Transacti
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-
-from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
+from ecommerce.extensions.payment.constants import ISO_8601_FORMAT, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.helpers import sign
@@ -226,13 +225,15 @@ class Cybersource(BasePaymentProcessor):
         total = Decimal(response[u'req_amount'])
         transaction_id = response[u'transaction_id']
         req_card_number = response[u'req_card_number']
+        card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response[u'req_card_type'])
 
         source = Source(source_type=source_type,
                         currency=currency,
                         amount_allocated=total,
                         amount_debited=total,
                         reference=transaction_id,
-                        label=req_card_number)
+                        label=req_card_number,
+                        card_type=card_type)
 
         # Create PaymentEvent to track
         event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
