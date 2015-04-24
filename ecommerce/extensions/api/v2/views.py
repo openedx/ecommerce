@@ -2,7 +2,6 @@
 import logging
 
 from django.conf import settings
-from django.http import Http404
 from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
@@ -319,27 +318,14 @@ class OrderRetrieveView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.OrderSerializer
     lookup_field = AC.KEYS.ORDER_NUMBER
-    queryset = Order.objects.all()
 
-    def get_object(self):
-        """Retrieve the order for this request.
-
-        Retrieves the associated order. If it is associated with the authenticated user, returns it. Otherwise,
-        raises an Http404 exception.
-
-        Returns:
-            Order: The associated order.
-
-        Raises:
-            Http404: Returns a 404 Not Found exception if the request order cannot be found or
-                is not associated with the authenticated user.
-
+    def get_queryset(self):
         """
-        order = super(OrderRetrieveView, self).get_object()
-        if order and order.user.username == self.request.user.username:
-            return order
-        else:
-            raise Http404
+        Returns a queryset consisting of only the authenticated user's orders.
+
+        This ensures we do not allow one user to view the data of another user.
+        """
+        return self.request.user.orders
 
 
 class OrderByBasketRetrieveView(OrderRetrieveView):
