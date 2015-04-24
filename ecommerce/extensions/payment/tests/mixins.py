@@ -1,10 +1,13 @@
 from oscar.core.loading import get_model
 
+from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
 
 
 Order = get_model('order', 'Order')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+
+DEFAULT_CARD_TYPE = 'visa'
 
 
 class PaymentEventsMixin(object):
@@ -45,6 +48,7 @@ class PaymentEventsMixin(object):
         self.assertEqual(source.amount_debited, total)
         self.assertEqual(source.reference, reference)
         self.assertEqual(source.label, label)
+        self.assertEqual(source.card_type, DEFAULT_CARD_TYPE)
 
     def assert_payment_source_exists(self, basket, source_type, reference, label):
         """ Validates that a single Source exists for the basket's associated order. """
@@ -81,6 +85,7 @@ class CybersourceMixin(object):
             u'req_tax_amount': u'0.00',
             u'req_currency': basket.currency,
             u'req_card_number': u'xxxxxxxxxxxx1111',
+            u'req_card_type': CARD_TYPES[DEFAULT_CARD_TYPE]['cybersource_code']
         }
 
         if billing_address:
