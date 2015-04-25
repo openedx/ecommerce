@@ -23,7 +23,6 @@ Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
-post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 class CybersourceNotifyView(EdxOrderPlacementMixin, View):
