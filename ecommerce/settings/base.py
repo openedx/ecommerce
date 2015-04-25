@@ -193,6 +193,7 @@ MIDDLEWARE_CLASSES = (
     'oscar.apps.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
@@ -223,29 +224,18 @@ OAUTH2_PROVIDER_URL = None
 
 # APP CONFIGURATION
 DJANGO_APPS = [
-    # Default Django apps
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.flatpages',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.flatpages',
-
-    # Useful template tags
-    'django.contrib.humanize',
-
-    # Django REST framework
-    'rest_framework',
-
-    # Admin panel and documentation
-    'django.contrib.admin',
-
-    # Feature gating
-    'waffle',
-
-    # Static file compression
     'compressor',
+    'rest_framework',
+    'simple_history',
+    'waffle',
 ]
 
 # Apps specific to this project go here.
