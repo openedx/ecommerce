@@ -1,93 +1,71 @@
 """Serializers for order and line item data."""
 # pylint: disable=abstract-method
-from decimal import Decimal
+from oscar.core.loading import get_model
 
 from rest_framework import serializers
 
+from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 
-class TransactionSerializer(serializers.Serializer):
-    """Serializes a transaction. """
-    txn_type = serializers.CharField(max_length=128)
-    amount = serializers.DecimalField(decimal_places=2, max_digits=12)
-    reference = serializers.CharField(max_length=128)
-    status = serializers.CharField(max_length=128)
-    date_created = serializers.DateTimeField()
-
-
-class SourceTypeSerializer(serializers.Serializer):
-    """Serializes the payment source type. """
-    name = serializers.CharField(max_length=128)
-    code = serializers.CharField(max_length=128)
+BillingAddress = get_model('order', 'BillingAddress')
+Line = get_model('order', 'Line')
+Order = get_model('order', 'Order')
+Product = get_model('catalogue', 'Product')
+ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 
 
-class SourceSerializer(serializers.Serializer):
-    """Serializes a payment source. """
-    source_type = SourceTypeSerializer()
-    transactions = TransactionSerializer(many=True)
-    currency = serializers.CharField(max_length=12)
-    amount_allocated = serializers.DecimalField(decimal_places=2, max_digits=12)
-    amount_debited = serializers.DecimalField(decimal_places=2, max_digits=12)
-    amount_refunded = serializers.DecimalField(decimal_places=2, max_digits=12)
-    reference = serializers.CharField(max_length=128)
-    label = serializers.CharField(max_length=128)
-
-
-class CountrySerializer(serializers.Serializer):
-    """Serializes a country, related to a billing address. """
-    printable_name = serializers.CharField(max_length=128)
-    name = serializers.CharField(max_length=128)
-    is_shipping_country = serializers.BooleanField()
-
-
-class BillingAddressSerializer(serializers.Serializer):
+class BillingAddressSerializer(serializers.ModelSerializer):
     """Serializes a Billing Address. """
-    title = serializers.CharField(max_length=64)
-    first_name = serializers.CharField(max_length=255)
-    last_name = serializers.CharField(max_length=255)
-    line1 = serializers.CharField(max_length=255)
-    line2 = serializers.CharField(max_length=255)
-    line3 = serializers.CharField(max_length=255)
-    line4 = serializers.CharField(max_length=255)
-    state = serializers.CharField(max_length=255)
-    postcode = serializers.CharField(max_length=64)
-    country = CountrySerializer()
+    city = serializers.CharField(max_length=255, source='line4')
+
+    class Meta(object):
+        model = BillingAddress
+        fields = ('first_name', 'last_name', 'line1', 'line2', 'postcode', 'state', 'country', 'city')
 
 
 class ProductAttributeValueSerializer(serializers.Serializer):
     """ Serializer for ProductAttributeValue objects. """
     name = serializers.SerializerMethodField()
     value = serializers.CharField()
+    type = serializers.SerializerMethodField()
 
     def get_name(self, instance):
         return instance.attribute.name
 
+    def get_type(self, instance):
+        return instance.attribute.type
 
-class ProductSerializer(serializers.Serializer):
+    class Meta(object):
+        model = ProductAttributeValue
+        fields = ('name', 'value', 'type')
+
+
+class ProductSerializer(serializers.ModelSerializer):
     """ Serializer for Products. """
     attribute_values = ProductAttributeValueSerializer(many=True)
 
+    class Meta(object):
+        model = Product
+        fields = ('attribute_values',)
 
-class LineSerializer(serializers.Serializer):
+
+class LineSerializer(serializers.ModelSerializer):
     """Serializer for parsing line item data."""
-    title = serializers.CharField(max_length=255)
-    quantity = serializers.IntegerField(min_value=0)
-    description = serializers.CharField()
-    status = serializers.CharField(max_length=255)
-    line_price_excl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.00'))
-    unit_price_excl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.00'))
     product = ProductSerializer()
 
+    class Meta(object):
+        model = Line
+        fields = ('title', 'quantity', 'description', 'status', 'line_price_excl_tax', 'unit_price_excl_tax', 'product')
 
-class OrderSerializer(serializers.Serializer):
+
+class OrderSerializer(serializers.ModelSerializer):
     """Serializer for parsing order data."""
-    number = serializers.CharField(max_length=128)
-    date_placed = serializers.DateTimeField()
-    status = serializers.CharField(max_length=100)
-    sources = SourceSerializer(many=True)
-    currency = serializers.CharField(min_length=3, max_length=3)
-    total_excl_tax = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.00'))
+    date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
     lines = LineSerializer(many=True)
     billing_address = BillingAddressSerializer(allow_null=True)
+
+    class Meta(object):
+        model = Order
+        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address')
 
 
 class PaymentProcessorSerializer(serializers.Serializer):
