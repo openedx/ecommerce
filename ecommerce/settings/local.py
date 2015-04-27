@@ -68,12 +68,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 
 # URL CONFIGURATION
-# Do not include a trailing slash.
 LMS_URL_ROOT = 'http://127.0.0.1:8000'
-
-
-def get_lms_url(path):
-    return LMS_URL_ROOT + path
 
 # The location of the LMS heartbeat page
 LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
@@ -112,8 +107,15 @@ PAYMENT_PROCESSOR_CONFIG = {
         'secret_key': 'fake-secret-key',
         'payment_page_url': 'https://replace-me/',
         'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
-        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/')
-    }
+        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
+    },
+    'paypal': {
+        'mode': 'sandbox',
+        'client_id': 'fake-client-id',
+        'client_secret': 'fake-client-secret',
+        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
+        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+    },
 }
 # END PAYMENT PROCESSING
 

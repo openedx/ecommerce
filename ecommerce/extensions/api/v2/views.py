@@ -34,7 +34,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
     def create(self, request, *args, **kwargs):
         """Add products to the authenticated user's basket.
 
-        Expects a list of product objects, 'products', each containing a SKU, in the request
+        Expects an array of product objects, 'products', each containing a SKU, in the request
         body. The SKUs are used to populate the user's basket with the corresponding products.
 
         The caller indicates whether checkout should occur by providing a Boolean value
@@ -168,7 +168,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             else:
                 payment_processor = get_default_processor_class()
 
-            response_data = self._checkout(basket, payment_processor=payment_processor())
+            response_data = self._checkout(basket, payment_processor())
         else:
             response_data = self._generate_basic_response(basket)
 
@@ -225,13 +225,14 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             # returned by this endpoint, simply returning the order number will suffice for now.
             response_data[AC.KEYS.ORDER] = {AC.KEYS.ORDER_NUMBER: order.number}
         else:
-            payment_data = {
-                AC.KEYS.PAYMENT_PROCESSOR_NAME: payment_processor.NAME,
-                AC.KEYS.PAYMENT_FORM_DATA: payment_processor.get_transaction_parameters(basket),
-                AC.KEYS.PAYMENT_PAGE_URL: payment_processor.payment_page_url,
-            }
+            parameters = payment_processor.get_transaction_parameters(basket, request=self.request)
+            payment_page_url = parameters.pop('payment_page_url')
 
-            response_data[AC.KEYS.PAYMENT_DATA] = payment_data
+            response_data[AC.KEYS.PAYMENT_DATA] = {
+                AC.KEYS.PAYMENT_PROCESSOR_NAME: payment_processor.NAME,
+                AC.KEYS.PAYMENT_FORM_DATA: parameters,
+                AC.KEYS.PAYMENT_PAGE_URL: payment_page_url,
+            }
 
         return response_data
 

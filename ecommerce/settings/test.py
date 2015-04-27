@@ -56,14 +56,13 @@ DATABASES = {
 
 
 # URL CONFIGURATION
-# Do not include a trailing slash.
 LMS_URL_ROOT = 'http://127.0.0.1:8000'
 
 # The location of the LMS heartbeat page
-LMS_HEARTBEAT_URL = LMS_URL_ROOT + '/heartbeat'
+LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
 
 # The location of the LMS student dashboard
-LMS_DASHBOARD_URL = LMS_URL_ROOT + '/dashboard'
+LMS_DASHBOARD_URL = get_lms_url('/dashboard')
 # END URL CONFIGURATION
 
 
@@ -82,20 +81,21 @@ EDX_API_KEY = 'replace-me'
 
 
 # PAYMENT PROCESSING
-PAYMENT_PROCESSORS = (
-    'ecommerce.extensions.payment.processors.Cybersource',
-)
-
 PAYMENT_PROCESSOR_CONFIG = {
     'cybersource': {
         'profile_id': 'fake-profile-id',
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',
         'payment_page_url': 'https://replace-me/',
-        # TODO: XCOM-202 must be completed before any other receipt page is used.
-        # By design this specific receipt page is expected.
-        'receipt_page_url': 'https://replace-me/verify_student/payment-confirmation/',
-        'cancel_page_url': 'https://replace-me/',
-    }
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
+    },
+    'paypal': {
+        'mode': 'sandbox',
+        'client_id': 'fake-client-id',
+        'client_secret': 'fake-client-secret',
+        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
+        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+    },
 }
 # END PAYMENT PROCESSING

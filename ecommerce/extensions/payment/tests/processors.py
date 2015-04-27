@@ -4,7 +4,7 @@ from ecommerce.extensions.payment.processors import BasePaymentProcessor
 class DummyProcessor(BasePaymentProcessor):
     NAME = 'dummy'
 
-    def get_transaction_parameters(self, basket):
+    def get_transaction_parameters(self, basket, request=None):
         pass
 
     def handle_processor_response(self, response, basket=None):

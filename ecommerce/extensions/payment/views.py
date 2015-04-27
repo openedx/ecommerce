@@ -3,6 +3,7 @@ import logging
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -23,6 +24,7 @@ BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class CybersourceNotifyView(EdxOrderPlacementMixin, View):
@@ -119,3 +121,57 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             return HttpResponse()
 
         return HttpResponse()
+
+
+class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
+    """Execute an approved PayPal payment and place an order for paid products as appropriate."""
+    payment_processor = processors.Paypal()
+
+    def _get_basket(self, payment_id):
+        """Retrieve a basket using a payment ID."""
+        basket = PaymentProcessorResponse.objects.get(
+            processor_name=self.payment_processor.NAME,
+            transaction_id=payment_id
+        ).basket
+
+        basket.strategy = strategy.Default()
+
+        return basket
+
+    def get(self, request):
+        """Handle an incoming user returned to us by PayPal after approving payment."""
+        payment_id = request.GET.get('paymentId')
+        payer_id = request.GET.get('PayerID')
+        logger.info(u"Payment [%s] approved by payer [%s]", payment_id, payer_id)
+
+        paypal_response = request.GET.dict()
+        basket = self._get_basket(payment_id)
+        receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_url, basket.id)
+
+        try:
+            self.handle_payment(paypal_response, basket)
+        except PaymentError:
+            return redirect(receipt_url)
+
+        shipping_method = NoShippingRequired()
+        shipping_charge = shipping_method.calculate(basket)
+        order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+        try:
+            user = basket.owner
+            order_number = self.generate_order_number(basket)
+
+            self.handle_order_placement(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=None,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                billing_address=None,
+                order_total=order_total
+            )
+        except UnableToPlaceOrder:
+            logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+
+        return redirect(receipt_url)
