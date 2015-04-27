@@ -202,9 +202,6 @@ MIDDLEWARE_CLASSES = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
 
-# See: https://docs.djangoproject.com/en/1.7/ref/settings/#append-slash
-APPEND_SLASH = False
-
 # Used to construct LMS URLs; must include a trailing slash
 LMS_URL_ROOT = None
 
