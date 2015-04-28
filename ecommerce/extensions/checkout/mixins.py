@@ -10,8 +10,6 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 
 class EdxOrderPlacementMixin(OrderPlacementMixin):
     """ Mixin for edX-specific order placement. """
-    _payment_sources = []
-    _payment_events = []
 
     # Note: Subclasses should set this value
     payment_processor = None
@@ -20,6 +18,8 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
     def add_payment_event(self, event):  # pylint: disable = arguments-differ
         """ Record a payment event for creation once the order is placed. """
+        if self._payment_events is None:
+            self._payment_events = []
         self._payment_events.append(event)
 
     def handle_payment(self, response, basket):
