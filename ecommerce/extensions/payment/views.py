@@ -9,7 +9,6 @@ from django.views.generic import View
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
-from oscar.apps.shipping import methods as shipping_methods
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
@@ -99,7 +99,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
 
         # Note (CCB): In the future, if we do end up shipping physical products, we will need to properly implement
         # shipping methods. See http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
-        shipping_method = shipping_methods.NoShippingRequired()
+        shipping_method = NoShippingRequired()
         shipping_charge = shipping_method.calculate(basket)
 
         # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization, thus we use
