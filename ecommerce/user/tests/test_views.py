@@ -39,10 +39,3 @@ class AutoAuthTests(TestCase):
 
         # Verify that the user has superuser permissions
         self.assertTrue(user.is_superuser)
-
-    @override_settings(ENABLE_AUTO_AUTH=True, AUTO_AUTH_USERNAME_PREFIX=None)
-    def test_prefix_invalid(self):
-        """When AUTO_AUTH_USERNAME_PREFIX is not set, the view should raises a ValueError."""
-        original_user_count = User.objects.count()
-        self.assertRaises(ValueError, self.client.get, self.AUTO_AUTH_PATH)
-        self.assertEqual(User.objects.count(), original_user_count)
