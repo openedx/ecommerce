@@ -19,11 +19,10 @@ class AutoAuth(View):
         if not getattr(settings, 'ENABLE_AUTO_AUTH', None):
             raise Http404
 
-        if not getattr(settings, 'AUTO_AUTH_USERNAME_PREFIX', None):
-            raise ValueError('AUTO_AUTH_USERNAME_PREFIX must be set.')
+        username_prefix = getattr(settings, 'AUTO_AUTH_USERNAME_PREFIX', 'auto_auth_')
 
         # Create a new user with staff permissions
-        username = password = settings.AUTO_AUTH_USERNAME_PREFIX + uuid.uuid4().hex[0:20]
+        username = password = username_prefix + uuid.uuid4().hex[0:20]
         User.objects.create_superuser(username, email=None, password=password)
 
         # Log in the new user
