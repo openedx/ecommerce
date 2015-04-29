@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Unit tests of payment processor implementations."""
-from uuid import UUID
 import datetime
+import json
+from uuid import UUID
 
 import ddt
 from django.conf import settings
@@ -68,7 +69,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     processor_class = processors.Cybersource
     processor_name = 'cybersource'
 
-    def assert_valid_transaction_parameters(self, cancel_page_url=None, receipt_page_url=None):
+    def assert_valid_transaction_parameters(self, cancel_page_url=None, receipt_page_url=None, tracking_context=None):
         """ Validates the transaction parameters returned by get_transaction_parameters(). """
 
         # Patch the datetime object so that we can validate the signed_date_time field
@@ -76,7 +77,8 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             mocked_datetime.utcnow.return_value = self.PI_DAY
             actual = self.processor.get_transaction_parameters(self.basket,
                                                                cancel_page_url=cancel_page_url,
-                                                               receipt_page_url=receipt_page_url)
+                                                               receipt_page_url=receipt_page_url,
+                                                               tracking_context=tracking_context)
 
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[self.processor_name]
         access_key = configuration[u'access_key']
@@ -93,8 +95,11 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             u'reference_number': unicode(self.basket.id),
             u'amount': unicode(self.basket.total_incl_tax),
             u'currency': self.basket.currency,
-            u'consumer_id': self.basket.owner.username
+            u'consumer_id': self.basket.owner.username,
         }
+
+        if tracking_context is not None:
+            expected[u'req_merchant_secure_data4'] = json.dumps({'tracking_context': tracking_context})
 
         cancel_page_url = cancel_page_url or self.processor.cancel_page_url
         if cancel_page_url:
@@ -140,9 +145,12 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     def test_handle_processor_response(self):
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
 
-        response = self.generate_notification(self.processor.secret_key, self.basket)
+        expected_tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id'}
+        response = self.generate_notification(self.processor.secret_key, self.basket,
+                                              tracking_context=expected_tracking_context)
         reference = response[u'transaction_id']
-        source, payment_event = self.processor.handle_processor_response(response, basket=self.basket)
+        source, payment_event, actual_tracking_context = self.processor.handle_processor_response(response,
+                                                                                                  basket=self.basket)
 
         # Validate the Source
         source_type = SourceType.objects.get(code=self.processor.NAME)
@@ -153,6 +161,9 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         paid_type = PaymentEventType.objects.get(code=u'paid')
         amount = self.basket.total_incl_tax
         self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
+
+        # Validate tracking_context
+        self.assertEqual(expected_tracking_context, actual_tracking_context)
 
     def test_handle_processor_response_invalid_signature(self):
         """
@@ -184,6 +195,19 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
                           basket=self.basket)
 
+    @mock.patch('ecommerce.extensions.payment.processors.json.loads', side_effect=Exception("Kaboom!"))
+    @mock.patch('ecommerce.extensions.payment.processors.logger.warning')
+    def test_handle_processor_response_tracking_error(self, mock_warning, mock_loads):
+        """ Ensure that failure to parse tracking context from the Cybersource callback causes a warning to be
+            logged, but does not otherwise disrupt the transaction.
+        """
+        response = self.generate_notification(self.processor.secret_key, self.basket, tracking_context={'foo': 'bar'})
+        self.processor.handle_processor_response(response, basket=self.basket)
+        self.assertTrue(mock_loads.called)
+        self.assertTrue(
+            mock_warning.called_with("Failed to parse tracking context from cybersource response, skipping.")
+        )
+
     def test_get_transaction_parameters(self):
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
 
@@ -206,3 +230,8 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.processor.receipt_page_url = None
         self.processor.cancel_page_url = None
         self.assert_valid_transaction_parameters()
+
+        # Test with tracking context
+        self.assert_valid_transaction_parameters(
+            tracking_context={'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id'}
+        )

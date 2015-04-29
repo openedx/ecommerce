@@ -2,6 +2,7 @@
 import abc
 import datetime
 from decimal import Decimal
+import json
 import logging
 import uuid
 
@@ -32,7 +33,8 @@ class BasePaymentProcessor(object):  # pragma: no cover
     NAME = None
 
     @abc.abstractmethod
-    def get_transaction_parameters(self, basket, receipt_page_url=None, cancel_page_url=None, **kwargs):
+    def get_transaction_parameters(self, basket, receipt_page_url=None, cancel_page_url=None,
+                                   tracking_context=None, **kwargs):
         """
         Generate a dictionary of signed parameters required for this processor to complete a transaction.
 
@@ -42,6 +44,8 @@ class BasePaymentProcessor(object):  # pragma: no cover
         Keyword Arguments:
             receipt_page_url (unicode): If provided, overrides the receipt page URL normally used by this processor.
             cancel_page_url (unicode): If provided, overrides the cancellation page URL normally used by this processor.
+            tracking_context (dict): If provided, will be be used to generate and correlate tracking events around
+                payment transactions.
 
         Returns:
             dict: Payment processor-specific parameters required to complete a transaction.
@@ -56,6 +60,7 @@ class BasePaymentProcessor(object):  # pragma: no cover
         This method does the following:
             1. Verify the validity of the response.
             2. Create PaymentEvents and Sources for successful payments.
+            3. Reconstruct a tracking_context based on any recognized callback parameters in the response.
 
         Args:
             response (dict): Dictionary of parameters received from the payment processor.
@@ -124,7 +129,8 @@ class Cybersource(BasePaymentProcessor):
         self.cancel_page_url = configuration.get('cancel_page_url')
         self.language_code = settings.LANGUAGE_CODE
 
-    def get_transaction_parameters(self, basket, receipt_page_url=None, cancel_page_url=None, **kwargs):
+    def get_transaction_parameters(self, basket, receipt_page_url=None, cancel_page_url=None,
+                                   tracking_context=None, **kwargs):
         """
         Generate a dictionary of signed parameters CyberSource requires to complete a transaction.
 
@@ -152,8 +158,14 @@ class Cybersource(BasePaymentProcessor):
             u'reference_number': unicode(basket.id),
             u'amount': unicode(basket.total_incl_tax),
             u'currency': basket.currency,
-            u'consumer_id': basket.owner.username
+            u'consumer_id': basket.owner.username,
         }
+
+        # req_merchant_secure_data4 is a an encrypted slot for user-defined parameters in the cybersource
+        # api.  PII is not disallowed in this slot.  The limit is 2000 characters.  This makes it suitable
+        # for carrying the tracking context (which could conceivably carry PII), among other things.
+        if tracking_context is not None:
+            parameters[u'req_merchant_secure_data4'] = json.dumps({'tracking_context': tracking_context})
 
         # TODO Include edX-specific data (e.g. course_id, seat type)
 
@@ -182,6 +194,7 @@ class Cybersource(BasePaymentProcessor):
         This method does the following:
             1. Verify the validity of the response.
             2. Create PaymentEvents and Sources for successful payments.
+            3. Reconstruct a tracking_context based on any recognized callback parameters in the response.
 
         Args:
             response (dict): Dictionary of parameters received from the payment processor.
@@ -239,7 +252,17 @@ class Cybersource(BasePaymentProcessor):
         event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
         event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id, processor_name=self.NAME)
 
-        return source, event
+        tracking_context = {}
+        # Extract tracking_context, if present
+        secure_data = response.get(u'req_merchant_secure_data4')
+        if secure_data and 'tracking_context' in secure_data:
+            try:
+                tracking_context = json.loads(secure_data).get('tracking_context', {})
+            except:  # pylint: disable=bare-except
+                # never hold up the transaction for a tracking problem.
+                logger.warning("Failed to parse tracking context from cybersource response, skipping.", exc_info=True)
+
+        return source, event, tracking_context
 
     def _generate_signature(self, parameters):
         """Sign the contents of the provided transaction parameters dictionary.

@@ -86,7 +86,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                                                                    basket=basket)
 
         try:
-            self.handle_payment(cybersource_response, basket)
+            tracking_context = self.handle_payment(cybersource_response, basket)
         except InvalidSignatureError:
             logger.exception(
                 'Received an invalid CyberSource response. The payment response was recorded in entry [%d].', ppr.id)
@@ -112,7 +112,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             user = basket.owner
             order_number = self.generate_order_number(basket)
             self.handle_order_placement(order_number, user, basket, None, shipping_method, shipping_charge,
-                                        billing_address, order_total)
+                                        billing_address, order_total, tracking_context)
         except UnableToPlaceOrder:
             logger.exception('Payment was received, but an order was not created for basket [%d].', basket.id)
             # Ensure we return, in case future changes introduce post-order placement functionality.

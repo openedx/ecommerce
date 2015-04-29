@@ -9,7 +9,7 @@ import ddt
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -19,9 +19,10 @@ from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
 
 from ecommerce.extensions.api import exceptions as api_exceptions
-from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.constants import APIConstants as AC, APITrackingKeys as ATK
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
+from ecommerce.extensions.api.v2.views import get_tracking_context
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
@@ -360,3 +361,24 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
     def test_get_many(self):
         """Ensure multiple processors in settings are handled correctly."""
         self.assert_processor_list_matches([DummyProcessor.NAME, AnotherDummyProcessor.NAME])
+
+
+@ddt.ddt
+class GetTrackingContextTests(TestCase):
+    """ Ensures correct extraction of tracking metadata in API requests."""
+
+    TEST_USER_ID = "test-user-id"
+    TEST_CLIENT_ID = "test-client-id"
+
+    @ddt.data(
+        {ATK.LMS_USER_ID: TEST_USER_ID, ATK.LMS_CLIENT_ID: TEST_CLIENT_ID},
+        {ATK.LMS_USER_ID: TEST_USER_ID},
+        {ATK.LMS_CLIENT_ID: TEST_CLIENT_ID},
+        {},
+    )
+    def test_get_tracking_context(self, tracking_data):
+        """ When present in the request, values of recognized headers are set with correct keys in the context."""
+        request_headers = {k.meta_key: v for k, v in tracking_data.items()}
+        expected_context = {k.context_key: v for k, v in tracking_data.items()}
+        request = RequestFactory().get('/foo', **request_headers)
+        self.assertEqual(get_tracking_context(request), expected_context)

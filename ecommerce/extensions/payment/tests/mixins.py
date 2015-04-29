@@ -1,3 +1,5 @@
+import json
+
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.payment.constants import CARD_TYPES
@@ -70,7 +72,7 @@ class CybersourceMixin(object):
         return sign(message, secret_key)
 
     def generate_notification(self, secret_key, basket, decision=u'ACCEPT', billing_address=None, auth_amount=None,
-                              **kwargs):
+                              tracking_context=None, **kwargs):
         """ Generates a dict containing the API reply fields expected to be received from CyberSource. """
 
         req_reference_number = kwargs.get('req_reference_number', unicode(basket.id))
@@ -102,6 +104,9 @@ class CybersourceMixin(object):
             # Address Line 2 is an optional response field
             if billing_address.line2:
                 notification[u'req_bill_to_address_line2'] = billing_address.line2
+
+        if tracking_context is not None:
+            notification['req_merchant_secure_data4'] = json.dumps({'tracking_context': tracking_context})
 
         notification[u'signed_field_names'] = u','.join(notification.keys())
         notification[u'signature'] = self.generate_signature(secret_key, notification)
