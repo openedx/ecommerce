@@ -1,9 +1,10 @@
-# Packages required by the ecommerce service
+analytics-python==1.0.3
 Django==1.7.7
 django-appconf==0.6
 django_compressor==1.4
 django-libsass==0.2
 django-model-utils==1.5.0
+django-oscar==1.0.2
 django_simple_history==1.6.1
 django-waffle==0.10
 djangorestframework==3.1.0
@@ -13,9 +14,3 @@ jsonfield==1.0.3
 logutils==0.3.3
 pycountry==1.10
 requests==2.6.0
-
-# Oscar
-git+https://github.com/edx/django-oscar.git@1ce871a29b97789354b422ca559de956c6762aee#egg=django-oscar
-
-# Segment REST API Python client
-analytics-python==1.0.3
