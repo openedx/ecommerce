@@ -12,3 +12,4 @@ nose-ignore-docstring==0.2
 pep8==1.6.2
 pylint==1.4.1
 selenium==2.45.0
+slumber==0.7.0

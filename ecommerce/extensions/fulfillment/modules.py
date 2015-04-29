@@ -90,8 +90,6 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
     """
 
-    REQUEST_TIMEOUT = 5
-
     def get_supported_lines(self, order, lines):
         """ Return a list of lines that can be fulfilled through enrollment.
 
@@ -168,7 +166,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     enrollment_api_url,
                     data=json.dumps(data),
                     headers=headers,
-                    timeout=self.REQUEST_TIMEOUT
+                    timeout=getattr(settings, 'ENROLLMENT_FULFILLMENT_TIMEOUT', 5)
                 )
 
                 if response.status_code == status.HTTP_200_OK:

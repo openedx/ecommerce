@@ -51,6 +51,8 @@ diff_*.html
 report
 edx_ecommerce.log
 venv
+acceptance_tests.*.log
+acceptance_tests.*.png
 
 # Override config files
 override.cfg
