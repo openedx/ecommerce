@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
-from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.constants import APIConstants as AC, APITrackingKeys as ATK
 # noinspection PyUnresolvedReferences
 from ecommerce.extensions.api.v1.views import OrderFulfillView  # pylint: disable=unused-import
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -21,6 +21,24 @@ from ecommerce.extensions.payment.helpers import (get_processor_class, get_defau
 logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
+
+
+def get_tracking_context(request):
+    """ Extract request metadata from HTTP headers for server-side event tracking.
+
+    Supported headers: Edx-Lms-User-Id, Edx-Lms-Client-Id
+
+    Arguments:
+        request (HttpRequest): the current HTTP request.
+
+    Returns:
+        A sparse dictionary containing all the recognized parameters found in the request.
+    """
+    context = {}
+    for k in [ATK.LMS_USER_ID, ATK.LMS_CLIENT_ID]:
+        if k.meta_key in request.META:
+            context[k.context_key] = request.META[k.meta_key]
+    return context
 
 
 class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
@@ -168,13 +186,13 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             else:
                 payment_processor = get_default_processor_class()
 
-            response_data = self._checkout(basket, payment_processor=payment_processor())
+            response_data = self._checkout(basket, payment_processor(), get_tracking_context(request))
         else:
             response_data = self._generate_basic_response(basket)
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    def _checkout(self, basket, payment_processor):
+    def _checkout(self, basket, payment_processor, tracking_context):
         """Perform checkout operations for the given basket.
 
         If the contents of the basket are free, places an order immediately. Otherwise,
@@ -188,6 +206,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             basket (Basket): The basket on which to perform checkout operations.
             payment_processor (class): An instance of the payment processor class corresponding
                 to the payment processor the user will visit to pay for the items in their basket.
+            tracking_context (dict): Any tracking context that accompanied the checkout request
 
         Returns:
             dict: Response data.
@@ -219,6 +238,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
                 shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
                 billing_address=None,
                 order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+                tracking_context=tracking_context
             )
 
             # Note: Our order serializer could be used here, but in an effort to pare down the information
@@ -227,7 +247,9 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
         else:
             payment_data = {
                 AC.KEYS.PAYMENT_PROCESSOR_NAME: payment_processor.NAME,
-                AC.KEYS.PAYMENT_FORM_DATA: payment_processor.get_transaction_parameters(basket),
+                AC.KEYS.PAYMENT_FORM_DATA: payment_processor.get_transaction_parameters(
+                    basket, tracking_context=tracking_context
+                ),
                 AC.KEYS.PAYMENT_PAGE_URL: payment_processor.payment_page_url,
             }
 
