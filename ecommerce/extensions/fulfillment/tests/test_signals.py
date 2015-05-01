@@ -13,7 +13,11 @@ class SignalTests(FulfillmentTestMixin, TestCase):
         """
         When the post_checkout signal is emitted, the receiver should attempt to fulfill the newly-placed order.
         """
-        self.assertEqual(len(post_checkout.receivers), 1, 'No receiver connected to to post_checkout signal!')
+        self.assertIn(
+            'fulfillment.post_checkout_callback',
+            [receiver[0][0] for receiver in post_checkout.receivers],
+            'Receiver not connected to post_checkout signal!',
+        )
         order = self.generate_open_order()
         post_checkout.send(sender=self.__class__, order=order)
         self.assert_order_fulfilled(order)
