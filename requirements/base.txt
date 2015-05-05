@@ -8,7 +8,7 @@ django-oscar==1.0.2
 django_simple_history==1.6.1
 django-waffle==0.10
 djangorestframework==3.1.0
-djangorestframework-jwt==1.4.0
+djangorestframework-jwt==1.5.0
 edx-auth-backends==0.1.3
 jsonfield==1.0.3
 logutils==0.3.3
