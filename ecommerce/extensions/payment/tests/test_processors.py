@@ -68,15 +68,13 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     processor_class = processors.Cybersource
     processor_name = 'cybersource'
 
-    def assert_valid_transaction_parameters(self, cancel_page_url=None, receipt_page_url=None):
-        """ Validates the transaction parameters returned by get_transaction_parameters(). """
+    def test_get_transaction_parameters(self):
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
 
         # Patch the datetime object so that we can validate the signed_date_time field
         with mock.patch.object(processors.datetime, u'datetime', mock.Mock(wraps=datetime.datetime)) as mocked_datetime:
             mocked_datetime.utcnow.return_value = self.PI_DAY
-            actual = self.processor.get_transaction_parameters(self.basket,
-                                                               cancel_page_url=cancel_page_url,
-                                                               receipt_page_url=receipt_page_url)
+            actual = self.processor.get_transaction_parameters(self.basket)
 
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[self.processor_name]
         access_key = configuration[u'access_key']
@@ -93,18 +91,10 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             u'reference_number': unicode(self.basket.id),
             u'amount': unicode(self.basket.total_incl_tax),
             u'currency': self.basket.currency,
-            u'consumer_id': self.basket.owner.username
+            u'consumer_id': self.basket.owner.username,
+            u'override_custom_receipt_page': u'{}?basket_id={}'.format(self.processor.receipt_page_url, self.basket.id),
+            u'override_custom_cancel_page': self.processor.cancel_page_url,
         }
-
-        cancel_page_url = cancel_page_url or self.processor.cancel_page_url
-        if cancel_page_url:
-            expected[u'override_custom_cancel_page'] = cancel_page_url
-
-        if self.processor.receipt_page_url and not receipt_page_url:
-            receipt_page_url = u'{}?basket_id={}'.format(self.processor.receipt_page_url, self.basket.id)
-
-        if receipt_page_url:
-            expected[u'override_custom_receipt_page'] = receipt_page_url
 
         signed_field_names = expected.keys() + [u'transaction_uuid']
         expected[u'signed_field_names'] = u','.join(sorted(signed_field_names))
@@ -183,26 +173,3 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         response = self.generate_notification(self.processor.secret_key, self.basket, auth_amount=u'0.00')
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
                           basket=self.basket)
-
-    def test_get_transaction_parameters(self):
-        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
-
-        # Test with settings overrides
-        self.processor.receipt_page_url = u'http://example.com/receipt/'
-        self.processor.cancel_page_url = u'http://example.com/cancel/'
-        self.assert_valid_transaction_parameters()
-
-        # Test with receipt page override
-        self.assert_valid_transaction_parameters(receipt_page_url=u'http://example.com/receipt/')
-
-        # Test with cancel page override
-        self.assert_valid_transaction_parameters(cancel_page_url=u'http://example.com/cancel/')
-
-        # Test with both overrides
-        self.assert_valid_transaction_parameters(cancel_page_url=u'http://example.com/cancel/',
-                                                 receipt_page_url=u'http://example.com/receipt/')
-
-        # Test without overrides
-        self.processor.receipt_page_url = None
-        self.processor.cancel_page_url = None
-        self.assert_valid_transaction_parameters()
