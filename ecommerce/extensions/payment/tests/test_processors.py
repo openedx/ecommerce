@@ -40,9 +40,8 @@ class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
         # certain logic and tests expect to find products with class 'seat' in
         # baskets, so that's done explicitly in this setup.
         self.product_class = factories.ProductClassFactory(slug='seat', requires_shipping=False, track_stock=False)
-        self.product_class.save()
-        factories.ProductAttributeFactory(code='course_key', product_class=self.product_class, type="text").save()
-        factories.ProductAttributeFactory(code='certificate_type', product_class=self.product_class, type="text").save()
+        factories.ProductAttributeFactory(code='course_key', product_class=self.product_class, type="text")
+        factories.ProductAttributeFactory(code='certificate_type', product_class=self.product_class, type="text")
         self.product = factories.ProductFactory(upc='dummy-upc', title='dummy-title', product_class=self.product_class)
         self.product.attr.course_key = self.COURSE_KEY
         self.product.attr.certificate_type = self.CERTIFICATE_TYPE

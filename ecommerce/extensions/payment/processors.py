@@ -176,8 +176,8 @@ class Cybersource(BasePaymentProcessor):
         except ProductClass.DoesNotExist:
             # this occurs in test configurations where the seat product class is not in use
             return None
-        products = [line.product for line in basket.lines.all() if line.product.product_class == seat_class]
-        return products[0] if products else None
+        line = basket.lines.filter(product__product_class=seat_class).first()
+        return line.product if line else None
 
     def handle_processor_response(self, response, basket=None):
         """
