@@ -32,16 +32,12 @@ class BasePaymentProcessor(object):  # pragma: no cover
     NAME = None
 
     @abc.abstractmethod
-    def get_transaction_parameters(self, basket, receipt_page_url=None, cancel_page_url=None, **kwargs):
+    def get_transaction_parameters(self, basket):
         """
         Generate a dictionary of signed parameters required for this processor to complete a transaction.
 
         Arguments:
             basket (Basket): The basket of products being purchased.
-
-        Keyword Arguments:
-            receipt_page_url (unicode): If provided, overrides the receipt page URL normally used by this processor.
-            cancel_page_url (unicode): If provided, overrides the cancellation page URL normally used by this processor.
 
         Returns:
             dict: Payment processor-specific parameters required to complete a transaction.
@@ -57,9 +53,11 @@ class BasePaymentProcessor(object):  # pragma: no cover
             1. Verify the validity of the response.
             2. Create PaymentEvents and Sources for successful payments.
 
-        Args:
-            response (dict): Dictionary of parameters received from the payment processor.
-            basket (Basket): Basket being purchased via the payment processor.
+        Arguments:
+            response (dict): Dictionary of parameters received from the payment processor
+
+        Keyword Arguments:
+            basket (Basket): Basket whose contents have been purchased via the payment processor
         """
         raise NotImplementedError
 
@@ -77,7 +75,7 @@ class BasePaymentProcessor(object):  # pragma: no cover
             dict: Payment processor configuration
 
         Raises:
-            KeyError: If no settings found for this payment processor.
+            KeyError: If no settings found for this payment processor
         """
         return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]
 
@@ -86,11 +84,11 @@ class BasePaymentProcessor(object):  # pragma: no cover
         Save the processor's response to the database for auditing.
 
         Arguments:
-            transaction_id (string): Identifier for the transaction on the payment processor's servers.
             response (dict): Response received from the payment processor
 
         Keyword Arguments:
-            basket (Basket): Basket associated with the payment event (e.g. being purchased)
+            transaction_id (string): Identifier for the transaction on the payment processor's servers
+            basket (Basket): Basket associated with the payment event (e.g., being purchased)
 
         Return
             PaymentProcessorResponse
@@ -120,22 +118,16 @@ class Cybersource(BasePaymentProcessor):
         self.access_key = configuration['access_key']
         self.secret_key = configuration['secret_key']
         self.payment_page_url = configuration['payment_page_url']
-        self.receipt_page_url = configuration.get('receipt_page_url')
-        self.cancel_page_url = configuration.get('cancel_page_url')
+        self.receipt_page_url = configuration['receipt_page_url']
+        self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
 
-    def get_transaction_parameters(self, basket, receipt_page_url=None, cancel_page_url=None, **kwargs):
+    def get_transaction_parameters(self, basket):
         """
         Generate a dictionary of signed parameters CyberSource requires to complete a transaction.
 
         Arguments:
             basket (Basket): The basket of products being purchased.
-
-        Keyword Arguments:
-            receipt_page_url (unicode): If provided, overrides the receipt page URL on the Secure Acceptance
-                profile in use for this transaction.
-            cancel_page_url (unicode): If provided, overrides the cancellation page URL on the Secure Acceptance
-                profile in use for this transaction.
 
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
@@ -152,21 +144,12 @@ class Cybersource(BasePaymentProcessor):
             u'reference_number': unicode(basket.id),
             u'amount': unicode(basket.total_incl_tax),
             u'currency': basket.currency,
-            u'consumer_id': basket.owner.username
+            u'consumer_id': basket.owner.username,
+            u'override_custom_receipt_page': u'{}?basket_id={}'.format(self.receipt_page_url, basket.id),
+            u'override_custom_cancel_page': self.cancel_page_url,
         }
 
         # TODO Include edX-specific data (e.g. course_id, seat type)
-
-        # Allow the URL overrides passed directly to this method to override those pulled from settings.
-        cancel_page_url = cancel_page_url or self.cancel_page_url
-        if cancel_page_url:
-            parameters[u'override_custom_cancel_page'] = cancel_page_url
-
-        if self.receipt_page_url and not receipt_page_url:
-            receipt_page_url = u'{}?basket_id={}'.format(self.receipt_page_url, basket.id)
-
-        if receipt_page_url:
-            parameters[u'override_custom_receipt_page'] = receipt_page_url
 
         # Sign all fields
         signed_field_names = parameters.keys()
