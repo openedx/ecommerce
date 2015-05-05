@@ -38,5 +38,5 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
     def handle_successful_order(self, order):
         # Send a signal so that receivers can perform relevant tasks (e.g. fulfill the order).
-        post_checkout.send(sender=self, order=order)
+        post_checkout.send_robust(sender=self, order=order)
         return order

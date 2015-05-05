@@ -21,12 +21,22 @@ class JwtAuthentication(JSONWebTokenAuthentication):
     is provided in the payload, it will be used to update the retrieved user's
     email address which surfaces in the Oscar management interface.
 
+    Additionally, clients may enclose a 'tracking_context' sub-dictionary in the
+    JWT payload.  If present, the service will update itself with the value
+    of the tracking_context, and will include its contents when firing tracking
+    events to analytics services (if and when configured to do so).
+
     Example:
         Access an endpoint protected by JWT authentication as follows.
 
         >>> url = 'http://localhost:8002/api/v1/orders/'  # Protected by JwtAuthentication
         >>> data = {'sku': 'SEAT-HONOR-EDX-DEMOX-DEMO-COURSE'}
-        >>> token = jwt.encode({'username': 'Saul', 'email': 'saul@bettercallsaul.com'}, 'insecure-secret-key')
+        >>> payload = {
+            'username': 'Saul',
+            'email': 'saul@bettercallsaul.com',
+            'tracking_context': {'lms_user_id': '123', 'lms_client_id': 'xyz'},
+        }
+        >>> token = jwt.encode(payload, 'insecure-secret-key')
         >>> headers = {
             'content-type': 'application/json',
             'Authorization': 'JWT ' + token
@@ -39,15 +49,19 @@ class JwtAuthentication(JSONWebTokenAuthentication):
     def authenticate_credentials(self, payload):
         """Get or create an active user with the username contained in the payload."""
         username = payload.get('username')
-        email = payload.get('email')
 
         if username is None:
             raise exceptions.AuthenticationFailed('Invalid payload.')
         else:
             try:
                 user, __ = User.objects.get_or_create(username=username)
-                if user.email != email and email is not None:
-                    user.email = email
+                is_update = False
+                for attr in ('email', 'tracking_context'):
+                    payload_value = payload.get(attr)
+                    if getattr(user, attr) != payload_value and payload_value is not None:
+                        setattr(user, attr, payload_value)
+                        is_update = True
+                if is_update:
                     user.save()
             except:  # pragma: no cover
                 raise exceptions.AuthenticationFailed('User retrieval failed.')

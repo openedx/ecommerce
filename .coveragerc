@@ -18,6 +18,8 @@ omit = ecommerce/settings*
     ecommerce/extensions/fulfillment/status.py
 
     # These files are loaded before coverage, thus they are falsely marked as not covered.
+    ecommerce/extensions/checkout/apps.py
+    ecommerce/extensions/checkout/signals.py
     ecommerce/extensions/fulfillment/apps.py
     ecommerce/extensions/fulfillment/signals.py
 
