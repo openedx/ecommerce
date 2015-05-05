@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+ProductClass = get_model('catalogue', 'ProductClass')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
@@ -149,7 +150,13 @@ class Cybersource(BasePaymentProcessor):
             u'override_custom_cancel_page': self.cancel_page_url,
         }
 
-        # TODO Include edX-specific data (e.g. course_id, seat type)
+        # XCOM-274: when internal reporting across all processors is
+        # operational, these custom fields will no longer be needed and should
+        # be removed.
+        single_seat = self.get_single_seat(basket)
+        if single_seat:
+            parameters[u'merchant_defined_data1'] = single_seat.attr.course_key
+            parameters[u'merchant_defined_data2'] = single_seat.attr.certificate_type
 
         # Sign all fields
         signed_field_names = parameters.keys()
@@ -157,6 +164,20 @@ class Cybersource(BasePaymentProcessor):
         parameters[u'signature'] = self._generate_signature(parameters)
 
         return parameters
+
+    @staticmethod
+    def get_single_seat(basket):
+        """
+        Return the first product encountered in the basket with the product
+        class of 'seat'.  Return None if no such products were found.
+        """
+        try:
+            seat_class = ProductClass.objects.get(slug='seat')
+        except ProductClass.DoesNotExist:
+            # this occurs in test configurations where the seat product class is not in use
+            return None
+        line = basket.lines.filter(product__product_class=seat_class).first()
+        return line.product if line else None
 
     def handle_processor_response(self, response, basket=None):
         """

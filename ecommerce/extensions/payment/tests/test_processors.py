@@ -31,10 +31,25 @@ class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
     # This value is used to test the NAME attribute on the processor.
     processor_name = None
 
+    COURSE_KEY = 'test-course-key'
+    CERTIFICATE_TYPE = 'test-certificate-type'
+
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
+
+        # certain logic and tests expect to find products with class 'seat' in
+        # baskets, so that's done explicitly in this setup.
+        self.product_class = factories.ProductClassFactory(slug='seat', requires_shipping=False, track_stock=False)
+        factories.ProductAttributeFactory(code='course_key', product_class=self.product_class, type="text")
+        factories.ProductAttributeFactory(code='certificate_type', product_class=self.product_class, type="text")
+        self.product = factories.ProductFactory(upc='dummy-upc', title='dummy-title', product_class=self.product_class)
+        self.product.attr.course_key = self.COURSE_KEY
+        self.product.attr.certificate_type = self.CERTIFICATE_TYPE
+        self.product.save()
+
         self.processor = self.processor_class()  # pylint: disable=not-callable
-        self.basket = factories.create_basket()
+        self.basket = factories.create_basket(empty=True)
+        self.basket.add_product(self.product)
         self.basket.owner = factories.UserFactory()
         self.basket.save()
 
@@ -94,6 +109,8 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             u'consumer_id': self.basket.owner.username,
             u'override_custom_receipt_page': u'{}?basket_id={}'.format(self.processor.receipt_page_url, self.basket.id),
             u'override_custom_cancel_page': self.processor.cancel_page_url,
+            u'merchant_defined_data1': self.COURSE_KEY,
+            u'merchant_defined_data2': self.CERTIFICATE_TYPE,
         }
 
         signed_field_names = expected.keys() + [u'transaction_uuid']
@@ -173,3 +190,39 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         response = self.generate_notification(self.processor.secret_key, self.basket, auth_amount=u'0.00')
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
                           basket=self.basket)
+
+    def test_get_single_seat(self):
+        """
+        The single-seat helper for cybersource reporting should correctly
+        and return the first 'seat' product encountered in a basket.
+        """
+        get_single_seat = processors.Cybersource.get_single_seat
+
+        # finds the seat when it's the only product in the basket.
+        self.assertEqual(get_single_seat(self.basket), self.product)
+
+        # finds the first seat added, when there's more than one.
+        basket = factories.create_basket(empty=True)
+        other_seat = factories.ProductFactory(upc='other-upc', title='other-title', product_class=self.product_class)
+        other_seat.save()
+        basket.add_product(self.product)
+        basket.add_product(other_seat)
+        self.assertEqual(get_single_seat(basket), self.product)
+
+        # finds the seat when there's a mixture of product classes.
+        basket = factories.create_basket(empty=True)
+        other_product = factories.ProductFactory(upc='not-a-seat', title='not-a-seat')
+        other_product.save()
+        basket.add_product(other_product)
+        basket.add_product(self.product)
+        self.assertEqual(get_single_seat(basket), self.product)
+        self.assertNotEqual(get_single_seat(basket), other_product)
+
+        # returns None when there's no seats.
+        basket = factories.create_basket(empty=True)
+        basket.add_product(other_product)
+        self.assertIsNone(get_single_seat(basket))
+
+        # returns None for an empty basket.
+        basket = factories.create_basket(empty=True)
+        self.assertIsNone(get_single_seat(basket))
