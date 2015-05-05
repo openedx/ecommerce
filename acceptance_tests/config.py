@@ -19,7 +19,7 @@ ECOMMERCE_API_TOKEN = os.environ.get('ECOMMERCE_API_AUTH_TOKEN', ACCESS_TOKEN)
 ORDER_PROCESSING_TIME = int(os.environ.get('ORDER_PROCESSING_TIME', 15))
 
 # Test configuration
-ENABLE_AUTO_AUTH = str2bool(os.environ.get('ENABLE_AUTO_AUTH', False))
+ENABLE_LMS_AUTO_AUTH = str2bool(os.environ.get('ENABLE_LMS_AUTO_AUTH', False))
 ENABLE_OAUTH_TESTS = str2bool(os.environ.get('ENABLE_OAUTH_TESTS', True))
 COURSE_ID = os.environ.get('COURSE_ID', 'edX/DemoX/Demo_Course')
 VERIFIED_COURSE_ID = os.environ.get('VERIFIED_COURSE_ID', 'edX/victor101/Victor_s_test_course')

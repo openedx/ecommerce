@@ -1,7 +1,8 @@
 # Packages required for testing
 -r base.txt
 
-bok-choy==0.3.3
+git+https://github.com/edx/bok-choy.git@e4e5934b9645e389d14ef22587e8462be4c1cd74#egg=bok_choy
+#bok-choy==0.3.3
 coverage==3.7.1
 ddt==1.0.0
 django-nose==1.3

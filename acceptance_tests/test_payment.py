@@ -14,7 +14,7 @@ class VerifiedCertificatePaymentTests(EcommerceApiMixin, EnrollmentApiMixin, Lms
     def setUp(self):
         super(VerifiedCertificatePaymentTests, self).setUp()
         self.course_id = VERIFIED_COURSE_ID
-        self.username, self.password, self.email = self.create_lms_user()
+        self.username, self.password, self.email = self.get_lms_user()
 
     def test_payment(self):
         self.login_with_lms(self.email, self.password)

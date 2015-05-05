@@ -8,7 +8,7 @@ class LoginEnrollmentTests(EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin, 
     def setUp(self):
         super(LoginEnrollmentTests, self).setUp()
         self.course_id = COURSE_ID
-        self.username, self.password, self.email = self.create_lms_user()
+        self.username, self.password, self.email = self.get_lms_user()
 
     def test_honor_enrollment_and_login(self):
         """ Verifies that a user can login and enroll in a course via the login page. """
