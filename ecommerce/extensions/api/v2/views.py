@@ -278,7 +278,13 @@ class OrderListView(ListAPIView):
     serializer_class = serializers.OrderSerializer
 
     def get_queryset(self):
-        return self.request.user.orders.order_by('-date_placed')
+        user = self.request.user
+        qs = user.orders
+
+        if user.is_superuser:
+            qs = Order.objects.all()
+
+        return qs.order_by('-date_placed')
 
 
 class OrderRetrieveView(RetrieveAPIView):
