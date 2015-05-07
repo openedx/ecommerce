@@ -327,6 +327,16 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assert_empty_result_response(response)
 
+    def test_super_user(self):
+        """ The view should return all orders for when authenticating as a superuser. """
+        superuser = self.create_user(is_superuser=True)
+        order = factories.create_order(user=self.user)
+
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(superuser))
+        content = json.loads(response.content)
+        self.assertEqual(content['count'], 1)
+        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+
 
 class PaymentProcessorListViewTests(TestCase, UserMixin):
     """ Ensures correct behavior of the payment processors list view."""

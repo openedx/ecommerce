@@ -3,7 +3,6 @@ import urllib
 
 from bok_choy.page_object import PageObject
 from bok_choy.promise import EmptyPromise
-from selenium.webdriver.support.select import Select
 
 from acceptance_tests.config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, APP_SERVER_URL, LMS_URL
 
@@ -78,45 +77,3 @@ class LMSCourseModePage(LMSPage):
     def __init__(self, browser, course_id):
         super(LMSCourseModePage, self).__init__(browser)
         self.course_id = course_id
-
-    def purchase_verified(self):
-        # Click the purchase button on the track selection page
-        self.q(css='input[name=verified_mode]').click()
-
-        # Click the payment button
-        self.q(css='a#cybersource').click()
-
-        # Wait for form to load
-        self.wait_for_element_presence('#billing_details', 'Waiting for billing form to load.')
-
-        # Select the credit card type (Visa) first since it triggers the display of additional fields
-        self.q(css='#card_type_001').click()  # Visa
-
-        # Select the appropriate <option> elements
-        select_fields = (
-            ('#bill_to_address_country', 'US'),
-            ('#bill_to_address_state_us_ca', 'MA'),
-            ('#card_expiry_year', '2020')
-        )
-        for selector, value in select_fields:
-            select = Select(self.browser.find_element_by_css_selector(selector))
-            select.select_by_value(value)
-
-        # Fill in the text fields
-        billing_information = {
-            'bill_to_forename': 'Ed',
-            'bill_to_surname': 'Xavier',
-            'bill_to_address_line1': '141 Portland Ave.',
-            'bill_to_address_line2': '9th Floor',
-            'bill_to_address_city': 'Cambridge',
-            'bill_to_address_postal_code': '02141',
-            'bill_to_email': 'edx@example.com',
-            'card_number': '4111111111111111',
-            'card_cvn': '1234'
-        }
-
-        for field, value in billing_information.items():
-            self.q(css='#' + field).fill(value)
-
-        # Click the payment button
-        self.q(css='input[type=submit]').click()

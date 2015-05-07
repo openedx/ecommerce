@@ -42,3 +42,6 @@ if not ENROLLMENT_API_URL:
     ENROLLMENT_API_URL = '{}/api/enrollment/v1'.format(LMS_URL)
 
 ENROLLMENT_API_TOKEN = os.environ.get('ENROLLMENT_API_TOKEN', ACCESS_TOKEN)
+
+PAYPAL_EMAIL = os.environ.get('PAYPAL_EMAIL', None)
+PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD', None)
