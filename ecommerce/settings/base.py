@@ -2,7 +2,9 @@
 import os
 from os.path import basename, normpath
 from sys import path
+from urlparse import urljoin
 
+from django.conf import settings
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.settings._oscar import *
@@ -202,8 +204,15 @@ MIDDLEWARE_CLASSES = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
 
-# Used to construct LMS URLs; must include a trailing slash
+# Absolute URL used to construct LMS URLs.
 LMS_URL_ROOT = None
+
+
+def get_lms_url(path):
+    # This function accesses Django settings because other settings modules override
+    # LMS_URL_ROOT; we don't always want this function to use the value of LMS_URL_ROOT
+    # defined in this module.
+    return urljoin(settings.LMS_URL_ROOT, path)
 
 # The location of the LMS heartbeat page
 LMS_HEARTBEAT_URL = None

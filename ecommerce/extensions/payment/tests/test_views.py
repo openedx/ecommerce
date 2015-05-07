@@ -3,17 +3,20 @@
 import ddt
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.client import RequestFactory
 from factory.django import mute_signals
+import httpretty
 import mock
 from oscar.apps.order.exceptions import UnableToPlaceOrder
+from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model, get_class
 from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.payment.processors import Cybersource
-from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin
-from ecommerce.extensions.payment.views import CybersourceNotifyView
+from ecommerce.extensions.payment.processors import Cybersource, Paypal
+from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
+from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
 
 
 Basket = get_model('basket', 'Basket')
@@ -27,11 +30,11 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 @ddt.ddt
-class CybersourceNotifyViewTestCase(CybersourceMixin, PaymentEventsMixin, TestCase):
+class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase):
     """ Test processing of CyberSource notifications. """
 
     def setUp(self):
-        super(CybersourceNotifyViewTestCase, self).setUp()
+        super(CybersourceNotifyViewTests, self).setUp()
 
         self.user = factories.UserFactory()
         factories.UserAddressFactory(user=self.user)
@@ -169,3 +172,66 @@ class CybersourceNotifyViewTestCase(CybersourceMixin, PaymentEventsMixin, TestCa
         # The response should be saved.
         self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
                                                 basket=self.basket)
+
+
+class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase):
+    """Test handling of users redirected by PayPal after approving payment."""
+
+    def setUp(self):
+        super(PaypalPaymentExecutionViewTests, self).setUp()
+
+        self.basket = factories.create_basket()
+        self.basket.owner = factories.UserFactory()
+        self.basket.freeze()
+
+        self.processor = Paypal()
+        self.processor_name = self.processor.NAME
+
+        # Dummy request from which an HTTP Host header can be extracted during
+        # construction of absolute URLs
+        self.request = RequestFactory().post('/')
+
+    @httpretty.activate
+    def _assert_execution_redirect(self):
+        """Verify redirection to the configured receipt page after attempted payment execution."""
+        self.mock_oauth2_response()
+
+        # Create a payment record the view can use to retrieve a basket
+        self.mock_payment_creation_response(self.basket)
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+
+        self.mock_payment_creation_response(self.basket, find=True)
+        self.mock_payment_execution_response(self.basket)
+
+        response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
+        self.assertRedirects(
+            response,
+            u'{}?basket_id={}'.format(self.processor.receipt_url, self.basket.id),
+            fetch_redirect_response=False
+        )
+
+    def test_payment_execution(self):
+        """Verify that a user who has approved payment is redirected to the configured receipt page."""
+        self._assert_execution_redirect()
+
+    def test_payment_error(self):
+        """
+        Verify that a user who has approved payment is redirected to the configured receipt page when payment
+        execution fails.
+        """
+        with mock.patch.object(
+            PaypalPaymentExecutionView, 'handle_payment', side_effect=PaymentError
+        ) as fake_handle_payment:
+            self._assert_execution_redirect()
+            self.assertTrue(fake_handle_payment.called)
+
+    def test_unable_to_place_order(self):
+        """
+        Verify that a user who has approved payment is redirected to the configured receipt page when the payment
+        is executed but an order cannot be placed.
+        """
+        with mock.patch.object(
+            PaypalPaymentExecutionView, 'handle_order_placement', side_effect=UnableToPlaceOrder
+        ) as fake_handle_order_placement:
+            self._assert_execution_redirect()
+            self.assertTrue(fake_handle_order_placement.called)

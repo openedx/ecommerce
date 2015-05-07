@@ -6,16 +6,19 @@ import datetime
 import ddt
 from django.conf import settings
 from django.test import TestCase
+from django.test.client import RequestFactory
+import httpretty
 import mock
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
 from oscar.core.loading import get_model
 from oscar.test import factories
+import paypalrestsdk
 
 from ecommerce.extensions.payment import processors
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
-from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin
+from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 
 
 PaymentEventType = get_model('order', 'PaymentEventType')
@@ -42,7 +45,8 @@ class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
         self.product_class = factories.ProductClassFactory(slug='seat', requires_shipping=False, track_stock=False)
         factories.ProductAttributeFactory(code='course_key', product_class=self.product_class, type="text")
         factories.ProductAttributeFactory(code='certificate_type', product_class=self.product_class, type="text")
-        self.product = factories.ProductFactory(upc='dummy-upc', title='dummy-title', product_class=self.product_class)
+
+        self.product = factories.ProductFactory(product_class=self.product_class, stockrecords__price_currency='USD')
         self.product.attr.course_key = self.COURSE_KEY
         self.product.attr.certificate_type = self.CERTIFICATE_TYPE
         self.product.save()
@@ -69,16 +73,12 @@ class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
         """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
         raise NotImplementedError
 
-    def test_is_signature_valid(self):
-        """ Verify that the is_signature_valid method properly validates the response's signature. """
-        raise NotImplementedError
-
 
 @ddt.ddt
 class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase):
     """ Tests for CyberSource payment processor. """
-    UUID = u'UUID'
     PI_DAY = datetime.datetime(2015, 3, 14, 9, 26, 53)
+    UUID = u'UUID'
 
     processor_class = processors.Cybersource
     processor_name = 'cybersource'
@@ -154,7 +154,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         # Validate the Source
         source_type = SourceType.objects.get(code=self.processor.NAME)
         label = response[u'req_card_number']
-        self.assert_basket_matches_source(self.basket, source, source_type, reference, label)
+        self.assert_basket_matches_source(
+            self.basket,
+            source,
+            source_type,
+            reference,
+            label,
+            card_type=self.DEFAULT_CARD_TYPE
+        )
 
         # Validate PaymentEvent
         paid_type = PaymentEventType.objects.get(code=u'paid')
@@ -203,16 +210,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # finds the first seat added, when there's more than one.
         basket = factories.create_basket(empty=True)
-        other_seat = factories.ProductFactory(upc='other-upc', title='other-title', product_class=self.product_class)
-        other_seat.save()
+        other_seat = factories.ProductFactory(product_class=self.product_class, stockrecords__price_currency='USD')
         basket.add_product(self.product)
         basket.add_product(other_seat)
         self.assertEqual(get_single_seat(basket), self.product)
 
         # finds the seat when there's a mixture of product classes.
         basket = factories.create_basket(empty=True)
-        other_product = factories.ProductFactory(upc='not-a-seat', title='not-a-seat')
-        other_product.save()
+        other_product = factories.ProductFactory(stockrecords__price_currency='USD')
         basket.add_product(other_product)
         basket.add_product(self.product)
         self.assertEqual(get_single_seat(basket), self.product)
@@ -226,3 +231,108 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         # returns None for an empty basket.
         basket = factories.create_basket(empty=True)
         self.assertIsNone(get_single_seat(basket))
+
+
+@ddt.ddt
+class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
+    """Tests for the PayPal payment processor."""
+    ERROR = {u'debug_id': u'foo'}
+
+    processor_class = processors.Paypal
+    processor_name = u'paypal'
+
+    def setUp(self):
+        super(PaypalTests, self).setUp()
+
+        # Dummy request from which an HTTP Host header can be extracted during
+        # construction of absolute URLs
+        self.request = RequestFactory().post('/')
+
+    def _assert_transaction_parameters(self):
+        """DRY helper for verifying transaction parameters."""
+        expected = {
+            u'payment_page_url': self.APPROVAL_URL,
+        }
+        actual = self.processor.get_transaction_parameters(self.basket, request=self.request)
+        self.assertEqual(actual, expected)
+
+    def _assert_payment_event_and_source(self):
+        """DRY helper for verifying a payment event and source."""
+        source, payment_event = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+
+        # Validate Source
+        source_type = SourceType.objects.get(code=self.processor.NAME)
+        reference = self.PAYMENT_ID
+        label = self.EMAIL
+        self.assert_basket_matches_source(self.basket, source, source_type, reference, label)
+
+        # Validate PaymentEvent
+        paid_type = PaymentEventType.objects.get(code=u'paid')
+        amount = self.basket.total_incl_tax
+        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
+
+    @httpretty.activate
+    def test_get_transaction_parameters(self):
+        """Verify the processor returns the appropriate parameters required to complete a transaction."""
+        self.mock_oauth2_response()
+        response = self.mock_payment_creation_response(self.basket)
+
+        self._assert_transaction_parameters()
+        self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
+
+    @httpretty.activate
+    @mock.patch.object(processors.Paypal, '_get_error', mock.Mock(return_value=ERROR))
+    def test_unexpected_payment_creation_state(self):
+        """Verify that failure to create a payment results in a GatewayError."""
+        self.mock_oauth2_response()
+        self.mock_payment_creation_response(self.basket)
+
+        with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
+            self.assertRaises(
+                GatewayError,
+                self.processor.get_transaction_parameters,
+                self.basket,
+                request=self.request
+            )
+            self.assert_processor_response_recorded(
+                self.processor.NAME,
+                self.ERROR['debug_id'],
+                self.ERROR,
+                basket=self.basket
+            )
+
+    @httpretty.activate
+    def test_approval_url_missing(self):
+        """Verify that a missing approval URL results in a GatewayError."""
+        self.mock_oauth2_response()
+        response = self.mock_payment_creation_response(self.basket, approval_url=None)
+
+        self.assertRaises(GatewayError, self.processor.get_transaction_parameters, self.basket, request=self.request)
+        self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
+
+    @httpretty.activate
+    def test_handle_processor_response(self):
+        """Verify that the processor creates the appropriate PaymentEvent and Source objects."""
+        self.mock_oauth2_response()
+        self.mock_payment_creation_response(self.basket, find=True)
+        response = self.mock_payment_execution_response(self.basket)
+
+        self._assert_payment_event_and_source()
+        self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
+
+    @httpretty.activate
+    @mock.patch.object(processors.Paypal, '_get_error', mock.Mock(return_value=ERROR))
+    def test_unexpected_payment_execution_state(self):
+        """Verify that failure to execute a payment results in a GatewayError."""
+        self.mock_oauth2_response()
+        self.mock_payment_creation_response(self.basket, find=True)
+        self.mock_payment_execution_response(self.basket)
+
+        with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
+            self.assertRaises(GatewayError, self.processor.handle_processor_response, self.RETURN_DATA, self.basket)
+            self.assert_processor_response_recorded(
+                self.processor.NAME,
+                self.ERROR['debug_id'],
+                self.ERROR,
+                basket=self.basket
+            )

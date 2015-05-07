@@ -91,19 +91,26 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.Cybersource',
+    'ecommerce.extensions.payment.processors.Paypal',
 )
 
 PAYMENT_PROCESSOR_CONFIG = {
     'cybersource': {
-        'profile_id': 'set-me-please',
-        'access_key': 'set-me-please',
-        'secret_key': 'set-me-please',
-        'payment_page_url': 'https://replace-me/',
-        # TODO: XCOM-202 must be completed before any other receipt page is used.
-        # By design this specific receipt page is expected.
-        'receipt_page_url': 'https://replace-me/verify_student/payment-confirmation/',
-        'cancel_page_url': 'https://replace-me/',
-    }
+        'profile_id': None,
+        'access_key': None,
+        'secret_key': None,
+        'payment_page_url': None,
+        'receipt_page_url': None,
+        'cancel_page_url': None,
+    },
+    'paypal': {
+        # 'mode' can be either 'sandbox' or 'live'
+        'mode': None,
+        'client_id': None,
+        'client_secret': None,
+        'receipt_url': None,
+        'cancel_url': None,
+    },
 }
 # END PAYMENT PROCESSING
 

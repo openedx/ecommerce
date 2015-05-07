@@ -11,7 +11,7 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 class EdxOrderPlacementMixin(OrderPlacementMixin):
     """ Mixin for edX-specific order placement. """
 
-    # Note: Subclasses should set this value
+    # Instance of a payment processor with which to handle payment. Subclasses should set this value.
     payment_processor = None
 
     __metaclass__ = abc.ABCMeta
