@@ -195,6 +195,7 @@ class PaypalMixin(object):
                         for line in basket.all_lines()
                     ],
                 },
+                u'invoice_number': unicode(basket.id),
                 u'related_resources': []
             }],
             u'update_time': u'2015-05-04T18:18:27Z'
@@ -269,6 +270,7 @@ class PaypalMixin(object):
                         for line in basket.all_lines()
                     ],
                 },
+                u'invoice_number': unicode(basket.id),
                 u'related_resources': [{
                     u'sale': {
                         u'amount': {
