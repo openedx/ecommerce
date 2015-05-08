@@ -351,6 +351,7 @@ class Paypal(BasePaymentProcessor):
                         for line in basket.all_lines()
                     ],
                 },
+                'invoice_number': unicode(basket.id),
             }],
         }
 
