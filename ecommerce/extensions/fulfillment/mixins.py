@@ -7,6 +7,7 @@ ShippingEventType = get_model('order', 'ShippingEventType')
 EventHandler = get_class('order.processing', 'EventHandler')
 
 
+# TODO (RFL): Retire this mixin in favor of the `post_checkout_callback`.
 class FulfillmentMixin(object):
     """A mixin that provides the ability to fulfill orders."""
     SHIPPING_EVENT_NAME = 'Shipped'

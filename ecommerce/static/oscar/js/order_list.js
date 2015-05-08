@@ -18,7 +18,7 @@ $(document).ready(function () {
 
         // Make AJAX call and update status
         $.ajax({
-            url: '/api/v1/orders/' + order_number + '/fulfill/',
+            url: '/api/v2/orders/' + order_number + '/fulfill/',
             method: 'PUT',
             headers: {'X-CSRFToken': $.cookie('csrftoken')}
         }).success(function (data) {
