@@ -19,6 +19,7 @@ OSCAR_HOMEPAGE = reverse_lazy('dashboard:index')
 OSCAR_APPS = [
     'ecommerce.extensions.api',
     'ecommerce.extensions.fulfillment',
+    'ecommerce.extensions.refund',
 ] + get_core_apps([
     'ecommerce.extensions.analytics',
     'ecommerce.extensions.catalogue',

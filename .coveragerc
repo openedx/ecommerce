@@ -10,8 +10,10 @@ omit = ecommerce/settings*
     # above causes all other code in the model to appear uncovered, resulting in
     # skewed coverage stats.
     ecommerce/extensions/order/models*
+
     ecommerce/extensions/payment/constants*
     ecommerce/extensions/payment/models*
+    ecommerce/extensions/refund/models*
 
     # The fulfillment app's status module only contains constants, which don't require
     # test coverage.
