@@ -7,6 +7,7 @@ import logging
 
 import ddt
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
@@ -22,6 +23,8 @@ from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
+from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
@@ -29,6 +32,8 @@ from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMix
 
 
 Basket = get_model('basket', 'Basket')
+Order = get_model('order', 'Order')
+ShippingEventType = get_model('order', 'ShippingEventType')
 
 
 @ddt.ddt
@@ -336,6 +341,93 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
         content = json.loads(response.content)
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], unicode(order.number))
+
+
+@ddt.ddt
+class OrderFulfillViewTests(UserMixin, TestCase):
+    def setUp(self):
+        super(OrderFulfillViewTests, self).setUp()
+        ShippingEventType.objects.create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
+
+        self.user = self.create_user(is_superuser=True)
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.order = factories.create_order()
+        self.order.status = ORDER.FULFILLMENT_ERROR
+        self.order.save()
+        self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)
+
+        self.url = reverse('api:v2:orders:fulfill', kwargs={'number': self.order.number})
+
+    def _put_to_view(self):
+        """
+        PUT to the view being tested.
+
+        Returns:
+            Response
+        """
+        return self.client.put(self.url)
+
+    @ddt.data('delete', 'get', 'post')
+    def test_post_required(self, method):
+        """ Verify that the view only responds to PUT and PATCH operations. """
+        response = getattr(self.client, method)(self.url)
+        self.assertEqual(405, response.status_code)
+
+    def test_login_required(self):
+        """ The view should return HTTP 401 status if the user is not logged in. """
+        self.client.logout()
+        self.assertEqual(401, self._put_to_view().status_code)
+
+    def test_change_permissions_required(self):
+        """
+        The view requires the user to have change permissions for Order objects. If the user does not have permission,
+        the view should return HTTP 403 status.
+        """
+        self.user.is_superuser = False
+        self.user.save()
+        self.assertEqual(403, self._put_to_view().status_code)
+
+        permission = Permission.objects.get(codename='change_order')
+        self.user.user_permissions.add(permission)
+        self.assertNotEqual(403, self._put_to_view().status_code)
+
+    @ddt.data(ORDER.OPEN, ORDER.COMPLETE)
+    def test_order_fulfillment_error_state_required(self, order_status):
+        """ If the order is not in the Fulfillment Error state, the view must return an HTTP 406. """
+        self.order.status = order_status
+        self.order.save()
+        self.assertEqual(406, self._put_to_view().status_code)
+
+    def test_ideal_conditions(self):
+        """
+        If the user is authenticated/authorized, and the order is in the Fulfillment Error state, the view should
+        attempt to fulfill the order. The view should return HTTP 200.
+        """
+        self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
+
+        with mock.patch('ecommerce.extensions.order.processing.EventHandler.handle_shipping_event') as mocked:
+            def handle_shipping_event(order, _event_type, _lines, _line_quantities, **_kwargs):
+                order.status = ORDER.COMPLETE
+                order.save()
+                return order
+
+            mocked.side_effect = handle_shipping_event
+            response = self._put_to_view()
+            self.assertTrue(mocked.called)
+
+        self.assertEqual(200, response.status_code)
+
+        # Reload the order from the DB and check its status
+        self.order = Order.objects.get(number=self.order.number)
+        self.assertEqual(unicode(self.order.number), response.data['number'])
+        self.assertEqual(self.order.status, response.data['status'])
+
+    def test_fulfillment_failed(self):
+        """ If fulfillment fails, the view should return HTTP 500. """
+        self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
+        response = self._put_to_view()
+        self.assertEqual(500, response.status_code)
 
 
 class PaymentProcessorListViewTests(TestCase, UserMixin):

@@ -4,15 +4,15 @@ import logging
 from django.conf import settings
 from oscar.core.loading import get_model
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
 # noinspection PyUnresolvedReferences
-from ecommerce.extensions.api.v1.views import OrderFulfillView  # pylint: disable=unused-import
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_processor_class, get_default_processor_class,
                                                   get_processor_class_by_name)
@@ -83,7 +83,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
 
             >>> data = {'products': [{'sku': 'SOME-SEAT'}, {'sku': 'SOME-OTHER-SEAT'}], 'checkout': False}
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
-            >>> json.loads(response.content)
+            >>> response.json()
             {
                 u'id': 7,
                 u'order': None,
@@ -94,7 +94,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
 
             >>> data = {'products': [{'sku': 'FREE-SEAT'}], 'checkout': True, 'payment_processor_name': 'paypal'}
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
-            >>> json.loads(response.content)
+            >>> response.json()
             {
                 u'id': 7,
                 u'order': {u'number': u'OSCR-100007'},
@@ -105,7 +105,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
 
             >>> data = {'products': [{'sku': 'PAID-SEAT'}], 'checkout': True, 'payment_processor_name': 'paypal'}
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
-            >>> json.loads(response.content)
+            >>> response.json()
             {
                 u'id': 7,
                 u'order': None,
@@ -342,6 +342,29 @@ class OrderByBasketRetrieveView(OrderRetrieveView):
     up via the id of the related basket.
     """
     lookup_field = 'basket_id'
+
+
+class OrderFulfillView(FulfillmentMixin, UpdateAPIView):
+    permission_classes = (IsAuthenticated, DjangoModelPermissions,)
+    lookup_field = 'number'
+    queryset = Order.objects.all()
+    serializer_class = serializers.OrderSerializer
+
+    def update(self, request, *args, **kwargs):
+        order = self.get_object()
+
+        if not order.can_retry_fulfillment:
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        logger.info('Retrying fulfillment of order [%s]...', order.number)
+        order = self.fulfill_order(order)
+
+        if order.can_retry_fulfillment:
+            logger.warning('Fulfillment of order [%s] failed!', order.number)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = self.get_serializer(order)
+        return Response(serializer.data)
 
 
 class PaymentProcessorListView(ListAPIView):

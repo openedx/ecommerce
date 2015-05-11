@@ -29,18 +29,13 @@ class JwtAuthentication(JSONWebTokenAuthentication):
     Example:
         Access an endpoint protected by JWT authentication as follows.
 
-        >>> url = 'http://localhost:8002/api/v1/orders/'  # Protected by JwtAuthentication
-        >>> data = {'sku': 'SEAT-HONOR-EDX-DEMOX-DEMO-COURSE'}
-        >>> payload = {
-            'username': 'Saul',
-            'email': 'saul@bettercallsaul.com',
-            'tracking_context': {'lms_user_id': '123', 'lms_client_id': 'xyz'},
-        }
-        >>> token = jwt.encode(payload, 'insecure-secret-key')
+        >>> url = 'http://localhost:8002/api/v2/baskets/'  # Protected by JwtAuthentication
+        >>> token = jwt.encode({'username': 'Saul', 'email': 'saul@bettercallsaul.com'}, 'insecure-secret-key')
         >>> headers = {
             'content-type': 'application/json',
             'Authorization': 'JWT ' + token
         }
+        >>> data = {'products': [{'sku': 'PAID-SEAT'}], 'checkout': True, 'payment_processor_name': 'paypal'}
         >>> response = requests.post(url, data=json.dumps(data), headers=headers)
         >>> response.status_code
         200
