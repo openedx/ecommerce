@@ -8,7 +8,6 @@ from ecommerce.extensions.fulfillment.status import ORDER
 
 
 class Order(AbstractOrder):
-    payment_processor = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)
     history = HistoricalRecords()
 
     @property
