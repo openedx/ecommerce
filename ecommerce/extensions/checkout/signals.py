@@ -62,7 +62,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                     'name': line.product.attr.course_key,
                     'price': str(line.line_price_excl_tax),
                     'quantity': line.quantity,
-                    'category': line.product.product_class.name,
+                    'category': line.product.get_product_class().name,
                 } for line in order.lines.all()
             ],
         },

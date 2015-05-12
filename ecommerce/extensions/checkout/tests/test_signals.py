@@ -29,14 +29,25 @@ class EdxOrderPlacementMixinTests(TestCase):
         product_class.save()
         attr = factories.ProductAttributeFactory(code='course_key', product_class=product_class, type="text")
         attr.save()
-        product = factories.ProductFactory(upc=UPC, title=TITLE, product_class=product_class)
-        product.attr.course_key = 'test-course-key'
-        product.save()
+        parent_product = factories.ProductFactory(
+            upc='dummy-parent-product',
+            title='dummy-title',
+            product_class=product_class,
+            structure='parent',
+        )
+        child_product = factories.ProductFactory(
+            upc='dummy-child-product',
+            title=TITLE,
+            structure='child',
+            parent=parent_product,
+        )
+        child_product.attr.course_key = 'test-course-key'
+        child_product.save()
 
         # create test user and set up basket / order
         self.user = factories.UserFactory()
         basket = factories.BasketFactory(total_incl_tax=Decimal('10.01'), total_excl_tax=Decimal(TOTAL))
-        basket.add_product(product)
+        basket.add_product(child_product)
         self.order = factories.create_order(user=self.user, basket=basket, currency=CURRENCY, number=ORDER_NUMBER)
 
     def assert_correct_event(self, mock_track, order, expected_user_id, expected_client_id):
@@ -70,7 +81,7 @@ class EdxOrderPlacementMixinTests(TestCase):
             self.assertEqual(line.product.attr.course_key, actual_product['name'])
             self.assertEqual(str(line.line_price_excl_tax), actual_product['price'])
             self.assertEqual(line.quantity, actual_product['quantity'])
-            self.assertEqual(line.product.product_class.name, actual_product['category'])
+            self.assertEqual(line.product.get_product_class().name, actual_product['category'])
 
     def test_handle_successful_order(self, mock_track):
         """
