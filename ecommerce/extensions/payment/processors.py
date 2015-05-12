@@ -3,6 +3,7 @@ import abc
 import datetime
 from decimal import Decimal
 import logging
+from urlparse import urljoin
 import uuid
 
 from django.conf import settings
@@ -302,10 +303,13 @@ class Paypal(BasePaymentProcessor):
 
         Raises:
             KeyError: If a required setting is not configured for this payment processor
+            AttributeError: If ECOMMERCE_URL_ROOT setting is not set.
         """
         configuration = self.configuration
         self.receipt_url = configuration['receipt_url']
         self.cancel_url = configuration['cancel_url']
+
+        self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
 
     def get_transaction_parameters(self, basket, request=None):
         """
@@ -325,7 +329,7 @@ class Paypal(BasePaymentProcessor):
             GatewayError: Indicates a general error or unexpected behavior on the part of PayPal which prevented
                 a payment from being created.
         """
-        return_url = request.build_absolute_uri(reverse('paypal_execute'))
+        return_url = urljoin(self.ecommerce_url_root, reverse('paypal_execute'))
         data = {
             'intent': 'sale',
             'redirect_urls': {

@@ -204,6 +204,9 @@ MIDDLEWARE_CLASSES = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
 
+# Absolute URL used to construct URLs pointing back to the ecommerce service.
+ECOMMERCE_URL_ROOT = None
+
 # Absolute URL used to construct LMS URLs.
 LMS_URL_ROOT = None
 

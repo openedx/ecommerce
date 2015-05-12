@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Unit tests of payment processor implementations."""
-from uuid import UUID
 import datetime
+import json
+from urlparse import urljoin
+from uuid import UUID
 
 import ddt
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import RequestFactory
 import httpretty
@@ -279,6 +282,10 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
         self._assert_transaction_parameters()
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
+
+        last_request_body = json.loads(httpretty.last_request().body)
+        expected = urljoin(settings.ECOMMERCE_URL_ROOT, reverse('paypal_execute'))
+        self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
 
     @httpretty.activate
     @mock.patch.object(processors.Paypal, '_get_error', mock.Mock(return_value=ERROR))
