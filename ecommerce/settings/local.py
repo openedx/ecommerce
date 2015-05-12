@@ -68,6 +68,8 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 
 # URL CONFIGURATION
+ECOMMERCE_URL_ROOT = 'http://localhost:8002'
+
 LMS_URL_ROOT = 'http://127.0.0.1:8000'
 
 # The location of the LMS heartbeat page
