@@ -28,7 +28,7 @@ migrate:
 	python manage.py migrate
 
 serve:
-	python manage.py runserver 8002
+	python manage.py runserver 0.0.0.0:8002
 
 clean:
 	find . -name '*.pyc' -delete
