@@ -8,6 +8,7 @@ from oscar.defaults import *
 from oscar import get_core_apps
 
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
 
 # URL CONFIGURATION
@@ -19,6 +20,7 @@ OSCAR_HOMEPAGE = reverse_lazy('dashboard:index')
 OSCAR_APPS = [
     'ecommerce.extensions.api',
     'ecommerce.extensions.fulfillment',
+    'ecommerce.extensions.refund',
 ] + get_core_apps([
     'ecommerce.extensions.analytics',
     'ecommerce.extensions.catalogue',
@@ -122,3 +124,25 @@ PAYMENT_PROCESSOR_CONFIG = {
 # queries which significantly degrade performance at scale.
 INSTALL_DEFAULT_ANALYTICS_RECEIVERS = False
 # END ANALYTICS
+
+
+# REFUND PROCESSING
+OSCAR_INITIAL_REFUND_STATUS = REFUND.OPEN
+OSCAR_INITIAL_REFUND_LINE_STATUS = REFUND_LINE.OPEN
+
+OSCAR_REFUND_STATUS_PIPELINE = {
+    REFUND.OPEN: (REFUND.DENIED, REFUND.ERROR, REFUND.COMPLETE),
+    REFUND.ERROR: (REFUND.COMPLETE, REFUND.ERROR),
+    REFUND.DENIED: (),
+    REFUND.COMPLETE: ()
+}
+
+OSCAR_REFUND_LINE_STATUS_PIPELINE = {
+    REFUND_LINE.OPEN: (REFUND_LINE.DENIED, REFUND_LINE.PAYMENT_REFUND_ERROR, REFUND_LINE.PAYMENT_REFUNDED),
+    REFUND_LINE.PAYMENT_REFUND_ERROR: (REFUND_LINE.PAYMENT_REFUNDED, REFUND_LINE.PAYMENT_REFUND_ERROR),
+    REFUND_LINE.PAYMENT_REFUNDED: (REFUND_LINE.COMPLETE, REFUND_LINE.REVOCATION_ERROR),
+    REFUND_LINE.REVOCATION_ERROR: (REFUND_LINE.COMPLETE, REFUND_LINE.REVOCATION_ERROR),
+    REFUND_LINE.DENIED: (),
+    REFUND_LINE.COMPLETE: ()
+}
+# END REFUND PROCESSING

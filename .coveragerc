@@ -13,6 +13,10 @@ omit = ecommerce/settings*
     ecommerce/extensions/payment/constants*
     ecommerce/extensions/payment/models*
 
+    ecommerce/extensions/refund/exceptions*
+    ecommerce/extensions/refund/models*
+    ecommerce/extensions/refund/status*
+
     # The fulfillment app's status module only contains constants, which don't require
     # test coverage.
     ecommerce/extensions/fulfillment/status.py
