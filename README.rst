@@ -43,11 +43,13 @@ To run the unit test suite followed by quality checks, run::
 
     $ make validate
 
-Acceptance tests require a valid LMS configuration and a user with a known username, email address, password, and access token. The following command will run the acceptance tests::
+Acceptance Testing
+~~~~~~~~~~~~~~~~~~
 
-    $ APP_SERVER_URL="<ECOMMERCE-URL>" LMS_URL="<LMS-URL>" LMS_USERNAME="<USERNAME>" LMS_EMAIL="<EMAIL>" LMS_PASSWORD="<PASSWORD>" ACCESS_TOKEN="<ACCESS-TOKEN>" make accept
+For instructions on how to run the acceptance tests, please consult the
+README file located in the `acceptance tests README`_.
 
-Note: Access tokens can be generated/obtained from the LMS admin portal (http://127.0.0.1:8000/admin/oauth2/accesstoken/).
+.. _acceptance tests README: acceptance_tests/README.rst
 
 Documentation |ReadtheDocs|_ 
 ----------------------------
