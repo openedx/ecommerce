@@ -37,9 +37,15 @@ PAYMENT_URLS = patterns(
     url(r'^processors/$', cache_page(60 * 30)(views.PaymentProcessorListView.as_view()), name='list_processors'),
 )
 
+REFUND_URLS = patterns(
+    '',
+    url(r'^$', views.RefundCreateView.as_view(), name='create'),
+)
+
 urlpatterns = patterns(
     '',
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^orders/', include(ORDER_URLS, namespace='orders')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
+    url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
 )

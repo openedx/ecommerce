@@ -28,12 +28,16 @@ from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
-from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMixin
-
+from ecommerce.extensions.refund.tests.factories import RefundLineFactory
+from ecommerce.extensions.refund.tests.test_api import RefundTestMixin
+from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMixin, JwtMixin
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
+Refund = get_model('refund', 'Refund')
+
+JSON_CONTENT_TYPE = 'application/json'
 
 
 @ddt.ddt
@@ -151,7 +155,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
         response = self.client.post(
             self.PATH,
             data=json.dumps(request_data),
-            content_type='application/json',
+            content_type=JSON_CONTENT_TYPE,
             HTTP_AUTHORIZATION='JWT ' + self.generate_token(self.USER_DATA)
         )
         self.assertEqual(response.status_code, 400)
@@ -347,7 +351,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
 class OrderFulfillViewTests(UserMixin, TestCase):
     def setUp(self):
         super(OrderFulfillViewTests, self).setUp()
-        ShippingEventType.objects.create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.get_or_create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
 
         self.user = self.create_user(is_superuser=True)
         self.client.login(username=self.user.username, password=self.password)
@@ -462,3 +466,161 @@ class PaymentProcessorListViewTests(TestCase, UserMixin):
     def test_get_many(self):
         """Ensure multiple processors in settings are handled correctly."""
         self.assert_processor_list_matches([DummyProcessor.NAME, AnotherDummyProcessor.NAME])
+
+
+class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, UserMixin, TestCase):
+    path = reverse('api:v2:refunds:create')
+
+    def setUp(self):
+        super(RefundCreateViewTests, self).setUp()
+        self.course_id = 'edX/DemoX/Demo_Course'
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+    def assert_bad_request_response(self, response, detail):
+        """ Assert the response has status code 406 and the appropriate detail message. """
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        data = json.loads(response.content)
+        self.assertEqual(data, {'detail': detail})
+
+    def assert_ok_response(self, response):
+        """ Assert the response has HTTP status 200 and no data. """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content), [])
+
+    def _get_data(self, username=None, course_id=None):
+        data = {}
+
+        if username:
+            data['username'] = username
+
+        if course_id:
+            data['course_id'] = course_id
+
+        return json.dumps(data)
+
+    def test_no_orders(self):
+        """ If the user has no orders, no refund IDs should be returned. HTTP status should be 200. """
+        self.assertFalse(self.user.orders.exists())
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+
+    def test_missing_data(self):
+        """
+        If course_id is missing from the POST body, return HTTP 400
+        """
+        data = self._get_data(self.user.username)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_bad_request_response(response, 'No course_id specified.')
+
+    def test_user_not_found(self):
+        """
+        If no user matching the username is found, return HTTP 400.
+        """
+        superuser = self.create_user(is_superuser=True)
+        self.client.login(username=superuser.username, password=self.password)
+
+        username = 'fakey-userson'
+        data = self._get_data(username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_bad_request_response(response, 'User "{}" does not exist.'.format(username))
+
+    def test_authentication_required(self):
+        """ Clients MUST be authenticated. """
+        self.client.logout()
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_jwt_authentication(self):
+        """ Client can authenticate with JWT. """
+        self.client.logout()
+
+        data = self._get_data(self.user.username, self.course_id)
+        auth_header = 'JWT ' + self.generate_token({'username': self.user.username})
+
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
+        self.assert_ok_response(response)
+
+    @httpretty.activate
+    @override_settings(OAUTH2_PROVIDER_URL=OAUTH2_PROVIDER_URL)
+    def test_oauth_authentication(self):
+        """ Client can authenticate with OAuth. """
+        self.client.logout()
+
+        data = self._get_data(self.user.username, self.course_id)
+        auth_header = 'Bearer ' + self.DEFAULT_TOKEN
+        self._mock_access_token_response(username=self.user.username)
+
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
+        self.assert_ok_response(response)
+
+    def test_session_authentication(self):
+        """ Client can authenticate with a Django session. """
+        self.client.logout()
+        self.client.login(username=self.user.username, password=self.password)
+
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+
+    def test_authorization(self):
+        """ Client must be authenticated as the user matching the username field or a superuser. """
+
+        # A normal user CANNOT create refunds for other users.
+        self.client.login(username=self.user.username, password=self.password)
+        data = self._get_data('not-me', self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # A superuser can create refunds for everyone.
+        superuser = self.create_user(is_superuser=True)
+        self.client.login(username=superuser.username, password=self.password)
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+
+    def test_valid_order(self):
+        """
+        View should create a refund if an order/line are found eligible for refund.
+        """
+        order = self.create_order()
+        self.assertFalse(Refund.objects.exists())
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        refund = Refund.objects.latest()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(json.loads(response.content), [refund.id])
+        self.assert_refund_matches_order(refund, order)
+
+        # A second call should result in no additional refunds being created
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+
+    def test_refunded_line(self):
+        """
+        View should NOT create a refund if an order/line is found, and has an existing refund.
+        """
+        order = self.create_order()
+        Refund.objects.all().delete()
+        RefundLineFactory(order_line=order.lines.first())
+        self.assertEqual(Refund.objects.count(), 1)
+
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+        self.assertEqual(Refund.objects.count(), 1)
+
+    def test_non_course_order(self):
+        """ Refunds should NOT be created for orders with no line items related to courses. """
+        Refund.objects.all().delete()
+        factories.create_order(user=self.user)
+        self.assertEqual(Refund.objects.count(), 0)
+
+        data = self._get_data(self.user.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+
+        self.assert_ok_response(response)
+        self.assertEqual(Refund.objects.count(), 0)
