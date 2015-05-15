@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import json
 from django.conf import settings
 
@@ -6,7 +7,7 @@ from django.test import TestCase, override_settings, RequestFactory
 from oscar.test import factories
 from rest_framework.exceptions import AuthenticationFailed
 
-from ecommerce.extensions.api.authentication import BearerAuthentication
+from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAuthentication
 
 
 OAUTH2_PROVIDER_URL = 'https://example.com/oauth2'
@@ -101,3 +102,16 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
 
         request = self._create_request()
         self.assertEqual(self.auth.authenticate(request), (user, self.DEFAULT_TOKEN))
+
+
+class JwtAuthenticationTests(TestCase):
+    def test_authenticate_credentials_user_creation(self):
+        """ Test whether the user model is being assigned fields from the payload. """
+        full_name = 'Ｇｅｏｒｇｅ Ｃｏｓｔａｎｚａ'
+        email = 'gcostanza@gmail.com'
+        username = 'gcostanza'
+        payload = {'username': username, 'email': email, 'full_name': full_name}
+        user = JwtAuthentication().authenticate_credentials(payload)
+        self.assertEquals(user.username, username)
+        self.assertEquals(user.email, email)
+        self.assertEquals(user.full_name, full_name)
