@@ -40,6 +40,9 @@ class StatusMixin(object):
         self.status = new_status
         self.save()
 
+    def __str__(self):
+        return unicode(self.id)
+
 
 class Refund(StatusMixin, TimeStampedModel):
     """Main refund model, used to represent the state of a refund."""
@@ -51,6 +54,19 @@ class Refund(StatusMixin, TimeStampedModel):
 
     history = HistoricalRecords()
     pipeline_setting = 'OSCAR_REFUND_STATUS_PIPELINE'
+
+    @classmethod
+    def all_statuses(cls):
+        """ Returns all possible statuses for a refund. """
+        return list(getattr(settings, cls.pipeline_setting).keys())
+
+    @property
+    def num_items(self):
+        """ Returns the number of items in this refund. """
+        num_items = 0
+        for line in self.lines.all():
+            num_items += line.quantity
+        return num_items
 
 
 class RefundLine(StatusMixin, TimeStampedModel):
