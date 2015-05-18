@@ -1,9 +1,9 @@
 from django.test import TestCase, override_settings
+from oscar.core.loading import get_model
 
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
-
 
 OSCAR_REFUND_STATUS_PIPELINE = {
     REFUND.OPEN: (REFUND.DENIED, REFUND.ERROR, REFUND.COMPLETE),
@@ -20,6 +20,8 @@ OSCAR_REFUND_LINE_STATUS_PIPELINE = {
     REFUND_LINE.DENIED: (),
     REFUND_LINE.COMPLETE: ()
 }
+
+Refund = get_model('refund', 'Refund')
 
 
 class StatusTestsMixin(object):
@@ -66,6 +68,19 @@ class RefundTests(StatusTestsMixin, TestCase):
 
     def _get_instance(self, **kwargs):
         return RefundFactory(**kwargs)
+
+    def test_num_items(self):
+        """ The method should return the total number of items being refunded. """
+        refund_line = RefundLineFactory(quantity=1)
+        refund = refund_line.refund
+        self.assertEqual(refund.num_items, 1)
+
+        RefundLineFactory(quantity=3, refund=refund)
+        self.assertEqual(refund.num_items, 4)
+
+    def test_all_statuses(self):
+        """ Refund.all_statuses should return all possible statuses for a refund. """
+        self.assertEqual(Refund.all_statuses(), OSCAR_REFUND_STATUS_PIPELINE.keys())
 
 
 @override_settings(OSCAR_REFUND_LINE_STATUS_PIPELINE=OSCAR_REFUND_LINE_STATUS_PIPELINE)

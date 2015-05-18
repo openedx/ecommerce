@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from os.path import abspath, join, dirname
 
 from django.core.urlresolvers import reverse_lazy
+from django.utils.translation import ugettext_lazy as _
 from oscar.defaults import *
 from oscar import get_core_apps
 
@@ -25,6 +26,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.analytics',
     'ecommerce.extensions.catalogue',
     'ecommerce.extensions.checkout',
+    'ecommerce.extensions.dashboard',
     'ecommerce.extensions.order',
     'ecommerce.extensions.partner',
     'ecommerce.extensions.payment',
@@ -146,3 +148,80 @@ OSCAR_REFUND_LINE_STATUS_PIPELINE = {
     REFUND_LINE.COMPLETE: ()
 }
 # END REFUND PROCESSING
+
+# DASHBOARD NAVIGATION MENU
+OSCAR_DASHBOARD_NAVIGATION = [
+    {
+        'label': _('Dashboard'),
+        'icon': 'icon-th-list',
+        'url_name': 'dashboard:index',
+    },
+    {
+        'label': _('Catalogue'),
+        'icon': 'icon-sitemap',
+        'children': [
+            {
+                'label': _('Products'),
+                'url_name': 'dashboard:catalogue-product-list',
+            },
+            {
+                'label': _('Product Types'),
+                'url_name': 'dashboard:catalogue-class-list',
+            },
+            {
+                'label': _('Categories'),
+                'url_name': 'dashboard:catalogue-category-list',
+            },
+            {
+                'label': _('Ranges'),
+                'url_name': 'dashboard:range-list',
+            },
+            {
+                'label': _('Low stock alerts'),
+                'url_name': 'dashboard:stock-alert-list',
+            },
+        ]
+    },
+    {
+        'label': _('Fulfillment'),
+        'icon': 'icon-shopping-cart',
+        'children': [
+            {
+                'label': _('Orders'),
+                'url_name': 'dashboard:order-list',
+            },
+            {
+                'label': _('Statistics'),
+                'url_name': 'dashboard:order-stats',
+            },
+            {
+                'label': _('Partners'),
+                'url_name': 'dashboard:partner-list',
+            },
+            {
+                'label': _('Refunds'),
+                'url_name': 'dashboard:refunds:list',
+            },
+        ]
+    },
+    {
+        'label': _('Customers'),
+        'icon': 'icon-group',
+        'children': [
+            {
+                'label': _('Customers'),
+                'url_name': 'dashboard:users-index',
+            },
+            {
+                'label': _('Stock alert requests'),
+                'url_name': 'dashboard:user-alert-list',
+            },
+        ]
+    },
+    {
+        'label': _('Reports'),
+        'icon': 'icon-bar-chart',
+        'url_name': 'dashboard:reports-index',
+    },
+]
+# END DASHBOARD NAVIGATION MENU
