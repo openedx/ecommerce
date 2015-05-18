@@ -51,8 +51,9 @@ class JwtAuthentication(JSONWebTokenAuthentication):
             try:
                 user, __ = User.objects.get_or_create(username=username)
                 is_update = False
-                for attr in ('email', 'tracking_context'):
+                for attr in ('full_name', 'email', 'tracking_context'):
                     payload_value = payload.get(attr)
+
                     if getattr(user, attr) != payload_value and payload_value is not None:
                         setattr(user, attr, payload_value)
                         is_update = True
