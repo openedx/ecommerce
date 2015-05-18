@@ -46,11 +46,21 @@ class ThrottlingMixin(object):
         self.addCleanup(cache.clear)
 
 
-class BasketCreationMixin(object):
+class JwtMixin(object):
+    """ Mixin with JWT-related helper functions. """
+    JWT_SECRET_KEY = getattr(settings, 'JWT_AUTH')['JWT_SECRET_KEY']
+
+    def generate_token(self, payload, secret=None):
+        """Generate a JWT token with the provided payload."""
+        secret = secret or self.JWT_SECRET_KEY
+        token = jwt.encode(payload, secret)
+        return token
+
+
+class BasketCreationMixin(JwtMixin):
     """Provides utility methods for creating baskets in test cases."""
     PATH = reverse('api:v2:baskets:create')
     SHIPPING_EVENT_NAME = FulfillmentMixin.SHIPPING_EVENT_NAME
-    JWT_SECRET_KEY = getattr(settings, 'JWT_AUTH')['JWT_SECRET_KEY']
     FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
     USER_DATA = {
         'username': 'sgoodman',
@@ -78,12 +88,6 @@ class BasketCreationMixin(object):
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=D('0.00'),
         )
-
-    def generate_token(self, payload, secret=None):
-        """Generate a JWT token with the provided payload."""
-        secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(payload, secret)
-        return token
 
     def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
         """Issue a POST request to the basket creation endpoint."""
@@ -121,7 +125,7 @@ class BasketCreationMixin(object):
     ):
         """Verify that basket creation succeeded."""
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
-        ShippingEventType.objects.create(name=self.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.get_or_create(name=self.SHIPPING_EVENT_NAME)
 
         response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
 

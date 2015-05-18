@@ -1,5 +1,7 @@
 """Exceptions and error messages used by the ecommerce API."""
 from django.utils.translation import ugettext_lazy as _
+from rest_framework import status
+from rest_framework.exceptions import APIException
 
 
 PRODUCT_OBJECTS_MISSING_DEVELOPER_MESSAGE = u"No product objects could be found in the request body"
@@ -23,3 +25,7 @@ class ApiError(Exception):
 class ProductNotFoundError(ApiError):
     """Raised when the provided SKU does not correspond to a product in the catalog."""
     pass
+
+
+class BadRequestException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
