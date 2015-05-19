@@ -3,46 +3,99 @@ import ddt
 from django.test import TestCase
 from django.test.utils import override_settings
 from nose.tools import raises
+from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment import api, exceptions
+from ecommerce.extensions.fulfillment.api import get_fulfillment_modules, get_fulfillment_modules_for_line, \
+    revoke_fulfillment_for_refund
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
+from ecommerce.extensions.fulfillment.tests.modules import FakeFulfillmentModule
+from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
+from ecommerce.extensions.refund.tests.factories import RefundFactory
 
 
 @ddt.ddt
-class FulfillmentTest(FulfillmentTestMixin, TestCase):
-    """
-    Test course seat fulfillment.
-    """
+class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
+    """ Tests for the fulfillment.api module. """
 
     def setUp(self):
-        super(FulfillmentTest, self).setUp()
+        super(FulfillmentApiTests, self).setUp()
         self.order = self.generate_open_order()
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
-    def test_successful_fulfillment(self):
+    def test_fulfill_order_successful_fulfillment(self):
         """ Test a successful fulfillment of an order. """
         api.fulfill_order(self.order, self.order.lines)
         self.assert_order_fulfilled(self.order)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
     @raises(exceptions.IncorrectOrderStatusError)
-    def test_bad_fulfillment_state(self):
+    def test_fulfill_order_bad_fulfillment_state(self):
         """Test a basic fulfillment of a Course Seat."""
         # Set the order to Refunded, which cannot be fulfilled.
         self.order.set_status(ORDER.COMPLETE)
         api.fulfill_order(self.order, self.order.lines)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FulfillNothingModule', ])
-    def test_unknown_product_type(self):
+    def test_fulfill_order_unknown_product_type(self):
         """Test an incorrect Fulfillment Module."""
         api.fulfill_order(self.order, self.order.lines)
         self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
         self.assertEquals(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.NotARealModule', ])
-    def test_incorrect_module(self):
+    def test_fulfill_order_incorrect_module(self):
         """Test an incorrect Fulfillment Module."""
         api.fulfill_order(self.order, self.order.lines)
         self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
         self.assertEquals(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
+
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule',
+                                            'ecommerce.extensions.fulfillment.tests.modules.NotARealModule'])
+    def test_get_fulfillment_modules(self):
+        """
+        Verify the function retrieves the modules specified in settings.
+        An error should be logged for modules that cannot be logged.
+        """
+        logger_name = 'ecommerce.extensions.fulfillment.api'
+
+        with LogCapture(logger_name) as l:
+            actual = get_fulfillment_modules()
+
+            # Only FakeFulfillmentModule should be loaded since it is the only real class.
+            self.assertEqual(actual, [FakeFulfillmentModule])
+
+            # An error should be logged for NotARealModule since it cannot be loaded.
+            l.check((logger_name, 'ERROR',
+                     'Could not load module at [ecommerce.extensions.fulfillment.tests.modules.NotARealModule]'))
+
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule',
+                                            'ecommerce.extensions.fulfillment.tests.modules.FulfillNothingModule'])
+    def test_get_fulfillment_modules_for_line(self):
+        """
+        Verify the function returns an array of fulfillment modules that can fulfill a specific line.
+        """
+        line = self.order.lines.first()
+        actual = get_fulfillment_modules_for_line(line)
+        self.assertEqual(actual, [FakeFulfillmentModule])
+
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule'])
+    def test_revoke_fulfillment_for_refund(self):
+        """
+        Verify the function revokes fulfillment for all lines in a refund.
+        """
+        refund = RefundFactory(status=REFUND.PAYMENT_REFUNDED)
+        self.assertTrue(revoke_fulfillment_for_refund(refund))
+        self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
+        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
+
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.RevocationFailureModule'])
+    def test_revoke_fulfillment_for_refund_revocation_error(self):
+        """
+        Verify the function sets the status of RefundLines and the Refund to "Revocation Error" if revocation fails.
+        """
+        refund = RefundFactory(status=REFUND.PAYMENT_REFUNDED)
+        self.assertFalse(revoke_fulfillment_for_refund(refund))
+        self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
+        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.REVOCATION_ERROR})

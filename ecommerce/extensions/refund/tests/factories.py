@@ -25,6 +25,17 @@ class RefundFactory(factory.DjangoModelFactory):
     def order(self):
         return factories.create_order(user=self.user)
 
+    @factory.post_generation
+    def create_lines(self, create, extracted, **kwargs):    # pylint: disable=unused-argument
+        if not create:
+            return
+
+        for __ in range(2):
+            RefundLineFactory.create(refund=self)
+
+        self.total_credit_excl_tax = sum([line.line_credit_excl_tax for line in self.lines.all()])
+        self.save()
+
     class Meta(object):
         model = get_model('refund', 'Refund')
 

@@ -75,3 +75,15 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         return PaymentProcessorResponse.objects.create(processor_name=self.NAME, transaction_id=transaction_id,
                                                        response=response, basket=basket)
+
+    @abc.abstractmethod
+    def issue_credit(self, source, amount, currency):
+        """
+        Issue a credit for the specified transaction.
+
+        Arguments:
+            source (Source): Payment Source used for the original debit/purchase.
+            amount (Decimal): amount to be credited/refunded
+            currency (string): currency of the amount to be credited
+        """
+        raise NotImplementedError

@@ -10,14 +10,18 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.refund.status import REFUND
-from ecommerce.extensions.refund.tests.factories import RefundFactory
-
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
 Refund = get_model('refund', 'Refund')
 
+ALL_REFUND_STATUSES = (
+    REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR, REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR, REFUND.COMPLETE,
+    REFUND.DENIED
+)
+
 
 @ddt.ddt
-class RefundAcceptanceTestMixin(object):
+class RefundAcceptanceTestMixin(RefundTestMixin):
     @classmethod
     def setUpClass(cls):
         cls.selenium = WebDriver()
@@ -31,7 +35,8 @@ class RefundAcceptanceTestMixin(object):
     def setUp(self):
         super(RefundAcceptanceTestMixin, self).setUp()
 
-        self.refund = RefundFactory()
+        self.refund = self.create_refund()
+
         self.approve_button_selector = '[data-refund-id="{}"] [data-decision="approve"]'.format(self.refund.id)
         self.deny_button_selector = '[data-refund-id="{}"] [data-decision="deny"]'.format(self.refund.id)
 
@@ -125,7 +130,7 @@ class RefundAcceptanceTestMixin(object):
         # Verify that the refund's status is updated.
         selector = 'tr[data-refund-id="{}"] .refund-status'.format(refund_id)
         status = self.selenium.find_element_by_css_selector(selector)
-        self.assertEqual(REFUND.ERROR, status.text)
+        self.assertEqual('Error', status.text)
 
         # Verify that an alert is displayed.
         self.assert_alert_displayed(
@@ -134,7 +139,7 @@ class RefundAcceptanceTestMixin(object):
             'Please try again, or contact the E-Commerce Development Team.'.format(refund_id=refund_id)
         )
 
-    @ddt.data(REFUND.OPEN, REFUND.DENIED, REFUND.ERROR, REFUND.COMPLETE)
+    @ddt.data(*ALL_REFUND_STATUSES)
     def test_button_configurations(self, status):
         """
         Verify correct button configurations for different refund statuses.
@@ -165,6 +170,7 @@ class RefundAcceptanceTestMixin(object):
 
 class RefundListViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
     """Acceptance tests of the refund list view."""
+
     def setUp(self):
         super(RefundListViewTests, self).setUp()
         self.path = reverse('dashboard:refunds:list')
@@ -172,6 +178,7 @@ class RefundListViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
 
 class RefundDetailViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
     """Acceptance tests of the refund detail view."""
+
     def setUp(self):
         super(RefundDetailViewTests, self).setUp()
         self.path = reverse('dashboard:refunds:detail', args=[self.refund.id])

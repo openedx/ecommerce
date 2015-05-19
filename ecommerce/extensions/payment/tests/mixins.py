@@ -1,12 +1,15 @@
 import json
+import os
+from urlparse import urljoin
 
 from django.conf import settings
 import httpretty
+import mock
 from oscar.core.loading import get_model
+from suds.sudsobject import Factory
 
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
-
 
 Order = get_model('order', 'Order')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -112,6 +115,38 @@ class CybersourceMixin(object):
         notification[u'signature'] = self.generate_signature(secret_key, notification)
         return notification
 
+    def mock_cybersource_wsdl(self):
+        files = ('CyberSourceTransaction_1.115.wsdl', 'CyberSourceTransaction_1.115.xsd')
+
+        for filename in files:
+            path = os.path.join(os.path.dirname(__file__), filename)
+            body = open(path, 'r').read()
+            url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['soap_api_url'], filename)
+            httpretty.register_uri(httpretty.GET, url, body=body)
+
+    def get_soap_mock(self, amount=100, currency='GBP', transaction_id=None, basket_id=None, decision='ACCEPT'):
+        class CybersourceSoapMock(mock.MagicMock):
+            def runTransaction(self, **kwargs):     # pylint: disable=unused-argument
+                cc_reply_items = {
+                    'reasonCode': 100,
+                    'amount': unicode(amount),
+                    'requestDateTime': '2015-01-01T:00:00:00Z',
+                    'reconciliationID': 'efg456'
+                }
+                items = {
+                    'requestID': transaction_id,
+                    'decision': decision,
+                    'merchantReferenceCode': unicode(basket_id),
+                    'reasonCode': 100,
+                    'requestToken': 'abc123',
+                    'purchaseTotals': Factory.object('PurchaseTotals', {'currency': currency}),
+                    'ccCreditReply': Factory.object('CCCreditReply', cc_reply_items)
+                }
+
+                return Factory.object('reply', items)
+
+        return CybersourceSoapMock
+
 
 class PaypalMixin(object):
     """Mixin with helper methods for mocking PayPal API responses."""
@@ -180,7 +215,7 @@ class PaypalMixin(object):
             u'state': state,
             u'transactions': [{
                 u'amount': {
-                    u'currency': u'USD',
+                    u'currency': u'GBP',
                     u'details': {u'subtotal': total},
                     u'total': total
                 },
@@ -255,7 +290,7 @@ class PaypalMixin(object):
             u'state': state,
             u'transactions': [{
                 u'amount': {
-                    u'currency': u'USD',
+                    u'currency': u'GBP',
                     u'details': {u'subtotal': total},
                     u'total': total
                 },
@@ -274,7 +309,7 @@ class PaypalMixin(object):
                 u'related_resources': [{
                     u'sale': {
                         u'amount': {
-                            u'currency': u'USD',
+                            u'currency': u'GBP',
                             u'total': total
                         },
                         u'create_time': u'2015-05-04T15:55:27Z',
@@ -306,7 +341,7 @@ class PaypalMixin(object):
                         u'protection_eligibility_type': u'ITEM_NOT_RECEIVED_ELIGIBLE,UNAUTHORIZED_PAYMENT_ELIGIBLE',
                         u'state': u'completed',
                         u'transaction_fee': {
-                            u'currency': u'USD',
+                            u'currency': u'GBP',
                             u'value': u'0.50'
                         },
                         u'update_time': u'2015-05-04T15:58:47Z'

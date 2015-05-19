@@ -5,8 +5,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 from rest_framework import status
+from rest_framework.exceptions import ParseError
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView, UpdateAPIView
-from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions, IsAdminUser
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
@@ -20,10 +21,10 @@ from ecommerce.extensions.payment.helpers import (get_processor_class, get_defau
                                                   get_processor_class_by_name)
 from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
 
-
 logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
+Refund = get_model('refund', 'Refund')
 User = get_user_model()
 
 
@@ -413,7 +414,7 @@ class RefundCreateView(CreateAPIView):
             raise BadRequestException('No course_id specified.')
 
         # We should always have a username value as long as CanActForUser is in place.
-        if not username:    # pragma: no cover
+        if not username:  # pragma: no cover
             raise BadRequestException('No username specified.')
 
         try:
@@ -435,3 +436,39 @@ class RefundCreateView(CreateAPIView):
 
         # Return HTTP 200 if we did NOT create refunds.
         return Response([], status=status.HTTP_200_OK)
+
+
+class RefundProcessView(UpdateAPIView):
+    """
+    Process--approve or deny--refunds.
+
+    This view can be used to approve, or deny, a Refund. Under normal conditions, the view returns HTTP status 200
+    and a serialized Refund. In the event of an error, the view will still return a serialized Refund (to reflect any
+    changed statuses); however, HTTP status will be 500.
+
+    Only staff users are permitted to use this view.
+    """
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+    queryset = Refund.objects.all()
+    serializer_class = serializers.RefundSerializer
+
+    def update(self, request, *args, **kwargs):
+        APPROVE = 'approve'
+        DENY = 'deny'
+
+        action = request.data.get('action', '').lower()
+
+        if action not in (APPROVE, DENY):
+            raise ParseError('The action [{}] is not valid.'.format(action))
+
+        refund = self.get_object()
+        result = False
+
+        if action == APPROVE:
+            result = refund.approve()
+        elif action == DENY:
+            result = refund.deny()
+
+        http_status = status.HTTP_200_OK if result else status.HTTP_500_INTERNAL_SERVER_ERROR
+        serializer = self.get_serializer(refund)
+        return Response(serializer.data, status=http_status)

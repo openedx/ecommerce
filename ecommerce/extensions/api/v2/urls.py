@@ -3,7 +3,6 @@ from django.views.decorators.cache import cache_page
 
 from ecommerce.extensions.api.v2 import views
 
-
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
 
@@ -40,6 +39,7 @@ PAYMENT_URLS = patterns(
 REFUND_URLS = patterns(
     '',
     url(r'^$', views.RefundCreateView.as_view(), name='create'),
+    url(r'^(?P<pk>[\d]+)/process/$', views.RefundProcessView.as_view(), name='process'),
 )
 
 urlpatterns = patterns(

@@ -13,6 +13,9 @@ class DummyProcessor(BasePaymentProcessor):
     def is_signature_valid(self, response):
         pass
 
+    def issue_credit(self, transaction_id, amount, currency):
+        pass
+
 
 class AnotherDummyProcessor(DummyProcessor):
     NAME = 'another-dummy'

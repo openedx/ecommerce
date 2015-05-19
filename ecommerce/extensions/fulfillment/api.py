@@ -12,7 +12,7 @@ from django.utils import importlib
 
 from ecommerce.extensions.fulfillment import exceptions
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
-
+from ecommerce.extensions.refund.status import REFUND_LINE
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,6 @@ def fulfill_order(order, lines):
         error_msg = "Order has a current status of [{status}] which cannot be fulfilled.".format(status=order.status)
         logger.error(error_msg)
         raise exceptions.IncorrectOrderStatusError(error_msg)
-    modules = getattr(settings, 'FULFILLMENT_MODULES', {})
 
     # Construct a dict of lines by their product type.
     line_items = list(lines.all())
@@ -50,22 +49,21 @@ def fulfill_order(order, lines):
         # any of the lines in the order. Fulfill line items in the order they are designated by the configuration.
         # Remaining line items should be marked with a fulfillment error since we have no configuration that
         # allows them to be fulfilled.
-        for cls_path in modules:
-            try:
-                module_path, _, name = cls_path.rpartition('.')
-                module = getattr(importlib.import_module(module_path), name)
-                supported_lines = module().get_supported_lines(order, line_items)
-                line_items = list(set(line_items) - set(supported_lines))
-                module().fulfill_product(order, supported_lines)
-            except (ImportError, ValueError, AttributeError):
-                logger.exception("Could not load module at [%s]", cls_path)
+        for module_class in get_fulfillment_modules():
+            module = module_class()
+            supported_lines = module.get_supported_lines(line_items)
+            line_items = list(set(line_items) - set(supported_lines))
+            module.fulfill_product(order, supported_lines)
 
         # Check to see if any line items in the order have not been accounted for by a FulfillmentModule
         # Any product does not line up with a module, we have to mark a fulfillment error.
         for line in line_items:
-            product_type = line.product.product_class.name
-            logger.error("Product Type [%s] in order does not have an associated Fulfillment Module", product_type)
+            product_type = line.product.get_product_class().name
+            logger.error("Product Type [%s] does not have an associated Fulfillment Module. It cannot be fulfilled.",
+                         product_type)
             line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
+    except Exception:   # pylint: disable=broad-except
+        logger.exception('An error occurred while fulfilling order [%s].', order.number)
     finally:
         # Check if all lines are successful, or there were errors, and set the status of the Order.
         order_status = ORDER.COMPLETE
@@ -77,3 +75,54 @@ def fulfill_order(order, lines):
         order.set_status(order_status)
         logger.info("Finished fulfilling order [%s] with status [%s]", order.number, order.status)
         return order  # pylint: disable=lost-exception
+
+
+def get_fulfillment_modules():
+    """ Retrieves all fulfillment modules declared in settings. """
+    module_paths = getattr(settings, 'FULFILLMENT_MODULES', [])
+    modules = []
+
+    for cls_path in module_paths:
+        try:
+            module_path, _, name = cls_path.rpartition('.')
+            module = getattr(importlib.import_module(module_path), name)
+            modules.append(module)
+        except (ImportError, ValueError, AttributeError):
+            logger.exception("Could not load module at [%s]", cls_path)
+
+    return modules
+
+
+def get_fulfillment_modules_for_line(line):
+    """
+    Returns a list of fulfillment modules that can fulfill the given Line.
+
+    Arguments
+        line (Line): Line to be considered for fulfillment.
+    """
+    return [module for module in get_fulfillment_modules() if module().supports_line(line)]
+
+
+def revoke_fulfillment_for_refund(refund):
+    """
+    Revokes fulfillment for all lines in a refund.
+
+    Returns
+        Boolean: True, if revocation of all lines succeeded; otherwise, False.
+    """
+    succeeded = True
+
+    # TODO (CCB): As our list of product types and fulfillment modules grows, this may become slow,
+    # and should be updated. Runtime is O(n^2).
+    for refund_line in refund.lines.all():
+        order_line = refund_line.order_line
+        modules = get_fulfillment_modules_for_line(order_line)
+
+        for module in modules:
+            if module().revoke_line(order_line):
+                refund_line.set_status(REFUND_LINE.COMPLETE)
+            else:
+                succeeded = False
+                refund_line.set_status(REFUND_LINE.REVOCATION_ERROR)
+
+    return succeeded
