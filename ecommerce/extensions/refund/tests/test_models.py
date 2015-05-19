@@ -1,3 +1,4 @@
+import ddt
 from django.test import TestCase, override_settings
 from oscar.core.loading import get_model
 
@@ -62,7 +63,8 @@ class StatusTestsMixin(object):
                 self.assertEqual(instance.status, new_status, 'Refund status was not updated!')
 
 
-@override_settings(OSCAR_REFUND_STATUS_PIPELINE=OSCAR_REFUND_STATUS_PIPELINE)
+@ddt.ddt
+@override_settings(OSCAR_REFUND_STATUS_PIPELINE=OSCAR_REFUND_STATUS_PIPELINE, OSCAR_INITIAL_REFUND_STATUS=REFUND.OPEN)
 class RefundTests(StatusTestsMixin, TestCase):
     pipeline = OSCAR_REFUND_STATUS_PIPELINE
 
@@ -81,6 +83,30 @@ class RefundTests(StatusTestsMixin, TestCase):
     def test_all_statuses(self):
         """ Refund.all_statuses should return all possible statuses for a refund. """
         self.assertEqual(Refund.all_statuses(), OSCAR_REFUND_STATUS_PIPELINE.keys())
+
+    @ddt.unpack
+    @ddt.data(
+        (REFUND.OPEN, True),
+        (REFUND.ERROR, True),
+        (REFUND.DENIED, False),
+        (REFUND.COMPLETE, False),
+    )
+    def test_can_approve(self, status, expected):
+        """ The method should return True if the Refund can be approved; otherwise, False. """
+        refund = self._get_instance(status=status)
+        self.assertEqual(refund.can_approve, expected)
+
+    @ddt.unpack
+    @ddt.data(
+        (REFUND.OPEN, True),
+        (REFUND.ERROR, False),
+        (REFUND.DENIED, False),
+        (REFUND.COMPLETE, False),
+    )
+    def test_can_deny(self, status, expected):
+        """ The method should return True if the Refund can be denied; otherwise, False. """
+        refund = self._get_instance(status=status)
+        self.assertEqual(refund.can_deny, expected)
 
 
 @override_settings(OSCAR_REFUND_LINE_STATUS_PIPELINE=OSCAR_REFUND_LINE_STATUS_PIPELINE)
