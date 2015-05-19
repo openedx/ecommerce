@@ -6,6 +6,7 @@ from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
 
 from ecommerce.extensions.refund.exceptions import InvalidStatus
+from ecommerce.extensions.refund.status import REFUND
 
 
 class StatusMixin(object):
@@ -67,6 +68,20 @@ class Refund(StatusMixin, TimeStampedModel):
         for line in self.lines.all():
             num_items += line.quantity
         return num_items
+
+    @property
+    def can_approve(self):
+        """
+        Returns a boolean indicating if this Refund can be approved.
+        """
+        return self.status not in (REFUND.COMPLETE, REFUND.DENIED)
+
+    @property
+    def can_deny(self):
+        """
+        Returns a boolean indicating if this Refund can be denied.
+        """
+        return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
 
 class RefundLine(StatusMixin, TimeStampedModel):
