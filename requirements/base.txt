@@ -17,4 +17,3 @@ paypalrestsdk==1.9.0
 pycountry==1.10
 requests==2.6.0
 
-git+https://github.com/edx/ecommerce-api-client.git@0.4.0#egg=ecommerce-api-client==0.4.0
