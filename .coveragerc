@@ -1,36 +1,10 @@
 [run]
 data_file = .coverage
 omit = ecommerce/settings*
-    # Custom code in the user app is covered, but something about the way Django 1.7
-    # loads models causes the rest of the app to appear uncovered. The result is
-    # skewed coverage stats, which is why the app is omitted from coverage reports.
-    ecommerce/user*
-
-    # Custom code in the order models app is covered, but the same issue described
-    # above causes all other code in the model to appear uncovered, resulting in
-    # skewed coverage stats.
-    ecommerce/extensions/order/models*
-    ecommerce/extensions/payment/constants*
-    ecommerce/extensions/payment/models*
-
-    ecommerce/extensions/refund/exceptions*
-    ecommerce/extensions/refund/models*
-    ecommerce/extensions/refund/status*
-
-    # The fulfillment app's status module only contains constants, which don't require
-    # test coverage.
-    ecommerce/extensions/fulfillment/status.py
-
-    # These files are loaded before coverage, thus they are falsely marked as not covered.
-    ecommerce/extensions/checkout/apps.py
-    ecommerce/extensions/checkout/signals.py
-    ecommerce/extensions/fulfillment/apps.py
-    ecommerce/extensions/fulfillment/signals.py
-
+    ecommerce/conf*
     *wsgi.py
     *migrations*
     *admin.py
     *test*
     *static*
-    *conf*
     *templates*
