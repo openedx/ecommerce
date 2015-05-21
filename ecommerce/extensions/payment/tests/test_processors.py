@@ -17,12 +17,13 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 import paypalrestsdk
 
-from ecommerce.extensions.payment import processors
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
+from ecommerce.extensions.payment.processors import cybersource
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
-
 
 PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
@@ -83,14 +84,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     PI_DAY = datetime.datetime(2015, 3, 14, 9, 26, 53)
     UUID = u'UUID'
 
-    processor_class = processors.Cybersource
+    processor_class = cybersource.Cybersource
     processor_name = 'cybersource'
 
     def test_get_transaction_parameters(self):
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
 
         # Patch the datetime object so that we can validate the signed_date_time field
-        with mock.patch.object(processors.datetime, u'datetime', mock.Mock(wraps=datetime.datetime)) as mocked_datetime:
+        with mock.patch.object(cybersource.datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as mocked_datetime:
             mocked_datetime.utcnow.return_value = self.PI_DAY
             actual = self.processor.get_transaction_parameters(self.basket)
 
@@ -206,7 +207,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         The single-seat helper for cybersource reporting should correctly
         and return the first 'seat' product encountered in a basket.
         """
-        get_single_seat = processors.Cybersource.get_single_seat
+        get_single_seat = Cybersource.get_single_seat
 
         # finds the seat when it's the only product in the basket.
         self.assertEqual(get_single_seat(self.basket), self.product)
@@ -241,7 +242,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
     """Tests for the PayPal payment processor."""
     ERROR = {u'debug_id': u'foo'}
 
-    processor_class = processors.Paypal
+    processor_class = Paypal
     processor_name = u'paypal'
 
     def setUp(self):
@@ -288,7 +289,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
 
     @httpretty.activate
-    @mock.patch.object(processors.Paypal, '_get_error', mock.Mock(return_value=ERROR))
+    @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_creation_state(self):
         """Verify that failure to create a payment results in a GatewayError."""
         self.mock_oauth2_response()
@@ -328,7 +329,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
     @httpretty.activate
-    @mock.patch.object(processors.Paypal, '_get_error', mock.Mock(return_value=ERROR))
+    @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_execution_state(self):
         """Verify that failure to execute a payment results in a GatewayError."""
         self.mock_oauth2_response()
