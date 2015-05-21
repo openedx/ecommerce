@@ -3,15 +3,13 @@ from django.test import TestCase
 
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory
-
 from ecommerce.tests.mixins import UserMixin
 
 
-class RefundListViewTests(UserMixin, TestCase):
-    path = reverse('dashboard:refunds:list')
+class RefundViewTestMixin(UserMixin):
 
     def setUp(self):
-        super(RefundListViewTests, self).setUp()
+        super(RefundViewTestMixin, self).setUp()
         self.user = self.create_user(is_superuser=True, is_staff=True)
 
     def assert_successful_response(self, response, refunds=None):
@@ -40,6 +38,14 @@ class RefundListViewTests(UserMixin, TestCase):
         self.client.login(username=superuser.username, password=self.password)
         response = self.client.get(self.path)
         self.assert_successful_response(response)
+
+
+class RefundListViewTests(RefundViewTestMixin, TestCase):
+    path = reverse('dashboard:refunds:list')
+
+    def setUp(self):
+        super(RefundListViewTests, self).setUp()
+        self.user = self.create_user(is_superuser=True, is_staff=True)
 
     def test_filtering(self):
         """ The view should allow filtering by ID and status. """
@@ -71,3 +77,13 @@ class RefundListViewTests(UserMixin, TestCase):
 
         response = self.client.get('{path}?sort=id&dir=desc'.format(path=self.path))
         self.assert_successful_response(response, list(reversed(refunds)))
+
+
+class RefundDetailViewTests(RefundViewTestMixin, TestCase):
+
+    def setUp(self):
+        super(RefundDetailViewTests, self).setUp()
+        self.user = self.create_user(is_superuser=True, is_staff=True)
+
+        refund = RefundFactory()
+        self.path = reverse('dashboard:refunds:detail', args=[refund.id])
