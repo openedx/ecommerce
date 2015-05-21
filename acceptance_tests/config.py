@@ -11,7 +11,6 @@ ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', 'edx')
 # Application configuration
 APP_SERVER_URL = os.environ.get('APP_SERVER_URL', 'http://localhost:8002').strip('/')
 ECOMMERCE_API_SERVER_URL = os.environ.get('ECOMMERCE_API_SERVER_URL', APP_SERVER_URL + '/api/v2').strip('/')
-ECOMMERCE_API_SIGNING_KEY = os.environ.get('ECOMMERCE_API_SIGNING_KEY', 'edx')
 ECOMMERCE_API_TOKEN = os.environ.get('ECOMMERCE_API_AUTH_TOKEN', ACCESS_TOKEN)
 
 # Amount of time allotted for processing an order. This value is used to match newly-placed orders in testing, and
