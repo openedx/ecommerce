@@ -13,9 +13,9 @@ from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment import processors
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
-
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.payment.processors.paypal import Paypal
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 class CybersourceNotifyView(EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
-    payment_processor = processors.Cybersource()
+    payment_processor = Cybersource()
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -125,7 +125,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
 
 class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     """Execute an approved PayPal payment and place an order for paid products as appropriate."""
-    payment_processor = processors.Paypal()
+    payment_processor = Paypal()
 
     def _get_basket(self, payment_id):
         """Retrieve a basket using a payment ID."""

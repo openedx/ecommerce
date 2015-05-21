@@ -14,7 +14,8 @@ from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.payment.processors import Cybersource, Paypal
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
 

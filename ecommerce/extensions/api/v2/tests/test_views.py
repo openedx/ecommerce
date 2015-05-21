@@ -26,7 +26,7 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin,
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.payment import exceptions as payment_exceptions
-from ecommerce.extensions.payment.processors import Cybersource
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory
 from ecommerce.extensions.refund.tests.test_api import RefundTestMixin
