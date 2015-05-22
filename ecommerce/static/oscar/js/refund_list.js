@@ -20,7 +20,7 @@ $(document).ready(function () {
         }).success(function (data) {
             $('tr[data-refund-id=' + refund_id + '] .refund-status').text(data.status);
             addMessage('alert-success', 'icon-check-sign', 'Refund #' + refund_id + ' has been processed.');
-            $actions.remove();
+            $('tr[data-refund-id=' + refund_id + '] [data-action=process-refund]').remove();
         }).fail(function (jqXHR, textStatus, errorThrown) {
             // NOTE (RFL): For an MVP, changing the displayed refund state on any error may be viable.
             // Ideally, the displayed refund state would only change if the refund were to enter an
