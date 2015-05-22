@@ -35,8 +35,9 @@ clean:
 	coverage erase
 
 test_python: clean
-	DISABLE_MIGRATIONS=True python manage.py test ecommerce --settings=ecommerce.settings.test --with-coverage \
-	--cover-package=ecommerce --with-ignore-docstrings
+	DISABLE_MIGRATIONS=True coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+	--settings=ecommerce.settings.test --with-ignore-docstrings
+	coverage report
 
 quality:
 	pep8 --config=.pep8 ecommerce acceptance_tests
