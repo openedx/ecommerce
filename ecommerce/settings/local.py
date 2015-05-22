@@ -94,7 +94,7 @@ JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-secret-key'
 
 # ORDER PROCESSING
 ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
-ENROLLMENT_FULFILLMENT_TIMEOUT = 15     # devstack is slow!
+ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 
 EDX_API_KEY = 'replace-me'
 # END ORDER PROCESSING
@@ -103,10 +103,13 @@ EDX_API_KEY = 'replace-me'
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
     'cybersource': {
+        'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
+        'merchant_id': 'fake-merchant-id',
+        'transaction_key': 'fake-transaction-key',
         'profile_id': 'fake-profile-id',
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',
-        'payment_page_url': 'https://replace-me/',
+        'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
         'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
         'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
     },

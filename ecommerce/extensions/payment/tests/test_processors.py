@@ -16,20 +16,26 @@ from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, Ga
 from oscar.core.loading import get_model
 from oscar.test import factories
 import paypalrestsdk
+from paypalrestsdk import Payment, Sale
+from paypalrestsdk.resource import Resource
 
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.payment import processors
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
-from ecommerce.extensions.payment.processors import cybersource
-from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.payment.processors.cybersource import Cybersource, suds_response_to_dict
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
+PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
+Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
+class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, PaymentEventsMixin):
     """ Mixin for payment processor tests. """
 
     # Subclasses should set this value. It will be used to instantiate the processor in setUp.
@@ -44,16 +50,8 @@ class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
 
-        # certain logic and tests expect to find products with class 'seat' in
-        # baskets, so that's done explicitly in this setup.
-        self.product_class = factories.ProductClassFactory(slug='seat', requires_shipping=False, track_stock=False)
-        factories.ProductAttributeFactory(code='course_key', product_class=self.product_class, type="text")
-        factories.ProductAttributeFactory(code='certificate_type', product_class=self.product_class, type="text")
-
-        self.product = factories.ProductFactory(product_class=self.product_class, stockrecords__price_currency='USD')
-        self.product.attr.course_key = self.COURSE_KEY
-        self.product.attr.certificate_type = self.CERTIFICATE_TYPE
-        self.product.save()
+        products = self.create_course_seats(self.COURSE_KEY, [self.CERTIFICATE_TYPE])
+        self.product = products[self.CERTIFICATE_TYPE]
 
         self.processor = self.processor_class()  # pylint: disable=not-callable
         self.basket = factories.create_basket(empty=True)
@@ -77,6 +75,14 @@ class PaymentProcessorTestCaseMixin(PaymentEventsMixin):
         """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
         raise NotImplementedError
 
+    def test_issue_credit(self):
+        """ Verify the payment processor responds appropriately to requests to issue credit. """
+        raise NotImplementedError
+
+    def test_issue_credit_error(self):
+        """ Verify the payment processor responds appropriately if the payment gateway cannot issue a credit. """
+        raise NotImplementedError
+
 
 @ddt.ddt
 class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase):
@@ -84,14 +90,15 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     PI_DAY = datetime.datetime(2015, 3, 14, 9, 26, 53)
     UUID = u'UUID'
 
-    processor_class = cybersource.Cybersource
+    processor_class = Cybersource
     processor_name = 'cybersource'
 
     def test_get_transaction_parameters(self):
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
 
         # Patch the datetime object so that we can validate the signed_date_time field
-        with mock.patch.object(cybersource.datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as mocked_datetime:
+        with mock.patch.object(processors.cybersource.datetime, u'datetime',
+                               mock.Mock(wraps=datetime.datetime)) as mocked_datetime:
             mocked_datetime.utcnow.return_value = self.PI_DAY
             actual = self.processor.get_transaction_parameters(self.basket)
 
@@ -214,14 +221,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # finds the first seat added, when there's more than one.
         basket = factories.create_basket(empty=True)
-        other_seat = factories.ProductFactory(product_class=self.product_class, stockrecords__price_currency='USD')
+        other_seat = factories.ProductFactory(product_class=self.seat_product_class)
         basket.add_product(self.product)
         basket.add_product(other_seat)
         self.assertEqual(get_single_seat(basket), self.product)
 
         # finds the seat when there's a mixture of product classes.
         basket = factories.create_basket(empty=True)
-        other_product = factories.ProductFactory(stockrecords__price_currency='USD')
+        other_product = factories.ProductFactory()
         basket.add_product(other_product)
         basket.add_product(self.product)
         self.assertEqual(get_single_seat(basket), self.product)
@@ -235,6 +242,66 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         # returns None for an empty basket.
         basket = factories.create_basket(empty=True)
         self.assertIsNone(get_single_seat(basket))
+
+    @httpretty.activate
+    def test_issue_credit(self):
+        transaction_id = 'request-1234'
+        refund = self.create_refund(self.processor_name)
+        order = refund.order
+        basket = order.basket
+        amount = refund.total_credit_excl_tax
+        currency = refund.currency
+        source = order.sources.first()
+
+        self.mock_cybersource_wsdl()
+
+        self.assertEqual(source.amount_refunded, 0)
+        self.assertFalse(order.payment_events.exists())
+
+        cs_soap_mock = self.get_soap_mock(amount=amount, currency=currency, transaction_id=transaction_id,
+                                          basket_id=basket.id)
+        with mock.patch('suds.client.ServiceSelector', cs_soap_mock):
+            self.processor.issue_credit(source, amount, currency)
+
+        # Verify PaymentProcessorResponse created
+        self.assert_processor_response_recorded(self.processor.NAME, transaction_id,
+                                                suds_response_to_dict(cs_soap_mock().runTransaction()),
+                                                basket)
+
+        # Verify Source updated
+        self.assertEqual(source.amount_refunded, amount)
+
+        # Verify PaymentEvent created
+        paid_type = PaymentEventType.objects.get(code=u'refunded')
+        payment_event = order.payment_events.first()
+        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, transaction_id)
+
+    @httpretty.activate
+    def test_issue_credit_error(self):
+        transaction_id = 'request-1234'
+        refund = self.create_refund(self.processor_name)
+        order = refund.order
+        basket = order.basket
+        amount = refund.total_credit_excl_tax
+        currency = refund.currency
+        source = order.sources.first()
+
+        self.mock_cybersource_wsdl()
+
+        # Test for communication failure.
+        with mock.patch('suds.client.ServiceSelector', mock.Mock(side_effect=Exception)):
+            self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+            self.assertEqual(source.amount_refunded, 0)
+
+        # Test for declined transaction
+        cs_soap_mock = self.get_soap_mock(amount=amount, currency=currency, transaction_id=transaction_id,
+                                          basket_id=basket.id, decision='DECLINE')
+        with mock.patch('suds.client.ServiceSelector', cs_soap_mock):
+            self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+            self.assert_processor_response_recorded(self.processor.NAME, transaction_id,
+                                                    suds_response_to_dict(cs_soap_mock().runTransaction()),
+                                                    basket)
+            self.assertEqual(source.amount_refunded, 0)
 
 
 @ddt.ddt
@@ -344,3 +411,64 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                 self.ERROR,
                 basket=self.basket
             )
+
+    def test_issue_credit(self):
+        refund = self.create_refund(self.processor_name)
+        order = refund.order
+        basket = order.basket
+        amount = refund.total_credit_excl_tax
+        currency = refund.currency
+        source = order.sources.first()
+
+        transaction_id = 'PAY-REFUND-1'
+        paypal_refund = paypalrestsdk.Refund({'id': transaction_id})
+
+        payment = Payment(
+            {'transactions': [Resource({'related_resources': [Resource({'sale': Sale({'id': 'PAY-SALE-1'})})]})]})
+        with mock.patch.object(Payment, 'find', return_value=payment):
+            with mock.patch.object(Sale, 'refund', return_value=paypal_refund):
+                self.processor.issue_credit(source, amount, currency)
+
+        # Verify PaymentProcessorResponse created
+        self.assert_processor_response_recorded(self.processor.NAME, transaction_id, {'id': transaction_id}, basket)
+
+        # Verify Source updated
+        self.assertEqual(source.amount_refunded, amount)
+
+        # Verify PaymentEvent created
+        paid_type = PaymentEventType.objects.get(code=u'refunded')
+        order = basket.order_set.first()
+        payment_event = order.payment_events.first()
+        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, transaction_id)
+
+    def test_issue_credit_error(self):
+        refund = self.create_refund(self.processor_name)
+        order = refund.order
+        basket = order.basket
+        amount = refund.total_credit_excl_tax
+        currency = refund.currency
+        source = order.sources.first()
+
+        transaction_id = 'PAY-REFUND-FAIL-1'
+        expected_response = {'debug_id': transaction_id}
+        paypal_refund = paypalrestsdk.Refund({'error': expected_response})
+
+        payment = Payment(
+            {'transactions': [Resource({'related_resources': [Resource({'sale': Sale({'id': 'PAY-SALE-1'})})]})]})
+
+        # Test general exception
+        with mock.patch.object(Payment, 'find', return_value=payment):
+            with mock.patch.object(Sale, 'refund', side_effect=ValueError):
+                self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+                self.assertEqual(source.amount_refunded, 0)
+
+        # Test error response
+        with mock.patch.object(Payment, 'find', return_value=payment):
+            with mock.patch.object(Sale, 'refund', return_value=paypal_refund):
+                self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+
+        # Verify PaymentProcessorResponse created
+        self.assert_processor_response_recorded(self.processor.NAME, transaction_id, expected_response, basket)
+
+        # Verify Source unchanged
+        self.assertEqual(source.amount_refunded, 0)

@@ -19,7 +19,6 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
 
-
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -220,9 +219,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         Verify that a user who has approved payment is redirected to the configured receipt page when payment
         execution fails.
         """
-        with mock.patch.object(
-            PaypalPaymentExecutionView, 'handle_payment', side_effect=PaymentError
-        ) as fake_handle_payment:
+        with mock.patch.object(PaypalPaymentExecutionView, 'handle_payment',
+                               side_effect=PaymentError) as fake_handle_payment:
             self._assert_execution_redirect()
             self.assertTrue(fake_handle_payment.called)
 
@@ -231,8 +229,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         Verify that a user who has approved payment is redirected to the configured receipt page when the payment
         is executed but an order cannot be placed.
         """
-        with mock.patch.object(
-            PaypalPaymentExecutionView, 'handle_order_placement', side_effect=UnableToPlaceOrder
-        ) as fake_handle_order_placement:
+        with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
+                               side_effect=UnableToPlaceOrder) as fake_handle_order_placement:
             self._assert_execution_redirect()
             self.assertTrue(fake_handle_order_placement.called)

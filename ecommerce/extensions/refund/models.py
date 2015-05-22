@@ -1,12 +1,22 @@
+import logging
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
+from oscar.apps.payment.exceptions import PaymentError
+from oscar.core.loading import get_class
 from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
 
+from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
+from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.refund.exceptions import InvalidStatus
-from ecommerce.extensions.refund.status import REFUND
+from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
+
+logger = logging.getLogger(__name__)
+
+post_refund = get_class('refund.signals', 'post_refund')
 
 
 class StatusMixin(object):
@@ -83,6 +93,63 @@ class Refund(StatusMixin, TimeStampedModel):
         """
         return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
+    def _issue_credit(self):
+        """ Issue a credit to the purchaser via the payment processor used for the original order. """
+
+        # TODO Update this if we ever support multiple payment sources for a single order.
+        source = self.order.sources.first()
+        processor = get_processor_class_by_name(source.source_type.name)()
+        processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+
+    def _revoke_lines(self):
+        """ Revoke fulfillment for the lines in this Refund. """
+        if revoke_fulfillment_for_refund(self):
+            self.set_status(REFUND.COMPLETE)
+            logger.info('Successfully revoked fulfillment for Refund [%d]', self.id)
+        else:
+            logger.error('Unable to revoke fulfillment of all lines of Refund [%d].', self.id)
+            self.set_status(REFUND.REVOCATION_ERROR)
+
+    def approve(self):
+        if not self.can_approve:
+            logger.debug('Refund [%d] cannot be approved.', self.id)
+            return False
+        elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
+            try:
+                self._issue_credit()
+                logger.info('Successfully issued credit for Refund [%d]', self.id)
+                self.set_status(REFUND.PAYMENT_REFUNDED)
+            except PaymentError:
+                logger.exception('Failed to issue credit for refund [%d].', self.id)
+                self.set_status(REFUND.PAYMENT_REFUND_ERROR)
+                return False
+
+        if self.status in (REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR):
+            self._revoke_lines()
+
+        if self.status == REFUND.COMPLETE:
+            post_refund.send(sender=self.__class__, refund=self)
+            return True
+
+        return False
+
+    def deny(self):
+        if not self.can_deny:
+            logger.debug('Refund [%d] cannot be denied.', self.id)
+            return False
+
+        self.set_status(REFUND.DENIED)
+
+        result = True
+        for line in self.lines.all():
+            try:
+                line.deny()
+            except Exception:  # pylint: disable=broad-except
+                logger.exception('Failed to deny RefundLine [%d].', line.id)
+                result = False
+
+        return result
+
 
 class RefundLine(StatusMixin, TimeStampedModel):
     """A refund line, used to represent the state of a single item as part of a larger Refund."""
@@ -94,3 +161,7 @@ class RefundLine(StatusMixin, TimeStampedModel):
 
     history = HistoricalRecords()
     pipeline_setting = 'OSCAR_REFUND_LINE_STATUS_PIPELINE'
+
+    def deny(self):
+        self.set_status(REFUND_LINE.DENIED)
+        return True

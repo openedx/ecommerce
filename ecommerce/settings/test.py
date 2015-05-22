@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import os
 
 from ecommerce.settings.base import *
+from ecommerce.settings.logger import get_logger_config
 
 
 # TEST SETTINGS
@@ -11,6 +12,8 @@ INSTALLED_APPS += (
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
 
 
 class DisableMigrations(object):
@@ -85,6 +88,9 @@ EDX_API_KEY = 'replace-me'
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
     'cybersource': {
+        'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
+        'merchant_id': 'fake-merchant-id',
+        'transaction_key': 'fake-transaction-key',
         'profile_id': 'fake-profile-id',
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',

@@ -21,14 +21,14 @@ from rest_framework.throttling import UserRateThrottle
 
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.api.serializers import OrderSerializer, RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
-from ecommerce.extensions.refund.tests.factories import RefundLineFactory
+from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
 from ecommerce.extensions.refund.tests.test_api import RefundTestMixin
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMixin, JwtMixin
 
@@ -373,7 +373,7 @@ class OrderFulfillViewTests(UserMixin, TestCase):
         return self.client.put(self.url)
 
     @ddt.data('delete', 'get', 'post')
-    def test_post_required(self, method):
+    def test_put_or_patch_required(self, method):
         """ Verify that the view only responds to PUT and PATCH operations. """
         response = getattr(self.client, method)(self.url)
         self.assertEqual(405, response.status_code)
@@ -624,3 +624,46 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, UserMix
 
         self.assert_ok_response(response)
         self.assertEqual(Refund.objects.count(), 0)
+
+
+@ddt.ddt
+class RefundProcessViewTests(UserMixin, TestCase):
+    def setUp(self):
+        super(RefundProcessViewTests, self).setUp()
+
+        self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+        self.refund = RefundFactory(user=self.user)
+
+    def put(self, action):
+        data = '{{"action": "{}"}}'.format(action)
+        path = reverse('api:v2:refunds:process', kwargs={'pk': self.refund.id})
+        return self.client.put(path, data, JSON_CONTENT_TYPE)
+
+    def test_staff_only(self):
+        """ The view should only be accessible to staff users. """
+        user = self.create_user(is_staff=False)
+        self.client.login(username=user.username, password=self.password)
+        response = self.put('approve')
+        self.assertEqual(response.status_code, 403)
+
+    def test_invalid_action(self):
+        """ If the action is neither approve nor deny, the view should return HTTP 400. """
+        response = self.put('reject')
+        self.assertEqual(response.status_code, 400)
+
+    @ddt.data('approve', 'deny')
+    def test_success(self, action):
+        """ If the action succeeds, the view should return HTTP 200 and the serialized Refund. """
+        with mock.patch('ecommerce.extensions.refund.models.Refund.{}'.format(action), mock.Mock(return_value=True)):
+            response = self.put(action)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.data, RefundSerializer(self.refund).data)
+
+    @ddt.data('approve', 'deny')
+    def test_failure(self, action):
+        """ If the action fails, the view should return HTTP 500 and the serialized Refund. """
+        with mock.patch('ecommerce.extensions.refund.models.Refund.{}'.format(action), mock.Mock(return_value=False)):
+            response = self.put(action)
+            self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.data, RefundSerializer(self.refund).data)

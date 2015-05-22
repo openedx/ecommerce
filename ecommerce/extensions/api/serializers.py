@@ -1,7 +1,6 @@
 """Serializers for order and line item data."""
 # pylint: disable=abstract-method
 from oscar.core.loading import get_model
-
 from rest_framework import serializers
 
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
@@ -11,6 +10,7 @@ Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+Refund = get_model('refund', 'Refund')
 
 
 class BillingAddressSerializer(serializers.ModelSerializer):
@@ -74,3 +74,10 @@ class PaymentProcessorSerializer(serializers.Serializer):
     def to_representation(self, instance):
         """ Serialize instances as a string instead of a mapping object. """
         return instance.NAME
+
+
+class RefundSerializer(serializers.ModelSerializer):
+    """ Serializer for Refund objects. """
+
+    class Meta(object):
+        model = Refund

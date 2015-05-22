@@ -1,3 +1,5 @@
+""" PayPal payment processing. """
+
 from decimal import Decimal
 import logging
 from urlparse import urljoin
@@ -16,6 +18,7 @@ logger = logging.getLogger(__name__)
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+ProductClass = get_model('catalogue', 'ProductClass')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
@@ -26,6 +29,7 @@ class Paypal(BasePaymentProcessor):
 
     For reference, see https://developer.paypal.com/docs/api/.
     """
+
     NAME = u'paypal'
 
     def __init__(self):
@@ -164,7 +168,7 @@ class Paypal(BasePaymentProcessor):
 
             raise GatewayError
 
-        entry = self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
+        self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
         logger.info(u"Successfully executed PayPal payment [%s] for basket [%d].", payment.id, basket.id)
 
         # Get or create Source used to track transactions related to PayPal
@@ -198,3 +202,62 @@ class Paypal(BasePaymentProcessor):
         attribute in this module.
         """
         return payment.error  # pragma: no cover
+
+    def _get_payment_sale(self, payment):
+        """
+        Returns the Sale related to a given Payment.
+
+        Note (CCB): We mostly expect to have a single sale and transaction per payment. If we
+        ever move to a split payment scenario, this will need to be updated.
+        """
+        for transaction in payment.transactions:
+            for related_resource in transaction.related_resources:
+                try:
+                    return related_resource.sale
+                except Exception:   # pylint: disable=broad-except
+                    continue
+
+        return None
+
+    def issue_credit(self, source, amount, currency):
+        order = source.order
+
+        try:
+            payment = paypalrestsdk.Payment.find(source.reference)
+            sale = self._get_payment_sale(payment)
+
+            if not sale:
+                logger.error('Unable to find a Sale associated with PayPal Payment [%s].', payment.id)
+
+            refund = sale.refund({
+                'amount': {
+                    'total': unicode(amount),
+                    'currency': currency,
+                }
+            })
+
+        except:
+            msg = 'An error occurred while attempting to issue a credit (via PayPal) for order [{}].'.format(
+                order.number)
+            logger.exception(msg)
+            raise GatewayError(msg)
+
+        basket = order.basket
+        if refund.success():
+            transaction_id = refund.id
+
+            self.record_processor_response(refund.to_dict(), transaction_id=transaction_id, basket=basket)
+
+            source.refund(amount, reference=transaction_id)
+
+            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
+            PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=transaction_id,
+                                        processor_name=self.NAME)
+        else:
+            error = refund.error
+            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
+
+            msg = "Failed to refund PayPal payment [{sale_id}]. " \
+                  "PayPal's response was recorded in entry [{response_id}].".format(sale_id=sale.id,
+                                                                                    response_id=entry.id)
+            raise GatewayError(msg)
