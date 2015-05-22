@@ -399,3 +399,12 @@ REST_FRAMEWORK = {
 
 # Resolving deprecation warning
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# COOKIE CONFIGURATION
+# The purpose of customizing the cookie names is to avoid conflicts when
+# multiple Django services are running behind the same hostname.
+# Detailed information at: https://docs.djangoproject.com/en/dev/ref/settings/
+SESSION_COOKIE_NAME = 'ecommerce_sessionid'
+CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
+LANGUAGE_COOKIE_NAME = 'ecommerce_language'
+# END COOKIE CONFIGURATION
