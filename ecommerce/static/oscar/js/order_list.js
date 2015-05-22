@@ -12,7 +12,7 @@ $(document).ready(function () {
         $.ajax({
             url: '/api/v2/orders/' + order_number + '/fulfill/',
             method: 'PUT',
-            headers: {'X-CSRFToken': $.cookie('csrftoken')}
+            headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')}
         }).success(function (data) {
             $('tr[data-order-number=' + order_number + '] .order-status').text(data.status);
             addMessage('alert-success', 'icon-check-sign', 'Order ' + order_number + ' has been fulfilled.');
