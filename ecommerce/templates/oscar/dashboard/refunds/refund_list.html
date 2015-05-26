@@ -85,6 +85,8 @@
 </div>
 
 {% if refunds %}
+
+    {% include "dashboard/partials/refund_action_modal.html" %}
     {% block refund_list %}
         <table class="table table-striped table-bordered table-hover">
             <caption>

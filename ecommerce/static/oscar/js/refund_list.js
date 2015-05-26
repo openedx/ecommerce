@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    var $actions = $('[data-action=process-refund]');
 
     var processRefund = function (e) {
         var $btn = $(e.target),
@@ -38,7 +37,29 @@ $(document).ready(function () {
             $btn.click(processRefund);
             $btn.removeClass('disabled');
         });
+
+        // dismiss the modal
+        $('#refundActionModal').modal( 'hide' );
     };
 
-    $actions.click(processRefund);
+    var launchRefundActionModal = function (e) {
+        var $button = $( e.target ),
+            refundId = $button.data( 'refundId' ),
+            decision = $button.data( 'decision'),
+            $modal = $('#refundActionModal');
+
+        // the message varies depending on the decision; hide both messages, and then
+        // reveal the one appropriate to the selected decision.
+        $modal.find( '.modal-body' ).hide();
+        $modal.find( '.modal-body.confirm-' + decision ).show();
+        // set the decision and refund id on the modal's confirm button.
+        $modal.find( '.btn-primary' ).data( 'refundId', refundId ).data( 'decision', decision );
+        $modal.modal( 'show' );
+    };
+
+    // bind clicks on refund action buttons to the modal.
+    $( '[data-action=process-refund]' ).click( launchRefundActionModal );
+    // bind modal confirmation clicks to the refund processing ajax call.
+    $( '#refundActionModal .btn-primary' ).click( processRefund );
+
 });
