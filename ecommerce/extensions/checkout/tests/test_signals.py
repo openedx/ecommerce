@@ -8,20 +8,18 @@ from mock import patch
 from oscar.test import factories
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-
-UPC = 'test-upc'
-TITLE = 'test-product-title'
-ORDER_NUMBER = '321'
-CURRENCY = 'test-currency'
-TOTAL = '9.99'
+from ecommerce.tests.mixins import BusinessIntelligenceMixin
 
 
 @override_settings(SEGMENT_KEY='dummy-key')
 @patch('analytics.track')
-class EdxOrderPlacementMixinTests(TestCase):
+class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, TestCase):
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
     """
+    ORDER_NUMBER = '321'
+    CURRENCY = 'test-currency'
+    TOTAL = '9.99'
 
     def setUp(self):
         # create product for test basket / order
@@ -37,7 +35,7 @@ class EdxOrderPlacementMixinTests(TestCase):
         )
         child_product = factories.ProductFactory(
             upc='dummy-child-product',
-            title=TITLE,
+            title='test-product-title',
             structure='child',
             parent=parent_product,
         )
@@ -46,42 +44,14 @@ class EdxOrderPlacementMixinTests(TestCase):
 
         # create test user and set up basket / order
         self.user = factories.UserFactory()
-        basket = factories.BasketFactory(total_incl_tax=Decimal('10.01'), total_excl_tax=Decimal(TOTAL))
+        basket = factories.BasketFactory(total_incl_tax=Decimal('10.01'), total_excl_tax=Decimal(self.TOTAL))
         basket.add_product(child_product)
-        self.order = factories.create_order(user=self.user, basket=basket, currency=CURRENCY, number=ORDER_NUMBER)
-
-    def assert_correct_event(self, mock_track, order, expected_user_id, expected_client_id):
-        """
-        Check that the tracking context was correctly reflected in the fired
-        event.
-        """
-        (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
-        self.assertEqual(event_user_id, expected_user_id)
-        self.assertEqual(event_name, 'Completed Order')
-        self.assertEqual(kwargs['context'], {'Google Analytics': {'clientId': expected_client_id}})
-        self.assert_correct_event_payload(order, event_payload)
-
-    def assert_correct_event_payload(self, order, actual_event_payload):
-        """
-        Check that field values in the event payload correctly represent the
-        completed order.
-        """
-        self.assertEqual(['currency', 'orderId', 'products', 'total'], sorted(actual_event_payload.keys()))
-        self.assertEqual(actual_event_payload['currency'], CURRENCY)
-        self.assertEqual(actual_event_payload['orderId'], ORDER_NUMBER)
-        self.assertEqual(actual_event_payload['total'], TOTAL)
-
-        lines = order.lines.all()
-        self.assertEqual(len(lines), len(actual_event_payload['products']))
-
-        actual_products_dict = {product['sku']: product for product in actual_event_payload['products']}
-        for line in lines:
-            actual_product = actual_products_dict.get(line.partner_sku)
-            self.assertIsNotNone(actual_product)
-            self.assertEqual(line.product.attr.course_key, actual_product['name'])
-            self.assertEqual(str(line.line_price_excl_tax), actual_product['price'])
-            self.assertEqual(line.quantity, actual_product['quantity'])
-            self.assertEqual(line.product.get_product_class().name, actual_product['category'])
+        self.order = factories.create_order(
+            user=self.user,
+            basket=basket,
+            currency=self.CURRENCY,
+            number=self.ORDER_NUMBER
+        )
 
     def test_handle_successful_order(self, mock_track):
         """
@@ -96,7 +66,13 @@ class EdxOrderPlacementMixinTests(TestCase):
         self.assertTrue(mock_track.called)
         # ensure event data is correct
         self.assert_correct_event(
-            mock_track, self.order, tracking_context['lms_user_id'], tracking_context['lms_client_id']
+            mock_track,
+            self.order,
+            tracking_context['lms_user_id'],
+            tracking_context['lms_client_id'],
+            self.ORDER_NUMBER,
+            self.CURRENCY,
+            self.TOTAL
         )
 
     def test_handle_successful_order_no_context(self, mock_track):
@@ -108,7 +84,15 @@ class EdxOrderPlacementMixinTests(TestCase):
         # ensure event is being tracked
         self.assertTrue(mock_track.called)
         # ensure event data is correct
-        self.assert_correct_event(mock_track, self.order, 'ecommerce-{}'.format(self.user.id), None)
+        self.assert_correct_event(
+            mock_track,
+            self.order,
+            'ecommerce-{}'.format(self.user.id),
+            None,
+            self.ORDER_NUMBER,
+            self.CURRENCY,
+            self.TOTAL
+        )
 
     @override_settings(SEGMENT_KEY=None)
     def test_handle_successful_order_no_segment_key(self, mock_track):
@@ -125,7 +109,7 @@ class EdxOrderPlacementMixinTests(TestCase):
         Ensure that exceptions raised while emitting tracking events are
         logged, but do not otherwise interrupt program flow.
         """
-        with patch('ecommerce.extensions.checkout.signals.logger.exception') as mock_log_exc:
+        with patch('ecommerce.extensions.analytics.utils.logger.exception') as mock_log_exc:
             mock_track.side_effect = Exception("clunk")
             EdxOrderPlacementMixin().handle_successful_order(self.order)
         # ensure that analytics.track was called, but the exception was caught

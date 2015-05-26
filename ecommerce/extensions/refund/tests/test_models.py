@@ -2,7 +2,6 @@ import ddt
 from django.conf import settings
 from django.test import TestCase
 import mock
-from mock_django import mock_signal_receiver
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model, get_class
 
@@ -10,6 +9,7 @@ from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
@@ -54,7 +54,7 @@ class StatusTestsMixin(object):
 
 
 @ddt.ddt
-class RefundTests(StatusTestsMixin, TestCase):
+class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
     pipeline = settings.OSCAR_REFUND_STATUS_PIPELINE
 
     def _get_instance(self, **kwargs):
@@ -108,19 +108,7 @@ class RefundTests(StatusTestsMixin, TestCase):
         RefundLine objects to Complete, and return True.
         """
         refund = self._get_instance()
-
-        def _revoke_lines(r):
-            for line in r.lines.all():
-                line.set_status(REFUND_LINE.COMPLETE)
-
-            r.set_status(REFUND.COMPLETE)
-
-        with mock.patch.object(Refund, '_issue_credit', return_value=None):
-            with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True):
-                with mock_signal_receiver(post_refund) as receiver:
-                    self.assertEqual(receiver.call_count, 0)
-                    self.assertTrue(refund.approve())
-                    self.assertEqual(receiver.call_count, 1)
+        self.approve(refund)
 
     def test_approve_payment_error(self):
         """

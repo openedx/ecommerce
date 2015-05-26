@@ -128,7 +128,7 @@ class Refund(StatusMixin, TimeStampedModel):
             self._revoke_lines()
 
         if self.status == REFUND.COMPLETE:
-            post_refund.send(sender=self.__class__, refund=self)
+            post_refund.send_robust(sender=self.__class__, refund=self)
             return True
 
         return False

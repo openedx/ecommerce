@@ -29,7 +29,7 @@ from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
-from ecommerce.extensions.refund.tests.test_api import RefundTestMixin
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin, BasketCreationMixin, JwtMixin
 
 Basket = get_model('basket', 'Basket')
