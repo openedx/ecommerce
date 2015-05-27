@@ -1,17 +1,15 @@
-# coding=utf-8
-from decimal import Decimal
 from unittest import TestCase
 
 import ddt
-from django.conf import settings
 from django.test import override_settings
 from oscar.core.loading import get_model
-from oscar.test.factories import create_order
-from oscar.test.newfactories import UserFactory, BasketFactory
+from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
-from ecommerce.extensions.refund.tests.factories import CourseFactory, RefundLineFactory
+from ecommerce.extensions.refund.tests.factories import RefundLineFactory
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+
 
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductClass = get_model("catalogue", "ProductClass")
@@ -19,38 +17,6 @@ Refund = get_model('refund', 'Refund')
 
 OSCAR_INITIAL_REFUND_STATUS = 'REFUND_OPEN'
 OSCAR_INITIAL_REFUND_LINE_STATUS = 'REFUND_LINE_OPEN'
-
-
-class RefundTestMixin(object):
-    def setUp(self):
-        self.course_id = u'edX/DemoX/Demo_Course'
-        self.course = CourseFactory(self.course_id, u'edX Demó Course')
-        self.honor_product = self.course.add_mode('honor', 0)
-        self.verified_product = self.course.add_mode('verified', Decimal(10.00), id_verification_required=True)
-
-    def create_order(self, user=None):
-        user = user or self.user
-        basket = BasketFactory(owner=user)
-        basket.add_product(self.verified_product)
-        order = create_order(basket=basket, user=user)
-        order.status = ORDER.COMPLETE
-        order.save()
-        return order
-
-    def assert_refund_matches_order(self, refund, order):
-        """ Verify the refund corresponds to the given order. """
-        self.assertEqual(refund.order, order)
-        self.assertEqual(refund.user, order.user)
-        self.assertEqual(refund.status, settings.OSCAR_INITIAL_REFUND_STATUS)
-        self.assertEqual(refund.total_credit_excl_tax, order.total_excl_tax)
-        self.assertEqual(refund.lines.count(), 1)
-
-        refund_line = refund.lines.first()
-        line = order.lines.first()
-        self.assertEqual(refund_line.status, settings.OSCAR_INITIAL_REFUND_LINE_STATUS)
-        self.assertEqual(refund_line.order_line, line)
-        self.assertEqual(refund_line.line_credit_excl_tax, line.line_price_excl_tax)
-        self.assertEqual(refund_line.quantity, 1)
 
 
 @ddt.ddt

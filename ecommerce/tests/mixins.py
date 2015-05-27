@@ -144,3 +144,56 @@ class BasketCreationMixin(JwtMixin):
         else:
             self.assertIsNone(response.data[AC.KEYS.ORDER])
             self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
+
+
+class BusinessIntelligenceMixin(object):
+    """Provides assertions for test cases validating the emission of business intelligence events."""
+
+    def assert_correct_event(
+            self, mock_track, instance, expected_user_id, expected_client_id, order_number, currency, total
+    ):
+        """Check that the tracking context was correctly reflected in the emitted event."""
+        (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
+        self.assertEqual(event_user_id, expected_user_id)
+        self.assertEqual(event_name, 'Completed Order')
+        self.assertEqual(kwargs['context'], {'Google Analytics': {'clientId': expected_client_id}})
+        self.assert_correct_event_payload(instance, event_payload, order_number, currency, total)
+
+    def assert_correct_event_payload(self, instance, event_payload, order_number, currency, total):
+        """
+        Check that field values in the event payload correctly represent the
+        completed order or refund.
+        """
+        self.assertEqual(['currency', 'orderId', 'products', 'total'], sorted(event_payload.keys()))
+        self.assertEqual(event_payload['orderId'], order_number)
+        self.assertEqual(event_payload['currency'], currency)
+
+        lines = instance.lines.all()
+        self.assertEqual(len(lines), len(event_payload['products']))
+
+        model_name = instance.__class__.__name__
+        tracked_products_dict = {product['sku']: product for product in event_payload['products']}
+
+        if model_name == 'Order':
+            self.assertEqual(event_payload['total'], total)
+
+            for line in lines:
+                tracked_product = tracked_products_dict.get(line.partner_sku)
+                self.assertIsNotNone(tracked_product)
+                self.assertEqual(line.product.attr.course_key, tracked_product['name'])
+                self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
+                self.assertEqual(line.quantity, tracked_product['quantity'])
+                self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
+        elif model_name == 'Refund':
+            self.assertEqual(event_payload['total'], '-{}'.format(total))
+
+            for line in lines:
+                tracked_product = tracked_products_dict.get(line.order_line.partner_sku)
+                self.assertIsNotNone(tracked_product)
+                self.assertEqual(line.order_line.product.attr.course_key, tracked_product['name'])
+                self.assertEqual(str(line.line_credit_excl_tax), tracked_product['price'])
+                self.assertEqual(-1 * line.quantity, tracked_product['quantity'])
+                self.assertEqual(line.order_line.product.get_product_class().name, tracked_product['category'])
+        else:
+            # Payload validation is currently limited to order and refund events
+            self.fail()
