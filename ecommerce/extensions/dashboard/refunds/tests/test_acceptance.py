@@ -48,14 +48,28 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         self.selenium.get(self.live_server_url + reverse('auto_auth'))
         self.selenium.get(self.live_server_url + self.path)
 
-    def _decide(self, approve):
+    def _decide(self, approve, confirm=True):
         """Click the Approve or Deny button and wait for the AJAX call to finish."""
         selector = self.approve_button_selector if approve else self.deny_button_selector
         button = self.selenium.find_element_by_css_selector(selector)
         button.click()
 
-        # Wait for the AJAX call to finish and display an alert
-        WebDriverWait(self.selenium, 0.1).until(lambda d: d.find_element_by_css_selector('#messages .alert'))
+        # Wait for the modal to display, demanding confirmation
+        WebDriverWait(self.selenium, 10).until(
+            lambda d: d.find_element_by_css_selector('#refundActionModal').is_displayed()
+        )
+        if confirm:
+            # click confirm
+            self.selenium.find_element_by_css_selector('#refundActionModal .btn-primary').click()
+            # Wait for the AJAX call to finish and display an alert
+            WebDriverWait(self.selenium, 10).until(lambda d: d.find_element_by_css_selector('#messages .alert'))
+        else:
+            self.selenium.find_element_by_css_selector('#refundActionModal .btn-default').click()
+
+        # Wait for the modal to be gone
+        WebDriverWait(self.selenium, 10).until(
+            lambda d: not d.find_element_by_css_selector('#refundActionModal').is_displayed()
+        )
 
     def assert_alert_displayed(self, alert_class, text):
         """Verifies that the most recent alert has the given class and message."""
@@ -64,7 +78,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         self.assertIn(alert_class, classes)
         self.assertEqual(alert.find_element_by_css_selector('.message').text, text)
 
-    @skip("Requires refund processing endpoint.")
+    @skip("Requires refund processing endpoint.  Move to acceptance_tests and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_processing_success(self, approve):
         """
@@ -100,14 +114,20 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         # Verify that an alert is displayed.
         self.assert_alert_displayed('alert-success', 'Refund {} has been processed.'.format(self.refund.id))
 
+    @skip("This test is flaky in Travis.  Move to acceptance_tests and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_processing_failure(self, approve):
         """
         Verify behavior when refund processing fails.
 
-        The refund list should display "Approve" and "Deny" buttons next to each refund. Clicking either button
-        should call the refund processing API endpoint via AJAX. When refund processing fails, the refund's
-        status should be updated, an alert should displayed, and both buttons should be reactivated.
+        The refund list should display "Approve" and "Deny" buttons next to
+        each refund. Clicking either button should trigger a confirmation
+        modal.
+
+        When the user confirms at the modal, call the refund processing API
+        endpoint via AJAX. When refund processing fails, the refund's status
+        should be updated, an alert should displayed, and both buttons should
+        be reactivated.
         """
         self._login()
 
@@ -138,6 +158,27 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             'Failed to process refund #{refund_id}: NOT FOUND. '
             'Please try again, or contact the E-Commerce Development Team.'.format(refund_id=refund_id)
         )
+
+    @skip("This test is flaky in Travis.  Move to acceptance_tests and re-enable under ticket XCOM-342.")
+    @ddt.data(True, False)
+    def test_cancel_action(self, approve):
+        """
+        Verify that the UI returns to its previous state unchanged, when a user
+        clicks one of the refund action buttons, but then cancels the operation
+        at the confirmation modal.
+        """
+        self._login()
+        self._decide(approve, False)
+
+        # Verify that both buttons are active.
+        for button_selector in [self.approve_button_selector, self.deny_button_selector]:
+            button = self.selenium.find_element_by_css_selector(button_selector)
+            classes = button.get_attribute('class').split(' ')
+            self.assertNotIn(
+                'disabled',
+                classes,
+                'Refund processing button is disabled, but should have been re-enabled!'
+            )
 
     @ddt.data(*ALL_REFUND_STATUSES)
     def test_button_configurations(self, status):

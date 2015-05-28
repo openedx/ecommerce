@@ -82,6 +82,8 @@
     {% endblock refund_overview %}
 
     {% block refund_details %}
+    {% include "dashboard/partials/refund_action_modal.html" %}
+
     <div class="table-header">
         <h3>{% trans "Refund Items" %}</h3>
     </div>
