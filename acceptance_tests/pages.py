@@ -22,7 +22,7 @@ class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method
 
 
 class DashboardHomePage(EcommerceAppPage):
-    path = ''
+    path = 'dashboard'
 
     def is_browser_on_page(self):
         return self.browser.title.startswith('Dashboard | Oscar')
