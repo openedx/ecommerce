@@ -32,7 +32,7 @@ $(document).ready(function () {
                 'icon-exclamation-sign',
                 'Failed to process refund #' + refund_id + ': ' + errorThrown + '. Please try again, or contact the E-Commerce Development Team.'
             );
-
+        }).always(function () {
             // Re-enable the button
             $btn.click(processRefund);
             $btn.removeClass('disabled');
