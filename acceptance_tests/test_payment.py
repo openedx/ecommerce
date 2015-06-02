@@ -68,7 +68,7 @@ class VerifiedCertificatePaymentTests(EcommerceApiMixin, EnrollmentApiMixin, Lms
         """ Completes the checkout process via CyberSource. """
 
         # Click the payment button
-        self.browser.find_element_by_css_selector('a#cybersource').click()
+        self.browser.find_element_by_css_selector('#cybersource').click()
 
         self._dismiss_alert()
 
@@ -122,7 +122,7 @@ class VerifiedCertificatePaymentTests(EcommerceApiMixin, EnrollmentApiMixin, Lms
         """ Completes the checkout process via PayPal. """
 
         # Click the payment button
-        self.browser.find_element_by_css_selector('a#paypal').click()
+        self.browser.find_element_by_css_selector('#paypal').click()
 
         # Make sure we are checking out with a PayPal account, instead of credit card
         try:
