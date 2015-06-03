@@ -26,10 +26,14 @@ class RefundTestMixin(object):
         self.honor_product = self.course.add_mode('honor', 0)
         self.verified_product = self.course.add_mode('verified', Decimal(10.00), id_verification_required=True)
 
-    def create_order(self, user=None):
+    def create_order(self, user=None, multiple_lines=False):
         user = user or self.user
         basket = BasketFactory(owner=user)
         basket.add_product(self.verified_product)
+
+        if multiple_lines:
+            basket.add_product(self.honor_product)
+
         order = create_order(basket=basket, user=user)
         order.status = ORDER.COMPLETE
         order.save()
@@ -41,14 +45,15 @@ class RefundTestMixin(object):
         self.assertEqual(refund.user, order.user)
         self.assertEqual(refund.status, settings.OSCAR_INITIAL_REFUND_STATUS)
         self.assertEqual(refund.total_credit_excl_tax, order.total_excl_tax)
-        self.assertEqual(refund.lines.count(), 1)
+        self.assertEqual(refund.lines.count(), order.lines.count())
 
-        refund_line = refund.lines.first()
-        line = order.lines.first()
-        self.assertEqual(refund_line.status, settings.OSCAR_INITIAL_REFUND_LINE_STATUS)
-        self.assertEqual(refund_line.order_line, line)
-        self.assertEqual(refund_line.line_credit_excl_tax, line.line_price_excl_tax)
-        self.assertEqual(refund_line.quantity, 1)
+        refund_lines = refund.lines.all()
+        order_lines = order.lines.all().order_by('refund_lines')
+        for refund_line, order_line in zip(refund_lines, order_lines):
+            self.assertEqual(refund_line.status, settings.OSCAR_INITIAL_REFUND_LINE_STATUS)
+            self.assertEqual(refund_line.order_line, order_line)
+            self.assertEqual(refund_line.line_credit_excl_tax, order_line.line_price_excl_tax)
+            self.assertEqual(refund_line.quantity, order_line.quantity)
 
     def create_refund(self, processor_name='cybersource'):
         refund = RefundFactory()

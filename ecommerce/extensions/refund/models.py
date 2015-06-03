@@ -14,6 +14,7 @@ from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
+
 logger = logging.getLogger(__name__)
 
 post_refund = get_class('refund.signals', 'post_refund')
@@ -29,13 +30,12 @@ class StatusMixin(object):
         return getattr(settings, self.pipeline_setting)
 
     def available_statuses(self):
-        """ Returns all possible statuses that this object can move to. """
+        """Returns all possible statuses that this object can move to."""
         return self.pipeline.get(self.status, ())
 
     # pylint: disable=access-member-before-definition,attribute-defined-outside-init
     def set_status(self, new_status):
-        """
-        Set a new status for this object.
+        """Set a new status for this object.
 
         If the requested status is not valid, then ``InvalidStatus`` is raised.
         """
@@ -68,12 +68,49 @@ class Refund(StatusMixin, TimeStampedModel):
 
     @classmethod
     def all_statuses(cls):
-        """ Returns all possible statuses for a refund. """
+        """Returns all possible statuses for a refund."""
         return list(getattr(settings, cls.pipeline_setting).keys())
+
+    @classmethod
+    def create_with_lines(cls, order, lines):
+        """Given an order and order lines, creates a Refund with corresponding RefundLines.
+
+        Only creates RefundLines for unrefunded order lines.
+
+        Arguments:
+            order (order.Order): The order to which the newly-created refund corresponds.
+            lines (list of order.Line): Order lines to be refunded.
+
+        Returns:
+            None: If no unrefunded order lines have been provided.
+            Refund: With RefundLines corresponding to each given unrefunded order line.
+        """
+        unrefunded_lines = [line for line in lines if not line.refund_lines.exists()]
+        if unrefunded_lines:
+            status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
+            total_credit_excl_tax = sum([line.line_price_excl_tax for line in unrefunded_lines])
+            refund = cls.objects.create(
+                order=order,
+                user=order.user,
+                status=status,
+                total_credit_excl_tax=total_credit_excl_tax
+            )
+
+            status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
+            for line in unrefunded_lines:
+                RefundLine.objects.create(
+                    refund=refund,
+                    order_line=line,
+                    line_credit_excl_tax=line.line_price_excl_tax,
+                    quantity=line.quantity,
+                    status=status
+                )
+
+            return refund
 
     @property
     def num_items(self):
-        """ Returns the number of items in this refund. """
+        """Returns the number of items in this refund."""
         num_items = 0
         for line in self.lines.all():
             num_items += line.quantity
@@ -81,20 +118,16 @@ class Refund(StatusMixin, TimeStampedModel):
 
     @property
     def can_approve(self):
-        """
-        Returns a boolean indicating if this Refund can be approved.
-        """
+        """Returns a boolean indicating if this Refund can be approved."""
         return self.status not in (REFUND.COMPLETE, REFUND.DENIED)
 
     @property
     def can_deny(self):
-        """
-        Returns a boolean indicating if this Refund can be denied.
-        """
+        """Returns a boolean indicating if this Refund can be denied."""
         return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
     def _issue_credit(self):
-        """ Issue a credit to the purchaser via the payment processor used for the original order. """
+        """Issue a credit to the purchaser via the payment processor used for the original order."""
 
         # TODO Update this if we ever support multiple payment sources for a single order.
         source = self.order.sources.first()
@@ -102,7 +135,7 @@ class Refund(StatusMixin, TimeStampedModel):
         processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
 
     def _revoke_lines(self):
-        """ Revoke fulfillment for the lines in this Refund. """
+        """Revoke fulfillment for the lines in this Refund."""
         if revoke_fulfillment_for_refund(self):
             self.set_status(REFUND.COMPLETE)
             logger.info('Successfully revoked fulfillment for Refund [%d]', self.id)
