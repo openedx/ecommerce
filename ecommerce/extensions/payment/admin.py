@@ -6,7 +6,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class PaymentProcessorResponseAdmin(admin.ModelAdmin):
-    list_display = ('processor_name', 'transaction_id', 'basket', 'created')
+    list_display = ('id', 'processor_name', 'transaction_id', 'basket', 'created')
 
 
 admin.site.register(PaymentProcessorResponse, PaymentProcessorResponseAdmin)
