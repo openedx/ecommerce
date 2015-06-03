@@ -4,6 +4,7 @@ from django.test import TestCase
 import mock
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model, get_class
+from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
@@ -71,6 +72,29 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
     def test_all_statuses(self):
         """ Refund.all_statuses should return all possible statuses for a refund. """
         self.assertEqual(Refund.all_statuses(), self.pipeline.keys())
+
+    @ddt.data(False, True)
+    def test_create_with_lines(self, multiple_lines):
+        """
+        Given an order and order lines that have not been refunded, Refund.create_with_lines
+        should create a Refund with corresponding RefundLines.
+        """
+        order = self.create_order(user=UserFactory(), multiple_lines=multiple_lines)
+        refund = Refund.create_with_lines(order, list(order.lines.all()))
+
+        self.assert_refund_matches_order(refund, order)
+
+    def test_create_with_lines_with_existing_refund(self):
+        """
+        Refund.create_with_lines should not create RefundLines for order lines
+        which have already been refunded.
+        """
+        order = self.create_order(user=UserFactory())
+        line = order.lines.first()
+        RefundLineFactory(order_line=line)
+        refund = Refund.create_with_lines(order, [line])
+
+        self.assertEqual(refund, None)
 
     @ddt.unpack
     @ddt.data(

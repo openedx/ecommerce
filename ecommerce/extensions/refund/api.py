@@ -1,9 +1,6 @@
-from django.conf import settings
-
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
 
 Refund = get_model('refund', 'Refund')
@@ -59,19 +56,8 @@ def create_refunds(orders, course_id):
                                    product__attribute_values__attribute__code='course_key',
                                    product__attribute_values__value_text=course_id)
 
-        # Only create a refund if there are line items to refund.
-        if lines:
-            total_credit_excl_tax = sum([line.line_price_excl_tax for line in lines])
-            status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
-            refund = Refund.objects.create(order=order, user=order.user, status=status,
-                                           total_credit_excl_tax=total_credit_excl_tax)
-
-            status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
-
-            for line in lines:
-                RefundLine.objects.create(refund=refund, order_line=line, line_credit_excl_tax=line.line_price_excl_tax,
-                                          quantity=line.quantity, status=status)
-
+        refund = Refund.create_with_lines(order, lines)
+        if refund is not None:
             refunds.append(refund)
 
     return refunds
