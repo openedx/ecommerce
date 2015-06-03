@@ -28,13 +28,13 @@ User = get_user_model()
 class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
     course_id = 'edX/DemoX/Demo_Course'
+    certificate_type = 'test-certificate-type'
 
     def setUp(self):
         user = UserFactory()
 
-        certificate_type = 'honor'
-        seats = self.create_course_seats(self.course_id, (certificate_type,))
-        self.seat = seats[certificate_type]
+        seats = self.create_course_seats(self.course_id, (self.certificate_type,))
+        self.seat = seats[self.certificate_type]
 
         for stock_record in self.seat.stockrecords.all():
             stock_record.price_currency = 'USD'
@@ -103,9 +103,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         expected = {
             'user': self.order.user.username,
             'is_active': False,
+            'mode': self.certificate_type,
             'course_details': {
-                'course_id': self.course_id
-            }
+                'course_id': self.course_id,
+            },
         }
         self.assertEqual(actual, expected)
 
