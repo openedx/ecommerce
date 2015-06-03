@@ -30,8 +30,8 @@ class RefundFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        for __ in range(2):
-            RefundLineFactory.create(refund=self)
+        for line in self.order.lines.all():
+            RefundLineFactory.create(refund=self, order_line=line)
 
         self.total_credit_excl_tax = sum([line.line_credit_excl_tax for line in self.lines.all()])
         self.save()
