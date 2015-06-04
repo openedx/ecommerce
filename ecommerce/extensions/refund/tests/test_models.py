@@ -64,10 +64,10 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
     def test_num_items(self):
         """ The method should return the total number of items being refunded. """
         refund = RefundFactory()
-        self.assertEqual(refund.num_items, 2)
+        self.assertEqual(refund.num_items, 1)
 
         RefundLineFactory(quantity=3, refund=refund)
-        self.assertEqual(refund.num_items, 5)
+        self.assertEqual(refund.num_items, 4)
 
     def test_all_statuses(self):
         """ Refund.all_statuses should return all possible statuses for a refund. """
