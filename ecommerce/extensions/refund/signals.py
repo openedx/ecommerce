@@ -31,7 +31,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
                 {
                     'id': line.order_line.upc,
                     'sku': line.order_line.partner_sku,
-                    'name': line.order_line.product.attr.course_key,
+                    'name': line.order_line.product.title,
                     'price': str(line.line_credit_excl_tax),
                     'quantity': -1 * line.quantity,
                     'category': line.order_line.product.get_product_class().name,

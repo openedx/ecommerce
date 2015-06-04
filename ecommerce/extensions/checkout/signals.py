@@ -28,7 +28,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                 {
                     'id': line.upc,
                     'sku': line.partner_sku,
-                    'name': line.product.attr.course_key,
+                    'name': line.product.title,
                     'price': str(line.line_price_excl_tax),
                     'quantity': line.quantity,
                     'category': line.product.get_product_class().name,

@@ -39,7 +39,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, TestCase):
             structure='child',
             parent=parent_product,
         )
-        child_product.attr.course_key = 'test-course-key'
+        child_product.attr.course_key = 'dummy-course-key'
         child_product.save()
 
         # create test user and set up basket / order

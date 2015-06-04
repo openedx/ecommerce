@@ -180,7 +180,7 @@ class BusinessIntelligenceMixin(object):
             for line in lines:
                 tracked_product = tracked_products_dict.get(line.partner_sku)
                 self.assertIsNotNone(tracked_product)
-                self.assertEqual(line.product.attr.course_key, tracked_product['name'])
+                self.assertEqual(line.product.title, tracked_product['name'])
                 self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
                 self.assertEqual(line.quantity, tracked_product['quantity'])
                 self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
@@ -190,7 +190,7 @@ class BusinessIntelligenceMixin(object):
             for line in lines:
                 tracked_product = tracked_products_dict.get(line.order_line.partner_sku)
                 self.assertIsNotNone(tracked_product)
-                self.assertEqual(line.order_line.product.attr.course_key, tracked_product['name'])
+                self.assertEqual(line.order_line.product.title, tracked_product['name'])
                 self.assertEqual(str(line.line_credit_excl_tax), tracked_product['price'])
                 self.assertEqual(-1 * line.quantity, tracked_product['quantity'])
                 self.assertEqual(line.order_line.product.get_product_class().name, tracked_product['category'])
