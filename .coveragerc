@@ -8,3 +8,5 @@ omit = ecommerce/settings*
     *test*
     *static*
     *templates*
+    ecommerce/extensions/checkout/apps.py
+    ecommerce/extensions/dashboard/refunds/config.py
