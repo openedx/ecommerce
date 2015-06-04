@@ -204,9 +204,10 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             data = {
                 'user': line.order.user.username,
                 'is_active': False,
+                'mode': line.product.attr.certificate_type,
                 'course_details': {
-                    'course_id': line.product.attr.course_key
-                }
+                    'course_id': line.product.attr.course_key,
+                },
             }
 
             response = self._post_to_enrollment_api(data)
