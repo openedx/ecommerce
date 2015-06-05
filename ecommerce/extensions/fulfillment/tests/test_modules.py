@@ -111,7 +111,26 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         self.assertEqual(actual, expected)
 
     @httpretty.activate
-    def test_revoke_product_api_error(self):
+    def test_revoke_product_expected_error(self):
+        """
+        If the Enrollment API responds with an expected error, the method should log that revocation was
+        bypassed, and return True.
+        """
+        message = 'Enrollment mode mismatch: active mode=x, requested mode=y. Won\'t deactivate.'
+        body = '{{"message": "{}"}}'.format(message)
+        httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=400, body=body, content_type=JSON)
+
+        line = self.order.lines.first()
+        logger_name = 'ecommerce.extensions.fulfillment.modules'
+        with LogCapture(logger_name) as l:
+            self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
+            l.check(
+                (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
+                (logger_name, 'INFO', 'Skipping revocation for line [%d]: %s' % (line.id, message))
+            )
+
+    @httpretty.activate
+    def test_revoke_product_unexpected_error(self):
         """ If the Enrollment API responds with a non-200 status, the method should log an error and return False. """
         message = 'Meh.'
         body = '{{"message": "{}"}}'.format(message)
