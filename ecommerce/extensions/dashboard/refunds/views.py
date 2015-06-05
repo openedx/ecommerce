@@ -25,7 +25,9 @@ class RefundListView(ListView):
 
         if self.form.is_valid():
             for field, value in self.form.cleaned_data.iteritems():
-                if value:
+                if field == 'status' and value:
+                    queryset = queryset.filter(status__in=value)
+                elif value:
                     queryset = queryset.filter(**{field: value})
 
         return queryset

@@ -1,6 +1,7 @@
 import ddt
 from django.conf import settings
 from django.test import TestCase
+import httpretty
 import mock
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model, get_class
@@ -95,6 +96,32 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         refund = Refund.create_with_lines(order, [line])
 
         self.assertEqual(refund, None)
+
+    @httpretty.activate
+    def test_zero_dollar_refund(self):
+        """
+        Given an order and order lines which total $0 and are not refunded, Refund.create_with_lines
+        should create and approve a Refund with corresponding RefundLines.
+        """
+        httpretty.register_uri(
+            httpretty.POST,
+            settings.ENROLLMENT_API_URL,
+            status=200,
+            body='{}',
+            content_type='application/json'
+        )
+
+        order = self.create_order(user=UserFactory(), free=True)
+
+        # Verify that the order totals $0.
+        self.assertEqual(order.total_excl_tax, 0)
+
+        refund = Refund.create_with_lines(order, list(order.lines.all()))
+
+        # Verify that the refund has been successfully approved.
+        self.assertEqual(refund.status, REFUND.COMPLETE)
+        for line in refund.lines.all():
+            self.assertEqual(line.status, REFUND_LINE.COMPLETE)
 
     @ddt.unpack
     @ddt.data(

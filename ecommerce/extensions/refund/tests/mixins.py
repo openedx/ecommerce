@@ -26,13 +26,17 @@ class RefundTestMixin(object):
         self.honor_product = self.course.add_mode('honor', 0)
         self.verified_product = self.course.add_mode('verified', Decimal(10.00), id_verification_required=True)
 
-    def create_order(self, user=None, multiple_lines=False):
+    def create_order(self, user=None, multiple_lines=False, free=False):
         user = user or self.user
         basket = BasketFactory(owner=user)
-        basket.add_product(self.verified_product)
 
         if multiple_lines:
+            basket.add_product(self.verified_product)
             basket.add_product(self.honor_product)
+        elif free:
+            basket.add_product(self.honor_product)
+        else:
+            basket.add_product(self.verified_product)
 
         order = create_order(basket=basket, user=user)
         order.status = ORDER.COMPLETE

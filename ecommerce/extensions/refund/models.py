@@ -75,7 +75,8 @@ class Refund(StatusMixin, TimeStampedModel):
     def create_with_lines(cls, order, lines):
         """Given an order and order lines, creates a Refund with corresponding RefundLines.
 
-        Only creates RefundLines for unrefunded order lines.
+        Only creates RefundLines for unrefunded order lines. Refunds corresponding to a total
+        credit of $0 are approved upon creation.
 
         Arguments:
             order (order.Order): The order to which the newly-created refund corresponds.
@@ -106,6 +107,9 @@ class Refund(StatusMixin, TimeStampedModel):
                     status=status
                 )
 
+            if total_credit_excl_tax == 0:
+                refund.approve()
+
             return refund
 
     @property
@@ -128,11 +132,15 @@ class Refund(StatusMixin, TimeStampedModel):
 
     def _issue_credit(self):
         """Issue a credit to the purchaser via the payment processor used for the original order."""
-
-        # TODO Update this if we ever support multiple payment sources for a single order.
-        source = self.order.sources.first()
-        processor = get_processor_class_by_name(source.source_type.name)()
-        processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+        try:
+            # TODO Update this if we ever support multiple payment sources for a single order.
+            source = self.order.sources.first()
+            processor = get_processor_class_by_name(source.source_type.name)()
+            processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+        except AttributeError:
+            # Order has no sources, resulting in an exception when trying to access `source_type`.
+            # This occurs when attempting to refund free orders.
+            logger.info("No payments to credit for Refund [%d]", self.id)
 
     def _revoke_lines(self):
         """Revoke fulfillment for the lines in this Refund."""
