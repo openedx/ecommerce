@@ -52,20 +52,29 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
         refund = RefundFactory()
         open_refund = RefundFactory(status=REFUND.OPEN)
         complete_refund = RefundFactory(status=REFUND.COMPLETE)
+        denied_refund = RefundFactory(status=REFUND.DENIED)
 
         self.client.login(username=self.user.username, password=self.password)
 
-        # Sanity check for an unfiltered query
+        # Sanity check for an unfiltered query. Completed and denied refunds should be excluded.
         response = self.client.get(self.path)
-        self.assert_successful_response(response, [refund, open_refund, complete_refund])
+        self.assert_successful_response(response, [refund, open_refund])
 
         # ID filtering
         response = self.client.get('{path}?id={id}'.format(path=self.path, id=open_refund.id))
         self.assert_successful_response(response, [open_refund])
 
-        # Status filtering
+        # Single-choice status filtering
         response = self.client.get('{path}?status={status}'.format(path=self.path, status=REFUND.COMPLETE))
         self.assert_successful_response(response, [complete_refund])
+
+        # Multiple-choice status filtering
+        response = self.client.get('{path}?status={complete_status}&status={denied_status}'.format(
+            path=self.path,
+            complete_status=REFUND.COMPLETE,
+            denied_status=REFUND.DENIED
+        ))
+        self.assert_successful_response(response, [complete_refund, denied_refund])
 
     def test_sorting(self):
         """ The view should allow sorting by ID. """
