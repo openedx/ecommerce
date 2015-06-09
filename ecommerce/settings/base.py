@@ -251,6 +251,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     'ecommerce.user',
     'ecommerce.health',
+    'ecommerce.courses'
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
