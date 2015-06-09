@@ -47,7 +47,8 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             # Oscar uses line4 for city
             line4=cybersource_response['req_bill_to_address_city'],
             postcode=cybersource_response['req_bill_to_address_postal_code'],
-            state=cybersource_response['req_bill_to_address_state'],
+            # State is optional
+            state=cybersource_response.get('req_bill_to_address_state', ''),
             country=Country.objects.get(
                 iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 

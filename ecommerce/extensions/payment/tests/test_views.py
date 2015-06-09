@@ -37,7 +37,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         super(CybersourceNotifyViewTests, self).setUp()
 
         self.user = factories.UserFactory()
-        factories.UserAddressFactory(user=self.user)
+        self.billing_address = self.make_billing_address()
 
         self.basket = factories.create_basket()
         self.basket.owner = self.user
@@ -76,8 +76,11 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         # The basket should not have an associated order if no payment was made.
         self.assertFalse(Order.objects.filter(basket=self.basket).exists())
 
-        address = self.user.addresses.first()
-        notification = self.generate_notification(self.processor.secret_key, self.basket, billing_address=address)
+        notification = self.generate_notification(
+            self.processor.secret_key,
+            self.basket,
+            billing_address=self.billing_address,
+        )
 
         with mock_signal_receiver(post_checkout) as receiver:
             response = self.client.post(reverse('cybersource_notify'), notification)
@@ -130,8 +133,11 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
     def test_unable_to_place_order(self):
         """ When payment is accepted, but an order cannot be placed, log an error and return HTTP 200. """
 
-        address = self.user.addresses.first()
-        notification = self.generate_notification(self.processor.secret_key, self.basket, billing_address=address)
+        notification = self.generate_notification(
+            self.processor.secret_key,
+            self.basket,
+            billing_address=self.billing_address,
+        )
 
         with mock.patch.object(CybersourceNotifyView, 'handle_order_placement', side_effect=UnableToPlaceOrder):
             response = self.client.post(reverse('cybersource_notify'), notification)
@@ -146,13 +152,55 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
     def test_invalid_basket(self, basket_id):
         """ When payment is accepted for a non-existent basket, log an error and record the response. """
 
-        address = self.user.addresses.first()
-        notification = self.generate_notification(self.processor.secret_key, self.basket, billing_address=address,
-                                                  req_reference_number=basket_id)
+        notification = self.generate_notification(
+            self.processor.secret_key,
+            self.basket,
+            billing_address=self.billing_address,
+            req_reference_number=basket_id,
+        )
         response = self.client.post(reverse('cybersource_notify'), notification)
 
         self.assertEqual(response.status_code, 200)
         self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification)
+
+    @ddt.data(('line2', 'foo'), ('state', 'bar'))
+    @ddt.unpack
+    @mock.patch('ecommerce.extensions.payment.views.CybersourceNotifyView.handle_order_placement')
+    def test_optional_fields(self, field_name, field_value, mock_placement_handler):
+        """ Ensure notifications are handled properly with or without keys/values present for optional fields. """
+
+        def check_notification_address(notification, expected_address):
+            response = self.client.post(reverse('cybersource_notify'), notification)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(mock_placement_handler.called)
+            actual_address = mock_placement_handler.call_args[0][6]
+            self.assertEqual(actual_address.summary, expected_address.summary)
+
+        cybersource_key = 'req_bill_to_address_{}'.format(field_name)
+
+        # Generate a notification without the optional field set.
+        # Ensure that the Cybersource key does not exist in the notification,
+        # and that the address our endpoint parses from the notification is
+        # equivalent to the original.
+        notification = self.generate_notification(
+            self.processor.secret_key,
+            self.basket,
+            billing_address=self.billing_address,
+        )
+        self.assertNotIn(cybersource_key, notification)
+        check_notification_address(notification, self.billing_address)
+
+        # Add the optional field to the billing address in the notification.
+        # Ensure that the Cybersource key now does exist, and that our endpoint
+        # recognizes and parses it correctly.
+        billing_address = self.make_billing_address({field_name: field_value})
+        notification = self.generate_notification(
+            self.processor.secret_key,
+            self.basket,
+            billing_address=billing_address,
+        )
+        self.assertIn(cybersource_key, notification)
+        check_notification_address(notification, billing_address)
 
     def test_invalid_signature(self):
         """

@@ -6,6 +6,7 @@ from django.conf import settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
+from oscar.test import newfactories
 from suds.sudsobject import Factory
 
 from ecommerce.extensions.payment.constants import CARD_TYPES
@@ -77,6 +78,23 @@ class CybersourceMixin(object):
         message = u','.join([u'{key}={value}'.format(key=key, value=data[key]) for key in keys])
         return sign(message, secret_key)
 
+    def make_billing_address(self, overrides=None):
+        """
+        Create a billing address for Cybersource tests with minimal required
+        fields defined.
+        """
+        kwargs = {
+            'first_name': 'TestForename',
+            'last_name': 'TestSurname',
+            'line1': 'TestLine1',
+            'line2': '',  # this is not required by Cybersource, so make it empty unless the caller overrides it.
+            'line4': 'TestLine4',
+            'postcode': 'TestPostCode',
+            'country': newfactories.CountryFactory(),
+        }
+        kwargs.update(overrides or {})
+        return newfactories.BillingAddressFactory(**kwargs)
+
     def generate_notification(self, secret_key, basket, decision=u'ACCEPT', billing_address=None, auth_amount=None,
                               **kwargs):
         """ Generates a dict containing the API reply fields expected to be received from CyberSource. """
@@ -103,13 +121,14 @@ class CybersourceMixin(object):
                 u'req_bill_to_address_line1': billing_address.line1,
                 u'req_bill_to_address_city': billing_address.line4,
                 u'req_bill_to_address_postal_code': billing_address.postcode,
-                u'req_bill_to_address_state': billing_address.state,
                 u'req_bill_to_address_country': billing_address.country.iso_3166_1_a2
             })
 
-            # Address Line 2 is an optional response field
+            # handle optional address fields
             if billing_address.line2:
                 notification[u'req_bill_to_address_line2'] = billing_address.line2
+            if billing_address.state:
+                notification[u'req_bill_to_address_state'] = billing_address.state
 
         notification[u'signed_field_names'] = u','.join(notification.keys())
         notification[u'signature'] = self.generate_signature(secret_key, notification)
