@@ -17,12 +17,14 @@ from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 
+
 logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -76,7 +78,8 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
 
         try:
             transaction_id = cybersource_response.get('transaction_id')
-            basket_id = cybersource_response.get('req_reference_number')
+            order_number = cybersource_response.get('req_reference_number')
+            basket_id = OrderNumberGenerator().basket_id(order_number)
 
             basket = self._get_basket(basket_id)
 
@@ -113,7 +116,6 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
 
         try:
             user = basket.owner
-            order_number = self.generate_order_number(basket)
             self.handle_order_placement(order_number, user, basket, None, shipping_method, shipping_charge,
                                         billing_address, order_total)
         except UnableToPlaceOrder:
@@ -160,7 +162,10 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
         try:
             user = basket.owner
-            order_number = self.generate_order_number(basket)
+            # Given a basket, order number generation is idempotent. Although we've already
+            # generated this order number once before, it's faster to generate it again
+            # than to retrieve an invoice number from PayPal.
+            order_number = basket.order_number
 
             self.handle_order_placement(
                 order_number=order_number,

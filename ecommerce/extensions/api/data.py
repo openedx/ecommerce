@@ -9,7 +9,6 @@ Product = get_model('catalogue', 'Product')
 
 Selector = get_class('partner.strategy', 'Selector')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
-OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
@@ -55,13 +54,12 @@ def get_order_metadata(basket):
         dict: Containing an order number, a shipping method, a shipping charge,
             and a Price object representing the order total.
     """
-    number = OrderNumberGenerator().order_number(basket)
     shipping_method = NoShippingRequired()
     shipping_charge = shipping_method.calculate(basket)
     total = OrderTotalCalculator().calculate(basket, shipping_charge)
 
     metadata = {
-        AC.KEYS.ORDER_NUMBER: number,
+        AC.KEYS.ORDER_NUMBER: basket.order_number,
         AC.KEYS.SHIPPING_METHOD: shipping_method,
         AC.KEYS.SHIPPING_CHARGE: shipping_charge,
         AC.KEYS.ORDER_TOTAL: total,
