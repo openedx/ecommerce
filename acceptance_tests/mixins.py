@@ -8,8 +8,7 @@ from acceptance_tests.api import EnrollmentApiClient
 from acceptance_tests.config import (ENABLE_LMS_AUTO_AUTH, APP_SERVER_URL, LMS_PASSWORD, LMS_EMAIL, LMS_URL,
                                      BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ECOMMERCE_API_SERVER_URL,
                                      LMS_USERNAME, ECOMMERCE_API_TOKEN)
-from acceptance_tests.pages import LMSLoginPage
-
+from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage
 
 log = logging.getLogger(__name__)
 
@@ -87,3 +86,16 @@ class EcommerceApiMixin(object):
         order = orders[0]
 
         self.assertEqual(order['status'], 'Complete')
+
+
+class UnenrollmentMixin(object):
+    def tearDown(self):
+        self.unenroll_via_dashboard(self.course_id)
+        super(UnenrollmentMixin, self).tearDown()
+
+    def unenroll_via_dashboard(self, course_id):
+        """ Unenroll the current user from a course via the LMS dashboard. """
+        LMSDashboardPage(self.browser).visit()
+        self.browser.find_element_by_css_selector('a.action-more').click()
+        self.browser.find_element_by_css_selector('a.action-unenroll[data-course-id="{}"]'.format(course_id)).click()
+        self.browser.find_element_by_css_selector('#unenroll_form input[name=submit]').click()

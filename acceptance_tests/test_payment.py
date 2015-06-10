@@ -1,19 +1,17 @@
 from bok_choy.web_app_test import WebAppTest
-
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-
 from acceptance_tests.config import VERIFIED_COURSE_ID, HTTPS_RECEIPT_PAGE, PAYPAL_PASSWORD, PAYPAL_EMAIL
-
-from acceptance_tests.mixins import LoginMixin, EnrollmentApiMixin, EcommerceApiMixin, LmsUserMixin
+from acceptance_tests.mixins import LoginMixin, EnrollmentApiMixin, EcommerceApiMixin, LmsUserMixin, UnenrollmentMixin
 from acceptance_tests.pages import LMSCourseModePage
 
 
-class VerifiedCertificatePaymentTests(EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin, LoginMixin, WebAppTest):
+class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin,
+                                      LoginMixin, WebAppTest):
     def setUp(self):
         super(VerifiedCertificatePaymentTests, self).setUp()
         self.course_id = VERIFIED_COURSE_ID

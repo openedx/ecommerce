@@ -1,10 +1,11 @@
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import COURSE_ID
-from acceptance_tests.mixins import LoginMixin, EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin
+from acceptance_tests.mixins import LoginMixin, EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin, UnenrollmentMixin
 
 
-class LoginEnrollmentTests(EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin, LoginMixin, WebAppTest):
+class LoginEnrollmentTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin, LoginMixin,
+                           WebAppTest):
     def setUp(self):
         super(LoginEnrollmentTests, self).setUp()
         self.course_id = COURSE_ID
