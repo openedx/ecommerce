@@ -14,6 +14,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku
 
 JSON = 'application/json'
+ACCESS_TOKEN = 'edx'
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +83,17 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
             self.assert_seat_valid(seat, seat_type)
             self.assert_stock_record_valid(stock_record, seat, self.prices[seat_type])
 
+    def assert_lms_api_headers(self, request):
+        self.assertEqual(request.headers['Accept'], JSON)
+        self.assertEqual(request.headers['Authorization'], 'Bearer ' + ACCESS_TOKEN)
+
 
 class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
         self._mock_lms_api()
         migrated_course = MigratedCourse(self.course_id)
-        migrated_course.load_from_lms()
+        migrated_course.load_from_lms(ACCESS_TOKEN)
         return migrated_course
 
     def test_constructor(self):
@@ -110,8 +115,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         # Ensure LMS was called with the correct headers
         for request in httpretty.httpretty.latest_requests:
-            self.assertEqual(request.headers['Accept'], JSON)
-            self.assertEqual(request.headers['X-Edx-Api-Key'], settings.EDX_API_KEY)
+            self.assert_lms_api_headers(request)
 
         # Verify created objects match mocked data
         parent_seat = migrated_course.parent_seat
@@ -146,12 +150,11 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         initial_stock_record_count = StockRecord.objects.count()
 
         self._mock_lms_api()
-        call_command('migrate_course', self.course_id)
+        call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN)
 
         # Ensure LMS was called with the correct headers
         for request in httpretty.httpretty.latest_requests:
-            self.assertEqual(request.headers['Accept'], JSON)
-            self.assertEqual(request.headers['X-Edx-Api-Key'], settings.EDX_API_KEY)
+            self.assert_lms_api_headers(request)
 
         self.assertEqual(Product.objects.count(), initial_product_count, 'No new Products should have been saved.')
         self.assertEqual(StockRecord.objects.count(), initial_stock_record_count,
@@ -161,5 +164,5 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
     def test_handle_with_commit(self):
         """ Verify the management command retrieves data, and saves it to the database. """
         self._mock_lms_api()
-        call_command('migrate_course', self.course_id, commit=True)
+        call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN, commit=True)
         self.assert_course_migrated()
