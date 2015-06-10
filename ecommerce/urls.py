@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
+from ecommerce.courses.views import CourseMigrationView
 
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 from ecommerce.user import views as user_views
@@ -34,6 +35,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^i18n/', include('django.conf.urls.i18n')),
+    url(r'^admin/courses/migrate/$', CourseMigrationView.as_view(), name='migrate_course'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^health/$', include('health.urls')),
