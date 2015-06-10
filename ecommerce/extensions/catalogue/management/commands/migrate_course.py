@@ -210,5 +210,8 @@ class Command(BaseCommand):
 
                 if options.get('commit', False):
                     migrated_course.save()
+                    logger.info('Course [%s] was saved to the database.', migrated_course.course.id)
+                else:
+                    logger.info('Course [%s] was NOT saved to the database.', migrated_course.course.id)
             except Exception:  # pylint: disable=broad-except
                 logger.exception('Failed to migrate [%s]!', course_id)
