@@ -48,7 +48,7 @@ def health(_):
         database_status = Status.UNAVAILABLE
 
     try:
-        response = requests.get(LMS_HEALTH_PAGE)
+        response = requests.get(LMS_HEALTH_PAGE, timeout=1)
 
         if response.status_code == status.HTTP_200_OK:
             lms_status = Status.OK
@@ -59,7 +59,7 @@ def health(_):
         logger.critical(UnavailabilityMessage.LMS)
         lms_status = Status.UNAVAILABLE
 
-    overall_status = Status.OK if (database_status == lms_status == Status.OK) else Status.UNAVAILABLE
+    overall_status = Status.OK if (database_status == Status.OK) else Status.UNAVAILABLE
 
     data = {
         'overall_status': overall_status,
