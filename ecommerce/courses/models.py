@@ -39,3 +39,6 @@ class Course(models.Model):
                     products.add(product)
 
         return list(products)
+
+    def __unicode__(self):
+        return self.id
