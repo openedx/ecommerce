@@ -77,3 +77,12 @@ class LMSCourseModePage(LMSPage):
     def __init__(self, browser, course_id):
         super(LMSCourseModePage, self).__init__(browser)
         self.course_id = course_id
+
+
+class LMSDashboardPage(LMSPage):
+    @property
+    def url(self):
+        return self._build_url('dashboard')
+
+    def is_browser_on_page(self):
+        return self.browser.title.startswith('Dashboard')
