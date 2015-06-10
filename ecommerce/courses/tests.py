@@ -8,6 +8,12 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 
 @ddt.ddt
 class CourseTests(CourseCatalogTestMixin, TestCase):
+    def test_unicode(self):
+        """Verify the __unicode__ method returns the Course ID."""
+        course_id = u'edx/Demo_Course/DemoX'
+        course = Course.objects.create(id=course_id)
+        self.assertEqual(unicode(course), course_id)
+
     def test_seat_products(self):
         """
         Verify the method returns a list containing purchasable course seats.
