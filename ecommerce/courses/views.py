@@ -47,7 +47,6 @@ class CourseMigrationView(View):
 
         course_ids = course_ids.split(',')
 
-        print user.access_token
         call_command('migrate_course', *course_ids, access_token=user.access_token, commit=commit,
                      settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
 
