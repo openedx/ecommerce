@@ -1,5 +1,6 @@
 from StringIO import StringIO
 import logging
+import os
 
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
@@ -38,14 +39,17 @@ class CourseMigrationView(View):
         else:
             msg += 'The changes will NOT be committed to the database.'
 
-        logger.info(msg, request.user.username, course_ids)
+        user = request.user
+        logger.info(msg, user.username, course_ids)
 
         if not course_ids:
             return HttpResponse('No course_ids specified.', status=400)
 
         course_ids = course_ids.split(',')
 
-        call_command('migrate_course', *course_ids, commit=commit, stdout=out, stderr=err)
+        print user.access_token
+        call_command('migrate_course', *course_ids, access_token=user.access_token, commit=commit,
+                     settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
 
         # Format the output for display
         output = 'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),

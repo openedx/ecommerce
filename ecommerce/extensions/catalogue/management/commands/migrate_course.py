@@ -1,6 +1,5 @@
 import logging
 from optparse import make_option
-from urlparse import urljoin
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -56,42 +55,54 @@ class MigratedCourse(object):
 
         self._unsaved_stock_records = {}
 
-    def load_from_lms(self):
+    def load_from_lms(self, access_token):
         """
         Loads course products from the LMS.
 
         Loaded data is NOT persisted until the save() method is called.
         """
-        name, modes = self._retrieve_data_from_lms()
+        name, modes = self._retrieve_data_from_lms(access_token)
         self.course.name = name
         self._get_products(name, modes)
 
-    def _retrieve_data_from_lms(self):
+    def _build_lms_url(self, path):
+        # We avoid using urljoin here because it URL-encodes the path, and some LMS APIs
+        # are not capable of decoding these values.
+        host = settings.LMS_URL_ROOT.strip('/')
+        return '{host}/{path}'.format(host=host, path=path)
+
+    def _retrieve_data_from_lms(self, access_token):
         """
         Retrieves the course name and modes from the LMS.
         """
         headers = {
             'Accept': 'application/json',
-            'X-Edx-Api-Key': settings.EDX_API_KEY
+            'Authorization': 'Bearer ' + access_token
         }
 
         # Get course name from Course Structure API
-        url = urljoin(settings.LMS_URL_ROOT, 'api/course_structure/v0/courses/{}/'.format(self.course_id))
+        url = self._build_lms_url('api/course_structure/v0/courses/{}/'.format(self.course_id))
         response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            raise Exception('Unable to retrieve course name: [{status}] - {body}'.format(status=response.status_code,
+                                                                                         body=response.content))
+
         data = response.json()
         logger.debug(data)
         course_name = data['name']
 
-        # TODO Handle non-200 responses and other errors
-
         # Get modes and pricing from Enrollment API
-        url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(self.course_id))
+        url = self._build_lms_url('api/enrollment/v1/course/{}'.format(self.course_id))
         response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            raise Exception('Unable to retrieve course modes: [{status}] - {body}'.format(status=response.status_code,
+                                                                                          body=response.content))
+
         data = response.json()
         logger.debug(data)
         modes = data['course_modes']
-
-        # TODO Handle non-200 responses and other errors
 
         return course_name, modes
 
@@ -179,6 +190,11 @@ class Command(BaseCommand):
     help = 'Migrate course modes and pricing from LMS to Oscar.'
 
     option_list = BaseCommand.option_list + (
+        make_option('--access_token',
+                    action='store',
+                    dest='access_token',
+                    default=None,
+                    help='OAuth2 access token used to authenticate against the LMS APIs.'),
         make_option('--commit',
                     action='store_true',
                     dest='commit',
@@ -189,12 +205,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         course_ids = args
+        access_token = options.get('access_token')
+        if not access_token:
+            logger.error('Courses cannot be migrated if no access token is supplied.')
+            return
 
         for course_id in course_ids:
             course_id = unicode(course_id)
             try:
                 migrated_course = MigratedCourse(course_id)
-                migrated_course.load_from_lms()
+                migrated_course.load_from_lms(access_token)
 
                 course = migrated_course.course
                 msg = 'Retrieved info for {0} ({1}):\n'.format(course.id, course.name)
@@ -203,7 +223,7 @@ class Command(BaseCommand):
                     stock_record = migrated_course._unsaved_stock_records[seat_type]  # pylint: disable=protected-access
                     data = (seat_type, seat.attr.id_verification_required,
                             '{0} {1}'.format(stock_record.price_currency, stock_record.price_excl_tax),
-                            stock_record.partner_sku)
+                            stock_record.partner_sku, seat.slug)
                     msg += '\t{}\n'.format(data)
 
                 logger.info(msg)
