@@ -29,6 +29,7 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
+
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 Source = get_model('payment', 'Source')
@@ -114,7 +115,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             u'signed_date_time': self.PI_DAY.strftime(ISO_8601_FORMAT),
             u'locale': settings.LANGUAGE_CODE,
             u'transaction_type': u'sale',
-            u'reference_number': unicode(self.basket.id),
+            u'reference_number': self.basket.order_number,
             u'amount': unicode(self.basket.total_incl_tax),
             u'currency': self.basket.currency,
             u'consumer_id': self.basket.owner.username,

@@ -1,5 +1,4 @@
 """ CyberSource payment processing. """
-
 import datetime
 from decimal import Decimal
 import logging
@@ -18,6 +17,7 @@ from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, Inva
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,10 +82,11 @@ class Cybersource(BasePaymentProcessor):
             u'signed_date_time': datetime.datetime.utcnow().strftime(ISO_8601_FORMAT),
             u'locale': self.language_code,
             u'transaction_type': u'sale',
-            u'reference_number': unicode(basket.id),
+            u'reference_number': basket.order_number,
             u'amount': unicode(basket.total_incl_tax),
             u'currency': basket.currency,
             u'consumer_id': basket.owner.username,
+            # TODO: Update once LMS receipt page is able to look up orders by order number.
             u'override_custom_receipt_page': u'{}?basket_id={}'.format(self.receipt_page_url, basket.id),
             u'override_custom_cancel_page': self.cancel_page_url,
         }
@@ -244,7 +245,7 @@ class Cybersource(BasePaymentProcessor):
             purchase_totals.currency = currency
             purchase_totals.grandTotalAmount = unicode(amount)
 
-            response = client.service.runTransaction(merchantID=self.merchant_id, merchantReferenceCode=order.basket.id,
+            response = client.service.runTransaction(merchantID=self.merchant_id, merchantReferenceCode=order.number,
                                                      orderRequestToken=order_request_token,
                                                      ccCreditService=credit_service,
                                                      purchaseTotals=purchase_totals)

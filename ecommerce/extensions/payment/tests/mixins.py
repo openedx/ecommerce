@@ -12,6 +12,7 @@ from suds.sudsobject import Factory
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
 
+
 Order = get_model('order', 'Order')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -99,7 +100,7 @@ class CybersourceMixin(object):
                               **kwargs):
         """ Generates a dict containing the API reply fields expected to be received from CyberSource. """
 
-        req_reference_number = kwargs.get('req_reference_number', unicode(basket.id))
+        req_reference_number = kwargs.get('req_reference_number', basket.order_number)
         total = unicode(basket.total_incl_tax)
         auth_amount = auth_amount or total
         notification = {
@@ -206,7 +207,6 @@ class PaypalMixin(object):
     def mock_payment_creation_response(self, basket, state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL,
                                        find=False):
         total = unicode(basket.total_incl_tax)
-
         payment_creation_response = {
             u'create_time': u'2015-05-04T18:18:27Z',
             u'id': self.PAYMENT_ID,
@@ -249,7 +249,7 @@ class PaypalMixin(object):
                         for line in basket.all_lines()
                     ],
                 },
-                u'invoice_number': unicode(basket.id),
+                u'invoice_number': basket.order_number,
                 u'related_resources': []
             }],
             u'update_time': u'2015-05-04T18:18:27Z'
@@ -275,7 +275,6 @@ class PaypalMixin(object):
 
     def mock_payment_execution_response(self, basket, state=PAYMENT_EXECUTION_STATE):
         total = unicode(basket.total_incl_tax)
-
         payment_execution_response = {
             u'create_time': u'2015-05-04T15:55:27Z',
             u'id': self.PAYMENT_ID,
@@ -324,7 +323,7 @@ class PaypalMixin(object):
                         for line in basket.all_lines()
                     ],
                 },
-                u'invoice_number': unicode(basket.id),
+                u'invoice_number': basket.order_number,
                 u'related_resources': [{
                     u'sale': {
                         u'amount': {
@@ -381,4 +380,4 @@ class PaypalMixin(object):
         mode = settings.PAYMENT_PROCESSOR_CONFIG['paypal']['mode']
         root = u'https://api.sandbox.paypal.com' if mode == 'sandbox' else u'https://api.paypal.com'
 
-        return root + path
+        return urljoin(root, path)

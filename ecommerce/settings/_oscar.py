@@ -24,6 +24,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.refund',
 ] + get_core_apps([
     'ecommerce.extensions.analytics',
+    'ecommerce.extensions.basket',
     'ecommerce.extensions.catalogue',
     'ecommerce.extensions.checkout',
     'ecommerce.extensions.dashboard',

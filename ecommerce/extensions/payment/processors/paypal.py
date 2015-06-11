@@ -1,5 +1,4 @@
 """ PayPal payment processing. """
-
 from decimal import Decimal
 import logging
 from urlparse import urljoin
@@ -12,6 +11,7 @@ import paypalrestsdk
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class Paypal(BasePaymentProcessor):
                         for line in basket.all_lines()
                     ],
                 },
-                'invoice_number': unicode(basket.id),
+                'invoice_number': basket.order_number,
             }],
         }
 

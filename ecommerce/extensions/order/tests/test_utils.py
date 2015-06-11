@@ -1,6 +1,5 @@
 """Test Order Utility classes """
-from unittest import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.extensions.order.utils import OrderNumberGenerator
@@ -9,15 +8,26 @@ from ecommerce.extensions.order.utils import OrderNumberGenerator
 class UtilsTest(TestCase):
     """Unit tests for the order utility functions and classes. """
 
-    ORDER_NUMBER_PREFIX = "Zoidberg"
+    ORDER_NUMBER_PREFIX = 'FOO'
 
     @override_settings(ORDER_NUMBER_PREFIX=ORDER_NUMBER_PREFIX)
-    def create_order_number(self):
-        """Test creating order numbers"""
-        basket = BasketFactory()
-        next_basket = BasketFactory()
-        new_order_number = OrderNumberGenerator.order_number(basket)
-        next_order_number = OrderNumberGenerator.order_number(next_basket)
-        self.assertIn(self.ORDER_NUMBER_PREFIX, new_order_number)
-        self.assertIn(self.ORDER_NUMBER_PREFIX, next_order_number)
-        self.assertNotEqual(new_order_number, next_order_number)
+    def test_order_number_generation(self):
+        """
+        Verify that order numbers are generated correctly, and that they can
+        be converted back into basket IDs when necessary.
+        """
+        first_basket = BasketFactory()
+        second_basket = BasketFactory()
+
+        first_order_number = OrderNumberGenerator().order_number(first_basket)
+        second_order_number = OrderNumberGenerator().order_number(second_basket)
+
+        self.assertIn(self.ORDER_NUMBER_PREFIX, first_order_number)
+        self.assertIn(self.ORDER_NUMBER_PREFIX, second_order_number)
+        self.assertNotEqual(first_order_number, second_order_number)
+
+        first_basket_id = OrderNumberGenerator().basket_id(first_order_number)
+        second_basket_id = OrderNumberGenerator().basket_id(second_order_number)
+
+        self.assertEqual(first_basket_id, first_basket.id)
+        self.assertEqual(second_basket_id, second_basket.id)
