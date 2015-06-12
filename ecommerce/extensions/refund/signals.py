@@ -29,8 +29,12 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
             'currency': refund.currency,
             'products': [
                 {
-                    'id': line.order_line.upc,
-                    'sku': line.order_line.partner_sku,
+                    # For backwards-compatibility with older events the `sku` field is (ab)used to
+                    # store the product's `certificate_type`, while the `id` field holds the product's
+                    # SKU. Marketing is aware that this approach will not scale once we start selling
+                    # products other than courses, and will need to change in the future.
+                    'id': line.order_line.partner_sku,
+                    'sku': line.order_line.product.attr.certificate_type,
                     'name': line.order_line.product.title,
                     'price': str(line.line_credit_excl_tax),
                     'quantity': -1 * line.quantity,

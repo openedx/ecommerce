@@ -26,8 +26,12 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             'currency': order.currency,
             'products': [
                 {
-                    'id': line.upc,
-                    'sku': line.partner_sku,
+                    # For backwards-compatibility with older events the `sku` field is (ab)used to
+                    # store the product's `certificate_type`, while the `id` field holds the product's
+                    # SKU. Marketing is aware that this approach will not scale once we start selling
+                    # products other than courses, and will need to change in the future.
+                    'id': line.partner_sku,
+                    'sku': line.product.attr.certificate_type,
                     'name': line.product.title,
                     'price': str(line.line_price_excl_tax),
                     'quantity': line.quantity,
