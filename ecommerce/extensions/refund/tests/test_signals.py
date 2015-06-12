@@ -42,6 +42,18 @@ class RefundTrackingTests(BusinessIntelligenceMixin, CourseCatalogTestMixin, Ref
             self.refund.total_credit_excl_tax
         )
 
+    def test_successful_zero_dollar_refund_no_tracking(self, mock_track):
+        """
+        Verify that tracking events are not emitted for refunds corresponding
+        to a total credit of 0.
+        """
+        order = self.create_order(free=True)
+        create_refunds([order], self.course_id)
+
+        # Verify that no business intelligence event was emitted. Refunds corresponding
+        # to a total credit of 0 are automatically approved upon creation.
+        self.assertFalse(mock_track.called)
+
     def test_successful_refund_tracking_without_context(self, mock_track):
         """Verify that a successfully placed refund is tracked, even if no tracking context is available."""
         # Approve the refund.

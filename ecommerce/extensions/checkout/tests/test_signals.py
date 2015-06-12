@@ -1,57 +1,26 @@
 """
 Tests for the ecommerce.extensions.checkout.mixins module.
 """
-from decimal import Decimal
-
 from django.test import TestCase, override_settings
 from mock import patch
-from oscar.test import factories
+from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 
 
 @override_settings(SEGMENT_KEY='dummy-key')
 @patch('analytics.track')
-class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, TestCase):
+class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
     """
-    ORDER_NUMBER = '321'
-    CURRENCY = 'test-currency'
-    TOTAL = '9.99'
-
     def setUp(self):
-        # create product for test basket / order
-        product_class = factories.ProductClassFactory(name='Seat', requires_shipping=False, track_stock=False)
-        product_class.save()
-        attr = factories.ProductAttributeFactory(code='course_key', product_class=product_class, type="text")
-        attr.save()
-        parent_product = factories.ProductFactory(
-            upc='dummy-parent-product',
-            title='dummy-title',
-            product_class=product_class,
-            structure='parent',
-        )
-        child_product = factories.ProductFactory(
-            upc='dummy-child-product',
-            title='test-product-title',
-            structure='child',
-            parent=parent_product,
-        )
-        child_product.attr.course_key = 'dummy-course-key'
-        child_product.save()
+        super(EdxOrderPlacementMixinTests, self).setUp()
 
-        # create test user and set up basket / order
-        self.user = factories.UserFactory()
-        basket = factories.BasketFactory(total_incl_tax=Decimal('10.01'), total_excl_tax=Decimal(self.TOTAL))
-        basket.add_product(child_product)
-        self.order = factories.create_order(
-            user=self.user,
-            basket=basket,
-            currency=self.CURRENCY,
-            number=self.ORDER_NUMBER
-        )
+        self.user = UserFactory()
+        self.order = self.create_order()
 
     def test_handle_successful_order(self, mock_track):
         """
@@ -70,10 +39,18 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, TestCase):
             self.order,
             tracking_context['lms_user_id'],
             tracking_context['lms_client_id'],
-            self.ORDER_NUMBER,
-            self.CURRENCY,
-            self.TOTAL
+            self.order.number,
+            self.order.currency,
+            self.order.total_excl_tax
         )
+
+    def test_handle_successful_free_order(self, mock_track):
+        """Verify that tracking events are not emitted for free orders."""
+        order = self.create_order(free=True)
+        EdxOrderPlacementMixin().handle_successful_order(order)
+
+        # Verify that no event was emitted.
+        self.assertFalse(mock_track.called)
 
     def test_handle_successful_order_no_context(self, mock_track):
         """
@@ -89,9 +66,9 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, TestCase):
             self.order,
             'ecommerce-{}'.format(self.user.id),
             None,
-            self.ORDER_NUMBER,
-            self.CURRENCY,
-            self.TOTAL
+            self.order.number,
+            self.order.currency,
+            self.order.total_excl_tax
         )
 
     @override_settings(SEGMENT_KEY=None)
