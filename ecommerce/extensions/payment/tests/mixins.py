@@ -24,9 +24,14 @@ class PaymentEventsMixin(object):
 
     def assert_processor_response_recorded(self, processor_name, transaction_id, response, basket=None):
         """ Ensures a PaymentProcessorResponse exists for the corresponding processor and response. """
-        ppr = PaymentProcessorResponse.objects.get(processor_name=processor_name, transaction_id=transaction_id)
+        ppr = PaymentProcessorResponse.objects.filter(
+            processor_name=processor_name,
+            transaction_id=transaction_id
+        ).latest('created')
         self.assertEqual(ppr.response, response)
         self.assertEqual(ppr.basket, basket)
+
+        return ppr.id
 
     def assert_valid_payment_event_fields(self, payment_event, amount, payment_event_type, processor_name, reference):
         """ Ensures the given PaymentEvent's fields match the specified values. """
