@@ -2,6 +2,7 @@
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -66,8 +67,9 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
         except (ValueError, ObjectDoesNotExist):
             return None
 
+    @transaction.non_atomic_requests
     def post(self, request):
-        """ Handle the response we've been given from the processor. """
+        """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
 
         # Note (CCB): Orders should not be created until the payment processor has validated the response's signature.
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
@@ -81,49 +83,71 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             order_number = cybersource_response.get('req_reference_number')
             basket_id = OrderNumberGenerator().basket_id(order_number)
 
+            logger.info(
+                'Received CyberSource merchant notification for transaction [%s], associated with basket [%d].',
+                transaction_id,
+                basket_id
+            )
+
             basket = self._get_basket(basket_id)
 
             if not basket:
                 logger.error('Received payment for non-existent basket [%s].', basket_id)
-                return HttpResponse()
+                return HttpResponse(status=400)
         finally:
             # Store the response in the database regardless of its authenticity.
             ppr = self.payment_processor.record_processor_response(cybersource_response, transaction_id=transaction_id,
                                                                    basket=basket)
 
         try:
-            self.handle_payment(cybersource_response, basket)
-        except InvalidSignatureError:
-            logger.exception(
-                'Received an invalid CyberSource response. The payment response was recorded in entry [%d].', ppr.id)
-            return HttpResponse(status=400)
-        except PaymentError:
-            logger.exception(
-                'CyberSource payment failed for basket [%d]. The payment response was recorded in entry [%d].',
-                basket.id, ppr.id)
-            return HttpResponse()
-
-        # Note (CCB): In the future, if we do end up shipping physical products, we will need to properly implement
-        # shipping methods. See http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
-        shipping_method = NoShippingRequired()
-        shipping_charge = shipping_method.calculate(basket)
-
-        # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization, thus we use
-        # the amounts stored in the database rather than those received from the payment processor.
-        order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-
-        billing_address = self._get_billing_address(cybersource_response)
+            # Explicitly delimit operations which will be rolled back if an exception occurs.
+            with transaction.atomic():
+                try:
+                    self.handle_payment(cybersource_response, basket)
+                except InvalidSignatureError:
+                    logger.exception(
+                        'Received an invalid CyberSource response. The payment response was recorded in entry [%d].',
+                        ppr.id
+                    )
+                    return HttpResponse(status=400)
+                except PaymentError:
+                    logger.exception(
+                        'CyberSource payment failed for basket [%d]. The payment response was recorded in entry [%d].',
+                        basket.id,
+                        ppr.id
+                    )
+                    return HttpResponse()
+        except:  # pylint: disable=bare-except
+            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
+            return HttpResponse(status=500)
 
         try:
-            user = basket.owner
-            self.handle_order_placement(order_number, user, basket, None, shipping_method, shipping_charge,
-                                        billing_address, order_total)
-        except UnableToPlaceOrder:
-            logger.exception('Payment was received, but an order was not created for basket [%d].', basket.id)
-            # Ensure we return, in case future changes introduce post-order placement functionality.
-            return HttpResponse()
+            with transaction.atomic():
+                # Note (CCB): In the future, if we do end up shipping physical products, we will need to
+                # properly implement shipping methods. For more, see
+                # http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
+                shipping_method = NoShippingRequired()
+                shipping_charge = shipping_method.calculate(basket)
 
-        return HttpResponse()
+                # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
+                # thus we use the amounts stored in the database rather than those received from the payment processor.
+                order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+                billing_address = self._get_billing_address(cybersource_response)
+
+                try:
+                    user = basket.owner
+                    self.handle_order_placement(order_number, user, basket, None, shipping_method, shipping_charge,
+                                                billing_address, order_total)
+                except UnableToPlaceOrder:
+                    logger.exception('Payment was received, but an order was not created for basket [%d].', basket.id)
+                    # Ensure we return, in case future changes introduce post-order placement functionality.
+                    return HttpResponse(status=500)
+
+                return HttpResponse()
+        except:  # pylint: disable=bare-except
+            logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
+            return HttpResponse(status=500)
 
 
 class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
@@ -141,6 +165,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
         return basket
 
+    @transaction.non_atomic_requests
     def get(self, request):
         """Handle an incoming user returned to us by PayPal after approving payment."""
         payment_id = request.GET.get('paymentId')
@@ -152,32 +177,42 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_url, basket.id)
 
         try:
-            self.handle_payment(paypal_response, basket)
-        except PaymentError:
+            with transaction.atomic():
+                try:
+                    self.handle_payment(paypal_response, basket)
+                except PaymentError:
+                    return redirect(receipt_url)
+        except:  # pylint: disable=bare-except
+            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
 
-        shipping_method = NoShippingRequired()
-        shipping_charge = shipping_method.calculate(basket)
-        order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-
         try:
-            user = basket.owner
-            # Given a basket, order number generation is idempotent. Although we've already
-            # generated this order number once before, it's faster to generate it again
-            # than to retrieve an invoice number from PayPal.
-            order_number = basket.order_number
+            with transaction.atomic():
+                shipping_method = NoShippingRequired()
+                shipping_charge = shipping_method.calculate(basket)
+                order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
 
-            self.handle_order_placement(
-                order_number=order_number,
-                user=user,
-                basket=basket,
-                shipping_address=None,
-                shipping_method=shipping_method,
-                shipping_charge=shipping_charge,
-                billing_address=None,
-                order_total=order_total
-            )
-        except UnableToPlaceOrder:
-            logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+                try:
+                    user = basket.owner
+                    # Given a basket, order number generation is idempotent. Although we've already
+                    # generated this order number once before, it's faster to generate it again
+                    # than to retrieve an invoice number from PayPal.
+                    order_number = basket.order_number
 
-        return redirect(receipt_url)
+                    self.handle_order_placement(
+                        order_number=order_number,
+                        user=user,
+                        basket=basket,
+                        shipping_address=None,
+                        shipping_method=shipping_method,
+                        shipping_charge=shipping_charge,
+                        billing_address=None,
+                        order_total=order_total
+                    )
+                except UnableToPlaceOrder:
+                    logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+
+                return redirect(receipt_url)
+        except:  # pylint: disable=bare-except
+            logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
+            return redirect(receipt_url)

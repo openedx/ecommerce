@@ -12,8 +12,8 @@ from oscar.test import factories
 from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin

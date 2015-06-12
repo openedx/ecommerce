@@ -12,6 +12,7 @@ from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
+from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
@@ -47,7 +48,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         self.processor = Cybersource()
         self.processor_name = self.processor.NAME
 
-    def assert_payment_data_recorded(self, notification):
+    def _assert_payment_data_recorded(self, notification):
         """ Ensure PaymentEvent, PaymentProcessorResponse, and Source objects are created for the basket. """
 
         # Ensure the response is stored in the database
@@ -63,6 +64,34 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         # Validate that PaymentEvents exist
         paid_type = PaymentEventType.objects.get(code='paid')
         self.assert_payment_event_exists(self.basket, paid_type, reference, self.processor_name)
+
+    def _assert_processing_failure(self, notification, status_code, error_message):
+        """Verify that payment processing operations fail gracefully."""
+        logger_name = 'ecommerce.extensions.payment.views'
+        with LogCapture(logger_name) as l:
+            response = self.client.post(reverse('cybersource_notify'), notification)
+
+            self.assertEqual(response.status_code, status_code)
+
+            self.assert_processor_response_recorded(
+                self.processor_name,
+                notification[u'transaction_id'],
+                notification,
+                basket=self.basket
+            )
+
+            l.check(
+                (
+                    logger_name,
+                    'INFO',
+                    'Received CyberSource merchant notification for transaction [{transaction_id}], '
+                    'associated with basket [{basket_id}].'.format(
+                        transaction_id=notification[u'transaction_id'],
+                        basket_id=self.basket.id
+                    )
+                ),
+                (logger_name, 'ERROR', error_message)
+            )
 
     # Disable the normal signal receivers so that we can verify the state of the created order.
     @mute_signals(post_checkout)
@@ -104,7 +133,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         self.assertEqual(response.status_code, 200)
 
         # Validate the payment data was recorded for auditing
-        self.assert_payment_data_recorded(notification)
+        self._assert_payment_data_recorded(notification)
 
         # The basket should be marked as submitted. Refresh with data from the database.
         basket = Basket.objects.get(id=self.basket.id)
@@ -131,6 +160,34 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
                                                 basket=self.basket)
 
+    def test_payment_handling_error(self):
+        """
+        Verify that CyberSource's merchant notification is saved to the database despite an error handling payment.
+        """
+        notification = self.generate_notification(
+            self.processor.secret_key,
+            self.basket,
+            billing_address=self.billing_address,
+        )
+
+        with mock.patch.object(CybersourceNotifyView, 'handle_payment',
+                               side_effect=PaymentError) as fake_handle_payment:
+            error_message = 'CyberSource payment failed for basket [{basket_id}]. '\
+                            'The payment response was recorded in entry [{response_id}].'.format(
+                                basket_id=self.basket.id,
+                                response_id=1
+                            )
+            self._assert_processing_failure(notification, 200, error_message)
+            self.assertTrue(fake_handle_payment.called)
+
+        with mock.patch.object(CybersourceNotifyView, 'handle_payment',
+                               side_effect=KeyError) as fake_handle_payment:
+            error_message = 'Attempts to handle payment for basket [{basket_id}] failed.'.format(
+                basket_id=self.basket.id
+            )
+            self._assert_processing_failure(notification, 500, error_message)
+            self.assertTrue(fake_handle_payment.called)
+
     def test_unable_to_place_order(self):
         """ When payment is accepted, but an order cannot be placed, log an error and return HTTP 200. """
 
@@ -140,14 +197,22 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
             billing_address=self.billing_address,
         )
 
-        with mock.patch.object(CybersourceNotifyView, 'handle_order_placement', side_effect=UnableToPlaceOrder):
-            response = self.client.post(reverse('cybersource_notify'), notification)
+        # Verify that anticipated errors are handled gracefully.
+        with mock.patch.object(CybersourceNotifyView, 'handle_order_placement',
+                               side_effect=UnableToPlaceOrder) as fake_handle_order_placement:
+            error_message = 'Payment was received, but an order was not created for basket [{basket_id}].'.format(
+                basket_id=self.basket.id,
+            )
+            self._assert_processing_failure(notification, 500, error_message)
+            self.assertTrue(fake_handle_order_placement.called)
 
-        # The view should always return 200
-        self.assertEqual(response.status_code, 200)
-
-        self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
-                                                basket=self.basket)
+        # Verify that unanticipated errors are also handled gracefully.
+        with mock.patch.object(CybersourceNotifyView, 'handle_order_placement',
+                               side_effect=KeyError) as fake_handle_order_placement:
+            error_message = 'Payment was received, but attempts to create an order for '\
+                            'basket [{basket_id}] failed.'.format(basket_id=self.basket.id)
+            self._assert_processing_failure(notification, 500, error_message)
+            self.assertTrue(fake_handle_order_placement.called)
 
     def test_invalid_basket(self):
         """ When payment is accepted for a non-existent basket, log an error and record the response. """
@@ -161,7 +226,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         )
         response = self.client.post(reverse('cybersource_notify'), notification)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
         self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification)
 
     @ddt.data(('line2', 'foo'), ('state', 'bar'))
@@ -249,8 +314,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.mock_payment_creation_response(self.basket)
         self.processor.get_transaction_parameters(self.basket, request=self.request)
 
-        self.mock_payment_creation_response(self.basket, find=True)
-        self.mock_payment_execution_response(self.basket)
+        creation_response = self.mock_payment_creation_response(self.basket, find=True)
+        execution_response = self.mock_payment_execution_response(self.basket)
 
         response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
         self.assertRedirects(
@@ -258,6 +323,34 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             u'{}?basket_id={}'.format(self.processor.receipt_url, self.basket.id),
             fetch_redirect_response=False
         )
+
+        return creation_response, execution_response
+
+    def _assert_order_placement_failure(self, error_message):
+        """Verify that order placement fails gracefully."""
+        logger_name = 'ecommerce.extensions.payment.views'
+        with LogCapture(logger_name) as l:
+            __, execution_response = self._assert_execution_redirect()
+
+            # Verify that the payment execution response was recorded despite the error
+            self.assert_processor_response_recorded(
+                self.processor_name,
+                self.PAYMENT_ID,
+                execution_response,
+                basket=self.basket
+            )
+
+            l.check(
+                (
+                    logger_name,
+                    'INFO',
+                    'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
+                        payment_id=self.PAYMENT_ID,
+                        payer_id=self.PAYER_ID
+                    )
+                ),
+                (logger_name, 'ERROR', error_message)
+            )
 
     def test_payment_execution(self):
         """Verify that a user who has approved payment is redirected to the configured receipt page."""
@@ -270,8 +363,65 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_payment',
                                side_effect=PaymentError) as fake_handle_payment:
-            self._assert_execution_redirect()
-            self.assertTrue(fake_handle_payment.called)
+            logger_name = 'ecommerce.extensions.payment.views'
+            with LogCapture(logger_name) as l:
+                creation_response, __ = self._assert_execution_redirect()
+                self.assertTrue(fake_handle_payment.called)
+
+                # Verify that the payment creation response was recorded despite the error
+                self.assert_processor_response_recorded(
+                    self.processor_name,
+                    self.PAYMENT_ID,
+                    creation_response,
+                    basket=self.basket
+                )
+
+                l.check(
+                    (
+                        logger_name,
+                        'INFO',
+                        'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
+                            payment_id=self.PAYMENT_ID,
+                            payer_id=self.PAYER_ID
+                        )
+                    ),
+                )
+
+    def test_unanticipated_error_during_payment_handling(self):
+        """
+        Verify that a user who has approved payment is redirected to the configured receipt page when payment
+        execution fails in an unanticipated manner.
+        """
+        with mock.patch.object(PaypalPaymentExecutionView, 'handle_payment',
+                               side_effect=KeyError) as fake_handle_payment:
+            logger_name = 'ecommerce.extensions.payment.views'
+            with LogCapture(logger_name) as l:
+                creation_response, __ = self._assert_execution_redirect()
+                self.assertTrue(fake_handle_payment.called)
+
+                # Verify that the payment creation response was recorded despite the error
+                self.assert_processor_response_recorded(
+                    self.processor_name,
+                    self.PAYMENT_ID,
+                    creation_response,
+                    basket=self.basket
+                )
+
+                l.check(
+                    (
+                        logger_name,
+                        'INFO',
+                        'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
+                            payment_id=self.PAYMENT_ID,
+                            payer_id=self.PAYER_ID
+                        )
+                    ),
+                    (
+                        logger_name,
+                        'ERROR',
+                        'Attempts to handle payment for basket [{basket_id}] failed.'.format(basket_id=self.basket.id)
+                    ),
+                )
 
     def test_unable_to_place_order(self):
         """
@@ -280,5 +430,17 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
                                side_effect=UnableToPlaceOrder) as fake_handle_order_placement:
-            self._assert_execution_redirect()
+            error_message = 'Payment was executed, but an order was not created for basket [{basket_id}].'.format(
+                basket_id=self.basket.id
+            )
+            self._assert_order_placement_failure(error_message)
+            self.assertTrue(fake_handle_order_placement.called)
+
+    def test_unanticipated_error_during_order_placement(self):
+        """Verify that unanticipated errors during order placement are handled gracefully."""
+        with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
+                               side_effect=KeyError) as fake_handle_order_placement:
+            error_message = 'Payment was received, but attempts to create an order for '\
+                            'basket [{basket_id}] failed.'.format(basket_id=self.basket.id)
+            self._assert_order_placement_failure(error_message)
             self.assertTrue(fake_handle_order_placement.called)
