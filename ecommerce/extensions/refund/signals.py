@@ -12,7 +12,7 @@ post_refund = Signal(providing_args=["refund"])
 @log_exceptions("Failed to emit tracking event upon refund completion.")
 def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=unused-argument
     """Emit a tracking event when a refund is completed."""
-    if not is_segment_configured():
+    if not (is_segment_configured() and refund.total_credit_excl_tax > 0):
         return
 
     user_tracking_id, lms_client_id = parse_tracking_context(refund.user)

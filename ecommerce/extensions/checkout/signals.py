@@ -12,7 +12,7 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 @log_exceptions("Failed to emit tracking event upon order completion.")
 def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unused-argument
     """Emit a tracking event when an order is placed."""
-    if not is_segment_configured():
+    if not (is_segment_configured() and order.total_excl_tax > 0):
         return
 
     user_tracking_id, lms_client_id = parse_tracking_context(order.user)

@@ -175,7 +175,7 @@ class BusinessIntelligenceMixin(object):
         tracked_products_dict = {product['sku']: product for product in event_payload['products']}
 
         if model_name == 'Order':
-            self.assertEqual(event_payload['total'], total)
+            self.assertEqual(event_payload['total'], str(total))
 
             for line in lines:
                 tracked_product = tracked_products_dict.get(line.partner_sku)
