@@ -172,7 +172,7 @@ class BusinessIntelligenceMixin(object):
         self.assertEqual(len(lines), len(event_payload['products']))
 
         model_name = instance.__class__.__name__
-        tracked_products_dict = {product['sku']: product for product in event_payload['products']}
+        tracked_products_dict = {product['id']: product for product in event_payload['products']}
 
         if model_name == 'Order':
             self.assertEqual(event_payload['total'], str(total))
@@ -183,6 +183,7 @@ class BusinessIntelligenceMixin(object):
                 self.assertEqual(line.product.title, tracked_product['name'])
                 self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
                 self.assertEqual(line.quantity, tracked_product['quantity'])
+                self.assertEqual(line.product.attr.certificate_type, tracked_product['sku'])
                 self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
         elif model_name == 'Refund':
             self.assertEqual(event_payload['total'], '-{}'.format(total))
@@ -193,6 +194,7 @@ class BusinessIntelligenceMixin(object):
                 self.assertEqual(line.order_line.product.title, tracked_product['name'])
                 self.assertEqual(str(line.line_credit_excl_tax), tracked_product['price'])
                 self.assertEqual(-1 * line.quantity, tracked_product['quantity'])
+                self.assertEqual(line.order_line.product.attr.certificate_type, tracked_product['sku'])
                 self.assertEqual(line.order_line.product.get_product_class().name, tracked_product['category'])
         else:
             # Payload validation is currently limited to order and refund events
