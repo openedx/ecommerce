@@ -1,7 +1,9 @@
 analytics-python==1.0.3
 Django==1.7.7
 django-appconf==0.6
+django-compressor==1.5
 django_extensions==1.5.5
+django-libsass==0.3
 django-oscar==1.0.2
 django_simple_history==1.6.1
 django-waffle==0.10

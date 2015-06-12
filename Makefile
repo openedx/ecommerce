@@ -1,3 +1,5 @@
+NODE_BIN=./node_modules/.bin
+
 help:
 	@echo '                                                                                     '
 	@echo 'Makefile for the edX ecommerce project.                                              '
@@ -20,7 +22,11 @@ help:
 	@echo '    make update_translations          install new translations from Transifex        '
 	@echo '                                                                                     '
 
-requirements:
+requirements.js:
+	npm install
+	$(NODE_BIN)/bower install
+
+requirements: requirements.js
 	pip install -qr requirements/local.txt --exists-action w
 	pip install -qr requirements/test.txt --exists-action w
 
@@ -44,6 +50,12 @@ quality:
 	pylint --rcfile=pylintrc ecommerce acceptance_tests
 
 validate: test_python quality
+
+static:
+	$(NODE_BIN)/r.js -o build.js
+	python manage.py collectstatic --noinput
+	python manage.py compress
+
 
 html_coverage:
 	coverage html && open htmlcov/index.html

@@ -1,0 +1,42 @@
+{# Base template for edX-specific pages. #}
+
+{% load i18n %}
+{% load compress %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock title %}</title>
+
+  {% compress css %}
+      <link rel="stylesheet" href="{% static 'sass/main.scss' %}" type="text/x-scss">
+  {% endcompress %}
+
+  {% compress css %}
+    {# This block is separated to better support browser caching. #}
+    {% block stylesheets %}
+    {% endblock %}
+  {% endcompress %}
+</head>
+<body>
+{% block content %}
+{% endblock content %}
+
+{% compress js %}
+    <script src="{% static 'bower_components/requirejs/require.js' %}"></script>
+    <script src="{% static 'js/config.js' %}"></script>
+
+    {# Note: django-compressor does not recognize the data-main attribute. Load the main script separately. #}
+    <script src="{% static 'js/common.js' %}"></script>
+{% endcompress %}
+
+{% compress js %}
+  {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
+     downloading a single, large file for each page. #}
+  {% block javascript %}
+  {% endblock javascript %}
+{% endcompress %}
+</body>
+</html>

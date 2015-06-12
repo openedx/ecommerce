@@ -25,9 +25,12 @@ pip-log.txt
 # Django
 default.db
 
-# Oscar
+# Static assets
 media/cache/
-assets
+assets/
+node_modules/
+ecommerce/static/bower_components/
+ecommerce/static/build/
 
 # Unit test / coverage reports
 .coverage

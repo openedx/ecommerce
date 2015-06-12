@@ -103,6 +103,7 @@ STATIC_URL = '/static/'
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = (
+    normpath(join(DJANGO_ROOT, 'static', 'build')),  # Check the r.js output directory first
     normpath(join(DJANGO_ROOT, 'static')),
 )
 
@@ -169,7 +170,7 @@ TEMPLATE_LOADERS = (
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
-    normpath(join(SITE_ROOT, 'templates')),
+    normpath(join(DJANGO_ROOT, 'templates')),
     # Templates which override default Oscar templates
     normpath(join(DJANGO_ROOT, 'templates/oscar')),
     OSCAR_MAIN_TEMPLATE_DIR,
@@ -251,7 +252,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     'ecommerce.user',
     'ecommerce.health',
-    'ecommerce.courses'
+    'ecommerce.courses',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
