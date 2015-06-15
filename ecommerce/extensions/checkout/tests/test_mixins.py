@@ -1,13 +1,19 @@
 """
 Tests for the ecommerce.extensions.checkout.mixins module.
 """
+from decimal import Decimal
+
 from django.test import TestCase, override_settings
-from mock import patch
+from mock import Mock, patch
 from oscar.test.newfactories import UserFactory
+from testfixtures import LogCapture
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
+
+
+LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
 
 @override_settings(SEGMENT_KEY='dummy-key')
@@ -22,6 +28,37 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         self.user = UserFactory()
         self.order = self.create_order()
 
+    def test_handle_payment_logging(self, __mock_track):
+        """
+        Ensure that we emit a log entry upon receipt of a payment notification.
+        """
+        mock_payment_event = Mock(
+            processor_name='test-processor-name',
+            reference='test-reference',
+            amount=Decimal('9.99'),
+        )
+        mock_handle_processor_response = Mock(return_value=(None, mock_payment_event))
+        mock_payment_processor = Mock(handle_processor_response=mock_handle_processor_response)
+
+        with patch(
+            'ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.payment_processor',
+            mock_payment_processor
+        ):
+            with LogCapture(LOGGER_NAME) as l:
+                EdxOrderPlacementMixin().handle_payment(Mock(), Mock(id='test-basket-id'))
+                l.check(
+                    (
+                        LOGGER_NAME,
+                        'INFO',
+                        'payment_received: processor_name="{}", reference="{}", amount="{}", basket_id="{}"'.format(
+                            'test-processor-name',
+                            'test-reference',
+                            '9.99',
+                            'test-basket-id',
+                        )
+                    )
+                )
+
     def test_handle_successful_order(self, mock_track):
         """
         Ensure that tracking events are fired with correct content when order
@@ -30,19 +67,32 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id'}
         self.user.tracking_context = tracking_context
         self.user.save()
-        EdxOrderPlacementMixin().handle_successful_order(self.order)
-        # ensure event is being tracked
-        self.assertTrue(mock_track.called)
-        # ensure event data is correct
-        self.assert_correct_event(
-            mock_track,
-            self.order,
-            tracking_context['lms_user_id'],
-            tracking_context['lms_client_id'],
-            self.order.number,
-            self.order.currency,
-            self.order.total_excl_tax
-        )
+
+        with LogCapture(LOGGER_NAME) as l:
+            EdxOrderPlacementMixin().handle_successful_order(self.order)
+            # ensure event is being tracked
+            self.assertTrue(mock_track.called)
+            # ensure event data is correct
+            self.assert_correct_event(
+                mock_track,
+                self.order,
+                tracking_context['lms_user_id'],
+                tracking_context['lms_client_id'],
+                self.order.number,
+                self.order.currency,
+                self.order.total_excl_tax
+            )
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'payment_applied: amount="{}", basket_id="{}", user_id="{}"'.format(
+                        self.order.total_excl_tax,
+                        self.order.basket.id,
+                        self.order.user.id,
+                    )
+                )
+            )
 
     def test_handle_successful_free_order(self, mock_track):
         """Verify that tracking events are not emitted for free orders."""
