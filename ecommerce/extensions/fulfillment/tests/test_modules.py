@@ -58,6 +58,17 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.COMPLETE, self.order.lines.all()[0].status)
 
+        actual = json.loads(httpretty.last_request().body)
+        expected = {
+            'user': self.order.user.username,
+            'is_active': True,
+            'mode': self.certificate_type,
+            'course_details': {
+                'course_id': self.course_id,
+            },
+        }
+        self.assertEqual(actual, expected)
+
     @override_settings(ENROLLMENT_API_URL='')
     def test_enrollment_module_not_configured(self):
         """Test that lines receive a configuration error status if fulfillment configuration is invalid."""
