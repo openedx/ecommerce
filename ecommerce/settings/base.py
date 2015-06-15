@@ -410,3 +410,6 @@ SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'ecommerce_language'
 # END COOKIE CONFIGURATION
+
+# Standard regex for course_id.
+COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+(/|\+)[^/+]+(/|\+)[^/]+)'

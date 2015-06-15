@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from django.views.generic import RedirectView
 from ecommerce.courses.views import CourseMigrationView
 
+
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 from ecommerce.user import views as user_views
 
@@ -51,6 +52,9 @@ urlpatterns = patterns(
         ),
         name='login'
     ),
+
+    # Credit app
+    url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
 
 )
 
