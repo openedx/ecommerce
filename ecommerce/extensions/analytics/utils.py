@@ -53,3 +53,26 @@ def log_exceptions(msg):
                 raise
         return wrapper
     return decorator
+
+
+def log_payment_received(processor_name, reference, amount, basket_id):
+    """Emit a log entry indicating that we were notified about a successful payment.
+
+    This should be called immediately after the notification has been received and interpreted (i.e.
+    after `handle_payment`).
+    """
+    logger.info(
+        'payment_received: processor_name="%s", reference="%s", amount="%s", basket_id="%s"',
+        processor_name,
+        reference,
+        amount,
+        basket_id,
+    )
+
+
+def log_payment_applied(amount, basket_id, user_id):
+    """Emit a log entry indicating that a payment was successfully applied to an order.
+
+    This should be called immediately after the order has been saved to db (i.e. after `handle_order_placement`).
+    """
+    logger.info('payment_applied: amount="%s", basket_id="%s", user_id="%s"', amount, basket_id, user_id)

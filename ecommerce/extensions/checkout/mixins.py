@@ -4,6 +4,7 @@ import abc
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class
 
+from ecommerce.extensions.analytics.utils import log_payment_received, log_payment_applied
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
@@ -35,8 +36,10 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
         self.add_payment_source(source)
         self.add_payment_event(payment_event)
+        log_payment_received(payment_event.processor_name, payment_event.reference, payment_event.amount, basket.id)
 
     def handle_successful_order(self, order):
         # Send a signal so that receivers can perform relevant tasks (e.g. fulfill the order).
         post_checkout.send_robust(sender=self, order=order)
+        log_payment_applied(order.total_excl_tax, order.basket.id, order.user.id)
         return order
