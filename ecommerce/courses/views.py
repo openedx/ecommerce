@@ -18,6 +18,7 @@ class CourseMigrationView(View):
 
     def get(self, request, *_args, **_kwargs):
         course_ids = request.GET.get('course_ids')
+        course_ids = course_ids.replace(' ', '+')   # Undo Django's URL decoding since we want the '+'.
         commit = request.GET.get('commit', False)
         commit = commit in ('1', 'true')
 
