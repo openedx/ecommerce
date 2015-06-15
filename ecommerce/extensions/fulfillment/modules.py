@@ -160,6 +160,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
             data = {
                 'user': order.user.username,
+                'is_active': True,
                 'mode': certificate_type,
                 'course_details': {
                     'course_id': course_key
