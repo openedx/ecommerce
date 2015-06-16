@@ -4,9 +4,17 @@ import os
 
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
-from django.views.generic import View
+from django.views.generic import View, ListView
+
+from ecommerce.courses.models import Course
 
 logger = logging.getLogger(__name__)
+
+
+class CourseAdminToolListView(ListView):
+    template_name = 'courses/list.html'
+    model = Course
+    context_object_name = 'courses'
 
 
 class CourseMigrationView(View):
