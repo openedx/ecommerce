@@ -2,6 +2,7 @@ import logging
 
 from django.db import models
 from oscar.core.loading import get_model
+from simple_history.models import HistoricalRecords
 
 logger = logging.getLogger(__name__)
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -10,6 +11,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 class Course(models.Model):
     id = models.CharField(null=False, max_length=255, primary_key=True, verbose_name='ID')
     name = models.CharField(null=False, max_length=255)
+    history = HistoricalRecords()
 
     @classmethod
     def is_mode_verified(cls, mode):
