@@ -1,0 +1,21 @@
+{
+  "name": "edx-ecommerce",
+  "homepage": "https://github.com/edx/ecommerce",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "~1.2.1",
+    "bootstrap-sass": "~3.3.4",
+    "jquery": "~1.11.3",
+    "jquery-cookie": "~1.4.1",
+    "requirejs": "~2.1.15",
+    "underscore": "~1.8.2",
+    "bootstrapaccessibilityplugin": "~1.0.4"
+  }
+}
