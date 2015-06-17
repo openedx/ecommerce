@@ -2,10 +2,26 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.dashboard.orders.views import OrderDetailView as CoreOrderDetailView
+from oscar.apps.dashboard.orders.views import (
+    OrderListView as CoreOrderListView, OrderDetailView as CoreOrderDetailView
+)
 from oscar.core.loading import get_model
 
+
 Refund = get_model('refund', 'Refund')
+
+
+class OrderListView(CoreOrderListView):
+    def get_queryset(self):
+        queryset = super(OrderListView, self).get_queryset()
+
+        form = self.form_class(self.request.GET)
+        if form.is_valid():
+            for field, value in form.cleaned_data.iteritems():
+                if field == 'username' and value:
+                    queryset = queryset.filter(user__username__istartswith=value)
+
+        return queryset
 
 
 class OrderDetailView(CoreOrderDetailView):

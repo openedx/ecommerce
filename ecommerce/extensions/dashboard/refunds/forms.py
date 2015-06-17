@@ -10,6 +10,8 @@ Refund = get_model('refund', 'Refund')
 
 class RefundSearchForm(forms.Form):
     id = forms.IntegerField(required=False, label=_('Refund ID'))
+    username = forms.CharField(required=False, label=_("Username"))
+
     status_choices = tuple([(status, status) for status in Refund.all_statuses()])
     status = forms.MultipleChoiceField(choices=status_choices, label=_("Status"), required=False)
 

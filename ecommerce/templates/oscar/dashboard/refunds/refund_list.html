@@ -49,7 +49,7 @@
 <div class="well">
     <form action="" method="get" class="form-inline" id="search_form">
         {% for field in form %}
-            {% if field.id_for_label == 'id_id' %}
+            {% if field.id_for_label == 'id_username' %}
                 {% if field.is_hidden %}
                     {{ field }}
                 {% else %}
@@ -99,7 +99,7 @@
                     <th>{% trans "Total Credit" %}</th>
                     <th>{% trans "Number of Items" %}</th>
                     <th>{% trans "Status" %}</th>
-                    <th>{% trans "Customer" %}</th>
+                    <th>{% trans "Username" %}</th>
                     <th>{% trans "Created" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
@@ -114,7 +114,11 @@
                     <td>{{ refund.num_items }}</td>
                     <td class="refund-status">{{ refund.status }}</td>
                     <td>
-                        <a href="{% url 'dashboard:user-detail' pk=refund.user.id %}">{{ refund.user.get_full_name|default:"-" }}</a>
+                        {% if refund.user %}
+                            <a href="{% url 'dashboard:user-detail' pk=refund.user.id %}">{{ refund.user.username }}</a>
+                        {% else %}
+                            &lt;{% trans "Deleted" %}&gt;
+                        {% endif %}
                     </td>
                     <td>{{ refund.created }}</td>
                     <td>

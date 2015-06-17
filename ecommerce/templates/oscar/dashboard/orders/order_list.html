@@ -44,7 +44,7 @@
     <div class="well">
         <form action="" method="get" class="form-inline" id="search_form">
           {% for field in form %}
-            {% if "order" in field.id_for_label %}
+            {% if field.id_for_label == 'id_username' %}
               {% if field.is_hidden %}
                 {{ field }}
               {% else %}
@@ -109,7 +109,7 @@
                     <th>{% anchor 'total_incl_tax' _("Total inc tax") %}</th>
                     <th>{% trans "Number of items" %}</th>
                     <th>{% trans "Status" %}</th>
-                    <th>{% trans "Customer" %}</th>
+                    <th>{% trans "Username" %}</th>
                     <th>{% trans "Shipping address" %}</th>
                     <th>{% trans "Billing address" %}</th>
                     <th>{% trans "Date of purchase" %}</th>
@@ -127,14 +127,11 @@
                         <td>{{ order.num_items }}</td>
                         <td class="order-status">{{ order.status|default:"-" }}</td>
                         <td>
-                          {% if order.guest_email %}
-                            {{ order.guest_email }}
-                          {% elif order.user %}
-                              <a href="{% url 'dashboard:user-detail' pk=order.user.id %}">
-                                {{ order.user.get_full_name|default:"-" }}</a>
-                          {% else %}
-                              &lt;{% trans "Deleted" %}&gt;
-                          {% endif %}
+                            {% if order.user %}
+                                <a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.username }}</a>
+                            {% else %}
+                                &lt;{% trans "Deleted" %}&gt;
+                            {% endif %}
                         </td>
                         <td>{{ order.shipping_address|default:"-" }}</td>
                         <td>{{ order.billing_address|default:"-" }}</td>

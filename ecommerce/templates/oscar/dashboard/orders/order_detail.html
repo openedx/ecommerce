@@ -30,31 +30,22 @@
   {% block customer_information %}
       <table class="table  table-bordered table-hover">
           <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" %}</caption>
-        {% if order.guest_email %}
-            <tr>
-                <th>{% trans "Name" %}</th>
-                <td>
-                  {% trans "Customer checked out as a guest." %}
-                </td>
-            </tr>
-            <tr>
-                <th>{% trans "Email address" %}</th>
-                <td>{{ order.email }}</td>
-            </tr>
-          {% elif order.user %}
-            <tr>
-                <th>{% trans "Name" %}</th>
-                <th>{% trans "Email address" %}</th>
-            </tr>
-            <tr>
-                <td>{{ order.user.get_full_name|default:"-" }}</td>
-                <td>{{ order.user.email|default:"-" }}</td>
-            </tr>
-        {% else %}
-            <tr>
-                <td>{% trans "Customer has deleted their account." %}</td>
-            </tr>
-        {% endif %}
+          {% if order.user %}
+              <tr>
+                  <th>{% trans "Username" %}</th>
+                  <th>{% trans "Full name" %}</th>
+                  <th>{% trans "Email address" %}</th>
+              </tr>
+              <tr>
+                  <td><a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.username }}</a></td>
+                  <td>{{ order.user.get_full_name }}</td>
+                  <td>{{ order.user.email }}</td>
+              </tr>
+          {% else %}
+              <tr>
+                  <td>{% trans "Customer has deleted their account." %}</td>
+              </tr>
+          {% endif %}
       </table>
   {% endblock customer_information %}
 

@@ -6,15 +6,59 @@ from oscar.core.loading import get_model
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import UserMixin
 
+
 Refund = get_model('refund', 'Refund')
 
 
-class OrderDetailViewTests(UserMixin, RefundTestMixin, TestCase):
+class OrderViewTestsMixin(UserMixin):
     def setUp(self):
-        super(OrderDetailViewTests, self).setUp()
+        super(OrderViewTestsMixin, self).setUp()
 
         # Staff permissions are required for this view
         self.user = self.create_user(is_staff=True)
+
+    def assert_successful_response(self, response, orders=None):
+        self.assertEqual(response.status_code, 200)
+
+        if orders:
+            self.assertListEqual(list(response.context['orders']), orders)
+
+
+class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, TestCase):
+    path = reverse('dashboard:order-list')
+    username = 'hackerman'
+
+    def setUp(self):
+        super(OrderListViewTests, self).setUp()
+
+    def test_filtering(self):
+        """Verify that the view allows filtering by username."""
+        self.create_order(user=self.user)
+
+        new_user = self.create_user(username=self.username)
+        new_order = self.create_order(user=new_user)
+
+        self.client.login(username=self.user.username, password=self.password)
+
+        # Username filtering
+        response = self.client.get('{path}?username={username}'.format(
+            path=self.path,
+            username=self.username
+        ))
+        self.assert_successful_response(response, [new_order])
+
+        # Validate case-insensitive, starts-with username filtering
+        response = self.client.get('{path}?username={username}'.format(
+            path=self.path,
+            # Cut the configured username in half, then invert the fragment's casing.
+            username=self.username[:len(self.username) / 2].swapcase()
+        ))
+        self.assert_successful_response(response, [new_order])
+
+
+class OrderDetailViewTests(OrderViewTestsMixin, RefundTestMixin, TestCase):
+    def setUp(self):
+        super(OrderDetailViewTests, self).setUp()
 
     def assert_message_equals(self, response, msg, level):  # pylint: disable=unused-argument
         """ Verify the latest message matches the expected value. """
