@@ -20,12 +20,9 @@
         {
             name: 'js/config'
         },
-        // Example module
-        //{
-        //    name: 'js/engagement-content-main',
-        //
-        //    // Always exclude js/common since it should be included in the base template.
-        //    exclude: ['js/common']
-        //}
+        {
+            name: 'js/views/course_list_view',
+            exclude: ['js/common']
+        }
     ]
 })
