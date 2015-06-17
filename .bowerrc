@@ -1,4 +1,7 @@
 {
   "directory": "ecommerce/static/bower_components",
-  "interactive": false
+  "interactive": false,
+  "scripts": {
+    "postinstall": "./bower-post-install.sh"
+  }
 }

@@ -4,8 +4,12 @@
     "type": "git",
     "url": "git://github.com/edx/edx-ecommerce"
   },
+  "scripts": {
+    "postinstall": "./npm-postinstall.sh"
+  },
   "dependencies": {
     "bower": "^1.4.1",
+    "edx-ux-pattern-library": "git+https://github.com/edx/ux-pattern-library.git#6b8c64415787a5bd82f7d85243e26cde146e7548",
     "requirejs": "^2.1.18"
   }
 }

@@ -1,3 +1,8 @@
 // config: variables
 // ====================
 // NOTE: these variables override Bootstrap-centric variables.
+
+// Note (CCB): These are here to appease Bootstrap compilation.
+$link-hover-color: $link-focus-color;
+$component-active-bg: $link-focus-color;
+$list-group-active-text-color: $link-focus-color;

@@ -1,0 +1,33 @@
+// config
+// --------------------
+@import 'config-assets';
+@import '../bower_components/bourbon/app/assets/stylesheets/bourbon';
+@import '../bower_components/edx-ux-pattern-library/_src/vendor/bi-app/bi-app-ltr';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/utilities/mixins';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/utilities/variables';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/utilities/functions';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/utilities/helpers';
+@import 'config-variables';
+
+// vendor
+// --------------------
+@import '../bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+@import '../bower_components/bootstrapaccessibilityplugin/plugins/css/bootstrap-accessibility';
+
+// edX Pattern Library
+// --------------------
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/base/normalize';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/base/reset';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/base/typography';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/components/buttons';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/components/colors';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/components/copy';
+@import '../bower_components/edx-ux-pattern-library/_src/pattern-library/sass/components/headings';
+
+// app styling
+// --------------------
+@import 'base';
+
+// utility/misc.
+// --------------------
+@import 'developer';    // developer-friendly file: add rough/WIP styling that needs UI triage
