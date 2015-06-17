@@ -1,40 +1,47 @@
-ecommerce  |Travis|_ |Coveralls|_
-=================================
+edX E-Commerce Service  |Travis|_ |Coveralls|_
+==============================================
 .. |Travis| image:: https://travis-ci.org/edx/ecommerce.svg?branch=master
 .. _Travis: https://travis-ci.org/edx/ecommerce
 
 .. |Coveralls| image:: https://coveralls.io/repos/edx/ecommerce/badge.svg?branch=master
 .. _Coveralls: https://coveralls.io/r/edx/ecommerce?branch=master
 
-Overview
---------
+This repository contains the edX E-Commerce Service, which relies heavily on `django-oscar <https://github.com/edx/django-oscar>`_, as well as all frontend and backend code used to manage edX's product catalog and handle orders for those products.
 
-This repository contains the edX ecommerce service, which relies heavily on `django-oscar <https://github.com/edx/django-oscar>`_. This repository is home to all front-end and back-end code used to manage edX's product catalog and handle orders for those products, and houses extensions of the Oscar core which are specific to edX's needs. Many of the models in this project override abstract models present in Oscar.
+Prerequisites
+-------------
+* Python 2.7.x (not tested with Python 3.x)
+* `gettext <http://www.gnu.org/software/gettext/>`_
+* `npm <https://www.npmjs.org/>`_
 
 Getting Started
 ---------------
 
 Most commands necessary to run and develop the ecommerce service can be found in the included Makefile.
 
-To install requirements necessary for local development, run::
+1. Install the Python/Node/Bower requirements for local development::
 
     $ make requirements
 
-``requirements/production.txt`` will install the packages needed to run the ecommerce service in a production setting.
+Note: If you want to install only the production requirements run ``pip install -r requirements/production.txt``.
 
-To apply migrations, run::
+2. Setup the database::
     
     $ make migrations
 
-Setup countries (for addresses) using the following command::
+3. Populate the countries tables (used for storing addresses)::
 
     $ python manage.py oscar_populate_countries
 
-To stand up the development server, run::
+4. Run the development server::
 
     $ make serve
 
-By default, the Django Debug Toolbar is disabled. To enable it, set the ENABLE_DJANGO_TOOLBAR environment variable.
+Django Debug Toolbar is disabled by default. Enable it by setting the environment variable ENABLE_DJANGO_TOOLBAR.
+
+Alternatively, you can launch the server using:
+
+    $ ENABLE_DJANGO_TOOLBAR=1 make serve
 
 Testing
 -------
