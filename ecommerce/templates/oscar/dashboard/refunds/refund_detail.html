@@ -46,14 +46,22 @@
     {% block customer_information %}
     <table class="table table-bordered table-hover">
         <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" %}</caption>
-        <tr>
-            <th>{% trans "Name" %}</th>
-            <th>{% trans "Email address" %}</th>
-        </tr>
-        <tr>
-            <td>{{ refund.user.get_full_name|default:"-" }}</td>
-            <td>{{ refund.user.email|default:"-" }}</td>
-        </tr>
+        {% if refund.user %}
+            <tr>
+                <th>{% trans "Username" %}</th>
+                <th>{% trans "Full name" %}</th>
+                <th>{% trans "Email address" %}</th>
+            </tr>
+            <tr>
+                <td><a href="{% url 'dashboard:user-detail' pk=refund.user.id %}">{{ refund.user.username }}</a></td>
+                <td>{{ refund.user.get_full_name }}</td>
+                <td>{{ refund.user.email }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td>{% trans "Customer has deleted their account." %}</td>
+            </tr>
+        {% endif %}
     </table>
     {% endblock customer_information %}
 

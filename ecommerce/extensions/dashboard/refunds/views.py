@@ -22,11 +22,12 @@ class RefundListView(ListView):
         queryset = sort_queryset(queryset, self.request, ['id'], 'id')
 
         self.form = self.form_class(self.request.GET)
-
         if self.form.is_valid():
             for field, value in self.form.cleaned_data.iteritems():
                 if field == 'status' and value:
                     queryset = queryset.filter(status__in=value)
+                elif field == 'username' and value:
+                    queryset = queryset.filter(user__username__istartswith=value)
                 elif value:
                     queryset = queryset.filter(**{field: value})
 

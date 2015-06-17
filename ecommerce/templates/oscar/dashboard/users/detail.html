@@ -4,7 +4,7 @@
 
 {% block body_class %}{{ block.super }} users{% endblock %}
 
-{% block title %}{{ customer.email }} | {{ block.super }}{% endblock %}
+{% block title %}{{ customer.username }} | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <ul class="breadcrumb">
@@ -16,11 +16,11 @@
             <a href="{% url 'dashboard:users-index' %}">{% trans "Customers" %}</a>
             <span class="divider">/</span>
         </li>
-        <li class="active">{{ customer.email }}</li>
+        <li class="active">{{ customer.username }}</li>
     </ul>
 {% endblock %}
 
-{% block headertext %}{{ customer.email }}{% endblock %}
+{% block headertext %}{{ customer.username }}{% endblock %}
 
 {% block dashboard_content %}
     <div class="row-fluid">
@@ -31,7 +31,11 @@
               </div>
               <table class="table table-bordered">
                   <tr>
-                      <th>{% trans "Name" %}</th>
+                      <th>{% trans "Username" %}</th>
+                      <td>{{ customer.username|default:"-" }}</td>
+                  </tr>
+                  <tr>
+                      <th>{% trans "Full name" %}</th>
                       <td>{{ customer.get_full_name|default:"-" }}</td>
                   </tr>
                   <tr>

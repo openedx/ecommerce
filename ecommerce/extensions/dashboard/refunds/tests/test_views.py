@@ -42,13 +42,13 @@ class RefundViewTestMixin(UserMixin):
 
 class RefundListViewTests(RefundViewTestMixin, TestCase):
     path = reverse('dashboard:refunds:list')
+    username = 'hackerman'
 
     def setUp(self):
         super(RefundListViewTests, self).setUp()
-        self.user = self.create_user(is_superuser=True, is_staff=True)
 
     def test_filtering(self):
-        """ The view should allow filtering by ID and status. """
+        """ The view should allow filtering by ID, status, and username. """
         refund = RefundFactory()
         open_refund = RefundFactory(status=REFUND.OPEN)
         complete_refund = RefundFactory(status=REFUND.COMPLETE)
@@ -75,6 +75,24 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
             denied_status=REFUND.DENIED
         ))
         self.assert_successful_response(response, [complete_refund, denied_refund])
+
+        new_user = self.create_user(username=self.username)
+        new_refund = RefundFactory(user=new_user)
+
+        # Username filtering
+        response = self.client.get('{path}?username={username}'.format(
+            path=self.path,
+            username=self.username
+        ))
+        self.assert_successful_response(response, [new_refund])
+
+        # Validate case-insensitive, starts-with username filtering
+        response = self.client.get('{path}?username={username}'.format(
+            path=self.path,
+            # Cut the configured username in half, then invert the fragment's casing.
+            username=self.username[:len(self.username) / 2].swapcase()
+        ))
+        self.assert_successful_response(response, [new_refund])
 
     def test_sorting(self):
         """ The view should allow sorting by ID. """
