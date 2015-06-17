@@ -27,7 +27,7 @@ Note: If you want to install only the production requirements run ``pip install 
 
 2. Setup the database::
     
-    $ make migrations
+    $ make migrate
 
 3. Populate the countries tables (used for storing addresses)::
 
