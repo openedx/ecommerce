@@ -6,9 +6,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 from ecommerce.courses.views import CourseMigrationView, CourseAdminToolListView
-
 
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 from ecommerce.user import views as user_views
@@ -33,9 +32,14 @@ def handler403(_):
 
 admin.autodiscover()
 
+js_info_dict = {
+    'packages': ('courses',),
+}
+
 urlpatterns = patterns(
     '',
     url(r'^i18n/', include('django.conf.urls.i18n')),
+    url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
     url(r'^admin/courses/migrate/$', CourseMigrationView.as_view(), name='migrate_course'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
@@ -75,6 +79,8 @@ if settings.DEBUG:  # pragma: no cover
         url(r'^403/$', handler403, name='403'),
         url(r'^404/$', 'django.views.defaults.page_not_found', name='404'),
         url(r'^500/$', 'django.views.defaults.server_error', name='500'),
+        url(r'^bootstrap/$', TemplateView.as_view(template_name='bootstrap-demo.html')),
+
     )
 
     if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):

@@ -1,3 +1,32 @@
 // config: variables
 // ====================
 // NOTE: these variables override Bootstrap-centric variables.
+
+// FontAwesome font directory
+$fa-font-path: "/static/bower_components/fontawesome/fonts";
+
+// Use asset paths relative to Bootstrap SASS files.
+$bootstrap-sass-asset-helper: true;
+
+$brand-primary: rgb(0, 121, 188);
+$brand-primary-accent: rgb(14, 166, 236);
+$brand-success: rgb(37, 184, 90);
+
+// brand primary light from ux.edx.org
+$brand-info: rgb(76, 161, 208);
+$brand-warning: rgb(253, 188, 86);
+$brand-danger: rgb(178, 6, 16);
+
+$btn-default-color: $brand-primary;
+$btn-default-border: $brand-primary;
+
+$link-hover-color: $brand-primary-accent;
+
+$border-radius-base: 3px;
+$border-radius-large: 3px;
+$border-radius-small: 3px;
+
+$navbar-default-bg: white;
+
+// TODO Use the correct color
+$navbar-default-border: $brand-primary-accent;

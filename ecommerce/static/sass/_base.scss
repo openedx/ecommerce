@@ -1,3 +1,56 @@
 // app styling: base
 // ====================
 // NOTE: used for any basic styling or overriding that isn't covered by Bootstrap or theming
+body {
+  // Make room for the navbar.
+  padding-top: $navbar-height + $navbar-margin-bottom;
+}
+
+.btn-default {
+  // Invert the background and foreground colors on active/focus/hover
+  &:hover,
+  &:focus,
+  &.focus,
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle {
+    color: $btn-default-bg;
+    background-color: $btn-default-color;
+    border-color: $btn-default-color;
+  }
+
+  // Use edX disabled state
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    color: $gray-light;
+    border-color: $gray-light;
+  }
+}
+
+.btn-primary {
+  // Highlight active/focus/hover
+  &:hover,
+  &:focus,
+  &.focus,
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle {
+    background-color: $brand-primary-accent;
+    border-color: $brand-primary-accent;
+  }
+
+  // Use edX disabled state
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    color: $gray-darker;
+    border-color: $gray-light;
+    background-color: $gray-light;
+    opacity: 0.50;
+  }
+}
+
+.navbar {
+  border-bottom: 4px solid $navbar-default-border;
+}
