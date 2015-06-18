@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView, TemplateView
-from ecommerce.courses.views import CourseMigrationView, CourseAdminToolListView
+from ecommerce.courses.views import CourseMigrationView, CourseListView
 
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 from ecommerce.user import views as user_views
@@ -43,7 +43,7 @@ urlpatterns = patterns(
     url(r'^admin/courses/migrate/$', CourseMigrationView.as_view(), name='migrate_course'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
-    url(r'^courses/$', CourseAdminToolListView.as_view(), name='courses_list'),
+    url(r'^courses/$', CourseListView.as_view(), name='courses_list'),
     url(r'^health/$', include('health.urls')),
 
     # Social auth

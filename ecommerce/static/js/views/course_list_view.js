@@ -2,7 +2,7 @@ require(['jquery', 'dataTablesBootstrap'], function($) {
 
     $(document).ready(function() {
 
-        var $table = $('#courseTable').DataTable({
+        $('#courseTable').DataTable({
             "info": false,
             "paging": false,
             "oLanguage": {
@@ -12,5 +12,4 @@ require(['jquery', 'dataTablesBootstrap'], function($) {
 
         $('#courseTable_filter input').attr('placeholder', gettext('Filter by org or course ID'));
    });
-
 });
