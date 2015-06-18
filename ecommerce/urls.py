@@ -43,7 +43,7 @@ urlpatterns = patterns(
     url(r'^admin/courses/migrate/$', CourseMigrationView.as_view(), name='migrate_course'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', user_views.AutoAuth.as_view(), name='auto_auth'),
-    url(r'^courses/$', CourseListView.as_view(), name='courses_list'),
+    url(r'^courses/$', CourseAdminToolListView.as_view(), name='courses_list'),
     url(r'^health/$', include('health.urls')),
 
     # Social auth
