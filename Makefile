@@ -65,18 +65,18 @@ accept:
 	nosetests --with-ignore-docstrings -v acceptance_tests
 
 extract_translations:
-	cd extensions && i18n_tool extract -v
+	cd ecommerce && i18n_tool extract -v
 
 dummy_translations:
-	cd extensions && i18n_tool dummy -v
+	cd ecommerce && i18n_tool dummy -v
 
 compile_translations:
-	cd extensions && i18n_tool generate -v
+	cd ecommerce && i18n_tool generate -v
 
 fake_translations: extract_translations dummy_translations compile_translations
 
 pull_translations:
-	cd extensions && tx pull -a
+	cd ecommerce && tx pull -a
 
 update_translations: pull_translations generate_fake_translations
 
