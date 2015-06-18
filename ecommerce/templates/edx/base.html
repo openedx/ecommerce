@@ -20,9 +20,12 @@
     {% endblock %}
   {% endcompress %}
 </head>
-<body>
+<body role="document">
 {% block content %}
 {% endblock content %}
+
+{# Translation support for JavaScript strings. #}
+<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
 {% compress js %}
     <script src="{% static 'bower_components/requirejs/require.js' %}"></script>

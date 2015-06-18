@@ -10,7 +10,7 @@ require(['jquery', 'dataTablesBootstrap'], function($) {
             }
         });
 
-        $('#courseTable_filter input').attr('placeholder', 'Filter by org or course ID');
+        $('#courseTable_filter input').attr('placeholder', gettext('Filter by org or course ID'));
    });
 
 });
