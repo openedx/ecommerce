@@ -176,7 +176,10 @@ class Paypal(BasePaymentProcessor):
         currency = payment.transactions[0].amount.currency
         total = Decimal(payment.transactions[0].amount.total)
         transaction_id = payment.id
+        # payer_info.email may be None, see:
+        # http://stackoverflow.com/questions/24090460/paypal-rest-api-return-empty-payer-info-for-non-us-accounts
         email = payment.payer.payer_info.email
+        label = 'PayPal ({})'.format(email) if email else 'PayPal Account'
 
         source = Source(
             source_type=source_type,
@@ -184,7 +187,7 @@ class Paypal(BasePaymentProcessor):
             amount_allocated=total,
             amount_debited=total,
             reference=transaction_id,
-            label=email,
+            label=label,
             card_type=None
         )
 

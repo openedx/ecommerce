@@ -2,6 +2,7 @@
 """Unit tests of payment processor implementations."""
 import datetime
 import json
+import logging
 from urlparse import urljoin
 from uuid import UUID
 
@@ -34,6 +35,9 @@ PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
+
+
+log = logging.getLogger(__name__)
 
 
 class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, PaymentEventsMixin):
@@ -328,14 +332,14 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         actual = self.processor.get_transaction_parameters(self.basket, request=self.request)
         self.assertEqual(actual, expected)
 
-    def _assert_payment_event_and_source(self):
+    def _assert_payment_event_and_source(self, payer_info):
         """DRY helper for verifying a payment event and source."""
         source, payment_event = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
 
         # Validate Source
         source_type = SourceType.objects.get(code=self.processor.NAME)
         reference = self.PAYMENT_ID
-        label = self.EMAIL
+        label = 'PayPal ({})'.format(payer_info['email']) if 'email' in payer_info else 'PayPal Account'
         self.assert_basket_matches_source(self.basket, source, source_type, reference, label)
 
         # Validate PaymentEvent
@@ -389,12 +393,15 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
     @httpretty.activate
     def test_handle_processor_response(self):
         """Verify that the processor creates the appropriate PaymentEvent and Source objects."""
-        self.mock_oauth2_response()
-        self.mock_payment_creation_response(self.basket, find=True)
-        response = self.mock_payment_execution_response(self.basket)
+        for payer_info in (PaypalMixin.PAYER_INFO, {"shipping_address": None}):
+            httpretty.reset()
+            log.info("Testing payer_info with email set to: %s", payer_info.get("email"))
+            self.mock_oauth2_response()
+            self.mock_payment_creation_response(self.basket, find=True)
+            response = self.mock_payment_execution_response(self.basket, payer_info=payer_info)
 
-        self._assert_payment_event_and_source()
-        self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
+            self._assert_payment_event_and_source(payer_info)
+            self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
     @httpretty.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
