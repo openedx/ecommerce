@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class CourseListView(ListView):
-    template_name = 'courses/list.html'
     model = Course
     context_object_name = 'courses'
 

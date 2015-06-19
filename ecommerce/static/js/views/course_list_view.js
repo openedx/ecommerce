@@ -1,7 +1,5 @@
-require(['jquery', 'dataTablesBootstrap'], function($) {
-
-    $(document).ready(function() {
-
+require(['jquery', 'dataTablesBootstrap'], function ($) {
+    $(document).ready(function () {
         $('#courseTable').DataTable({
             "info": false,
             "paging": false,
@@ -11,5 +9,5 @@ require(['jquery', 'dataTablesBootstrap'], function($) {
         });
 
         $('#courseTable_filter input').attr('placeholder', gettext('Filter by org or course ID'));
-   });
+    });
 });
