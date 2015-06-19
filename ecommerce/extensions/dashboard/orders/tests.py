@@ -7,6 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
+from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
@@ -147,17 +148,7 @@ class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, LiveServerTestCas
         self.assert_successful_response(response, [new_order])
 
 
-class OrderDetailViewTests(OrderViewTestsMixin, RefundTestMixin, TestCase):
-    def assert_message_equals(self, response, msg, level):  # pylint: disable=unused-argument
-        """ Verify the latest message matches the expected value. """
-        messages = []
-        for context in response.context:
-            messages += context.get('messages', [])
-
-        message = messages[0]
-        self.assertEqual(message.level, level)
-        self.assertEqual(message.message, msg)
-
+class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTestMixin, TestCase):
     def _request_refund(self, order):
         """POST to the view."""
 

@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<table class="table table-striped table-bordered table-hover">
+    <caption>{% trans "Enrollments" %}</caption>
+
+  {% if enrollments %}
+      <tr>
+          <th>{% trans "Course ID" %}</th>
+          <th>{% trans "Mode" %}</th>
+          <th>{% trans "Active?" %}</th>
+      </tr>
+    {% for enrollment in enrollments %}
+        <tr>
+            <td>{{ enrollment.course_details.course_id }}</td>
+            <td>{{ enrollment.mode|capfirst }}</td>
+            <td>{{ enrollment.is_active }}</td>
+        </tr>
+    {% endfor %}
+  {% else %}
+      <tr>
+          <td>{% trans "No enrollments found." %}</td>
+      </tr>
+  {% endif %}
+</table>

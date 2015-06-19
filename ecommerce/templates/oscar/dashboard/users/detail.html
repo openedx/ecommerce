@@ -1,6 +1,7 @@
 {% extends 'dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
+{% load waffle_tags %}
 
 {% block body_class %}{{ block.super }} users{% endblock %}
 
@@ -113,6 +114,9 @@
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#user_orders" data-toggle="tab">{% trans "Orders" %}</a></li>
                     <li><a href="#user_refunds" data-toggle="tab">{% trans "Refunds" %}</a></li>
+                  {% switch "user_enrollments_on_dashboard" %}
+                      <li><a href="#user_enrollments" data-toggle="tab">{% trans "Enrollments" %}</a></li>
+                  {% endswitch %}
                     <li><a href="#user_addresses" data-toggle="tab">{% trans "Addresses" %}</a></li>
                     <li><a href="#user_reviews" data-toggle="tab">{% trans "Reviews" %}</a></li>
                 </ul>
@@ -162,6 +166,14 @@
                       {% include "dashboard/partials/refund_table.html" with refunds=customer.refunds.all %}
                     </div>
                 {% endblock %}
+
+                {% switch "user_enrollments_on_dashboard" %}
+                  {% block user_enrollments %}
+                      <div id="user_enrollments" class="tab-pane">
+                        {% include "dashboard/partials/enrollment_table.html" with enrollments=enrollments %}
+                      </div>
+                  {% endblock %}
+                {% endswitch %}
 
 
                 {% block user_addresses %}
