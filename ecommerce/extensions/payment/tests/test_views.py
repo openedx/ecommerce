@@ -288,6 +288,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
                                                 basket=self.basket)
 
 
+@ddt.ddt
 class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase):
     """Test handling of users redirected by PayPal after approving payment."""
 
@@ -306,7 +307,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.request = RequestFactory().post('/')
 
     @httpretty.activate
-    def _assert_execution_redirect(self):
+    def _assert_execution_redirect(self, payer_info=None):
         """Verify redirection to the configured receipt page after attempted payment execution."""
         self.mock_oauth2_response()
 
@@ -315,7 +316,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.processor.get_transaction_parameters(self.basket, request=self.request)
 
         creation_response = self.mock_payment_creation_response(self.basket, find=True)
-        execution_response = self.mock_payment_execution_response(self.basket)
+        execution_response = self.mock_payment_execution_response(self.basket, payer_info=payer_info)
 
         response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
         self.assertRedirects(
@@ -352,9 +353,17 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 (logger_name, 'ERROR', error_message)
             )
 
-    def test_payment_execution(self):
+    @ddt.data(
+        None,  # falls back to PaypalMixin.PAYER_INFO, a fully-populated payer_info object
+        {"shipping_address": None},  # minimal data, which may be sent in some Paypal execution responses
+    )
+    def test_payment_execution(self, payer_info):
         """Verify that a user who has approved payment is redirected to the configured receipt page."""
-        self._assert_execution_redirect()
+        self._assert_execution_redirect(payer_info=payer_info)
+        # even if an exception occurs during handling of the payment notification, we still redirect the
+        # user to the receipt page.  Therefore in addition to checking that the response had the correct
+        # redirection, we also need to check that the order was actually created.
+        self.get_order(self.basket)
 
     def test_payment_error(self):
         """

@@ -181,6 +181,20 @@ class PaypalMixin(object):
     PAYMENT_ID = u'PAY-123ABC'
     PAYMENT_CREATION_STATE = u'created'
     PAYMENT_EXECUTION_STATE = u'approved'
+    PAYER_INFO = {
+        u'email': EMAIL,
+        u'first_name': u'test',
+        u'last_name': u'buyer',
+        u'payer_id': u'123ABC',
+        u'shipping_address': {
+            u'city': u'San Jose',
+            u'country_code': u'US',
+            u'line1': u'1 Main St',
+            u'postal_code': u'95131',
+            u'recipient_name': u'test buyer',
+            u'state': u'CA'
+        }
+    }
     RETURN_DATA = {
         u'paymentId': PAYMENT_ID,
         u'PayerID': PAYER_ID
@@ -278,7 +292,9 @@ class PaypalMixin(object):
 
         return payment_creation_response
 
-    def mock_payment_execution_response(self, basket, state=PAYMENT_EXECUTION_STATE):
+    def mock_payment_execution_response(self, basket, state=PAYMENT_EXECUTION_STATE, payer_info=None):
+        if payer_info is None:
+            payer_info = self.PAYER_INFO
         total = unicode(basket.total_incl_tax)
         payment_execution_response = {
             u'create_time': u'2015-05-04T15:55:27Z',
@@ -290,20 +306,7 @@ class PaypalMixin(object):
                 u'rel': u'self'
             }],
             u'payer': {
-                u'payer_info': {
-                    u'email': self.EMAIL,
-                    u'first_name': u'test',
-                    u'last_name': u'buyer',
-                    u'payer_id': u'123ABC',
-                    u'shipping_address': {
-                        u'city': u'San Jose',
-                        u'country_code': u'US',
-                        u'line1': u'1 Main St',
-                        u'postal_code': u'95131',
-                        u'recipient_name': u'test buyer',
-                        u'state': u'CA'
-                    }
-                },
+                u'payer_info': payer_info,
                 u'payment_method': u'paypal'
             },
             u'redirect_urls': {
