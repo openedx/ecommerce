@@ -2,8 +2,10 @@ from StringIO import StringIO
 import logging
 import os
 
+from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
+from django.utils.decorators import method_decorator
 from django.views.generic import View, ListView
 
 from ecommerce.courses.models import Course
@@ -14,6 +16,13 @@ logger = logging.getLogger(__name__)
 class CourseListView(ListView):
     model = Course
     context_object_name = 'courses'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise Http404
+
+        return super(CourseListView, self).dispatch(request, *args, **kwargs)
 
 
 class CourseMigrationView(View):
