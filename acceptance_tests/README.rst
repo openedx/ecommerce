@@ -67,10 +67,10 @@ Learning Management System (LMS) Settings
    next to "Trusted Clients".
 
 5. Add an access token for the superuser by clicking the *Add* button
-   next to "Access Tokens". Set the "Client" of the access token to the 
-   client just created, and make sure that the expiration date is sometime 
-   into the future.  Make note of this access token, as it will be 
-   required to run the acceptance tests. Once this step is completed, 
+   next to "Access Tokens". Set the "Client" of the access token to the
+   client just created, and make sure that the expiration date is sometime
+   into the future.  Make note of this access token, as it will be
+   required to run the acceptance tests. Once this step is completed,
    close out of the admin panel.
 
 6. After these settings are confirmed, open
@@ -113,7 +113,7 @@ Oscar E-Commerce Settings
 
 5. Create a new product:
 
-   1. From the menu, select Products > Catalogue. 
+   1. From the menu, select Products > Catalogue.
    2. Add a new product of type "Seat" and fill it out with the new
       course information.
    3. Under the "Categories" tab, set the category to type "Seat".
@@ -152,6 +152,10 @@ variables that should be set.
 +---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
 | Variable                  | Purpose                                                                  | Example                                   |
 +===========================+==========================================================================+===========================================+
+| BASIC\_AUTH\_USERNAME     | Username for basic server authentication                                 | MyUsername                                |
++---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
+| BASIC\_AUTH\_PASSWORD     | Password for basic server authentication                                 | my\_pass1234                              |
++---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
 | APP\_SERVER\_URL          | The URL of the E-Commerce server                                         | https://ecommerce.example.com             |
 +---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
 | LMS\_URL                  | URL of the LMS server                                                    | https://courses.example.com               |
