@@ -112,17 +112,24 @@ def revoke_fulfillment_for_refund(refund):
     """
     succeeded = True
 
-    # TODO (CCB): As our list of product types and fulfillment modules grows, this may become slow,
-    # and should be updated. Runtime is O(n^2).
-    for refund_line in refund.lines.all():
-        order_line = refund_line.order_line
-        modules = get_fulfillment_modules_for_line(order_line)
+    # Refunds corresponding to a total credit of $0 require no revocation. This also
+    # prevents deadlocking with the LMS which occurs when Otto attempts to revoke an
+    # automatically-approved refund.
+    if refund.total_credit_excl_tax == 0:
+        for refund_line in refund.lines.all():
+            refund_line.set_status(REFUND_LINE.COMPLETE)
+    else:
+        # TODO (CCB): As our list of product types and fulfillment modules grows, this may become slow,
+        # and should be updated. Runtime is O(n^2).
+        for refund_line in refund.lines.all():
+            order_line = refund_line.order_line
+            modules = get_fulfillment_modules_for_line(order_line)
 
-        for module in modules:
-            if module().revoke_line(order_line):
-                refund_line.set_status(REFUND_LINE.COMPLETE)
-            else:
-                succeeded = False
-                refund_line.set_status(REFUND_LINE.REVOCATION_ERROR)
+            for module in modules:
+                if module().revoke_line(order_line):
+                    refund_line.set_status(REFUND_LINE.COMPLETE)
+                else:
+                    succeeded = False
+                    refund_line.set_status(REFUND_LINE.REVOCATION_ERROR)
 
     return succeeded

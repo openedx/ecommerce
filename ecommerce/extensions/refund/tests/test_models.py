@@ -98,7 +98,8 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         self.assertEqual(refund, None)
 
     @httpretty.activate
-    def test_zero_dollar_refund(self):
+    @mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule.revoke_line')
+    def test_zero_dollar_refund(self, mock_revoke_line):
         """
         Given an order and order lines which total $0 and are not refunded, Refund.create_with_lines
         should create and approve a Refund with corresponding RefundLines.
@@ -118,10 +119,12 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
 
         refund = Refund.create_with_lines(order, list(order.lines.all()))
 
+        # Verify that refund lines are not revoked.
+        self.assertFalse(mock_revoke_line.called)
+
         # Verify that the refund has been successfully approved.
         self.assertEqual(refund.status, REFUND.COMPLETE)
-        for line in refund.lines.all():
-            self.assertEqual(line.status, REFUND_LINE.COMPLETE)
+        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
 
     @ddt.unpack
     @ddt.data(
