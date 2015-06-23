@@ -1,4 +1,5 @@
 from bok_choy.web_app_test import WebAppTest
+import ddt
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -10,6 +11,7 @@ from acceptance_tests.mixins import LoginMixin, EnrollmentApiMixin, EcommerceApi
 from acceptance_tests.pages import LMSCourseModePage
 
 
+@ddt.ddt
 class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin,
                                       LoginMixin, WebAppTest):
     def setUp(self):
@@ -62,7 +64,7 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
             except TimeoutException:
                 pass
 
-    def _checkout_with_cybersource(self):
+    def _checkout_with_cybersource(self, address):
         """ Completes the checkout process via CyberSource. """
 
         # Click the payment button
@@ -78,22 +80,23 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
 
         # Select the appropriate <option> elements
         select_fields = (
-            ('#bill_to_address_country', 'US'),
-            ('#bill_to_address_state_us_ca', 'MA'),
+            ('#bill_to_address_country', address['country']),
+            ('#bill_to_address_state_us_ca', address['state']),
             ('#card_expiry_year', '2020')
         )
         for selector, value in select_fields:
-            select = Select(self.browser.find_element_by_css_selector(selector))
-            select.select_by_value(value)
+            if value:
+                select = Select(self.browser.find_element_by_css_selector(selector))
+                select.select_by_value(value)
 
         # Fill in the text fields
         billing_information = {
             'bill_to_forename': 'Ed',
             'bill_to_surname': 'Xavier',
-            'bill_to_address_line1': '141 Portland Ave.',
-            'bill_to_address_line2': '9th Floor',
-            'bill_to_address_city': 'Cambridge',
-            'bill_to_address_postal_code': '02141',
+            'bill_to_address_line1': address['line1'],
+            'bill_to_address_line2': address['line2'],
+            'bill_to_address_city': address['city'],
+            'bill_to_address_postal_code': address['postal_code'],
             'bill_to_email': 'edx@example.com',
             'card_number': '4111111111111111',
             'card_cvn': '1234'
@@ -107,10 +110,28 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
 
         self._dismiss_alert()
 
-    def test_cybersource(self):
+    @ddt.data(
+        {
+            'country': 'US',
+            'state': 'MA',
+            'line1': '141 Portland Ave.',
+            'line2': '9th Floor',
+            'city': 'Cambridge',
+            'postal_code': '02141',
+        },
+        {
+            'country': 'FR',
+            'state': None,
+            'line1': 'Champ de Mars',
+            'line2': '5 Avenue Anatole',
+            'city': 'Paris',
+            'postal_code': '75007',
+        }
+    )
+    def test_cybersource(self, address):
         """ Test checkout with CyberSource. """
         self._start_checkout()
-        self._checkout_with_cybersource()
+        self._checkout_with_cybersource(address)
 
         self.assert_receipt_page_loads()
         self.assert_order_created_and_completed()
