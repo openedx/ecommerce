@@ -90,6 +90,20 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
         self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
 
+    @override_settings(FULFILLMENT_MODULES=[])
+    def test_suppress_revocation_for_zero_dollar_refund(self):
+        """
+        Verify that the function does not require use of fulfillment modules to mark lines in a refund
+        corresponding to a total credit of $0 as complete.
+        """
+        refund = RefundFactory(status=REFUND.PAYMENT_REFUNDED)
+        refund.total_credit_excl_tax = 0
+        refund.save()
+
+        self.assertTrue(revoke_fulfillment_for_refund(refund))
+        self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
+        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
+
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.RevocationFailureModule'])
     def test_revoke_fulfillment_for_refund_revocation_error(self):
         """
