@@ -18,9 +18,12 @@ from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 
+
 JSON = 'application/json'
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 User = get_user_model()
+
+LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
 
 @ddt.ddt
@@ -55,8 +58,24 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
 
         # Attempt to enroll.
-        EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
-        self.assertEqual(LINE.COMPLETE, self.order.lines.all()[0].status)
+        with LogCapture(LOGGER_NAME) as l:
+            EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+            order_line = self.order.lines.get()
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'line_fulfilled: order_line_id="{}", order_number="{}", product_class="{}", user_id="{}"'.format(
+                        order_line.id,
+                        self.order.number,
+                        order_line.product.get_product_class().name,
+                        self.order.user.id
+                    )
+                )
+            )
+
+        self.assertEqual(LINE.COMPLETE, order_line.status)
 
         actual = json.loads(httpretty.last_request().body)
         expected = {
@@ -108,7 +127,22 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         """ The method should call the Enrollment API to un-enroll the student, and return True. """
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
         line = self.order.lines.first()
-        self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
+
+        with LogCapture(LOGGER_NAME) as l:
+            self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
+
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'line_revoked: order_line_id="{}", order_number="{}", product_class="{}", user_id="{}"'.format(
+                        line.id,
+                        line.order.number,
+                        line.product.get_product_class().name,
+                        line.order.user.id
+                    )
+                )
+            )
 
         actual = json.loads(httpretty.last_request().body)
         expected = {

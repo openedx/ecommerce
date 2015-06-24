@@ -2,6 +2,7 @@
 from decimal import Decimal
 
 from django.conf import settings
+from django.test import override_settings
 import mock
 from mock_django import mock_signal_receiver
 from oscar.core.loading import get_model, get_class
@@ -9,6 +10,7 @@ from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import CourseFactory, RefundFactory
 
@@ -59,7 +61,7 @@ class RefundTestMixin(object):
             self.assertEqual(refund_line.line_credit_excl_tax, order_line.line_price_excl_tax)
             self.assertEqual(refund_line.quantity, order_line.quantity)
 
-    def create_refund(self, processor_name='cybersource'):
+    def create_refund(self, processor_name=DummyProcessor.NAME):
         refund = RefundFactory()
         order = refund.order
         source_type, __ = SourceType.objects.get_or_create(name=processor_name)
@@ -68,6 +70,7 @@ class RefundTestMixin(object):
 
         return refund
 
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def approve(self, refund):
         def _revoke_lines(r):
             for line in r.lines.all():
@@ -75,9 +78,8 @@ class RefundTestMixin(object):
 
             r.set_status(REFUND.COMPLETE)
 
-        with mock.patch.object(Refund, '_issue_credit', return_value=None):
-            with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True):
-                with mock_signal_receiver(post_refund) as receiver:
-                    self.assertEqual(receiver.call_count, 0)
-                    self.assertTrue(refund.approve())
-                    self.assertEqual(receiver.call_count, 1)
+        with mock.patch.object(Refund, '_revoke_lines', side_effect=_revoke_lines, autospec=True):
+            with mock_signal_receiver(post_refund) as receiver:
+                self.assertEqual(receiver.call_count, 0)
+                self.assertTrue(refund.approve())
+                self.assertEqual(receiver.call_count, 1)

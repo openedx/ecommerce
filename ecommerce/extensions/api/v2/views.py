@@ -10,6 +10,7 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView,
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions, IsAdminUser
 from rest_framework.response import Response
 
+from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.exceptions import BadRequestException
@@ -203,11 +204,18 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             dict: Response data.
         """
         basket.freeze()
-        logger.info(u"Froze basket [%d]", basket.id)
+
+        audit_log(
+            'basket_frozen',
+            amount=basket.total_excl_tax,
+            basket_id=basket.id,
+            currency=basket.currency,
+            user_id=basket.owner.id
+        )
 
         response_data = self._generate_basic_response(basket)
 
-        if basket.total_incl_tax == AC.FREE:
+        if basket.total_excl_tax == AC.FREE:
             order_metadata = data.get_order_metadata(basket)
 
             logger.info(

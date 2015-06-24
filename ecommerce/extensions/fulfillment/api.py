@@ -14,6 +14,7 @@ from ecommerce.extensions.fulfillment import exceptions
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.refund.status import REFUND_LINE
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -63,7 +64,7 @@ def fulfill_order(order, lines):
                          product_type)
             line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
     except Exception:   # pylint: disable=broad-except
-        logger.exception('An error occurred while fulfilling order [%s].', order.number)
+        logger.exception('An unexpected error occurred while fulfilling order [%s].', order.number)
     finally:
         # Check if all lines are successful, or there were errors, and set the status of the Order.
         order_status = ORDER.COMPLETE
@@ -72,6 +73,7 @@ def fulfill_order(order, lines):
                 logger.error('There was an error while fulfilling order [%s]', order.number)
                 order_status = ORDER.FULFILLMENT_ERROR
                 break
+
         order.set_status(order_status)
         logger.info("Finished fulfilling order [%s] with status [%s]", order.number, order.status)
         return order  # pylint: disable=lost-exception

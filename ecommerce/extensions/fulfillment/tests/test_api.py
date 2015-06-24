@@ -33,13 +33,13 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
     @raises(exceptions.IncorrectOrderStatusError)
     def test_fulfill_order_bad_fulfillment_state(self):
         """Test a basic fulfillment of a Course Seat."""
-        # Set the order to Refunded, which cannot be fulfilled.
+        # Set the order to Complete, which cannot be fulfilled.
         self.order.set_status(ORDER.COMPLETE)
         api.fulfill_order(self.order, self.order.lines)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FulfillNothingModule', ])
     def test_fulfill_order_unknown_product_type(self):
-        """Test an incorrect Fulfillment Module."""
+        """Test an unknown product type."""
         api.fulfill_order(self.order, self.order.lines)
         self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
         self.assertEquals(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
@@ -56,7 +56,7 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
     def test_get_fulfillment_modules(self):
         """
         Verify the function retrieves the modules specified in settings.
-        An error should be logged for modules that cannot be logged.
+        An error should be logged for modules that cannot be loaded.
         """
         logger_name = 'ecommerce.extensions.fulfillment.api'
 

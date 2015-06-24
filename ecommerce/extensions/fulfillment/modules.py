@@ -12,7 +12,9 @@ from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
 
+from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.status import LINE
+
 
 logger = logging.getLogger(__name__)
 
@@ -171,8 +173,15 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 response = self._post_to_enrollment_api(data)
 
                 if response.status_code == status.HTTP_200_OK:
-                    logger.info("Success fulfilling line [%d] of order [%s].", line.id, order.number)
                     line.set_status(LINE.COMPLETE)
+
+                    audit_log(
+                        'line_fulfilled',
+                        order_line_id=line.id,
+                        order_number=order.number,
+                        product_class=line.product.get_product_class().name,
+                        user_id=order.user.id
+                    )
                 else:
                     try:
                         data = response.json()
@@ -214,7 +223,14 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             response = self._post_to_enrollment_api(data)
 
             if response.status_code == status.HTTP_200_OK:
-                logger.info('Successfully revoked line [%d].', line.id)
+                audit_log(
+                    'line_revoked',
+                    order_line_id=line.id,
+                    order_number=line.order.number,
+                    product_class=line.product.get_product_class().name,
+                    user_id=line.order.user.id
+                )
+
                 return True
             else:
                 # check if the error / message are something we can recover from.

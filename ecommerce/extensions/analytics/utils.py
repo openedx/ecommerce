@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from functools import wraps
 import logging
 
@@ -55,24 +56,32 @@ def log_exceptions(msg):
     return decorator
 
 
-def log_payment_received(processor_name, reference, amount, basket_id):
-    """Emit a log entry indicating that we were notified about a successful payment.
+def audit_log(name, **kwargs):
+    """DRY helper used to emit an INFO-level log message.
 
-    This should be called immediately after the notification has been received and interpreted (i.e.
-    after `handle_payment`).
+    Messages logged with this function are used to construct an audit trail. Log messages
+    should be emitted immediately after the event they correspond to has occurred and, if
+    applicable, after the database has been updated. These log messages use a verbose
+    key-value pair syntax to make it easier to extract fields when parsing the application's
+    logs.
+
+    This function is variadic, accepting a variable number of keyword arguments.
+
+    Arguments:
+        name (str): The name of the message to log. For example, 'payment_received'.
+
+    Keyword Arguments:
+        Indefinite. Keyword arguments are strung together as comma-separated key-value
+        pairs alphabetically ordered by key in the resulting log message.
+
+    Returns:
+        None
     """
-    logger.info(
-        'payment_received: processor_name="%s", reference="%s", amount="%s", basket_id="%s"',
-        processor_name,
-        reference,
-        amount,
-        basket_id,
-    )
+    d = OrderedDict(sorted(kwargs.items(), key=lambda i: i[0]))
 
+    # Joins keys and values from the sorted dictionary above with an "=", wraps each value
+    # in quotes, and separates each pair with a comma and a space.
+    payload = u', '.join(['{k}="{v}"'.format(k=k, v=v) for k, v in d.iteritems()])
+    message = u'{name}: {payload}'.format(name=name, payload=payload)
 
-def log_payment_applied(amount, basket_id, user_id):
-    """Emit a log entry indicating that a payment was successfully applied to an order.
-
-    This should be called immediately after the order has been saved to db (i.e. after `handle_order_placement`).
-    """
-    logger.info('payment_applied: amount="%s", basket_id="%s", user_id="%s"', amount, basket_id, user_id)
+    logger.info(message)

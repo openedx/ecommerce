@@ -9,6 +9,7 @@ from oscar.core.loading import get_class
 from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
 
+from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.refund.exceptions import InvalidStatus
@@ -97,6 +98,15 @@ class Refund(StatusMixin, TimeStampedModel):
                 total_credit_excl_tax=total_credit_excl_tax
             )
 
+            audit_log(
+                'refund_created',
+                amount=total_credit_excl_tax,
+                currency=refund.currency,
+                order_number=order.number,
+                refund_id=refund.id,
+                user_id=refund.user.id
+            )
+
             status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
             for line in unrefunded_lines:
                 RefundLine.objects.create(
@@ -137,6 +147,15 @@ class Refund(StatusMixin, TimeStampedModel):
             source = self.order.sources.first()
             processor = get_processor_class_by_name(source.source_type.name)()
             processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+
+            audit_log(
+                'credit_issued',
+                amount=self.total_credit_excl_tax,
+                currency=self.currency,
+                processor_name=processor.NAME,
+                refund_id=self.id,
+                user_id=self.user.id
+            )
         except AttributeError:
             # Order has no sources, resulting in an exception when trying to access `source_type`.
             # This occurs when attempting to refund free orders.
@@ -146,7 +165,6 @@ class Refund(StatusMixin, TimeStampedModel):
         """Revoke fulfillment for the lines in this Refund."""
         if revoke_fulfillment_for_refund(self):
             self.set_status(REFUND.COMPLETE)
-            logger.info('Successfully revoked fulfillment for Refund [%d]', self.id)
         else:
             logger.error('Unable to revoke fulfillment of all lines of Refund [%d].', self.id)
             self.set_status(REFUND.REVOCATION_ERROR)
@@ -158,7 +176,6 @@ class Refund(StatusMixin, TimeStampedModel):
         elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
             try:
                 self._issue_credit()
-                logger.info('Successfully issued credit for Refund [%d]', self.id)
                 self.set_status(REFUND.PAYMENT_REFUNDED)
             except PaymentError:
                 logger.exception('Failed to issue credit for refund [%d].', self.id)

@@ -377,7 +377,7 @@ class OrderFulfillViewTests(UserMixin, TestCase):
         self.user = self.create_user(is_superuser=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        self.order = factories.create_order()
+        self.order = factories.create_order(user=self.user)
         self.order.status = ORDER.FULFILLMENT_ERROR
         self.order.save()
         self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)
