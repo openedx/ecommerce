@@ -1,9 +1,12 @@
 """ Views for interacting with the payment processor. """
+from cStringIO import StringIO
 import logging
+import os
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import call_command
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -216,3 +219,58 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         except:  # pylint: disable=bare-except
             logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
+
+
+class PaypalProfileAdminView(View):
+
+    ACTIONS = ('list', 'create', 'show', 'update', 'delete', 'enable', 'disable')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            raise Http404
+
+        return super(PaypalProfileAdminView, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, *_args, **_kwargs):
+
+        # Capture all output and logging
+        out = StringIO()
+        err = StringIO()
+        log = StringIO()
+
+        log_handler = logging.StreamHandler(log)
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        log_handler.setFormatter(formatter)
+        logger.addHandler(log_handler)
+
+        action = request.GET.get('action')
+        if action not in self.ACTIONS:
+            return HttpResponseBadRequest("Invalid action.")
+        profile_id = request.GET.get('id', '')
+        json_str = request.GET.get('json', '')
+
+        command_params = [action]
+        if action in ('show', 'update', 'delete', 'enable', 'disable'):
+            command_params.append(profile_id.strip())
+        if action in ('create', 'update'):
+            command_params.append(json_str.strip())
+
+        logger.info("user %s is managing paypal profiles: %s", request.user.username, command_params)
+
+        success = False
+        try:
+            call_command('paypal_profile', *command_params,
+                         settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
+            success = True
+        except:  # pylint: disable=bare-except
+            # we still want to present the output whether or not the command succeeded.
+            pass
+
+        # Format the output for display
+        output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
+                                                                        log=log.getvalue())
+
+        # Remove the log capture handler
+        logger.removeHandler(log_handler)
+
+        return HttpResponse(output, content_type='text/plain', status=200 if success else 500)

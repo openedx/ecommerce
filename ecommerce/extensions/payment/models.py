@@ -25,5 +25,11 @@ class PaymentProcessorResponse(models.Model):
 class Source(AbstractSource):
     card_type = models.CharField(max_length=255, choices=CARD_TYPE_CHOICES, null=True, blank=True)
 
+
+class PaypalWebProfile(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255, unique=True)
+
+
 # noinspection PyUnresolvedReferences
 from oscar.apps.payment.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import

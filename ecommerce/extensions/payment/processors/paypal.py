@@ -11,6 +11,7 @@ import paypalrestsdk
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.models import PaypalWebProfile
 
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class Paypal(BasePaymentProcessor):
     """
 
     NAME = u'paypal'
+    DEFAULT_PROFILE_NAME = 'default'
 
     def __init__(self):
         """
@@ -93,6 +95,12 @@ class Paypal(BasePaymentProcessor):
                 'invoice_number': basket.order_number,
             }],
         }
+
+        try:
+            web_profile = PaypalWebProfile.objects.get(name=self.DEFAULT_PROFILE_NAME)
+            data['experience_profile_id'] = web_profile.id
+        except PaypalWebProfile.DoesNotExist:
+            pass
 
         payment = paypalrestsdk.Payment(data)
         payment.create()
