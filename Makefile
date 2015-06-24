@@ -39,6 +39,7 @@ serve:
 clean:
 	find . -name '*.pyc' -delete
 	coverage erase
+	rm -rf assets/ ecommerce/static/build
 
 test_python: clean
 	python manage.py compress --settings=ecommerce.settings.test
