@@ -1,6 +1,7 @@
 // config
 // --------------------
 @import "config-variables";
+@import "config-assets";
 
 // vendor
 // --------------------
@@ -12,6 +13,8 @@
 
 // app styling
 // --------------------
+@import "mixins";
+@import "navbar";
 @import 'base';
 
 // utility/misc.

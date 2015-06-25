@@ -1,0 +1,11 @@
+// app styling: mixins
+// ====================
+// NOTE: used for sass mixins
+
+@mixin rotate($angle) {
+    -webkit-transform: rotate($angle);
+    -moz-transform: rotate($angle);
+    -ms-transform: rotate($angle);
+    -o-transform: rotate($angle);
+    transform: rotate($angle);
+}
