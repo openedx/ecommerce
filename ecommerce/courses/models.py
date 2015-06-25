@@ -1,8 +1,12 @@
 import logging
 
-from django.db import models
+from django.db import models, transaction
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
+import waffle
+from ecommerce.courses.exceptions import PublishFailed
+
+from ecommerce.courses.publishers import LMSPublisher
 
 logger = logging.getLogger(__name__)
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -12,6 +16,17 @@ class Course(models.Model):
     id = models.CharField(null=False, max_length=255, primary_key=True, verbose_name='ID')
     name = models.CharField(null=False, max_length=255)
     history = HistoricalRecords()
+
+    @transaction.atomic
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(Course, self).save(force_insert, force_update, using, update_fields)
+
+        if waffle.switch_is_active('publish_course_modes_to_lms'):
+            if not LMSPublisher().publish(self):
+                # Raise an exception to force a rollback
+                raise PublishFailed('Failed to publish {}'.format(self.id))
+        else:
+            logger.debug('Course mode publishing is not enabled. Commerce changes will not be published!')
 
     @classmethod
     def is_mode_verified(cls, mode):

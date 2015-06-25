@@ -231,6 +231,10 @@ LMS_DASHBOARD_URL = None
 # URL to which enrollment requests should be made
 ENROLLMENT_API_URL = None
 
+# Commerce API settings used for publishing information to LMS.
+COMMERCE_API_TIMEOUT = 7
+COMMERCE_API_URL = None
+
 # OAuth2 provider URL used for OAuth2 transactions (e.g. validating access tokens)
 OAUTH2_PROVIDER_URL = None
 # END URL CONFIGURATION

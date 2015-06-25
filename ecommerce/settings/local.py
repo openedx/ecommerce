@@ -78,6 +78,8 @@ LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
 LMS_DASHBOARD_URL = get_lms_url('/dashboard')
 
 OAUTH2_PROVIDER_URL = get_lms_url('/oauth2')
+
+COMMERCE_API_URL = get_lms_url('/commerce/api/v1/')
 # END URL CONFIGURATION
 
 
