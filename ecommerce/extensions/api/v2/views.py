@@ -62,15 +62,14 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
                 'payment_processor_name' in the body.
 
         Returns:
-            HTTP_200_OK if a basket was created successfully; the basket ID is included in
-                the response body along with either an order number corresponding to the placed
-                order (None if one wasn't placed) or payment information (None if payment isn't required).
-            HTTP_400_BAD_REQUEST if the client provided invalid data or attempted to add an
-                unavailable product to their basket, with reason for the failure in JSON format.
-            HTTP_401_UNAUTHORIZED if an unauthenticated request is denied permission to access
-                the endpoint.
-            HTTP_429_TOO_MANY_REQUESTS if the client has made requests at a rate exceeding that
-                allowed by the configured rate limit.
+            200 if a basket was created successfully; the basket ID is included in the response body along with
+                either an order number corresponding to the placed order (None if one wasn't placed) or
+                payment information (None if payment isn't required).
+            400 if the client provided invalid data or attempted to add an unavailable product to their basket,
+                with reason for the failure in JSON format.
+            401 if an unauthenticated request is denied permission to access the endpoint.
+            429 if the client has made requests at a rate exceeding that allowed by the configured rate limit.
+            500 if an error occurs when attempting to initiate checkout.
 
         Examples:
             Create a basket for the user with username 'Saul' as follows. Successful fulfillment
@@ -126,6 +125,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
         requested_products = request.data.get(AC.KEYS.PRODUCTS)
         if requested_products:
             for requested_product in requested_products:
+                # Ensure the requested products exist
                 sku = requested_product.get(AC.KEYS.SKU)
                 if sku:
                     try:
@@ -138,6 +138,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
                         api_exceptions.SKU_NOT_FOUND_USER_MESSAGE
                     )
 
+                # Ensure the requested products are available for purchase before adding them to the basket
                 availability = basket.strategy.fetch_for_product(product).availability
                 if not availability.is_available_to_buy:
                     return self._report_bad_request(
@@ -149,18 +150,16 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
                     )
 
                 basket.add_product(product)
-                logger.info(
-                    u"Added product with SKU [%s] to basket [%d]",
-                    sku,
-                    basket.id,
-                )
+                logger.info(u"Added product with SKU [%s] to basket [%d]", sku, basket.id)
         else:
+            # If no products were included in the request, we cannot checkout.
             return self._report_bad_request(
                 api_exceptions.PRODUCT_OBJECTS_MISSING_DEVELOPER_MESSAGE,
                 api_exceptions.PRODUCT_OBJECTS_MISSING_USER_MESSAGE
             )
 
         if request.data.get(AC.KEYS.CHECKOUT) is True:
+            # Begin the checkout process, if requested, with the requested payment processor.
             payment_processor_name = request.data.get(AC.KEYS.PAYMENT_PROCESSOR_NAME)
             if payment_processor_name:
                 try:
@@ -173,8 +172,14 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             else:
                 payment_processor = get_default_processor_class()
 
-            response_data = self._checkout(basket, payment_processor())
+            try:
+                response_data = self._checkout(basket, payment_processor())
+            except Exception as ex:  # pylint: disable=broad-except
+                basket.thaw()
+                logger.exception('Failed to initiate checkout for Basket [%d]. Basket has been thawed.', basket.id)
+                return Response({'developer_message': ex.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
+            # Return a serialized basket, if checkout was not requested.
             response_data = self._generate_basic_response(basket)
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -198,10 +203,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
             dict: Response data.
         """
         basket.freeze()
-        logger.info(
-            u"Froze basket [%d]",
-            basket.id,
-        )
+        logger.info(u"Froze basket [%d]", basket.id)
 
         response_data = self._generate_basic_response(basket)
 

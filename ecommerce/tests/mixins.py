@@ -62,8 +62,9 @@ class BasketCreationMixin(JwtMixin):
     PATH = reverse('api:v2:baskets:create')
     SHIPPING_EVENT_NAME = FulfillmentMixin.SHIPPING_EVENT_NAME
     FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
+    USERNAME = 'sgoodman'
     USER_DATA = {
-        'username': 'sgoodman',
+        'username': USERNAME,
         'email': 'saul@bettercallsaul.com',
     }
 

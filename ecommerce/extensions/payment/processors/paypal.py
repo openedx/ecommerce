@@ -12,7 +12,6 @@ import paypalrestsdk
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 
-
 logger = logging.getLogger(__name__)
 
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -109,12 +108,11 @@ class Paypal(BasePaymentProcessor):
                 entry.id
             )
 
-            raise GatewayError
+            raise GatewayError(error)
 
         entry = self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
         logger.info(u"Successfully created PayPal payment [%s] for basket [%d].", payment.id, basket.id)
 
-        # Dat HATEOAS
         for link in payment.links:
             if link.rel == 'approval_url':
                 approval_url = link.href
@@ -125,7 +123,8 @@ class Paypal(BasePaymentProcessor):
                 payment.id,
                 entry.id
             )
-            raise GatewayError
+            raise GatewayError(
+                'Approval URL missing from PayPal payment response. See entry [{}] for details.'.format(entry.id))
 
         parameters = {
             'payment_page_url': approval_url,
