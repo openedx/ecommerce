@@ -18,11 +18,13 @@ from oscar.test import factories
 from oscar.test.newfactories import ProductAttributeValueFactory
 from rest_framework import status
 from rest_framework.throttling import UserRateThrottle
+from testfixtures import LogCapture
 
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.serializers import OrderSerializer, RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
+from ecommerce.extensions.api.v2.views import BasketCreateView
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.payment import exceptions as payment_exceptions
@@ -36,8 +38,10 @@ Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Refund = get_model('refund', 'Refund')
+User = get_user_model()
 
 JSON_CONTENT_TYPE = 'application/json'
+LOGGER_NAME = 'ecommerce.extensions.api.v2.views'
 
 
 @ddt.ddt
@@ -56,9 +60,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
 
     def setUp(self):
         super(BasketCreateViewTests, self).setUp()
-
-        # Override all loggers, suppressing logging calls of severity CRITICAL and below
-        logging.disable(logging.CRITICAL)
 
         self.paid_product = factories.ProductFactory(
             structure='child',
@@ -82,9 +83,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             stockrecords__price_excl_tax=Decimal('240000.00'),
         )
 
-        # Remove logger override
-        self.addCleanup(logging.disable, logging.NOTSET)
-
     @ddt.data(
         ([FREE_SKU], False, None, False),
         ([FREE_SKU], True, None, False),
@@ -102,7 +100,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
 
     def test_multiple_baskets(self):
         """Test that basket operations succeed if multiple editable baskets exist for the user."""
-        User = get_user_model()
         user = User.objects.create_user(
             username=self.USER_DATA['username'],
         )
@@ -231,6 +228,30 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             'user_message': user_message
         }
         return bad_request_dict
+
+    @mock.patch.object(BasketCreateView, '_checkout', mock.Mock(side_effect=ValueError('Test message')))
+    def test_checkout_exception(self):
+        """ If an exception is raised when initiating the checkout process, a PaymentProcessorResponse should be
+        recorded, and the view should return HTTP status 500. """
+
+        with LogCapture(LOGGER_NAME, level=logging.ERROR) as l:
+            response = self.create_basket(skus=[self.PAID_SKU], checkout=True)
+
+            # Ensure the user's basket is thawed
+            user = User.objects.get(username=self.USERNAME)
+            basket = user.baskets.get()
+            self.assertEqual(basket.status, Basket.OPEN)
+
+            l.check((LOGGER_NAME, 'ERROR',
+                     'Failed to initiate checkout for Basket [{}]. Basket has been thawed.'.format(basket.id)))
+
+        # Validate the response status and content
+        self.assertEqual(response.status_code, 500)
+        actual = json.loads(response.content)
+        expected = {
+            'developer_message': 'Test message'
+        }
+        self.assertDictEqual(actual, expected)
 
 
 class RetrieveOrderViewTests(ThrottlingMixin, UserMixin, TestCase):
