@@ -5,18 +5,22 @@ from decimal import Decimal as D
 
 import jwt
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
+from mock import patch
 from oscar.test import factories
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 
 
 Basket = get_model('basket', 'Basket')
+Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
+User = get_user_model()
 
 
 class UserMixin(object):
@@ -128,23 +132,36 @@ class BasketCreationMixin(JwtMixin):
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
         ShippingEventType.objects.get_or_create(name=self.SHIPPING_EVENT_NAME)
 
-        response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
+        with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
+            response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['id'], Basket.objects.get().id)
+            self.assertEqual(response.status_code, 200)
 
-        if checkout:
-            if requires_payment:
-                self.assertIsNone(response.data[AC.KEYS.ORDER])
-                self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME])
-                self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_FORM_DATA])
-                self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PAGE_URL])
+            basket = Basket.objects.get()
+            user = User.objects.get(username=self.USER_DATA['username'])
+            basket.strategy = Selector().strategy(user=user)
+            self.assertEqual(response.data['id'], basket.id)
+
+            if checkout:
+                self.assertTrue(mock_audit_log.called_with(
+                    'basket_frozen',
+                    amount=basket.total_excl_tax,
+                    basket_id=basket.id,
+                    currency=basket.currency,
+                    user_id=basket.owner.id
+                ))
+
+                if requires_payment:
+                    self.assertIsNone(response.data[AC.KEYS.ORDER])
+                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME])
+                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_FORM_DATA])
+                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PAGE_URL])
+                else:
+                    self.assertEqual(response.data[AC.KEYS.ORDER][AC.KEYS.ORDER_NUMBER], Order.objects.get().number)
+                    self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
             else:
-                self.assertEqual(response.data[AC.KEYS.ORDER][AC.KEYS.ORDER_NUMBER], Order.objects.get().number)
+                self.assertIsNone(response.data[AC.KEYS.ORDER])
                 self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
-        else:
-            self.assertIsNone(response.data[AC.KEYS.ORDER])
-            self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
 
 
 class BusinessIntelligenceMixin(object):

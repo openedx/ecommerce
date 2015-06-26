@@ -6,6 +6,7 @@ import mock
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model, get_class
 from oscar.test.newfactories import UserFactory
+from testfixtures import LogCapture
 
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
@@ -13,8 +14,11 @@ from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
+
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
+
+LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
 
 class StatusTestsMixin(object):
@@ -81,7 +85,24 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         should create a Refund with corresponding RefundLines.
         """
         order = self.create_order(user=UserFactory(), multiple_lines=multiple_lines)
-        refund = Refund.create_with_lines(order, list(order.lines.all()))
+
+        with LogCapture(LOGGER_NAME) as l:
+            refund = Refund.create_with_lines(order, list(order.lines.all()))
+
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'refund_created: amount="{}", currency="{}", order_number="{}", '
+                    'refund_id="{}", user_id="{}"'.format(
+                        refund.total_credit_excl_tax,
+                        refund.currency,
+                        order.number,
+                        refund.id,
+                        refund.user.id
+                    )
+                )
+            )
 
         self.assert_refund_matches_order(refund, order)
 
@@ -93,9 +114,12 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         order = self.create_order(user=UserFactory())
         line = order.lines.first()
         RefundLineFactory(order_line=line)
-        refund = Refund.create_with_lines(order, [line])
 
-        self.assertEqual(refund, None)
+        with LogCapture(LOGGER_NAME) as l:
+            refund = Refund.create_with_lines(order, [line])
+            self.assertEqual(refund, None)
+
+            l.check()
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule.revoke_line')
@@ -161,8 +185,24 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         If payment refund and fulfillment revocation succeed, the method should update the status of the Refund and
         RefundLine objects to Complete, and return True.
         """
-        refund = self._get_instance()
-        self.approve(refund)
+        refund = self.create_refund()
+        with LogCapture(LOGGER_NAME) as l:
+            self.approve(refund)
+
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'credit_issued: amount="{}", currency="{}", processor_name="{}", '
+                    'refund_id="{}", user_id="{}"'.format(
+                        refund.total_credit_excl_tax,
+                        refund.currency,
+                        refund.order.sources.first().source_type.name,
+                        refund.id,
+                        refund.user.id
+                    )
+                )
+            )
 
     def test_approve_payment_error(self):
         """
