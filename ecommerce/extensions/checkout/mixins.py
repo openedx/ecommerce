@@ -50,8 +50,6 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
     def handle_successful_order(self, order):
         """Send a signal so that receivers can perform relevant tasks (e.g., fulfill the order)."""
-        post_checkout.send_robust(sender=self, order=order)
-
         audit_log(
             'order_placed',
             amount=order.total_excl_tax,
@@ -60,5 +58,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             order_number=order.number,
             user_id=order.user.id
         )
+
+        post_checkout.send_robust(sender=self, order=order)
 
         return order
