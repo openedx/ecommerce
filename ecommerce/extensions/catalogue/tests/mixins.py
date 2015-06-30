@@ -52,7 +52,7 @@ class CourseCatalogTestMixin(object):
             seat.course = course
             seat.save()
 
-    def create_course_seats(self, course_id, certificate_types):
+    def create_course_seats(self, course_id, certificate_types, provider=None):
         title = 'Seat in {}'.format(course_id)
         parent_product = factories.ProductFactory(structure='parent', title=title,
                                                   product_class=self.seat_product_class)
@@ -65,6 +65,7 @@ class CourseCatalogTestMixin(object):
 
             seat.attr.certificate_type = certificate_type
             seat.attr.course_key = course_id
+            seat.attr.credit_provider = provider
             seat.save()
 
             factories.StockRecordFactory(product=seat)

@@ -32,10 +32,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
     """Test course seat fulfillment."""
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
+    # provider = 'MIT'
 
     def setUp(self):
         user = UserFactory()
-
         seats = self.create_course_seats(self.course_id, (self.certificate_type,))
         self.seat = seats[self.certificate_type]
 
@@ -56,7 +56,6 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
     def test_enrollment_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill enrollments."""
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
-
         # Attempt to enroll.
         with LogCapture(LOGGER_NAME) as l:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
@@ -66,14 +65,15 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'line_fulfilled: certificate_type="{}", course_id="{}", order_line_id="{}", order_number="{}", '
-                    'product_class="{}", user_id="{}"'.format(
+                    'line_fulfilled: certificate_type="{}", course_id="{}", credit_provider="{}", order_line_id="{}", '
+                    'order_number="{}", product_class="{}", user_id="{}"'.format(
                         line.product.attr.certificate_type,
                         line.product.attr.course_key,
+                        None,
                         line.id,
                         line.order.number,
                         line.product.get_product_class().name,
-                        line.order.user.id
+                        line.order.user.id,
                     )
                 )
             )
@@ -88,6 +88,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             'course_details': {
                 'course_id': self.course_id,
             },
+            'enrollment_attributes': []
         }
         self.assertEqual(actual, expected)
 
@@ -215,3 +216,73 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [{}].'.format(line.id))
             )
+
+
+@ddt.ddt
+@override_settings(EDX_API_KEY='foo')
+class EnrollmentFulfillmentCreditSeatModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+    """Test course seat fulfillment."""
+    course_id = 'edX/DemoX/Demo_Course'
+    certificate_type = 'credit'
+    provider = 'MIT'
+
+    def setUp(self):
+        user = UserFactory()
+
+        seats = self.create_course_seats(self.course_id, (self.certificate_type,), self.provider)
+        self.seat = seats[self.certificate_type]
+
+        for stock_record in self.seat.stockrecords.all():
+            stock_record.price_currency = 'USD'
+            stock_record.save()
+
+        basket = BasketFactory()
+        basket.add_product(self.seat, 1)
+        self.order = factories.create_order(number=1, basket=basket, user=user)
+
+    @httpretty.activate
+    def test_enrollment_module_fulfill(self):
+        """Happy path test to ensure we can properly fulfill enrollments."""
+        httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
+
+        # Attempt to enroll.
+        with LogCapture(LOGGER_NAME) as l:
+            EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+            line = self.order.lines.get()
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'line_fulfilled: certificate_type="{}", course_id="{}", credit_provider="{}", order_line_id="{}", '
+                    'order_number="{}", product_class="{}", user_id="{}"'.format(
+                        line.product.attr.certificate_type,
+                        line.product.attr.course_key,
+                        line.product.attr.credit_provider,
+                        line.id,
+                        line.order.number,
+                        line.product.get_product_class().name,
+                        line.order.user.id,
+                    )
+                )
+            )
+
+        self.assertEqual(LINE.COMPLETE, line.status)
+
+        actual = json.loads(httpretty.last_request().body)
+        expected = {
+            'user': self.order.user.username,
+            'is_active': True,
+            'mode': self.certificate_type,
+            'course_details': {
+                'course_id': self.course_id,
+            },
+            'enrollment_attributes': [
+                {
+                    'namespace': 'credit',
+                    'name': 'provider_id',
+                    'value': self.provider
+                }
+            ]
+        }
+        self.assertEqual(actual, expected)

@@ -80,3 +80,4 @@ override.cfg
 .DS_Store
 
 *.trace
+private.py

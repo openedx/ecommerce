@@ -159,6 +159,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 logger.error("Supported Seat Product does not have required attributes, [certificate_type, course_key]")
                 line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
                 continue
+            try:
+                provider = line.product.attr.credit_provider
+            except AttributeError:
+                logger.info("Supported Seat Product does not have the provider. Setting it to None")
+                provider = None
 
             data = {
                 'user': order.user.username,
@@ -166,9 +171,17 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 'mode': certificate_type,
                 'course_details': {
                     'course_id': course_key
-                }
+                },
+                'enrollment_attributes': []
             }
-
+            if provider:
+                data['enrollment_attributes'].append(
+                    {
+                        'namespace': 'credit',
+                        'name': 'provider_id',
+                        'value': provider
+                    }
+                )
             try:
                 response = self._post_to_enrollment_api(data)
 
@@ -182,7 +195,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                         product_class=line.product.get_product_class().name,
                         course_id=course_key,
                         certificate_type=certificate_type,
-                        user_id=order.user.id
+                        user_id=order.user.id,
+                        credit_provider=provider,
                     )
                 else:
                     try:
