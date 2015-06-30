@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from functools import wraps
 import logging
 
@@ -72,16 +71,14 @@ def audit_log(name, **kwargs):
 
     Keyword Arguments:
         Indefinite. Keyword arguments are strung together as comma-separated key-value
-        pairs alphabetically ordered by key in the resulting log message.
+        pairs ordered alphabetically by key in the resulting log message.
 
     Returns:
         None
     """
-    d = OrderedDict(sorted(kwargs.items(), key=lambda i: i[0]))
-
-    # Joins keys and values from the sorted dictionary above with an "=", wraps each value
+    # Joins sorted keyword argument keys and values with an "=", wraps each value
     # in quotes, and separates each pair with a comma and a space.
-    payload = u', '.join(['{k}="{v}"'.format(k=k, v=v) for k, v in d.iteritems()])
+    payload = u', '.join(['{k}="{v}"'.format(k=k, v=v) for k, v in sorted(kwargs.items())])
     message = u'{name}: {payload}'.format(name=name, payload=payload)
 
     logger.info(message)

@@ -61,21 +61,24 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         with LogCapture(LOGGER_NAME) as l:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
-            order_line = self.order.lines.get()
+            line = self.order.lines.get()
             l.check(
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'line_fulfilled: order_line_id="{}", order_number="{}", product_class="{}", user_id="{}"'.format(
-                        order_line.id,
-                        self.order.number,
-                        order_line.product.get_product_class().name,
-                        self.order.user.id
+                    'line_fulfilled: certificate_type="{}", course_id="{}", order_line_id="{}", order_number="{}", '
+                    'product_class="{}", user_id="{}"'.format(
+                        line.product.attr.certificate_type,
+                        line.product.attr.course_key,
+                        line.id,
+                        line.order.number,
+                        line.product.get_product_class().name,
+                        line.order.user.id
                     )
                 )
             )
 
-        self.assertEqual(LINE.COMPLETE, order_line.status)
+        self.assertEqual(LINE.COMPLETE, line.status)
 
         actual = json.loads(httpretty.last_request().body)
         expected = {
@@ -135,7 +138,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'line_revoked: order_line_id="{}", order_number="{}", product_class="{}", user_id="{}"'.format(
+                    'line_revoked: certificate_type="{}", course_id="{}", order_line_id="{}", order_number="{}", '
+                    'product_class="{}", user_id="{}"'.format(
+                        line.product.attr.certificate_type,
+                        line.product.attr.course_key,
                         line.id,
                         line.order.number,
                         line.product.get_product_class().name,
