@@ -1,9 +1,8 @@
 // app styling: base
 // ====================
 // NOTE: used for any basic styling or overriding that isn't covered by Bootstrap or theming
-body {
-  // Make room for the navbar.
-  padding-top: $navbar-height + $navbar-margin-bottom;
+.container {
+  background-color: white;
 }
 
 .btn-default {
