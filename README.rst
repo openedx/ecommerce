@@ -61,6 +61,23 @@ for assets in ``ecommerce\static\``. If you run ``make static`` or ``r.js`` loca
 make sure you delete ``ecommerce/static/build`` or run ``make static`` before continuing with development. If you do not
 all changes made to static files will be ignored.
 
+Feature Switches
+----------------
+This app uses `Waffle`_ to manage feature gating/switching. Switches can be managed via Django admin. The following
+switches exist:
+
++--------------------------------+---------------------------------------------------------------------------+
+| Name                           | Functionality                                                             |
++================================+=======================+===================================================+
+| user_enrollments_on_dashboard  | Display a user's current enrollments on the dashboard user detail page    |
++--------------------------------+---------------------------------------------------------------------------+
+| publish_course_modes_to_lms    | Publish prices and SKUs to the LMS after every course modification        |
++--------------------------------+---------------------------------------------------------------------------+
+
+.. _Waffle: https://waffle.readthedocs.org/
+
+
+
 Testing
 -------
 
