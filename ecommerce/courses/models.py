@@ -16,6 +16,7 @@ class Course(models.Model):
     id = models.CharField(null=False, max_length=255, primary_key=True, verbose_name='ID')
     name = models.CharField(null=False, max_length=255)
     history = HistoricalRecords()
+    thumbnail_url = models.URLField(null=True, blank=True)
 
     @transaction.atomic
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
