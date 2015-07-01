@@ -25,7 +25,7 @@
 
   .course-details,
   .provider-details {
-    border-bottom: 1px solid $light-gray;
+    border-bottom: 1px solid palette(grayscale, light);
     margin-bottom: 20px;
     padding: 20px 0;
   }
@@ -60,4 +60,3 @@
     }
   }
 }
-

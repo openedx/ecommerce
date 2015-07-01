@@ -1,0 +1,29 @@
+// config: variables
+// ====================
+// NOTE: these variables override Bootstrap-centric variables.
+
+// FontAwesome font directory
+$fa-font-path: "/static/bower_components/fontawesome/fonts";
+
+// UX Pattern Library font directory
+$font-path: '/static/bower_components/edx-ux-pattern-library/_src/pattern-library/fonts';
+
+// Use asset paths relative to Bootstrap SASS files.
+$bootstrap-sass-asset-helper: true;
+
+// body
+$body-bg: darken(white, 2%);
+
+// borders
+$border-radius-base: 3px;
+$border-radius-large: 3px;
+$border-radius-small: 3px;
+
+// typography
+$font-family-sans-serif: 'Open Sans','Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-monospace: 'Bitstream Vera Sans Mono', Consolas, Courier, monospace;
+
+// navbar
+$navbar-default-bg: white;
+$navbar-height: 74px;
+$navbar-border-bottom-width: 4px;

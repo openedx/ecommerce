@@ -1,0 +1,77 @@
+// navbar
+// --------------------------------------------------
+
+.nav {
+    .nav-link {
+        &:hover,
+        &:focus {
+            outline:inherit;
+            border-bottom-color:transparent;
+        }
+    }
+}
+
+.navbar {
+  // Remove default Bootstrap navbar border styling
+  border: none;
+  border-radius: 0;
+
+  // Add our own border
+  border-bottom: $navbar-border-bottom-width solid palette(primary, accent);
+
+  // Vertically center the logo
+  .navbar-brand .navbar-brand-logo {
+    @include center-vertically;
+  }
+
+}
+
+@media (min-width: $grid-float-breakpoint-max) {
+  .navbar {
+    // Display the user menu as a .navbar-btn when not collapsed to handle vertical centering.
+    .user-menu {
+      @include navbar-vertical-align($input-height-base);
+    }
+  }
+}
+
+.user-menu {
+  > .nav-button {
+    border-color: palette(grayscale, light);
+    color: palette(grayscale, dark);
+
+    &:hover,
+    &:focus {
+      color: palette(grayscale, white-t);
+
+      > .icon {
+        color: palette(grayscale, white-t);
+      }
+    }
+  }
+
+  .main-btn {
+    font-weight: bold;
+    color: palette(grayscale, x-dark);
+
+    .icon {
+      display: inline-block;
+      float: left;
+      margin: 2px 6px -3px 3px;
+      font-size: 1.2em;
+      color: palette(grayscale, base);
+    }
+  }
+}
+
+.dropdown-menu {
+    .nav-link {
+        // Disables default link behavior of pattern library on menu items
+        transition:none;
+
+        &:hover,
+        &:focus {
+            border-bottom-color:transparent;
+        }
+    }
+}
