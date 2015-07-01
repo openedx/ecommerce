@@ -12,11 +12,15 @@
             <th>{% trans "ID" %}</th>
             <th>{% trans "Credit providers" %}</th>
             <th>{% trans "Price" %}</th>
+            <th>{% trans "Thumbnail URL" %}</th>
           </tr>
           <tr>
             <td>{{ credit_seat.id  }}</td>
             <td>{{ credit_seat.attr.credit_provider  }}</td>
             <td>{{ credit_seat.stockrecords.first.price_excl_tax }}</td>
+            <td>
+                <img src="{{ credit_seat.attr.thumbnail_url }}" alt="{{ credit_seat.id }}">
+            </td>
           </tr>
         </table>
     {% endfor %}
