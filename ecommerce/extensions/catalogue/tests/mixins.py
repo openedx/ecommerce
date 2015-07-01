@@ -32,6 +32,7 @@ class CourseCatalogTestMixin(object):
             factories.ProductAttributeFactory(code='course_key', product_class=pc, type='text')
             factories.ProductAttributeFactory(code='id_verification_required', product_class=pc, type='boolean')
             factories.ProductAttributeFactory(code='credit_provider', product_class=pc, type='text')
+            factories.ProductAttributeFactory(code='thumbnail_url', product_class=pc, type='text')
 
         return pc
 

@@ -42,6 +42,7 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
 
         seat = self.seats['credit']
         seat.attr.credit_provider = self.provider
+        seat.attr.thumbnail_url = 'http://www.edx.org/provider.jpg'
         seat.save()
 
         partner, _created = Partner.objects.get_or_create(code='edx')
