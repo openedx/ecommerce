@@ -1,0 +1,54 @@
+//
+// Navbars
+// --------------------------------------------------
+
+.navbar {
+  // Remove default Bootstrap navbar border styling
+  border: none;
+  border-radius: 0;
+
+  // Add our own border
+  border-bottom: $navbar-border-bottom-width solid $navbar-default-border;
+
+  // Vertically center the logo
+  .navbar-brand .navbar-brand-logo {
+    @include center-vertically;
+  }
+}
+
+@media (min-width: $grid-float-breakpoint-max) {
+  .navbar {
+
+    // Display the user menu as a .navbar-btn when not collapsed to handle vertical centering.
+    .user-menu {
+      @include navbar-vertical-align($input-height-base);
+    }
+  }
+}
+
+.user-menu {
+  > button {
+    border-color: $grayLight;
+    color: $grayDark;
+
+    &:hover, &:focus {
+      color: $white;
+
+      > .icon {
+        color: $white;
+      }
+    }
+  }
+
+  .main-btn {
+    font-weight: bold;
+
+    .icon {
+      display: inline-block;
+      float: left;
+      margin: 2px 6px -3px 3px;
+      font-size: 1.2em;
+      color: $grayLight;
+    }
+  }
+}

@@ -1,0 +1,48 @@
+//
+// Buttons
+// --------------------------------------------------
+
+.btn-default {
+  // Invert the background and foreground colors on active/focus/hover
+  &:hover,
+  &:focus,
+  &.focus,
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle {
+    border-color: $btn-default-color;
+    background-color: $btn-default-color;
+    color: $btn-default-bg;
+  }
+
+  // Use edX disabled state
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    border-color: $gray-light;
+    color: $gray-light;
+  }
+}
+
+.btn-primary {
+  // Highlight active/focus/hover
+  &:hover,
+  &:focus,
+  &.focus,
+  &:active,
+  &.active,
+  .open > &.dropdown-toggle {
+    border-color: $brand-primary-accent;
+    background-color: $brand-primary-accent;
+  }
+
+  // Use edX disabled state
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    opacity: 0.50;
+    border-color: $gray-light;
+    background-color: $gray-light;
+    color: $gray-darker;
+  }
+}
