@@ -1,6 +1,7 @@
 """
 Tests for the checkout page.
 """
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from oscar.core.loading import get_model
@@ -8,6 +9,7 @@ from waffle import Switch
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.tests.mixins import UserMixin
 
 
@@ -74,9 +76,17 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
     def test_get_checkout_page_with_credit_seats(self):
         """
         Test checkout page with credit course showing all information.
-        course name , thumbnail url , provider name , price.
+        course name , thumbnail url , provider name , price , payment processors.
         """
         response = self.client.get(reverse('credit:checkout', args=[self.course.id]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['course'], self.course)
         self.assertEqual(response.context['credit_seats'][0], self.seats['credit'])
+        self.assertEqual(
+            sorted(
+                response.context['payment_processors'].keys()
+            ),
+            sorted(
+                [get_processor_class(path).NAME.lower() for path in settings.PAYMENT_PROCESSORS]
+            )
+        )

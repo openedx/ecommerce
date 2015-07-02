@@ -1,8 +1,12 @@
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 import waffle
 
 from ecommerce.courses.models import Course
+from ecommerce.extensions.payment.helpers import get_processor_class
 
 
 class Checkout(TemplateView):
@@ -14,22 +18,36 @@ class Checkout(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Checkout, self).get_context_data(**kwargs)
-        context['request'] = self.request
-        context['user'] = self.request.user
 
         try:
             course = Course.objects.get(id=kwargs.get('course_id'))
         except Course.DoesNotExist:
             raise Http404
 
-        context['course'] = course
+        # Make button text for each processor which will be shown to user.
+        processors_dict = {}
+        for path in settings.PAYMENT_PROCESSORS:
+            processor = get_processor_class(path).NAME.lower()
+            if processor == 'cybersource':
+                processors_dict[processor] = 'Checkout'
+            elif processor == 'paypal':
+                processors_dict[processor] = 'Checkout with PayPal'
+            else:
+                processors_dict[processor] = 'Checkout with {}'.format(processor)
 
-        context['credit_seats'] = [
-            seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
-        ]
+        context.update({
+            'request': self.request,
+            'user': self.request.user,
+            'course': course,
+            'payment_processors': processors_dict,
+            'credit_seats': [
+                seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
+            ]
+        })
 
         return context
 
+    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         """Get method for checkout page."""
         if not waffle.switch_is_active('ENABLE_CREDIT_APP'):
