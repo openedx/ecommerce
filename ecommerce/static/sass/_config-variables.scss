@@ -5,6 +5,10 @@
 // FontAwesome font directory
 $fa-font-path: "/static/bower_components/fontawesome/fonts";
 
+// Body stylings
+$body-bg: rgb(247, 247, 247);
+$font-family-sans-serif: 'Open Sans', Helvetica Neue, Arial, sans-serif;
+
 // Use asset paths relative to Bootstrap SASS files.
 $bootstrap-sass-asset-helper: true;
 
@@ -26,7 +30,24 @@ $border-radius-base: 3px;
 $border-radius-large: 3px;
 $border-radius-small: 3px;
 
+// Navigation bar
 $navbar-default-bg: white;
-
-// TODO Use the correct color
 $navbar-default-border: $brand-primary-accent;
+
+// Dropdown button
+$dropdown-btn-bg: white;
+$dropdown-btn-border: rgb(200, 200, 200);
+$dropdown-btn-color: rgb(60, 60, 60);
+$dropdown-btn-icon: rgb(138, 140, 143);
+
+// Dropdown menu
+$dropdown-bg: white;
+$dropdown-border: rgb(100, 100, 100);
+$dropdown-divider: $dropdown-btn-border;
+$dropdown-fallback-border: $dropdown-border;
+$dropdown-link-color: rgb(0, 120, 176);
+$dropdown-link-hover-color: rgb(60, 60, 60);
+$dropdown-link-hover-bg: rgba(0, 0, 0, 0);
+$dropdown-link-active-color: $dropdown-link-hover-color;
+$dropdown-link-active-bg: $dropdown-link-hover-bg;
+$dropdown-shadow: $dropdown-border;

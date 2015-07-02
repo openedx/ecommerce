@@ -11,7 +11,7 @@
     <title>{% block title %}{% endblock title %}</title>
 
   {% compress css %}
-      <link rel="stylesheet" href="{% static 'sass/main.scss' %}" type="text/x-scss">
+      <link rel="stylesheet" href="{% static 'sass/main.scss' %}" type="text/x-scss" media="screen">
   {% endcompress %}
 
   {% compress css %}
@@ -19,8 +19,45 @@
     {% block stylesheets %}
     {% endblock %}
   {% endcompress %}
+
 </head>
 <body role="document">
+
+<nav class="nav navbar-default" role="banner" aria-label="Main">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#edx-navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <div class="navbar-brand">
+        <img class="site-logo image-style-none" itemprop="logo" typeof="foaf:Image" src="{% static 'images/edx-logo-header.png' %}" alt="edX">
+      </div>
+    </div>
+    <div class="collapse navbar-collapse" id="edx-navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <div class="text" href="#">
+                  <i class="icon fa fa-home"></i>
+                  <div>{{ username }}</div>
+              </div>
+              <div class="arrow">
+                  <span class="caret"></span>
+              </div>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="{{ lms_dashboard_url }}">Dashboard</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
 {% block content %}
 {% endblock content %}
 

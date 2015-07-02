@@ -1,10 +1,9 @@
 // app styling: base
 // ====================
 // NOTE: used for any basic styling or overriding that isn't covered by Bootstrap or theming
-body {
-  // Make room for the navbar.
-  padding-top: $navbar-height + $navbar-margin-bottom;
-}
+
+// Buttons
+// -----------
 
 .btn-default {
   // Invert the background and foreground colors on active/focus/hover
@@ -12,8 +11,7 @@ body {
   &:focus,
   &.focus,
   &:active,
-  &.active,
-  .open > &.dropdown-toggle {
+  &.active {
     color: $btn-default-bg;
     background-color: $btn-default-color;
     border-color: $btn-default-color;
@@ -49,8 +47,4 @@ body {
     background-color: $gray-light;
     opacity: 0.50;
   }
-}
-
-.navbar {
-  border-bottom: 4px solid $navbar-default-border;
 }
