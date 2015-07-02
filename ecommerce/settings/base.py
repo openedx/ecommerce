@@ -250,6 +250,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'widget_tweaks',
     'compressor',
     'rest_framework',
     'simple_history',
