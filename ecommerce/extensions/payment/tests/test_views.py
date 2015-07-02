@@ -19,6 +19,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
+from ecommerce.tests.mixins import UserMixin
 
 
 Basket = get_model('basket', 'Basket')
@@ -453,3 +454,40 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                             'basket [{basket_id}] failed.'.format(basket_id=self.basket.id)
             self._assert_order_placement_failure(error_message)
             self.assertTrue(fake_handle_order_placement.called)
+
+
+@mock.patch('ecommerce.extensions.payment.views.call_command')
+class PaypalProfileAdminViewTests(UserMixin, TestCase):
+
+    path = reverse('paypal_profiles')
+
+    def get_response(self, is_superuser, expected_status, data=None):
+        user = self.create_user(is_superuser=is_superuser)
+        self.client.login(username=user.username, password=self.password)
+        response = self.client.get(self.path, data=data or {})
+        self.assertEqual(response.status_code, expected_status)
+        return response
+
+    def test_superuser_required(self, mock_call_command):
+        """ Verify the view is only accessible to superusers. """
+        response = self.client.get(self.path)
+        self.assertFalse(mock_call_command.called)
+        self.assertEqual(response.status_code, 404)
+
+        self.get_response(False, 404)
+        self.assertFalse(mock_call_command.called)
+
+    def test_valid_action_required(self, mock_call_command):
+        self.get_response(True, 400)
+        self.assertFalse(mock_call_command.called)
+
+        self.get_response(True, 400, {"action": "invalid"})
+        self.assertFalse(mock_call_command.called)
+
+        self.get_response(True, 200, {"action": "list"})
+        self.assertTrue(mock_call_command.called)
+
+    def test_command_exception(self, mock_call_command):
+        mock_call_command.side_effect = Exception("oof")
+        self.get_response(True, 500, {"action": "list"})
+        self.assertTrue(mock_call_command.called)

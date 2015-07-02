@@ -25,6 +25,7 @@ from ecommerce.extensions.payment import processors
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
+from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.processors.cybersource import Cybersource, suds_response_to_dict
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
@@ -359,6 +360,27 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         last_request_body = json.loads(httpretty.last_request().body)
         expected = urljoin(settings.ECOMMERCE_URL_ROOT, reverse('paypal_execute'))
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
+    @ddt.data(None, Paypal.DEFAULT_PROFILE_NAME, "some-other-name")
+    def test_web_profiles(self, enabled_profile_name, mock_payment):
+        """
+        Verify that the payment creation payload references a web profile when one is enabled with the expected name.
+        """
+        mock_payment_instance = mock.Mock()
+        mock_payment_instance.to_dict.return_value = {}
+        mock_payment_instance.links = [mock.Mock(rel='approval_url', href='dummy')]
+        mock_payment.return_value = mock_payment_instance
+        if enabled_profile_name is not None:
+            PaypalWebProfile.objects.create(name=enabled_profile_name, id="test-profile-id")
+
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        payment_creation_payload = mock_payment.call_args[0][0]
+        if enabled_profile_name == Paypal.DEFAULT_PROFILE_NAME:
+            self.assertEqual(payment_creation_payload['experience_profile_id'], "test-profile-id")
+        else:
+            self.assertNotIn('experience_profile_id', payment_creation_payload)
 
     @httpretty.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
