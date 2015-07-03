@@ -1,0 +1,63 @@
+// Oscar - views - credit checkout dashboard page
+// ====================
+// Table of Contents
+// * +Dashboard - Course Item
+// * +Dashboard - Partner Item
+// * +Dashboard - Purchase Credit Buttons
+// ====================
+
+.credit-checkout {
+  color: gray;
+  padding-bottom: 30px;
+
+  .title {
+    color: $text-color;
+
+    span.course-title {
+      color: $brand-primary;
+    }
+  }
+
+  .course-details .course-image,
+  .provider-details .provider-image {
+    max-width: 100%;
+  }
+
+  .course-details,
+  .provider-details {
+    border-bottom: 1px solid $light-gray;
+    margin-bottom: 20px;
+    padding: 20px 0;
+  }
+
+  .provider-details {
+    .eligibility-details{
+      margin-top: 10px;
+    }
+  }
+
+  .total-price {
+    font-weight: bold;
+    color: $brand-primary;
+  }
+
+  .checkout-controls {
+    margin-top: 20px;
+
+    .payment-button {
+      width: 100%;
+    }
+  }
+}
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: $grid-float-breakpoint-max) {
+
+  .checkout-controls {
+    float: right;
+    .col-xs-6 {
+      width: initial;
+    }
+  }
+}
+

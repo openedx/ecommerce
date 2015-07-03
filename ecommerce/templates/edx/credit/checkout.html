@@ -3,23 +3,45 @@
 {% block title %}{% trans "Credit Checkout" %}{% endblock title %}
 
 {% block content %}
-    Course Name : {{ course.name }}
-    <img src="{{ course.thumbnail_url }}" alt="{{ course.name }}">
+    <div class="container credit-checkout">
+        <div class="row center-block course-details">
+            <div class="col-sm-3 hidden-xs">
+                <img class="course-image" alt="{{ course.name }}" src="{{ course.thumbnail_url }}">
+            </div>
+            <div class="col-sm-9">
+                <h3 class="title">
+                    Purchasing credit for:
+                    <span class="course-title text-nowrap">{{ course.name }}</span>
+                </h3>
+                Congratulations, you are eligible to purchase credit from {{ credit_seats.0.attr.credit_provider }} by Feb 05, 2013.
+            </div>
+        </div>
 
-    {% for credit_seat in credit_seats %}
-        <table>
-          <tr>
-            <th>{% trans "ID" %}</th>
-            <th>{% trans "Credit providers" %}</th>
-            <th>{% trans "Price" %}</th>
-          </tr>
-          <tr>
-            <td>{{ credit_seat.id  }}</td>
-            <td>{{ credit_seat.attr.credit_provider  }}</td>
-            <td>{{ credit_seat.stockrecords.first.price_excl_tax }}</td>
-          </tr>
-        </table>
-    {% endfor %}
+        <div class="row center-block provider-details">
+            <div class="col-sm-3 hidden-xs">
+                <img alt="{{ credit_seats.0.attr.credit_provider }}" class="provider-image" src="http://img2.findthebest.com/sites/default/files/10/media/images/Arizona_State_University_at_the_West_Campus_226828.jpg">
+            </div>
+            <div class="col-sm-9">
+                <h3 class="title">{{ credit_seats.0.attr.credit_provider }}</h3>
+                A new model for the American Research University, creating an institution that is committed to
+                excellence, access and impact.
+                <div class="row eligibility-details">
+                    <div class="col-sm-6 pull-left">Eligible until Feb 05, 2013</div>
+                    <div class="col-sm-6 text-right price">Price: ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>
+                </div>
+            </div>
+        </div>
 
+        <div class="row center-block text-right total-price">
+            <div class="col-sm-12">Total: ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>
+        </div>
+        <div class="row center-block checkout-controls">
+          <div class="col-xs-6 ">
+            <button class="btn btn-primary payment-button">Checkout with PayPal</button>
+          </div>
+          <div class="col-xs-6 ">
+            <button class="btn btn-primary payment-button">Checkout</button>
+          </div>
+        </div>
+    </div>
 {% endblock content %}
-
