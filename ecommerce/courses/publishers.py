@@ -15,7 +15,8 @@ class LMSPublisher(object):
             'name': seat.attr.certificate_type,
             'currency': stock_record.price_currency,
             'price': int(stock_record.price_excl_tax),
-            'sku': stock_record.partner_sku
+            'sku': stock_record.partner_sku,
+            'expires': seat.expires.isoformat() if seat.expires else None,
         }
 
     def publish(self, course):

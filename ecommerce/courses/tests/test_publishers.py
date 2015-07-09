@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 import json
 
@@ -9,7 +10,6 @@ import httpretty
 import mock
 from oscar.test import factories
 from requests import Timeout
-
 from testfixtures import LogCapture
 
 from ecommerce.courses.models import Course
@@ -35,7 +35,6 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
         body = body or {}
         url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
-        print url
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
                                content_type=JSON)
 
@@ -97,7 +96,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
     def test_serialize_seat_for_commerce_api(self):
         """ The method should convert a seat to a JSON-serializable dict consumable by the Commerce API. """
-        seat = factories.ProductFactory(product_class=self.seat_product_class)
+        seat = factories.ProductFactory(product_class=self.seat_product_class, expires=None)
         certificate_type = 'honor'
         seat.attr.certificate_type = certificate_type
         seat.save()
@@ -111,6 +110,14 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             'name': certificate_type,
             'currency': stock_record.price_currency,
             'price': int(stock_record.price_excl_tax),
-            'sku': stock_record.partner_sku
+            'sku': stock_record.partner_sku,
+            'expires': None
         }
+        self.assertDictEqual(actual, expected)
+
+        # Try with an expiration datetime
+        expires = datetime.datetime.utcnow()
+        seat.expires = expires
+        expected['expires'] = expires.isoformat()
+        actual = self.publisher.serialize_seat_for_commerce_api(seat)
         self.assertDictEqual(actual, expected)

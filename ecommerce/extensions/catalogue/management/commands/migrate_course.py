@@ -1,6 +1,7 @@
 import logging
 from optparse import make_option
 
+import dateutil.parser
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -37,7 +38,8 @@ class MigratedCourse(object):
 
     @transaction.atomic
     def save(self):
-        self.course.save()
+        # Do NOT publish back to LMS until all data has been saved.
+        self.course.save(publish=False)
 
         self.parent_seat.course = self.course
         self.parent_seat.save()
@@ -54,6 +56,9 @@ class MigratedCourse(object):
             stock_record.save()
 
         self._unsaved_stock_records = {}
+
+        # Publish to LMS
+        self.course.publish_to_lms()
 
     def load_from_lms(self, access_token):
         """
@@ -159,6 +164,8 @@ class MigratedCourse(object):
             seat.is_discountable = True
             seat.structure = Product.CHILD
             seat.title = self._get_product_name(course_name, seat_type)
+            expires = mode.get('expiration_datetime')
+            seat.expires = dateutil.parser.parse(expires) if expires else None
             seat.attr.certificate_type = seat_type
             seat.attr.course_key = course_id
             seat.attr.id_verification_required = Course.is_mode_verified(seat_type)
@@ -223,7 +230,7 @@ class Command(BaseCommand):
                     stock_record = migrated_course._unsaved_stock_records[seat_type]  # pylint: disable=protected-access
                     data = (seat_type, seat.attr.id_verification_required,
                             '{0} {1}'.format(stock_record.price_currency, stock_record.price_excl_tax),
-                            stock_record.partner_sku, seat.slug)
+                            stock_record.partner_sku, seat.slug, seat.expires)
                     msg += '\t{}\n'.format(data)
 
                 logger.info(msg)

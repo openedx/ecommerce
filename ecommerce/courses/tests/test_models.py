@@ -1,6 +1,6 @@
 import ddt
 from django.test import TestCase
-from django_dynamic_fixture import G
+from django_dynamic_fixture import G, N
 import mock
 from testfixtures import LogCapture
 from waffle import Switch
@@ -66,14 +66,19 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         """ Verify the method returns the correct certificate type for a given mode. """
         self.assertEqual(Course.certificate_type_for_mode(mode), expected)
 
+    def test_publish_to_lms(self):
+        """ Verify the method publishes data to LMS. """
+        course = G(Course)
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            course.publish_to_lms()
+            self.assertTrue(mock_publish.called)
+
     def test_save_and_publish_to_lms(self):
-        """
-        Verify the save method calls the LMS publisher if the feature is enabled.
-        """
+        """ Verify the save method calls publish_to_lms if the feature is enabled. """
         switch, __ = Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=False)
         course = G(Course)
 
-        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+        with mock.patch.object(Course, 'publish_to_lms') as mock_publish:
             logger_name = 'ecommerce.courses.models'
             with LogCapture(logger_name) as l:
                 course.save()
@@ -89,7 +94,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
             # With the feature active, the mock method should be called.
             course.save()
-            mock_publish.assert_called_with(course)
+            self.assertTrue(mock_publish.called)
 
     def test_save_with_publish_failure(self):
         """ Verify that, if the publish operation fails, the model's changes are not saved to the database. """
@@ -104,3 +109,12 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         # Reload the course from the database
         course = Course.objects.get(id=course.id)
         self.assertEqual(course.name, orignal_name)
+
+    def test_save_without_publish(self):
+        """ Verify the Course is not published to LMS if the publish kwarg is set to False. """
+        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=False)
+        course = N(Course)
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            course.save(publish=False)
+            self.assertFalse(mock_publish.called)
