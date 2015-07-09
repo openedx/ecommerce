@@ -13,18 +13,17 @@
                     Purchasing credit for:
                     <span class="course-title text-nowrap">{{ course.name }}</span>
                 </h3>
-                Congratulations, you are eligible to purchase credit from {{ credit_seats.0.attr.credit_provider }} by Feb 05, 2013.
+                Congratulations, you are eligible to purchase credit from {{ provider_info.display_name }} by Feb 05, 2013.
             </div>
         </div>
 
         <div class="row center-block provider-details">
             <div class="col-sm-3 hidden-xs">
-                <img alt="{{ credit_seats.0.attr.credit_provider }}" class="provider-image" src="http://img2.findthebest.com/sites/default/files/10/media/images/Arizona_State_University_at_the_West_Campus_226828.jpg">
+                <img alt="{{ provider_info.display_name }}" class="provider-image" src="http://img2.findthebest.com/sites/default/files/10/media/images/Arizona_State_University_at_the_West_Campus_226828.jpg">
             </div>
             <div class="col-sm-9">
-                <h3 class="title">{{ credit_seats.0.attr.credit_provider }}</h3>
-                A new model for the American Research University, creating an institution that is committed to
-                excellence, access and impact.
+                <h3 class="title">{{ provider_info.display_name }} </h3>
+                {{ provider_info.provider_description }}
                 <div class="row eligibility-details">
                     <div class="col-sm-6 pull-left">Eligible until Feb 05, 2013</div>
                     <div class="col-sm-6 text-right price">Price: ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>

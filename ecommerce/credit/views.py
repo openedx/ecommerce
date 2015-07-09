@@ -1,5 +1,9 @@
+from urlparse import urljoin
+
 from django.http import Http404
 from django.views.generic import TemplateView
+from django.conf import settings
+import requests
 import waffle
 
 from ecommerce.courses.models import Course
@@ -27,6 +31,14 @@ class Checkout(TemplateView):
         context['credit_seats'] = [
             seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
         ]
+
+        if context['credit_seats']:
+            provider_id = context['credit_seats'][0].attr.credit_provider
+            url = urljoin(settings.LMS_URL_ROOT, '/api/credit/v1/provider/info/{}'.format(provider_id))
+            response = requests.get(url)
+            if response.status_code != 200:
+                response.raise_for_status()
+            context['provider_info'] = response.json()
 
         return context
 
