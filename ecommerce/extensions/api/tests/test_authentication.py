@@ -1,16 +1,35 @@
 # -*- coding: UTF-8 -*-
+from datetime import datetime
 import json
-from django.conf import settings
 
 import httpretty
+from django.conf import settings
+from django.conf.urls import patterns
+from django.http import HttpResponse
 from django.test import TestCase, override_settings, RequestFactory
 from oscar.test import factories
+from rest_framework import permissions
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.views import APIView
+from rest_framework_jwt import utils
+from rest_framework_jwt.settings import api_settings, DEFAULTS
 
 from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAuthentication
-
+from ecommerce.tests.mixins import JwtMixin, UserMixin
 
 OAUTH2_PROVIDER_URL = 'https://example.com/oauth2'
+
+
+class MockView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):  # pylint: disable=unused-variable, unused-argument
+        return HttpResponse()
+
+urlpatterns = patterns(
+    '',
+    (r'^jwt/$', MockView.as_view(authentication_classes=[JwtAuthentication]))
+)
 
 
 class AccessTokenMixin(object):
@@ -104,12 +123,64 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
         self.assertEqual(self.auth.authenticate(request), (user, self.DEFAULT_TOKEN))
 
 
-class JwtAuthenticationTests(TestCase):
+class JwtAuthenticationTests(JwtMixin, UserMixin, TestCase):
+    urls = 'ecommerce.extensions.api.tests.test_authentication'
+
+    def setUp(self):
+        api_settings.JWT_ISSUER = 'http://example.com/oauth'
+        api_settings.JWT_VERIFY_EXPIRATION = True
+
+    def tearDown(self):
+        api_settings.JWT_ISSUER = DEFAULTS['JWT_ISSUER']
+        api_settings.JWT_VERIFY_EXPIRATION = DEFAULTS['JWT_VERIFY_EXPIRATION']
+
+    def assert_jwt_status(self, issuer=None, expires=None, status_code=200):
+        """ Assert that the payload has a valid issuer and has not expired. """
+
+        staff_user = self.create_user(is_staff=True)
+        issuer = issuer or api_settings.JWT_ISSUER
+
+        payload = {
+            'iss': issuer,
+            'username': staff_user.username,
+            'email': staff_user.email,
+            'full_name': staff_user.full_name
+        }
+
+        if expires:
+            payload['exp'] = expires
+
+        token = utils.jwt_encode_handler(payload)
+
+        auth = 'JWT {0}'.format(token)
+        response = self.client.get('/jwt/', HTTP_AUTHORIZATION=auth)
+
+        self.assertEqual(response.status_code, status_code)
+
+    def test_valid_issuer(self):
+        """ Verify payloads with valid issuers are validated. """
+        self.assert_jwt_status()
+
+    def test_invalid_issuer(self):
+        """ Verify payloads with invalid issuers are NOT validated. """
+        self.assert_jwt_status(issuer='some-invalid-issuer', status_code=401)
+
+    def test_valid_expiration(self):
+        """ Verify payloads with valid expiration dates are validated. """
+        valid_timestamp = int(datetime.max.strftime('%s'))
+        self.assert_jwt_status(expires=valid_timestamp)
+
+    def test_invalid_expiration(self):
+        """ Verify payloads with invalid expiration dates are NOT validated. """
+        self.assert_jwt_status(expires=1, status_code=401)
+
     def test_authenticate_credentials_user_creation(self):
         """ Test whether the user model is being assigned fields from the payload. """
+
         full_name = 'Ｇｅｏｒｇｅ Ｃｏｓｔａｎｚａ'
         email = 'gcostanza@gmail.com'
         username = 'gcostanza'
+
         payload = {'username': username, 'email': email, 'full_name': full_name}
         user = JwtAuthentication().authenticate_credentials(payload)
         self.assertEquals(user.username, username)
