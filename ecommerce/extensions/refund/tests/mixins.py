@@ -23,6 +23,7 @@ SourceType = get_model('payment', 'SourceType')
 
 class RefundTestMixin(object):
     def setUp(self):
+        super(RefundTestMixin, self).setUp()
         self.course_id = u'edX/DemoX/Demo_Course'
         self.course = CourseFactory(self.course_id, u'edX Demó Course')
         self.honor_product = self.course.add_mode('honor', 0)

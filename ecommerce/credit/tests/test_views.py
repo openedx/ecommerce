@@ -34,24 +34,8 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
             thumbnail_url=self.thumbnail_url
         )
 
-        # Create the seat products
-        self.seats = self.create_course_seats(self.course.id, ('credit', 'honor', 'verified'))
-
-        # Associate the parent and child products with the course. The method should be able to filter out the parent.
-        parent = self.seats.values()[0].parent
-        parent.course = self.course
-        parent.save()
-
-        seat = self.seats['credit']
-        seat.attr.credit_provider = self.provider
-        seat.save()
-
-        partner, _created = Partner.objects.get_or_create(code='edx')
-        for stock_record in seat.stockrecords.all():
-            stock_record.price_currency = 'USD'
-            stock_record.price_excl_tax = self.price
-            stock_record.partner = partner
-            stock_record.save()
+        # Create the credit seat
+        self.seat = self.course.create_or_update_seat('credit', True, self.price, self.provider)
 
     @property
     def path(self):
@@ -83,7 +67,7 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         expected = {
             'course': self.course,
-            'credit_seats': [self.seats['credit']],
+            'credit_seats': [self.seat],
         }
         self.assertDictContainsSubset(expected, response.context)
 

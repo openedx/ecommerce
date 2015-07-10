@@ -13,6 +13,7 @@ from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
 
 
+CURRENCY = u'USD'
 Order = get_model('order', 'Order')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -149,7 +150,7 @@ class CybersourceMixin(object):
             url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['soap_api_url'], filename)
             httpretty.register_uri(httpretty.GET, url, body=body)
 
-    def get_soap_mock(self, amount=100, currency='GBP', transaction_id=None, basket_id=None, decision='ACCEPT'):
+    def get_soap_mock(self, amount=100, currency=CURRENCY, transaction_id=None, basket_id=None, decision='ACCEPT'):
         class CybersourceSoapMock(mock.MagicMock):
             def runTransaction(self, **kwargs):     # pylint: disable=unused-argument
                 cc_reply_items = {
@@ -253,7 +254,7 @@ class PaypalMixin(object):
             u'state': state,
             u'transactions': [{
                 u'amount': {
-                    u'currency': u'GBP',
+                    u'currency': CURRENCY,
                     u'details': {u'subtotal': total},
                     u'total': total
                 },
@@ -316,7 +317,7 @@ class PaypalMixin(object):
             u'state': state,
             u'transactions': [{
                 u'amount': {
-                    u'currency': u'GBP',
+                    u'currency': CURRENCY,
                     u'details': {u'subtotal': total},
                     u'total': total
                 },
@@ -335,7 +336,7 @@ class PaypalMixin(object):
                 u'related_resources': [{
                     u'sale': {
                         u'amount': {
-                            u'currency': u'GBP',
+                            u'currency': CURRENCY,
                             u'total': total
                         },
                         u'create_time': u'2015-05-04T15:55:27Z',
@@ -367,7 +368,7 @@ class PaypalMixin(object):
                         u'protection_eligibility_type': u'ITEM_NOT_RECEIVED_ELIGIBLE,UNAUTHORIZED_PAYMENT_ELIGIBLE',
                         u'state': u'completed',
                         u'transaction_fee': {
-                            u'currency': u'GBP',
+                            u'currency': CURRENCY,
                             u'value': u'0.50'
                         },
                         u'update_time': u'2015-05-04T15:58:47Z'

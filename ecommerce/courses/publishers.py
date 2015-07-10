@@ -8,11 +8,17 @@ logger = logging.getLogger(__name__)
 
 
 class LMSPublisher(object):
+    # TODO Test this and update SKU generation
+    def mode_for_seat(self, seat):
+        if seat.attr.certificate_type == 'professional' and not seat.attr.id_verification_required:
+            return 'no-id-professional'
+        return seat.attr.certificate_type
+
     def serialize_seat_for_commerce_api(self, seat):
         """ Serializes a course seat product to a dict that can be further serialized to JSON. """
         stock_record = seat.stockrecords.first()
         return {
-            'name': seat.attr.certificate_type,
+            'name': self.mode_for_seat(seat),
             'currency': stock_record.price_currency,
             'price': int(stock_record.price_excl_tax),
             'sku': stock_record.partner_sku,
