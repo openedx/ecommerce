@@ -4,12 +4,13 @@ import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
-from rest_framework import status
+from rest_framework import status, generics, viewsets, mixins
 from rest_framework.exceptions import ParseError
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions, IsAdminUser
 from rest_framework.response import Response
+from rest_framework_extensions.mixins import NestedViewSetMixin
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -25,11 +26,12 @@ from ecommerce.extensions.refund.api import find_orders_associated_with_course, 
 logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
+Product = get_model('catalogue', 'Product')
 Refund = get_model('refund', 'Refund')
 User = get_user_model()
 
 
-class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
+class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
     """Endpoint for creating baskets.
 
     If requested, performs checkout operations on baskets, placing an order if
@@ -284,7 +286,7 @@ class BasketCreateView(EdxOrderPlacementMixin, CreateAPIView):
         )
 
 
-class OrderListView(ListAPIView):
+class OrderListView(generics.ListAPIView):
     """Endpoint for listing orders.
 
     Results are ordered with the newest order being the first in the list of results.
@@ -302,7 +304,7 @@ class OrderListView(ListAPIView):
         return qs.order_by('-date_placed')
 
 
-class OrderRetrieveView(RetrieveAPIView):
+class OrderRetrieveView(generics.RetrieveAPIView):
     """Allow the viewing of orders.
 
     Given an order number, allow the viewing of the corresponding order. This endpoint will return a 404 response
@@ -359,7 +361,7 @@ class OrderByBasketRetrieveView(OrderRetrieveView):
     lookup_field = 'basket_id'
 
 
-class OrderFulfillView(FulfillmentMixin, UpdateAPIView):
+class OrderFulfillView(FulfillmentMixin, generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, DjangoModelPermissions,)
     lookup_field = 'number'
     queryset = Order.objects.all()
@@ -382,7 +384,7 @@ class OrderFulfillView(FulfillmentMixin, UpdateAPIView):
         return Response(serializer.data)
 
 
-class PaymentProcessorListView(ListAPIView):
+class PaymentProcessorListView(generics.ListAPIView):
     """View that lists the available payment processors."""
     pagination_class = None
     permission_classes = (IsAuthenticated,)
@@ -393,7 +395,7 @@ class PaymentProcessorListView(ListAPIView):
         return [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
 
 
-class RefundCreateView(CreateAPIView):
+class RefundCreateView(generics.CreateAPIView):
     """
     Creates refunds.
 
@@ -448,7 +450,7 @@ class RefundCreateView(CreateAPIView):
         return Response([], status=status.HTTP_200_OK)
 
 
-class RefundProcessView(UpdateAPIView):
+class RefundProcessView(generics.UpdateAPIView):
     """
     Process--approve or deny--refunds.
 
@@ -482,3 +484,20 @@ class RefundProcessView(UpdateAPIView):
         http_status = status.HTTP_200_OK if result else status.HTTP_500_INTERNAL_SERVER_ERROR
         serializer = self.get_serializer(refund)
         return Response(serializer.data, status=http_status)
+
+
+class NonDestroyableModelViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet):
+    pass
+
+
+class CourseViewSet(NonDestroyableModelViewSet):
+    lookup_value_regex = settings.COURSE_ID_REGEX
+    queryset = Course.objects.all()
+    serializer_class = serializers.CourseSerializer
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+
+
+class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = serializers.ProductSerializer
+    permission_classes = (IsAuthenticated, IsAdminUser,)

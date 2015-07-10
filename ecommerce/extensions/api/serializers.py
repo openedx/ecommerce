@@ -1,8 +1,10 @@
 """Serializers for order and line item data."""
-# pylint: disable=abstract-method
-from oscar.core.loading import get_model
-from rest_framework import serializers
 
+from oscar.core.loading import get_model, get_class
+from rest_framework import serializers
+from rest_framework.reverse import reverse
+
+from ecommerce.courses.models import Course
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 
 BillingAddress = get_model('order', 'BillingAddress')
@@ -11,6 +13,10 @@ Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 Refund = get_model('refund', 'Refund')
+Selector = get_class('partner.strategy', 'Selector')
+
+COURSE_DETAIL_VIEW = 'api:v2:course-detail'
+PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
 
 
 class BillingAddressSerializer(serializers.ModelSerializer):
@@ -22,30 +28,52 @@ class BillingAddressSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'line1', 'line2', 'postcode', 'state', 'country', 'city')
 
 
-class ProductAttributeValueSerializer(serializers.Serializer):
+class ProductAttributeValueSerializer(serializers.ModelSerializer):
     """ Serializer for ProductAttributeValue objects. """
     name = serializers.SerializerMethodField()
-    value = serializers.CharField()
-    type = serializers.SerializerMethodField()
+    value = serializers.SerializerMethodField()
 
     def get_name(self, instance):
         return instance.attribute.name
 
-    def get_type(self, instance):
-        return instance.attribute.type
+    def get_value(self, obj):
+        return obj.value
 
     class Meta(object):
         model = ProductAttributeValue
-        fields = ('name', 'value', 'type')
+        fields = ('name', 'value',)
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.HyperlinkedModelSerializer):
     """ Serializer for Products. """
-    attribute_values = ProductAttributeValueSerializer(many=True)
+    attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
+    product_class = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    is_available_to_buy = serializers.SerializerMethodField()
+
+    def get_product_class(self, product):
+        return product.get_product_class().name
+
+    def get_price(self, product):
+        info = self._get_info(product)
+        if info.availability.is_available_to_buy:
+            return serializers.DecimalField(max_digits=10, decimal_places=2).to_representation(info.price.excl_tax)
+        return None
+
+    def _get_info(self, product):
+        info = Selector().strategy().fetch_for_product(product)
+        return info
+
+    def get_is_available_to_buy(self, product):
+        info = self._get_info(product)
+        return info.availability.is_available_to_buy
 
     class Meta(object):
         model = Product
-        fields = ('attribute_values',)
+        fields = ('id', 'url', 'product_class', 'title', 'price', 'expires', 'attribute_values', 'is_available_to_buy',)
+        extra_kwargs = {
+            'url': {'view_name': PRODUCT_DETAIL_VIEW},
+        }
 
 
 class LineSerializer(serializers.ModelSerializer):
@@ -68,7 +96,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address')
 
 
-class PaymentProcessorSerializer(serializers.Serializer):
+class PaymentProcessorSerializer(serializers.Serializer):   # pylint: disable=abstract-method
     """ Serializer to use with instances of processors.BasePaymentProcessor """
 
     def to_representation(self, instance):
@@ -81,3 +109,18 @@ class RefundSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Refund
+
+
+class CourseSerializer(serializers.HyperlinkedModelSerializer):
+    products_url = serializers.SerializerMethodField()
+
+    def get_products_url(self, obj):
+        return reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': obj.id},
+                       request=self.context['request'])
+
+    class Meta(object):
+        model = Course
+        fields = ('id', 'url', 'name', 'products_url',)
+        extra_kwargs = {
+            'url': {'view_name': COURSE_DETAIL_VIEW}
+        }

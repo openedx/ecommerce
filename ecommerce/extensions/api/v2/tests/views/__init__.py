@@ -1,3 +1,4 @@
+from django.test import RequestFactory
 from oscar.test import factories
 from oscar.test.newfactories import ProductAttributeValueFactory
 
@@ -24,9 +25,10 @@ class OrderDetailViewTestMixin(ThrottlingMixin, UserMixin):
 
     def test_get_order(self):
         """Test successful order retrieval."""
+        request = RequestFactory().get(self.url)
         response = self.client.get(self.url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, OrderSerializer(self.order).data)
+        self.assertEqual(response.data, OrderSerializer(self.order, context={'request': request}).data)
 
     def test_order_wrong_user(self):
         """Test scenarios where an order should return a 404 due to the wrong user."""
@@ -34,3 +36,9 @@ class OrderDetailViewTestMixin(ThrottlingMixin, UserMixin):
         other_token = self.generate_jwt_token_header(other_user)
         response = self.client.get(self.url, HTTP_AUTHORIZATION=other_token)
         self.assertEqual(response.status_code, 404)
+
+
+class TestServerUrlMixin(object):
+    def get_full_url(self, path):
+        """ Returns a complete URL with the given path. """
+        return 'http://testserver' + path
