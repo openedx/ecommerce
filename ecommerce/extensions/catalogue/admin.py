@@ -3,7 +3,8 @@ from simple_history.admin import SimpleHistoryAdmin
 
 
 class ProductAdminExtended(SimpleHistoryAdmin):
-    list_display = ('get_title', 'upc', 'get_product_class', 'structure', 'attribute_summary', 'date_created', 'course')
+    list_display = ('get_title', 'upc', 'get_product_class', 'structure', 'attribute_summary', 'date_created', 'course',
+                    'expires',)
     prepopulated_fields = {"slug": ("title",)}
     inlines = [AttributeInline, CategoryInline, ProductRecommendationInline]
 

@@ -14,5 +14,6 @@ jsonfield==1.0.3
 libsass==0.8.2
 paypalrestsdk==1.9.0
 pycountry==1.10
+pytz==2015.4
 requests==2.6.0
 suds==0.4
