@@ -1,16 +1,23 @@
 require.config({
     baseUrl: '/static/',
     paths: {
-        backbone: 'bower_components/backbone/backbone',
-        bootstrap: 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
-        bootstrap_accessibility: 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
-        dataTables: 'bower_components/datatables/media/js/jquery.dataTables',
-        dataTablesBootstrap: 'vendor/dataTables/dataTables.bootstrap',
-        jquery: 'bower_components/jquery/dist/jquery',
+        'backbone': 'bower_components/backbone/backbone',
+        'backbone.paginator': 'bower_components/backbone.paginator/lib/backbone.paginator',
+        'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
+        'bootstrap_accessibility': 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
+        'collections': 'js/collections',
+        'dataTables': 'bower_components/datatables/media/js/jquery.dataTables',
+        'dataTablesBootstrap': 'vendor/dataTables/dataTables.bootstrap',
+        'jquery': 'bower_components/jquery/dist/jquery',
         'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
-        requirejs: 'bower_components/requirejs/require',
-        underscore: 'bower_components/underscore/underscore',
-        views: 'js/views'
+        'models': 'js/models',
+        'moment': 'bower_components/moment/moment',
+        'requirejs': 'bower_components/requirejs/require',
+        'templates': 'templates',
+        'text': 'bower_components/text/text',
+        'underscore': 'bower_components/underscore/underscore',
+        'underscore.string': 'bower_components/underscore.string/dist/underscore.string',
+        'views': 'js/views'
     },
     shim: {
         bootstrap: {
@@ -27,6 +34,6 @@ require.config({
         },
         'jquery-cookie': {
             deps: ['jquery']
-        },
+        }
     }
 });

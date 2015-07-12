@@ -1,0 +1,18 @@
+<div class="row course-seat">
+    <div class="col-md-4">
+        <div class="seat-type"><%= seat.getSeatType() %></div>
+        <% if (seat.get('price')) { %>
+        <div class="seat-price"><%= gettext('Price:') + ' $' + seat.get('price') %></div>
+        <% } %>
+    </div>
+    <div class="col-md-4 seat-certificate-type">
+        <i class="fa fa-check-square-o"></i> <%= seat.getCertificateDisplayName() %>
+    </div>
+    <div class="col-md-4 seat-additional-info">
+        <% var expires = seat.get('expires');
+        if(expires) {
+        print(gettext('Verification Close:') + ' ' + moment(expires).format('LLL Z'));
+        }
+        %>
+    </div>
+</div>

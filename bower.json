@@ -19,6 +19,10 @@
     "bootstrapaccessibilityplugin": "~1.0.4",
     "datatables": "~1.10.7",
     "fontawesome": "~4.3.0",
-    "edx-ux-pattern-library": "https://github.com/edx/ux-pattern-library.git#82fa1c823bc322ba8b0742f0c546a89b0c69e952"
+    "edx-ux-pattern-library": "https://github.com/edx/ux-pattern-library.git#82fa1c823bc322ba8b0742f0c546a89b0c69e952",
+    "text": "~2.0.14",
+    "backbone.paginator": "~2.0.2",
+    "moment": "~2.10.3",
+    "underscore.string": "~3.1.1"
   }
 }

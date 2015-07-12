@@ -1,6 +1,8 @@
 require([
     'jquery',
+    'backbone',
     'bootstrap',
-    'bootstrap_accessibility'
+    'bootstrap_accessibility',
+    'underscore'
 ], function () {
 });
