@@ -259,8 +259,7 @@ DJANGO_APPS = [
 
 # Apps specific to this project go here.
 LOCAL_APPS = [
-    'ecommerce.user',
-    'ecommerce.health',
+    'ecommerce.core',
     'ecommerce.courses',
 ]
 
@@ -314,7 +313,7 @@ WSGI_APPLICATION = 'wsgi.application'
 # users. In order to pair with the LMS, we need our users to have usernames,
 # and since we don't need Oscar's custom logic for transferring user notifications,
 # we can rely on a user model which subclasses Django's AbstractUser.
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'core.User'
 
 # See: http://getblimp.github.io/django-rest-framework-jwt/#additional-settings
 JWT_AUTH = {

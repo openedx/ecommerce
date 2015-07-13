@@ -2,11 +2,10 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 from social.apps.django_app.default.models import UserSocialAuth
 
-from ecommerce.user.models import User
+from ecommerce.core.models import User
 
 
 class UserTests(TestCase):
-
     TEST_CONTEXT = {'foo': 'bar', 'baz': None}
 
     def test_access_token(self):
