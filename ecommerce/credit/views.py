@@ -2,9 +2,10 @@ import logging
 import requests
 from urlparse import urljoin
 
+from django.conf import settings
 from django.http import Http404
 from django.views.generic import TemplateView
-from django.conf import settings
+
 import waffle
 
 from ecommerce.courses.models import Course
@@ -36,8 +37,8 @@ class Checkout(TemplateView):
         ]
 
         if credit_seats:
-            provider_id = [seat.attr.credit_provider for seat in credit_seats]
-            context['providers'] = self.get_providers_detail(provider_id)
+            provider_ids = [seat.attr.credit_provider for seat in credit_seats]
+            context['providers'] = self.get_providers_detail(provider_ids=provider_ids)
             context['credit_seats'] = credit_seats
 
         return context
@@ -48,11 +49,11 @@ class Checkout(TemplateView):
             raise Http404
         return super(Checkout, self).get(request, args, **kwargs)
 
-    def get_providers_detail(self, provider_id):
+    def get_providers_detail(self, provider_ids):
         """Helper method for getting provider info from LMS.
 
         Arguments:
-            provider_id: provider_id will be list containing provider ids
+            provider_ids: provider_ids will be list containing provider ids
 
         Returns:
             Get response from LMS as json containing list of providers and
@@ -60,8 +61,8 @@ class Checkout(TemplateView):
 
         """
 
-        provider_id = ",".join(provider_id)
-        url = urljoin(settings.LMS_URL_ROOT, '/api/credit/v1/providers/?provider_id={}'.format(provider_id))
+        provider_ids = ",".join(provider_ids)
+        url = urljoin(settings.LMS_URL_ROOT, '/api/credit/v1/providers/?provider_id={}'.format(provider_ids))
         try:
             response = requests.get(url)
         except requests.exceptions.RequestException as ex:
@@ -69,6 +70,6 @@ class Checkout(TemplateView):
             return {}
 
         if response.status_code != 200:
-            response.raise_for_status()
+            logging.exception(response.raise_for_status())
 
         return response.json()
