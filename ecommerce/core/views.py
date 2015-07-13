@@ -1,19 +1,22 @@
 """HTTP endpoint for verifying the health of the ecommerce front-end."""
 import logging
+import uuid
 
 import requests
 from requests.exceptions import RequestException
 from rest_framework import status
-from django.conf import settings
 from django.db import transaction, connection, DatabaseError
 from django.http import JsonResponse
+from django.conf import settings
+from django.contrib.auth import get_user_model, login, authenticate
+from django.http import Http404
+from django.shortcuts import redirect
+from django.views.generic import View
 
-from ecommerce.health.constants import Status, UnavailabilityMessage
-
+from ecommerce.core.constants import Status, UnavailabilityMessage
 
 logger = logging.getLogger(__name__)
-
-LMS_HEALTH_PAGE = getattr(settings, 'LMS_HEARTBEAT_URL')
+User = get_user_model()
 
 
 @transaction.non_atomic_requests
@@ -48,7 +51,7 @@ def health(_):
         database_status = Status.UNAVAILABLE
 
     try:
-        response = requests.get(LMS_HEALTH_PAGE, timeout=1)
+        response = requests.get(settings.LMS_HEARTBEAT_URL, timeout=1)
 
         if response.status_code == status.HTTP_200_OK:
             lms_status = Status.OK
@@ -73,3 +76,26 @@ def health(_):
         return JsonResponse(data)
     else:
         return JsonResponse(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+class AutoAuth(View):
+    """Creates and authenticates a new User with superuser permissions.
+
+    If the ENABLE_AUTO_AUTH setting is not True, returns a 404.
+    """
+
+    def get(self, request):
+        if not getattr(settings, 'ENABLE_AUTO_AUTH', None):
+            raise Http404
+
+        username_prefix = getattr(settings, 'AUTO_AUTH_USERNAME_PREFIX', 'auto_auth_')
+
+        # Create a new user with staff permissions
+        username = password = username_prefix + uuid.uuid4().hex[0:20]
+        User.objects.create_superuser(username, email=None, password=password)
+
+        # Log in the new user
+        user = authenticate(username=username, password=password)
+        login(request, user)
+
+        return redirect('/')

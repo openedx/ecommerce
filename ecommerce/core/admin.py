@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
 
-from ecommerce.user.models import User
+from ecommerce.core.models import User
 
 
 class EcommerceUserAdmin(UserAdmin):
