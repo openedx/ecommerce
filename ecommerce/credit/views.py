@@ -1,6 +1,6 @@
-from urlparse import urljoin
-import requests
 import logging
+import requests
+from urlparse import urljoin
 
 from django.http import Http404
 from django.views.generic import TemplateView
@@ -31,13 +31,14 @@ class Checkout(TemplateView):
 
         context['course'] = course
 
-        context['credit_seats'] = [
+        credit_seats = [
             seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
         ]
 
-        if context['credit_seats']:
-            provider_id = [seat.attr.credit_provider for seat in context['credit_seats']]
-            context['providers'] = self.get_providers_from_lms(provider_id)
+        if credit_seats:
+            provider_id = [seat.attr.credit_provider for seat in credit_seats]
+            context['providers'] = self.get_providers_detail(provider_id)
+            context['credit_seats'] = credit_seats
 
         return context
 
@@ -47,17 +48,14 @@ class Checkout(TemplateView):
             raise Http404
         return super(Checkout, self).get(request, args, **kwargs)
 
-    def get_providers_from_lms(self, provider_id):
-        """
+    def get_providers_detail(self, provider_id):
+        """Helper method for getting provider info from LMS.
 
-        helper method for getting provider info from LMS with graceful
-        error handling
+        Arguments:
+            provider_id: provider_id will be list containing provider ids
 
-        **Parameter**
-            *provider_id: provider_id will be list containing provider ids
-
-        **Returns**
-            * get response from LMS as json containing list of providers and
+        Returns:
+            Get response from LMS as json containing list of providers and
             returns
 
         """
@@ -67,7 +65,7 @@ class Checkout(TemplateView):
         try:
             response = requests.get(url)
         except requests.exceptions.RequestException as ex:
-            logging.error(ex)
+            logging.exception(ex)
             return {}
 
         if response.status_code != 200:
