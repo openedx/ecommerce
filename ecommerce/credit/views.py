@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -42,7 +44,20 @@ class Checkout(TemplateView):
             'payment_processors': processors_dict,
             'credit_seats': [
                 seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
-            ]
+            ],
+            'analytics_data': json.dumps({
+                'course': {
+                    'courseId': course.id
+                },
+                'tracking': {
+                    'segmentApplicationId': settings.SEGMENT_KEY
+                },
+                'user': {
+                    'username': self.request.user.get_username(),
+                    'name': self.request.user.get_full_name(),
+                    'email': self.request.user.email
+                }
+            })
         })
 
         return context
