@@ -1,4 +1,6 @@
 {% extends 'edx/base.html' %}
+{% load compress %}
+{% load staticfiles %}
 {% load i18n %}
 {% block title %}{% trans "Credit Checkout" %}{% endblock title %}
 
@@ -35,13 +37,25 @@
         <div class="row center-block text-right total-price">
             <div class="col-sm-12">Total: ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>
         </div>
-        <div class="row center-block checkout-controls">
-          <div class="col-xs-6 ">
-            <button class="btn btn-primary payment-button">Checkout with PayPal</button>
-          </div>
-          <div class="col-xs-6 ">
-            <button class="btn btn-primary payment-button">Checkout</button>
-          </div>
+        <div id="payment-buttons" class="row center-block checkout-controls">
+          {% for processor_name, button_text in payment_processors.items %}
+            <div class="col-xs-6 ">
+                <button data-processor-name="{{ processor_name }}" data-sku="{{ credit_seats.0.stockrecords.first.partner_sku }}"
+                        data-course-id="{{ course.id }}"
+                        class="btn btn-primary payment-button">
+                {{ button_text }}
+                </button>
+            </div>
+          {% endfor %}
         </div>
     </div>
+
+    <form id="payment-processor-form">
+    </form>
 {% endblock content %}
+
+{% compress js %}
+    {% block javascript %}
+        <script src="{% static 'js/views/credit_checkout.js' %}"></script>
+    {% endblock %}
+{% endcompress %}

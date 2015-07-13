@@ -23,6 +23,10 @@
         {
             name: 'js/views/course_list_view',
             exclude: ['js/common']
+        },
+        {
+            name: 'js/views/payment_button_view',
+            exclude: ['js/common']
         }
     ]
 })
