@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 from urlparse import urljoin
@@ -7,6 +8,7 @@ from django.core.management import call_command
 from django.test import TestCase
 import httpretty
 from oscar.core.loading import get_model
+import pytz
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.management.commands.migrate_course import MigratedCourse
@@ -15,6 +17,8 @@ from ecommerce.extensions.catalogue.utils import generate_sku
 
 JSON = 'application/json'
 ACCESS_TOKEN = 'edx'
+EXPIRES = datetime.datetime(year=1985, month=10, day=26, hour=1, minute=20, tzinfo=pytz.utc)
+EXPIRES_STRING = EXPIRES.isoformat()[:-6] + 'Z'
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +48,8 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(self.course_id))
         body = {
             'course_id': self.course_id,
-            'course_modes': [{'slug': seat_type, 'min_price': price} for seat_type, price in self.prices.iteritems()]
+            'course_modes': [{'slug': seat_type, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
+                             seat_type, price in self.prices.iteritems()]
         }
         httpretty.register_uri(httpretty.GET, url, body=json.dumps(body), content_type=JSON)
 
@@ -64,6 +69,7 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
             expected_title += u' (and ID verification)'
 
         self.assertEqual(seat.title, expected_title)
+        self.assertEqual(seat.expires, EXPIRES)
         self.assertEqual(seat.attr.certificate_type, seat_type)
         self.assertEqual(seat.attr.course_key, self.course_id)
         self.assertEqual(seat.attr.id_verification_required, Course.is_mode_verified(seat_type))

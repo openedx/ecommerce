@@ -4,8 +4,8 @@ from django.db import models, transaction
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
 import waffle
-from ecommerce.courses.exceptions import PublishFailed
 
+from ecommerce.courses.exceptions import PublishFailed
 from ecommerce.courses.publishers import LMSPublisher
 
 logger = logging.getLogger(__name__)
@@ -18,16 +18,21 @@ class Course(models.Model):
     history = HistoricalRecords()
     thumbnail_url = models.URLField(null=True, blank=True)
 
+    # pylint: disable=arguments-differ
     @transaction.atomic
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, publish=True):
         super(Course, self).save(force_insert, force_update, using, update_fields)
 
-        if waffle.switch_is_active('publish_course_modes_to_lms'):
-            if not LMSPublisher().publish(self):
+        if publish and waffle.switch_is_active('publish_course_modes_to_lms'):
+            if not self.publish_to_lms():
                 # Raise an exception to force a rollback
                 raise PublishFailed('Failed to publish {}'.format(self.id))
         else:
             logger.debug('Course mode publishing is not enabled. Commerce changes will not be published!')
+
+    def publish_to_lms(self):
+        """ Publish Course and Products to LMS. """
+        return LMSPublisher().publish(self)
 
     @classmethod
     def is_mode_verified(cls, mode):
