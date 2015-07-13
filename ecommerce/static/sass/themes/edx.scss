@@ -1,0 +1,7 @@
+$brand-logo-path: '/static/images/edx-logo.png';
+$brand-logo-width: 93px;
+$brand-logo-height: 47px;
+
+/* We only need to update the logo. The variables above will override those in the Open edX theme (which will handle
+  defining the position of the logo). */
+@import "default";

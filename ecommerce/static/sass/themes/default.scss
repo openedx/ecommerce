@@ -1,0 +1,11 @@
+$brand-logo-path: '/static/images/default-logo.png' !default;
+$brand-logo-width: 72px !default;
+$brand-logo-height: 48px !default;
+
+@import "../mixins";
+
+.navbar-brand {
+  .navbar-brand-logo {
+    @include brand-logo($brand-logo-path, $brand-logo-width, $brand-logo-height, 32px);
+  }
+}

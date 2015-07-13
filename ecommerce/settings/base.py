@@ -259,6 +259,7 @@ DJANGO_APPS = [
 
 # Apps specific to this project go here.
 LOCAL_APPS = [
+    'ecommerce.core',
     'ecommerce.user',
     'ecommerce.health',
     'ecommerce.courses',
@@ -422,3 +423,6 @@ LANGUAGE_COOKIE_NAME = 'ecommerce_language'
 
 # Standard regex for course_id.
 COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+(/|\+)[^/+]+(/|\+)[^/]+)'
+
+PLATFORM_NAME = 'Your Platform Name Here'
+THEME_SCSS = 'sass/themes/default.scss'
