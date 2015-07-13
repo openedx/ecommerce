@@ -1,8 +1,15 @@
+import logging
+import requests
+from urlparse import urljoin
+
 from django.http import Http404
 from django.views.generic import TemplateView
+from django.conf import settings
 import waffle
 
 from ecommerce.courses.models import Course
+
+logger = logging.getLogger(__name__)
 
 
 class Checkout(TemplateView):
@@ -24,9 +31,14 @@ class Checkout(TemplateView):
 
         context['course'] = course
 
-        context['credit_seats'] = [
+        credit_seats = [
             seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
         ]
+
+        if credit_seats:
+            provider_id = [seat.attr.credit_provider for seat in credit_seats]
+            context['providers'] = self.get_providers_detail(provider_id)
+            context['credit_seats'] = credit_seats
 
         return context
 
@@ -35,3 +47,28 @@ class Checkout(TemplateView):
         if not waffle.switch_is_active('ENABLE_CREDIT_APP'):
             raise Http404
         return super(Checkout, self).get(request, args, **kwargs)
+
+    def get_providers_detail(self, provider_id):
+        """Helper method for getting provider info from LMS.
+
+        Arguments:
+            provider_id: provider_id will be list containing provider ids
+
+        Returns:
+            Get response from LMS as json containing list of providers and
+            returns
+
+        """
+
+        provider_id = ",".join(provider_id)
+        url = urljoin(settings.LMS_URL_ROOT, '/api/credit/v1/providers/?provider_id={}'.format(provider_id))
+        try:
+            response = requests.get(url)
+        except requests.exceptions.RequestException as ex:
+            logging.exception(ex)
+            return {}
+
+        if response.status_code != 200:
+            response.raise_for_status()
+
+        return response.json()
