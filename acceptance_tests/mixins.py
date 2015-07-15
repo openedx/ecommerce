@@ -69,8 +69,22 @@ class EnrollmentApiMixin(object):
         self.enrollment_api_client = EnrollmentApiClient()
 
     def assert_user_enrolled(self, username, course_id, mode='honor'):
+        """ Verify the user is enrolled in the given course and mode. """
         status = self.enrollment_api_client.get_enrollment_status(username, course_id)
         self.assertDictContainsSubset({'is_active': True, 'mode': mode}, status)
+
+    def assert_user_not_enrolled(self, username, course_id):
+        """ Verify the user is NOT enrolled in the given course. """
+        try:
+            status = self.enrollment_api_client.get_enrollment_status(username, course_id)
+        except ValueError:
+            # Silly Enrollment API doesn't actually return data if an enrollment does not exist.
+            return
+
+        # If/when the API is updated, use this code to check enrollment status.
+        if status:
+            msg = '{} should NOT be enrolled in {}'.format(username, course_id)
+            self.assertDictContainsSubset({'is_active': False}, status, msg)
 
 
 class EcommerceApiMixin(object):
