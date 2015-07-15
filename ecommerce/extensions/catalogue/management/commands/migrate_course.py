@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import logging
 from optparse import make_option
 
@@ -112,12 +113,12 @@ class MigratedCourse(object):
         return course_name, modes
 
     def _get_product_name(self, course_name, mode):
-        name = u'Seat in {course_name} with {certificate_type} certificate'.format(
+        name = 'Seat in {course_name} with {certificate_type} certificate'.format(
             course_name=course_name,
             certificate_type=Course.certificate_type_for_mode(mode))
 
         if Course.is_mode_verified(mode):
-            name += u' (and ID verification)'
+            name += ' (and ID verification)'
 
         return name
 
@@ -134,30 +135,30 @@ class MigratedCourse(object):
 
         seats = {}
         stock_records = {}
-        slug = u'parent-cs-{}'.format(slugify(course_id))
+        slug = 'parent-cs-{}'.format(slugify(course_id))
         partner = Partner.objects.get(code='edx')
 
         try:
             parent = Product.objects.get(slug=slug)
-            logger.info(u'Retrieved parent seat product for [%s] from database.', course_id)
+            logger.info('Retrieved parent seat product for [%s] from database.', course_id)
         except Product.DoesNotExist:
             product_class = ProductClass.objects.get(slug='seat')
             parent = Product(slug=slug, is_discountable=True, structure=Product.PARENT, product_class=product_class)
-            logger.info(u'Parent seat product for [%s] does not exist. Instantiated a new instance.', course_id)
+            logger.info('Parent seat product for [%s] does not exist. Instantiated a new instance.', course_id)
 
-        parent.title = u'Seat in {}'.format(course_name)
+        parent.title = 'Seat in {}'.format(course_name)
         parent.attr.course_key = course_id
 
         # Create the child products
         for mode in modes:
             seat_type = mode['slug']
-            slug = u'child-cs-{}-{}'.format(seat_type, slugify(course_id))
+            slug = 'child-cs-{}-{}'.format(seat_type, slugify(course_id))
             try:
                 seat = Product.objects.get(slug=slug)
-                logger.info(u'Retrieved [%s] course seat child product for [%s] from database.', seat_type, course_id)
+                logger.info('Retrieved [%s] course seat child product for [%s] from database.', seat_type, course_id)
             except Product.DoesNotExist:
                 seat = Product(slug=slug)
-                logger.info(u'[%s] course seat product for [%s] does not exist. Instantiated a new instance.',
+                logger.info('[%s] course seat product for [%s] does not exist. Instantiated a new instance.',
                             seat_type, course_id)
 
             seat.parent = parent
@@ -174,13 +175,13 @@ class MigratedCourse(object):
 
             try:
                 stock_record = StockRecord.objects.get(product=seat, partner=partner)
-                logger.info(u'Retrieved [%s] course seat child product stock record for [%s] from database.',
+                logger.info('Retrieved [%s] course seat child product stock record for [%s] from database.',
                             seat_type, course_id)
             except StockRecord.DoesNotExist:
                 partner_sku = generate_sku(seat)
                 stock_record = StockRecord(product=seat, partner=partner, partner_sku=partner_sku)
                 logger.info(
-                    u'[%s] course seat product stock record for [%s] does not exist. Instantiated a new instance.',
+                    '[%s] course seat product stock record for [%s] does not exist. Instantiated a new instance.',
                     seat_type, course_id)
 
             stock_record.price_excl_tax = mode['min_price']
