@@ -1,3 +1,5 @@
+# coding=utf-8
+from __future__ import unicode_literals
 import datetime
 import json
 import logging
@@ -42,7 +44,7 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
 
         # Mock Course Structure API
         url = urljoin(settings.LMS_URL_ROOT, 'api/course_structure/v0/courses/{}/'.format(self.course_id))
-        httpretty.register_uri(httpretty.GET, url, body='{"name": "A Test Course"}', content_type=JSON)
+        httpretty.register_uri(httpretty.GET, url, body='{"name": "A Tést Côurse"}', content_type=JSON)
 
         # Mock Enrollment API
         url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(self.course_id))
@@ -64,9 +66,9 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         """ Verify the given seat is configured correctly. """
         certificate_type = Course.certificate_type_for_mode(seat_type)
 
-        expected_title = u'Seat in A Test Course with {} certificate'.format(certificate_type)
+        expected_title = 'Seat in A Tést Côurse with {} certificate'.format(certificate_type)
         if Course.is_mode_verified(seat_type):
-            expected_title += u' (and ID verification)'
+            expected_title += ' (and ID verification)'
 
         self.assertEqual(seat.title, expected_title)
         self.assertEqual(seat.expires, EXPIRES)
@@ -125,7 +127,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         # Verify created objects match mocked data
         parent_seat = migrated_course.parent_seat
-        self.assertEqual(parent_seat.title, 'Seat in A Test Course')
+        self.assertEqual(parent_seat.title, 'Seat in A Tést Côurse')
 
         for seat_type, price in self.prices.iteritems():
             logger.info('Validating objects for %s certificate type...', seat_type)
