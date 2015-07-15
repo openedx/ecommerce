@@ -7,12 +7,17 @@ require([
         'js/views/clickable-view',
         'js/views/analytics_view',
         'js/views/payment_button_view',
-        'js/utils/utils'
+        'js/utils/utils',
+        'js/views/provider_view'
     ],
-    function( $,Backbone, UserModel, TrackingModel, CourseModel, ClickableView, AnalyticsView, PaymentButtonView, Utils ) {
+    function( $,Backbone, UserModel, TrackingModel, CourseModel, ClickableView, AnalyticsView, PaymentButtonView, Utils, ProviderView ) {
 
         new PaymentButtonView({
-           el: $( '#payment-buttons')
+           el: $( '#payment-buttons' )
+        });
+
+        new ProviderView({
+           el: $( '.provider-details' )
         });
 
         var courseModel = new CourseModel(),

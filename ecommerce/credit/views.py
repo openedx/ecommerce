@@ -37,14 +37,21 @@ class Checkout(TemplateView):
             else:
                 processors_dict[processor] = 'Checkout with {}'.format(processor)
 
+        credit_seats = [
+            seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
+        ]
+        provider_ids = None
+        if credit_seats:
+            provider_ids = ",".join([seat.attr.credit_provider for seat in credit_seats if seat.attr.credit_provider])
+
         context.update({
             'request': self.request,
             'user': self.request.user,
             'course': course,
             'payment_processors': processors_dict,
-            'credit_seats': [
-                seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
-            ],
+            'credit_seats': credit_seats,
+            'lms_url_root': settings.LMS_URL_ROOT,
+            'providers_ids': provider_ids,
             'analytics_data': json.dumps({
                 'course': {
                     'courseId': course.id
