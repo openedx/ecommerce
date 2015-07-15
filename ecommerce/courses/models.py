@@ -115,7 +115,7 @@ class Course(models.Model):
         return name
 
     def create_or_update_seat(self, certificate_type, id_verification_required, price, credit_provider=None,
-                              expires=None):
+                              expires=None, credit_hours=None):
         """
         Creates course seat products.
 
@@ -151,6 +151,9 @@ class Course(models.Model):
 
         if credit_provider:
             seat.attr.credit_provider = credit_provider
+
+        if credit_hours:
+            seat.attr.credit_hours = credit_hours
 
         seat.save()
 

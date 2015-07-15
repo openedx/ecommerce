@@ -37,6 +37,7 @@ class CourseCatalogTestMixin(object):
                 ('course_key', 'text'),
                 ('credit_provider', 'text'),
                 ('id_verification_required', 'boolean'),
+                ('credit_hours', 'integer'),
             )
 
             for code, attr_type in attributes:
