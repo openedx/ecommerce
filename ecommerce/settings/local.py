@@ -90,7 +90,10 @@ SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
 SOCIAL_AUTH_EDX_OIDC_URL_ROOT = OAUTH2_PROVIDER_URL
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
-JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-secret-key'
+JWT_AUTH.update({
+    'JWT_SECRET_KEY': 'insecure-secret-key',
+    'JWT_ISSUER': OAUTH2_PROVIDER_URL
+})
 # END AUTHENTICATION
 
 
@@ -132,6 +135,6 @@ LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 try:
-    from .private import *      # pylint: disable=import-error
+    from .private import *  # pylint: disable=import-error
 except ImportError:
     pass

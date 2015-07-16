@@ -319,6 +319,8 @@ AUTH_USER_MODEL = 'core.User'
 JWT_AUTH = {
     'JWT_SECRET_KEY': None,
     'JWT_ALGORITHM': 'HS256',
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_ISSUER': None
 }
 
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
