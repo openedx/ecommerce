@@ -48,29 +48,33 @@ class CourseMigrationView(View):
         log_handler.setFormatter(formatter)
         root_logger.addHandler(log_handler)
 
-        # Log who ran this request
-        msg = u'User [%s] requested course migration for [%s]. '
-        if commit:
-            msg += u'The changes will be committed to the database.'
-        else:
-            msg += u'The changes will NOT be committed to the database.'
+        try:
+            # Log who ran this request
+            msg = u'User [%s] requested course migration for [%s]. '
+            if commit:
+                msg += u'The changes will be committed to the database.'
+            else:
+                msg += u'The changes will NOT be committed to the database.'
 
-        user = request.user
-        logger.info(msg, user.username, course_ids)
+            user = request.user
+            logger.info(msg, user.username, course_ids)
 
-        if not course_ids:
-            return HttpResponse('No course_ids specified.', status=400)
+            if not course_ids:
+                return HttpResponse('No course_ids specified.', status=400)
 
-        course_ids = course_ids.split(',')
+            course_ids = course_ids.split(',')
 
-        call_command('migrate_course', *course_ids, access_token=user.access_token, commit=commit,
-                     settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
+            call_command('migrate_course', *course_ids, access_token=user.access_token, commit=commit,
+                         settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
 
-        # Format the output for display
-        output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
-                                                                        log=log.getvalue())
+            # Format the output for display
+            output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
+                                                                            log=log.getvalue())
 
-        # Remove the log capture handler
-        root_logger.removeHandler(log_handler)
-
-        return HttpResponse(output, content_type='text/plain')
+            return HttpResponse(output, content_type='text/plain')
+        finally:
+            # Remove the log capture handler and close all streams
+            root_logger.removeHandler(log_handler)
+            log.close()
+            out.close()
+            err.close()
