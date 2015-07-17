@@ -6,7 +6,7 @@ from ecommerce.tests.mixins import UserMixin
 
 
 class CourseMigrationViewTests(UserMixin, TestCase):
-    path = reverse('migrate_course')
+    path = reverse('courses:migrate')
 
     def test_superuser_required(self):
         """ Verify the view is only accessible to superusers. """
@@ -38,7 +38,7 @@ class CourseMigrationViewTests(UserMixin, TestCase):
 
 
 class CourseListViewTests(UserMixin, TestCase):
-    path = reverse('courses_list')
+    path = reverse('courses:list')
 
     def test_login_required(self):
         """ Users are required to login before accessing the view. """

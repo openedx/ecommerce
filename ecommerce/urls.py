@@ -8,7 +8,6 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView, TemplateView
 
-from ecommerce.courses import views as course_views
 from ecommerce.core import views as core_views
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
@@ -41,14 +40,9 @@ urlpatterns = patterns(
     '',
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
-    url(r'^admin/courses/migrate/$', course_views.CourseMigrationView.as_view(), name='migrate_course'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
-    url(r'^courses/$', course_views.CourseListView.as_view(), name='courses_list'),
     url(r'^health/$', core_views.health, name='health'),
-
-    # Social auth
-    url('', include('social.apps.django_app.urls', namespace='social')),
     url(
         r'^accounts/login/$',
         RedirectView.as_view(
@@ -59,9 +53,9 @@ urlpatterns = patterns(
         name='login'
     ),
 
-    # Credit app
+    url('', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
-
 )
 
 # Install Oscar extension URLs
