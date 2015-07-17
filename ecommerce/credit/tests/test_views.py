@@ -12,12 +12,12 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.tests.mixins import UserMixin
 
-
 Partner = get_model('partner', 'Partner')
 
 
 class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
     """Test for Checkout page"""
+
     def setUp(self):
         super(CheckoutPageTest, self).setUp()
         self.switch, __ = Switch.objects.get_or_create(name='ENABLE_CREDIT_APP', active=True)
@@ -53,12 +53,16 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
             stock_record.partner = partner
             stock_record.save()
 
+    @property
+    def path(self):
+        return reverse('credit:checkout', args=[self.course.id])
+
     def test_get_with_enabled_flag(self):
         """
         Test checkout page accessibility. Page will appear only if feature
         flag is enabled.
         """
-        response = self.client.get(reverse('credit:checkout', args=[self.course.id]))
+        response = self.client.get(self.path)
 
         self.assertEqual(response.status_code, 200)
 
@@ -69,24 +73,20 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
         """
         self.switch.active = False
         self.switch.save()
-        response = self.client.get(reverse('credit:checkout', args=[self.course.id]))
+        response = self.client.get(self.path)
 
         self.assertEqual(response.status_code, 404)
 
     def test_get_checkout_page_with_credit_seats(self):
-        """
-        Test checkout page with credit course showing all information.
-        course name , thumbnail url , provider name , price , payment processors.
-        """
-        response = self.client.get(reverse('credit:checkout', args=[self.course.id]))
+        """ Verify page loads and has the necessary context. """
+        response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['course'], self.course)
-        self.assertEqual(response.context['credit_seats'][0], self.seats['credit'])
-        self.assertEqual(
-            sorted(
-                response.context['payment_processors'].keys()
-            ),
-            sorted(
-                [get_processor_class(path).NAME.lower() for path in settings.PAYMENT_PROCESSORS]
-            )
-        )
+        expected = {
+            'course': self.course,
+            'credit_seats': [self.seats['credit']],
+        }
+        self.assertDictContainsSubset(expected, response.context)
+
+        # Verify the payment processors are returned
+        self.assertEqual(sorted(response.context['payment_processors'].keys()),
+                         sorted([get_processor_class(path).NAME.lower() for path in settings.PAYMENT_PROCESSORS]))
