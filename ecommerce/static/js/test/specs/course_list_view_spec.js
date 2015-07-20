@@ -1,32 +1,42 @@
 define([
         'jquery',
-        'underscore.string',
-        'models/course_model',
-        'views/course_detail_view'
+        'views/course_list_view',
+        'collections/course_collection'
        ],
-       function ($, _s, CourseModel, CourseDetailView) {
+       function ($, CourseListView, CourseCollection) {
 
            describe('course list view', function () {
 
                 var view,
-                    model,
-                    renderInterval,
-                    COURSE_ID = 'edX/DemoX.1/2014';
+                    collection,
+                    defaultCourses,
+                    renderInterval;
 
                 beforeEach(function (done) {
 
-                    model = new CourseModel();
+                    defaultCourses = {
+                        "id": "edX/DemoX.1/2014",
+                        "name": "DemoX",
+                        "last_edited": "2015-06-16T19:14:34Z"
+                    },
+                    {
+                        "id": "edX/victor101/Victor_s_Test_Course",
+                        "name": "Victor's Test Course",
+                        "last_edited": "2015-06-16T19:42:55Z"
+                    };
+
+                    collection = new CourseCollection();
 
                     spyOn(collection, 'fetch').and.callFake(function () {
-                        model.set({
-
-                        })
+                        collection.set(defaultCourses);
                     });
 
                     // Set up the environment
-                    setFixtures(_s.sprintf('<div class="course-detail-view" data-course-id="%s"></div>', COURSE_ID));
+                    setFixtures('<div id="course-list-view"></div>');
 
-                    view = new CourseDetailView();
+                    view = new CourseListView({
+                        collection: collection
+                    });
 
                     // Wait till the DOM is rendered before continuing
                     renderInterval = setInterval(function () {

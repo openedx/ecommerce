@@ -104,7 +104,7 @@ The complete unit test suite (Python, JavaScript, code quality) can be run with 
 
     $ make validate
 
-Run the Python tess with the following command:
+Run the Python tests with the following command:
 
 ::
 
@@ -113,16 +113,17 @@ Run the Python tess with the following command:
 JavaScript Unit Testing
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-JavaScript is unit tested using the Jasmine framework. Tests should be placed in the
-ecommerce/static/js/test/specs directory, and suffixedwith _spec
+JavaScript is unit tested using the Jasmine framework and should follow the `Jasmine 2.3 API
+specifications <http://jasmine.github.io/2.3/introduction.html>`__.
+Tests should be placed in the ecommerce/static/js/test/specs directory, and suffixed with _spec
 (e.g. ecommerce/static/js/test/specs/course_list_view_spec.js).
 
-Run the JavaScript tests with the following command:
+Tests can be run with the following command:
+>>>>>>> Added Jasmine testing functionality to ecommerce
 
 ::
 
     $ make test_javascript
-
 
 Acceptance Testing
 ~~~~~~~~~~~~~~~~~~
