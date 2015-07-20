@@ -20,6 +20,7 @@ help:
 	@echo '    make fake_translations            install fake translations                      '
 	@echo '    make pull_translations            pull translations from Transifex               '
 	@echo '    make update_translations          install new translations from Transifex        '
+	@echo '    make test_javascript              run javascript unit tests				       	'
 	@echo '                                                                                     '
 
 requirements.js:
@@ -41,6 +42,9 @@ clean:
 	coverage erase
 	rm -rf assets/ ecommerce/static/build
 
+test_javascript:
+	gulp test
+
 test_python: clean
 	python manage.py compress --settings=ecommerce.settings.test
 	DISABLE_MIGRATIONS=True coverage run --branch --source=ecommerce ./manage.py test ecommerce \
@@ -51,7 +55,7 @@ quality:
 	pep8 --config=.pep8 ecommerce acceptance_tests
 	pylint --rcfile=pylintrc ecommerce acceptance_tests
 
-validate: test_python quality
+validate: test_python quality test_javascript
 
 static:
 	$(NODE_BIN)/r.js -o build.js
@@ -82,5 +86,5 @@ pull_translations:
 update_translations: pull_translations generate_fake_translations
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
-.PHONY: help requirements migrate serve clean test_python quality validate html_coverage accept \
+.PHONY: help requirements migrate serve clean test_python quality test_javascript validate html_coverage accept \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations update_translations

@@ -39,6 +39,7 @@ htmlcov
 .tox
 nosetests.xml
 unittests.xml
+coverage/
 
 ### Internationalization artifacts
 *.mo
