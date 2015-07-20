@@ -1,5 +1,4 @@
 import datetime
-from decimal import Decimal
 import json
 
 import ddt
@@ -8,7 +7,6 @@ from django.test import TestCase, override_settings
 from django_dynamic_fixture import G
 import httpretty
 import mock
-from oscar.test import factories
 from requests import Timeout
 from testfixtures import LogCapture
 
@@ -27,7 +25,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
         self.course = G(Course)
-        self.create_course_seats(self.course.id, ('honor', 'verified'))
+        self.course.create_or_update_seat('honor', False, 0)
+        self.course.create_or_update_seat('verified', True, 50)
         self.publisher = LMSPublisher()
 
     def _mock_commerce_api(self, status, body=None):
@@ -96,19 +95,14 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
     def test_serialize_seat_for_commerce_api(self):
         """ The method should convert a seat to a JSON-serializable dict consumable by the Commerce API. """
-        seat = factories.ProductFactory(product_class=self.seat_product_class, expires=None)
-        certificate_type = 'honor'
-        seat.attr.certificate_type = certificate_type
-        seat.save()
-
-        seat.stockrecords.all().delete()
-        stock_record = factories.StockRecordFactory(product=seat, partner_sku='ABC123', price_currency='USD',
-                                                    price_excl_tax=Decimal('10'))
+        # Grab the verified seat
+        seat = sorted(self.course.seat_products, key=lambda p: p.attr.certificate_type)[1]
+        stock_record = seat.stockrecords.first()
 
         actual = self.publisher.serialize_seat_for_commerce_api(seat)
         expected = {
-            'name': certificate_type,
-            'currency': stock_record.price_currency,
+            'name': 'verified',
+            'currency': 'USD',
             'price': int(stock_record.price_excl_tax),
             'sku': stock_record.partner_sku,
             'expires': None

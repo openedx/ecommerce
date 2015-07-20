@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 from urlparse import urljoin
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.management import call_command
@@ -62,19 +63,20 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         self.assertEqual(stock_record.price_currency, 'USD')
         self.assertEqual(stock_record.partner_sku, generate_sku(seat))
 
-    def assert_seat_valid(self, seat, seat_type):
+    def assert_seat_valid(self, seat, certificate_type):
         """ Verify the given seat is configured correctly. """
-        certificate_type = Course.certificate_type_for_mode(seat_type)
+        certificate_type = Course.certificate_type_for_mode(certificate_type)
 
         expected_title = 'Seat in A Tést Côurse with {} certificate'.format(certificate_type)
-        if Course.is_mode_verified(seat_type):
-            expected_title += ' (and ID verification)'
+        if seat.attr.id_verification_required:
+            expected_title += u' (and ID verification)'
 
         self.assertEqual(seat.title, expected_title)
+        self.assertEqual(seat.attr.certificate_type, certificate_type)
         self.assertEqual(seat.expires, EXPIRES)
-        self.assertEqual(seat.attr.certificate_type, seat_type)
+        self.assertEqual(seat.attr.certificate_type, certificate_type)
         self.assertEqual(seat.attr.course_key, self.course_id)
-        self.assertEqual(seat.attr.id_verification_required, Course.is_mode_verified(seat_type))
+        # self.assertEqual(seat.attr.id_verification_required, Course.is_mode_verified(certificate_type))
 
     def assert_course_migrated(self):
         """ Verify the course was migrated and saved to the database. """
@@ -85,6 +87,8 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         self.assertEqual(list(parent.categories.all()), [self.category])
         for seat in seats:
             seat_type = seat.attr.certificate_type
+            if seat_type == 'professional' and not seat.attr.id_verification_required:
+                seat_type = 'no-id-professional'
             logger.info('Validating objects for %s certificate type...', seat_type)
 
             stock_record = self.partner.stockrecords.get(product=seat)
@@ -104,50 +108,26 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         migrated_course.load_from_lms(ACCESS_TOKEN)
         return migrated_course
 
-    def test_constructor(self):
-        """Verify the constructor instantiates a new object with default property values."""
-        migrated_course = MigratedCourse(self.course_id)
-        self.assertEqual(migrated_course.course_id, unicode(self.course_id))
-        self.assertEqual(migrated_course.course.id, self.course_id)
-        self.assertIsNone(migrated_course.parent_seat)
-        self.assertEqual(migrated_course.child_seats, {})
-        self.assertEqual(migrated_course._unsaved_stock_records, {})  # pylint: disable=protected-access
-
     @httpretty.activate
     def test_load_from_lms(self):
         """ Verify the method creates new objects based on data loaded from the LMS. """
-        initial_product_count = Product.objects.count()
-        initial_stock_record_count = StockRecord.objects.count()
-
         migrated_course = self._migrate_course_from_lms()
+        course = migrated_course.course
 
         # Ensure LMS was called with the correct headers
         for request in httpretty.httpretty.latest_requests:
             self.assert_lms_api_headers(request)
 
         # Verify created objects match mocked data
-        parent_seat = migrated_course.parent_seat
+        parent_seat = course.parent_seat_product
         self.assertEqual(parent_seat.title, 'Seat in A Tést Côurse')
 
-        for seat_type, price in self.prices.iteritems():
-            logger.info('Validating objects for %s certificate type...', seat_type)
-
-            seat = migrated_course.child_seats[seat_type]
-            self.assert_seat_valid(seat, seat_type)
-
-            stock_record = migrated_course._unsaved_stock_records[seat_type]  # pylint: disable=protected-access
-            self.assert_stock_record_valid(stock_record, seat, price)
-
-        self.assertEqual(Product.objects.count(), initial_product_count, 'No new Products should have been saved.')
-        self.assertEqual(StockRecord.objects.count(), initial_stock_record_count,
-                         'No new StockRecords should have been saved.')
-
-    @httpretty.activate
-    def test_save(self):
-        """ Verify the method saves the data to the database. """
-        migrated_course = self._migrate_course_from_lms()
-        migrated_course.save()
-        self.assert_course_migrated()
+        for seat in course.seat_products:
+            certificate_type = seat.attr.certificate_type
+            if certificate_type == 'professional' and not seat.attr.id_verification_required:
+                certificate_type = 'no-id-professional'
+            logger.info('Validating objects for %s certificate type...', certificate_type)
+            self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[certificate_type]))
 
 
 class CommandTests(CourseMigrationTestMixin, TestCase):

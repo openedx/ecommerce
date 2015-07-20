@@ -44,7 +44,7 @@ clean:
 test_python: clean
 	python manage.py compress --settings=ecommerce.settings.test
 	DISABLE_MIGRATIONS=True coverage run --branch --source=ecommerce ./manage.py test ecommerce \
-	--settings=ecommerce.settings.test --with-ignore-docstrings
+	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 
 quality:

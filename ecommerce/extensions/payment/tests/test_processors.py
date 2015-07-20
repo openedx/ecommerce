@@ -20,6 +20,7 @@ import paypalrestsdk
 from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment import processors
 from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
@@ -31,12 +32,10 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
-
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
-
 
 log = logging.getLogger(__name__)
 
@@ -50,14 +49,13 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
     # This value is used to test the NAME attribute on the processor.
     processor_name = None
 
-    COURSE_KEY = 'test-course-key'
     CERTIFICATE_TYPE = 'test-certificate-type'
 
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
 
-        products = self.create_course_seats(self.COURSE_KEY, [self.CERTIFICATE_TYPE])
-        self.product = products[self.CERTIFICATE_TYPE]
+        self.course = Course.objects.create(id='a/b/c', name='Demo Course')
+        self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20)
 
         self.processor = self.processor_class()  # pylint: disable=not-callable
         self.basket = factories.create_basket(empty=True)
@@ -126,7 +124,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             u'consumer_id': self.basket.owner.username,
             u'override_custom_receipt_page': u'{}?basket_id={}'.format(self.processor.receipt_page_url, self.basket.id),
             u'override_custom_cancel_page': self.processor.cancel_page_url,
-            u'merchant_defined_data1': self.COURSE_KEY,
+            u'merchant_defined_data1': self.course.id,
             u'merchant_defined_data2': self.CERTIFICATE_TYPE,
         }
 
@@ -227,14 +225,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # finds the first seat added, when there's more than one.
         basket = factories.create_basket(empty=True)
-        other_seat = factories.ProductFactory(product_class=self.seat_product_class)
+        other_seat = factories.ProductFactory(product_class=self.seat_product_class, stockrecords__price_currency='USD')
         basket.add_product(self.product)
         basket.add_product(other_seat)
         self.assertEqual(get_single_seat(basket), self.product)
 
         # finds the seat when there's a mixture of product classes.
         basket = factories.create_basket(empty=True)
-        other_product = factories.ProductFactory()
+        other_product = factories.ProductFactory(stockrecords__price_currency='USD')
         basket.add_product(other_product)
         basket.add_product(self.product)
         self.assertEqual(get_single_seat(basket), self.product)

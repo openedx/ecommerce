@@ -13,39 +13,40 @@ from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 
-
 JSON = 'application/json'
+LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
+
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 User = get_user_model()
 
-LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
-
-@ddt.ddt
-@override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
-    """Test course seat fulfillment."""
-    course_id = 'edX/DemoX/Demo_Course'
+class EnrollmentFulfillmentTestMixin(CourseCatalogTestMixin, FulfillmentTestMixin):
     certificate_type = 'test-certificate-type'
-    # provider = 'MIT'
+    course_id = 'edX/DemoX/Demo_Course'
+    provider = None
 
     def setUp(self):
-        user = UserFactory()
-        seats = self.create_course_seats(self.course_id, (self.certificate_type,))
-        self.seat = seats[self.certificate_type]
+        super(EnrollmentFulfillmentTestMixin, self).setUp()
 
-        for stock_record in self.seat.stockrecords.all():
-            stock_record.price_currency = 'USD'
-            stock_record.save()
+        user = UserFactory()
+        course = Course.objects.create(id=self.course_id, name='Demo Course')
+        self.seat = course.create_or_update_seat(self.certificate_type, False, 100, self.provider)
 
         basket = BasketFactory()
         basket.add_product(self.seat, 1)
         self.order = factories.create_order(number=1, basket=basket, user=user)
+
+
+@ddt.ddt
+@override_settings(EDX_API_KEY='foo')
+class EnrollmentFulfillmentModuleTests(EnrollmentFulfillmentTestMixin, TestCase):
+    """Test course seat fulfillment."""
 
     def test_enrollment_module_support(self):
         """Test that we get the correct values back for supported product lines."""
@@ -220,25 +221,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentCreditSeatModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+class EnrollmentFulfillmentCreditSeatModuleTests(EnrollmentFulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
-    course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'credit'
     provider = 'MIT'
-
-    def setUp(self):
-        user = UserFactory()
-
-        seats = self.create_course_seats(self.course_id, (self.certificate_type,), self.provider)
-        self.seat = seats[self.certificate_type]
-
-        for stock_record in self.seat.stockrecords.all():
-            stock_record.price_currency = 'USD'
-            stock_record.save()
-
-        basket = BasketFactory()
-        basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=1, basket=basket, user=user)
 
     @httpretty.activate
     def test_enrollment_module_fulfill(self):

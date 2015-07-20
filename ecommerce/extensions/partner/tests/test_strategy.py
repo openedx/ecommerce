@@ -4,6 +4,7 @@ from django.test import TestCase
 from oscar.apps.partner import availability
 import pytz
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy, Selector
 
@@ -12,7 +13,8 @@ class DefaultStrategyTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(DefaultStrategyTests, self).setUp()
         self.strategy = DefaultStrategy()
-        self.honor_seat = self.create_course_seats('a/b/c', ('honor',))['honor']
+        course = Course.objects.create(id='a/b/c', name='Demo Course')
+        self.honor_seat = course.create_or_update_seat('honor', False, 0)
 
     def test_seat_class(self):
         """ Verify the property returns the course seat Product Class. """
