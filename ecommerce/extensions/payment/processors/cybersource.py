@@ -11,8 +11,9 @@ from suds.client import Client
 from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.constants import ISO_8601_FORMAT, CYBERSOURCE_CARD_TYPE_MAP
+from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.helpers import sign

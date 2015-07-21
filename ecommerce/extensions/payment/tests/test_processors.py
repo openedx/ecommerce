@@ -20,10 +20,10 @@ import paypalrestsdk
 from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment import processors
-from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.models import PaypalWebProfile
