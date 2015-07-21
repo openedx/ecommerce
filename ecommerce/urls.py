@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.views import logout
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView, TemplateView
@@ -52,6 +53,7 @@ urlpatterns = patterns(
         ),
         name='login'
     ),
+    url(r'^accounts/logout/$', logout, name='logout'),
 
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),

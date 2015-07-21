@@ -1,26 +1,81 @@
 {# Base template for edX-specific pages. #}
 
-{% load i18n %}
 {% load compress %}
+{% load core_extras %}
+{% load i18n %}
 {% load staticfiles %}
 
 <!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
 
-  {% compress css %}
-      <link rel="stylesheet" href="{% static 'sass/main.scss' %}" type="text/x-scss">
-  {% endcompress %}
+    {% compress css %}
+        <link rel="stylesheet" href="{% static 'sass/base/main.scss' %}" type="text/x-scss">
+        {% captureas theme_scss %}
+            {% settings_value 'THEME_SCSS' %}
+        {% endcaptureas %}
+        <link rel="stylesheet" href="{% static theme_scss %}" type="text/x-scss">
+    {% endcompress %}
 
-  {% compress css %}
-    {# This block is separated to better support browser caching. #}
-    {% block stylesheets %}
-    {% endblock %}
-  {% endcompress %}
+    {% compress css %}
+        {# This block is separated to better support browser caching. #}
+        {% block stylesheets %}
+        {% endblock %}
+    {% endcompress %}
 </head>
-<body role="document">
+<body>
+{% block navbar %}
+    <nav class="navbar navbar-default" aria-label="Account">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#main-navbar-collapse" aria-expanded="false">
+                    <span class="sr-only">{% trans "Toggle navigation" %}</span>
+                    <span aria-hidden="true" class="icon-bar"></span>
+                    <span aria-hidden="true" class="icon-bar"></span>
+                    <span aria-hidden="true" class="icon-bar"></span>
+                </button>
+                <div class="navbar-brand">
+                    <div class="navbar-brand-logo" alt="{% settings_value 'PLATFORM_NAME' %}"></div>
+                </div>
+            </div>
+
+            <div class="collapse navbar-collapse" id="main-navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                        <li class="btn-group user-menu">
+                            <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
+                                    onclick="window.open('{% settings_value 'LMS_DASHBOARD_URL' %}');">
+                                <i class="icon fa fa-home" aria-hidden="true"></i>
+                                <span class="sr-only">{% trans "Dashboard for:" %}</span>
+                                {{ user.username }}
+                            </button>
+                            <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true">
+                                <span class="caret"></span>
+                                <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-expanded="false">
+                                {% include "courses/menu_options.html" %}
+                            </ul>
+                            {% include "courses/menu_options.html" with additional_class="visible-xs" %}
+                        </li>
+                    {% else %}
+                        <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" %}</a>
+                        <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
+                        </a>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock navbar %}
+
 {% block content %}
 {% endblock content %}
 
@@ -36,10 +91,10 @@
 {% endcompress %}
 
 {% compress js %}
-  {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
-     downloading a single, large file for each page. #}
-  {% block javascript %}
-  {% endblock javascript %}
+    {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
+    downloading a single, large file for each page. #}
+    {% block javascript %}
+    {% endblock javascript %}
 {% endcompress %}
 </body>
 </html>

@@ -1,0 +1,17 @@
+// base styles
+// --------------------
+
+html {
+    font-size:16px;
+}
+
+a {
+    &:hover,
+    &:focus {
+        text-decoration: none;
+    }
+}
+
+.container {
+    background-color: white;
+}

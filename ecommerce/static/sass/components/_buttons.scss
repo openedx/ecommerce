@@ -1,0 +1,7 @@
+// buttons
+// --------------------------------------------------
+
+.btn:focus {
+    // Disable Bootstrap default dotted outline
+    outline:inherit;
+}

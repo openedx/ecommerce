@@ -1,0 +1,30 @@
+// utilities
+// --------------------
+@import '../utilities/developer';    // developer-friendly file: add rough/WIP styling that needs UI triage
+@import '../utilities/variables';
+@import '../utilities/mixins';
+
+// vendor
+// --------------------
+@import '../../bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+@import '../../bower_components/bootstrapaccessibilityplugin/plugins/css/bootstrap-accessibility';
+@import '../../vendor/dataTables/dataTables.bootstrap';
+@import '../../bower_components/fontawesome/scss/font-awesome';
+@import '../../vendor/dataTables/dataTables.fontAwesome';
+
+// pattern library
+// --------------------
+@import '_pattern_library';
+
+// base overrides
+// --------------------
+@import 'base';
+
+// components
+// --------------------
+@import '../components/buttons';
+@import '../components/navbar';
+
+// views
+// --------------------
+@import '../views/credit';

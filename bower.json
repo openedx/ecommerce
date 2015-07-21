@@ -18,6 +18,7 @@
     "underscore": "~1.8.2",
     "bootstrapaccessibilityplugin": "~1.0.4",
     "datatables": "~1.10.7",
-    "fontawesome": "~4.3.0"
+    "fontawesome": "~4.3.0",
+    "edx-ux-pattern-library": "https://github.com/edx/ux-pattern-library.git#82fa1c823bc322ba8b0742f0c546a89b0c69e952"
   }
 }
