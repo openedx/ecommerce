@@ -4,8 +4,8 @@ from oscar.core.loading import get_model, get_class
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
-from ecommerce.extensions.payment.constants import ISO_8601_FORMAT
 
 BillingAddress = get_model('order', 'BillingAddress')
 Line = get_model('order', 'Line')

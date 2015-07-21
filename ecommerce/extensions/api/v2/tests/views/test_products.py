@@ -7,6 +7,7 @@ from django.test import TestCase
 from oscar.core.loading import get_model, get_class
 import pytz
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, TestServerUrlMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -38,7 +39,7 @@ class ProductViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin,
             'url': self.get_full_url(reverse('api:v2:product-detail', kwargs={'pk': product.id})),
             'product_class': unicode(product.get_product_class()),
             'title': product.title,
-            'expires': product.expires.isoformat()[:-6] + 'Z' if product.expires else None,
+            'expires': product.expires.strftime(ISO_8601_FORMAT) if product.expires else None,
             'attribute_values': attribute_values
         }
 

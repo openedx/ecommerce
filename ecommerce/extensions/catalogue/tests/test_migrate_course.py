@@ -13,6 +13,7 @@ import httpretty
 from oscar.core.loading import get_model
 import pytz
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.management.commands.migrate_course import MigratedCourse
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -21,7 +22,7 @@ from ecommerce.extensions.catalogue.utils import generate_sku
 JSON = 'application/json'
 ACCESS_TOKEN = 'edx'
 EXPIRES = datetime.datetime(year=1985, month=10, day=26, hour=1, minute=20, tzinfo=pytz.utc)
-EXPIRES_STRING = EXPIRES.isoformat()[:-6] + 'Z'
+EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
 
 logger = logging.getLogger(__name__)
 
