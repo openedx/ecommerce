@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, url, include
 from django.views.decorators.cache import cache_page
+from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.extensions.api.v2 import views
 
@@ -49,3 +50,10 @@ urlpatterns = patterns(
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
 )
+
+router = ExtendedSimpleRouter()
+router.register(r'courses', views.CourseViewSet)\
+    .register(r'products', views.ProductViewSet, base_name='course-product', parents_query_lookups=['course_id'])
+router.register(r'products', views.ProductViewSet)
+
+urlpatterns += router.urls

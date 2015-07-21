@@ -12,7 +12,6 @@ from suds.sudsobject import Factory
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
 
-
 CURRENCY = u'USD'
 Order = get_model('order', 'Order')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -152,7 +151,7 @@ class CybersourceMixin(object):
 
     def get_soap_mock(self, amount=100, currency=CURRENCY, transaction_id=None, basket_id=None, decision='ACCEPT'):
         class CybersourceSoapMock(mock.MagicMock):
-            def runTransaction(self, **kwargs):     # pylint: disable=unused-argument
+            def runTransaction(self, **kwargs):  # pylint: disable=unused-argument
                 cc_reply_items = {
                     'reasonCode': 100,
                     'amount': unicode(amount),
