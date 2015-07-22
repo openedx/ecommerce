@@ -70,7 +70,8 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta(object):
         model = Product
-        fields = ('id', 'url', 'product_class', 'title', 'price', 'expires', 'attribute_values', 'is_available_to_buy',)
+        fields = ('id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
+                  'is_available_to_buy',)
         extra_kwargs = {
             'url': {'view_name': PRODUCT_DETAIL_VIEW},
         }
@@ -96,7 +97,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address')
 
 
-class PaymentProcessorSerializer(serializers.Serializer):   # pylint: disable=abstract-method
+class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     """ Serializer to use with instances of processors.BasePaymentProcessor """
 
     def to_representation(self, instance):
@@ -120,7 +121,8 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta(object):
         model = Course
-        fields = ('id', 'url', 'name', 'products_url',)
+        fields = ('id', 'url', 'name', 'type', 'products_url',)
+        read_only_fields = ('type',)
         extra_kwargs = {
             'url': {'view_name': COURSE_DETAIL_VIEW}
         }

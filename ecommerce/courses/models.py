@@ -81,6 +81,19 @@ class Course(models.Model):
         return mode
 
     @property
+    def type(self):
+        """ Returns the type of the course (based on the available seat types). """
+        seat_types = [(seat.attr.certificate_type or '').lower() for seat in self.seat_products]
+        if 'credit' in seat_types:
+            return 'credit'
+        elif 'professional' in seat_types or 'no-id-professional' in seat_types:
+            return 'professional'
+        elif 'verified' in seat_types:
+            return 'verified'
+        else:
+            return 'honor'
+
+    @property
     def parent_seat_product(self):
         """ Returns the course seat parent Product. """
         return self.products.get(product_class__slug='seat', structure=Product.PARENT)
