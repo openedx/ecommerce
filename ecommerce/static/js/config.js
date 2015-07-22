@@ -9,7 +9,8 @@ require.config({
         jquery: 'bower_components/jquery/dist/jquery',
         'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
         requirejs: 'bower_components/requirejs/require',
-        underscore: 'bower_components/underscore/underscore'
+        underscore: 'bower_components/underscore/underscore',
+        views: 'js/views'
     },
     shim: {
         bootstrap: {

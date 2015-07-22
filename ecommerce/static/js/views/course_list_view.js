@@ -1,23 +1,44 @@
-require(['jquery', 'dataTablesBootstrap'], function ($) {
-    $(document).ready(function () {
+define([
+        'jquery',
+        'underscore',
+        'backbone',
+        'dataTablesBootstrap'
+      ],
+      function ($, _, Backbone) {
 
+        'use strict';
 
-        var filter_placeholder = gettext('Filter by org or course ID'),
-            $empty_label = $('<label>').addClass('sr-only').html(filter_placeholder);
+        return Backbone.View.extend({
 
-        $('#courseTable').DataTable({
-            "info": false,
-            "paging": false,
-            "oLanguage": {
-                "sSearch": ''
+            el: '#course-list-view',
+
+            initialize: function () {
+                this.render();
+            },
+
+            render: function () {
+
+                var filterPlaceholder = gettext('Filter by org or course ID'),
+                    $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
+
+                this.$el.find('#courseTable').DataTable({
+                    info: false,
+                    paging: false,
+                    oLanguage: {
+                        sSearch: ''
+                    }
+                });
+
+                this.$el.find('#courseTable_filter label').prepend($emptyLabel);
+
+                this.$el.find('#courseTable_filter input')
+                    .attr('placeholder', filterPlaceholder)
+                    .addClass('field-input input-text')
+                    .removeClass('form-control input-sm');
+
+                return this;
             }
+
         });
-
-        $('#courseTable_filter label').prepend($empty_label);
-
-        $('#courseTable_filter input')
-            .attr('placeholder', filter_placeholder)
-            .addClass('field-input input-text')
-            .removeClass('form-control input-sm');
-    });
-});
+    }
+);
