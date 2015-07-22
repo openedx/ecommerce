@@ -10,11 +10,14 @@ from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 import httpretty
+import mock
 from oscar.core.loading import get_model
 import pytz
+from waffle import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
+from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.management.commands.migrate_course import MigratedCourse
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku
@@ -102,6 +105,10 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
 
 
 class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
+    def setUp(self):
+        super(MigratedCourseTests, self).setUp()
+        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=True)
+
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
         self._mock_lms_api()
@@ -112,8 +119,13 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     @httpretty.activate
     def test_load_from_lms(self):
         """ Verify the method creates new objects based on data loaded from the LMS. """
-        migrated_course = self._migrate_course_from_lms()
-        course = migrated_course.course
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            mock_publish.return_value = True
+            migrated_course = self._migrate_course_from_lms()
+            course = migrated_course.course
+
+            # Verify that the migrated course was not published back to the LMS
+            self.assertFalse(mock_publish.called)
 
         # Ensure LMS was called with the correct headers
         for request in httpretty.httpretty.latest_requests:
@@ -132,6 +144,10 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
 
 class CommandTests(CourseMigrationTestMixin, TestCase):
+    def setUp(self):
+        super(CommandTests, self).setUp()
+        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=True)
+
     @httpretty.activate
     def test_handle(self):
         """ Verify the management command retrieves data, but does not save it to the database. """
@@ -139,7 +155,13 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         initial_stock_record_count = StockRecord.objects.count()
 
         self._mock_lms_api()
-        call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN)
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            mock_publish.return_value = True
+            call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN)
+
+            # Verify that the migrated course was not published back to the LMS
+            self.assertFalse(mock_publish.called)
 
         # Ensure LMS was called with the correct headers
         for request in httpretty.httpretty.latest_requests:
@@ -153,5 +175,12 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
     def test_handle_with_commit(self):
         """ Verify the management command retrieves data, and saves it to the database. """
         self._mock_lms_api()
-        call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN, commit=True)
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            mock_publish.return_value = True
+            call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN, commit=True)
+
+            # Verify that the migrated course was not published back to the LMS
+            self.assertFalse(mock_publish.called)
+
         self.assert_course_migrated()

@@ -15,7 +15,12 @@ logger = logging.getLogger(__name__)
 
 class MigratedCourse(object):
     def __init__(self, course_id):
-        self.course, __ = Course.objects.get_or_create(id=course_id)
+        # Avoid use of get_or_create to prevent publication to the
+        # LMS when saving the newly instantiated Course.
+        try:
+            self.course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            self.course = Course(id=course_id)
 
     def load_from_lms(self, access_token):
         """
@@ -25,7 +30,7 @@ class MigratedCourse(object):
         """
         name, modes = self._retrieve_data_from_lms(access_token)
         self.course.name = name
-        self.course.save()
+        self.course.save(publish=False)
         self._get_products(modes)
 
     def _build_lms_url(self, path):
