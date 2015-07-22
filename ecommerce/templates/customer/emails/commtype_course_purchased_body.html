@@ -1,0 +1,36 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% block body %}
+<!-- Message Body -->
+<tr>
+    <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-radius: 5px;" align="left">
+        <br>
+        <!--/message HTML content -->
+        <p>{% blocktrans %}Hi {{full_name}},{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans with course_title=course_title platform_name=platform_name %}Thank you for purchasing {{course_title}}. The charge below will appear on your next credit or debit card statement with a company name of {{platform_name}}.{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans %}You can access your course and complete your verification (if required) on your {{platform_name}} dashboard. {% endblocktrans %} </p>
+        <p>{% blocktrans %}To explore other great courses, visit the {{platform_name}} website. More courses are added every day!{% endblocktrans %}</p>
+        <br>
+        <p>{% trans "Thank you. We hope you enjoy the course!" %}</p>
+        <p>{% blocktrans %}{{platform_name}} team {% endblocktrans %}</p>
+        <!--/message HTML content -->
+        <br><br>
+    </td>
+</tr>
+
+<tr>
+    <td class="footer-padding" style="padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #002D40; background-color: #f3f3f3;" align="left">
+        <!--footer content -->
+        <br>
+        <p>{% blocktrans with course_title=course_title platform_name=platform_name %}You are receiving this email because you purchased a seat in the {{platform_name}} course {{course_title}}.{% endblocktrans %}</p>
+        <br>
+        <!--/ end footer content -->
+    </td>
+</tr>
+<!--/100% wrapper-->
+<br>
+<br>
+{% endblock body %}
+

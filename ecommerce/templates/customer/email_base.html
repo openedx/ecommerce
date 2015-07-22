@@ -1,0 +1,200 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0">    <!-- So that mobile webkit will display zoomed in -->
+    <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
+
+    <style type="text/css">
+        /* Resets: see reset.css for details */
+        .ReadMsgBody { width: 100%; background-color: #ebebeb;}
+        .ExternalClass { width: 100%; background-color: #ebebeb;}
+        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height:100%;}
+        body {-webkit-text-size-adjust:none;
+            -ms-text-size-adjust:none;
+            margin:0;
+            padding:10px 0;
+        }
+        table {border-spacing:0;}
+        table td {border-collapse:collapse;}
+        .yshortcuts a {border-bottom: none !important;}
+        /* Constrain email width for small screens */
+        @media screen and (max-width: 600px) {
+            table[class="container"] {
+                width: 95% !important;
+            }
+            table[class="columns-container"] {
+                width: 100%;
+            }
+        }
+        /* Give content more room on mobile */
+        @media screen and (max-width: 480px) {
+            td[class="container-padding"] {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+         }
+        /* Styles for forcing columns to rows */
+        @media only screen and (max-width : 600px) {
+            /* force container columns to (horizontal) blocks */
+            td[class="force-col"] {
+                display: block;
+                padding-right: 0 !important;
+            }
+            table[class="col-2"] {
+                /* unset table align="left/right" */
+                float: none !important;
+                width: 100% !important;
+                /* change left/right padding and margins to top/bottom ones */
+                margin-bottom: 12px;
+                border-bottom: 1px solid #eeeeee;
+            }
+            /* remove bottom border for last column/row */
+            table[id="last-col-2"] {
+                border-bottom: none !important;
+                margin-bottom: 0;
+            }
+            /* adjust text sizing for email type */
+            td[class="email-type"] {
+                line-height: 30px;
+            }
+            table[class="col-2-actions"] {
+                /* unset table align="left/right" */
+                float: none !important;
+                width: 100% !important;
+                /* change left/right padding and margins to top/bottom ones */
+                margin-bottom: 20px;
+            }
+            table[class="col-2-edx"] {
+                /* unset table align="left/right" */
+                float: none !important;
+                width: 100% !important;
+                /* change left/right padding and margins to top/bottom ones */
+                margin-bottom: 20px;
+            }
+        }
+
+    </style>
+
+</head>
+<body bgcolor="#dddddd" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+
+<br>
+<table border="0" width="100%" height="100%" cellpadding="0" cellspacing="0" bgcolor="#dddddd" style="padding-top:5px; padding-bottom: 5px; padding-left:5px; padding-right:5px;">
+    <tr>
+        <td align="center" valign="top" bgcolor="#dddddd" style="background-color: #dddddd;">
+            <!-- 600px container (white background) -->
+            <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" bgcolor="#ffffff" style="border-radius: 5px; box-shadow: 0 0 2px #aaaaaa;">
+                <tr>
+                    <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-top: 10px solid #1AA1E0; border-radius: 5px;">
+                        <table border="0" cellpadding="0" cellspacing="0" class="pre-header-container">
+                            <tr>
+                                <td align="left" valign="middle" style="font-size:30px; font-style: bold; height: 50px; font-family: Open Sans, Arial, sans-serif;">
+                                    <img src="http://gallery.mailchimp.com/1822a33c054dc20e223ca40e2/images/logo_web_edx_studio01aad778f34f.png" height="30" alt="{platform_name} Logo" border="0" hspace="0" vspace="0" class="platform-img">
+                                </td>
+                                <td align="left" class="email-type" valign="top" style="font-size: 20px; vertical-align: middle; padding-left: 20px; font-family: Open Sans, Arial, sans-serif; color: #127eb1;">
+                                    {% trans "Receipt Confirmation" %}
+                                </td>
+                            </tr>
+                        </table><!--/ end .pre-header-container-->
+                    </td>
+                </tr>
+                <!-- Header -->
+                {% block header %}
+                <tr>
+                    <td class="container-padding" bgcolor="#f3f3f3" style="padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; background-color: #f3f3f3; border-top: 1px solid #cccccc; border-bottom: 1px solid #eeeeee;">
+                        <table border="0" cellpadding="0" cellspacing="0" class="columns-container" style="width:100%;">
+                          <tr>
+                            <td class="force-col" style="padding-right: 20px;" valign="middle">
+                                <!-- ### COLUMN 1 - COURSE AND TITLE ### -->
+                                <table border="0" cellspacing="0" cellpadding="0" width="280" align="left" class="col-2">
+                                    <tr>
+                                        <td align="left" valign="top" style="font-size:13px; line-height: 20px; font-family: Open Sans, Arial, sans-serif; color: #aaaaaa;">
+                                            <br>
+                                            {% trans "Receipt Confirmation for:" %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" valign="top" style="line-height: 26px; font-family: Open Sans, Arial, sans-serif; font-style: bold; font-size:24px; color: #002D40;">
+                                            {{course_title}}
+                                            <br><br>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td class="force-col"  valign="middle">
+                                <!-- ### COLUMN 2 - VIEW RECEIPT ### -->
+                                <table border="0" cellspacing="0" cellpadding="10" width="100" align="right" class="col-2">
+                                    <tr>
+                                        <td align="center" valign="middle" style="font-size:13px; font-family: Open Sans, Arial, sans-serif; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
+                                            <a href="{{course_url}}" style="color: #ffffff; text-decoration: none;">{% trans "View Receipt" %}</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                          </tr>
+                        </table><!--/ end .columns-container-->
+                    </td>
+                </tr>
+                {% endblock header %}
+                {% block body %}
+                {% endblock body %}
+                {% block footer %}
+                <tr>
+                    <td class="footer-padding" style="padding-left: 30px; padding-right: 30px; padding-bottom: 20px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #002D40; border-radius: 5px;" align="left">
+                        <table border="0" cellpadding="0" cellspacing="0" class="columns-container">
+                            <tr>
+                                <td class="force-col" style="padding-right: 20px;" valign="middle">
+                                    <!-- ### COLUMN 1 -  FOOTER  ### -->
+                                    <table border="0" cellspacing="0" cellpadding="10" width="100"  align="right" class="col-2-actions">
+                                        <tr>
+                                            <td align="center" valign="right" style="font-size:13px; font-family: Open Sans, Arial, sans-serif; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
+                                                <a href="{{course_url}}" style="color: #ffffff; text-decoration: none;">{% trans "View Receipt" %}</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        <br>
+                    </td>
+                </tr>
+                <!-- Copyright and Address -->
+                <tr>
+                    <td class="container-padding" bgcolor="#ffffff" style="padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; background-color: #ffffff; border-bottom: 1px solid #cccccc; border-radius: 5px;">
+
+                        <table border="0" cellpadding="0" cellspacing="0" class="columns-container">
+                          <tr>
+                            <td class="force-col" style="padding-right: 20px;" valign="middle">
+
+                                <!-- ### COLUMN 1 - COPYRIGHT AND ADDRESS ### -->
+                                <table border="0" cellspacing="0" cellpadding="0" width="250" align="left" class="col-2-edx">
+                                <tr>
+                                    <td align="left" valign="top" style="font-size: 10px; color: #767676; font-style: italic;">
+                                        <br>
+                                        {% blocktrans %}Copyright © 2015 {{platform_name}}, All Rights. Reserved.{% endblocktrans %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left" valign="top" style="font-size: 10px; color: #767676;">
+                                        141 Portland St, Cambridge, MA 02142
+                                        <br><br>
+                                    </td>
+                                </tr>
+                                </table>
+
+                            </td>
+                          </tr>
+                        </table><!--/ end .columns-container-->
+                    </td>
+                </tr>
+                {% endblock footer %}
+            </table>
+        </td>
+    </tr>
+</table>
+<img src="{{tracking_pixel}}"/>
+</body>
+</html>
+

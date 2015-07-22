@@ -1,8 +1,10 @@
 import analytics
+import waffle
 from django.dispatch import receiver
 from oscar.core.loading import get_class
 
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
+from ecommerce.notifications.notifications import send_notification
 
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
@@ -45,3 +47,13 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             }
         },
     )
+
+
+@receiver(post_checkout, dispatch_uid='send_completed_order_email')
+@log_exceptions("Failed to send order completion email.")
+def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable=unused-argument
+    """Send course purchase notification email when a course is purchased."""
+    if waffle.switch_is_active('ENABLE_NOTIFICATIONS'):
+        # Here we assume that order type will always be a 'Seat' i.e. course
+        if len(order.lines.all()) == 1:
+            send_notification(order.user, 'COURSE_PURCHASED', {'course_title': order.lines.first().product.title})
