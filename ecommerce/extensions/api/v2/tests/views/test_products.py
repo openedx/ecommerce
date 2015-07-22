@@ -37,6 +37,7 @@ class ProductViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin,
         data = {
             'id': product.id,
             'url': self.get_full_url(reverse('api:v2:product-detail', kwargs={'pk': product.id})),
+            'structure': product.structure,
             'product_class': unicode(product.get_product_class()),
             'title': product.title,
             'expires': product.expires.strftime(ISO_8601_FORMAT) if product.expires else None,

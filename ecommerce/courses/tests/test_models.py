@@ -176,3 +176,25 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(course.products.count(), 2)
         seat = course.seat_products[0]
         self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price, credit_provider)
+
+    def test_type(self):
+        """ Verify the property returns a type value corresponding to the available products. """
+        course = Course.objects.create(id='a/b/c', name='Test Course')
+        self.assertEqual(course.type, 'honor')
+
+        course.create_or_update_seat('honor', False, 0)
+        self.assertEqual(course.type, 'honor')
+
+        course.create_or_update_seat('verified', True, 10)
+        self.assertEqual(course.type, 'verified')
+
+        seat = course.create_or_update_seat('professional', True, 100)
+        self.assertEqual(course.type, 'professional')
+
+        seat.delete()
+        self.assertEqual(course.type, 'verified')
+        course.create_or_update_seat('no-id-professional', False, 100)
+        self.assertEqual(course.type, 'professional')
+
+        course.create_or_update_seat('credit', True, 1000, credit_provider='SMU')
+        self.assertEqual(course.type, 'credit')
