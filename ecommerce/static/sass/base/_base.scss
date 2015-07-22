@@ -15,3 +15,7 @@ a {
 .container {
     background-color: white;
 }
+
+.sr {
+   @extend .sr-only;
+}
