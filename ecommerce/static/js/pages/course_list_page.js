@@ -1,9 +1,12 @@
 require([
+        'collections/course_collection',
         'views/course_list_view'
     ],
-    function (CourseListView) {
+    function (CourseCollection, CourseListView) {
 
-        return new CourseListView();
+        return new CourseListView({
+            collection: new CourseCollection()
+        });
 
     }
 );

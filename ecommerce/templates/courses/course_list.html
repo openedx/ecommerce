@@ -5,37 +5,7 @@
 {% block title %}{% trans "Courses" %}{% endblock %}
 
 {% block content %}
-    <div class="container" id="course-list-view">
-        <div class="page-header">
-            <h1 class="hd-1 emphasized">
-              {% trans "Courses" %}
-                <button class="btn btn-primary btn-small">{% trans "Add New Course" %}</button>
-            </h1>
-        </div>
-
-        <table id="courseTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
-            <caption class="sr-only">Current Courses</caption>
-            <thead>
-            <tr>
-                <th>{% trans "ID" %}</th>
-                <th>{% trans "Name" %}</th>
-                <th>{% trans "Last Edited" %}</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            {% for course in courses %}
-                <tr>
-                    <td><a href="{% url 'courses:detail' course.id %}">{{ course.id }}</a></td>
-                    <td>{{ course.name }}</td>
-                    <td data-sort="{{ course.history.latest.history_date|date:'U' }}">
-                      {{ course.history.latest.history_date }}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <div class="container" id="course-list-view"></div>
 {% endblock %}
 
 {% block javascript %}
