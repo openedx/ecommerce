@@ -55,8 +55,8 @@ validate: test_python quality
 
 static:
 	$(NODE_BIN)/r.js -o build.js
-	python manage.py collectstatic --noinput
-	python manage.py compress
+	python manage.py collectstatic --noinput -v0
+	python manage.py compress -v0
 
 
 html_coverage:
