@@ -12,7 +12,6 @@ djangorestframework-jwt==1.5.0
 edx-auth-backends==0.1.3
 jsonfield==1.0.3
 libsass==0.8.2
-nodeenv==0.13.2
 paypalrestsdk==1.9.0
 pycountry==1.10
 python-dateutil==2.4.2
