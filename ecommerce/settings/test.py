@@ -105,6 +105,12 @@ PAYMENT_PROCESSOR_CONFIG = {
         'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
     },
+    'braintree': {
+        'merchant_id': 'fake-merchant-id',
+        'public_key': 'fake-public-key',
+        'private_key': 'fake-private-key',
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+    },
 }
 # END PAYMENT PROCESSING
 

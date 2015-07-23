@@ -1,4 +1,5 @@
 """JWT authentication scheme for use with DRF."""
+import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 import requests
@@ -8,6 +9,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -40,6 +42,15 @@ class JwtAuthentication(JSONWebTokenAuthentication):
         >>> response.status_code
         200
     """
+
+    def authenticate(self, request):
+        try:
+            return super(JwtAuthentication, self).authenticate(request)
+        except Exception as ex:
+            # Errors in production do not need to be logged (as they may be noisy),
+            # but debug logging can help quickly resolve issues during development.
+            logger.debug(ex)
+            raise
 
     def authenticate_credentials(self, payload):
         """Get or create an active user with the username contained in the payload."""

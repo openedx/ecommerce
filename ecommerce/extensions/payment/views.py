@@ -3,24 +3,27 @@ from cStringIO import StringIO
 import logging
 import os
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import call_command
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.partner import strategy
+
 from oscar.apps.payment.exceptions import PaymentError
+
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-
+from ecommerce.extensions.payment.processors.braintree import Braintree
 
 logger = logging.getLogger(__name__)
 
@@ -33,13 +36,29 @@ OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
-class CybersourceNotifyView(EdxOrderPlacementMixin, View):
-    """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
-    payment_processor = Cybersource()
-
+class CSRFExemptViewMixin(object):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        return super(CybersourceNotifyView, self).dispatch(request, *args, **kwargs)
+        return super(CSRFExemptViewMixin, self).dispatch(request, *args, **kwargs)
+
+
+class BasketRetrievalMixin(object):
+    def get_basket(self, basket_id):
+        if not basket_id:
+            return None
+
+        try:
+            basket_id = int(basket_id)
+            basket = Basket.objects.get(id=basket_id)
+            basket.strategy = strategy.Default()
+            return basket
+        except (ValueError, ObjectDoesNotExist):
+            return None
+
+
+class CybersourceNotifyView(BasketRetrievalMixin, CSRFExemptViewMixin, EdxOrderPlacementMixin, View):
+    """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
+    payment_processor = Cybersource()
 
     def _get_billing_address(self, cybersource_response):
         return BillingAddress(
@@ -57,18 +76,6 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             state=cybersource_response.get('req_bill_to_address_state', ''),
             country=Country.objects.get(
                 iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
-
-    def _get_basket(self, basket_id):
-        if not basket_id:
-            return None
-
-        try:
-            basket_id = int(basket_id)
-            basket = Basket.objects.get(id=basket_id)
-            basket.strategy = strategy.Default()
-            return basket
-        except (ValueError, ObjectDoesNotExist):
-            return None
 
     @transaction.non_atomic_requests
     def post(self, request):
@@ -92,11 +99,11 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                 basket_id
             )
 
-            basket = self._get_basket(basket_id)
+            basket = self.get_basket(basket_id)
 
             if not basket:
                 logger.error('Received payment for non-existent basket [%s].', basket_id)
-                return HttpResponse(status=400)
+                return HttpResponseBadRequest()
         finally:
             # Store the response in the database regardless of its authenticity.
             ppr = self.payment_processor.record_processor_response(cybersource_response, transaction_id=transaction_id,
@@ -112,7 +119,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                         'Received an invalid CyberSource response. The payment response was recorded in entry [%d].',
                         ppr.id
                     )
-                    return HttpResponse(status=400)
+                    return HttpResponseBadRequest()
                 except PaymentError:
                     logger.exception(
                         'CyberSource payment failed for basket [%d]. The payment response was recorded in entry [%d].',
@@ -122,7 +129,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                     return HttpResponse()
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-            return HttpResponse(status=500)
+            return HttpResponseServerError()
 
         try:
             with transaction.atomic():
@@ -145,12 +152,12 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                 except UnableToPlaceOrder:
                     logger.exception('Payment was received, but an order was not created for basket [%d].', basket.id)
                     # Ensure we return, in case future changes introduce post-order placement functionality.
-                    return HttpResponse(status=500)
+                    return HttpResponseServerError()
 
                 return HttpResponse()
         except:  # pylint: disable=bare-except
             logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
-            return HttpResponse(status=500)
+            return HttpResponseServerError()
 
 
 class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
@@ -222,7 +229,6 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
 
 class PaypalProfileAdminView(View):
-
     ACTIONS = ('list', 'create', 'show', 'update', 'delete', 'enable', 'disable')
 
     def dispatch(self, request, *args, **kwargs):
@@ -274,3 +280,64 @@ class PaypalProfileAdminView(View):
         logger.removeHandler(log_handler)
 
         return HttpResponse(output, content_type='text/plain', status=200 if success else 500)
+
+
+class BraintreeCheckoutView(EdxOrderPlacementMixin, BasketRetrievalMixin, CSRFExemptViewMixin, View):
+    payment_processor = Braintree()
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(BraintreeCheckoutView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
+        nonce = request.POST['payment_method_nonce']
+        device_data = request.POST.get('device_data', None)
+        basket_id = request.POST['basket_id']
+
+        # Retrieve the basket, or bail out, if it cannot be found.
+        basket = self.get_basket(basket_id)
+
+        if not basket:
+            logger.error('Payment requested for non-existent basket [%s].', basket_id)
+            # TODO Handle this better (perhaps redirect to an error page).
+            return HttpResponseBadRequest()
+
+        try:
+            with transaction.atomic():
+                try:
+                    # Process the payment via Braintree
+                    self.handle_payment((nonce, device_data), basket)
+                except PaymentError:
+                    # TODO Handle this better (perhaps redirect to an error page).
+                    return HttpResponseBadRequest()
+        except:  # pylint: disable=bare-except
+            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
+            # TODO Handle this better (perhaps redirect to an error page).
+            return HttpResponseBadRequest()
+
+        # Create the order in our system
+        try:
+            with transaction.atomic():
+                shipping_method = NoShippingRequired()
+                shipping_charge = shipping_method.calculate(basket)
+                order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+                try:
+                    self.handle_order_placement(
+                        order_number=basket.order_number,
+                        user=basket.owner,
+                        basket=basket,
+                        shipping_address=None,
+                        shipping_method=shipping_method,
+                        shipping_charge=shipping_charge,
+                        billing_address=None,
+                        order_total=order_total
+                    )
+                except UnableToPlaceOrder:
+                    logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+        except:  # pylint: disable=bare-except
+            logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
+
+        receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_page_url, basket.id)
+        return redirect(receipt_url)
