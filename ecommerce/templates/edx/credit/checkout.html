@@ -12,7 +12,11 @@
             </div>
             <div class="col-sm-9">
                 <h3 class="title">
-                    Purchasing credit for:
+                    {% blocktrans count hours=credit_seats.0.attr.credit_hours %}
+                        You are purchasing 1 credit hour for:
+                    {% plural %}
+                        You are purchasing {{ hours }} credit hours for:
+                    {% endblocktrans %}
                     <span class="course-title text-nowrap">{{ course.name }}</span>
                 </h3>
                 Congratulations, you are eligible to purchase credit from {{ credit_seats.0.attr.credit_provider }} by Feb 05, 2013.

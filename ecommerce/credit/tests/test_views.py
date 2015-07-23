@@ -27,6 +27,7 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
         self.provider = 'ASU'
         self.price = 100
         self.thumbnail_url = 'http://www.edx.org/course.jpg'
+        self.credit_hours = 2
         # Create the course
         self.course = Course.objects.create(
             id=u'edx/Demo_Course/DemoX',
@@ -35,7 +36,9 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
         )
 
         # Create the credit seat
-        self.seat = self.course.create_or_update_seat('credit', True, self.price, self.provider)
+        self.seat = self.course.create_or_update_seat(
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
+        )
 
     @property
     def path(self):
@@ -74,3 +77,8 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
         # Verify the payment processors are returned
         self.assertEqual(sorted(response.context['payment_processors'].keys()),
                          sorted([get_processor_class(path).NAME.lower() for path in settings.PAYMENT_PROCESSORS]))
+
+        self.assertContains(
+            response,
+            'You are purchasing {} credit hours for'.format(self.credit_hours)
+        )

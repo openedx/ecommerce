@@ -138,7 +138,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(parent.attr.course_key, course.id)
 
     def assert_course_seat_valid(self, seat, course, certificate_type, id_verification_required, price,
-                                 credit_provider=None):
+                                 credit_provider=None, credit_hours=None):
         """ Ensure the given seat has the correct attribute values. """
         self.assertEqual(seat.structure, Product.CHILD)
         # pylint: disable=protected-access
@@ -151,6 +151,9 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
         if credit_provider:
             self.assertEqual(seat.attr.credit_provider, credit_provider)
+
+        if credit_hours:
+            self.assertEqual(seat.attr.credit_hours, credit_hours)
 
     def test_create_or_update_seat(self):
         """ Verify the method creates or updates a seat Product. """
@@ -170,12 +173,17 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         # Test update
         price = 100
         credit_provider = 'MIT'
-        course.create_or_update_seat(certificate_type, id_verification_required, price, credit_provider)
+        credit_hours = 2
+        course.create_or_update_seat(
+            certificate_type, id_verification_required, price, credit_provider, credit_hours=credit_hours
+        )
 
         # Again, only two seats with one being the parent seat product.
         self.assertEqual(course.products.count(), 2)
         seat = course.seat_products[0]
-        self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price, credit_provider)
+        self.assert_course_seat_valid(
+            seat, course, certificate_type, id_verification_required, price, credit_provider, credit_hours=credit_hours
+        )
 
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
