@@ -44,9 +44,14 @@
         <div id="payment-buttons" class="row center-block checkout-controls">
           {% for processor_name, button_text in payment_processors.items %}
             <div class="col-xs-6 ">
-                <button data-processor-name="{{ processor_name }}" data-sku="{{ credit_seats.0.stockrecords.first.partner_sku }}"
+                <button data-track-type="click"
+                        data-track-event="edx.bi.ecommerce.credit.payment_selected"
+                        data-track-category="{{ processor_name }}"
+                        data-processor-name="{{ processor_name }}"
+                        data-sku="{{ credit_seats.0.stockrecords.first.partner_sku }}"
                         data-course-id="{{ course.id }}"
-                        class="btn btn-primary payment-button">
+                        class="btn btn-primary payment-button"
+                >
                 {{ button_text }}
                 </button>
             </div>
@@ -56,10 +61,17 @@
 
     <form id="payment-processor-form">
     </form>
+
+    {% if analytics_data %}
+        <script type="text/javascript">
+            var initModelData = {{ analytics_data|safe }};
+        </script>
+    {% endif %}
+
 {% endblock content %}
 
 {% compress js %}
     {% block javascript %}
-        <script src="{% static 'js/views/credit_checkout.js' %}"></script>
+        <script src="{% static 'js/pages/credit_checkout.js' %}"></script>
     {% endblock %}
 {% endcompress %}

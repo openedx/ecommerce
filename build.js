@@ -27,6 +27,10 @@
         {
             name: 'js/views/payment_button_view',
             exclude: ['js/common']
+        },
+        {
+            name: 'js/pages/credit_checkout',
+            exclude: ['js/common']
         }
     ]
 })
