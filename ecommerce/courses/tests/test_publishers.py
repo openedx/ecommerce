@@ -115,3 +115,25 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         expected['expires'] = expires.isoformat()
         actual = self.publisher.serialize_seat_for_commerce_api(seat)
         self.assertDictEqual(actual, expected)
+
+    @ddt.unpack
+    @ddt.data(
+        (True, 'professional'),
+        (False, 'no-id-professional'),
+    )
+    def test_serialize_seat_for_commerce_api_with_professional(self, is_verified, expected_mode):
+        """
+        Verify that (a) professional seats NEVER have an expiration date and (b) the name/mode is properly set for
+        no-id-professional seats.
+        """
+        seat = self.course.create_or_update_seat('professional', is_verified, 500, expires=datetime.datetime.utcnow())
+        stock_record = seat.stockrecords.first()
+        actual = self.publisher.serialize_seat_for_commerce_api(seat)
+        expected = {
+            'name': expected_mode,
+            'currency': 'USD',
+            'price': int(stock_record.price_excl_tax),
+            'sku': stock_record.partner_sku,
+            'expires': None
+        }
+        self.assertDictEqual(actual, expected)

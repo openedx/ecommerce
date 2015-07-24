@@ -177,10 +177,9 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         self._mock_lms_api()
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            mock_publish.return_value = True
             call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN, commit=True)
 
-            # Verify that the migrated course was not published back to the LMS
-            self.assertFalse(mock_publish.called)
+            # Verify that the migrated course was published back to the LMS
+            self.assertTrue(mock_publish.called)
 
         self.assert_course_migrated()
