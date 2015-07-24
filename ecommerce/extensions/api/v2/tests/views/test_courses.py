@@ -3,9 +3,12 @@ import json
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+import mock
 from oscar.core.loading import get_model, get_class
+from waffle import Switch
 
 from ecommerce.courses.models import Course
+from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, TestServerUrlMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.mixins import UserMixin
@@ -111,3 +114,33 @@ class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, 
         response = self.client.delete(path)
         self.assertEqual(response.status_code, 405)
         self.assertTrue(Course.objects.filter(id=course_id).exists())
+
+    def assert_publish_response(self, response, status_code, msg):
+        self.assertEqual(response.status_code, status_code)
+        self.assertDictEqual(json.loads(response.content), {'status': msg.format(course_id=self.course.id)})
+
+    def test_publish(self):
+        """ Verify the view publishes course data to LMS. """
+        course_id = self.course.id
+        path = reverse('api:v2:course-publish', kwargs={'pk': course_id})
+
+        # Method should return a 500 if the switch is inactive
+        switch, _created = Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=False)
+        response = self.client.post(path)
+        msg = 'Course [{course_id}] was not published to LMS ' \
+              'because the switch [publish_course_modes_to_lms] is disabled.'
+        self.assert_publish_response(response, 500, msg)
+
+        switch.active = True
+        switch.save()
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            # If publish fails, return a 500
+            mock_publish.return_value = False
+            response = self.client.post(path)
+            self.assert_publish_response(response, 500, 'An error occurred while publishing [{course_id}] to LMS.')
+
+            # If publish succeeds, return a 200
+            mock_publish.return_value = True
+            response = self.client.post(path)
+            self.assert_publish_response(response, 200, 'Course [{course_id}] was successfully published to LMS.')
