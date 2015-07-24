@@ -14,6 +14,7 @@ from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
 from ecommerce.courses.models import Course
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
@@ -66,11 +67,11 @@ class EnrollmentFulfillmentModuleTests(EnrollmentFulfillmentTestMixin, TestCase)
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'line_fulfilled: certificate_type="{}", course_id="{}", credit_provider="{}", order_line_id="{}", '
+                    'line_fulfilled: course_id="{}", credit_provider="{}", mode="{}", order_line_id="{}", '
                     'order_number="{}", product_class="{}", user_id="{}"'.format(
-                        line.product.attr.certificate_type,
                         line.product.attr.course_key,
                         None,
+                        mode_for_seat(line.product),
                         line.id,
                         line.order.number,
                         line.product.get_product_class().name,
@@ -240,11 +241,11 @@ class EnrollmentFulfillmentCreditSeatModuleTests(EnrollmentFulfillmentTestMixin,
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'line_fulfilled: certificate_type="{}", course_id="{}", credit_provider="{}", order_line_id="{}", '
+                    'line_fulfilled: course_id="{}", credit_provider="{}", mode="{}", order_line_id="{}", '
                     'order_number="{}", product_class="{}", user_id="{}"'.format(
-                        line.product.attr.certificate_type,
                         line.product.attr.course_key,
                         line.product.attr.credit_provider,
+                        mode_for_seat(line.product),
                         line.id,
                         line.order.number,
                         line.product.get_product_class().name,

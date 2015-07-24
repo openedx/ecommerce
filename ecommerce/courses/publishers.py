@@ -4,16 +4,12 @@ import logging
 from django.conf import settings
 import requests
 
+from ecommerce.courses.utils import mode_for_seat
+
 logger = logging.getLogger(__name__)
 
 
 class LMSPublisher(object):
-    # TODO Test this and update SKU generation
-    def mode_for_seat(self, seat):
-        if seat.attr.certificate_type == 'professional' and not seat.attr.id_verification_required:
-            return 'no-id-professional'
-        return seat.attr.certificate_type
-
     def get_seat_expiration(self, seat):
         if not seat.expires or 'professional' in seat.attr.certificate_type:
             return None
@@ -24,7 +20,7 @@ class LMSPublisher(object):
         """ Serializes a course seat product to a dict that can be further serialized to JSON. """
         stock_record = seat.stockrecords.first()
         return {
-            'name': self.mode_for_seat(seat),
+            'name': mode_for_seat(seat),
             'currency': stock_record.price_currency,
             'price': int(stock_record.price_excl_tax),
             'sku': stock_record.partner_sku,

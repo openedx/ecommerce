@@ -11,6 +11,7 @@ from django.conf import settings
 from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
+from ecommerce.courses.utils import mode_for_seat
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.status import LINE
@@ -153,7 +154,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
         for line in lines:
             try:
-                certificate_type = line.product.attr.certificate_type
+                mode = mode_for_seat(line.product)
                 course_key = line.product.attr.course_key
             except AttributeError:
                 logger.error("Supported Seat Product does not have required attributes, [certificate_type, course_key]")
@@ -168,7 +169,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             data = {
                 'user': order.user.username,
                 'is_active': True,
-                'mode': certificate_type,
+                'mode': mode,
                 'course_details': {
                     'course_id': course_key
                 },
@@ -194,7 +195,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                         order_number=order.number,
                         product_class=line.product.get_product_class().name,
                         course_id=course_key,
-                        certificate_type=certificate_type,
+                        mode=mode,
                         user_id=order.user.id,
                         credit_provider=provider,
                     )
