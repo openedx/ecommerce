@@ -45,7 +45,7 @@ class LMSPublisher(object):
 
         if not settings.COMMERCE_API_URL:
             logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
-            return
+            return False
 
         modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
         course_id = course.id

@@ -5,10 +5,12 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 from rest_framework import status, generics, viewsets, mixins
+from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
+import waffle
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import audit_log
@@ -495,6 +497,24 @@ class CourseViewSet(NonDestroyableModelViewSet):
     queryset = Course.objects.all()
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    @detail_route(methods=['post'])
+    def publish(self, request, pk=None):  # pylint: disable=unused-argument
+        """ Publish the course to LMS. """
+        course = self.get_object()
+        published = False
+        msg = 'Course [{course_id}] was not published to LMS ' \
+              'because the switch [publish_course_modes_to_lms] is disabled.'
+
+        if waffle.switch_is_active('publish_course_modes_to_lms'):
+            published = course.publish_to_lms()
+            if published:
+                msg = 'Course [{course_id}] was successfully published to LMS.'
+            else:
+                msg = 'An error occurred while publishing [{course_id}] to LMS.'
+
+        return Response({'status': msg.format(course_id=course.id)},
+                        status=status.HTTP_200_OK if published else status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
