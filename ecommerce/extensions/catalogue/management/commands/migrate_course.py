@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.db import transaction
 import requests
+import waffle
 
 from ecommerce.courses.models import Course
 
@@ -15,12 +16,7 @@ logger = logging.getLogger(__name__)
 
 class MigratedCourse(object):
     def __init__(self, course_id):
-        # Avoid use of get_or_create to prevent publication to the
-        # LMS when saving the newly instantiated Course.
-        try:
-            self.course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            self.course = Course(id=course_id)
+        self.course, _created = Course.objects.get_or_create(id=course_id)
 
     def load_from_lms(self, access_token):
         """
@@ -30,7 +26,7 @@ class MigratedCourse(object):
         """
         name, modes = self._retrieve_data_from_lms(access_token)
         self.course.name = name
-        self.course.save(publish=False)
+        self.course.save()
         self._get_products(modes)
 
     def _build_lms_url(self, path):
@@ -118,6 +114,7 @@ class Command(BaseCommand):
 
                     course = migrated_course.course
                     msg = 'Retrieved info for {0} ({1}):\n'.format(course.id, course.name)
+                    msg += '\t(cert. type, verified?, price, SKU, slug, expires)\n'
 
                     for seat in course.seat_products:
                         stock_record = seat.stockrecords.first()
@@ -129,10 +126,14 @@ class Command(BaseCommand):
                     logger.info(msg)
 
                     if options.get('commit', False):
-                        logger.info('Course [%s] was saved to the database.', migrated_course.course.id)
-                        transaction.commit()
+                        logger.info('Course [%s] was saved to the database.', course.id)
+                        if waffle.switch_is_active('publish_course_modes_to_lms'):
+                            course.publish_to_lms()
+                        else:
+                            logger.info('Data was not published to LMS because the switch '
+                                        '[publish_course_modes_to_lms] is disabled.')
                     else:
-                        logger.info('Course [%s] was NOT saved to the database.', migrated_course.course.id)
+                        logger.info('Course [%s] was NOT saved to the database.', course.id)
                         raise Exception('Forced rollback.')
             except Exception:  # pylint: disable=broad-except
                 logger.exception('Failed to migrate [%s]!', course_id)

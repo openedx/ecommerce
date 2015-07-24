@@ -14,6 +14,12 @@ class LMSPublisher(object):
             return 'no-id-professional'
         return seat.attr.certificate_type
 
+    def get_seat_expiration(self, seat):
+        if not seat.expires or 'professional' in seat.attr.certificate_type:
+            return None
+
+        return seat.expires.isoformat()
+
     def serialize_seat_for_commerce_api(self, seat):
         """ Serializes a course seat product to a dict that can be further serialized to JSON. """
         stock_record = seat.stockrecords.first()
@@ -22,7 +28,7 @@ class LMSPublisher(object):
             'currency': stock_record.price_currency,
             'price': int(stock_record.price_excl_tax),
             'sku': stock_record.partner_sku,
-            'expires': seat.expires.isoformat() if seat.expires else None,
+            'expires': self.get_seat_expiration(seat),
         }
 
     def publish(self, course):

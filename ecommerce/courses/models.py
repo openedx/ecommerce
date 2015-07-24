@@ -5,9 +5,7 @@ from django.db import models, transaction
 from django.utils.text import slugify
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
-import waffle
 
-from ecommerce.courses.exceptions import PublishFailed
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.utils import generate_sku
 
@@ -48,19 +46,10 @@ class Course(models.Model):
         else:
             logger.debug('Parent seat [%d] already exists for [%s].', parent.id, self.id)
 
-    # pylint: disable=arguments-differ
     @transaction.atomic
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, publish=True):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super(Course, self).save(force_insert, force_update, using, update_fields)
-
         self._create_parent_seat()
-
-        if publish and waffle.switch_is_active('publish_course_modes_to_lms'):
-            if not self.publish_to_lms():
-                # Raise an exception to force a rollback
-                raise PublishFailed('Failed to publish {}'.format(self.id))
-        else:
-            logger.debug('Course mode publishing is not enabled. Commerce changes will not be published!')
 
     def publish_to_lms(self):
         """ Publish Course and Products to LMS. """
@@ -125,13 +114,22 @@ class Course(models.Model):
 
         certificate_type = certificate_type.lower()
         course_id = unicode(self.id)
+
+        slugs = []
         slug = 'child-cs-{}-{}'.format(certificate_type, slugify(course_id))
+
+        # Note (CCB): Our previous method of slug generation did not account for ID verification. By using a list
+        # we can update these seats. This should be removed after the courses have been re-migrated.
+        if certificate_type == 'verified':
+            slugs.append(slug)
 
         if id_verification_required:
             slug += '-id-verified'
+        slugs.append(slug)
+        slugs = set(slugs)
 
         try:
-            seat = Product.objects.get(slug=slug)
+            seat = Product.objects.get(slug__in=slugs)
             logger.info('Retrieved [%s] course seat child product for [%s] from database.', certificate_type,
                         course_id)
         except Product.DoesNotExist:

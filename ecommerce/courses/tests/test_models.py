@@ -1,10 +1,8 @@
 import ddt
 from django.test import TestCase
-from django_dynamic_fixture import G, N
+from django_dynamic_fixture import G
 import mock
 from oscar.core.loading import get_model
-from testfixtures import LogCapture
-from waffle import Switch
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
@@ -75,56 +73,6 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             course.publish_to_lms()
             self.assertTrue(mock_publish.called)
-
-    def test_save_and_publish_to_lms(self):
-        """ Verify the save method calls publish_to_lms if the feature is enabled. """
-        switch, __ = Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=False)
-        course = G(Course)
-
-        with mock.patch.object(Course, 'publish_to_lms') as mock_publish:
-            logger_name = 'ecommerce.courses.models'
-            with LogCapture(logger_name) as l:
-                course.save()
-                l.check(
-                    (logger_name, 'DEBUG',
-                     'Parent seat [{}] already exists for [{}].'.format(course.parent_seat_product.id, course.id)),
-                    (logger_name, 'DEBUG',
-                     'Course mode publishing is not enabled. Commerce changes will not be published!')
-                )
-
-            self.assertFalse(mock_publish.called)
-
-            # Reset the mock and activate the feature.
-            mock_publish.reset_mock()
-            switch.active = True
-            switch.save()
-
-            # With the feature active, the mock method should be called.
-            course.save()
-            self.assertTrue(mock_publish.called)
-
-    def test_save_with_publish_failure(self):
-        """ Verify that, if the publish operation fails, the model's changes are not saved to the database. """
-        orignal_name = 'A Most Awesome Course'
-        course = G(Course, name=orignal_name)
-        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=True)
-
-        # Mock an error in the publisher
-        with mock.patch.object(LMSPublisher, 'publish', return_value=False):
-            course.name = 'An Okay Course'
-
-        # Reload the course from the database
-        course = Course.objects.get(id=course.id)
-        self.assertEqual(course.name, orignal_name)
-
-    def test_save_without_publish(self):
-        """ Verify the Course is not published to LMS if the publish kwarg is set to False. """
-        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=False)
-        course = N(Course)
-
-        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            course.save(publish=False)
-            self.assertFalse(mock_publish.called)
 
     def test_save_creates_parent_seat(self):
         """ Verify the save method creates a parent seat if one does not exist. """
