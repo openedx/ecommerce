@@ -18,6 +18,7 @@ pycountry==1.10
 python-dateutil==2.4.2
 pytz==2015.4
 requests==2.6.0
+stripe==1.23.0
 suds==0.4
 
 # TODO https://github.com/chibisov/drf-extensions/pull/87

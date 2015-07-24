@@ -130,7 +130,7 @@ class Command(BaseCommand):
 
                     if options.get('commit', False):
                         logger.info('Course [%s] was saved to the database.', migrated_course.course.id)
-                        transaction.commit()
+                        migrated_course.course.publish_to_lms()
                     else:
                         logger.info('Course [%s] was NOT saved to the database.', migrated_course.course.id)
                         raise Exception('Forced rollback.')

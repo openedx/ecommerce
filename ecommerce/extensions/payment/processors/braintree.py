@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-ProductClass = get_model('catalogue', 'ProductClass')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 

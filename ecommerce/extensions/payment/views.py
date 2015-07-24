@@ -14,9 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.partner import strategy
-
 from oscar.apps.payment.exceptions import PaymentError
-
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -24,6 +22,7 @@ from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.processors.braintree import Braintree
+from ecommerce.extensions.payment.processors.stripe import Stripe
 
 logger = logging.getLogger(__name__)
 
@@ -282,18 +281,18 @@ class PaypalProfileAdminView(View):
         return HttpResponse(output, content_type='text/plain', status=200 if success else 500)
 
 
-class BraintreeCheckoutView(EdxOrderPlacementMixin, BasketRetrievalMixin, CSRFExemptViewMixin, View):
-    payment_processor = Braintree()
-
+class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(BraintreeCheckoutView, self).dispatch(request, *args, **kwargs)
+        return super(CheckoutViewMixin, self).dispatch(request, *args, **kwargs)
+
+    def get_payment_data(self, request):
+        raise NotImplementedError
 
     def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
-        nonce = request.POST['payment_method_nonce']
-        device_data = request.POST.get('device_data', None)
         basket_id = request.POST['basket_id']
+        payment_data = self.get_payment_data(request)
 
         # Retrieve the basket, or bail out, if it cannot be found.
         basket = self.get_basket(basket_id)
@@ -306,8 +305,7 @@ class BraintreeCheckoutView(EdxOrderPlacementMixin, BasketRetrievalMixin, CSRFEx
         try:
             with transaction.atomic():
                 try:
-                    # Process the payment via Braintree
-                    self.handle_payment((nonce, device_data), basket)
+                    self.handle_payment(payment_data, basket)
                 except PaymentError:
                     # TODO Handle this better (perhaps redirect to an error page).
                     return HttpResponseBadRequest()
@@ -341,3 +339,19 @@ class BraintreeCheckoutView(EdxOrderPlacementMixin, BasketRetrievalMixin, CSRFEx
 
         receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_page_url, basket.id)
         return redirect(receipt_url)
+
+
+class BraintreeCheckoutView(CheckoutViewMixin, View):
+    payment_processor = Braintree()
+
+    def get_payment_data(self, request):
+        nonce = request.POST['payment_method_nonce']
+        device_data = request.POST.get('device_data', None)
+        return nonce, device_data
+
+
+class StripeCheckoutView(CheckoutViewMixin, View):
+    payment_processor = Stripe()
+
+    def get_payment_data(self, request):
+        return request.POST['stripeToken']
