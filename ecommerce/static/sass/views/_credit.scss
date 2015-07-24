@@ -7,11 +7,15 @@
 // ====================
 
 .credit-checkout {
-  color: gray;
   padding-bottom: 30px;
 
+  .header-title {
+    padding-left: 20px;
+  }
   .title {
     color: $text-color;
+    margin: 0;
+    margin-bottom: 20px;
 
     span.course-title {
       color: $brand-primary;
@@ -20,19 +24,26 @@
 
   .course-details .course-image,
   .provider-details .provider-image {
-    max-width: 100%;
+    width: 200px;
   }
 
   .course-details,
   .provider-details {
-    border-bottom: 1px solid palette(grayscale, light);
-    margin-bottom: 20px;
     padding: 20px 0;
   }
 
   .provider-details {
-    .eligibility-details{
-      margin-top: 10px;
+    .show-instructions {
+      padding-left: initial;
+    }
+  }
+
+  .eligibility-details {
+      border-bottom: 1px solid $gray-light;
+      margin-bottom: 20px;
+
+    .date {
+      margin-bottom: 20px;
     }
   }
 
@@ -47,6 +58,22 @@
     .payment-button {
       width: 100%;
     }
+  }
+
+  .course-details {
+    .row {
+      overflow: hidden;
+      .advantages {
+        background-color: white;
+        padding: 10px 15px;
+        margin-bottom: -1000px;
+        padding-bottom: 1000px;
+      }
+    }
+  }
+
+  div.advantages p {
+    color: $gray;
   }
 }
 
