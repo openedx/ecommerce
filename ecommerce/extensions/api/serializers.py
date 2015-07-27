@@ -1,11 +1,20 @@
-"""Serializers for order and line item data."""
+"""Serializers for data manipulated by ecommerce API endpoints."""
+from decimal import Decimal
+import logging
 
+from dateutil.parser import parse
+from django.db import transaction
+from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model, get_class
 from rest_framework import serializers
 from rest_framework.reverse import reverse
+import waffle
 
-from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.courses.models import Course
+
+
+logger = logging.getLogger(__name__)
 
 BillingAddress = get_model('order', 'BillingAddress')
 Line = get_model('order', 'Line')
@@ -113,6 +122,7 @@ class RefundSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
     products_url = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
 
@@ -130,3 +140,104 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'url': {'view_name': COURSE_DETAIL_VIEW}
         }
+
+
+class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    """Serializer for saving and publishing a Course and associated products.
+
+    Using a ModelSerializer for the Course data makes it difficult to use this serializer to handle updates.
+    The automatically applied validation logic rejects course IDs which already exist in the database.
+    """
+    id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
+    name = serializers.CharField(max_length=255)
+    products = serializers.ListField()
+
+    def validate_products(self, products):
+        """Validate product data."""
+        for product in products:
+            # Verify that each product is intended to be a Seat.
+            product_class = product.get('product_class')
+            if product_class != 'Seat':
+                raise serializers.ValidationError(
+                    _(u"Invalid product class [{product_class}] requested.".format(product_class=product_class))
+                )
+
+            # Verify that attributes required to create a Seat are present.
+            attrs = self._flatten(product['attribute_values'])
+            if attrs.get('certificate_type') is None:
+                raise serializers.ValidationError(_(u"Products must have a certificate type."))
+            elif attrs.get('id_verification_required') is None:
+                raise serializers.ValidationError(_(u"Products must indicate whether ID verification is required."))
+
+            # Verify that a price is present.
+            if product.get('price') is None:
+                raise serializers.ValidationError(_(u"Products must have a price."))
+
+        return products
+
+    def save(self):
+        """Save and publish Course and associated products."
+
+        Returns:
+            tuple: A Boolean indicating whether the Course was created, an Exception,
+                if one was raised (else None), and a message for the user, if necessary (else None).
+        """
+        course_id = self.validated_data['id']
+        course_name = self.validated_data['name']
+        products = self.validated_data['products']
+
+        try:
+            # Explicitly delimit operations which will be rolled back if an exception is raised.
+            with transaction.atomic():
+                course, created = Course.objects.get_or_create(id=course_id, defaults={'name': course_name})
+
+                for product in products:
+                    attrs = self._flatten(product['attribute_values'])
+
+                    # Extract arguments required for Seat creation, deserializing as necessary.
+                    certificate_type = attrs['certificate_type']
+                    id_verification_required = (attrs['id_verification_required'] == 'True')
+                    price = Decimal(product['price'])
+
+                    # Extract arguments which are optional for Seat creation, deserializing as necessary.
+                    expires = product.get('expires')
+                    expires = parse(expires) if expires else None
+                    credit_provider = attrs.get('credit_provider')
+                    credit_hours = attrs.get('credit_hours')
+                    credit_hours = int(credit_hours) if credit_hours else None
+
+                    course.create_or_update_seat(
+                        certificate_type,
+                        id_verification_required,
+                        price,
+                        expires=expires,
+                        credit_provider=credit_provider,
+                        credit_hours=credit_hours,
+                    )
+
+                if waffle.switch_is_active('publish_course_modes_to_lms'):
+                    published = course.publish_to_lms()
+                    if published:
+                        return created, None, None
+                    else:
+                        message = (
+                            u'An error occurred while publishing [{course_id}] to LMS. '
+                            u'No data has been saved or published.'
+                        ).format(course_id=course_id)
+                        raise Exception(message)
+                else:
+                    message = (
+                        u'Course [{course_id}] was not published to LMS '
+                        u'because the switch [publish_course_modes_to_lms] is disabled. '
+                        u'Data has been saved, but not published.'
+                    ).format(course_id=course_id)
+                    logger.info(message)
+
+                    return created, None, message
+        except Exception as e:  # pylint: disable=broad-except
+            logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
+            return False, e, e.message
+
+    def _flatten(self, attrs):
+        """Transform a list of attribute names and values into a dictionary keyed on the names."""
+        return {attr['name']: attr['value'] for attr in attrs}

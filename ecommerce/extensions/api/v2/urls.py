@@ -2,10 +2,13 @@ from django.conf.urls import patterns, url, include
 from django.views.decorators.cache import cache_page
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
+from ecommerce.core.constants import COURSE_ID_PATTERN
 from ecommerce.extensions.api.v2 import views
+
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
+
 
 BASKET_URLS = patterns(
     '',
@@ -43,12 +46,23 @@ REFUND_URLS = patterns(
     url(r'^(?P<pk>[\d]+)/process/$', views.RefundProcessView.as_view(), name='process'),
 )
 
+ATOMIC_PUBLICATION_URLS = patterns(
+    '',
+    url(r'^$', views.AtomicPublicationView.as_view(), name='create'),
+    url(
+        r'^{course_id}$'.format(course_id=COURSE_ID_PATTERN),
+        views.AtomicPublicationView.as_view(),
+        name='update'
+    ),
+)
+
 urlpatterns = patterns(
     '',
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^orders/', include(ORDER_URLS, namespace='orders')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
+    url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
 )
 
 router = ExtendedSimpleRouter()

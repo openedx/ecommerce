@@ -409,8 +409,10 @@ REST_FRAMEWORK = {
 }
 # END DJANGO REST FRAMEWORK
 
+
 # Resolving deprecation warning
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 
 # COOKIE CONFIGURATION
 # The purpose of customizing the cookie names is to avoid conflicts when
@@ -421,9 +423,6 @@ CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'ecommerce_language'
 # END COOKIE CONFIGURATION
 
-# Standard regex for course_id.
-COURSE_ID_REGEX = r'[^/+]+(/|\+)[^/+]+(/|\+)[^/]+'
-COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
 
 PLATFORM_NAME = 'Your Platform Name Here'
 THEME_SCSS = 'sass/themes/default.scss'
