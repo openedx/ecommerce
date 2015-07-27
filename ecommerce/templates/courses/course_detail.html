@@ -1,0 +1,10 @@
+{% extends 'edx/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="course-detail-view" data-course-id="{{ course_id }}"></div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/pages/course_detail_page.js' %}"></script>
+{% endblock %}

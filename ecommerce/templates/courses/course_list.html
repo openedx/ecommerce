@@ -26,7 +26,7 @@
             <tbody>
             {% for course in courses %}
                 <tr>
-                    <td>{{ course.id }}</td>
+                    <td><a href="{% url 'courses:detail' course.id %}">{{ course.id }}</a></td>
                     <td>{{ course.name }}</td>
                     <td data-sort="{{ course.history.latest.history_date|date:'U' }}">
                       {{ course.history.latest.history_date }}
