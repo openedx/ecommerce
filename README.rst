@@ -100,29 +100,29 @@ To enable custom credit checkout page, please add the following waffle switch:
 Testing
 -------
 
-To run the unit test suite followed by quality checks, run::
+The complete unit test suite (Python, JavaScript, code quality) can be run with the command below::
 
     $ make validate
 
-To run only Python unit tests, run:
+Run the Python tess with the following command:
 
 ::
 
     $ make test_python
 
-To run only Javascript unit tests, run:
+JavaScript Unit Testing
+~~~~~~~~~~~~~~~~~~~~~~~
+
+JavaScript is unit tested using the Jasmine framework. Tests should be placed in the
+ecommerce/static/js/test/specs directory, and suffixedwith _spec
+(e.g. ecommerce/static/js/test/specs/course_list_view_spec.js).
+
+Run the JavaScript tests with the following command:
 
 ::
 
     $ make test_javascript
 
-Javascript Unit Testing
-~~~~~~~~~~~~~~~~~~~~~~~
-
-All unit tests should follow the `Jasmine 2.3 API
-specifications <http://jasmine.github.io/2.3/introduction.html>`__ and
-must be placed in the ``test/specs`` directory. Each test file name must
-end in ``_spec.js`` in order to be run.
 
 Acceptance Testing
 ~~~~~~~~~~~~~~~~~~

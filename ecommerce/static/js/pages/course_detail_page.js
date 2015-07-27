@@ -1,9 +1,13 @@
 require([
+        'models/course_model',
         'views/course_detail_view'
     ],
-    function (CourseDetailView) {
+    function (CourseModel, CourseDetailView) {
         'use strict';
 
-        new CourseDetailView();
+        var $el = $('.course-detail-view'),
+            course = new CourseModel({id: $el.data('course-id')});
+        new CourseDetailView({el: $el[0], model: course});
+        course.fetch();
     }
 );

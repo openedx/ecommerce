@@ -19,21 +19,25 @@ define([
         'use strict';
 
         return Backbone.View.extend({
-            el: '.course-detail-view',
+            tagName: 'div',
+            className: '.course-detail-view',
 
             initialize: function () {
-                var self = this,
-                    course_id = self.$el.data('course-id');
+                var self = this;
 
-                this.course = new CourseModel({id: course_id});
-                this.course.fetch({
-                    success: function (course) {
-                        self.render();
-                        course.getProducts().done(function () {
-                            self.renderSeats();
-                        });
-                    }
-                });
+                _.bindAll(this, 'render');
+                this.model.bind('change', this.render);
+                //this.model.bind('change', this.model.getProducts);
+                this.model.bind('change:products', this.renderSeats);
+
+                //this.model.fetch({
+                //    success: function (model) {
+                //        self.render();
+                //        //model.getProducts().done(function () {
+                //        //    self.renderSeats();
+                //        //});
+                //    }
+                //});
             },
 
             getSeats: function () {
@@ -43,7 +47,7 @@ define([
                         'honor', 'verified', 'no-id-professional', 'professional', 'credit'
                     ])));
 
-                seats = _.sortBy(this.course.getSeats(), function (seat) {
+                seats = _.sortBy(this.model.getSeats(), function (seat) {
                     return sortObj[seat.get('certificate_type')]
                 });
 
@@ -52,15 +56,16 @@ define([
 
             render: function () {
                 var html, templateData;
-                document.title = this.course.get('name') + ' - ' + gettext('View Course');
+                document.title = this.model.get('name') + ' - ' + gettext('View Course');
 
                 templateData = {
-                    course: this.course.attributes,
-                    courseType: _s.capitalize(this.course.get('type'))
+                    course: this.model.attributes,
+                    courseType: _s.capitalize(this.model.get('type'))
                 };
 
                 html = _.template(CourseDetailTemplate)(templateData);
-                this.$el.html(html)
+                this.$el.html(html);
+                return this;
             },
 
             renderSeats: function () {
@@ -72,6 +77,8 @@ define([
                 });
 
                 $seatHolder.append(html);
+
+                return this;
             }
         });
     }

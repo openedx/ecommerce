@@ -11,12 +11,11 @@ var isBrowser = window.__karma__ === undefined,
 if (isBrowser) {
     // The browser cannot read directories, so all files must be enumerated below.
     specs = [
-        config.baseUrl + 'js/test/specs/test_spec.js'
+        config.baseUrl + 'js/test/specs/course_detail_view_spec.js'
     ];
 } else {
-    // the Insights application loads gettext identity library via django, thus
-    // components reference gettext globally so a shim is added here to reflect
-    // the text so tests can be run if modules reference gettext
+    // gettext is normally loaded from Django. Add a shim so that tests continue to
+    // function without having to run Django.
     if (!window.gettext) {
         window.gettext = function(text) {
             'use strict';
@@ -24,7 +23,7 @@ if (isBrowser) {
         };
     }
 
-    // you can automatically get the test files using karma's configs
+    // Automatically load spec files
     for (var file in window.__karma__.files) {
         if (/spec\.js$/.test(file)) {
             specs.push(file);

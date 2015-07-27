@@ -15,9 +15,12 @@ define([
 
             getProducts: function () {
                 if (_.isUndefined(this._products)) {
+                    var self = this;
                     this._products = new ProductCollection();
                     this._products.url = this.get('products_url');
-                    return this._products.getFirstPage({fetch: true});
+                    this._products.getFirstPage({fetch: true}).done(function () {
+                        self.trigger('change:products');
+                    });
                 }
 
                 return this._products;
