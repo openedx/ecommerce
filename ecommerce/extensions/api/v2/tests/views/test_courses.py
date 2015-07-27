@@ -7,6 +7,7 @@ import mock
 from oscar.core.loading import get_model, get_class
 from waffle import Switch
 
+from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, TestServerUrlMixin
@@ -35,12 +36,16 @@ class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, 
         """ Serializes a course to a Python dict. """
         products_url = self.get_full_url(reverse('api:v2:course-product-list',
                                                  kwargs={'parent_lookup_course_id': course.id}))
+
+        last_edited = course.history.latest().history_date.strftime(ISO_8601_FORMAT)
+
         return {
             'id': course.id,
             'name': course.name,
             'type': course.type,
             'url': self.get_full_url(reverse('api:v2:course-detail', kwargs={'pk': course.id})),
             'products_url': products_url,
+            'last_edited': last_edited
         }
 
     def test_list(self):

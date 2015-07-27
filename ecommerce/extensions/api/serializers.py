@@ -114,6 +114,10 @@ class RefundSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     products_url = serializers.SerializerMethodField()
+    last_edited = serializers.SerializerMethodField()
+
+    def get_last_edited(self, obj):
+        return obj.history.latest().history_date.strftime(ISO_8601_FORMAT)
 
     def get_products_url(self, obj):
         return reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': obj.id},
@@ -121,7 +125,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta(object):
         model = Course
-        fields = ('id', 'url', 'name', 'type', 'products_url',)
+        fields = ('id', 'url', 'name', 'type', 'products_url', 'last_edited')
         read_only_fields = ('type',)
         extra_kwargs = {
             'url': {'view_name': COURSE_DETAIL_VIEW}
