@@ -73,9 +73,28 @@ switches exist:
 +--------------------------------+---------------------------------------------------------------------------+
 | publish_course_modes_to_lms    | Publish prices and SKUs to the LMS after every course modification        |
 +--------------------------------+---------------------------------------------------------------------------+
+| ENABLE_CREDIT_APP              | Enable the credit checkout page from where student's can purchase credit  |
+|                                | courses.                                                                  |
++--------------------------------+---------------------------------------------------------------------------+
 
 .. _Waffle: https://waffle.readthedocs.org/
 
+
+Analytics
+---------
+
+To use google analytics for specific events e.g., button clicks, you need to add the segment key into the settings
+file:
+
+``SEGMENT_KEY = 'your segment key'``
+
+
+Credit
+------
+
+To enable custom credit checkout page, please add the following waffle switch:
+
+``ENABLE_CREDIT_APP``
 
 
 Testing
