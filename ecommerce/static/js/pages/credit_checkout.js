@@ -1,10 +1,10 @@
 require([
         'jquery',
         'backbone',
-        'js/models/user-model',
-        'js/models/tracking-model',
+        'js/models/user_model',
+        'js/models/tracking_model',
         'js/models/course_model',
-        'js/views/clickable-view',
+        'js/views/clickable_view',
         'js/views/analytics_view',
         'js/views/payment_button_view',
         'js/utils/utils',
