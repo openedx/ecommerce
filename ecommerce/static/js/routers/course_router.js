@@ -4,14 +4,16 @@ define([
         'backbone.super',
         'pages/course_list_page',
         'pages/course_detail_page',
-        'pages/course_create_page'
+        'pages/course_create_page',
+        'pages/course_edit_page'
     ],
     function (Backbone,
               BackboneRouteFilter,
               BackboneSuper,
               CourseListPage,
               CourseDetailPage,
-              CourseCreatePage) {
+              CourseCreatePage,
+              CourseEditPage) {
         'use strict';
 
         return Backbone.Router.extend({
@@ -47,6 +49,8 @@ define([
 
                 // Custom routes, requiring RegExp or other complex placeholders, should be defined here
                 this.route(new RegExp('^' + courseIdRegex.source + '(\/)?$'), 'show');
+                this.route(new RegExp('^' + courseIdRegex.source + '/edit(\/)?$'), 'edit');
+
             },
 
             /**
@@ -105,6 +109,12 @@ define([
                 var page = new CourseCreatePage();
                 this.currentView = page;
                 this.$el.html(page.el);
+            },
+
+            edit: function (id) {
+                var page = new CourseEditPage({id: id});
+                this.currentView = page;
+                $('#app').html(page.el);
             }
         });
     }

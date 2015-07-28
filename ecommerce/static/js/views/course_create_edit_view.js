@@ -49,6 +49,9 @@ define([
 
                 // Render the complete view
                 this.$el.html($html);
+                
+                // Activate the tooltips
+                this.$el.find('[data-toggle="tooltip"]').tooltip();
 
                 return this;
             }
