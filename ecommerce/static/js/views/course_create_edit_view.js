@@ -1,0 +1,53 @@
+define([
+        'jquery',
+        'backbone',
+        'backbone-super',
+        'underscore',
+        'views/course_form_view',
+        'text!templates/course_create_edit.html'
+    ],
+    function ($,
+              Backbone,
+              BackboneSuper,
+              _,
+              CourseFormView,
+              CourseCreateEditTemplate) {
+        'use strict';
+
+        return Backbone.View.extend({
+            template: _.template(CourseCreateEditTemplate),
+            className: 'course-create-edit-view',
+
+            initialize: function (options) {
+                this.editing = options.editing;
+            },
+
+            remove: function(){
+                if(this.formView) {
+                    this.formView.remove();
+                    this.formView = null;
+                }
+
+                this._super();
+            },
+
+            render: function () {
+                var $html,
+                    data = this.model.attributes;
+
+                this.formView = this.formView || new CourseFormView({editing: this.editing, model: this.model});
+
+                data.editing = this.editing;
+                $html = $(this.template(data));
+
+                // Render the form
+                this.formView.render();
+                $html.find('.course-form-outer').html(this.formView.el);
+
+                // Render the complete view
+                this.$el.html($html);
+                return this;
+            }
+        });
+    }
+);

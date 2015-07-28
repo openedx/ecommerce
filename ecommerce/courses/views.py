@@ -6,39 +6,22 @@ from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
 from django.utils.decorators import method_decorator
-from django.views.generic import View, ListView, TemplateView
-
-from ecommerce.courses.models import Course
+from django.views.generic import View, TemplateView
 
 logger = logging.getLogger(__name__)
 
 
-class CourseListView(ListView):
-    model = Course
-    context_object_name = 'courses'
-
+class StaffOnlyMixin(object):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
             raise Http404
 
-        return super(CourseListView, self).dispatch(request, *args, **kwargs)
+        return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
-class CourseDetailView(TemplateView):
-    template_name = 'courses/course_detail.html'
-
-    def get(self, request, *args, **kwargs):
-        if not Course.objects.filter(id=kwargs['course_id']).exists():
-            raise Http404
-        return super(CourseDetailView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(CourseDetailView, self).get_context_data()
-        context.update({
-            'course_id': kwargs['course_id']
-        })
-        return context
+class CourseAppView(StaffOnlyMixin, TemplateView):
+    template_name = 'courses/course_app.html'
 
 
 class CourseMigrationView(View):

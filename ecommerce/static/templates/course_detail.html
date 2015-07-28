@@ -1,24 +1,33 @@
 <div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/courses/"><%= gettext('Courses') %></a></li>
+        <li class="active"><%= course['name'] %></li>
+    </ol>
     <div class="page-header">
         <h1 class="hd-1 emphasized">
-            <%= gettext('View Course') %>
+            <%= course['name'] %>
             <div class="pull-right">
-                <button class="btn btn-primary btn-small"><%= gettext('Edit Course') %></button>
+                <a class="btn btn-primary btn-small" href="/courses/<%= course['id'] %>/edit/">
+                    <%= gettext('Edit Course') %>
+                </a>
             </div>
         </h1>
     </div>
 
     <div class="course-information">
-        <h3 class="hd-3"><%= gettext('Course Information') %></h3>
+        <h3 class="hd-3 de-emphasized"><%= gettext('Course Information') %></h3>
 
-        <div class="heading course-name"><%= course['name'] %></div>
-        <div class="course-id"><%= course['id'] %></div>
-
-        <div class="heading"><%= gettext('Course Type') %></div>
-        <div class="course-type"><%= courseType %></div>
+        <div class="info-item">
+            <div class="heading"><%= gettext('Course ID') %></div>
+            <div class="course-id"><%= course['id'] %></div>
+        </div>
+        <div class="info-item">
+            <div class="heading"><%= gettext('Course Type') %></div>
+            <div class="course-type"><%= courseType %></div>
+        </div>
     </div>
 
-    <h3 class="hd-3"><%= gettext('Course Seats') %></h3>
+    <h3 class="hd-3 de-emphasized"><%= gettext('Course Seats') %></h3>
 
     <div class="course-seats"></div>
 </div>

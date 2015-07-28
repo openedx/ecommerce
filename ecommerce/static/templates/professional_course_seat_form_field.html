@@ -1,0 +1,61 @@
+<div class="col-sm-12">
+    <div class="seat-type"><%= gettext('Professional Education') %></div>
+</div>
+<div class="col-sm-4">
+    <input type="hidden" name="certificate_type" value="professional">
+
+    <div class="seat-price">
+        <div class="form-group">
+            <label for="price"><%= gettext('Price (in USD)') %></label>
+
+            <div class="input-group">
+                <div class="input-group-addon">$</div>
+                <input type="number" class="form-control" name="price" id="price" min="5" step="1" pattern="\d+"
+                       placeholder="100" value="<%= price %>">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group expires">
+        <label for="expires"><%= gettext('Upgrade Deadline') %></label>
+
+        <div class="input-group" data-toggle="tooltip" title="<%= gettext('Professional education courses have no upgrade deadline.') %>">
+            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            <input type="datetime-local" id="expires" name="expires" class="form-control" value=""
+                   aria-describedby="expiresHelpBlock" disabled="disabled">
+        </div>
+        <span id="expiresHelpBlock" class="help-block">
+            <%= gettext('After this date/time, students can no longer enroll in this track.') %>
+        </span>
+    </div>
+</div>
+<div class="col-sm-4 seat-certificate-type">
+    <%= gettext('Professional Education Certificate') %>
+</div>
+<div class="col-sm-4 seat-additional-info">
+    <div class="form-group">
+        <label for="id_verification_required"><%= gettext('ID Verification Required?') %></label>
+
+        <div class="input-group">
+            <label class="radio-inline">
+                <input type="radio" name="id_verification_required" value="true"> Yes
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="id_verification_required" value="false"> No
+            </label>
+        </div>
+    </div>
+    <div class="form-group verification-close">
+        <label for="verification_close"><%= gettext('Verification Close Date') %></label>
+
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            <!-- TODO Display value here. -->
+            <input type="datetime-local" id="verification_close" name="verification_close" class="form-control"
+                   value="" aria-describedby="verificationCloseHelpBlock">
+        </div>
+        <span id="verificationCloseHelpBlock" class="help-block">
+            <%= gettext('After this date/time, students can no longer submit photos for verification.') %>
+        </span>
+    </div>
+</div>
