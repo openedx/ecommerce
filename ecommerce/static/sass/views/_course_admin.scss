@@ -10,4 +10,41 @@
       font-weight: bold;
     }
   }
+
+  .breadcrumb {
+    background-color: $breadcrumb-bg;
+    padding-left: 0;
+    margin-top: spacing-vertical(small);
+  }
+
+  .course-detail-view {
+    .page-header {
+      margin-top: 0;
+    }
+
+    .course-information {
+      margin-bottom: spacing-vertical(small);
+
+      .info-item {
+        margin-bottom: 10px;
+
+        .heading {
+          font-weight: bold;
+        }
+      }
+    }
+
+    .course-seats {
+      .course-seat {
+        margin-bottom: spacing-vertical(mid-small);
+
+        .seat-type {
+          margin-bottom: 5px;
+          border-bottom: 1px solid $page-header-border-color;
+          padding-bottom: 3px;
+          font-weight: bold;
+        }
+      }
+    }
+  }
 }

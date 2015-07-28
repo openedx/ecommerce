@@ -1,37 +1,46 @@
 define([
         'backbone',
+        'backbone.relational',
         'underscore',
         'collections/product_collection',
         'models/course_seat_model'
     ],
     function (Backbone,
+              BackboneRelational,
               _,
               ProductCollection,
               CourseSeatModel) {
         'use strict';
 
-        return Backbone.Model.extend({
+        return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/courses/',
+
             defaults: {
-                name: ''
+                id: null,
+                name: null,
+                type: null
             },
 
-            getProducts: function () {
-                if (_.isUndefined(this._products)) {
-                    this._products = new ProductCollection();
-                    this._products.url = this.get('products_url');
-                    return this._products.getFirstPage({fetch: true});
-                }
-
-                return this._products;
-            },
+            relations: [{
+                type: Backbone.HasMany,
+                key: 'products',
+                relatedModel: CourseSeatModel,
+                includeInJSON: false,
+                parse: true
+            }],
 
             getSeats: function () {
                 // Returns the seat products
-                return this.getProducts().filter(function (product) {
-                    // Filter out parent products since there is no need to display or modify.
-                    return (product instanceof CourseSeatModel) && product.get('structure') !== 'parent';
-                });
+
+                var seats = this.get('products').filter(function (product) {
+                        // Filter out parent products since there is no need to display or modify.
+                        return (product instanceof CourseSeatModel) && product.get('structure') !== 'parent';
+                    }),
+                    seatTypes = _.map(seats, function (seat) {
+                        return seat.get('certificate_type');
+                    });
+
+                return _.object(seatTypes, seats);
             }
         });
     }

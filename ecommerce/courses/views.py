@@ -8,8 +8,6 @@ from django.http import Http404, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView
 
-from ecommerce.courses.models import Course
-
 logger = logging.getLogger(__name__)
 
 
@@ -24,22 +22,6 @@ class StaffOnlyMixin(object):
 
 class CourseAppView(StaffOnlyMixin, TemplateView):
     template_name = 'courses/course_app.html'
-
-
-class CourseDetailView(TemplateView):
-    template_name = 'courses/course_detail.html'
-
-    def get(self, request, *args, **kwargs):
-        if not Course.objects.filter(id=kwargs['course_id']).exists():
-            raise Http404
-        return super(CourseDetailView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(CourseDetailView, self).get_context_data()
-        context.update({
-            'course_id': kwargs['course_id']
-        })
-        return context
 
 
 class CourseMigrationView(View):

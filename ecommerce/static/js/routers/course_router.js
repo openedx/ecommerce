@@ -1,11 +1,15 @@
 define([
         'backbone',
+        'backbone.route-filter',
         'backbone.super',
-        'pages/course_list_page'
+        'pages/course_list_page',
+        'pages/course_detail_page'
     ],
     function (Backbone,
+              BackboneRouteFilter,
               BackboneSuper,
-              CourseListPage) {
+              CourseListPage,
+              CourseDetailPage) {
         'use strict';
 
         return Backbone.Router.extend({
@@ -33,8 +37,13 @@ define([
              * refers to a jQuery Element where the pages will be rendered.
              */
             initialize: function (options) {
+                var courseIdRegex = /([^/+]+(\/|\+)[^/+]+(\/|\+)[^/]+)/;
+
                 // This is where views will be rendered
                 this.$el = options.$el;
+
+                // Custom routes, requiring RegExp or other complex placeholders, should be defined here
+                this.route(new RegExp('^' + courseIdRegex.source + '(\/)?$'), 'show');
             },
 
             /**
@@ -71,6 +80,17 @@ define([
              */
             index: function () {
                 var page = new CourseListPage();
+                this.currentView = page;
+                this.$el.html(page.el);
+            },
+
+
+            /**
+             * Display details for a single course.
+             * @param {String} id - ID of the course to display.
+             */
+            show: function (id) {
+                var page = new CourseDetailPage({id: id});
                 this.currentView = page;
                 this.$el.html(page.el);
             }

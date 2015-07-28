@@ -41,12 +41,14 @@ require([
         $(function () {
             var $app = $('#app');
 
-            // Let's start the show!
             courseApp = new CourseRouter({$el: $app});
             courseApp.start();
 
             // Handle navbar clicks.
             $('a.navbar-brand').on('click', navigate);
+
+            // Handle internal clicks
+            $app.on('click', 'a', navigate);
         });
     }
 );

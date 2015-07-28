@@ -5,6 +5,14 @@ define([
         'use strict';
 
         return ProductModel.extend({
+            defaults: {
+                certificate_type: null,
+                expires: null,
+                id_verification_required: null,
+                price: null,
+                product_class: 'Seat'
+            },
+
             getSeatType: function () {
                 switch (this.get('certificate_type')) {
                     case 'verified':

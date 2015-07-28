@@ -3,6 +3,7 @@ require.config({
     paths: {
         'backbone': 'bower_components/backbone/backbone',
         'backbone.paginator': 'bower_components/backbone.paginator/lib/backbone.paginator',
+        'backbone.relational': 'bower_components/backbone-relational/backbone-relational',
         'backbone.route-filter': 'bower_components/backbone-route-filter/backbone-route-filter',
         'backbone.super': 'bower_components/backbone-super/backbone-super/backbone-super',
         'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
