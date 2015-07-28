@@ -9,42 +9,34 @@
 .credit-checkout {
   padding-bottom: 30px;
 
-  .header-title {
-    padding-left: 20px;
-  }
   .title {
     color: $text-color;
-    margin: 0;
-    margin-bottom: 20px;
 
     span.course-title {
       color: $brand-primary;
     }
   }
 
-  .course-details .course-image,
+  .advatanges-panel .course-image,
   .provider-details .provider-image {
     width: 200px;
   }
 
-  .course-details,
+  .advatanges-panel,
   .provider-details {
     padding: 20px 0;
   }
 
   .provider-details {
+    border-bottom: 1px solid $gray-light;
+
     .show-instructions {
       padding-left: initial;
     }
   }
 
   .eligibility-details {
-      border-bottom: 1px solid $gray-light;
-      margin-bottom: 20px;
-
-    .date {
-      margin-bottom: 20px;
-    }
+    margin-bottom: 20px;
   }
 
   .total-price {
@@ -56,19 +48,8 @@
     margin-top: 20px;
 
     .payment-button {
-      width: 100%;
-    }
-  }
-
-  .course-details {
-    .row {
-      overflow: hidden;
-      .advantages {
-        background-color: white;
-        padding: 10px 15px;
-        margin-bottom: -1000px;
-        padding-bottom: 1000px;
-      }
+      background-color: $brand-success;
+      border-color: $brand-success;
     }
   }
 
@@ -77,13 +58,48 @@
   }
 }
 
-/* Small devices (tablets, 768px and up) */
-@media (min-width: $grid-float-breakpoint-max) {
-
-  .checkout-controls {
-    float: right;
-    .col-xs-6 {
-      width: initial;
+.advatanges-panel {
+  background-color: $gray-lighter;
+  .row {
+    .col-md-4 {
+      .advantages {
+        background-color: white;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+      }
     }
+  }
+}
+
+.course-details {
+  border-bottom: 1px solid $gray-light;
+}
+
+.payment-button {
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.cap-image {
+  max-width: 20px;
+  margin-bottom: 5px;
+}
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: $screen-sm-min) {
+  .payment-button {
+    width: 49%;
+  }
+
+  .course-details {
+    border-bottom: none;
+  }
+
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: $screen-md-min) {
+  .payment-button {
+    width: auto;
   }
 }

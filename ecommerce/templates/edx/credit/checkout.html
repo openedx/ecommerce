@@ -6,42 +6,22 @@
 
 {% block content %}
     <div class="container credit-checkout">
-        <div class="course-details well">
-            <div class="row center-block ">
-                <h4 class="header-title title">
-                    {% blocktrans count hours=credit_seats.0.attr.credit_hours %}
-                        You are purchasing 1 credit hour for:
-                    {% plural %}
-                        You are purchasing {{ hours }} credit hours for:
+        <div class="row center-block course-details">
+            <div class="col-sm-11">
+                <h3 class="title">
+                    {% blocktrans with provider='<span class="provider-name"></span>' count hours=credit_seats.0.attr.credit_hours %}
+                        Purchase 1 credit from {{ provider }} for:
+                        {% plural %}
+                        Purchase {{ hours }} credits from {{ provider }} for:
                     {% endblocktrans %}
                     <span id="course-name" data-course_key="{{ course }}" data-username="{{ request.user }}"
                           class="course-title text-nowrap">{{ course.name }}</span>
-                </h4>
-                <div class="col-sm-4">
-                    <div class="advantages">
-                        <strong>{% trans "You deserved it." %}</strong>
-                        <p>
-                            {% trans "The hard work is over; you passed the course. Now get the credit you deserve to start or complete a degree." %}
-                        </p>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="advantages">
-                        <strong>{% trans "It's affordable." %}</strong>
-                        <p>
-                            {% trans "The credit offered on edX is generally lower than for-credit courses on campus." %}
-                        </p>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="advantages">
-                        <strong>{% trans "It opens doors." %}</strong>
-                        <p>
-                            {% trans "It is estimated that most job openings by 2018 will require a college degree. Start your path to success." %}
-                        </p>
-                    </div>
-                </div>
+                </h3>
             </div>
+            <div class="col-sm-1 price text-right">
+                <strong>${{ credit_seats.0.stockrecords.first.price_excl_tax }}</strong>
+            </div>
+
         </div>
         <div class="provider-container">
             <div class="alert alert-danger error-message hide" role="alert">
@@ -52,26 +32,14 @@
                     {# data will be loaded with underscore template #}
                 </div>
 
-                <div class="row center-block eligibility-details">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-9 date">
-                        {# date will be added with ajax call #}
-                        {% blocktrans with date='<span class="deadline-date"></span>' %}
-                            Credit eligibility expires on {{ date }}
-                        {% endblocktrans %}
-                    <span class="price pull-right">
-                        {% trans "Price" %}: ${{ credit_seats.0.stockrecords.first.price_excl_tax }}
-                    </span>
-                    </div>
-                </div>
-
                 <div class="row center-block text-right total-price">
-                    <div class="col-sm-12">{% trans "Total:" %} ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>
+                    <div class="col-sm-12">{% trans "Total:" %}
+                        ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>
                 </div>
 
-                <div id="payment-buttons" class="row center-block checkout-controls">
-                    {% for processor_name, button_text in payment_processors.items %}
-                        <div class="col-xs-6 ">
+                <div id="payment-buttons" class="row checkout-controls center-block text-right">
+                    <div class="col-sm-12">
+                        {% for processor_name, button_text in payment_processors.items %}
                             <button data-track-type="click"
                                     data-track-event="edx.bi.ecommerce.credit.payment_selected"
                                     data-track-category="{{ processor_name }}"
@@ -79,22 +47,78 @@
                                     data-sku="{{ credit_seats.0.stockrecords.first.partner_sku }}"
                                     data-course-id="{{ course.id }}"
                                     class="btn btn-primary payment-button"
-                            >
+                                    >
                                 {{ button_text }}
                             </button>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
+
+                </div>
+                <div class="row center-block eligibility-details text-right">
+                    <div class="col-sm-12">
+                        {# date will be added with ajax call #}
+                        <small>
+                            {% blocktrans with date='<span class="deadline-date"></span>' %}
+                                Credit eligibility expires on {{ date }}
+                            {% endblocktrans %}
+                        </small>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <div class="advatanges-panel well">
+            <div class="row center-block">
+                <div class="col-md-12">
+                    <img class="cap-image" src="{% static "images/cap.png" %}" alt=""/>
+                    <strong>Earn Academic Credit for Your Accomplishments</strong>
+                </div>
+            </div>
+
+            <div class="row center-block ">
+
+                <div class="col-md-4">
+                    <div class="advantages">
+                        <strong>{% trans "You deserved it." %}</strong>
+
+                        <p>
+                            {% trans "The hard work is over - you passed the course! Now get the credit you deserve to start or complete a degree." %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="advantages">
+                        <strong>{% trans "It's affordable." %}</strong>
+
+                        <p>
+                            {% trans "The credit offered through edX generally costs less than the same credit at most institutions." %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="advantages">
+                        <strong>{% trans "It opens doors." %}</strong>
+
+                        <p>
+                            {% trans "Many of today's most in-demand jobs require a college degree. Start your path to success!" %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row center-block">
+            <strong>{% trans "Questions?" %}</strong>
+        </div>
+        <div class="row center-block">
+            {% blocktrans with link='<a href="https://www.edx.org/gfa">our FAQs to view common quistions about our certificates.</a>' %}
+                Please read {{ link }}
+            {% endblocktrans %}
         </div>
     </div>
 
     <form id="payment-processor-form">
     </form>
-
-    <script type="text/template" id="provider-details-tpl">
-        {% include "edx/credit/provider-details.underscore" %}
-    </script>
 
     <script>
         var lmsRootUrl = "{{ lms_url_root }}";

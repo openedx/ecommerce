@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import json
 
 from django.conf import settings
@@ -27,7 +28,7 @@ class Checkout(TemplateView):
             raise Http404
 
         # Make button text for each processor which will be shown to user.
-        processors_dict = {}
+        processors_dict = OrderedDict()
         for path in settings.PAYMENT_PROCESSORS:
             processor = get_processor_class(path).NAME.lower()
             if processor == 'cybersource':
