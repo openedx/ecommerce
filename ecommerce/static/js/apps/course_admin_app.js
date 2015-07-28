@@ -38,6 +38,20 @@ require([
             }
         };
 
+        /**
+         * Navigate to a new page within the Course App.
+         *
+         * This extends Backbone.View, allowing pages to navigate to
+         * any path within the app, without requiring a reference to the
+         * app instance.
+         *
+         * @param {String} fragment
+         */
+        Backbone.View.prototype.goTo = function (fragment) {
+            courseApp.navigate(fragment, {trigger: true});
+        };
+
+
         $(function () {
             var $app = $('#app');
 

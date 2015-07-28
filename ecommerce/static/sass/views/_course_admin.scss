@@ -17,7 +17,8 @@
     margin-top: spacing-vertical(small);
   }
 
-  .course-detail-view {
+  .course-detail-view,
+  .course-create-edit-view {
     .page-header {
       margin-top: 0;
     }
@@ -45,6 +46,12 @@
           font-weight: bold;
         }
       }
+    }
+  }
+
+  .course-create-edit-view {
+    .fields {
+      width: 50%;
     }
   }
 }

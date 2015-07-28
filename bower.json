@@ -26,6 +26,8 @@
     "underscore.string": "~3.1.1",
     "backbone-super": "~1.0.4",
     "backbone-route-filter": "~0.1.2",
-    "backbone-relational": "~0.9.0"
+    "backbone-relational": "~0.9.0",
+    "backbone-validation": "~0.11.5",
+    "backbone.stickit": "~0.9.2"
   }
 }

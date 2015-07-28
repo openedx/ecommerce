@@ -1,14 +1,18 @@
 define([
         'backbone',
         'backbone.relational',
+        'backbone.validation',
         'moment',
         'underscore'
     ],
     function (Backbone,
               BackboneRelational,
+              BackboneValidation,
               moment,
               _) {
         'use strict';
+
+        _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/products/',

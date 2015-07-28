@@ -6,5 +6,9 @@ require([
         'underscore'
     ],
     function () {
+        $(function () {
+            // Activate all pre-rendered tooltips.
+            $('[data-toggle="tooltip"]').tooltip();
+        })
     }
 );

@@ -1,7 +1,9 @@
 define([
+        'backbone.super',
         'models/product_model'
     ],
-    function (ProductModel) {
+    function (BackboneSuper,
+              ProductModel) {
         'use strict';
 
         return ProductModel.extend({
@@ -11,6 +13,18 @@ define([
                 id_verification_required: null,
                 price: null,
                 product_class: 'Seat'
+            },
+
+            validation: {
+                certificate_type: {
+                    required: true
+                },
+                price: {
+                    required: true
+                },
+                product_class: {
+                    oneOf: ['Seat']
+                }
             },
 
             getSeatType: function () {

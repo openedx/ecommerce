@@ -3,13 +3,15 @@ define([
         'backbone.route-filter',
         'backbone.super',
         'pages/course_list_page',
-        'pages/course_detail_page'
+        'pages/course_detail_page',
+        'pages/course_create_page'
     ],
     function (Backbone,
               BackboneRouteFilter,
               BackboneSuper,
               CourseListPage,
-              CourseDetailPage) {
+              CourseDetailPage,
+              CourseCreatePage) {
         'use strict';
 
         return Backbone.Router.extend({
@@ -21,6 +23,7 @@ define([
 
             routes: {
                 '(/)': 'index',
+                'new(/)': 'new',
                 '*path': 'notFound'
             },
 
@@ -91,6 +94,15 @@ define([
              */
             show: function (id) {
                 var page = new CourseDetailPage({id: id});
+                this.currentView = page;
+                this.$el.html(page.el);
+            },
+
+            /**
+             * Display a form for creating a new course.
+             */
+            new: function () {
+                var page = new CourseCreatePage();
                 this.currentView = page;
                 this.$el.html(page.el);
             }
