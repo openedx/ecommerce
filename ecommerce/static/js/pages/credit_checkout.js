@@ -3,7 +3,7 @@ require([
         'backbone',
         'js/models/user-model',
         'js/models/tracking-model',
-        'js/models/course-model',
+        'js/models/course_model',
         'js/views/clickable-view',
         'js/views/analytics_view',
         'js/views/payment_button_view',
