@@ -21,11 +21,7 @@
             name: 'js/config'
         },
         {
-            name: 'js/views/course_list_view',
-            exclude: ['js/common']
-        },
-        {
-            name: 'js/views/payment_button_view',
+            name: 'js/pages/course_list_page',
             exclude: ['js/common']
         },
         {
