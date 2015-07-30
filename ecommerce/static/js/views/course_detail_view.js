@@ -26,18 +26,12 @@ define([
                 var self = this;
 
                 _.bindAll(this, 'render');
+
                 this.model.bind('change', this.render);
-                //this.model.bind('change', this.model.getProducts);
                 this.model.bind('change:products', this.renderSeats);
 
-                //this.model.fetch({
-                //    success: function (model) {
-                //        self.render();
-                //        //model.getProducts().done(function () {
-                //        //    self.renderSeats();
-                //        //});
-                //    }
-                //});
+                this.model.fetch();
+
             },
 
             getSeats: function () {

@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "bower": "^1.4.1",
+    "karma-sinon": "^1.0.4",
     "requirejs": "^2.1.19"
   },
   "devDependencies": {

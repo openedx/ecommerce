@@ -10,11 +10,16 @@ define([
             mode: 'client',
             model: function (attrs, options) {
                 var modelClass = ProductModel;
+
                 if (attrs.product_class === 'Seat') {
                     modelClass = CourseSeatModel;
                 }
 
                 return new modelClass(attrs, options);
+            },
+
+            initialize: function (models, options) {
+                this.url = options.url;
             }
         });
     });
