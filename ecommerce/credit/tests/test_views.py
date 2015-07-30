@@ -80,5 +80,5 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
 
         self.assertContains(
             response,
-            'You are purchasing {} credit hours for'.format(self.credit_hours)
+            'Purchase {} credits from'.format(self.credit_hours)
         )

@@ -4,21 +4,30 @@ require([
         'js/models/user_model',
         'js/models/tracking_model',
         'js/models/course_model',
+        'js/collections/provider_collection',
+        'js/collections/user_eligibility_collection',
         'js/views/clickable_view',
         'js/views/analytics_view',
         'js/views/payment_button_view',
         'js/utils/utils',
-        'js/views/provider_view'
+        'js/views/provider_view',
+        'js/views/user_eligibility_view'
     ],
-    function( $,Backbone, UserModel, TrackingModel, CourseModel, ClickableView, AnalyticsView, PaymentButtonView, Utils, ProviderView ) {
+    function( $,Backbone, UserModel, TrackingModel, CourseModel, ProviderCollection, EligibilityCollection, ClickableView, AnalyticsView, PaymentButtonView, Utils, ProviderView, EligibilityView ) {
 
         new PaymentButtonView({
-           el: $( '#payment-buttons' )
+            el: $( '#payment-buttons' )
         });
 
         new ProviderView({
-           el: $( '.provider-details' )
+            el: $( '.provider-details' ),
+            collection: new ProviderCollection()
         });
+
+        new EligibilityView({
+            collection: new EligibilityCollection()
+        });
+
 
         var courseModel = new CourseModel(),
             trackingModel = new TrackingModel(),
