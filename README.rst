@@ -26,7 +26,7 @@ Most commands necessary to run and develop the ecommerce service can be found in
 Note: If you want to install only the production requirements run ``pip install -r requirements/production.txt``.
 
 2. Setup the database::
-    
+
     $ make migrate
 
 3. Populate the countries tables (used for storing addresses)::
@@ -104,6 +104,32 @@ To run the unit test suite followed by quality checks, run::
 
     $ make validate
 
+To run only Python unit tests, run:
+
+::
+
+    $ make test_python
+
+To run only JavaScript unit tests, run:
+
+::
+
+    $ make test_javascript
+
+JavaScript Unit Testing
+~~~~~~~~~~~~~~~~~~~~~~~
+
+JavaScript is unit tested using the Jasmine framework and should follow the `Jasmine 2.3 API
+specifications <http://jasmine.github.io/2.3/introduction.html>`__.
+Tests should be placed in the ecommerce/static/js/test/specs directory, and suffixed with _spec
+(e.g. ecommerce/static/js/test/specs/course_list_view_spec.js).
+
+Tests can be run with the following command:
+
+::
+
+    $ make test_javascript
+
 Acceptance Testing
 ~~~~~~~~~~~~~~~~~~
 
@@ -112,7 +138,7 @@ README file located in the `acceptance tests README`_.
 
 .. _acceptance tests README: acceptance_tests/README.rst
 
-Documentation |ReadtheDocs|_ 
+Documentation |ReadtheDocs|_
 ----------------------------
 .. |ReadtheDocs| image:: https://readthedocs.org/projects/edx-ecommerce/badge/?version=latest
 .. _ReadtheDocs: http://edx-ecommerce.readthedocs.org/en/latest/
