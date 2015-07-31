@@ -12,9 +12,10 @@ from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 import waffle
 
+from ecommerce.core.constants import COURSE_ID_REGEX
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import audit_log
-from ecommerce.extensions.api import data, exceptions as api_exceptions, serializers
+from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
@@ -24,6 +25,7 @@ from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_processor_class, get_default_processor_class,
                                                   get_processor_class_by_name)
 from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
+
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +127,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 }
             }
         """
-        basket = data.get_basket(request.user)
+        basket = data_api.get_basket(request.user)
 
         requested_products = request.data.get(AC.KEYS.PRODUCTS)
         if requested_products:
@@ -134,7 +136,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 sku = requested_product.get(AC.KEYS.SKU)
                 if sku:
                     try:
-                        product = data.get_product(sku)
+                        product = data_api.get_product(sku)
                     except api_exceptions.ProductNotFoundError as error:
                         return self._report_bad_request(error.message, api_exceptions.PRODUCT_NOT_FOUND_USER_MESSAGE)
                 else:
@@ -220,7 +222,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         response_data = self._generate_basic_response(basket)
 
         if basket.total_excl_tax == AC.FREE:
-            order_metadata = data.get_order_metadata(basket)
+            order_metadata = data_api.get_order_metadata(basket)
 
             logger.info(
                 u"Preparing to place order [%s] for the contents of basket [%d]",
@@ -493,7 +495,7 @@ class NonDestroyableModelViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixi
 
 
 class CourseViewSet(NonDestroyableModelViewSet):
-    lookup_value_regex = settings.COURSE_ID_REGEX
+    lookup_value_regex = COURSE_ID_REGEX
     queryset = Course.objects.all()
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
@@ -521,3 +523,34 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
     queryset = Product.objects.all()
     serializer_class = serializers.ProductSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
+
+
+class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
+    """Attempt to save and publish a Course and associated products.
+
+    If either fails, the entire operation is rolled back. This keeps Otto and the LMS in sync.
+    """
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+    serializer_class = serializers.AtomicPublicationSerializer
+
+    def post(self, request, *args, **kwargs):
+        return self._save_and_publish(request.data)
+
+    def put(self, request, *args, **kwargs):
+        return self._save_and_publish(request.data, course_id=kwargs['course_id'])
+
+    def _save_and_publish(self, data, course_id=None):
+        """Create or update a Course and associated products, then publish the result."""
+        if course_id is not None:
+            data['id'] = course_id
+
+        serializer = self.get_serializer(data=data)
+        is_valid = serializer.is_valid(raise_exception=True)
+        if is_valid:
+            created, failure, message = serializer.save()
+            if failure:
+                return Response({'error': message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                content = serializer.data
+                content['message'] = message if message else None
+                return Response(content, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)

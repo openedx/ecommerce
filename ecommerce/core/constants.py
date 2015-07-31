@@ -1,6 +1,11 @@
-"""Health check constants."""
+"""Constants core to the ecommerce app."""
 
 ISO_8601_FORMAT = u'%Y-%m-%dT%H:%M:%SZ'
+
+
+# Regex used to match course IDs.
+COURSE_ID_REGEX = r'[^/+]+(/|\+)[^/+]+(/|\+)[^/]+'
+COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
 
 
 class Status(object):
