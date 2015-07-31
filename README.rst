@@ -76,6 +76,9 @@ switches exist:
 | ENABLE_CREDIT_APP              | Enable the credit checkout page from where student's can purchase credit  |
 |                                | courses.                                                                  |
 +--------------------------------+---------------------------------------------------------------------------+
+| ENABLE_NOTIFICATIONS           | Enable email notification for the different task generated e.g. course    |
+|                                | purchase.                                                                 |
++--------------------------------+---------------------------------------------------------------------------+
 
 .. _Waffle: https://waffle.readthedocs.org/
 
@@ -95,6 +98,25 @@ Credit
 To enable custom credit checkout page, please add the following waffle switch:
 
 ``ENABLE_CREDIT_APP``
+
+
+Notification
+------------
+
+To create and send email notifications for a task, we use `Communications API <http://django-oscar.readthedocs.org/en/latest/howto/how_to_customise_oscar_communications.html#communications-api>`_:
+
+1. First you need to define an arbitrary ``Communication Type Code`` that would be use to refer a particular type
+    of notification. For example, ``Communication Type Code`` used for the course purchased would be ``COURSE_PURCHASED``.
+
+2. Create three template files (HTML, plain text, subject) associated with the email in directory ``ecommerce/ecommerce/templates/customer/emails/``.
+    Note that the naming convention should be something like ``commtype_{Communication Type Code}_body.html``
+    For example for ``COURSE_PURCHASED`` code template file names will be ``commtype_course_purchased_body.html``,
+    ``commtype_course_purchased_body.txt`` and ``commtype_course_purchased_subject.txt``. The HTML file should
+    extend ``email_base.html`` for basic styling. You can override ``block body`` (must) and ``block footer``(optionally)
+    to add your custom email body and custom footer respectively.
+
+3. Use the method ``send_notification(user, commtype_code, context)``, implemented in ``ecommerce/ecommerce/notifications/notifications.py``.
+    For more information please read method docstring.
 
 
 Testing
