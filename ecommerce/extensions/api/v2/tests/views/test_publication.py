@@ -84,9 +84,8 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
             # Create a Course.
             course = Course.objects.create(id=self.course_id, name=self.course_name)
 
-            updated_data = deepcopy(self.data)
             # Create associated products.
-            for product in updated_data['products']:
+            for product in self.data['products']:
                 attrs = {attr['name']: attr['value'] for attr in product['attribute_values']}
 
                 attrs['expires'] = EXPIRES if product['expires'] else None
@@ -95,14 +94,21 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
                 course.create_or_update_seat(**attrs)
 
-                # Update the price of the verified seat.
-                if attrs['certificate_type'] == 'verified':
-                    product['price'] = 20.00
+    def _update_data(self):
+        updated_data = deepcopy(self.data)
+        for product in updated_data['products']:
+            attrs = {attr['name']: attr['value'] for attr in product['attribute_values']}
 
-            # Strip course_id, which should be absent from PUT requests.
-            updated_data.pop('id')
+            # Update the price of the verified seat.
+            if attrs['certificate_type'] == 'verified':
+                product['price'] = 20.00
 
-            return updated_data
+        updated_data['name'] = 'A New Name'
+
+        # Strip course_id, which should be absent from PUT requests.
+        updated_data.pop('id')
+
+        return updated_data
 
     def _assert_course_saved(self, course_id, expected=None):
         """Verify that the expected Course and associated products have been saved."""
@@ -172,14 +178,16 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
     def test_update(self):
         """Verify that a Course and associated products can be updated and published."""
-        updated_data = self._purge_courses(recreate=True)
+        self._purge_courses(recreate=True)
+        updated_data = self._update_data()
 
         # If LMS publication is disabled, the view should return a 200 and data should be saved.
         response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 200)
         self._assert_course_saved(self.course_id, expected=updated_data)
 
-        updated_data = self._purge_courses(recreate=True)
+        self._purge_courses(recreate=True)
+        updated_data = self._update_data()
         self._toggle_publication(True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:

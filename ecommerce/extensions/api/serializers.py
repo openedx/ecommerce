@@ -189,7 +189,9 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         try:
             # Explicitly delimit operations which will be rolled back if an exception is raised.
             with transaction.atomic():
-                course, created = Course.objects.get_or_create(id=course_id, defaults={'name': course_name})
+                course, created = Course.objects.get_or_create(id=course_id)
+                course.name = course_name
+                course.save()
 
                 for product in products:
                     attrs = self._flatten(product['attribute_values'])
