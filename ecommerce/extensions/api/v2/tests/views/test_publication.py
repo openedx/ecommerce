@@ -155,12 +155,11 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
     def test_create(self):
         """Verify that a Course and associated products can be created and published."""
-        # If LMS publication is disabled, the view should return a 201 and data should be saved.
+        # If LMS publication is disabled, the view should return a 500 and data should NOT be saved.
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
-        self.assertEqual(response.status_code, 201)
-        self._assert_course_saved(self.course_id, expected=self.data)
+        self.assertEqual(response.status_code, 500)
+        self._assert_course_saved(self.course_id)
 
-        self._purge_courses()
         self._toggle_publication(True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
@@ -181,13 +180,11 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self._purge_courses(recreate=True)
         updated_data = self._update_data()
 
-        # If LMS publication is disabled, the view should return a 200 and data should be saved.
+        # If LMS publication is disabled, the view should return a 500 and data should NOT be saved.
         response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
-        self.assertEqual(response.status_code, 200)
-        self._assert_course_saved(self.course_id, expected=updated_data)
+        self.assertEqual(response.status_code, 500)
+        self._assert_course_saved(self.course_id, expected=self.data)
 
-        self._purge_courses(recreate=True)
-        updated_data = self._update_data()
         self._toggle_publication(True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:

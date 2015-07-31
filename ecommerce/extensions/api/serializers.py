@@ -226,19 +226,24 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                             u'An error occurred while publishing [{course_id}] to LMS. '
                             u'No data has been saved or published.'
                         ).format(course_id=course_id)
+
                         raise Exception(message)
                 else:
                     message = (
                         u'Course [{course_id}] was not published to LMS '
                         u'because the switch [publish_course_modes_to_lms] is disabled. '
-                        u'Data has been saved, but not published.'
+                        u'To avoid ghost SKUs, data has not been saved.'
                     ).format(course_id=course_id)
-                    logger.info(message)
 
-                    return created, None, message
+                    raise Exception(message)
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
-            return False, e, e.message
+
+            user_message = (
+                u'Publication of course data to the LMS failed. '
+                u'To avoid checkout failures, this data has NOT been saved.'
+            )
+            return False, e, user_message
 
     def _flatten(self, attrs):
         """Transform a list of attribute names and values into a dictionary keyed on the names."""
