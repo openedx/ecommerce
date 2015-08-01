@@ -187,6 +187,15 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         products = self.validated_data['products']
 
         try:
+            if not waffle.switch_is_active('publish_course_modes_to_lms'):
+                message = (
+                    u'Course [{course_id}] was not published to LMS '
+                    u'because the switch [publish_course_modes_to_lms] is disabled. '
+                    u'To avoid ghost SKUs, data has not been saved.'
+                ).format(course_id=course_id)
+
+                raise Exception(message)
+
             # Explicitly delimit operations which will be rolled back if an exception is raised.
             with transaction.atomic():
                 course, created = Course.objects.get_or_create(id=course_id)
@@ -217,22 +226,13 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                     )
 
-                if waffle.switch_is_active('publish_course_modes_to_lms'):
-                    published = course.publish_to_lms()
-                    if published:
-                        return created, None, None
-                    else:
-                        message = (
-                            u'An error occurred while publishing [{course_id}] to LMS. '
-                            u'No data has been saved or published.'
-                        ).format(course_id=course_id)
-
-                        raise Exception(message)
+                published = course.publish_to_lms()
+                if published:
+                    return created, None, None
                 else:
                     message = (
-                        u'Course [{course_id}] was not published to LMS '
-                        u'because the switch [publish_course_modes_to_lms] is disabled. '
-                        u'To avoid ghost SKUs, data has not been saved.'
+                        u'An error occurred while publishing [{course_id}] to LMS. '
+                        u'No data has been saved or published.'
                     ).format(course_id=course_id)
 
                     raise Exception(message)
