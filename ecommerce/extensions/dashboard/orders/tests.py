@@ -1,6 +1,9 @@
+import os
+
 from django.contrib.messages import constants as MSG
 from django.core.urlresolvers import reverse
 from django.test import TestCase, LiveServerTestCase, override_settings
+from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
 from selenium.common.exceptions import NoSuchElementException
@@ -37,6 +40,9 @@ class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, LiveServerTestCas
 
     @classmethod
     def setUpClass(cls):
+        if os.environ.get('DISABLE_ACCEPTANCE_TESTS') == 'True':
+            raise SkipTest
+
         cls.selenium = WebDriver()
         super(OrderListViewTests, cls).setUpClass()
 

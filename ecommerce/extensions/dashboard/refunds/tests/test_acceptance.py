@@ -1,8 +1,10 @@
+import os
 from unittest import skip
 
 import ddt
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
+from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
 from selenium.common.exceptions import NoSuchElementException
@@ -24,6 +26,9 @@ ALL_REFUND_STATUSES = (
 class RefundAcceptanceTestMixin(RefundTestMixin):
     @classmethod
     def setUpClass(cls):
+        if os.environ.get('DISABLE_ACCEPTANCE_TESTS') == 'True':
+            raise SkipTest
+
         cls.selenium = WebDriver()
         super(RefundAcceptanceTestMixin, cls).setUpClass()
 
