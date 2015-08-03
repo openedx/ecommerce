@@ -500,6 +500,11 @@ class CourseViewSet(NonDestroyableModelViewSet):
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
 
+    def get_serializer_context(self):
+        context = super(CourseViewSet, self).get_serializer_context()
+        context['include_products'] = bool(self.request.GET.get('include_products', False))
+        return context
+
     @detail_route(methods=['post'])
     def publish(self, request, pk=None):  # pylint: disable=unused-argument
         """ Publish the course to LMS. """
