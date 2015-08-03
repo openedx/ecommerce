@@ -34,6 +34,7 @@ ecommerce/static/build/
 npm-debug.log
 
 # Unit test / coverage reports
+coverage/
 .coverage
 htmlcov
 .tox
