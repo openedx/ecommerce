@@ -44,7 +44,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                         },
                         {
                             'name': 'id_verification_required',
-                            'value': 'False'
+                            'value': False
                         }
                     ]
                 },
@@ -59,7 +59,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                         },
                         {
                             'name': 'id_verification_required',
-                            'value': 'True'
+                            'value': True
                         }
                     ]
                 }
@@ -89,7 +89,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                 attrs = {attr['name']: attr['value'] for attr in product['attribute_values']}
 
                 attrs['expires'] = EXPIRES if product['expires'] else None
-                attrs['id_verification_required'] = (attrs['id_verification_required'] == 'True')
                 attrs['price'] = Decimal(product['price'])
 
                 course.create_or_update_seat(**attrs)
@@ -135,7 +134,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                     if name == 'certificate_type':
                         certificate_type = attr['value']
                     elif name == 'id_verification_required':
-                        id_verification_required = True if attr['value'] == 'True' else False
+                        id_verification_required = attr['value']
 
                 seat_title = 'Seat in {course_name} with {certificate_type} certificate'.format(
                     course_name=course.name,
