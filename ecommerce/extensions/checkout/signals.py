@@ -1,14 +1,21 @@
+import logging
+
 import analytics
-import waffle
 from django.dispatch import receiver
-from oscar.core.loading import get_class
+import waffle
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
+from ecommerce.extensions.checkout.utils import get_provider_data
 from ecommerce.notifications.notifications import send_notification
+from ecommerce.settings.base import get_lms_url
+from oscar.core.loading import get_class
 
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
+logger = logging.getLogger(__name__)
+# Number of orders currently supported for the email notifications
+ORDER_LINE_COUNT = 1
 
 
 @receiver(post_checkout, dispatch_uid='tracking.post_checkout_callback')
@@ -55,6 +62,30 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable=unused-argument
     """Send course purchase notification email when a course is purchased."""
     if waffle.switch_is_active('ENABLE_NOTIFICATIONS'):
-        # Here we assume that order type will always be a 'Seat' i.e. course
-        if len(order.lines.all()) == 1:
-            send_notification(order.user, 'COURSE_PURCHASED', {'course_title': order.lines.first().product.title})
+        # We do not currently support email sending for orders with more than one item.
+        if len(order.lines.all()) == ORDER_LINE_COUNT:
+            product = order.lines.first().product
+            provider_id = getattr(product.attr, 'credit_provider', None)
+            if not provider_id:
+                logger.error(
+                    'Failed to send credit receipt notification. Credit seat product [%s] has not provider.', product.id
+                )
+                return
+            elif product.get_product_class().name == 'Seat':
+                provider_data = get_provider_data(provider_id)
+                if provider_data:
+                    send_notification(
+                        order.user,
+                        'CREDIT_RECEIPT',
+                        {
+                            'course_title': product.title,
+                            'receipt_page_url': get_lms_url(
+                                '/commerce/checkout/receipt/?basket_id={}'.format(order.basket.id)
+                            ),
+                            'credit_hours': product.attr.credit_hours,
+                            'credit_provider': provider_data['display_name'],
+                        }
+                    )
+
+        else:
+            logger.info('Currently support receipt emails for order with one item.')
