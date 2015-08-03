@@ -42,6 +42,7 @@ class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, 
         return {
             'id': course.id,
             'name': course.name,
+            'verification_deadline': course.verification_deadline,
             'type': course.type,
             'url': self.get_full_url(reverse('api:v2:course-detail', kwargs={'pk': course.id})),
             'products_url': products_url,

@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import logging
 from optparse import make_option
 
-import dateutil.parser
+from dateutil.parser import parse
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -24,9 +24,12 @@ class MigratedCourse(object):
 
         Loaded data is NOT persisted until the save() method is called.
         """
-        name, modes = self._retrieve_data_from_lms(access_token)
+        name, verification_deadline, modes = self._retrieve_data_from_lms(access_token)
+
         self.course.name = name
+        self.course.verification_deadline = verification_deadline
         self.course.save()
+
         self._get_products(modes)
 
     def _build_lms_url(self, path):
@@ -34,6 +37,52 @@ class MigratedCourse(object):
         # are not capable of decoding these values.
         host = settings.LMS_URL_ROOT.strip('/')
         return '{host}/{path}'.format(host=host, path=path)
+
+    def _query_commerce_api(self, headers):
+        """Get course name and verification deadline from the Commerce API."""
+        if not settings.COMMERCE_API_URL:
+            message = 'Aborting migration. COMMERCE_API_URL is not set.'
+            logger.error(message)
+            raise Exception(message)
+
+        url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
+        timeout = settings.COMMERCE_API_TIMEOUT
+
+        response = requests.get(url, headers=headers, timeout=timeout)
+        if response.status_code != 200:
+            raise Exception('Unable to retrieve course name and verification deadline: [{status}] - {body}'.format(
+                status=response.status_code,
+                body=response.content
+            ))
+
+        data = response.json()
+        logger.debug(data)
+
+        course_name = data['name']
+        if course_name is None:
+            message = u'Aborting migration. No name is available for {}.'.format(self.course.id)
+            logger.error(message)
+            raise Exception(message)
+
+        course_verification_deadline = data['verification_deadline']
+        course_verification_deadline = parse(course_verification_deadline) if course_verification_deadline else None
+
+        return course_name, course_verification_deadline
+
+    def _query_enrollment_api(self, headers):
+        """Get modes and pricing from Enrollment API."""
+        url = self._build_lms_url('api/enrollment/v1/course/{}'.format(self.course.id))
+        response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            raise Exception('Unable to retrieve course modes: [{status}] - {body}'.format(
+                status=response.status_code,
+                body=response.content
+            ))
+
+        data = response.json()
+        logger.debug(data)
+        return data['course_modes']
 
     def _retrieve_data_from_lms(self, access_token):
         """
@@ -44,31 +93,10 @@ class MigratedCourse(object):
             'Authorization': 'Bearer ' + access_token
         }
 
-        # Get course name from Course Structure API
-        url = self._build_lms_url('api/course_structure/v0/courses/{}/'.format(self.course.id))
-        response = requests.get(url, headers=headers)
+        course_name, course_verification_deadline = self._query_commerce_api(headers)
+        modes = self._query_enrollment_api(headers)
 
-        if response.status_code != 200:
-            raise Exception('Unable to retrieve course name: [{status}] - {body}'.format(status=response.status_code,
-                                                                                         body=response.content))
-
-        data = response.json()
-        logger.debug(data)
-        course_name = data['name']
-
-        # Get modes and pricing from Enrollment API
-        url = self._build_lms_url('api/enrollment/v1/course/{}'.format(self.course.id))
-        response = requests.get(url, headers=headers)
-
-        if response.status_code != 200:
-            raise Exception('Unable to retrieve course modes: [{status}] - {body}'.format(status=response.status_code,
-                                                                                          body=response.content))
-
-        data = response.json()
-        logger.debug(data)
-        modes = data['course_modes']
-
-        return course_name, modes
+        return course_name, course_verification_deadline, modes
 
     def _get_products(self, modes):
         """ Creates/updates course seat products. """
@@ -77,7 +105,7 @@ class MigratedCourse(object):
             id_verification_required = Course.is_mode_verified(mode['slug'])
             price = mode['min_price']
             expires = mode.get('expiration_datetime')
-            expires = dateutil.parser.parse(expires) if expires else None
+            expires = parse(expires) if expires else None
             self.course.create_or_update_seat(certificate_type, id_verification_required, price, expires=expires)
 
 

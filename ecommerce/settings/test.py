@@ -68,6 +68,8 @@ LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
 
 # The location of the LMS student dashboard
 LMS_DASHBOARD_URL = get_lms_url('/dashboard')
+
+COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
 # END URL CONFIGURATION
 
 
