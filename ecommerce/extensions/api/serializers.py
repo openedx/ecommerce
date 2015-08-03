@@ -135,7 +135,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta(object):
         model = Course
-        fields = ('id', 'url', 'name', 'type', 'products_url', 'last_edited')
+        fields = ('id', 'url', 'name', 'verification_deadline', 'type', 'products_url', 'last_edited')
         read_only_fields = ('type',)
         extra_kwargs = {
             'url': {'view_name': COURSE_DETAIL_VIEW}
@@ -150,6 +150,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     """
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
     name = serializers.CharField(max_length=255)
+    verification_deadline = serializers.DateTimeField()
     products = serializers.ListField()
 
     def validate_products(self, products):
@@ -184,6 +185,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         """
         course_id = self.validated_data['id']
         course_name = self.validated_data['name']
+        course_verification_deadline = self.validated_data['verification_deadline']
         products = self.validated_data['products']
 
         try:
@@ -200,6 +202,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
             with transaction.atomic():
                 course, created = Course.objects.get_or_create(id=course_id)
                 course.name = course_name
+                course.verification_deadline = course_verification_deadline
                 course.save()
 
                 for product in products:

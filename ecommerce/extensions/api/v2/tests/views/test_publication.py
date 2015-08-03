@@ -32,6 +32,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self.data = {
             'id': self.course_id,
             'name': self.course_name,
+            'verification_deadline': EXPIRES_STRING,
             'products': [
                 {
                     'product_class': 'Seat',
@@ -82,7 +83,11 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
         if recreate:
             # Create a Course.
-            course = Course.objects.create(id=self.course_id, name=self.course_name)
+            course = Course.objects.create(
+                id=self.course_id,
+                name=self.course_name,
+                verification_deadline=EXPIRES,
+            )
 
             # Create associated products.
             for product in self.data['products']:
@@ -119,6 +124,9 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
             course = Course.objects.get(id=course_id)
             self.assertEqual(course.name, expected['name'])
+
+            verification_deadline = EXPIRES if expected['verification_deadline'] else None
+            self.assertEqual(course.verification_deadline, verification_deadline)
 
             # Validate product structure.
             products = expected['products']

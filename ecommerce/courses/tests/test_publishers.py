@@ -89,6 +89,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         actual = json.loads(last_request.body)
         expected = {
             'id': self.course.id,
+            'name': self.course.name,
+            'verification_deadline': self.course.verification_deadline.isoformat(),
             'modes': [self.publisher.serialize_seat_for_commerce_api(seat) for seat in self.course.seat_products]
         }
         self.assertDictEqual(actual, expected)

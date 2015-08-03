@@ -16,6 +16,9 @@ class LMSPublisher(object):
 
         return seat.expires.isoformat()
 
+    def get_course_verification_deadline(self, course):
+        return course.verification_deadline.isoformat() if course.verification_deadline else None
+
     def serialize_seat_for_commerce_api(self, seat):
         """ Serializes a course seat product to a dict that can be further serialized to JSON. """
         stock_record = seat.stockrecords.first()
@@ -43,11 +46,15 @@ class LMSPublisher(object):
             logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
             return False
 
-        modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
         course_id = course.id
+        name = course.name
+        verification_deadline = self.get_course_verification_deadline(course)
+        modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
         data = {
             'id': course_id,
-            'modes': modes
+            'name': name,
+            'verification_deadline': verification_deadline,
+            'modes': modes,
         }
 
         url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)

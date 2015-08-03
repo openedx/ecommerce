@@ -3,6 +3,7 @@ import logging
 
 from django.db import models, transaction
 from django.utils.text import slugify
+from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
 
@@ -21,6 +22,11 @@ StockRecord = get_model('partner', 'StockRecord')
 class Course(models.Model):
     id = models.CharField(null=False, max_length=255, primary_key=True, verbose_name='ID')
     name = models.CharField(null=False, max_length=255)
+    verification_deadline = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_('Last date/time on which verification for this product can be submitted.')
+    )
     history = HistoricalRecords()
     thumbnail_url = models.URLField(null=True, blank=True)
 

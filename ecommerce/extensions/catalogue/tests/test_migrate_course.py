@@ -36,6 +36,8 @@ StockRecord = get_model('partner', 'StockRecord')
 
 class CourseMigrationTestMixin(CourseCatalogTestMixin):
     course_id = 'aaa/bbb/ccc'
+    commerce_api_url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
+    enrollment_api_url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(course_id))
 
     prices = {
         'honor': 0,
@@ -47,18 +49,20 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
     def _mock_lms_api(self):
         self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock LMS API calls.')
 
-        # Mock Course Structure API
-        url = urljoin(settings.LMS_URL_ROOT, 'api/course_structure/v0/courses/{}/'.format(self.course_id))
-        httpretty.register_uri(httpretty.GET, url, body='{"name": "A Tést Côurse"}', content_type=JSON)
+        # Mock Commerce API
+        body = {
+            'name': 'A Tést Côurse',
+            'verification_deadline': EXPIRES_STRING,
+        }
+        httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
 
         # Mock Enrollment API
-        url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(self.course_id))
         body = {
             'course_id': self.course_id,
             'course_modes': [{'slug': seat_type, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
                              seat_type, price in self.prices.iteritems()]
         }
-        httpretty.register_uri(httpretty.GET, url, body=json.dumps(body), content_type=JSON)
+        httpretty.register_uri(httpretty.GET, self.enrollment_api_url, body=json.dumps(body), content_type=JSON)
 
     def assert_stock_record_valid(self, stock_record, seat, price):
         """ Verify the given StockRecord is configured correctly. """
@@ -67,9 +71,9 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         self.assertEqual(stock_record.price_currency, 'USD')
         self.assertEqual(stock_record.partner_sku, generate_sku(seat))
 
-    def assert_seat_valid(self, seat, certificate_type):
+    def assert_seat_valid(self, seat, mode):
         """ Verify the given seat is configured correctly. """
-        certificate_type = Course.certificate_type_for_mode(certificate_type)
+        certificate_type = Course.certificate_type_for_mode(mode)
 
         expected_title = 'Seat in A Tést Côurse with {} certificate'.format(certificate_type)
         if seat.attr.id_verification_required:
@@ -78,9 +82,8 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         self.assertEqual(seat.title, expected_title)
         self.assertEqual(seat.attr.certificate_type, certificate_type)
         self.assertEqual(seat.expires, EXPIRES)
-        self.assertEqual(seat.attr.certificate_type, certificate_type)
         self.assertEqual(seat.attr.course_key, self.course_id)
-        # self.assertEqual(seat.attr.id_verification_required, Course.is_mode_verified(certificate_type))
+        self.assertEqual(seat.attr.id_verification_required, Course.is_mode_verified(mode))
 
     def assert_course_migrated(self):
         """ Verify the course was migrated and saved to the database. """
@@ -134,6 +137,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         # Verify created objects match mocked data
         parent_seat = course.parent_seat_product
         self.assertEqual(parent_seat.title, 'Seat in A Tést Côurse')
+        self.assertEqual(course.verification_deadline, EXPIRES)
 
         for seat in course.seat_products:
             certificate_type = seat.attr.certificate_type
@@ -141,6 +145,18 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
                 certificate_type = 'no-id-professional'
             logger.info('Validating objects for %s certificate type...', certificate_type)
             self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[certificate_type]))
+
+    @httpretty.activate
+    def test_course_name_missing(self):
+        """Verify that an exception is raised when the Commerce API doesn't return a course name."""
+        body = {
+            'name': None,
+            'verification_deadline': EXPIRES_STRING,
+        }
+        httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
+
+        migrated_course = MigratedCourse(self.course_id)
+        self.assertRaises(Exception, migrated_course.load_from_lms, ACCESS_TOKEN)
 
 
 class CommandTests(CourseMigrationTestMixin, TestCase):
