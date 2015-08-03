@@ -4,21 +4,19 @@ import json
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_model
 import pytz
 
-from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
-from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, TestServerUrlMixin
+from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.mixins import UserMixin
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
-Selector = get_class('partner.strategy', 'Selector')
 
 
-class ProductViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, TestCase):
+class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMixin, TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -30,27 +28,6 @@ class ProductViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin,
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)
         self.seat = self.course.create_or_update_seat('honor', False, 0, expires=expires)
-
-    def serialize_product(self, product):
-        """ Serializes a Product to a Python dict. """
-        attribute_values = [{'name': av.attribute.name, 'value': av.value} for av in product.attribute_values.all()]
-        data = {
-            'id': product.id,
-            'url': self.get_full_url(reverse('api:v2:product-detail', kwargs={'pk': product.id})),
-            'structure': product.structure,
-            'product_class': unicode(product.get_product_class()),
-            'title': product.title,
-            'expires': product.expires.strftime(ISO_8601_FORMAT) if product.expires else None,
-            'attribute_values': attribute_values
-        }
-
-        info = Selector().strategy().fetch_for_product(product)
-        data.update({
-            'is_available_to_buy': info.availability.is_available_to_buy,
-            'price': "{0:.2f}".format(info.price.excl_tax) if info.availability.is_available_to_buy else None
-        })
-
-        return data
 
     def test_list(self):
         """ Verify a list of products is returned. """

@@ -10,7 +10,7 @@ from waffle import Switch
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
-from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, TestServerUrlMixin
+from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.mixins import UserMixin
 
@@ -19,7 +19,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 Selector = get_class('partner.strategy', 'Selector')
 
 
-class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, TestCase):
+class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMixin, TestCase):
     maxDiff = None
     list_path = reverse('api:v2:course-list')
 
@@ -32,14 +32,14 @@ class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, 
     def create_course(self):
         return Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
 
-    def serialize_course(self, course):
+    def serialize_course(self, course, include_products=False):
         """ Serializes a course to a Python dict. """
         products_url = self.get_full_url(reverse('api:v2:course-product-list',
                                                  kwargs={'parent_lookup_course_id': course.id}))
 
         last_edited = course.history.latest().history_date.strftime(ISO_8601_FORMAT)
 
-        return {
+        data = {
             'id': course.id,
             'name': course.name,
             'verification_deadline': course.verification_deadline,
@@ -48,6 +48,11 @@ class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, 
             'products_url': products_url,
             'last_edited': last_edited
         }
+
+        if include_products:
+            data['products'] = [self.serialize_product(product) for product in course.products.all()]
+
+        return data
 
     def test_list(self):
         """ Verify the view returns a list of Courses. """
@@ -99,6 +104,11 @@ class CourseViewSetTests(TestServerUrlMixin, CourseCatalogTestMixin, UserMixin, 
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(json.loads(response.content), self.serialize_course(self.course))
+
+        # Verify nested products can be included
+        response = self.client.get(path + '?include_products=true')
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(json.loads(response.content), self.serialize_course(self.course, include_products=True))
 
     def test_update(self):
         """ Verify the view updates the information of existing courses. """
