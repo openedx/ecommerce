@@ -3,6 +3,8 @@ require.config({
     paths: {
         'backbone': 'bower_components/backbone/backbone',
         'backbone.paginator': 'bower_components/backbone.paginator/lib/backbone.paginator',
+        'backbone.route-filter': 'bower_components/backbone-route-filter/backbone-route-filter',
+        'backbone.super': 'bower_components/backbone-super/backbone-super/backbone-super',
         'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
         'bootstrap_accessibility': 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
         'collections': 'js/collections',
@@ -12,7 +14,9 @@ require.config({
         'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
         'models': 'js/models',
         'moment': 'bower_components/moment/moment',
+        'pages': 'js/pages',
         'requirejs': 'bower_components/requirejs/require',
+        'routers': 'js/routers',
         'templates': 'templates',
         'text': 'bower_components/text/text',
         'underscore': 'bower_components/underscore/underscore',

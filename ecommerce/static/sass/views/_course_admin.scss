@@ -1,0 +1,13 @@
+#app {
+  padding-bottom: spacing-vertical(x-small);
+
+  .container {
+    padding-bottom: spacing-vertical(small);
+  }
+
+  #courseTable {
+    .course-name {
+      font-weight: bold;
+    }
+  }
+}

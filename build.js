@@ -21,7 +21,7 @@
             name: 'js/config'
         },
         {
-            name: 'js/pages/course_list_page',
+            name: 'js/apps/course_admin_app',
             exclude: ['js/common']
         },
         {

@@ -7,8 +7,13 @@ define([
         'use strict';
 
         return Backbone.PageableCollection.extend({
+            queryParams: {
+                pageSize: 'page_size'
+            },
+
             state: {
-                pageSize: 20
+                // TODO Replace this collection with something that works properly with our API.
+                pageSize: 10000
             },
 
             parseRecords: function (resp, options) {

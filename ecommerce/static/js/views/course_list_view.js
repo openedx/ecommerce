@@ -1,37 +1,41 @@
 define([
         'jquery',
+        'backbone',
         'underscore',
         'underscore.string',
-        'backbone',
         'moment',
         'text!templates/course_list.html',
         'dataTablesBootstrap'
-      ],
-      function ($, _, _s, Backbone, moment, courseListViewTemplate) {
+    ],
+    function ($,
+              Backbone,
+              _,
+              _s,
+              moment,
+              courseListViewTemplate) {
 
         'use strict';
 
         return Backbone.View.extend({
-
-            el: '#course-list-view',
+            className: 'course-list-view',
 
             template: _.template(courseListViewTemplate),
 
-            initialize: function (options) {
+            initialize: function () {
                 this.listenTo(this.collection, 'add remove change', this.render);
-                this.collection.fetch();
             },
 
             renderCourseTable: function () {
 
                 var tableData = [],
-                    filterPlaceholder = gettext('Filter by org or course ID'),
+                    filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
                 this.collection.each(function (value) {
                     tableData.push(
                         {
                             id: value.get('id'),
+                            type: value.get('type'),
                             name: value.get('name'),
                             last_edited: moment(value.get('last_edited')).format('MMMM DD, YYYY, h:mm A')
                         }
@@ -43,26 +47,48 @@ define([
                     this.$el.find('#courseTable').DataTable({
                         autoWidth: false,
                         data: tableData,
-                        info: false,
-                        paging: false,
+                        info: true,
+                        paging: true,
                         oLanguage: {
+                            oPaginate: {
+                                sNext: gettext('Next'),
+                                sPrevious: gettext('Previous')
+                            },
+
+                            // Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.
+                            sInfo: gettext("Displaying _START_ to _END_ of _TOTAL_ courses"),
+
+                            // Translators: _MAX_ is a placeholder. Do NOT translate it.
+                            sInfoFiltered: gettext('(filtered from _MAX_ total courses)'),
+
+                            // Translators: _MENU_ is a placeholder. Do NOT translate it.
+                            sLengthMenu: gettext('Display _MENU_ courses'),
                             sSearch: ''
                         },
+                        order: [[0, 'asc']],
                         columns: [
                             {
-                                title: gettext('ID'),
-                                data: 'id',
+                                title: gettext('Course'),
+                                data: 'name',
                                 fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-                                    $(nTd).html(_s.sprintf('<a href=\'/courses/%s\'>%s</a>', oData.id, oData.id));
+                                    $(nTd).html(_s.sprintf('<a href="/courses/%s/" class="course-name">%s</a><div class="course-id">%s</div>', oData.id, oData.name, oData.id));
                                 }
                             },
                             {
-                                title: gettext('Name'),
-                                data: 'name'
+                                title: gettext('Course Type'),
+                                data: 'type',
+                                fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+                                    $(nTd).html(_s.capitalize(oData.type));
+                                }
                             },
                             {
                                 title: gettext('Last Edited'),
                                 data: 'last_edited'
+                            },
+                            {
+                                data: 'id',
+                                visible: false,
+                                searchable: true
                             }
                         ]
                     });

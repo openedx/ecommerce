@@ -20,10 +20,18 @@ $border-radius-large: 3px;
 $border-radius-small: 3px;
 
 // typography
-$font-family-sans-serif: 'Open Sans','Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-sans-serif: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 $font-family-monospace: 'Bitstream Vera Sans Mono', Consolas, Courier, monospace;
 
 // navbar
 $navbar-default-bg: white;
 $navbar-height: 74px;
 $navbar-border-bottom-width: 4px;
+
+// Footer
+$footer-bg: $body-bg;
+$footer-height: 37px;
+$footer-margin: $footer-height;
+
+// Miscellaneous
+$container-bg: white;

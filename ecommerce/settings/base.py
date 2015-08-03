@@ -164,6 +164,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'oscar.apps.checkout.context_processors.checkout',
     'oscar.apps.customer.notifications.context_processors.notifications',
     'oscar.core.context_processors.metadata',
+    'ecommerce.core.context_processors.core',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
@@ -398,7 +399,7 @@ REST_FRAMEWORK = {
         'ecommerce.extensions.api.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'ecommerce.extensions.api.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.UserRateThrottle',

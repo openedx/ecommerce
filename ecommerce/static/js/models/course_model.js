@@ -4,7 +4,10 @@ define([
         'collections/product_collection',
         'models/course_seat_model'
     ],
-    function (Backbone, _, ProductCollection, CourseSeatModel) {
+    function (Backbone,
+              _,
+              ProductCollection,
+              CourseSeatModel) {
         'use strict';
 
         return Backbone.Model.extend({
