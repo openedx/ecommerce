@@ -186,6 +186,14 @@ ALLOWED_INCLUDE_ROOTS = (
 # END TEMPLATE CONFIGURATION
 
 
+# THEMING
+# Name of your LMS
+PLATFORM_NAME = 'Your Platform Name Here'
+
+THEME_SCSS = 'sass/themes/default.scss'
+# END THEMING
+
+
 # MIDDLEWARE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
@@ -422,7 +430,3 @@ SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'ecommerce_language'
 # END COOKIE CONFIGURATION
-
-
-PLATFORM_NAME = 'Your Platform Name Here'
-THEME_SCSS = 'sass/themes/default.scss'

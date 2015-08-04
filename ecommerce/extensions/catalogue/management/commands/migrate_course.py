@@ -101,8 +101,12 @@ class MigratedCourse(object):
     def _get_products(self, modes):
         """ Creates/updates course seat products. """
         for mode in modes:
-            certificate_type = Course.certificate_type_for_mode(mode['slug'])
-            id_verification_required = Course.is_mode_verified(mode['slug'])
+            mode_slug = mode['slug'].lower()
+            if mode_slug == 'audit':
+                continue
+
+            certificate_type = Course.certificate_type_for_mode(mode_slug)
+            id_verification_required = Course.is_mode_verified(mode_slug)
             price = mode['min_price']
             expires = mode.get('expiration_datetime')
             expires = parse(expires) if expires else None
