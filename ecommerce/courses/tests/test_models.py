@@ -59,7 +59,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         ('professional', 'professional'),
         ('honor', 'honor'),
         ('no-id-professional', 'professional'),
-        ('audit', 'audit'),
+        ('audit', ''),
         ('unknown', 'unknown'),
     )
     @ddt.unpack
@@ -92,7 +92,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         # pylint: disable=protected-access
         self.assertEqual(seat.title, course._get_course_seat_name(certificate_type, id_verification_required))
         self.assertEqual(seat.get_product_class(), self.seat_product_class)
-        self.assertEqual(seat.attr.certificate_type, certificate_type)
+        self.assertEqual(getattr(seat.attr, 'certificate_type', ''), certificate_type)
         self.assertEqual(seat.attr.course_key, course.id)
         self.assertEqual(seat.attr.id_verification_required, id_verification_required)
         self.assertEqual(seat.stockrecords.first().price_excl_tax, price)

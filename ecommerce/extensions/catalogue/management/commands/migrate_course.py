@@ -146,9 +146,14 @@ class Command(BaseCommand):
 
                     for seat in course.seat_products:
                         stock_record = seat.stockrecords.first()
-                        data = (seat.attr.certificate_type, seat.attr.id_verification_required,
-                                '{0} {1}'.format(stock_record.price_currency, stock_record.price_excl_tax),
-                                stock_record.partner_sku, seat.slug, seat.expires)
+                        data = (
+                            getattr(seat.attr, 'certificate_type', ''),
+                            seat.attr.id_verification_required,
+                            '{0} {1}'.format(stock_record.price_currency, stock_record.price_excl_tax),
+                            stock_record.partner_sku,
+                            seat.slug,
+                            seat.expires
+                        )
                         msg += '\t{}\n'.format(data)
 
                     logger.info(msg)
