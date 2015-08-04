@@ -43,7 +43,9 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         'honor': 0,
         'verified': 10,
         'no-id-professional': 100,
-        'professional': 1000
+        'professional': 1000,
+        'audit': 0,
+        'credit': 0,
     }
 
     def _mock_lms_api(self):
@@ -89,9 +91,13 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         """ Verify the course was migrated and saved to the database. """
         course = Course.objects.get(id=self.course_id)
         seats = course.seat_products
-        self.assertEqual(len(seats), 4)
+
+        # The "audit" mode should not be migrated, but all others should be.
+        self.assertEqual(len(seats), len(self.prices) - 1)
+
         parent = course.products.get(structure=Product.PARENT)
         self.assertEqual(list(parent.categories.all()), [self.category])
+
         for seat in seats:
             seat_type = seat.attr.certificate_type
             if seat_type == 'professional' and not seat.attr.id_verification_required:
