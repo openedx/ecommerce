@@ -1,0 +1,42 @@
+<div class="alerts"></div>
+
+<div class="form-group">
+    <label class="hd-3" for="id"><%= gettext('Course ID') %></label>
+    <% if(editing){ %>
+    <input type="hidden" name="id" value="<%= id %>">
+
+    <div class="course-id"><%= id %></div>
+    <% } else { %>
+    <input type="text" class="form-control" name="id" placeholder="e.g. edX/DemoX/Demo_Course">
+
+    <p class="help-block"></p>
+    <% } %>
+</div>
+
+<!-- TODO: Hide this field and get the data from an API. -->
+<div class="form-group">
+    <label class="hd-3" for="name"><%= gettext('Course Name') %></label>
+    <input type="text" class="form-control" name="name" placeholder="e.g. edX Demonstration Course">
+
+    <p class="help-block"></p>
+</div>
+
+<div class="form-group">
+    <label class="hd-3" for="courseType"><%= gettext('Course Type') %></label>
+
+    <p class="help-block"></p>
+    <!-- Radio fields will be appended here. -->
+    <div class="course-types"></div>
+</div>
+
+<div class="form-group course-seats">
+    <label class="hd-3"><%= gettext('Course Seats') %></label>
+
+    <div class="course-seat empty"><em><%= gettext('Select a course type.') %></em></div>
+    <div class="editable-seats"></div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= gettext(editing ? 'Save Changes' : 'Create Course') %></button>
+    <a class="btn btn-default" href="/courses/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
+</div>

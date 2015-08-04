@@ -4,7 +4,6 @@ define([
         'underscore',
         'underscore.string',
         'moment',
-        'models/course_model',
         'text!templates/course_detail.html',
         'text!templates/_course_seat.html'
     ],
@@ -13,27 +12,15 @@ define([
               _,
               _s,
               moment,
-              CourseModel,
               CourseDetailTemplate,
               CourseSeatTemplate) {
         'use strict';
 
         return Backbone.View.extend({
-            el: '.course-detail-view',
+            className: 'course-detail-view',
 
             initialize: function () {
-                var self = this,
-                    course_id = self.$el.data('course-id');
-
-                this.course = new CourseModel({id: course_id});
-                this.course.fetch({
-                    success: function (course) {
-                        self.render();
-                        course.getProducts().done(function () {
-                            self.renderSeats();
-                        });
-                    }
-                });
+                this.listenTo(this.model, 'change', this.render);
             },
 
             getSeats: function () {
@@ -43,7 +30,8 @@ define([
                         'honor', 'verified', 'no-id-professional', 'professional', 'credit'
                     ])));
 
-                seats = _.sortBy(this.course.getSeats(), function (seat) {
+                seats = _.values(this.model.getSeats());
+                seats = _.sortBy(seats, function (seat) {
                     return sortObj[seat.get('certificate_type')]
                 });
 
@@ -51,27 +39,27 @@ define([
             },
 
             render: function () {
-                var html, templateData;
-                document.title = this.course.get('name') + ' - ' + gettext('View Course');
-
-                templateData = {
-                    course: this.course.attributes,
-                    courseType: _s.capitalize(this.course.get('type'))
+                var html, templateData = {
+                    course: this.model.attributes,
+                    courseType: _s.capitalize(this.model.get('type'))
                 };
 
                 html = _.template(CourseDetailTemplate)(templateData);
-                this.$el.html(html)
+                this.$el.html(html);
+
+                this.renderSeats();
+
+                return this;
             },
 
             renderSeats: function () {
                 var html = '',
                     $seatHolder = $('.course-seats', this.$el);
-
-                this.getSeats().forEach(function (seat) {
+                _.each(this.getSeats(), function (seat) {
                     html += _.template(CourseSeatTemplate)({seat: seat, moment: moment});
                 });
 
-                $seatHolder.append(html);
+                $seatHolder.html(html);
             }
         });
     }

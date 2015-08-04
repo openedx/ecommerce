@@ -1,8 +1,13 @@
 require([
-    'jquery',
-    'backbone',
-    'bootstrap',
-    'bootstrap_accessibility',
-    'underscore'
-], function () {
-});
+        'jquery',
+        'backbone',
+        'backbone-super',
+        'bootstrap',
+        'bootstrap_accessibility',
+        'underscore'
+    ],
+    function () {
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    });

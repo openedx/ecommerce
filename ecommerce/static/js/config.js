@@ -2,7 +2,11 @@ require.config({
     baseUrl: '/static/',
     paths: {
         'backbone': 'bower_components/backbone/backbone',
+        'backbone-relational': 'bower_components/backbone-relational/backbone-relational',
+        'backbone-super': 'bower_components/backbone-super/backbone-super/backbone-super',
+        'backbone-validation': 'bower_components/backbone-validation/dist/backbone-validation-amd',
         'backbone.paginator': 'bower_components/backbone.paginator/lib/backbone.paginator',
+        'backbone.stickit': 'bower_components/backbone.stickit/backbone.stickit',
         'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
         'bootstrap_accessibility': 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
         'collections': 'js/collections',
