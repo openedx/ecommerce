@@ -125,7 +125,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
             course = Course.objects.get(id=course_id)
             self.assertEqual(course.name, expected['name'])
 
-            verification_deadline = EXPIRES if expected['verification_deadline'] else None
+            verification_deadline = EXPIRES if expected.get('verification_deadline') else None
             self.assertEqual(course.verification_deadline, verification_deadline)
 
             # Validate product structure.
@@ -238,3 +238,14 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
         self._assert_course_saved(self.course_id)
+
+    def test_verification_deadline_optional(self):
+        """Verify that submitting a course verification deadline is optional."""
+        self.data.pop('verification_deadline')
+        self._toggle_publication(True)
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            mock_publish.return_value = True
+            response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+            self.assertEqual(response.status_code, 201)
+            self._assert_course_saved(self.course_id, expected=self.data)
