@@ -1,32 +1,10 @@
-{# Base template for edX-specific pages. #}
-
-{% load compress %}
+{% extends 'edx/base.html' %}
 {% load core_extras %}
 {% load i18n %}
 {% load staticfiles %}
 
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock title %}</title>
+{% block title %}{% trans "Courses" %}{% endblock %}
 
-    {% compress css %}
-        <link rel="stylesheet" href="{% static 'sass/base/main.scss' %}" type="text/x-scss">
-        {% captureas theme_scss %}
-            {% settings_value 'THEME_SCSS' %}
-        {% endcaptureas %}
-        <link rel="stylesheet" href="{% static theme_scss %}" type="text/x-scss">
-    {% endcompress %}
-
-    {% compress css %}
-        {# This block is separated to better support browser caching. #}
-        {% block stylesheets %}
-        {% endblock %}
-    {% endcompress %}
-</head>
-<body>
 {% block navbar %}
     <nav class="navbar navbar-default" aria-label="Account">
         <div class="container">
@@ -39,9 +17,10 @@
                     <span aria-hidden="true" class="icon-bar"></span>
                     <span aria-hidden="true" class="icon-bar"></span>
                 </button>
-                <div class="navbar-brand">
+                <a class="navbar-brand" href="/courses/">
                     <div class="navbar-brand-logo" alt="{% settings_value 'PLATFORM_NAME' %}"></div>
-                </div>
+                    <div class="navbar-brand-app">{% trans "Course Administration" %}</div>
+                </a>
             </div>
 
             <div class="collapse navbar-collapse" id="main-navbar-collapse">
@@ -77,27 +56,21 @@
 {% endblock navbar %}
 
 {% block content %}
-{% endblock content %}
+    <div id="app" class="container"></div>
+{% endblock %}
 
 {% block footer %}
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 text-right">
+                    <em>{% blocktrans %}{{ platform_name }} Course Administration Tool{% endblocktrans %}</em>
+                </div>
+            </div>
+        </div>
+    </footer>
 {% endblock footer %}
 
-{# Translation support for JavaScript strings. #}
-<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
-
-{% compress js %}
-    <script src="{% static 'bower_components/requirejs/require.js' %}"></script>
-    <script src="{% static 'js/config.js' %}"></script>
-
-    {# Note: django-compressor does not recognize the data-main attribute. Load the main script separately. #}
-    <script src="{% static 'js/common.js' %}"></script>
-{% endcompress %}
-
-{% compress js %}
-    {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
-    downloading a single, large file for each page. #}
-    {% block javascript %}
-    {% endblock javascript %}
-{% endcompress %}
-</body>
-</html>
+{% block javascript %}
+    <script src="{% static 'js/apps/course_admin_app.js' %}"></script>
+{% endblock %}

@@ -2,16 +2,18 @@
 // --------------------------------------------------
 
 .nav {
-    .nav-link {
-        &:hover,
-        &:focus {
-            outline:inherit;
-            border-bottom-color:transparent;
-        }
+  .nav-link {
+    &:hover,
+    &:focus {
+      outline: inherit;
+      border-bottom-color: transparent;
     }
+  }
 }
 
 .navbar {
+  margin-bottom: 0;
+
   // Remove default Bootstrap navbar border styling
   border: none;
   border-radius: 0;
@@ -20,8 +22,24 @@
   border-bottom: $navbar-border-bottom-width solid palette(primary, accent);
 
   // Vertically center the logo
-  .navbar-brand .navbar-brand-logo {
-    @include center-vertically;
+  .navbar-brand {
+    &:active,
+    &:focus,
+    &:hover {
+      border: none;
+    }
+
+    .navbar-brand-logo {
+      @include center-vertically;
+    }
+
+    .navbar-brand-app {
+      @include center-vertically;
+      top: 0;
+      display: inline-block;
+      color: palette(primary, accent);
+      font-weight: 600;
+    }
   }
 
 }
@@ -65,13 +83,13 @@
 }
 
 .dropdown-menu {
-    .nav-link {
-        // Disables default link behavior of pattern library on menu items
-        transition:none;
+  .nav-link {
+    // Disables default link behavior of pattern library on menu items
+    transition: none;
 
-        &:hover,
-        &:focus {
-            border-bottom-color:transparent;
-        }
+    &:hover,
+    &:focus {
+      border-bottom-color: transparent;
     }
+  }
 }

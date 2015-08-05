@@ -1,12 +1,16 @@
 define([
-  'underscore',
-  'collections/drf_pageable_collection',
-  'models/course_model'
-], function (_, DrfPageableCollection, CourseModel) {
+        'underscore',
+        'collections/drf_pageable_collection',
+        'models/course_model'
+    ],
+    function (_,
+              DrfPageableCollection,
+              CourseModel) {
+        'use strict';
 
-  return DrfPageableCollection.extend({
-    model: CourseModel,
-    url: '/api/v2/courses/',
-  });
-
-});
+        return DrfPageableCollection.extend({
+            model: CourseModel,
+            url: '/api/v2/courses/'
+        });
+    }
+);

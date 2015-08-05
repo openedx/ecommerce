@@ -1,12 +1,22 @@
-require([
+define([
         'collections/course_collection',
-        'views/course_list_view'
+        'views/course_list_view',
+        'pages/page'
     ],
-    function (CourseCollection, CourseListView) {
+    function (CourseCollection,
+              CourseListView,
+              Page) {
+        'use strict';
 
-        return new CourseListView({
-            collection: new CourseCollection()
+        return Page.extend({
+            title: 'Courses',
+
+            initialize: function () {
+                this.collection = new CourseCollection();
+                this.view = new CourseListView({collection: this.collection});
+                this.listenTo(this.collection, 'reset', this.render);
+                this.collection.fetch({reset: true});
+            }
         });
-
     }
 );

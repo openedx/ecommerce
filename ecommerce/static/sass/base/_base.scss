@@ -2,20 +2,34 @@
 // --------------------
 
 html {
-    font-size:16px;
+  font-size: 16px;
 }
 
 a {
-    &:hover,
-    &:focus {
-        text-decoration: none;
-    }
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
 }
 
 .container {
-    background-color: white;
+  background-color: $container-bg;
 }
 
 .sr {
-   @extend .sr-only;
+  @extend .sr-only;
+}
+
+.page-header {
+  .hd-1 {
+    margin: 0;
+  }
+}
+
+.breadcrumb {
+  > li {
+    + li:before {
+      content: "#{$breadcrumb-separator} ";
+    }
+  }
 }

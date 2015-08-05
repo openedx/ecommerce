@@ -37,8 +37,8 @@ class CourseMigrationViewTests(UserMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class CourseListViewTests(UserMixin, TestCase):
-    path = reverse('courses:list')
+class CourseAppViewTests(UserMixin, TestCase):
+    path = reverse('courses:app', args=[''])
 
     def test_login_required(self):
         """ Users are required to login before accessing the view. """

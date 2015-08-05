@@ -26,7 +26,7 @@ if (isBrowser) {
 
     // you can automatically get the test files using karma's configs
     for (var file in window.__karma__.files) {
-        if (/spec\.js$/.test(file)) {
+        if (/js\/test\/specs\/.*spec\.js$/.test(file)) {
             specs.push(file);
         }
     }
