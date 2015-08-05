@@ -29,7 +29,16 @@
         <!-- Radio fields will be appended here. -->
         <div class="course-types"></div>
     </div>
+</div>
 
+<div class="form-group course-seats">
+    <label class="hd-4"><%= gettext('Course Seats') %></label>
+
+    <div class="course-seat empty"><em><%= gettext('Select a course type.') %></em></div>
+    <div class="editable-seats"></div>
+</div>
+
+<div class="fields">
     <div class="form-group verification-deadline hidden">
         <label class="hd-4" for="verification_deadline"><%= gettext('Verification Deadline') %></label>
 
@@ -44,16 +53,9 @@
             <%= gettext('After this date/time, students can no longer submit photos for ID verification.') %>
         </span>
         <span class="help-block">
-            <em>(<%= gettext('This is only required for course modes that require ID verification.') %>)</em>
+            <em>(<%= gettext('This is field is optional for course seats that require ID verification.') %>)</em>
         </span>
     </div>
-</div>
-
-<div class="form-group course-seats">
-    <label class="hd-4"><%= gettext('Course Seats') %></label>
-
-    <div class="course-seat empty"><em><%= gettext('Select a course type.') %></em></div>
-    <div class="editable-seats"></div>
 </div>
 
 <div class="form-actions">

@@ -24,6 +24,7 @@ require.config({
         'text': 'bower_components/text/text',
         'underscore': 'bower_components/underscore/underscore',
         'underscore.string': 'bower_components/underscore.string/dist/underscore.string',
+        'utils': 'js/utils',
         'views': 'js/views'
     },
     shim: {

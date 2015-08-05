@@ -21,7 +21,7 @@ define([
                     model: this.model
                 });
 
-                this.listenTo(this.model, 'change sync', this.render);
+                this.listenTo(this.model, 'sync', this.render);
                 this.model.fetch({
                     data: {include_products: true}
                 });

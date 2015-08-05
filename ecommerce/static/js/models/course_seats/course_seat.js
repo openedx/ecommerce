@@ -1,9 +1,7 @@
 define([
-        'backbone.super',
         'models/product_model'
     ],
-    function (BackboneSuper,
-              ProductModel) {
+    function (ProductModel) {
         'use strict';
 
         return ProductModel.extend({
@@ -11,14 +9,15 @@ define([
                 certificate_type: null,
                 expires: null,
                 id_verification_required: null,
-                price: null,
+                price: 0,
                 product_class: 'Seat'
             },
 
             validation: {
-                certificate_type: {
-                    required: true
-                },
+                // TODO Determine how to set this to the model's default.
+                //certificate_type: {
+                //    required: true
+                //},
                 price: {
                     required: true
                 },
@@ -27,7 +26,25 @@ define([
                 }
             },
 
+            // TODO Determine how to use the extended seatType attribute of child classes with Backbone.Relational
+            // http://backbonerelational.org/#RelationalModel-subModelTypes
             getSeatType: function () {
+                switch (this.get('certificate_type')) {
+                    case 'verified':
+                        return 'verified';
+                    case 'credit':
+                        return 'credit';
+                    case 'professional':
+                    case 'no-id-professional':
+                        return 'professional';
+                    case 'honor':
+                        return 'honor';
+                    default:
+                        return 'audit';
+                }
+            },
+
+            getSeatTypeDisplayName: function () {
                 switch (this.get('certificate_type')) {
                     case 'verified':
                         return gettext('Verified');

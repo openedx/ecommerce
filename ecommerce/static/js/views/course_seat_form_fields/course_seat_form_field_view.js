@@ -71,8 +71,6 @@ define([
                 return this.$(_s.sprintf('input[name=%s]', name)).val();
             },
 
-            // TODO Validate the input: http://thedersen.com/projects/backbone-validation/.
-
             /***
              * Return the input data from the form fields.
              */
@@ -85,10 +83,6 @@ define([
                 }, this);
 
                 return data;
-            },
-
-            updateModel: function () {
-                this.model.set(this.getData());
             }
         });
     }
