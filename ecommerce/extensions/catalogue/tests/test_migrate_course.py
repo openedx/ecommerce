@@ -8,11 +8,12 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
 import pytz
+
 from waffle import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
@@ -23,7 +24,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku
 
 JSON = 'application/json'
-ACCESS_TOKEN = 'edx'
+EDX_API_KEY = 'edx'
 EXPIRES = datetime.datetime(year=1985, month=10, day=26, hour=1, minute=20, tzinfo=pytz.utc)
 EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
 
@@ -104,9 +105,11 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
 
     def assert_lms_api_headers(self, request):
         self.assertEqual(request.headers['Accept'], JSON)
-        self.assertEqual(request.headers['Authorization'], 'Bearer ' + ACCESS_TOKEN)
+        self.assertEqual(request.headers['Content-Type'], JSON)
+        self.assertEqual(request.headers['X-Edx-Api-Key'], EDX_API_KEY)
 
 
+@override_settings(EDX_API_KEY=EDX_API_KEY)
 class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(MigratedCourseTests, self).setUp()
@@ -116,7 +119,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
         self._mock_lms_api()
         migrated_course = MigratedCourse(self.course_id)
-        migrated_course.load_from_lms(ACCESS_TOKEN)
+        migrated_course.load_from_lms()
         return migrated_course
 
     @httpretty.activate
@@ -156,9 +159,10 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
 
         migrated_course = MigratedCourse(self.course_id)
-        self.assertRaises(Exception, migrated_course.load_from_lms, ACCESS_TOKEN)
+        self.assertRaises(Exception, migrated_course.load_from_lms)
 
 
+@override_settings(EDX_API_KEY=EDX_API_KEY)
 class CommandTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(CommandTests, self).setUp()
@@ -174,7 +178,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             mock_publish.return_value = True
-            call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN)
+            call_command('migrate_course', self.course_id)
 
             # Verify that the migrated course was not published back to the LMS
             self.assertFalse(mock_publish.called)
@@ -193,7 +197,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         self._mock_lms_api()
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN, commit=True)
+            call_command('migrate_course', self.course_id, commit=True)
 
             # Verify that the migrated course was published back to the LMS
             self.assertTrue(mock_publish.called)
