@@ -18,13 +18,13 @@ class MigratedCourse(object):
     def __init__(self, course_id):
         self.course, _created = Course.objects.get_or_create(id=course_id)
 
-    def load_from_lms(self, access_token):
+    def load_from_lms(self):
         """
         Loads course products from the LMS.
 
         Loaded data is NOT persisted until the save() method is called.
         """
-        name, verification_deadline, modes = self._retrieve_data_from_lms(access_token)
+        name, verification_deadline, modes = self._retrieve_data_from_lms()
 
         self.course.name = name
         self.course.verification_deadline = verification_deadline
@@ -84,13 +84,14 @@ class MigratedCourse(object):
         logger.debug(data)
         return data['course_modes']
 
-    def _retrieve_data_from_lms(self, access_token):
+    def _retrieve_data_from_lms(self):
         """
         Retrieves the course name and modes from the LMS.
         """
         headers = {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ' + access_token
+            'Content-Type': 'application/json',
+            'X-Edx-Api-Key': settings.EDX_API_KEY
         }
 
         course_name, course_verification_deadline = self._query_commerce_api(headers)
@@ -113,11 +114,6 @@ class Command(BaseCommand):
     help = 'Migrate course modes and pricing from LMS to Oscar.'
 
     option_list = BaseCommand.option_list + (
-        make_option('--access_token',
-                    action='store',
-                    dest='access_token',
-                    default=None,
-                    help='OAuth2 access token used to authenticate against the LMS APIs.'),
         make_option('--commit',
                     action='store_true',
                     dest='commit',
@@ -128,17 +124,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         course_ids = args
-        access_token = options.get('access_token')
-        if not access_token:
-            logger.error('Courses cannot be migrated if no access token is supplied.')
-            return
 
         for course_id in course_ids:
             course_id = unicode(course_id)
             try:
                 with transaction.atomic():
                     migrated_course = MigratedCourse(course_id)
-                    migrated_course.load_from_lms(access_token)
+                    migrated_course.load_from_lms()
 
                     course = migrated_course.course
                     msg = 'Retrieved info for {0} ({1}):\n'.format(course.id, course.name)
