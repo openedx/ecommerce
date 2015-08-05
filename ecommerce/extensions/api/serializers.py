@@ -158,7 +158,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     """
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
     name = serializers.CharField(max_length=255)
-    verification_deadline = serializers.DateTimeField()
+    # Verification deadline should only be required if the course actually requires verification.
+    verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
     products = serializers.ListField()
 
     def validate_products(self, products):
@@ -193,7 +194,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         """
         course_id = self.validated_data['id']
         course_name = self.validated_data['name']
-        course_verification_deadline = self.validated_data['verification_deadline']
+        course_verification_deadline = self.validated_data.get('verification_deadline')
         products = self.validated_data['products']
 
         try:
