@@ -11,6 +11,7 @@ import waffle
 
 from ecommerce.courses.models import Course
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,13 +19,13 @@ class MigratedCourse(object):
     def __init__(self, course_id):
         self.course, _created = Course.objects.get_or_create(id=course_id)
 
-    def load_from_lms(self):
+    def load_from_lms(self, access_token):
         """
         Loads course products from the LMS.
 
         Loaded data is NOT persisted until the save() method is called.
         """
-        name, verification_deadline, modes = self._retrieve_data_from_lms()
+        name, verification_deadline, modes = self._retrieve_data_from_lms(access_token)
 
         self.course.name = name
         self.course.verification_deadline = verification_deadline
@@ -69,6 +70,32 @@ class MigratedCourse(object):
 
         return course_name, course_verification_deadline
 
+    def _query_course_structure_api(self, access_token):
+        """Get course name from the Course Structure API."""
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + access_token
+        }
+
+        url = self._build_lms_url('api/course_structure/v0/courses/{}/'.format(self.course.id))
+        response = requests.get(url, headers=headers)
+
+        if response.status_code != 200:
+            raise Exception('Unable to retrieve course name: [{status}] - {body}'.format(
+                status=response.status_code,
+                body=response.content
+            ))
+
+        data = response.json()
+        logger.debug(data)
+
+        course_name = data['name']
+        # A course without entries in the LMS CourseModes table must be an honor course, meaning
+        # it has no verification deadline.
+        course_verification_deadline = None
+
+        return course_name, course_verification_deadline
+
     def _query_enrollment_api(self, headers):
         """Get modes and pricing from Enrollment API."""
         url = self._build_lms_url('api/enrollment/v1/course/{}'.format(self.course.id))
@@ -84,7 +111,7 @@ class MigratedCourse(object):
         logger.debug(data)
         return data['course_modes']
 
-    def _retrieve_data_from_lms(self):
+    def _retrieve_data_from_lms(self, access_token):
         """
         Retrieves the course name and modes from the LMS.
         """
@@ -94,7 +121,15 @@ class MigratedCourse(object):
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
 
-        course_name, course_verification_deadline = self._query_commerce_api(headers)
+        try:
+            course_name, course_verification_deadline = self._query_commerce_api(headers)
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning(
+                u"Calling Enrollment API failed with: [%s]. Falling back to Course Structure API.",
+                e.message
+            )
+            course_name, course_verification_deadline = self._query_course_structure_api(access_token)
+
         modes = self._query_enrollment_api(headers)
 
         return course_name, course_verification_deadline, modes
@@ -114,6 +149,11 @@ class Command(BaseCommand):
     help = 'Migrate course modes and pricing from LMS to Oscar.'
 
     option_list = BaseCommand.option_list + (
+        make_option('--access_token',
+                    action='store',
+                    dest='access_token',
+                    default=None,
+                    help='OAuth2 access token used to authenticate against some LMS APIs.'),
         make_option('--commit',
                     action='store_true',
                     dest='commit',
@@ -124,13 +164,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         course_ids = args
+        access_token = options.get('access_token')
+        if not access_token:
+            logger.error('Courses cannot be migrated if no access token is supplied.')
+            return
 
         for course_id in course_ids:
             course_id = unicode(course_id)
             try:
                 with transaction.atomic():
                     migrated_course = MigratedCourse(course_id)
-                    migrated_course.load_from_lms()
+                    migrated_course.load_from_lms(access_token)
 
                     course = migrated_course.course
                     msg = 'Retrieved info for {0} ({1}):\n'.format(course.id, course.name)
