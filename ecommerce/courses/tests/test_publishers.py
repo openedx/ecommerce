@@ -98,7 +98,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def test_serialize_seat_for_commerce_api(self):
         """ The method should convert a seat to a JSON-serializable dict consumable by the Commerce API. """
         # Grab the verified seat
-        seat = sorted(self.course.seat_products, key=lambda p: p.attr.certificate_type)[1]
+        seat = sorted(self.course.seat_products, key=lambda p: getattr(p.attr, 'certificate_type', ''))[1]
         stock_record = seat.stockrecords.first()
 
         actual = self.publisher.serialize_seat_for_commerce_api(seat)

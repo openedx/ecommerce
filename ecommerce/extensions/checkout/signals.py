@@ -3,6 +3,7 @@ import waffle
 from django.dispatch import receiver
 from oscar.core.loading import get_class
 
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
 from ecommerce.notifications.notifications import send_notification
 
@@ -33,7 +34,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                     # SKU. Marketing is aware that this approach will not scale once we start selling
                     # products other than courses, and will need to change in the future.
                     'id': line.partner_sku,
-                    'sku': line.product.attr.certificate_type,
+                    'sku': mode_for_seat(line.product),
                     'name': line.product.title,
                     'price': str(line.line_price_excl_tax),
                     'quantity': line.quantity,

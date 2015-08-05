@@ -11,6 +11,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 class UtilsTests(CourseCatalogTestMixin, TestCase):
     @ddt.unpack
     @ddt.data(
+        ('', False, 'audit'),
         ('honor', True, 'honor'),
         ('honor', False, 'honor'),
         ('verified', True, 'verified'),

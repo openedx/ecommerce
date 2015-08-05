@@ -143,7 +143,7 @@ class EnrollmentFulfillmentModuleTests(EnrollmentFulfillmentTestMixin, TestCase)
                     'INFO',
                     'line_revoked: certificate_type="{}", course_id="{}", order_line_id="{}", order_number="{}", '
                     'product_class="{}", user_id="{}"'.format(
-                        line.product.attr.certificate_type,
+                        getattr(line.product.attr, 'certificate_type', ''),
                         line.product.attr.course_key,
                         line.id,
                         line.order.number,

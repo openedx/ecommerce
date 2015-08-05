@@ -228,12 +228,12 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         try:
             logger.info('Attempting to revoke fulfillment of Line [%d]...', line.id)
 
-            certificate_type = line.product.attr.certificate_type
+            mode = mode_for_seat(line.product)
             course_key = line.product.attr.course_key
             data = {
                 'user': line.order.user.username,
                 'is_active': False,
-                'mode': certificate_type,
+                'mode': mode,
                 'course_details': {
                     'course_id': course_key,
                 },
@@ -248,7 +248,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     order_number=line.order.number,
                     product_class=line.product.get_product_class().name,
                     course_id=course_key,
-                    certificate_type=certificate_type,
+                    certificate_type=getattr(line.product.attr, 'certificate_type', ''),
                     user_id=line.order.user.id
                 )
 

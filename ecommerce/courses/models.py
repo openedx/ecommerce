@@ -72,13 +72,16 @@ class Course(models.Model):
 
         if mode == 'no-id-professional':
             return 'professional'
+        elif mode == 'audit':
+            # Historically, users enrolled in an 'audit' mode have not received a certificate.
+            return ''
 
         return mode
 
     @property
     def type(self):
         """ Returns the type of the course (based on the available seat types). """
-        seat_types = [(seat.attr.certificate_type or '').lower() for seat in self.seat_products]
+        seat_types = [getattr(seat.attr, 'certificate_type', '').lower() for seat in self.seat_products]
         if 'credit' in seat_types:
             return 'credit'
         elif 'professional' in seat_types or 'no-id-professional' in seat_types:
@@ -100,12 +103,13 @@ class Course(models.Model):
 
     def _get_course_seat_name(self, certificate_type, id_verification_required):
         """ Returns the name for a course seat. """
-        name = 'Seat in {course_name} with {certificate_type} certificate'.format(
-            course_name=self.name,
-            certificate_type=certificate_type)
+        name = u'Seat in {}'.format(self.name)
 
-        if id_verification_required:
-            name += ' (and ID verification)'
+        if certificate_type != '':
+            name += u' with {} certificate'.format(certificate_type)
+
+            if id_verification_required:
+                name += u' (and ID verification)'
 
         return name
 
@@ -117,7 +121,6 @@ class Course(models.Model):
         Returns:
             Product:  The seat that has been created or updated.
         """
-
         certificate_type = certificate_type.lower()
         course_id = unicode(self.id)
 
@@ -136,12 +139,18 @@ class Course(models.Model):
 
         try:
             seat = Product.objects.get(slug__in=slugs)
-            logger.info('Retrieved [%s] course seat child product for [%s] from database.', certificate_type,
-                        course_id)
+            logger.info(
+                'Retrieved course seat child product with certificate type [%s] for [%s] from database.',
+                certificate_type,
+                course_id
+            )
         except Product.DoesNotExist:
             seat = Product(slug=slug)
-            logger.info('[%s] course seat product for [%s] does not exist. Instantiated a new instance.',
-                        certificate_type, course_id)
+            logger.info(
+                'Course seat product with certificate type [%s] for [%s] does not exist. Instantiated a new instance.',
+                certificate_type,
+                course_id
+            )
 
         seat.course = self
         seat.parent = self.parent_seat_product
@@ -149,7 +158,11 @@ class Course(models.Model):
         seat.structure = Product.CHILD
         seat.title = self._get_course_seat_name(certificate_type, id_verification_required)
         seat.expires = expires
+
+        # If a ProductAttribute is saved with a value of None or the empty string, the ProductAttribute is deleted.
+        # As a consequence, Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
         seat.attr.certificate_type = certificate_type
+
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
 
@@ -165,14 +178,20 @@ class Course(models.Model):
         partner = Partner.objects.get(code='edx')
         try:
             stock_record = StockRecord.objects.get(product=seat, partner=partner)
-            logger.info('Retrieved [%s] course seat child product stock record for [%s] from database.',
-                        certificate_type, course_id)
+            logger.info(
+                'Retrieved course seat product stock record with certificate type [%s] for [%s] from database.',
+                certificate_type,
+                course_id
+            )
         except StockRecord.DoesNotExist:
             partner_sku = generate_sku(seat)
             stock_record = StockRecord(product=seat, partner=partner, partner_sku=partner_sku)
             logger.info(
-                '[%s] course seat product stock record for [%s] does not exist. Instantiated a new instance.',
-                certificate_type, course_id)
+                'Course seat product stock record with certificate type [%s] for [%s] does not exist. '
+                'Instantiated a new instance.',
+                certificate_type,
+                course_id
+            )
 
         stock_record.price_excl_tax = price
 

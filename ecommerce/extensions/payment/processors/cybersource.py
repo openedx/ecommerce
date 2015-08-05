@@ -98,7 +98,7 @@ class Cybersource(BasePaymentProcessor):
         single_seat = self.get_single_seat(basket)
         if single_seat:
             parameters[u'merchant_defined_data1'] = single_seat.attr.course_key
-            parameters[u'merchant_defined_data2'] = single_seat.attr.certificate_type
+            parameters[u'merchant_defined_data2'] = getattr(single_seat.attr, 'certificate_type', '')
 
         # Sign all fields
         signed_field_names = parameters.keys()

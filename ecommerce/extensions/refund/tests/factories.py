@@ -7,7 +7,9 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.newfactories import UserFactory
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
+
 
 Category = get_model("catalogue", "Category")
 Partner = get_model('partner', 'Partner')
@@ -87,14 +89,21 @@ class CourseFactory(object):
     def add_mode(self, name, price, id_verification_required=False):
         parent_product = self._get_parent_seat_product()
 
-        title = u'{mode_name} Seat in {course_name}'.format(mode_name=name, course_name=self.course_name)
-        slug = slugify(u'{course_name}-seat-{mode_name}'.format(course_name=self.course_name, mode_name=name))
+        certificate_type = Course.certificate_type_for_mode(name)
+        title = u'{certificate_type} Seat in {course_name}'.format(
+            certificate_type=certificate_type,
+            course_name=self.course_name
+        )
+        slug = slugify(u'{course_name}-seat-{certificate_type}'.format(
+            course_name=self.course_name,
+            certificate_type=certificate_type
+        ))
         child_product, created = Product.objects.get_or_create(parent=parent_product, title=title, slug=slug,
                                                                structure='child')
 
         if created:
             child_product.attr.course_key = self.course_id
-            child_product.attr.certificate_type = name
+            child_product.attr.certificate_type = certificate_type
             child_product.attr.id_verification_required = id_verification_required
             child_product.save()
 

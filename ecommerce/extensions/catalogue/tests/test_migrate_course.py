@@ -19,6 +19,7 @@ from waffle import Switch
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.management.commands.migrate_course import MigratedCourse
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku
@@ -44,7 +45,9 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         'honor': 0,
         'verified': 10,
         'no-id-professional': 100,
-        'professional': 1000
+        'professional': 1000,
+        'audit': 0,
+        'credit': 0,
     }
 
     def _mock_lms_api(self):
@@ -60,8 +63,8 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         # Mock Enrollment API
         body = {
             'course_id': self.course_id,
-            'course_modes': [{'slug': seat_type, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
-                             seat_type, price in self.prices.iteritems()]
+            'course_modes': [{'slug': mode, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
+                             mode, price in self.prices.iteritems()]
         }
         httpretty.register_uri(httpretty.GET, self.enrollment_api_url, body=json.dumps(body), content_type=JSON)
 
@@ -76,12 +79,15 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         """ Verify the given seat is configured correctly. """
         certificate_type = Course.certificate_type_for_mode(mode)
 
-        expected_title = 'Seat in A Tést Côurse with {} certificate'.format(certificate_type)
-        if seat.attr.id_verification_required:
-            expected_title += u' (and ID verification)'
+        expected_title = 'Seat in A Tést Côurse'
+        if certificate_type != '':
+            expected_title += ' with {} certificate'.format(certificate_type)
+
+            if seat.attr.id_verification_required:
+                expected_title += u' (and ID verification)'
 
         self.assertEqual(seat.title, expected_title)
-        self.assertEqual(seat.attr.certificate_type, certificate_type)
+        self.assertEqual(getattr(seat.attr, 'certificate_type', ''), certificate_type)
         self.assertEqual(seat.expires, EXPIRES)
         self.assertEqual(seat.attr.course_key, self.course_id)
         self.assertEqual(seat.attr.id_verification_required, Course.is_mode_verified(mode))
@@ -90,18 +96,20 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         """ Verify the course was migrated and saved to the database. """
         course = Course.objects.get(id=self.course_id)
         seats = course.seat_products
-        self.assertEqual(len(seats), 4)
+
+        # Verify that all modes are migrated.
+        self.assertEqual(len(seats), len(self.prices))
+
         parent = course.products.get(structure=Product.PARENT)
         self.assertEqual(list(parent.categories.all()), [self.category])
+
         for seat in seats:
-            seat_type = seat.attr.certificate_type
-            if seat_type == 'professional' and not seat.attr.id_verification_required:
-                seat_type = 'no-id-professional'
-            logger.info('Validating objects for %s certificate type...', seat_type)
+            mode = mode_for_seat(seat)
+            logger.info('Validating objects for [%s] mode...', mode)
 
             stock_record = self.partner.stockrecords.get(product=seat)
-            self.assert_seat_valid(seat, seat_type)
-            self.assert_stock_record_valid(stock_record, seat, self.prices[seat_type])
+            self.assert_seat_valid(seat, mode)
+            self.assert_stock_record_valid(stock_record, seat, self.prices[mode])
 
     def assert_lms_api_headers(self, request):
         self.assertEqual(request.headers['Accept'], JSON)
@@ -143,11 +151,10 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         self.assertEqual(course.verification_deadline, EXPIRES)
 
         for seat in course.seat_products:
-            certificate_type = seat.attr.certificate_type
-            if certificate_type == 'professional' and not seat.attr.id_verification_required:
-                certificate_type = 'no-id-professional'
-            logger.info('Validating objects for %s certificate type...', certificate_type)
-            self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[certificate_type]))
+            mode = mode_for_seat(seat)
+            logger.info('Validating objects for [%s] mode...', mode)
+
+            self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[mode]))
 
     @httpretty.activate
     def test_course_name_missing(self):

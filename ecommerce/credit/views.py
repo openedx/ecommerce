@@ -39,7 +39,7 @@ class Checkout(TemplateView):
                 processors_dict[processor] = 'Checkout with {}'.format(processor)
 
         credit_seats = [
-            seat for seat in course.seat_products if seat.attr.certificate_type == self.CREDIT_MODE
+            seat for seat in course.seat_products if getattr(seat.attr, 'certificate_type', '') == self.CREDIT_MODE
         ]
         provider_ids = None
         if credit_seats:

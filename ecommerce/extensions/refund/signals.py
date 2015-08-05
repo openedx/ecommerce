@@ -1,6 +1,7 @@
 import analytics
 from django.dispatch import receiver, Signal
 
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
 
 
@@ -34,7 +35,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
                     # SKU. Marketing is aware that this approach will not scale once we start selling
                     # products other than courses, and will need to change in the future.
                     'id': line.order_line.partner_sku,
-                    'sku': line.order_line.product.attr.certificate_type,
+                    'sku': mode_for_seat(line.order_line.product),
                     'name': line.order_line.product.title,
                     'price': str(line.line_credit_excl_tax),
                     'quantity': -1 * line.quantity,

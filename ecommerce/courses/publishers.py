@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class LMSPublisher(object):
     def get_seat_expiration(self, seat):
-        if not seat.expires or 'professional' in seat.attr.certificate_type:
+        if not seat.expires or 'professional' in getattr(seat.attr, 'certificate_type', ''):
             return None
 
         return seat.expires.isoformat()
