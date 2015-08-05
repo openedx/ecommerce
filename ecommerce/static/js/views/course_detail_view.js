@@ -40,13 +40,13 @@ define([
 
             render: function () {
                 var html,
-                    verifcationDeadline = this.model.get('verification_deadline'),
+                    verificationDeadline = this.model.get('verification_deadline'),
                     templateData;
 
                 templateData = {
                     course: this.model.attributes,
                     courseType: _s.capitalize(this.model.get('type')),
-                    verificationDeadline: verifcationDeadline ? moment.utc(verifcationDeadline).format('lll z') : null
+                    verificationDeadline: verificationDeadline ? moment.utc(verificationDeadline).format('lll z') : null
                 };
 
                 html = _.template(CourseDetailTemplate)(templateData);
