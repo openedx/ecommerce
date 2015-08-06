@@ -98,7 +98,7 @@ class MigratedCourse(object):
 
     def _query_enrollment_api(self, headers):
         """Get modes and pricing from Enrollment API."""
-        url = self._build_lms_url('api/enrollment/v1/course/{}'.format(self.course.id))
+        url = self._build_lms_url('api/enrollment/v1/course/{}?include_expired=1'.format(self.course.id))
         response = requests.get(url, headers=headers)
 
         if response.status_code != 200:
@@ -125,7 +125,7 @@ class MigratedCourse(object):
             course_name, course_verification_deadline = self._query_commerce_api(headers)
         except Exception as e:  # pylint: disable=broad-except
             logger.warning(
-                u"Calling Enrollment API failed with: [%s]. Falling back to Course Structure API.",
+                u"Calling Commerce API failed with: [%s]. Falling back to Course Structure API.",
                 e.message
             )
             course_name, course_verification_deadline = self._query_course_structure_api(access_token)
