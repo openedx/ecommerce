@@ -277,11 +277,8 @@ define([
 
                         if (viewClass) {
                             view = new viewClass({model: model});
-
-                            // TODO Listen to the views (specifically professional education) to determine if
-                            // the verification deadline field needs to be toggled.
-
                             view.render();
+
                             this.courseSeatViews[seatType] = view;
                             $courseSeatsContainer.append(view.el);
                         } else {

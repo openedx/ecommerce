@@ -1,16 +1,26 @@
 define([
+        'backbone',
         'underscore',
-        'collections/drf_pageable_collection',
         'models/course_model'
     ],
-    function (_,
-              DrfPageableCollection,
+    function (Backbone,
+              _,
               CourseModel) {
         'use strict';
 
-        return DrfPageableCollection.extend({
+        return Backbone.Collection.extend({
             model: CourseModel,
-            url: '/api/v2/courses/'
+            url: '/api/v2/courses/',
+
+            parse: function (response) {
+                // Continue retrieving the remaining data
+                if (response.next) {
+                    this.url = response.next;
+                    this.fetch({remove: false});
+                }
+
+                return response.results;
+            }
         });
     }
 );
