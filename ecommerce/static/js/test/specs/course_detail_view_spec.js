@@ -103,9 +103,7 @@ define([
 
             it('should list the course seats', function () {
                 var $seats = view.$el.find('.course-seat'),
-                    products = _.filter(data.products, function (product) {
-                        return product.product_class === 'Seat' && product.structure === 'child';
-                    });
+                    products = _.where(data.products, {structure: 'child'});
 
                 expect($seats.length).toEqual(products.length);
 

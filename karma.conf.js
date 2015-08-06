@@ -17,10 +17,7 @@ module.exports = function(config) {
 	files: [
       {pattern: 'ecommerce/static/vendor/**/*.js', included: false},
       {pattern: 'ecommerce/static/bower_components/**/*.js', included: false},
-      {pattern: 'ecommerce/static/js/models/**/*.js', included: false},
-      {pattern: 'ecommerce/static/js/views/**/*.js', included: false},
-      {pattern: 'ecommerce/static/js/collections/**/*.js', included: false},
-      {pattern: 'ecommerce/static/js/test/specs/*.js', included: false},
+      {pattern: 'ecommerce/static/js/**/*.js', included: false},
       {pattern: 'ecommerce/static/templates/**/*.html', included: false},
       'ecommerce/static/js/config.js',
       'ecommerce/static/js/test/spec-runner.js'
@@ -33,9 +30,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'ecommerce/static/js/views/**/*.js': ['coverage'],
-        'ecommerce/static/js/models/**/*.js': ['coverage'],
-        'ecommerce/static/js/collections/**/*.js': ['coverage']
+        'ecommerce/static/js/!(test)/**/*.js': ['coverage']
     },
 
     // enabled plugins

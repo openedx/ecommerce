@@ -1,20 +1,26 @@
 define([
         'collections/drf_pageable_collection',
         'models/product_model',
-        'models/course_seat_model'
+        'models/course_seats/course_seat',
+        'utils/course_utils'
     ],
-    function (DrfPageableCollection, ProductModel, CourseSeatModel) {
+    function (DrfPageableCollection,
+              Product,
+              CourseSeat,
+              CourseUtils) {
         'use strict';
 
         return DrfPageableCollection.extend({
             mode: 'client',
+
             model: function (attrs, options) {
-                var modelClass = ProductModel;
+                var modelClass = Product;
                 if (attrs.product_class === 'Seat') {
-                    modelClass = CourseSeatModel;
+                    modelClass = CourseUtils.getCourseSeatModel(CourseUtils.getSeatType(attrs));
                 }
 
                 return new modelClass(attrs, options);
             }
         });
-    });
+    }
+);

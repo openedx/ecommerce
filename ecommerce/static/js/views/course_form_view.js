@@ -7,7 +7,6 @@ define([
         'moment',
         'underscore',
         'underscore.string',
-        'models/course_seat_model',
         'text!templates/course_form.html',
         'text!templates/_course_type_radio_field.html',
         'views/course_seat_form_fields/honor_course_seat_form_field_view',
@@ -24,7 +23,6 @@ define([
               moment,
               _,
               _s,
-              CourseSeat,
               CourseFormTemplate,
               CourseTypeRadioTemplate,
               HonorCourseSeatFormFieldView,
@@ -142,13 +140,12 @@ define([
                 this.editing = options.editing || false;
 
                 this.listenTo(this.model, 'change:type', this.renderCourseSeats);
-                this.listenTo(this.model, 'change:type', this.renderVerificationDeadline);
-                this.listenTo(this.model, 'change:products', this.updateCourseSeatModels);
+                this.listenTo(this.model, 'change:type change:id_verification_required', this.renderVerificationDeadline);
 
                 // Listen for the sync event so that we can keep track of the original course type.
                 // This helps us determine which course types the course can be upgraded to.
                 if (this.editing) {
-                    this.listenTo(this.model, 'sync', this.setLockedCourseType);
+                    this.setLockedCourseType()
                 }
 
                 // Enable validation
@@ -248,42 +245,13 @@ define([
             },
 
             /**
-             * Returns a boolean indicating if the course being modified requires ID verification.
-             */
-            idVerified: function () {
-                // TODO Move this to the course model
-                var activeSeatTypes = this.courseTypeSeatMapping[this.model.get('type')];
-
-                return Boolean(_.find(activeSeatTypes, function (seatType) {
-                    return this.courseSeatViews[seatType].idVerificationRequired;
-                }, this));
-            },
-
-            /**
              * Displays, or hides, the verification deadline based on the course type.
              */
             renderVerificationDeadline: function () {
-                var $verificationDeadline = $('.verification-deadline');
+                var $verificationDeadline = this.$el.find('.verification-deadline');
 
                 // TODO Make this display a bit smoother with a slide.
-                $verificationDeadline.toggleClass('hidden', !Boolean(this.idVerified()));
-
-                return this;
-            },
-
-            /**
-             * Updates the models used by the nested course seat views to be the nested
-             * seat models of this view's course.
-             */
-            updateCourseSeatModels: function () {
-                _.each(this.model.getSeats(), function (seat, seatType) {
-                    var view = this.courseSeatViews[seatType];
-
-                    if (view) {
-                        view.model = seat;
-                        view.render();
-                    }
-                }, this);
+                $verificationDeadline.toggleClass('hidden', !this.model.isIdVerified());
 
                 return this;
             },
@@ -293,15 +261,18 @@ define([
              */
             renderCourseSeats: function () {
                 var $courseSeats,
-                    seats = this.model.getSeats(),
                     $courseSeatsContainer = this.$el.find('.course-seats'),
-                    activeSeats = this.courseTypeSeatMapping[this.model.get('type')] || ['empty'];
+                    activeSeats = this.model.validSeatTypes();
+
+                // Display a helpful message if the user has not yet selected a course type.
+                if (activeSeats.length < 1) {
+                    activeSeats = ['empty'];
+                }
 
                 if (_.isEmpty(this.courseSeatViews)) {
                     _.each(this.courseSeatTypes, function (seatType) {
                         var view,
-                            price = seatType === 'honor' ? 0 : null,
-                            model = seats[seatType] || new CourseSeat({certificate_type: seatType, price: price}),
+                            model = this.model.getOrCreateSeat(seatType),
                             viewClass = this.courseSeatViewMappings[seatType];
 
                         if (viewClass) {
@@ -394,12 +365,11 @@ define([
              * @param e
              */
             submit: function (e) {
-                var data,
-                    activeSeatTypes,
-                    message,
-                    view,
-                    verificationDeadline,
-                    products = [];
+                var $buttons,
+                    $submitButton,
+                    btnDefaultText,
+                    self = this,
+                    btnSavingContent = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' + gettext('Saving...');
 
                 e.preventDefault();
 
@@ -410,48 +380,41 @@ define([
                     return;
                 }
 
-                // Get the product data
-                activeSeatTypes = this.courseTypeSeatMapping[this.model.get('type')];
+                $buttons = this.$el.find('.form-actions .btn');
+                $submitButton = $buttons.filter('button[type=submit]');
 
-                _.each(activeSeatTypes, function (seatType) {
-                    view = this.courseSeatViews[seatType];
-                    view.updateModel();
-                    products.push(view.model.toJSON());
+                // Store the default button text, and replace it with the saving state content.
+                btnDefaultText = $submitButton.text();
+                $submitButton.html(btnSavingContent);
 
-                }, this);
+                // Disable all buttons by setting the attribute (for <button>) and class (for <a>)
+                $buttons.attr('disabled', 'disabled').addClass('disabled');
 
-                data = {
-                    id: this.getFieldValue('id'),
-                    name: this.getFieldValue('name'),
-                    products: products,
-                    verification_deadline: null
-                };
+                this.model.save({
+                    complete: function () {
+                        // Restore the button text
+                        $submitButton.text(btnDefaultText);
 
-                verificationDeadline = this.getFieldValue('verification_deadline');
-                if (this.idVerified() && verificationDeadline) {
-                    data.verification_deadline =  moment.utc(this.getFieldValue('verification_deadline')).format();
-                }
-
-                $.ajax({
-                    contentType: 'application/json',
-                    context: this,
-                    data: JSON.stringify(data),
-                    dataType: 'json',
-                    headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')},
-                    method: 'POST',
-                    url: '/api/v2/publication/',
-                    success: function (data, textStatus, jqXHR) {
-                        this.goTo(data.id);
+                        // Re-enable the buttons
+                        $buttons.removeAttr('disabled').removeClass('disabled');
                     },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        // NOTE: jqXHR.responseJSON maps field names to an array of error messages.
-                        console.debug(jqXHR.responseJSON);
-                        message = jqXHR.responseJSON.error || gettext('An error occurred while saving the data.');
-                        this.clearAlerts();
-                        this.renderAlert('danger', message);
-                        this.$el.animate({scrollTop: 0}, 'slow');
+                    success: function (model, response) {
+                        self.goTo(model.id);
+                    },
+                    error: function (model, response) {
+                        var message = gettext('An error occurred while saving the data.');
+
+                        if (response.responseJSON && response.responseJSON.error) {
+                            message = response.responseJSON.error;
+                        }
+
+                        self.clearAlerts();
+                        self.renderAlert('danger', message);
+                        self.$el.animate({scrollTop: 0}, 'slow');
                     }
                 });
+
+                return this;
             }
         });
     }

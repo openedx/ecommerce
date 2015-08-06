@@ -23,16 +23,19 @@ define([
                 this.listenTo(this.model, 'change', this.render);
             },
 
+            /**
+             * Returns an array of CourseSeat models, sorted in the order expected for display.
+             * @returns {CourseSeat[]}
+             */
             getSeats: function () {
                 // Returns an array of seats sorted for display
                 var seats,
                     sortObj = _.invert(_.object(_.pairs([
-                        'honor', 'verified', 'no-id-professional', 'professional', 'credit'
+                        'audit', 'honor', 'verified', 'no-id-professional', 'professional', 'credit'
                     ])));
 
-                seats = _.values(this.model.getSeats());
-                seats = _.sortBy(seats, function (seat) {
-                    return sortObj[seat.get('certificate_type')]
+                seats = _.sortBy(this.model.seats(), function (seat) {
+                    return sortObj[seat.getSeatType()];
                 });
 
                 return seats;
