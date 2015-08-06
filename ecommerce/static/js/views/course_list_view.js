@@ -22,31 +22,25 @@ define([
             template: _.template(courseListViewTemplate),
 
             initialize: function () {
-                this.listenTo(this.collection, 'add remove change', this.render);
+                this.listenTo(this.collection, 'update', this.refreshTableData);
+            },
+
+            getRowData: function (course) {
+                return {
+                    id: course.get('id'),
+                    type: course.get('type'),
+                    name: course.get('name'),
+                    last_edited: moment(course.get('last_edited')).format('MMMM DD, YYYY, h:mm A')
+                };
             },
 
             renderCourseTable: function () {
-
-                var tableData = [],
-                    filterPlaceholder = gettext('Search...'),
+                var filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
-                this.collection.each(function (value) {
-                    tableData.push(
-                        {
-                            id: value.get('id'),
-                            type: value.get('type'),
-                            name: value.get('name'),
-                            last_edited: moment(value.get('last_edited')).format('MMMM DD, YYYY, h:mm A')
-                        }
-                    );
-                });
-
                 if (!$.fn.dataTable.isDataTable('#courseTable')) {
-
                     this.$el.find('#courseTable').DataTable({
                         autoWidth: false,
-                        data: tableData,
                         info: true,
                         paging: true,
                         oLanguage: {
@@ -105,13 +99,23 @@ define([
             },
 
             render: function () {
-
                 this.$el.html(this.template);
                 this.renderCourseTable();
+                this.refreshTableData();
 
                 return this;
-            }
+            },
 
+            /**
+             * Refresh the data table with the collection's current information.
+             */
+            refreshTableData: function () {
+                var data = this.collection.map(this.getRowData, this),
+                    $table = this.$el.find('#courseTable').DataTable();
+
+                $table.clear().rows.add(data).draw();
+                return this;
+            }
         });
     }
 );
