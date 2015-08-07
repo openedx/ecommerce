@@ -9,11 +9,12 @@ define([
         'underscore.string',
         'text!templates/course_form.html',
         'text!templates/_course_type_radio_field.html',
+        'views/course_seat_form_fields/audit_course_seat_form_field_view',
         'views/course_seat_form_fields/honor_course_seat_form_field_view',
         'views/course_seat_form_fields/verified_course_seat_form_field_view',
         'views/course_seat_form_fields/professional_course_seat_form_field_view',
         'views/alert_view',
-        'jquery-cookie'
+        'utils/course_utils'
     ],
     function ($,
               Backbone,
@@ -25,11 +26,12 @@ define([
               _s,
               CourseFormTemplate,
               CourseTypeRadioTemplate,
+              AuditCourseSeatFormFieldView,
               HonorCourseSeatFormFieldView,
               VerifiedCourseSeatFormFieldView,
               ProfessionalCourseSeatFormFieldView,
               AlertView,
-              cookie) {
+              CourseUtils) {
         'use strict';
 
         // Extend the callbacks to work with Bootstrap.
@@ -83,19 +85,9 @@ define([
                 }
             },
 
-            // Map course types to the available seats
-            courseTypeSeatMapping: {
-                honor: ['honor'],
-                verified: ['honor', 'verified'],
-                professional: ['professional'],
-                credit: ['honor', 'verified', 'credit']
-            },
-
-            // TODO Activate credit
-            courseSeatTypes: ['honor', 'verified', 'professional'],
-
             // Map course seats to view classes
             courseSeatViewMappings: {
+                audit: AuditCourseSeatFormFieldView,
                 honor: HonorCourseSeatFormFieldView,
                 verified: VerifiedCourseSeatFormFieldView,
                 professional: ProfessionalCourseSeatFormFieldView
@@ -261,6 +253,7 @@ define([
              */
             renderCourseSeats: function () {
                 var $courseSeats,
+                    seatTypes,
                     $courseSeatsContainer = this.$el.find('.course-seats'),
                     activeSeats = this.model.validSeatTypes();
 
@@ -270,7 +263,9 @@ define([
                 }
 
                 if (_.isEmpty(this.courseSeatViews)) {
-                    _.each(this.courseSeatTypes, function (seatType) {
+                    seatTypes = CourseUtils.orderSeatTypesForDisplay(this.model.courseSeatTypes());
+
+                    _.each(seatTypes, function (seatType) {
                         var view,
                             model = this.model.getOrCreateSeat(seatType),
                             viewClass = this.courseSeatViewMappings[seatType];

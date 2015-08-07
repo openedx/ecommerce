@@ -15,6 +15,10 @@ define([
         'use strict';
 
         return {
+            seatSortObj: _.invert(_.object(_.pairs([
+                'audit', 'honor', 'verified', 'no-id-professional', 'professional', 'credit'
+            ]))),
+
             /**
              * Returns a mapping of seat types to CourseSeat classes.
              *
@@ -68,6 +72,24 @@ define([
                 }
 
                 return seatType;
+            },
+
+
+            /**
+             * Returns an array of CourseSeats, ordered as they should be displayed.
+             * @param {CourseSeat[]} seats
+             * @returns {CourseSeat[]}
+             */
+            orderSeatsForDisplay: function (seats) {
+                return _.sortBy(seats, function (seat) {
+                    return this.seatSortObj[seat.getSeatType()];
+                }, this);
+            },
+
+            orderSeatTypesForDisplay: function(seatTypes){
+                return _.sortBy(seatTypes, function (seatType) {
+                    return this.seatSortObj[seatType];
+                }, this);
             }
         }
     }

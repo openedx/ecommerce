@@ -5,7 +5,8 @@ define([
         'underscore.string',
         'moment',
         'text!templates/course_detail.html',
-        'text!templates/_course_seat.html'
+        'text!templates/_course_seat.html',
+        'utils/course_utils'
     ],
     function ($,
               Backbone,
@@ -13,7 +14,8 @@ define([
               _s,
               moment,
               CourseDetailTemplate,
-              CourseSeatTemplate) {
+              CourseSeatTemplate,
+              CourseUtils) {
         'use strict';
 
         return Backbone.View.extend({
@@ -21,24 +23,6 @@ define([
 
             initialize: function () {
                 this.listenTo(this.model, 'change', this.render);
-            },
-
-            /**
-             * Returns an array of CourseSeat models, sorted in the order expected for display.
-             * @returns {CourseSeat[]}
-             */
-            getSeats: function () {
-                // Returns an array of seats sorted for display
-                var seats,
-                    sortObj = _.invert(_.object(_.pairs([
-                        'audit', 'honor', 'verified', 'no-id-professional', 'professional', 'credit'
-                    ])));
-
-                seats = _.sortBy(this.model.seats(), function (seat) {
-                    return sortObj[seat.getSeatType()];
-                });
-
-                return seats;
             },
 
             render: function () {
@@ -62,9 +46,10 @@ define([
 
             renderSeats: function () {
                 var html = '',
+                    seats = CourseUtils.orderSeatsForDisplay(this.model.seats()),
                     $seatHolder = $('.course-seats', this.$el);
 
-                _.each(this.getSeats(), function (seat) {
+                _.each(seats, function (seat) {
                     html += _.template(CourseSeatTemplate)({seat: seat, moment: moment});
                 });
 

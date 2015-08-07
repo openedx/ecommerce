@@ -89,10 +89,10 @@ define([
              * Mapping of course type to an array of course seat types.
              */
             courseTypeSeatMapping: {
-                honor: ['honor'],
-                verified: ['honor', 'verified'],
+                honor: ['audit', 'honor'],
+                verified: ['audit', 'honor', 'verified'],
                 professional: ['professional'],
-                credit: ['honor', 'verified', 'credit']
+                credit: ['audit', 'honor', 'verified', 'credit']
             },
 
             initialize: function () {
@@ -146,6 +146,7 @@ define([
                         return (product instanceof CourseSeat) && (product.seatType === seatType);
                     });
 
+                // Do NOT create new audit seats
                 if (!seat) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
                     seat = new seatClass();
@@ -204,6 +205,16 @@ define([
                 return this.seats().filter(function (seat) {
                     return _.contains(this.validSeatTypes(), seat.getSeatType());
                 }, this);
+            },
+
+            courseSeatTypes: function(){
+                var seatTypes = this.seats().map(function(seat){
+                    return seat.getSeatType();
+                });
+
+                // Note (CCB): Audit is intentionally left out of this list, to avoid
+                // creating new audit seats (which we do not yet support).
+                return seatTypes.length > 0 ? seatTypes : ['honor', 'verified', 'professional'];
             },
 
             /**
