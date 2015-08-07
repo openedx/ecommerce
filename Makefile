@@ -43,8 +43,10 @@ clean:
 	coverage erase
 	rm -rf assets/ ecommerce/static/build
 
-test_js:
+validate_js:
 	gulp test
+	gulp lint
+	gulp jscs
 
 test_python: clean
 	python manage.py compress --settings=ecommerce.settings.test -v0
@@ -61,7 +63,9 @@ quality:
 	pep8 --config=.pep8 ecommerce acceptance_tests
 	pylint --rcfile=pylintrc ecommerce acceptance_tests
 
-validate: test_python quality test_js
+validate_python: test_python quality
+
+validate: validate_python validate_js
 
 static:
 	$(NODE_BIN)/r.js -o build.js

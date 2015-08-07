@@ -10,6 +10,8 @@
   },
   "devDependencies": {
     "gulp": "^3.9.0",
+    "gulp-jscs": "^2.0.0",
+    "gulp-jshint": "^1.11.2",
     "jasmine-core": "^2.3.4",
     "karma": "^0.13.2",
     "karma-coverage": "^0.4.2",
