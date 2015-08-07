@@ -57,5 +57,9 @@
     .form-actions {
       margin-top: spacing-vertical(large);
     }
+
+    .price-label {
+      @extend label;
+    }
   }
 }

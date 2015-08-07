@@ -174,9 +174,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
             # Verify that attributes required to create a Seat are present.
             attrs = self._flatten(product['attribute_values'])
-            if attrs.get('certificate_type') is None:
-                raise serializers.ValidationError(_(u"Products must have a certificate type."))
-            elif attrs.get('id_verification_required') is None:
+            if attrs.get('id_verification_required') is None:
                 raise serializers.ValidationError(_(u"Products must indicate whether ID verification is required."))
 
             # Verify that a price is present.

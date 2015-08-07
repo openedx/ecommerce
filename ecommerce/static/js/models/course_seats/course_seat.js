@@ -53,8 +53,10 @@ define([
                     case 'professional':
                     case 'no-id-professional':
                         return gettext('Professional');
-                    default:
+                    case 'honor':
                         return gettext('Honor');
+                    default:
+                        return gettext('Audit');
                 }
             },
 
@@ -68,8 +70,11 @@ define([
                     case 'no-id-professional':
                         return gettext('Professional Certificate');
 
-                    default:
+                    case 'honor':
                         return gettext('Honor Certificate');
+
+                    default:
+                        return '(' + gettext('No Certificate') + ')';
                 }
             }
         });
