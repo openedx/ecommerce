@@ -9,7 +9,8 @@ define([
         'collections/product_collection',
         'models/course_seats/course_seat',
         'models/course_seats/honor_seat',
-        'utils/course_utils'
+        'utils/course_utils',
+        'utils/utils'
     ],
     function (Backbone,
               BackboneRelational,
@@ -21,7 +22,8 @@ define([
               ProductCollection,
               CourseSeat,
               HonorSeat,
-              CourseUtils) {
+              CourseUtils,
+              Utils) {
         'use strict';
 
         Backbone.Validation.configure({
@@ -59,13 +61,6 @@ define([
                 type: {
                     required: true,
                     msg: gettext('You must select a course type.')
-                },
-                verification_deadline: {
-                    msg: gettext('Verification deadline is required for course types with verified modes.'),
-                    required: function (value, attr, computedState) {
-                        // TODO Return true if one of the products requires ID verification.
-                        return false;
-                    }
                 }
             },
 
@@ -98,6 +93,26 @@ define([
             initialize: function () {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
                 this.on('sync', this.removeParentProducts, this);
+            },
+
+            parse: function (response) {
+                response = this._super(response);
+
+                // Form fields display date-times in the user's local timezone. We want all
+                // times to be displayed in UTC to avoid confusion. Strip the timezone data to workaround the UI
+                // deficiencies. We will restore the UTC timezone in toJSON().
+                response.verification_deadline = Utils.stripTimezone(response.verification_deadline);
+
+                return response;
+            },
+
+            toJSON: function () {
+                var data = this._super();
+
+                // Restore the timezone component, and output the ISO 8601 format expected by the server.
+                data.verification_deadline = Utils.restoreTimezone(data.verification_deadline);
+
+                return data;
             },
 
             /**
