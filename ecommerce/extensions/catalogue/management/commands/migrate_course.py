@@ -59,16 +59,16 @@ class MigratedCourse(object):
         data = response.json()
         logger.debug(data)
 
-        course_name = data['name']
+        course_name = data.get('name')
         if course_name is None:
-            message = u'Aborting migration. No name is available for {}.'.format(self.course.id)
+            message = u'Unable to retrieve course name for {}.'.format(self.course.id)
             logger.error(message)
             raise Exception(message)
 
         course_verification_deadline = data['verification_deadline']
         course_verification_deadline = parse(course_verification_deadline) if course_verification_deadline else None
 
-        return course_name, course_verification_deadline
+        return course_name.strip(), course_verification_deadline
 
     def _query_course_structure_api(self, access_token):
         """Get course name from the Course Structure API."""
@@ -89,12 +89,17 @@ class MigratedCourse(object):
         data = response.json()
         logger.debug(data)
 
-        course_name = data['name']
+        course_name = data.get('name')
+        if course_name is None:
+            message = u'Aborting migration. No name is available for {}.'.format(self.course.id)
+            logger.error(message)
+            raise Exception(message)
+
         # A course without entries in the LMS CourseModes table must be an honor course, meaning
         # it has no verification deadline.
         course_verification_deadline = None
 
-        return course_name, course_verification_deadline
+        return course_name.strip(), course_verification_deadline
 
     def _query_enrollment_api(self, headers):
         """Get modes and pricing from Enrollment API."""
