@@ -139,6 +139,8 @@ class Course(models.Model):
 
         try:
             seat = Product.objects.get(slug__in=slugs)
+            seat.slug = slug
+
             logger.info(
                 'Retrieved course seat child product with certificate type [%s] for [%s] from database.',
                 certificate_type,
