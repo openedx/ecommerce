@@ -217,6 +217,28 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             mode = mode_for_seat(seat)
             self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[mode]))
 
+    @httpretty.activate
+    def test_whitespace_stripped(self):
+        """Verify that whitespace in course names is stripped during migration."""
+        self._mock_lms_apis()
+
+        body = {
+            # Wrap the course name with whitespace
+            'name': '  {}  '.format(self.course_name),
+            'verification_deadline': EXPIRES_STRING,
+        }
+        httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
+
+        migrated_course = MigratedCourse(self.course_id)
+        migrated_course.load_from_lms(ACCESS_TOKEN)
+        course = migrated_course.course
+
+        # Verify that whitespace has been stripped from the course name.
+        self.assertEqual(course.name, self.course_name)
+
+        parent_seat = course.parent_seat_product
+        self.assertEqual(parent_seat.title, 'Seat in {}'.format(self.course_name))
+
 
 @override_settings(EDX_API_KEY=EDX_API_KEY)
 class CommandTests(CourseMigrationTestMixin, TestCase):
