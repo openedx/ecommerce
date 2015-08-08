@@ -41,9 +41,10 @@ serve:
 clean:
 	find . -name '*.pyc' -delete
 	coverage erase
-	rm -rf assets/ ecommerce/static/build
+	rm -rf assets/ ecommerce/static/build coverage
 
 validate_js:
+	rm -rf coverage
 	gulp test
 	gulp lint
 	gulp jscs

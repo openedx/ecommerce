@@ -46,7 +46,10 @@ module.exports = function(config) {
 
     // Karma coverage config
     coverageReporter: {
-        type : 'text'
+        reporters: [
+            {type: 'text'},
+            { type: 'lcov', subdir: 'report-lcov' }
+        ]
     },
 
     // test results reporter to use
