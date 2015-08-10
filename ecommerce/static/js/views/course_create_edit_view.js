@@ -4,7 +4,8 @@ define([
         'backbone.super',
         'underscore',
         'views/course_form_view',
-        'text!templates/course_create_edit.html'
+        'text!templates/course_create_edit.html',
+        'bootstrap'
     ],
     function ($,
               Backbone,

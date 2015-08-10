@@ -48,7 +48,7 @@ define([
              */
             stripTimezone: function (datetime) {
                 if (datetime) {
-                    datetime = moment.utc(datetime).format('YYYY-MM-DDTHH:mm:ss');
+                    datetime = moment.utc(new Date(datetime)).format('YYYY-MM-DDTHH:mm:ss');
                 }
 
                 return datetime;

@@ -4,7 +4,7 @@
                aria-describedby="courseType<%= type %>HelpBlock"
                <% if(disabled) { print('disabled="disabled"'); } %>
                <% if(checked) { print('checked'); } %>>
-        <%= displayName %>
+        <div class="course-type-display-name"><%= displayName %></div>
         <span id="courseType<%= type %>HelpBlock" class="help-block">
             <%= helpText %>
         </span>
