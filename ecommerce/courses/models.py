@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.db import models, transaction
-from django.utils.text import slugify
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
@@ -35,15 +35,14 @@ class Course(models.Model):
 
     def _create_parent_seat(self):
         """ Create the parent seat product if it does not already exist. """
-        slug = 'parent-cs-{}'.format(slugify(unicode(self.id)))
-        defaults = {
-            'is_discountable': True,
-            'structure': Product.PARENT,
-            'product_class': ProductClass.objects.get(slug='seat')
-        }
-        parent, created = self.products.get_or_create(slug=slug, defaults=defaults)
+        parent, created = self.products.get_or_create(
+            course=self,
+            structure=Product.PARENT,
+            product_class=ProductClass.objects.get(slug='seat'),
+        )
         ProductCategory.objects.get_or_create(category=Category.objects.get(name='Seats'), product=parent)
         parent.title = 'Seat in {}'.format(self.name)
+        parent.is_discountable = True
         parent.attr.course_key = self.id
         parent.save()
 
@@ -98,8 +97,8 @@ class Course(models.Model):
 
     @property
     def seat_products(self):
-        """ Returns a list of course seat Products related to this course. """
-        return list(self.parent_seat_product.children.all().prefetch_related('stockrecords'))
+        """ Returns a queryset of course seat Products related to this course. """
+        return self.parent_seat_product.children.all().prefetch_related('stockrecords')
 
     def _get_course_seat_name(self, certificate_type, id_verification_required):
         """ Returns the name for a course seat. """
@@ -124,22 +123,23 @@ class Course(models.Model):
         certificate_type = certificate_type.lower()
         course_id = unicode(self.id)
 
-        slugs = []
-        slug = 'child-cs-{}-{}'.format(certificate_type, slugify(course_id))
+        if certificate_type == self.certificate_type_for_mode('audit'):
+            # Yields a match if attribute names do not include 'certificate_type'.
+            certificate_type_query = ~Q(attributes__name='certificate_type')
+        else:
+            # Yields a match if attribute with name 'certificate_type' matches provided value.
+            certificate_type_query = Q(
+                attributes__name='certificate_type',
+                attribute_values__value_text=certificate_type
+            )
 
-        # Note (CCB): Our previous method of slug generation did not account for ID verification. By using a list
-        # we can update these seats. This should be removed after the courses have been re-migrated.
-        if certificate_type == 'verified':
-            slugs.append(slug)
-
-        if id_verification_required:
-            slug += '-id-verified'
-        slugs.append(slug)
-        slugs = set(slugs)
+        id_verification_required_query = Q(
+            attributes__name='id_verification_required',
+            attribute_values__value_boolean=id_verification_required
+        )
 
         try:
-            seat = Product.objects.get(slug__in=slugs)
-            seat.slug = slug
+            seat = self.seat_products.filter(certificate_type_query).get(id_verification_required_query)
 
             logger.info(
                 'Retrieved course seat child product with certificate type [%s] for [%s] from database.',
@@ -147,7 +147,7 @@ class Course(models.Model):
                 course_id
             )
         except Product.DoesNotExist:
-            seat = Product(slug=slug)
+            seat = Product()
             logger.info(
                 'Course seat product with certificate type [%s] for [%s] does not exist. Instantiated a new instance.',
                 certificate_type,
@@ -155,16 +155,15 @@ class Course(models.Model):
             )
 
         seat.course = self
+        seat.structure = Product.CHILD
         seat.parent = self.parent_seat_product
         seat.is_discountable = True
-        seat.structure = Product.CHILD
         seat.title = self._get_course_seat_name(certificate_type, id_verification_required)
         seat.expires = expires
 
         # If a ProductAttribute is saved with a value of None or the empty string, the ProductAttribute is deleted.
         # As a consequence, Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
         seat.attr.certificate_type = certificate_type
-
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
 
