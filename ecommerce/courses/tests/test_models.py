@@ -133,6 +133,20 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
             seat, course, certificate_type, id_verification_required, price, credit_provider, credit_hours=credit_hours
         )
 
+    def test_slug_generation(self):
+        """Verify that product slug collisions due to stripped characters are avoided."""
+        dotted_course = Course.objects.create(id='a/...course.../id')
+        regular_course = Course.objects.create(id='a/course/id')
+
+        certificate_type = 'honor'
+        id_verification_required = False
+        price = 0
+        dotted_course.create_or_update_seat(certificate_type, id_verification_required, price)
+        regular_course.create_or_update_seat(certificate_type, id_verification_required, price)
+
+        child_products = Product.objects.filter(slug__istartswith='child-cs')
+        self.assertEqual(len(child_products), 2)
+
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
         course = Course.objects.create(id='a/b/c', name='Test Course')

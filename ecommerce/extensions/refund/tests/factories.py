@@ -1,9 +1,9 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.utils.text import slugify
 import factory
 from oscar.core.loading import get_model
+from oscar.core.utils import slugify
 from oscar.test import factories
 from oscar.test.newfactories import UserFactory
 
