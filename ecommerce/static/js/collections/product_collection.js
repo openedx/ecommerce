@@ -1,3 +1,5 @@
+// jscs:disable requireCapitalizedConstructors
+
 define([
         'backbone',
         'models/product_model',
@@ -17,7 +19,9 @@ define([
                     modelClass = CourseUtils.getCourseSeatModel(CourseUtils.getSeatType(attrs));
                 }
 
+                /*jshint newcap: false */
                 return new modelClass(attrs, options);
+                /*jshint newcap: true */
             }
         });
     }

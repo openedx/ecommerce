@@ -54,7 +54,6 @@ define([
                 return datetime;
             },
 
-
             /**
              * Adds the UTC timezone to a given datetime string.
              *

@@ -40,14 +40,14 @@ define([
 
             initialize: function () {
                 Backbone.Validation.bind(this, {
-                    valid: function (view, attr, selector) {
+                    valid: function (view, attr) {
                         var $el = view.$('[name=' + attr + ']'),
                             $group = $el.closest('.form-group');
 
                         $group.removeClass('has-error');
                         $group.find('.help-block:first').html('').addClass('hidden');
                     },
-                    invalid: function (view, attr, error, selector) {
+                    invalid: function (view, attr, error) {
                         var $el = view.$('[name=' + attr + ']'),
                             $group = $el.closest('.form-group');
 
@@ -63,7 +63,7 @@ define([
                 return this;
             },
 
-            cleanIdVerificationRequired: function(val){
+            cleanIdVerificationRequired: function (val) {
                 return _s.toBoolean(val);
             },
 

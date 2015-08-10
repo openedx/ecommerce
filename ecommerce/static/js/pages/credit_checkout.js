@@ -13,21 +13,33 @@ require([
         'js/views/provider_view',
         'js/views/user_eligibility_view'
     ],
-    function( $,Backbone, UserModel, TrackingModel, CourseModel, ProviderCollection, EligibilityCollection, ClickableView, AnalyticsView, PaymentButtonView, Utils, ProviderView, EligibilityView ) {
+    function ($,
+              Backbone,
+              UserModel,
+              TrackingModel,
+              CourseModel,
+              ProviderCollection,
+              EligibilityCollection,
+              ClickableView,
+              AnalyticsView,
+              PaymentButtonView,
+              Utils,
+              ProviderView,
+              EligibilityView) {
+        'use strict';
 
         new PaymentButtonView({
-            el: $( '#payment-buttons' )
+            el: $('#payment-buttons')
         });
 
         new ProviderView({
-            el: $( '.provider-details' ),
+            el: $('.provider-details'),
             collection: new ProviderCollection()
         });
 
         new EligibilityView({
             collection: new EligibilityCollection()
         });
-
 
         var courseModel = new CourseModel(),
             trackingModel = new TrackingModel(),
@@ -43,7 +55,7 @@ require([
         /*
          Triggering the analytics events on clicking the payment buttons on checkoutpage.
          Buttons has the data-track- attributes type , event and category.
-        */
+         */
 
         new AnalyticsView({
             model: trackingModel,
@@ -54,7 +66,7 @@ require([
         // instrument the click events
         _($('[data-track-type="click"]')).each(function (track) {
             var properties = Utils.getNodeProperties(track.attributes,
-                        'data-track-', ['data-track-event']);
+                'data-track-', ['data-track-event']);
 
             new ClickableView({
                 model: trackingModel,

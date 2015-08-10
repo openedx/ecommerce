@@ -1,3 +1,5 @@
+// jscs:disable requireCapitalizedConstructors
+
 define([
         'jquery',
         'backbone',
@@ -37,14 +39,14 @@ define([
         // Extend the callbacks to work with Bootstrap.
         // See: http://thedersen.com/projects/backbone-validation/#callbacks
         _.extend(Backbone.Validation.callbacks, {
-            valid: function (view, attr, selector) {
+            valid: function (view, attr) {
                 var $el = view.$('[name=' + attr + ']'),
                     $group = $el.closest('.form-group');
 
                 $group.removeClass('has-error');
                 $group.find('.help-block:first').html('').addClass('hidden');
             },
-            invalid: function (view, attr, error, selector) {
+            invalid: function (view, attr, error) {
                 var $el = view.$('[name=' + attr + ']'),
                     $group = $el.closest('.form-group');
 
@@ -76,12 +78,14 @@ define([
                 professional: {
                     type: 'professional',
                     displayName: gettext('Professional Education'),
-                    helpText: gettext('Paid certificate track with initial verification and Professional Education Certificate')
+                    helpText: gettext('Paid certificate track with initial verification and Professional ' +
+                        'Education Certificate')
                 },
                 credit: {
                     type: 'credit',
                     displayName: gettext('Credit'),
-                    helpText: gettext('Paid certificate track with initial verification and Verified Certificate, and option to buy credit')
+                    helpText: gettext('Paid certificate track with initial verification and Verified Certificate, ' +
+                        'and option to buy credit')
                 }
             },
 
@@ -92,7 +96,6 @@ define([
                 verified: VerifiedCourseSeatFormFieldView,
                 professional: ProfessionalCourseSeatFormFieldView
             },
-
 
             events: {
                 'change input[name=type]': 'changedCourseType',
@@ -127,12 +130,13 @@ define([
                 this.editing = options.editing || false;
 
                 this.listenTo(this.model, 'change:type', this.renderCourseSeats);
-                this.listenTo(this.model, 'change:type change:id_verification_required', this.renderVerificationDeadline);
+                this.listenTo(this.model, 'change:type change:id_verification_required',
+                    this.renderVerificationDeadline);
 
                 // Listen for the sync event so that we can keep track of the original course type.
                 // This helps us determine which course types the course can be upgraded to.
                 if (this.editing) {
-                    this.setLockedCourseType()
+                    this.setLockedCourseType();
                 }
 
                 // Enable validation
@@ -144,7 +148,7 @@ define([
 
                 this.clearAlerts();
 
-                _.each(this.courseSeatViews, function (view, seatType) {
+                _.each(this.courseSeatViews, function (view) {
                     view.remove();
                 }, this);
 
@@ -266,7 +270,9 @@ define([
                             viewClass = this.courseSeatViewMappings[seatType];
 
                         if (viewClass) {
+                            /*jshint newcap: false */
                             view = new viewClass({model: model});
+                            /*jshint newcap: true */
                             view.render();
 
                             this.courseSeatViews[seatType] = view;
@@ -356,7 +362,8 @@ define([
                     $submitButton,
                     btnDefaultText,
                     self = this,
-                    btnSavingContent = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' + gettext('Saving...');
+                    btnSavingContent = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' +
+                        gettext('Saving...');
 
                 e.preventDefault();
 
@@ -385,7 +392,7 @@ define([
                         // Re-enable the buttons
                         $buttons.removeAttr('disabled').removeClass('disabled');
                     },
-                    success: function (model, response) {
+                    success: function (model) {
                         self.goTo(model.id);
                     },
                     error: function (model, response) {

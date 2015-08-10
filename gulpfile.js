@@ -1,3 +1,5 @@
+'use strict';
+
 var gulp = require('gulp'),
     jscs = require('gulp-jscs'),
     jshint = require('gulp-jshint'),
@@ -27,13 +29,12 @@ gulp.task('test', function (cb) {
     }, cb).start();
 });
 
-
 /**
  * Runs the JSHint linter.
  *
  * http://jshint.com/about/
  */
-gulp.task('lint', function() {
+gulp.task('lint', function () {
     return gulp.src(paths.lint)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
