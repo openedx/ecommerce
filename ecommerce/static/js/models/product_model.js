@@ -3,13 +3,15 @@ define([
         'backbone.relational',
         'backbone.validation',
         'moment',
-        'underscore'
+        'underscore',
+        'utils/utils'
     ],
     function (Backbone,
               BackboneRelational,
               BackboneValidation,
               moment,
-              _) {
+              _,
+              Utils) {
         'use strict';
 
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
@@ -27,12 +29,10 @@ define([
 
                 delete response.attribute_values;
 
-                // The view displaying the expires value assumes times are in the user's local timezone. We want all
+                // Form fields display date-times in the user's local timezone. We want all
                 // times to be displayed in UTC to avoid confusion. Strip the timezone data to workaround the UI
                 // deficiencies. We will restore the UTC timezone in toJSON().
-                if (response.expires) {
-                    response.expires = moment.utc(response.expires).format('YYYY-MM-DDTHH:mm:ss');
-                }
+                response.expires = Utils.stripTimezone(response.expires);
 
                 return response;
             },
@@ -54,9 +54,7 @@ define([
                 }, this);
 
                 // Restore the timezone component, and output the ISO 8601 format expected by the server.
-                if (data.expires) {
-                    data.expires = moment.utc(data.expires + 'Z').format();
-                }
+                data.expires = Utils.restoreTimezone(data.expires);
 
                 return data;
             }
