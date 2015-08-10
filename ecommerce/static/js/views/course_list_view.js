@@ -50,7 +50,7 @@ define([
                             },
 
                             // Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.
-                            sInfo: gettext("Displaying _START_ to _END_ of _TOTAL_ courses"),
+                            sInfo: gettext('Displaying _START_ to _END_ of _TOTAL_ courses'),
 
                             // Translators: _MAX_ is a placeholder. Do NOT translate it.
                             sInfoFiltered: gettext('(filtered from _MAX_ total courses)'),
@@ -64,14 +64,15 @@ define([
                             {
                                 title: gettext('Course'),
                                 data: 'name',
-                                fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-                                    $(nTd).html(_s.sprintf('<a href="/courses/%s/" class="course-name">%s</a><div class="course-id">%s</div>', oData.id, oData.name, oData.id));
+                                fnCreatedCell: function (nTd, sData, oData) {
+                                    $(nTd).html(_s.sprintf('<a href="/courses/%s/" class="course-name">%s</a>' +
+                                        '<div class="course-id">%s</div>', oData.id, oData.name, oData.id));
                                 }
                             },
                             {
                                 title: gettext('Course Type'),
                                 data: 'type',
-                                fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+                                fnCreatedCell: function (nTd, sData, oData) {
                                     $(nTd).html(_s.capitalize(oData.type));
                                 }
                             },

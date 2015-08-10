@@ -130,27 +130,29 @@ To run only Python unit tests, run:
 
 ::
 
-    $ make test_python
+    $ make validate_python
 
 To run only JavaScript unit tests, run:
 
 ::
 
-    $ make test_javascript
+    $ make validate_js
 
 JavaScript Unit Testing
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-JavaScript is unit tested using the Jasmine framework and should follow the `Jasmine 2.3 API
-specifications <http://jasmine.github.io/2.3/introduction.html>`__.
+This project uses `Jasmine <http://jasmine.github.io/2.3/introduction.html>`__ for JavaScript unit testing.
 Tests should be placed in the ecommerce/static/js/test/specs directory, and suffixed with _spec
 (e.g. ecommerce/static/js/test/specs/course_list_view_spec.js).
 
-Tests can be run with the following command:
+Additionally, all JavaScript code should adhere to the `edX JavaScript standards <https://github.com/edx/edx-platform/wiki/Javascript-standards-for-the-edx-platform>`__.
+These standards are enforced using `JSHint <http://www.jshint.com/>`__ and `jscs <https://www.npmjs.org/package/jscs>`__.
+
+Tests and linting can be run with the following command:
 
 ::
 
-    $ make test_javascript
+    $ make validate_js
 
 Acceptance Testing
 ~~~~~~~~~~~~~~~~~~

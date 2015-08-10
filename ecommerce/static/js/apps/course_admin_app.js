@@ -22,7 +22,7 @@ require([
             var url = $(this).attr('href').replace(courseApp.root, '');
 
             // Handle the cases where the user wants to open the link in a new tab/window.
-            if (event.ctrlKey || event.shiftKey || event.metaKey || event.which == 2) {
+            if (event.ctrlKey || event.shiftKey || event.metaKey || event.which === 2) {
                 return true;
             }
 
@@ -50,7 +50,6 @@ require([
         Backbone.View.prototype.goTo = function (fragment) {
             courseApp.navigate(fragment, {trigger: true});
         };
-
 
         $(function () {
             var $app = $('#app');

@@ -91,7 +91,6 @@ define([
                 this.$el.html(page.el);
             },
 
-
             /**
              * Display details for a single course.
              * @param {String} id - ID of the course to display.

@@ -1,7 +1,6 @@
 define(['backbone',
         'backbone.super'],
-    function (Backbone,
-              BackboneSuper) {
+    function (Backbone) {
         'use strict';
 
         /***

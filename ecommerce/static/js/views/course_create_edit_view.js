@@ -23,8 +23,8 @@ define([
                 this.editing = options.editing;
             },
 
-            remove: function(){
-                if(this.formView) {
+            remove: function () {
+                if (this.formView) {
                     this.formView.remove();
                     this.formView = null;
                 }
@@ -49,7 +49,7 @@ define([
 
                 // Render the complete view
                 this.$el.html($html);
-                
+
                 // Activate the tooltips
                 this.$el.find('[data-toggle="tooltip"]').tooltip();
 

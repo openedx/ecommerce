@@ -74,7 +74,6 @@ define([
                 return seatType;
             },
 
-
             /**
              * Returns an array of CourseSeats, ordered as they should be displayed.
              * @param {CourseSeat[]} seats
@@ -86,11 +85,11 @@ define([
                 }, this);
             },
 
-            orderSeatTypesForDisplay: function(seatTypes){
+            orderSeatTypesForDisplay: function (seatTypes) {
                 return _.sortBy(seatTypes, function (seatType) {
                     return this.seatSortObj[seatType];
                 }, this);
             }
-        }
+        };
     }
 );

@@ -1,3 +1,5 @@
+// jscs:disable requireCapitalizedConstructors
+
 define([
         'backbone',
         'backbone.relational',
@@ -118,7 +120,7 @@ define([
             /**
              * Alerts listeners that this Course's ID verification status MAY have changed.
              */
-            triggerIdVerified: function (model, value) {
+            triggerIdVerified: function () {
                 this.trigger('change:id_verification_required', this.isIdVerified());
             },
 
@@ -164,7 +166,9 @@ define([
                 // Do NOT create new audit seats
                 if (!seat) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
+                    /*jshint newcap: false */
                     seat = new seatClass();
+                    /*jshint newcap: true */
                     products.add(seat);
                 }
 
@@ -222,8 +226,8 @@ define([
                 }, this);
             },
 
-            courseSeatTypes: function(){
-                var seatTypes = this.seats().map(function(seat){
+            courseSeatTypes: function () {
+                var seatTypes = this.seats().map(function (seat) {
                     return seat.getSeatType();
                 });
 
