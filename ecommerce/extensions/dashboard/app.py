@@ -4,6 +4,7 @@ from oscar.core.loading import get_class
 
 
 class DashboardApplication(app.DashboardApplication):
+    index_view = get_class('dashboard.views', 'ExtendedIndexView')
     refunds_app = get_class('dashboard.refunds.app', 'application')
 
     def get_urls(self):
