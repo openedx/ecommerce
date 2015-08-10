@@ -152,6 +152,7 @@ OSCAR_REFUND_LINE_STATUS_PIPELINE = {
 }
 # END REFUND PROCESSING
 
+
 # DASHBOARD NAVIGATION MENU
 OSCAR_DASHBOARD_NAVIGATION = [
     {
@@ -228,6 +229,15 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
 ]
 # END DASHBOARD NAVIGATION MENU
+
+
+# SLUG SETTINGS
+# Mapping applied before slug generation. Use to replace characters which would normally be stripped.
+OSCAR_SLUG_MAP = {
+    '.': '_',
+}
+# END SLUG SETTINGS
+
 
 # Default timeout for Enrollment API calls
 ENROLLMENT_FULFILLMENT_TIMEOUT = 7

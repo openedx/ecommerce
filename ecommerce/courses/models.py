@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 import logging
 
 from django.db import models, transaction
-from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
+from oscar.core.utils import slugify
 from simple_history.models import HistoricalRecords
 
 from ecommerce.courses.publishers import LMSPublisher
@@ -35,7 +35,7 @@ class Course(models.Model):
 
     def _create_parent_seat(self):
         """ Create the parent seat product if it does not already exist. """
-        slug = 'parent-cs-{}'.format(slugify(unicode(self.id)))
+        slug = 'parent-cs-{}'.format(slugify(self.id))
         defaults = {
             'is_discountable': True,
             'structure': Product.PARENT,
