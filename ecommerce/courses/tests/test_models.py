@@ -133,6 +133,23 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
             seat, course, certificate_type, id_verification_required, price, credit_provider, credit_hours=credit_hours
         )
 
+    def test_collision_avoidance(self):
+        """
+        Sanity check verifying that course IDs which produced collisions due to a
+        lossy slug generation process no longer do so.
+        """
+        dotted_course = Course.objects.create(id='a/...course.../id')
+        regular_course = Course.objects.create(id='a/course/id')
+
+        certificate_type = 'honor'
+        id_verification_required = False
+        price = 0
+        dotted_course.create_or_update_seat(certificate_type, id_verification_required, price)
+        regular_course.create_or_update_seat(certificate_type, id_verification_required, price)
+
+        child_products = Product.objects.filter(structure=Product.CHILD).count()
+        self.assertEqual(child_products, 2)
+
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
         course = Course.objects.create(id='a/b/c', name='Test Course')
