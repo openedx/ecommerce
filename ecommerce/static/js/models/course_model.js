@@ -92,6 +92,13 @@ define([
                 credit: ['audit', 'honor', 'verified', 'credit']
             },
 
+            /**
+             * Seat types that can be created by the user.
+             *
+             * Note that audit seats cannot be created, only edited.
+             */
+            creatableSeatTypes: ['honor', 'verified', 'professional'],
+
             initialize: function () {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
                 this.on('sync', this.removeParentProducts, this);
@@ -157,36 +164,20 @@ define([
              */
             getOrCreateSeat: function (seatType) {
                 var seatClass,
-                    products = this.get('products'),
-                    seat = products.find(function (product) {
-                        // Filter out parent products since there is no need to display or modify.
-                        return (product instanceof CourseSeat) && (product.getSeatType() === seatType);
+                    seat = _.find(this.seats(), function (product) {
+                        // Find the seat with the specific seat type
+                        return product.getSeatType() === seatType;
                     });
 
-                if (!seat) {
+                if (!seat && _.contains(this.creatableSeatTypes, seatType)) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
                     /*jshint newcap: false */
                     seat = new seatClass();
                     /*jshint newcap: true */
-                    products.add(seat);
+                    this.get('products').add(seat);
                 }
 
                 return seat;
-            },
-
-            // TODO Rename to seatMap
-            /**
-             * Returns a mapping of certificate types/modes to CourseSeats.
-             *
-             * @returns {Object}
-             */
-            getSeats: function () {
-                var seats = this.seats(),
-                    seatTypes = _.map(seats, function (seat) {
-                        return seat.getSeatType();
-                    });
-
-                return _.object(seatTypes, seats);
             },
 
             /**
@@ -223,16 +214,6 @@ define([
                 return this.seats().filter(function (seat) {
                     return _.contains(this.validSeatTypes(), seat.getSeatType());
                 }, this);
-            },
-
-            courseSeatTypes: function () {
-                var seatTypes = this.seats().map(function (seat) {
-                    return seat.getSeatType();
-                });
-
-                // Note (CCB): Audit is intentionally left out of this list, to avoid
-                // creating new audit seats (which we do not yet support).
-                return seatTypes.length > 0 ? seatTypes : ['honor', 'verified', 'professional'];
             },
 
             /**
