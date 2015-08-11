@@ -11,13 +11,53 @@
         .ReadMsgBody { width: 100%; background-color: #ebebeb;}
         .ExternalClass { width: 100%; background-color: #ebebeb;}
         .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height:100%;}
-        body {-webkit-text-size-adjust:none;
-            -ms-text-size-adjust:none;
+        body {
             margin:0;
             padding:10px 0;
         }
         table {border-spacing:0;}
         table td {border-collapse:collapse;}
+        .container-pre-header {
+            background-color: #ffffff;
+            padding-left: 30px;
+            padding-right: 30px;
+            font-size: 14px;
+            line-height: 20px;
+            font-family: Open Sans, sans-serif;
+            color: #333;
+            border-top: 10px solid #1AA1E0;
+            border-radius: 5px;
+        }
+        .container-header {
+            padding-left: 30px;
+            padding-right: 30px;
+            font-size: 14px;
+            line-height: 20px;
+            font-family: Open Sans, sans-serif;
+            color: #333;
+            background-color: #f3f3f3;
+            border-top: 1px solid #cccccc;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .container-body{
+            background-color: #ffffff;
+            padding-left: 30px;
+            padding-right: 30px;
+            font-size: 13px;
+            line-height: 20px;
+            font-family: Open Sans, sans-serif;
+            color: #333;
+            border-radius: 5px;
+        }
+        .container-footer{
+            padding-left: 30px;
+            padding-right: 30px;
+            font-size: 13px;
+            line-height: 20px;
+            font-family: Open Sans, sans-serif;
+            color: #002D40;
+            background-color: #f3f3f3;
+        }
         .yshortcuts a {border-bottom: none !important;}
         /* Constrain email width for small screens */
         @media screen and (max-width: 600px) {
@@ -86,80 +126,9 @@
         <td align="center" valign="top" bgcolor="#dddddd" style="background-color: #dddddd;">
             <!-- 600px container (white background) -->
             <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" bgcolor="#ffffff" style="border-radius: 5px; box-shadow: 0 0 2px #aaaaaa;">
-                <tr>
-                    <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-top: 10px solid #1AA1E0; border-radius: 5px;">
-                        <table border="0" cellpadding="0" cellspacing="0" class="pre-header-container">
-                            <tr>
-                                <td align="left" valign="middle" style="font-size:30px; font-style: bold; height: 50px; font-family: Open Sans, Arial, sans-serif;">
-                                    <img src="http://gallery.mailchimp.com/1822a33c054dc20e223ca40e2/images/logo_web_edx_studio01aad778f34f.png" height="30" alt="{platform_name} Logo" border="0" hspace="0" vspace="0" class="platform-img">
-                                </td>
-                                <td align="left" class="email-type" valign="top" style="font-size: 20px; vertical-align: middle; padding-left: 20px; font-family: Open Sans, Arial, sans-serif; color: #127eb1;">
-                                    {% trans "Receipt Confirmation" %}
-                                </td>
-                            </tr>
-                        </table><!--/ end .pre-header-container-->
-                    </td>
-                </tr>
-                <!-- Header -->
-                {% block header %}
-                <tr>
-                    <td class="container-padding" bgcolor="#f3f3f3" style="padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; background-color: #f3f3f3; border-top: 1px solid #cccccc; border-bottom: 1px solid #eeeeee;">
-                        <table border="0" cellpadding="0" cellspacing="0" class="columns-container" style="width:100%;">
-                          <tr>
-                            <td class="force-col" style="padding-right: 20px;" valign="middle">
-                                <!-- ### COLUMN 1 - COURSE AND TITLE ### -->
-                                <table border="0" cellspacing="0" cellpadding="0" width="280" align="left" class="col-2">
-                                    <tr>
-                                        <td align="left" valign="top" style="font-size:13px; line-height: 20px; font-family: Open Sans, Arial, sans-serif; color: #aaaaaa;">
-                                            <br>
-                                            {% trans "Receipt Confirmation for:" %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="left" valign="top" style="line-height: 26px; font-family: Open Sans, Arial, sans-serif; font-style: bold; font-size:24px; color: #002D40;">
-                                            {{course_title}}
-                                            <br><br>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                            <td class="force-col"  valign="middle">
-                                <!-- ### COLUMN 2 - VIEW RECEIPT ### -->
-                                <table border="0" cellspacing="0" cellpadding="10" width="100" align="right" class="col-2">
-                                    <tr>
-                                        <td align="center" valign="middle" style="font-size:13px; font-family: Open Sans, Arial, sans-serif; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
-                                            <a href="{{course_url}}" style="color: #ffffff; text-decoration: none;">{% trans "View Receipt" %}</a>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                          </tr>
-                        </table><!--/ end .columns-container-->
-                    </td>
-                </tr>
-                {% endblock header %}
                 {% block body %}
                 {% endblock body %}
                 {% block footer %}
-                <tr>
-                    <td class="footer-padding" style="padding-left: 30px; padding-right: 30px; padding-bottom: 20px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #002D40; border-radius: 5px;" align="left">
-                        <table border="0" cellpadding="0" cellspacing="0" class="columns-container">
-                            <tr>
-                                <td class="force-col" style="padding-right: 20px;" valign="middle">
-                                    <!-- ### COLUMN 1 -  FOOTER  ### -->
-                                    <table border="0" cellspacing="0" cellpadding="10" width="100"  align="right" class="col-2-actions">
-                                        <tr>
-                                            <td align="center" valign="right" style="font-size:13px; font-family: Open Sans, Arial, sans-serif; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
-                                                <a href="{{course_url}}" style="color: #ffffff; text-decoration: none;">{% trans "View Receipt" %}</a>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                        <br>
-                    </td>
-                </tr>
                 <!-- Copyright and Address -->
                 <tr>
                     <td class="container-padding" bgcolor="#ffffff" style="padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; background-color: #ffffff; border-bottom: 1px solid #cccccc; border-radius: 5px;">

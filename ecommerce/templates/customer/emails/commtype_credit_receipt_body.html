@@ -1,0 +1,86 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% block body %}
+<tr>
+    <td class="container-padding container-pre-header" bgcolor="#ffffff">
+        <table border="0" cellpadding="0" cellspacing="0" class="pre-header-container">
+            <tr>
+                <td align="left" valign="middle" style="font-size:30px; font-style: bold; height: 50px; font-family: Open Sans, Arial, sans-serif;">
+                    <img src="http://gallery.mailchimp.com/1822a33c054dc20e223ca40e2/images/logo_web_edx_studio01aad778f34f.png" height="30" alt="{platform_name} Logo" border="0" hspace="0" vspace="0" class="platform-img">
+                </td>
+                <td align="left" class="email-type" valign="top" style="font-size: 20px; vertical-align: middle; padding-left: 20px; font-family: Open Sans, Arial, sans-serif; color: #127eb1;">
+                    {% trans "Receipt Confirmation" %}
+                </td>
+            </tr>
+        </table><!--/ end .pre-header-container-->
+    </td>
+</tr>
+<tr>
+    <td class="container-padding container-header" bgcolor="#f3f3f3">
+        <table border="0" cellpadding="0" cellspacing="0" class="columns-container" style="width:100%;">
+          <tr>
+            <td class="force-col" style="padding-right: 20px;" valign="middle">
+                <!-- ### COLUMN 1 - COURSE AND TITLE ### -->
+                <table border="0" cellspacing="0" cellpadding="0" width="280" align="left" class="col-2">
+                    <tr>
+                        <td align="left" valign="top" style="font-size:13px; line-height: 20px; font-family: Open Sans, Arial, sans-serif; color: #aaaaaa;">
+                            <br>
+                            {% trans "Receipt Confirmation for:" %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left" valign="top" style="line-height: 26px; font-family: Open Sans, Arial, sans-serif; font-style: bold; font-size:24px; color: #002D40;">
+                            {{course_title}}
+                            <br><br>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td class="force-col"  valign="middle">
+                <!-- ### COLUMN 2 - VIEW RECEIPT ### -->
+                <table border="0" cellspacing="0" cellpadding="10" width="100" align="right" class="col-2">
+                    <tr>
+                        <td align="center" valign="middle" style="font-size:13px; font-family: Open Sans, Arial, sans-serif; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
+                            <a href="{{receipt_page_url}}" style="color: #ffffff; text-decoration: none;">{% trans "View Receipt" %}</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+          </tr>
+        </table><!--/ end .columns-container-->
+    </td>
+</tr>
+
+<!-- Message Body -->
+<tr>
+    <td class="container-padding container-body" bgcolor="#ffffff" align="left">
+        <br>
+        <!--/message HTML content -->
+        <p>{% blocktrans %}Hi {{full_name}},{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans with credit_hours=credit_hours credit_provider=credit_provider course_title=course_title platform_name=platform_name %}Thank you for purchasing {{credit_hours}} credit hours from {{credit_provider}} for {{course_title}}. The charge below will appear on your next credit or debit card statement with a company name of {{platform_name}}.{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans %}You can see the status the status of your credit request or complete the credit request process on your {{platform_name}} dashboard{% endblocktrans %}</p>
+        <p>{% blocktrans %}To browse other credit-eligible courses visit the {{platform_name}} website. More courses are added all the time.{% endblocktrans %}</p>
+        <br>
+        <p>{% trans "Thank you and congratulation on your achievement. We hope you enjoy the course!" %}</p>
+        <p>{% blocktrans %}{{platform_name}} team{% endblocktrans %}</p>
+        <!--/message HTML content -->
+        <br><br>
+    </td>
+</tr>
+
+<tr>
+    <td class="footer-padding container-footer" align="left">
+        <!--footer content -->
+        <br>
+        <p>{% blocktrans with course_title=course_title platform_name=platform_name %}You are receiving this email because you purchased a seat in the {{platform_name}} course {{course_title}}.{% endblocktrans %}</p>
+        <br>
+        <!--/ end footer content -->
+    </td>
+</tr>
+<!--/100% wrapper-->
+<br>
+<br>
+{% endblock body %}
+

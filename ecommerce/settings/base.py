@@ -236,6 +236,9 @@ ENROLLMENT_API_URL = None
 COMMERCE_API_TIMEOUT = 7
 COMMERCE_API_URL = None
 
+# PROVIDER DATA PROCESSING
+PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
+
 # OAuth2 provider URL used for OAuth2 transactions (e.g. validating access tokens)
 OAUTH2_PROVIDER_URL = None
 # END URL CONFIGURATION

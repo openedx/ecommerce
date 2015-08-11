@@ -1,5 +1,5 @@
 {% load i18n %}
-{% trans "Receipt Confirmation for: " %}{{notification_data.course_title}}
+{% trans "Receipt Confirmation for: " %}{{course_title}}
 
 {% blocktrans %}Hi {{full_name}},{% endblocktrans %}
 
