@@ -14,10 +14,6 @@ define([
             },
 
             validation: {
-                // TODO Determine how to set this to the model's default.
-                //certificate_type: {
-                //    required: true
-                //},
                 price: {
                     required: true
                 },

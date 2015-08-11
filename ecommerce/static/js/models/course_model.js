@@ -160,10 +160,9 @@ define([
                     products = this.get('products'),
                     seat = products.find(function (product) {
                         // Filter out parent products since there is no need to display or modify.
-                        return (product instanceof CourseSeat) && (product.seatType === seatType);
+                        return (product instanceof CourseSeat) && (product.getSeatType() === seatType);
                     });
 
-                // Do NOT create new audit seats
                 if (!seat) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
                     /*jshint newcap: false */
