@@ -98,7 +98,6 @@ define([
             },
 
             events: {
-                'change input[name=type]': 'changedCourseType',
                 'submit': 'submit'
             },
 
@@ -252,33 +251,32 @@ define([
              */
             renderCourseSeats: function () {
                 var $courseSeats,
-                    seatTypes,
                     $courseSeatsContainer = this.$el.find('.course-seats'),
                     activeSeats = this.model.validSeatTypes();
 
                 // Display a helpful message if the user has not yet selected a course type.
                 if (activeSeats.length < 1) {
                     activeSeats = ['empty'];
-                }
+                } else {
 
-                if (_.isEmpty(this.courseSeatViews)) {
-                    seatTypes = CourseUtils.orderSeatTypesForDisplay(this.model.courseSeatTypes());
+                    _.each(CourseUtils.orderSeatTypesForDisplay(activeSeats), function (seatType) {
+                        var model,
+                            viewClass,
+                            view = this.courseSeatViews[seatType];
 
-                    _.each(seatTypes, function (seatType) {
-                        var view,
-                            model = this.model.getOrCreateSeat(seatType),
+                        if (!view) {
+                            model = this.model.getOrCreateSeat(seatType);
                             viewClass = this.courseSeatViewMappings[seatType];
 
-                        if (viewClass) {
-                            /*jshint newcap: false */
-                            view = new viewClass({model: model});
-                            /*jshint newcap: true */
-                            view.render();
+                            if (viewClass && model) {
+                                /*jshint newcap: false */
+                                view = new viewClass({model: model});
+                                /*jshint newcap: true */
+                                view.render();
 
-                            this.courseSeatViews[seatType] = view;
-                            $courseSeatsContainer.append(view.el);
-                        } else {
-                            console.warn('No view class found for seat type: ' + seatType);
+                                this.courseSeatViews[seatType] = view;
+                                $courseSeatsContainer.append(view.el);
+                            }
                         }
                     }, this);
                 }
@@ -321,20 +319,6 @@ define([
 
                 this.alertViews = [];
 
-                return this;
-            },
-
-            /**
-             * Event handler for course type selection.
-             *
-             * The course model's type field is updated from the selection,
-             * and the course seats are re-rendered.
-             *
-             * @param {Event} e - Event that triggered this callback.
-             */
-            changedCourseType: function (e) {
-                this.model.set('type', e.target.value);
-                this.renderCourseSeats();
                 return this;
             },
 
