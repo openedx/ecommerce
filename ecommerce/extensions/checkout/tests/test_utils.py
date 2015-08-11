@@ -1,11 +1,15 @@
-import httpretty
-
+import ddt
 from django.test import TestCase
+import httpretty
+import mock
+import requests
+from requests import ConnectionError, Timeout
 
-from ecommerce.settings.base import get_lms_url
 from ecommerce.extensions.checkout.utils import get_provider_data
+from ecommerce.settings.base import get_lms_url
 
 
+@ddt.ddt
 class UtilTests(TestCase):
     @httpretty.activate
     def test_get_provider_data(self):
@@ -31,3 +35,9 @@ class UtilTests(TestCase):
         )
         provider_data = get_provider_data('ABC')
         self.assertEqual(provider_data, None)
+
+    @ddt.data(ConnectionError, Timeout)
+    def test_exceptions(self, exception):
+        """ Verify the function returns None when a request exception is raised. """
+        with mock.patch.object(requests, 'get', mock.Mock(side_effect=exception)):
+            self.assertIsNone(get_provider_data('ABC'))
