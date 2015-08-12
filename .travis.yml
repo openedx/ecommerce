@@ -19,6 +19,7 @@ before_install:
     - "sh -e /etc/init.d/xvfb start"
 install:
     - gem install coveralls-lcov
+    - pip install -U pip wheel
     - pip install -r requirements/test.txt
     - pip install coveralls
     - make requirements.js
