@@ -12,6 +12,8 @@ import paypalrestsdk
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.models import PaypalWebProfile
+from ecommerce.extensions.payment.utils import middle_truncate
+
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +86,8 @@ class Paypal(BasePaymentProcessor):
                     'items': [
                         {
                             'quantity': line.quantity,
-                            'name': line.product.title,
+                            # PayPal requires that item names be at most 127 characters long.
+                            'name': middle_truncate(line.product.title, 127),
                             'price': unicode(line.price_incl_tax),
                             'currency': line.stockrecord.price_currency,
                         }
