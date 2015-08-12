@@ -18,7 +18,7 @@ define([
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/products/',
-            nestedAttributes: ['certificate_type', 'id_verification_required', 'course_key'],
+            nestedAttributes: ['certificate_type', 'course_key', 'id_verification_required'],
 
             parse: function (response) {
                 // Un-nest the attributes

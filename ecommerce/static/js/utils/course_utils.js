@@ -41,40 +41,6 @@ define([
             },
 
             /**
-             * Returns the seat type for a given model.
-             *
-             * @param {Backbone.Model|Object} seat
-             * @returns {String|null}
-             */
-            getSeatType: function (seat) {
-                var seatType = seat.seatType;
-
-                if (!seatType) {
-                    // Fall back to using certificate type
-                    switch (seat.get('certificate_type') || seat.certificate_type) {
-                        case 'verified':
-                            seatType = 'verified';
-                            break;
-                        case 'credit':
-                            seatType = 'credit';
-                            break;
-                        case 'professional':
-                        case 'no-id-professional':
-                            seatType = 'professional';
-                            break;
-                        case 'honor':
-                            seatType = 'honor';
-                            break;
-                        default:
-                            seatType = 'audit';
-                            break;
-                    }
-                }
-
-                return seatType;
-            },
-
-            /**
              * Returns an array of CourseSeats, ordered as they should be displayed.
              * @param {CourseSeat[]} seats
              * @returns {CourseSeat[]}

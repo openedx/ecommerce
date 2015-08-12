@@ -82,3 +82,9 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
             response,
             'Purchase {} credits from'.format(self.credit_hours)
         )
+
+    def test_course_not_found(self):
+        """ The view should return HTTP 404 if the course cannot be found. """
+        path = reverse('credit:checkout', args=['course/not/found'])
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 404)

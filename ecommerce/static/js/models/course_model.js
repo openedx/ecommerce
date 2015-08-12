@@ -138,7 +138,7 @@ define([
              */
             removeParentProducts: function () {
                 var products = this.get('products'),
-                    parents = _.where(products, {structure: 'parent'});
+                    parents = products.where({structure: 'parent'});
 
                 products.remove(parents);
             },

@@ -7,10 +7,15 @@ sudo: false
 cache:
   directories:
     - $HOME/.cache/pip
+addons:
+    apt:
+        packages:
+            - lcov
 before_install:
     - "export DISPLAY=:99.0"
     - "sh -e /etc/init.d/xvfb start"
 install:
+    - gem install coveralls-lcov
     - pip install -r requirements/test.txt
     - pip install coveralls
     - make requirements.js
@@ -21,4 +26,5 @@ branches:
     only:
         - master
 after_success:
-    coveralls
+    - coveralls-lcov -v -n coverage/report-lcov/lcov.info > js-coverage.json
+    - coveralls --merge=js-coverage.json
