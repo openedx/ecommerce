@@ -24,8 +24,7 @@ module.exports = function(config) {
     ],
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: [],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -37,7 +36,6 @@ module.exports = function(config) {
     plugins:[
        'karma-jasmine',
        'karma-requirejs',
-       'karma-jasmine-jquery',
        'karma-firefox-launcher',
        'karma-coverage',
        'karma-spec-reporter',
@@ -56,9 +54,6 @@ module.exports = function(config) {
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['spec', 'coverage'],
-
-    // frameworks to use
-    frameworks: ['jasmine-jquery', 'jasmine', 'requirejs'],
 
     // web server port
     port: 9876,
