@@ -12,8 +12,9 @@ from ecommerce.settings.base import get_lms_url
 from oscar.core.loading import get_class
 
 
-post_checkout = get_class('checkout.signals', 'post_checkout')
 logger = logging.getLogger(__name__)
+post_checkout = get_class('checkout.signals', 'post_checkout')
+
 # Number of orders currently supported for the email notifications
 ORDER_LINE_COUNT = 1
 
@@ -42,7 +43,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                     # products other than courses, and will need to change in the future.
                     'id': line.partner_sku,
                     'sku': mode_for_seat(line.product),
-                    'name': line.product.title,
+                    'name': line.product.course.id,
                     'price': str(line.line_price_excl_tax),
                     'quantity': line.quantity,
                     'category': line.product.get_product_class().name,

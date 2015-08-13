@@ -1,13 +1,11 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.utils.text import slugify
 import factory
 from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.newfactories import UserFactory
 
-from ecommerce.courses.models import Course
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
 
@@ -28,7 +26,7 @@ class RefundFactory(factory.DjangoModelFactory):
         return factories.create_order(user=self.user)
 
     @factory.post_generation
-    def create_lines(self, create, extracted, **kwargs):    # pylint: disable=unused-argument
+    def create_lines(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
         if not create:
             return
 
@@ -54,62 +52,3 @@ class RefundLineFactory(factory.DjangoModelFactory):
 
     class Meta(object):
         model = get_model('refund', 'RefundLine')
-
-
-class CourseFactory(object):
-    def __init__(self, course_id, course_name):
-        self.course_name = course_name
-        self.course_id = course_id
-        self.modes = {}
-        self.partner, _created = Partner.objects.get_or_create(name='edX')
-
-    def _get_parent_seat_product(self):
-        seat, created = ProductClass.objects.get_or_create(slug='seat',
-                                                           defaults={'track_stock': False, 'requires_shipping': False,
-                                                                     'name': 'Seat'})
-
-        if created:
-            ProductAttribute.objects.create(product_class=seat, name='course_key', code='course_key', type='text',
-                                            required=True)
-            ProductAttribute.objects.create(product_class=seat, name='id_verification_required',
-                                            code='id_verification_required', type='boolean', required=False)
-            ProductAttribute.objects.create(product_class=seat, name='certificate_type', code='certificate_type',
-                                            type='text', required=False)
-
-        slug = slugify(self.course_name)
-        title = u'Seat in {}'.format(self.course_name)
-        parent_product, created = Product.objects.get_or_create(product_class=seat, slug=slug, structure='parent',
-                                                                defaults={'title': title})
-        if created:
-            parent_product.attr.course_key = self.course_id
-            parent_product.save()
-
-        return parent_product
-
-    def add_mode(self, name, price, id_verification_required=False):
-        parent_product = self._get_parent_seat_product()
-
-        certificate_type = Course.certificate_type_for_mode(name)
-        title = u'{certificate_type} Seat in {course_name}'.format(
-            certificate_type=certificate_type,
-            course_name=self.course_name
-        )
-        slug = slugify(u'{course_name}-seat-{certificate_type}'.format(
-            course_name=self.course_name,
-            certificate_type=certificate_type
-        ))
-        child_product, created = Product.objects.get_or_create(parent=parent_product, title=title, slug=slug,
-                                                               structure='child')
-
-        if created:
-            child_product.attr.course_key = self.course_id
-            child_product.attr.certificate_type = certificate_type
-            child_product.attr.id_verification_required = id_verification_required
-            child_product.save()
-
-            child_product.stockrecords.create(partner=self.partner, partner_sku=slug, num_in_stock=None,
-                                              price_currency=settings.OSCAR_DEFAULT_CURRENCY, price_excl_tax=price)
-
-        self.modes[name] = child_product
-
-        return child_product

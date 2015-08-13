@@ -32,7 +32,7 @@ class ApiTests(RefundTestMixin, TestCase):
         order = self.create_order()
         self.assertTrue(self.user.orders.exists())
 
-        actual = find_orders_associated_with_course(self.user, self.course_id)
+        actual = find_orders_associated_with_course(self.user, self.course.id)
         self.assertEqual(actual, [order])
 
     @ddt.data('', ' ', None)
@@ -44,7 +44,7 @@ class ApiTests(RefundTestMixin, TestCase):
         """ An empty list should be returned if the user has never placed an order. """
         self.assertFalse(self.user.orders.exists())
 
-        actual = find_orders_associated_with_course(self.user, self.course_id)
+        actual = find_orders_associated_with_course(self.user, self.course.id)
         self.assertEqual(actual, [])
 
     @ddt.data(ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
@@ -54,7 +54,7 @@ class ApiTests(RefundTestMixin, TestCase):
         order.status = status
         order.save()
 
-        actual = find_orders_associated_with_course(self.user, self.course_id)
+        actual = find_orders_associated_with_course(self.user, self.course.id)
         self.assertEqual(actual, [])
 
     # TODO Implement this when we begin storing the verification close date.
@@ -67,7 +67,7 @@ class ApiTests(RefundTestMixin, TestCase):
     def test_create_refunds(self):
         """ The method should create refunds for orders/lines that have not been refunded. """
         order = self.create_order()
-        actual = create_refunds([order], self.course_id)
+        actual = create_refunds([order], self.course.id)
         refund = Refund.objects.get(order=order)
         self.assertEqual(actual, [refund])
         self.assert_refund_matches_order(refund, order)
@@ -77,5 +77,5 @@ class ApiTests(RefundTestMixin, TestCase):
         order = self.create_order()
         RefundLineFactory(order_line=order.lines.first())
 
-        actual = create_refunds([order], self.course_id)
+        actual = create_refunds([order], self.course.id)
         self.assertEqual(actual, [])

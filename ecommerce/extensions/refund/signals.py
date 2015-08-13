@@ -36,7 +36,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
                     # products other than courses, and will need to change in the future.
                     'id': line.order_line.partner_sku,
                     'sku': mode_for_seat(line.order_line.product),
-                    'name': line.order_line.product.title,
+                    'name': line.order_line.product.course.id,
                     'price': str(line.line_credit_excl_tax),
                     'quantity': -1 * line.quantity,
                     'category': line.order_line.product.get_product_class().name,
