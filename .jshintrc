@@ -146,6 +146,9 @@
         "gettext",
 
         // App-specific
-        "analytics"
+        "analytics",
+
+        // Jasmine
+        "done"
     ]
 }

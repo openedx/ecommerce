@@ -1,7 +1,8 @@
 define([
         'underscore.string',
         'views/course_seat_form_fields/verified_course_seat_form_field_view',
-        'text!templates/professional_course_seat_form_field.html'
+        'text!templates/professional_course_seat_form_field.html',
+        'backbone.super'
     ],
     function (_s,
               VerifiedCourseSeatFormFieldView,
