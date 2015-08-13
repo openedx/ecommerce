@@ -39,6 +39,7 @@ define([
             },
 
             initialize: function () {
+                /* istanbul ignore next */
                 Backbone.Validation.bind(this, {
                     valid: function (view, attr) {
                         var $el = view.$('[name=' + attr + ']'),
