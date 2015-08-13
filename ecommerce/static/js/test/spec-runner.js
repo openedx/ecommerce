@@ -11,7 +11,10 @@ var isBrowser = window.__karma__ === undefined,
 if (isBrowser) {
     // The browser cannot read directories, so all files must be enumerated below.
     specs = [
-        config.baseUrl + 'js/test/specs/test_spec.js'
+        config.baseUrl + 'js/test/specs/course_create_view_spec.js',
+        config.baseUrl + 'js/test/specs/course_edit_view_spec.js',
+        config.baseUrl + 'js/test/specs/course_detail_view_spec.js',
+        config.baseUrl + 'js/test/specs/course_list_view_spec.js'
     ];
 } else {
     // the E-Commerce application loads gettext identity library via django, thus
