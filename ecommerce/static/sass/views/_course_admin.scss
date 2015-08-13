@@ -38,13 +38,13 @@
     .course-seats {
       .course-seat {
         margin-bottom: spacing-vertical(mid-small);
+      }
 
-        .seat-type {
-          margin-bottom: 5px;
-          border-bottom: 1px solid $page-header-border-color;
-          padding-bottom: 3px;
-          font-weight: bold;
-        }
+      .seat-type {
+        margin-bottom: 5px;
+        border-bottom: 1px solid $page-header-border-color;
+        padding-bottom: 3px;
+        font-weight: bold;
       }
     }
   }

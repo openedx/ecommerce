@@ -43,5 +43,33 @@ define([
                 });
             });
         });
+
+        describe('filterSeats', function () {
+            it('should filter CourseSeats of the requested type', function () {
+                var honor = new HonorSeat(),
+                    verified = new VerifiedSeat(),
+                    professional = new ProfessionalSeat(),
+                    expected = [
+                        {
+                            input: [honor, verified, professional],
+                            output: {
+                                filtered: [verified],
+                                residual: [honor, professional]
+                            }
+                        },
+                        {
+                            input: [honor, verified, verified, professional],
+                            output: {
+                                filtered: [verified, verified],
+                                residual: [honor, professional]
+                            }
+                        },
+                    ];
+
+                _.each(expected, function (expected) {
+                    expect(CourseUtils.filterSeats(expected.input, 'verified')).toEqual(expected.output);
+                });
+            });
+        });
     }
 );
