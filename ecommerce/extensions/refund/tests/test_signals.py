@@ -2,7 +2,6 @@ from django.test import TestCase, override_settings
 from mock import patch
 from oscar.test.newfactories import UserFactory
 
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
@@ -10,14 +9,15 @@ from ecommerce.tests.mixins import BusinessIntelligenceMixin
 
 @override_settings(SEGMENT_KEY='dummy-key')
 @patch('analytics.track')
-class RefundTrackingTests(BusinessIntelligenceMixin, CourseCatalogTestMixin, RefundTestMixin, TestCase):
+class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
     """Tests verifying the behavior of refund tracking."""
+
     def setUp(self):
         super(RefundTrackingTests, self).setUp()
 
         self.user = UserFactory()
         self.order = self.create_order()
-        self.refund = create_refunds([self.order], self.course_id)[0]
+        self.refund = create_refunds([self.order], self.course.id)[0]
 
     def test_successful_refund_tracking(self, mock_track):
         """Verify that a successfully placed refund is tracked when Segment is enabled."""
@@ -48,7 +48,7 @@ class RefundTrackingTests(BusinessIntelligenceMixin, CourseCatalogTestMixin, Ref
         to a total credit of 0.
         """
         order = self.create_order(free=True)
-        create_refunds([order], self.course_id)
+        create_refunds([order], self.course.id)
 
         # Verify that no business intelligence event was emitted. Refunds corresponding
         # to a total credit of 0 are automatically approved upon creation.

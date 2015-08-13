@@ -1,5 +1,4 @@
 # coding=utf-8
-from decimal import Decimal
 
 from django.conf import settings
 from django.test import override_settings
@@ -9,11 +8,12 @@ from oscar.core.loading import get_model, get_class
 from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 
+from ecommerce.courses.models import Course
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-from ecommerce.extensions.refund.tests.factories import CourseFactory, RefundFactory
-
+from ecommerce.extensions.refund.tests.factories import RefundFactory
 
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
@@ -21,13 +21,12 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class RefundTestMixin(object):
+class RefundTestMixin(CourseCatalogTestMixin):
     def setUp(self):
         super(RefundTestMixin, self).setUp()
-        self.course_id = u'edX/DemoX/Demo_Course'
-        self.course = CourseFactory(self.course_id, u'edX Demó Course')
-        self.honor_product = self.course.add_mode('honor', 0)
-        self.verified_product = self.course.add_mode('verified', Decimal(10.00), id_verification_required=True)
+        self.course, __ = Course.objects.get_or_create(id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course')
+        self.honor_product = self.course.create_or_update_seat('honor', False, 0)
+        self.verified_product = self.course.create_or_update_seat('verified', True, 10)
 
     def create_order(self, user=None, multiple_lines=False, free=False):
         user = user or self.user
