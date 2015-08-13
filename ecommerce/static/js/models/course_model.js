@@ -30,10 +30,6 @@ define([
               Utils) {
         'use strict';
 
-        Backbone.Validation.configure({
-            labelFormatter: 'label'
-        });
-
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
         _.extend(Backbone.Validation.patterns, {
@@ -82,6 +78,11 @@ define([
 
                     if (invalid) {
                         return gettext('The verification deadline must occur AFTER the upgrade deadline.');
+                    }
+                },
+                products: function (value) {
+                    if (!value.isValid()) {
+                        return gettext('Product validation failed.');
                     }
                 }
             },

@@ -144,7 +144,7 @@ define([
                 }
 
                 // Enable validation
-                Backbone.Validation.bind(this, {forceUpdate: !this.editing});
+                Backbone.Validation.bind(this);
             },
 
             remove: function () {
@@ -389,6 +389,12 @@ define([
 
                         if (response.responseJSON && response.responseJSON.error) {
                             message = response.responseJSON.error;
+
+                            // Log the error to the console for debugging purposes
+                            console.error(message);
+                        } else {
+                            // Log the error to the console for debugging purposes
+                            console.error(response.responseText);
                         }
 
                         self.clearAlerts();
