@@ -15,7 +15,8 @@ define([
 
             validation: {
                 price: {
-                    required: true
+                    required: true,
+                    msg: gettext('All course seats must have a price.')
                 },
                 product_class: {
                     oneOf: ['Seat']
