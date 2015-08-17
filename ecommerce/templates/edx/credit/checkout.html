@@ -5,7 +5,7 @@
 {% block title %}{% trans "Credit Checkout" %}{% endblock title %}
 
 {% block content %}
-    <div class="container credit-checkout">
+    <div class="container credit-checkout" data-lms-root-url="{{ lms_url_root }}">
         <div class="row center-block course-details">
             <div class="col-sm-11">
                 <h3 class="title">
@@ -28,7 +28,7 @@
                 {% trans "Something went wrong! Please try again later." %}
             </div>
             <div class="provider-panel hide">
-                <div data-providers-ids="{{ providers_ids }}" class="row center-block provider-details">
+                <div data-provider-ids="{{ provider_ids }}" class="row center-block provider-details">
                     {# data will be loaded with underscore template #}
                 </div>
 
@@ -117,12 +117,7 @@
         </div>
     </div>
 
-    <form id="payment-processor-form">
-    </form>
-
-    <script>
-        var lmsRootUrl = "{{ lms_url_root }}";
-    </script>
+    <form id="payment-processor-form"></form>
 
     {% if analytics_data %}
         <script type="text/javascript">

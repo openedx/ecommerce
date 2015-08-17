@@ -2,13 +2,12 @@
     <img alt="<%= display_name %>" class="img-responsive provider-image" src="<%= thumbnail_url %>">
 </div>
 <div class="col-sm-10">
-    <h3 class="title"><%= gettext('About Credit at ') %> <%= id %> </h3>
+    <h3 class="title"><%= interpolate(gettext('About Credit at %(provider)s'), {provider:id}, true) %></h3>
     <p><%= gettext( description ) %></p>
-    <button class="btn btn-link show-instructions" data-toggle="collapse" data-target="#fulfillment-instructions"><%=
-        gettext( "How does credit works?" ) %>
+    <button class="btn-link show-instructions" data-toggle="collapse" data-target="#fulfillment-instructions">
+        <%= gettext( "How does credit work?" ) %>
     </button>
     <div class="collapse" id="fulfillment-instructions">
-        <h4 class="text-uppercase"><%= gettext('credit with ') %><%= display_name %> </h4>
         <%= fulfillment_instructions %>
     </div>
 </div>
