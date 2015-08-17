@@ -107,31 +107,56 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         """ Verify the method creates or updates a seat Product. """
         course = Course.objects.create(id='a/b/c', name='Test Course')
 
-        # Test creation
-        certificate_type = 'honor'
+        # Test seat creation
+        certificate_type = 'verified'
         id_verification_required = True
-        price = 0
+        price = 5
         course.create_or_update_seat(certificate_type, id_verification_required, price)
 
-        # Two seats: one honor, the other the parent seat product
+        # Two seats: one verified, the other the parent seat product
         self.assertEqual(course.products.count(), 2)
         seat = course.seat_products[0]
         self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price)
 
-        # Test update
-        price = 100
-        credit_provider = 'MIT'
-        credit_hours = 2
-        course.create_or_update_seat(
-            certificate_type, id_verification_required, price, credit_provider, credit_hours=credit_hours
-        )
+        # Test seat update
+        price = 10
+        course.create_or_update_seat(certificate_type, id_verification_required, price)
 
         # Again, only two seats with one being the parent seat product.
         self.assertEqual(course.products.count(), 2)
         seat = course.seat_products[0]
-        self.assert_course_seat_valid(
-            seat, course, certificate_type, id_verification_required, price, credit_provider, credit_hours=credit_hours
-        )
+        self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price)
+
+    def test_create_credit_seats(self):
+        """Verify that the model's seat creation method allows the creation of multiple credit seats."""
+        course = Course.objects.create(id='a/b/c', name='Test Course')
+        credit_data = {'MIT': 2, 'Harvard': 0.5}
+        certificate_type = 'credit'
+        id_verification_required = True
+        price = 10
+
+        # Verify that the course can have multiple credit seats added to it
+        for credit_provider, credit_hours in credit_data.iteritems():
+            credit_seat = course.create_or_update_seat(
+                certificate_type,
+                id_verification_required,
+                price,
+                credit_provider=credit_provider,
+                credit_hours=credit_hours
+            )
+
+            self.assert_course_seat_valid(
+                credit_seat,
+                course,
+                certificate_type,
+                id_verification_required,
+                price,
+                credit_provider=credit_provider,
+                credit_hours=credit_hours
+            )
+
+        # Expected seat total, with one being the parent seat product.
+        self.assertEqual(course.products.count(), len(credit_data) + 1)
 
     def test_collision_avoidance(self):
         """

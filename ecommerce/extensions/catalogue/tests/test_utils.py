@@ -15,7 +15,8 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         certificate_type = 'honor'
         product = course.create_or_update_seat(certificate_type, False, 0)
 
-        _hash = md5(u'{} {} {}'.format(certificate_type, course_id, 'False')).hexdigest()[-7:]
+        _hash = u'{} {} {} {}'.format(certificate_type, course_id, 'False', '')
+        _hash = md5(_hash.lower()).hexdigest()[-7:]
         expected = _hash.upper()
         actual = generate_sku(product)
         self.assertEqual(actual, expected)

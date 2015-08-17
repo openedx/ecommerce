@@ -138,8 +138,24 @@ class Course(models.Model):
             attribute_values__value_boolean=id_verification_required
         )
 
+        if credit_provider is None:
+            # Yields a match if attribute names do not include 'credit_provider'.
+            credit_provider_query = ~Q(attributes__name='credit_provider')
+        else:
+            # Yields a match if attribute with name 'credit_provider' matches provided value.
+            credit_provider_query = Q(
+                attributes__name='credit_provider',
+                attribute_values__value_text=credit_provider
+            )
+
         try:
-            seat = self.seat_products.filter(certificate_type_query).get(id_verification_required_query)
+            seat = self.seat_products.filter(
+                certificate_type_query
+            ).filter(
+                id_verification_required_query
+            ).get(
+                credit_provider_query
+            )
 
             logger.info(
                 'Retrieved course seat child product with certificate type [%s] for [%s] from database.',

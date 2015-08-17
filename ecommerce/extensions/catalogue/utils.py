@@ -10,11 +10,12 @@ def generate_sku(product):
     # Note: This currently supports seats. In the future, this should
     # be updated to accommodate other product classes.
     _hash = u' '.join((
-        getattr(product.attr, 'certificate_type', '').lower(),
-        product.attr.course_key.lower(),
-        unicode(product.attr.id_verification_required)
+        getattr(product.attr, 'certificate_type', ''),
+        product.attr.course_key,
+        unicode(product.attr.id_verification_required),
+        getattr(product.attr, 'credit_provider', '')
     ))
-    _hash = md5(_hash)
+    _hash = md5(_hash.lower())
     _hash = _hash.hexdigest()[-7:]
 
     return _hash.upper()
