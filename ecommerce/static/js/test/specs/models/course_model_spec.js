@@ -2,6 +2,7 @@ define([
         'jquery',
         'moment',
         'underscore',
+        'collections/product_collection',
         'models/course_model',
         'models/course_seats/professional_seat',
         'jquery-cookie'
@@ -9,6 +10,7 @@ define([
     function ($,
               moment,
               _,
+              ProductCollection,
               Course,
               ProfessionalSeat) {
         'use strict';
@@ -207,6 +209,12 @@ define([
 
                 // The new seat's class/type should correspond to the passed in seat type
                 expect(seat).toEqual(jasmine.any(ProfessionalSeat));
+            });
+        });
+
+        describe('products', function () {
+            it('is a ProductCollection', function () {
+                expect(model.get('products')).toEqual(jasmine.any(ProductCollection));
             });
         });
     }
