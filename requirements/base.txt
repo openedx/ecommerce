@@ -1,5 +1,5 @@
 analytics-python==1.0.3
-Django==1.7.9
+Django==1.7.10
 django-appconf==0.6
 django-compressor==1.5
 django_extensions==1.5.5
