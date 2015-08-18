@@ -216,7 +216,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                     attrs = self._flatten(product['attribute_values'])
 
                     # Extract arguments required for Seat creation, deserializing as necessary.
-                    certificate_type = attrs['certificate_type']
+                    certificate_type = attrs.get('certificate_type', '')
                     id_verification_required = attrs['id_verification_required']
                     price = Decimal(product['price'])
 
