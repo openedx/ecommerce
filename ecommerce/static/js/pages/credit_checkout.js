@@ -4,13 +4,13 @@ require([
         'models/user_model',
         'models/tracking_model',
         'models/course_model',
-        'collections/provider_collection',
+        'collections/credit_provider_collection',
         'collections/credit_eligibility_collection',
         'views/clickable_view',
         'views/analytics_view',
         'views/payment_button_view',
         'utils/utils',
-        'views/provider_view',
+        'views/credit_provider_view',
         'views/credit_eligibility_view'
     ],
     function ($,
@@ -18,27 +18,39 @@ require([
               UserModel,
               TrackingModel,
               CourseModel,
-              ProviderCollection,
+              CreditProviderCollection,
               CreditEligibilityCollection,
               ClickableView,
               AnalyticsView,
               PaymentButtonView,
               Utils,
-              ProviderView,
+              CreditProviderView,
               CreditEligibilityView) {
         'use strict';
+
+        var $container = $('.credit-checkout'),
+            $courseDetails = $container.find('#course-name'),
+            $providerDetails = $container.find('.provider-details'),
+            lmsRootUrl = $container.data('lms-root-url');
 
         new PaymentButtonView({
             el: $('#payment-buttons')
         });
 
-        new ProviderView({
-            el: $('.provider-details'),
-            collection: new ProviderCollection()
+        new CreditProviderView({
+            el: $providerDetails,
+            collection: new CreditProviderCollection({
+                lmsRootUrl: lmsRootUrl,
+                providerIds: $providerDetails.data('provider-ids')
+            })
         });
 
         new CreditEligibilityView({
-            collection: new CreditEligibilityCollection()
+            collection: new CreditEligibilityCollection({
+                lmsRootUrl: lmsRootUrl,
+                username: $courseDetails.data('username'),
+                courseKey: $courseDetails.data('course_key')
+            })
         });
 
         var courseModel = new CourseModel(),

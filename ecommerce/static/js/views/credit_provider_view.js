@@ -2,15 +2,16 @@ define([
         'jquery',
         'underscore',
         'backbone',
-        'moment'
+        'text!templates/credit_provider_details.html'
     ],
     function ($,
               _,
               Backbone,
-              moment) {
+              creditProviderTemplate) {
         'use strict';
 
         return Backbone.View.extend({
+            template: _.template(creditProviderTemplate),
 
             initialize: function () {
                 this.listenTo(this.collection, 'sync', this.render);
@@ -18,11 +19,14 @@ define([
             },
 
             render: function () {
-                var deadline;
+                var provider;
 
                 if (this.collection.length) {
-                    deadline = moment.utc(this.collection.at(0).get('deadline'));
-                    $('.eligibility-details').find('.deadline-date').text(deadline.format('LL'));
+                    // Currently we are assuming that we are having only one provider
+                    provider = this.collection.at(0);
+                    // TODO Get rid of this!
+                    $('.title').find('.provider-name').text(provider.get('display_name'));
+                    this.$el.html(this.template(provider.attributes));
                     this.toggleProviderContent(true);
                 } else {
                     this.toggleProviderContent(false);
@@ -37,3 +41,4 @@ define([
         });
     }
 );
+

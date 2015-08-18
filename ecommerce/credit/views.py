@@ -52,7 +52,7 @@ class Checkout(TemplateView):
             'payment_processors': processors_dict,
             'credit_seats': credit_seats,
             'lms_url_root': settings.LMS_URL_ROOT,
-            'providers_ids': provider_ids,
+            'provider_ids': provider_ids,
             'analytics_data': json.dumps({
                 'course': {
                     'courseId': course.id
