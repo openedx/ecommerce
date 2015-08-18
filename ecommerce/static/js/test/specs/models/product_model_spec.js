@@ -36,40 +36,42 @@ define([
             model = Product.findOrCreate(data, {parse: true});
         });
 
-        // NOTE (CCB): There is a bug preventing this from being called 'toJSON'.
-        // See https://github.com/karma-runner/karma/issues/1534.
-        describe('#toJSON', function () {
-            it('should not modify expires if expires is empty', function () {
-                var json,
-                    values = [null, ''];
+        describe('Product model', function () {
+            // NOTE (CCB): There is a bug preventing this from being called 'toJSON'.
+            // See https://github.com/karma-runner/karma/issues/1534.
+            describe('#toJSON', function () {
+                it('should not modify expires if expires is empty', function () {
+                    var json,
+                        values = [null, ''];
 
-                _.each(values, function (value) {
-                    model.set('expires', value);
-                    json = model.toJSON();
-                    expect(json.expires).toEqual(value);
+                    _.each(values, function (value) {
+                        model.set('expires', value);
+                        json = model.toJSON();
+                        expect(json.expires).toEqual(value);
+                    });
                 });
-            });
 
-            it('should add a timezone to expires if expires is not empty', function () {
-                var json,
-                    deadline = '2015-01-01T00:00:00';
+                it('should add a timezone to expires if expires is not empty', function () {
+                    var json,
+                        deadline = '2015-01-01T00:00:00';
 
-                model.set('expires', deadline);
-                json = model.toJSON();
+                    model.set('expires', deadline);
+                    json = model.toJSON();
 
-                expect(json.expires).toEqual(deadline + '+00:00');
-            });
+                    expect(json.expires).toEqual(deadline + '+00:00');
+                });
 
-            it('should re-nest the un-nested attributes', function () {
-                var json = model.toJSON();
+                it('should re-nest the un-nested attributes', function () {
+                    var json = model.toJSON();
 
-                // Sanity check
-                expect(model.get('certificate_type')).toEqual('verified');
-                expect(model.get('course_key')).toEqual('edX/DemoX/Demo_Course');
-                expect(model.get('id_verification_required')).toEqual(true);
+                    // Sanity check
+                    expect(model.get('certificate_type')).toEqual('verified');
+                    expect(model.get('course_key')).toEqual('edX/DemoX/Demo_Course');
+                    expect(model.get('id_verification_required')).toEqual(true);
 
-                // Very the attributes have been re-nested
-                expect(json.attribute_values).toEqual(data.attribute_values);
+                    // Very the attributes have been re-nested
+                    expect(json.attribute_values).toEqual(data.attribute_values);
+                });
             });
         });
     }

@@ -13,10 +13,12 @@ define([
             view = new CourseSeatFormFieldView({model: model});
         });
 
-        describe('cleanIdVerificationRequired', function () {
-            it('should always return a boolean', function () {
-                expect(view.cleanIdVerificationRequired('false')).toEqual(false);
-                expect(view.cleanIdVerificationRequired('true')).toEqual(true);
+        describe('course seat form field view', function () {
+            describe('cleanIdVerificationRequired', function () {
+                it('should always return a boolean', function () {
+                    expect(view.cleanIdVerificationRequired('false')).toEqual(false);
+                    expect(view.cleanIdVerificationRequired('true')).toEqual(true);
+                });
             });
         });
     }
