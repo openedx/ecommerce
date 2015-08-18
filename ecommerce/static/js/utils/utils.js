@@ -1,7 +1,11 @@
 define([
+        'backbone',
+        'backbone.validation',
         'moment',
         'underscore'],
-    function (moment,
+    function (Backbone,
+              BackboneValidation,
+              moment,
               _) {
         'use strict';
 
@@ -80,6 +84,43 @@ define([
             areModelsValid: function (models) {
                 return _.every(models, function (model) {
                     return model.isValid(true);
+                });
+            },
+
+            /**
+             * Bind the provided view for form validation.
+             *
+             * @param {Backbone.View} view
+             */
+            bindValidation: function (view) {
+                /* istanbul ignore next */
+                Backbone.Validation.bind(view, {
+                    valid: function (view, attr) {
+                        var $el = view.$el.find('[name=' + attr + ']'),
+                            $group = $el.closest('.form-group'),
+                            $helpBlock = $group.find('.help-block:first'),
+                            className = 'invalid-' + attr,
+                            $msg = $helpBlock.find('.' + className);
+
+                        $msg.remove();
+
+                        $group.removeClass('has-error');
+                        $helpBlock.addClass('hidden');
+                    },
+                    invalid: function (view, attr, error) {
+                        var $el = view.$el.find('[name=' + attr + ']'),
+                            $group = $el.closest('.form-group'),
+                            $helpBlock = $group.find('.help-block:first'),
+                            className = 'invalid-' + attr,
+                            $msg = $helpBlock.find('.' + className);
+
+                        if (_.isEqual($msg.length, 0)) {
+                            $helpBlock.append('<div class="' + className + '">' + error + '</div>');
+                        }
+
+                        $group.addClass('has-error');
+                        $helpBlock.removeClass('hidden');
+                    }
                 });
             }
         };

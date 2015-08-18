@@ -10,12 +10,15 @@ define([
                 expires: null,
                 id_verification_required: null,
                 price: 0,
+                credit_provider: null,
+                credit_hours: null,
                 product_class: 'Seat'
             },
 
             validation: {
                 price: {
                     required: true,
+                    pattern: 'number',
                     msg: gettext('All course seats must have a price.')
                 },
                 product_class: {

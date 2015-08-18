@@ -120,7 +120,7 @@ define([
              *
              * Note that audit seats cannot be created, only edited.
              */
-            creatableSeatTypes: ['honor', 'verified', 'professional'],
+            creatableSeatTypes: ['honor', 'verified', 'professional', 'credit'],
 
             initialize: function () {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
@@ -179,28 +179,30 @@ define([
             },
 
             /**
-             * Returns an existing CourseSeat corresponding to the given seat type; or creates a new one,
-             * if one is not found.
+             * Returns existing CourseSeats corresponding to the given seat type. If none
+             * are not found, creates a new one.
              *
              * @param {String} seatType
-             * @returns {CourseSeat}
+             * @returns {CourseSeat[]}
              */
-            getOrCreateSeat: function (seatType) {
+            getOrCreateSeats: function (seatType) {
                 var seatClass,
-                    seat = _.find(this.seats(), function (product) {
-                        // Find the seat with the specific seat type
+                    seats = _.filter(this.seats(), function (product) {
+                        // Find the seats with the specific seat type
                         return product.getSeatType() === seatType;
-                    });
+                    }),
+                    seat;
 
-                if (!seat && _.contains(this.creatableSeatTypes, seatType)) {
+                if (_.isEmpty(seats) && _.contains(this.creatableSeatTypes, seatType)) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
                     /*jshint newcap: false */
                     seat = new seatClass();
                     /*jshint newcap: true */
                     this.get('products').add(seat);
+                    seats.push(seat);
                 }
 
-                return seat;
+                return seats;
             },
 
             /**

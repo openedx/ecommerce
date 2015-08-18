@@ -9,12 +9,14 @@ define([
         'moment',
         'underscore',
         'underscore.string',
+        'collections/product_collection',
         'text!templates/course_form.html',
         'text!templates/_course_type_radio_field.html',
         'views/course_seat_form_fields/audit_course_seat_form_field_view',
         'views/course_seat_form_fields/honor_course_seat_form_field_view',
         'views/course_seat_form_fields/verified_course_seat_form_field_view',
         'views/course_seat_form_fields/professional_course_seat_form_field_view',
+        'views/course_seat_form_fields/credit_course_seat_form_field_view',
         'views/alert_view',
         'utils/course_utils'
     ],
@@ -26,12 +28,14 @@ define([
               moment,
               _,
               _s,
+              ProductCollection,
               CourseFormTemplate,
               CourseTypeRadioTemplate,
               AuditCourseSeatFormFieldView,
               HonorCourseSeatFormFieldView,
               VerifiedCourseSeatFormFieldView,
               ProfessionalCourseSeatFormFieldView,
+              CreditCourseSeatFormFieldView,
               AlertView,
               CourseUtils) {
         'use strict';
@@ -85,7 +89,7 @@ define([
                     type: 'credit',
                     displayName: gettext('Credit'),
                     helpText: gettext('Paid certificate track with initial verification and Verified Certificate, ' +
-                        'and option to buy credit')
+                        'and option to purchase credit')
                 }
             },
 
@@ -94,7 +98,8 @@ define([
                 audit: AuditCourseSeatFormFieldView,
                 honor: HonorCourseSeatFormFieldView,
                 verified: VerifiedCourseSeatFormFieldView,
-                professional: ProfessionalCourseSeatFormFieldView
+                professional: ProfessionalCourseSeatFormFieldView,
+                credit: CreditCourseSeatFormFieldView
             },
 
             events: {
@@ -188,18 +193,11 @@ define([
                         break;
                 }
 
-                // TODO Activate credit seat
-                var index = activeCourseTypes.indexOf('credit');
-                if (index > -1) {
-                    activeCourseTypes.splice(index, 1);
-                }
-
                 return activeCourseTypes;
             },
 
             setLockedCourseType: function () {
                 this.lockedCourseType = this.model.get('type');
-                this.renderCourseTypes();
             },
 
             render: function () {
@@ -212,6 +210,9 @@ define([
                 this.renderVerificationDeadline();
 
                 this.stickit();
+
+                // Avoid the need to create this jQuery object every time an alert has to be rendered.
+                this.$alerts = this.$el.find('.alerts');
 
                 return this;
             },
@@ -263,19 +264,25 @@ define([
                 if (activeSeats.length < 1) {
                     activeSeats = ['empty'];
                 } else {
-
                     _.each(CourseUtils.orderSeatTypesForDisplay(activeSeats), function (seatType) {
-                        var model,
+                        var seats,
                             viewClass,
                             view = this.courseSeatViews[seatType];
 
                         if (!view) {
-                            model = this.model.getOrCreateSeat(seatType);
+                            seats = this.model.getOrCreateSeats(seatType);
+                            // seats = new ProductCollection(this.model.getOrCreateSeats(seatType));
                             viewClass = this.courseSeatViewMappings[seatType];
 
-                            if (viewClass && model) {
+                            if (viewClass && seats.length > 0) {
                                 /*jshint newcap: false */
-                                view = new viewClass({model: model});
+                                if (_.isEqual(seatType, 'credit')) {
+                                    seats = new ProductCollection(seats);
+                                    view = new viewClass({collection: seats, course: this.model});
+                                } else {
+                                    view = new viewClass({model: seats[0]});
+                                }
+
                                 /*jshint newcap: true */
                                 view.render();
 
@@ -287,7 +294,7 @@ define([
                 }
 
                 // Retrieve these after any new renderings.
-                $courseSeats = $courseSeatsContainer.find('.course-seat');
+                $courseSeats = $courseSeatsContainer.find('.row');
 
                 // Hide all seats
                 $courseSeats.hide();
@@ -307,9 +314,16 @@ define([
              */
             renderAlert: function (level, message) {
                 var view = new AlertView({level: level, title: gettext('Error!'), message: message});
+
                 view.render();
-                this.$el.find('.alerts').append(view.el);
+                this.$alerts.append(view.el);
                 this.alertViews.push(view);
+
+                $('body').animate({
+                    scrollTop: this.$alerts.offset().top
+                }, 500);
+
+                this.$alerts.focus();
 
                 return this;
             },
