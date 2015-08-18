@@ -40,6 +40,17 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                     'price': 0.00,
                     'attribute_values': [
                         {
+                            'name': 'id_verification_required',
+                            'value': False
+                        }
+                    ]
+                },
+                {
+                    'product_class': 'Seat',
+                    'expires': None,
+                    'price': 0.00,
+                    'attribute_values': [
+                        {
                             'name': 'certificate_type',
                             'value': 'honor'
                         },
@@ -91,7 +102,8 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
             # Create associated products.
             for product in self.data['products']:
-                attrs = {attr['name']: attr['value'] for attr in product['attribute_values']}
+                attrs = {'certificate_type': ''}
+                attrs.update({attr['name']: attr['value'] for attr in product['attribute_values']})
 
                 attrs['expires'] = EXPIRES if product['expires'] else None
                 attrs['price'] = Decimal(product['price'])
@@ -104,7 +116,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
             attrs = {attr['name']: attr['value'] for attr in product['attribute_values']}
 
             # Update the price of the verified seat.
-            if attrs['certificate_type'] == 'verified':
+            if attrs.get('certificate_type') == 'verified':
                 product['price'] = 20.00
 
         updated_data['name'] = 'A New Name'
@@ -137,6 +149,9 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
             # Validate product metadata.
             for product in products:
+                certificate_type = ''
+                id_verification_required = False
+
                 for attr in product['attribute_values']:
                     name = attr['name']
                     if name == 'certificate_type':
@@ -144,18 +159,18 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                     elif name == 'id_verification_required':
                         id_verification_required = attr['value']
 
-                seat_title = 'Seat in {course_name} with {certificate_type} certificate'.format(
-                    course_name=course.name,
-                    certificate_type=certificate_type
-                )
+                seat_title = 'Seat in {course_name}'.format(course_name=course.name)
+
+                if certificate_type:
+                    seat_title += ' with {certificate_type} certificate'.format(certificate_type=certificate_type)
 
                 if id_verification_required:
                     seat_title += ' (and ID verification)'
 
-                self.assertTrue(course.products.filter(title=seat_title).exists())
+                # If the seat does not exist, an error will be raised.
+                seat = course.seat_products.get(title=seat_title)
 
                 # Verify product price and expiration time.
-                seat = course.products.get(title=seat_title)
                 expires = EXPIRES if product['expires'] else None
                 self.assertEqual(seat.expires, expires)
                 self.assertEqual(seat.stockrecords.first().price_excl_tax, product['price'])
