@@ -55,7 +55,26 @@ define([
                 return _.sortBy(seatTypes, function (seatType) {
                     return this.seatSortObj[seatType];
                 }, this);
-            }
+            },
+
+            /**
+             * Given an array of CourseSeats and seatType, returns an object
+             * containing two arrays of CourseSeats, one containing seats of
+             * type seatType and a second containing all seats of other types.
+             *
+             * @param {CourseSeat[]} seats
+             * @param {String} seatType
+             * @returns {Object}
+             */
+            filterSeats: function (seats, seatType) {
+                return _.groupBy(seats, function (seat) {
+                    if (seat.getSeatType() === seatType) {
+                        return 'filtered';
+                    }
+
+                    return 'residual';
+                });
+            },
         };
     }
 );

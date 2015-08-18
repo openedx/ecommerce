@@ -6,6 +6,7 @@ define([
         'moment',
         'text!templates/course_detail.html',
         'text!templates/_course_seat.html',
+        'text!templates/_course_credit_seats.html',
         'utils/course_utils'
     ],
     function ($,
@@ -15,6 +16,7 @@ define([
               moment,
               CourseDetailTemplate,
               CourseSeatTemplate,
+              CourseCreditSeatsTemplate,
               CourseUtils) {
         'use strict';
 
@@ -49,9 +51,15 @@ define([
                     seats = CourseUtils.orderSeatsForDisplay(this.model.seats()),
                     $seatHolder = $('.course-seats', this.$el);
 
-                _.each(seats, function (seat) {
+                seats = CourseUtils.filterSeats(seats, 'credit');
+
+                _.each(seats.residual, function (seat) {
                     html += _.template(CourseSeatTemplate)({seat: seat, moment: moment});
                 });
+
+                if (seats.filtered && seats.filtered.length > 0) {
+                    html += _.template(CourseCreditSeatsTemplate)({creditSeats: seats.filtered, moment: moment});
+                }
 
                 $seatHolder.html(html);
             }

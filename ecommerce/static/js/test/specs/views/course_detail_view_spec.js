@@ -85,6 +85,70 @@ define([
                                 }
                             ],
                             is_available_to_buy: false
+                        },
+                        {
+                            id: 6,
+                            url: 'http://ecommerce.local:8002/api/v2/products/6/',
+                            structure: 'child',
+                            product_class: 'Seat',
+                            title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                            price: '150.00',
+                            expires: null,
+                            attribute_values: [
+                                {
+                                    name: 'certificate_type',
+                                    value: 'credit'
+                                },
+                                {
+                                    name: 'course_key',
+                                    value: 'edX/DemoX/Demo_Course'
+                                },
+                                {
+                                    name: 'id_verification_required',
+                                    value: true
+                                },
+                                {
+                                    name: 'credit_provider',
+                                    value: 'Harvard'
+                                },
+                                {
+                                    name: 'credit_hours',
+                                    value: 1
+                                }
+                            ],
+                            is_available_to_buy: true
+                        },
+                        {
+                            id: 5,
+                            url: 'http://ecommerce.local:8002/api/v2/products/5/',
+                            structure: 'child',
+                            product_class: 'Seat',
+                            title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                            price: '100.00',
+                            expires: null,
+                            attribute_values: [
+                                {
+                                    name: 'certificate_type',
+                                    value: 'credit'
+                                },
+                                {
+                                    name: 'course_key',
+                                    value: 'edX/DemoX/Demo_Course'
+                                },
+                                {
+                                    name: 'id_verification_required',
+                                    value: true
+                                },
+                                {
+                                    name: 'credit_provider',
+                                    value: 'MIT'
+                                },
+                                {
+                                    name: 'credit_hours',
+                                    value: 2
+                                }
+                            ],
+                            is_available_to_buy: true
                         }
                     ]
                 };
@@ -103,9 +167,16 @@ define([
 
             it('should list the course seats', function () {
                 var $seats = view.$el.find('.course-seat'),
+                    $creditSeats = view.$el.find('.credit-seats .course-seat'),
                     products = _.where(data.products, {structure: 'child'});
 
                 expect($seats.length).toEqual(products.length);
+                expect($creditSeats.length).toEqual(
+                    _.where(
+                        products,
+                        {title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)'}
+                    ).length
+                );
 
                 // TODO Verify the rendered info matches the data
             });
