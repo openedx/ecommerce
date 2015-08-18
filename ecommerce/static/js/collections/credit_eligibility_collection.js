@@ -1,12 +1,13 @@
 define([
         'backbone',
-        'js/models/user_eligibility_model'
+        'models/credit_eligibility_model'
     ],
-    function (Backbone, EligibilityModel) {
+    function (Backbone,
+              CreditEligibility) {
         'use strict';
 
         return Backbone.Collection.extend({
-                model: EligibilityModel,
+                model: CreditEligibility,
 
                 /*jshint undef: false */
                 url: lmsRootUrl + '/api/credit/v1/eligibility/',

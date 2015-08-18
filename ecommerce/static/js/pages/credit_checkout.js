@@ -1,17 +1,17 @@
 require([
         'jquery',
         'backbone',
-        'js/models/user_model',
-        'js/models/tracking_model',
-        'js/models/course_model',
-        'js/collections/provider_collection',
-        'js/collections/user_eligibility_collection',
-        'js/views/clickable_view',
-        'js/views/analytics_view',
-        'js/views/payment_button_view',
-        'js/utils/utils',
-        'js/views/provider_view',
-        'js/views/user_eligibility_view'
+        'models/user_model',
+        'models/tracking_model',
+        'models/course_model',
+        'collections/provider_collection',
+        'collections/credit_eligibility_collection',
+        'views/clickable_view',
+        'views/analytics_view',
+        'views/payment_button_view',
+        'utils/utils',
+        'views/provider_view',
+        'views/credit_eligibility_view'
     ],
     function ($,
               Backbone,
@@ -19,13 +19,13 @@ require([
               TrackingModel,
               CourseModel,
               ProviderCollection,
-              EligibilityCollection,
+              CreditEligibilityCollection,
               ClickableView,
               AnalyticsView,
               PaymentButtonView,
               Utils,
               ProviderView,
-              EligibilityView) {
+              CreditEligibilityView) {
         'use strict';
 
         new PaymentButtonView({
@@ -37,8 +37,8 @@ require([
             collection: new ProviderCollection()
         });
 
-        new EligibilityView({
-            collection: new EligibilityCollection()
+        new CreditEligibilityView({
+            collection: new CreditEligibilityCollection()
         });
 
         var courseModel = new CourseModel(),
