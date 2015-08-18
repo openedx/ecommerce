@@ -13,22 +13,25 @@ define([
             view = new CourseSeatFormFieldView({model: model}).render();
         });
 
-        describe('getFieldValue', function () {
-            it('should return a boolean if the name is id_verification_required', function () {
-                // NOTE (CCB): Ideally _.each should be used here to loop over an array of Boolean values.
-                // However, the tests fail when that implementation is used, hence the repeated code.
-                model.set('id_verification_required', false);
-                expect(model.get('id_verification_required')).toEqual(false);
-                expect(view.getFieldValue('id_verification_required')).toEqual(false);
+        describe('professional course seat form field view', function () {
+            describe('getFieldValue', function () {
+                it('should return a boolean if the name is id_verification_required', function () {
+                    // NOTE (CCB): Ideally _.each should be used here to loop over an array of Boolean values.
+                    // However, the tests fail when that implementation is used, hence the repeated code.
+                    model.set('id_verification_required', false);
+                    expect(model.get('id_verification_required')).toEqual(false);
+                    expect(view.getFieldValue('id_verification_required')).toEqual(false);
 
-                model.set('id_verification_required', true);
-                expect(model.get('id_verification_required')).toEqual(true);
-                expect(view.getFieldValue('id_verification_required')).toEqual(true);
-            });
+                    model.set('id_verification_required', true);
+                    expect(model.get('id_verification_required')).toEqual(true);
+                    expect(view.getFieldValue('id_verification_required')).toEqual(true);
+                });
 
-            // NOTE (CCB): This test is flaky (hence it being skipped). Occasionally, calls to the parent class fail.
-            xit('should always return professional if the name is certificate_type', function () {
-                expect(view.getFieldValue('certificate_type')).toEqual('professional');
+                // NOTE (CCB): This test is flaky (hence it being skipped).
+                // Occasionally, calls to the parent class fail.
+                xit('should always return professional if the name is certificate_type', function () {
+                    expect(view.getFieldValue('certificate_type')).toEqual('professional');
+                });
             });
         });
     }

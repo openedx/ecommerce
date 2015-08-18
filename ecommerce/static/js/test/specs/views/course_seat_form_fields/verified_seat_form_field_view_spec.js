@@ -13,16 +13,18 @@ define([
             view = new VerifiedCourseSeatFormFieldView({model: model}).render();
         });
 
-        describe('getData', function () {
-            it('should return the data from the DOM/model', function () {
-                var data = {
-                    certificate_type: 'verified',
-                    id_verification_required: 'true',
-                    price: '100',
-                    expires: ''
-                };
+        describe('verified course seat form field view', function () {
+            describe('getData', function () {
+                it('should return the data from the DOM/model', function () {
+                    var data = {
+                        certificate_type: 'verified',
+                        id_verification_required: 'true',
+                        price: '100',
+                        expires: ''
+                    };
 
-                expect(view.getData()).toEqual(data);
+                    expect(view.getData()).toEqual(data);
+                });
             });
         });
     }

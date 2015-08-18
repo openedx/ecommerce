@@ -25,18 +25,20 @@ define([
             collection = new CourseCollection();
         });
 
-        describe('parse', function () {
-            it('should return the results list in the response', function () {
-                expect(collection.parse(response)).toEqual(response.results);
-            });
+        describe('Course collection', function () {
+            describe('parse', function () {
+                it('should return the results list in the response', function () {
+                    expect(collection.parse(response)).toEqual(response.results);
+                });
 
-            it('should fetch the next page of results', function () {
-                spyOn(collection, 'fetch').and.returnValue(null);
-                response.next = '/api/v2/courses/?page=2';
+                it('should fetch the next page of results', function () {
+                    spyOn(collection, 'fetch').and.returnValue(null);
+                    response.next = '/api/v2/courses/?page=2';
 
-                collection.parse(response);
-                expect(collection.url).toEqual(response.next);
-                expect(collection.fetch).toHaveBeenCalledWith({remove: false});
+                    collection.parse(response);
+                    expect(collection.url).toEqual(response.next);
+                    expect(collection.fetch).toHaveBeenCalledWith({remove: false});
+                });
             });
         });
     }

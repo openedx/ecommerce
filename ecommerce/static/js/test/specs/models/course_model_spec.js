@@ -98,123 +98,125 @@ define([
             model = Course.findOrCreate(data, {parse: true});
         });
 
-        describe('removeParentProducts', function () {
-            it('should remove all parent products from the products collection', function () {
-                var products = model.get('products');
+        describe('Course model', function () {
+            describe('removeParentProducts', function () {
+                it('should remove all parent products from the products collection', function () {
+                    var products = model.get('products');
 
-                // Sanity check to ensure the products were properly parsed
-                expect(products.length).toEqual(3);
+                    // Sanity check to ensure the products were properly parsed
+                    expect(products.length).toEqual(3);
 
-                // Remove the parent products
-                model.removeParentProducts();
+                    // Remove the parent products
+                    model.removeParentProducts();
 
-                // Only the children survived...
-                expect(products.length).toEqual(2);
-                expect(products.where({structure: 'child'}).length).toEqual(2);
+                    // Only the children survived...
+                    expect(products.length).toEqual(2);
+                    expect(products.where({structure: 'child'}).length).toEqual(2);
+                });
             });
-        });
 
-        // NOTE (CCB): There is a bug preventing this from being called 'toJSON'.
-        // See https://github.com/karma-runner/karma/issues/1534.
-        describe('#toJSON', function () {
-            it('should not modify verification_deadline if verification_deadline is empty', function () {
-                var json,
-                    values = [null, ''];
+            // NOTE (CCB): There is a bug preventing this from being called 'toJSON'.
+            // See https://github.com/karma-runner/karma/issues/1534.
+            describe('#toJSON', function () {
+                it('should not modify verification_deadline if verification_deadline is empty', function () {
+                    var json,
+                        values = [null, ''];
 
-                _.each(values, function (value) {
-                    model.set('verification_deadline', value);
+                    _.each(values, function (value) {
+                        model.set('verification_deadline', value);
+                        json = model.toJSON();
+                        expect(json.verification_deadline).toEqual(value);
+                    });
+                });
+
+                it('should add a timezone to verification_deadline if verification_deadline is not empty', function () {
+                    var json,
+                        deadline = '2015-01-01T00:00:00';
+
+                    model.set('verification_deadline', deadline);
                     json = model.toJSON();
-                    expect(json.verification_deadline).toEqual(value);
+
+                    expect(json.verification_deadline).toEqual(deadline + '+00:00');
                 });
             });
 
-            it('should add a timezone to verification_deadline if verification_deadline is not empty', function () {
-                var json,
-                    deadline = '2015-01-01T00:00:00';
+            describe('save', function () {
+                var expectedAjaxData = function (data) {
+                    var products,
+                        expected = {
+                            id: data.id,
+                            name: data.name,
+                            verification_deadline: moment.utc(data.verification_deadline).format()
+                        };
 
-                model.set('verification_deadline', deadline);
-                json = model.toJSON();
+                    products = _.filter(data.products, function (product) {
+                        return product.structure === 'child';
+                    });
 
-                expect(json.verification_deadline).toEqual(deadline + '+00:00');
-            });
-        });
+                    expected.products = _.map(products, function (product) {
+                        return product;
+                    });
 
-        describe('save', function () {
-            var expectedAjaxData = function (data) {
-                var products,
-                    expected = {
-                        id: data.id,
-                        name: data.name,
-                        verification_deadline: moment.utc(data.verification_deadline).format()
-                    };
-
-                products = _.filter(data.products, function (product) {
-                    return product.structure === 'child';
-                });
-
-                expected.products = _.map(products, function (product) {
-                    return product;
-                });
-
-                return expected;
-            };
-
-            it('should POST to the publication endpoint', function () {
-                var args,
-                    cookie = 'save-test';
-
-                spyOn($, 'ajax');
-                $.cookie('ecommerce_csrftoken', cookie);
-
-                model.save();
-
-                // $.ajax should have been called
-                expect($.ajax).toHaveBeenCalled();
-
-                // Ensure the data was POSTed to the correct endpoint
-                args = $.ajax.calls.argsFor(0)[0];
-                expect(args.type).toEqual('POST');
-                expect(args.url).toEqual('/api/v2/publication/');
-                expect(args.contentType).toEqual('application/json');
-                expect(args.headers).toEqual({'X-CSRFToken': cookie});
-                expect(JSON.parse(args.data)).toEqual(expectedAjaxData(data));
-            });
-        });
-
-        describe('getOrCreateSeat', function () {
-            it('should return existing seats', function () {
-                var mapping = {
-                    'honor': honorSeat,
-                    'verified': verifiedSeat
+                    return expected;
                 };
 
-                _.each(mapping, function (expected, seatType) {
-                    expect(model.getOrCreateSeat(seatType).toJSON()).toEqual(expected);
+                it('should POST to the publication endpoint', function () {
+                    var args,
+                        cookie = 'save-test';
+
+                    spyOn($, 'ajax');
+                    $.cookie('ecommerce_csrftoken', cookie);
+
+                    model.save();
+
+                    // $.ajax should have been called
+                    expect($.ajax).toHaveBeenCalled();
+
+                    // Ensure the data was POSTed to the correct endpoint
+                    args = $.ajax.calls.argsFor(0)[0];
+                    expect(args.type).toEqual('POST');
+                    expect(args.url).toEqual('/api/v2/publication/');
+                    expect(args.contentType).toEqual('application/json');
+                    expect(args.headers).toEqual({'X-CSRFToken': cookie});
+                    expect(JSON.parse(args.data)).toEqual(expectedAjaxData(data));
                 });
             });
 
-            it('should return null if an audit seat does not already exist', function () {
-                expect(model.getOrCreateSeat('audit')).toBeUndefined();
+            describe('getOrCreateSeat', function () {
+                it('should return existing seats', function () {
+                    var mapping = {
+                        'honor': honorSeat,
+                        'verified': verifiedSeat
+                    };
+
+                    _.each(mapping, function (expected, seatType) {
+                        expect(model.getOrCreateSeat(seatType).toJSON()).toEqual(expected);
+                    });
+                });
+
+                it('should return null if an audit seat does not already exist', function () {
+                    expect(model.getOrCreateSeat('audit')).toBeUndefined();
+                });
+
+                it('should create a new CourseSeat if one does not exist', function () {
+                    var seat;
+
+                    // Sanity check to confirm a new seat is created later
+                    expect(model.seats().length).toEqual(2);
+
+                    // A new seat should be created
+                    seat = model.getOrCreateSeat('professional');
+                    expect(model.seats().length).toEqual(3);
+
+                    // The new seat's class/type should correspond to the passed in seat type
+                    expect(seat).toEqual(jasmine.any(ProfessionalSeat));
+                });
             });
 
-            it('should create a new CourseSeat if one does not exist', function () {
-                var seat;
-
-                // Sanity check to confirm a new seat is created later
-                expect(model.seats().length).toEqual(2);
-
-                // A new seat should be created
-                seat = model.getOrCreateSeat('professional');
-                expect(model.seats().length).toEqual(3);
-
-                // The new seat's class/type should correspond to the passed in seat type
-                expect(seat).toEqual(jasmine.any(ProfessionalSeat));
-            });
-        });
-
-        describe('products', function () {
-            it('is a ProductCollection', function () {
-                expect(model.get('products')).toEqual(jasmine.any(ProductCollection));
+            describe('products', function () {
+                it('is a ProductCollection', function () {
+                    expect(model.get('products')).toEqual(jasmine.any(ProductCollection));
+                });
             });
         });
     }
