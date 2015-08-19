@@ -65,6 +65,24 @@ define([
                 type: {
                     required: true,
                     msg: gettext('You must select a course type.')
+                },
+                verification_deadline: function (value) {
+                    var invalid;
+
+                    // No validation is needed for empty values
+                    if (_.isEmpty(value)) {
+                        return;
+                    }
+
+                    // Find seats where the verification deadline occurs before the upgrade deadline.
+                    invalid = _.some(this.seats(), function (seat) {
+                        var expires = seat.get('expires');
+                        return expires && moment(value).isBefore(expires);
+                    });
+
+                    if (invalid) {
+                        return gettext('The verification deadline must occur AFTER the upgrade deadline.');
+                    }
                 }
             },
 

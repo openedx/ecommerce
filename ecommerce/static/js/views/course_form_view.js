@@ -120,7 +120,12 @@ define([
                         validate: true
                     }
                 },
-                'input[name=verification_deadline]': 'verification_deadline'
+                'input[name=verification_deadline]': {
+                    observe: 'verification_deadline',
+                    setOptions: {
+                        validate: true
+                    }
+                }
             },
 
             initialize: function (options) {
