@@ -218,6 +218,27 @@ define([
                     expect(model.get('products')).toEqual(jasmine.any(ProductCollection));
                 });
             });
+
+            describe('verification deadline validation', function () {
+                it('succeeds if the verification deadline is after the course seats\' expiration dates', function () {
+                    var seat = model.getOrCreateSeat('verified');
+                    model.set('verification_deadline', '2016-01-01T00:00:00Z');
+                    seat.set('expires', '2015-01-01T00:00:00Z');
+
+                    expect(model.validate()).toBeUndefined();
+                    expect(model.isValid(true)).toBeTruthy();
+                });
+
+                it('fails if the verification deadline is before the course seats\' expiration dates', function () {
+                    var seat = model.getOrCreateSeat('verified'),
+                        msg = 'The verification deadline must occur AFTER the upgrade deadline.';
+                    model.set('verification_deadline', '2014-01-01T00:00:00Z');
+                    seat.set('expires', '2015-01-01T00:00:00Z');
+
+                    expect(model.validate().verification_deadline).toEqual(msg);
+                    expect(model.isValid(true)).toBeFalsy();
+                });
+            });
         });
     }
 );
