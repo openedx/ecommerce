@@ -36,7 +36,12 @@ define([
                         validate: true
                     }
                 },
-                'input[name=expires]': 'expires'
+                'input[name=expires]': {
+                    observe: 'expires',
+                    setOptions: {
+                        validate: true
+                    }
+                }
             },
 
             initialize: function (options) {

@@ -1,10 +1,12 @@
 define([
+        'moment',
         'models/product_model'
     ],
-    function (ProductModel) {
+    function (moment,
+              Product) {
         'use strict';
 
-        return ProductModel.extend({
+        return Product.extend({
             defaults: {
                 certificate_type: null,
                 expires: null,
@@ -15,6 +17,8 @@ define([
                 product_class: 'Seat'
             },
 
+            course: null,
+
             validation: {
                 price: {
                     required: true,
@@ -23,6 +27,21 @@ define([
                 },
                 product_class: {
                     oneOf: ['Seat']
+                },
+                expires: function (value) {
+                    var verificationDeadline,
+                        course = this.course;
+
+                    // No validation is needed for empty values or seats not linked to courses.
+                    if (_.isEmpty(value) || !course) {
+                        return;
+                    }
+
+                    // Determine if the supplied expiration date occurs after the course verification deadline.
+                    verificationDeadline = course.get('verification_deadline');
+                    if (verificationDeadline && !moment(value).isBefore(verificationDeadline)) {
+                        return gettext('The upgrade deadline must occur BEFORE the verification deadline.');
+                    }
                 }
             },
 

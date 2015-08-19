@@ -1,8 +1,10 @@
 define([
         'underscore',
+        'models/course_model',
         'models/course_seats/course_seat'
     ],
     function (_,
+              Course,
               CourseSeat) {
         'use strict';
 
@@ -113,6 +115,38 @@ define([
                         expect(model.getCertificateDisplayName()).toEqual('(No Certificate)');
                     });
                 });
+            });
+
+            describe('expires validation', function () {
+                function assertExpiresInvalid(expires, verification_deadline) {
+                    var msg = 'The upgrade deadline must occur BEFORE the verification deadline.';
+                    model.set('expires', expires);
+                    model.course = Course.findOrCreate({id: 'a/b/c', verification_deadline: verification_deadline});
+                    expect(model.validate().expires).toEqual(msg);
+                    expect(model.isValid(true)).toBeFalsy();
+                }
+
+                it('should do nothing if the CourseSeat has no associated Course', function () {
+                    model.course = null;
+                    expect(model.validation.expires('2015-01-01')).toBeUndefined();
+                });
+
+                it('should do nothing if the CourseSeat has no expiration value set', function () {
+                    expect(model.validation.expires(null)).toBeUndefined();
+                    expect(model.validation.expires(undefined)).toBeUndefined();
+                });
+
+                it('should return a message if the CourseSeat expires after the Course verification deadline',
+                    function () {
+                        assertExpiresInvalid('2016-01-01', '2014-01-01');
+                    }
+                );
+
+                it('should return a message if the CourseSeat expires at the same time verification closes',
+                    function () {
+                        assertExpiresInvalid('2016-01-01', '2016-01-01');
+                    }
+                );
             });
         });
     }

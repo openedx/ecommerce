@@ -11,7 +11,6 @@ define([
         'underscore',
         'collections/product_collection',
         'models/course_seats/course_seat',
-        'models/course_seats/honor_seat',
         'utils/course_utils',
         'utils/utils'
     ],
@@ -25,7 +24,6 @@ define([
               _,
               ProductCollection,
               CourseSeat,
-              HonorSeat,
               CourseUtils,
               Utils) {
         'use strict';
@@ -102,7 +100,10 @@ define([
                 key: 'products',
                 relatedModel: CourseSeat,
                 includeInJSON: false,
-                parse: true
+                parse: true,
+                collectionOptions: function (model) {
+                    return {course: model};
+                }
             }],
 
             /**
@@ -196,7 +197,7 @@ define([
                 if (_.isEmpty(seats) && _.contains(this.creatableSeatTypes, seatType)) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
                     /*jshint newcap: false */
-                    seat = new seatClass();
+                    seat = new seatClass({course: this});
                     /*jshint newcap: true */
                     this.get('products').add(seat);
                     seats.push(seat);
