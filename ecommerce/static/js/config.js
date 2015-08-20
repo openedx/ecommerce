@@ -20,6 +20,7 @@ require.config({
         'requirejs': 'bower_components/requirejs/require',
         'routers': 'js/routers',
         'templates': 'templates',
+        'test': 'js/test',
         'text': 'bower_components/text/text',
         'underscore': 'bower_components/underscore/underscore',
         'underscore.string': 'bower_components/underscore.string/dist/underscore.string',

@@ -67,6 +67,21 @@ define([
                     datetime = moment.utc(datetime + 'Z').format();
                 }
                 return datetime;
+            },
+
+            /**
+             * Indicates if all models in the array are valid.
+             *
+             * Calls isValid() on every model in the array.
+             *
+             * @param {Backbone.Model[]} models
+             * @returns {Boolean} indicates if ALL models are valid.
+             */
+            areModelsValid: function (models) {
+                return _.every(models, function (model) {
+                    return model.isValid(true);
+                });
             }
         };
-    });
+    }
+);

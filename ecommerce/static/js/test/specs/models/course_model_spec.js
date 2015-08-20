@@ -94,16 +94,23 @@ define([
                 ]
             };
 
-        beforeEach(function () {
-            model = Course.findOrCreate(data, {parse: true});
-        });
-
         describe('Course model', function () {
+            beforeEach(function () {
+                model = Course.findOrCreate(data, {parse: true});
+
+                // Remove the parent products
+                model.removeParentProducts();
+            });
+
             describe('removeParentProducts', function () {
                 it('should remove all parent products from the products collection', function () {
-                    var products = model.get('products');
+                    var products;
+
+                    // Re-initialize the model since the beforeEach removes the parents
+                    model = Course.findOrCreate(data, {parse: true});
 
                     // Sanity check to ensure the products were properly parsed
+                    products = model.get('products');
                     expect(products.length).toEqual(3);
 
                     // Remove the parent products
@@ -167,6 +174,7 @@ define([
                     spyOn($, 'ajax');
                     $.cookie('ecommerce_csrftoken', cookie);
 
+                    expect(model.validate()).toBeFalsy();
                     model.save();
 
                     // $.ajax should have been called
@@ -236,6 +244,19 @@ define([
                     seat.set('expires', '2015-01-01T00:00:00Z');
 
                     expect(model.validate().verification_deadline).toEqual(msg);
+                    expect(model.isValid(true)).toBeFalsy();
+                });
+            });
+
+            describe('products validation', function () {
+                it('should return an error message if any product is invalid', function () {
+                    var msg = 'Product validation failed.',
+                        products = model.get('products');
+
+                    // Add an invalid product
+                    products.push(new ProfessionalSeat({price: null}));
+
+                    expect(model.validate().products).toEqual(msg);
                     expect(model.isValid(true)).toBeFalsy();
                 });
             });
