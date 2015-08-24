@@ -8,7 +8,7 @@ import httpretty
 import mock
 from requests import Timeout
 from testfixtures import LogCapture
-from waffle import Switch
+from waffle.models import Switch
 
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.dashboard.users.views import UserDetailView

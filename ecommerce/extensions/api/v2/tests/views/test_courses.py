@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
 from oscar.core.loading import get_model, get_class
-from waffle import Switch
+from waffle.models import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course

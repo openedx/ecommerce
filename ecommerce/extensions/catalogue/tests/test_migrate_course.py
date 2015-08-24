@@ -13,8 +13,7 @@ import httpretty
 import mock
 from oscar.core.loading import get_model
 import pytz
-
-from waffle import Switch
+from waffle.models import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course

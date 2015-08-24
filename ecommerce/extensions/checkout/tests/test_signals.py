@@ -1,17 +1,15 @@
-import httpretty
-
 from django.conf import settings
 from django.core import mail
 from django.test import TestCase
-
-from waffle import Switch
+import httpretty
+from oscar.test import factories
+from oscar.test.newfactories import BasketFactory, UserFactory
+from waffle.models import Switch
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
 from ecommerce.settings.base import get_lms_url
-from oscar.test import factories
-from oscar.test.newfactories import BasketFactory, UserFactory
 
 
 class SignalTests(CourseCatalogTestMixin, TestCase):
