@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
 import pytz
-from waffle import Switch
+from waffle.models import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
