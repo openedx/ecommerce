@@ -33,7 +33,7 @@ class HealthTests(TestCase):
 
         self._assert_health(status.HTTP_200_OK, Status.OK, Status.OK, Status.OK)
 
-    @mock.patch('django.db.backends.BaseDatabaseWrapper.cursor', mock.Mock(side_effect=DatabaseError))
+    @mock.patch('django.db.backends.base.base.BaseDatabaseWrapper.cursor', mock.Mock(side_effect=DatabaseError))
     def test_database_outage(self, mock_lms_request):
         """Test that the endpoint reports when the database is unavailable."""
         self.fake_lms_response.status_code = status.HTTP_200_OK
@@ -115,7 +115,7 @@ class AutoAuthTests(TestCase):
         user = User.objects.latest()
 
         # Verify that the user is logged in and that their username has the expected prefix
-        self.assertEqual(self.client.session['_auth_user_id'], user.pk)
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
         self.assertTrue(user.username.startswith(settings.AUTO_AUTH_USERNAME_PREFIX))
 
         # Verify that the user has superuser permissions

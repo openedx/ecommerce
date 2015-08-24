@@ -2,11 +2,11 @@
 from datetime import datetime
 import json
 
-import httpretty
 from django.conf import settings
-from django.conf.urls import patterns
 from django.http import HttpResponse
+from django.conf.urls import url
 from django.test import TestCase, override_settings, RequestFactory
+import httpretty
 from oscar.test import factories
 from rest_framework import permissions
 from rest_framework.exceptions import AuthenticationFailed
@@ -26,10 +26,10 @@ class MockView(APIView):
     def get(self, request):  # pylint: disable=unused-variable, unused-argument
         return HttpResponse()
 
-urlpatterns = patterns(
-    '',
-    (r'^jwt/$', MockView.as_view(authentication_classes=[JwtAuthentication]))
-)
+
+urlpatterns = [
+    url(r'^jwt/$', MockView.as_view(authentication_classes=[JwtAuthentication]))
+]
 
 
 class AccessTokenMixin(object):
@@ -123,9 +123,8 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
         self.assertEqual(self.auth.authenticate(request), (user, self.DEFAULT_TOKEN))
 
 
+@override_settings(ROOT_URLCONF='ecommerce.extensions.api.tests.test_authentication')
 class JwtAuthenticationTests(JwtMixin, UserMixin, TestCase):
-    urls = 'ecommerce.extensions.api.tests.test_authentication'
-
     def setUp(self):
         api_settings.JWT_ISSUER = 'http://example.com/oauth'
         api_settings.JWT_VERIFY_EXPIRATION = True
