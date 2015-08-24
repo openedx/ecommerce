@@ -249,15 +249,23 @@ define([
             });
 
             describe('products validation', function () {
-                it('should return an error message if any product is invalid', function () {
-                    var msg = 'Product validation failed.',
-                        products = model.get('products');
+                describe('with single value', function () {
+                    it('should return an error message if any product is invalid', function () {
+                        var msg = 'Product validation failed.',
+                            products = model.get('products');
 
-                    // Add an invalid product
-                    products.push(new ProfessionalSeat({price: null}));
+                        // Add an invalid product
+                        products.push(new ProfessionalSeat({price: null}));
 
-                    expect(model.validate().products).toEqual(msg);
-                    expect(model.isValid(true)).toBeFalsy();
+                        expect(model.validate().products).toEqual(msg);
+                        expect(model.isValid(true)).toBeFalsy();
+                    });
+                });
+
+                describe('with non-products', function () {
+                    it('should have an undefined return value', function () {
+                        expect(model.validation.products([])).toBeUndefined();
+                    });
                 });
             });
         });
