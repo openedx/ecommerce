@@ -167,15 +167,27 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
     @httpretty.activate
     def test_course_name_missing(self):
-        """Verify that an exception is raised when the Commerce API doesn't return a course name."""
+        """Verify the Course Structure API is queried if the Commerce API doesn't return a course name."""
+        # Mock the Commerce API so that it does not return a name
         body = {
             'name': None,
             'verification_deadline': EXPIRES_STRING,
         }
         httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
 
-        migrated_course = MigratedCourse(self.course_id)
-        self.assertRaises(Exception, migrated_course.load_from_lms, ACCESS_TOKEN)
+        # Mock the Course Structure API
+        httpretty.register_uri(httpretty.GET, self.course_structure_url, body='{}', content_type=JSON)
+
+        # Try migrating the course, which should fail.
+        try:
+            migrated_course = MigratedCourse(self.course_id)
+            migrated_course.load_from_lms(ACCESS_TOKEN)
+        except Exception as ex:  # pylint: disable=broad-except
+            self.assertEqual(ex.message, 'Aborting migration. No name is available for {}.'.format(self.course_id))
+
+        # Verify the Course Structure API was called.
+        last_request = httpretty.last_request()
+        self.assertEqual(last_request.path, urlparse(self.course_structure_url).path)
 
     @httpretty.activate
     def test_fall_back_to_course_structure(self):
