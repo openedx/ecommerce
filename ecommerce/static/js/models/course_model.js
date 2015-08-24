@@ -81,7 +81,9 @@ define([
                     }
                 },
                 products: function (value) {
-                    if (!value.isValid()) {
+                    // NOTE (CCB): When syncing from the server, the value is an array. We can safely ignore
+                    // validation in this case since the values from the server should be valid.
+                    if (!_.isArray(value) && !value.isValid()) {
                         return gettext('Product validation failed.');
                     }
                 }
