@@ -7,6 +7,7 @@ from ecommerce.courses.models import Course
 
 class CourseAdmin(SimpleHistoryAdmin):
     list_display = ('id', 'name',)
+    search_fields = ('id', 'name',)
 
     def get_urls(self):
         """Returns the additional urls used by the Reversion admin."""
