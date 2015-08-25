@@ -1,7 +1,7 @@
 import os
 
 from django.conf import settings
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import logout
@@ -37,8 +37,7 @@ js_info_dict = {
     'packages': ('courses',),
 }
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
     url(r'^admin/', include(admin.site.urls)),
@@ -58,7 +57,7 @@ urlpatterns = patterns(
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
-)
+]
 
 # Install Oscar extension URLs
 urlpatterns += extensions_patterns
@@ -70,20 +69,17 @@ if settings.DEBUG and settings.MEDIA_ROOT:  # pragma: no cover
     )
 
 if settings.DEBUG:  # pragma: no cover
-    # Allow error pages to be tested
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
         url(r'^403/$', handler403, name='403'),
         url(r'^404/$', 'django.views.defaults.page_not_found', name='404'),
         url(r'^500/$', 'django.views.defaults.server_error', name='500'),
         url(r'^bootstrap/$', TemplateView.as_view(template_name='bootstrap-demo.html')),
-
-    )
+    ]
+    # Allow error pages to be tested
 
     if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
         import debug_toolbar  # pylint: disable=import-error
 
-        urlpatterns += patterns(
-            '',
-            url(r'^__debug__/', include(debug_toolbar.urls)),
-        )
+        urlpatterns += [
+            url(r'^__debug__/', include(debug_toolbar.urls))
+        ]

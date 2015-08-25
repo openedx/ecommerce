@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -17,13 +17,12 @@ class CourseAdmin(SimpleHistoryAdmin):
             info = opts.app_label, opts.model_name
         except AttributeError:  # Django < 1.7
             info = opts.app_label, opts.module_name
-        history_urls = patterns(
-            "",
+        history_urls = [
             # Note: We use a custom URL pattern to match against course IDs.
             url("^(.+)/history/([^/]+)/$",
                 admin_site.admin_view(self.history_form_view),
                 name='%s_%s_simple_history' % info),
-        )
+        ]
         return history_urls + urls
 
 

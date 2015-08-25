@@ -80,7 +80,7 @@ class Cybersource(BasePaymentProcessor):
             u'transaction_uuid': uuid.uuid4().hex,
             u'signed_field_names': u'',
             u'unsigned_field_names': u'',
-            u'signed_date_time': datetime.datetime.utcnow().strftime(ISO_8601_FORMAT),
+            u'signed_date_time': self.utcnow().strftime(ISO_8601_FORMAT),
             u'locale': self.language_code,
             u'transaction_type': u'sale',
             u'reference_number': basket.order_number,
@@ -108,6 +108,15 @@ class Cybersource(BasePaymentProcessor):
         parameters[u'payment_page_url'] = self.payment_page_url
 
         return parameters
+
+    @staticmethod
+    def utcnow():
+        """
+        Returns the current datetime in UTC.
+
+        This is primarily here as a test helper, since we cannot mock datetime.datetime.
+        """
+        return datetime.datetime.utcnow()
 
     @staticmethod
     def get_single_seat(basket):
