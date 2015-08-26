@@ -1,4 +1,6 @@
 """JWT authentication scheme for use with DRF."""
+import logging
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 import requests
@@ -7,7 +9,7 @@ from rest_framework.authentication import get_authorization_header, BaseAuthenti
 from rest_framework.status import HTTP_200_OK
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -59,8 +61,10 @@ class JwtAuthentication(JSONWebTokenAuthentication):
                         is_update = True
                 if is_update:
                     user.save()
-            except:  # pragma: no cover
-                raise exceptions.AuthenticationFailed('User retrieval failed.')
+            except:
+                msg = 'User retrieval failed.'
+                logger.exception(msg)
+                raise exceptions.AuthenticationFailed(msg)
 
         return user
 

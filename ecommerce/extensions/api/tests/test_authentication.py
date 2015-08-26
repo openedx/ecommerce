@@ -1,12 +1,15 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
 import json
+from logging import Logger
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.conf.urls import url
 from django.test import TestCase, override_settings, RequestFactory
 import httpretty
+import mock
 from oscar.test import factories
 from rest_framework import permissions
 from rest_framework.exceptions import AuthenticationFailed
@@ -18,6 +21,8 @@ from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAut
 from ecommerce.tests.mixins import JwtMixin, UserMixin
 
 OAUTH2_PROVIDER_URL = 'https://example.com/oauth2'
+
+User = get_user_model()
 
 
 class MockView(APIView):
@@ -185,3 +190,15 @@ class JwtAuthenticationTests(JwtMixin, UserMixin, TestCase):
         self.assertEquals(user.username, username)
         self.assertEquals(user.email, email)
         self.assertEquals(user.full_name, full_name)
+
+    def test_user_retrieval_failed(self):
+        """ Verify exceptions raised during user retrieval are properly logged. """
+
+        with mock.patch.object(User.objects, 'get_or_create', side_effect=ValueError):
+            with mock.patch.object(Logger, 'exception') as logger:
+                msg = 'User retrieval failed.'
+                with self.assertRaisesRegexp(AuthenticationFailed, msg):
+                    payload = {'username': 'test', 'email': 'test@example.com', 'full_name': 'Testy'}
+                    JwtAuthentication().authenticate_credentials(payload)
+
+                logger.assert_called_with(msg)
