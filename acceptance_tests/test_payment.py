@@ -7,13 +7,13 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import VERIFIED_COURSE_ID, HTTPS_RECEIPT_PAGE, PAYPAL_PASSWORD, PAYPAL_EMAIL
-from acceptance_tests.mixins import LoginMixin, EnrollmentApiMixin, EcommerceApiMixin, LmsUserMixin, UnenrollmentMixin
+from acceptance_tests.mixins import LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin, UnenrollmentMixin
 from acceptance_tests.pages import LMSCourseModePage
 
 
 @ddt.ddt
-class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LmsUserMixin,
-                                      LoginMixin, WebAppTest):
+class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin,
+                                      WebAppTest):
     def setUp(self):
         super(VerifiedCertificatePaymentTests, self).setUp()
         self.course_id = VERIFIED_COURSE_ID

@@ -2,12 +2,12 @@ from unittest import skip
 
 from bok_choy.web_app_test import WebAppTest
 
-from acceptance_tests.mixins import LoginMixin, LmsUserMixin, EnrollmentApiMixin
+from acceptance_tests.mixins import LogistrationMixin, EnrollmentApiMixin
 from acceptance_tests.pages import LMSCourseModePage
 
 
 @skip('Prof. Ed. tests should be run on an as-needed basis.')
-class ProfessionalEducationEnrollmentTests(EnrollmentApiMixin, LmsUserMixin, LoginMixin, WebAppTest):
+class ProfessionalEducationEnrollmentTests(EnrollmentApiMixin, LogistrationMixin, WebAppTest):
     def test_payment_required(self):
         """ Verify payment is required before enrolling in a professional education course. """
 
