@@ -23,7 +23,7 @@ class LmsUserMixin(object):
         return LMS_USERNAME, LMS_PASSWORD, LMS_EMAIL
 
     def generate_user_credentials(self, username_prefix):
-        username = username_prefix + uuid.uuid4().hex[0:20]
+        username = username_prefix + uuid.uuid4().hex[0:10]
         password = self.password
         email = '{}@example.com'.format(username)
         return username, email, password
