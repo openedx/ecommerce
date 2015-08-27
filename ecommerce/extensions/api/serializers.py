@@ -162,6 +162,11 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
     products = serializers.ListField()
 
+    def __init__(self, *args, **kwargs):
+        super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
+
+        self.access_token = kwargs['context'].pop('access_token')
+
     def validate_products(self, products):
         """Validate product data."""
         for product in products:
@@ -236,7 +241,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                     )
 
-                published = course.publish_to_lms()
+                published = course.publish_to_lms(access_token=self.access_token)
                 if published:
                     return created, None, None
                 else:
