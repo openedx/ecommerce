@@ -3,6 +3,7 @@ import urllib
 
 from bok_choy.page_object import PageObject
 from bok_choy.promise import EmptyPromise
+from selenium.webdriver.support.select import Select
 
 from acceptance_tests.config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, APP_SERVER_URL, LMS_URL
 
@@ -83,6 +84,10 @@ class LMSRegistrationPage(LMSPage):
         self.q(css='input#register-name').fill(name)
         self.q(css='input#register-email').fill(email)
         self.q(css='input#register-password').fill(password)
+
+        select = Select(self.browser.find_element_by_css_selector('select#register-country'))
+        select.select_by_value('US')
+
         self.q(css='input#register-honor_code').click()
         self.q(css='button.register-button').click()
 
