@@ -215,7 +215,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
             self._assert_course_saved(self.course_id)
 
             # If publication succeeds, the view should return a 201 and data should be saved.
-            mock_publish.return_value = True
+            mock_publish.return_value = True, None
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
             self._assert_course_saved(self.course_id, expected=self.data)
@@ -240,7 +240,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
             self._assert_course_saved(self.course_id, expected=self.data)
 
             # If publication succeeds, the view should return a 200 and data should be saved.
-            mock_publish.return_value = True
+            mock_publish.return_value = True, None
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 200)
             self._assert_course_saved(self.course_id, expected=updated_data)
@@ -283,7 +283,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self._toggle_publication(True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            mock_publish.return_value = True
+            mock_publish.return_value = True, None
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
             self._assert_course_saved(self.course_id, expected=self.data)

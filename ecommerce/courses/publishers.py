@@ -79,8 +79,10 @@ class LMSPublisher(object):
         """
 
         if not settings.COMMERCE_API_URL:
-            logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
-            return False
+            error_message = 'COMMERCE_API_URL is not set. Commerce data will not be published!'
+            logger.error(error_message)
+
+            return False, error_message
 
         course_id = course.id
         name = course.name
@@ -120,6 +122,7 @@ class LMSPublisher(object):
         }
 
         url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
+        timeout = settings.COMMERCE_API_TIMEOUT
 
         headers = {
             'Content-Type': 'application/json',
@@ -127,15 +130,47 @@ class LMSPublisher(object):
         }
 
         try:
-            response = requests.put(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
-            status_code = response.status_code
-            if status_code in (200, 201):
-                logger.info(u'Successfully published commerce data for [%s].', course_id)
-                return True
-            else:
-                logger.error(u'Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
-                             course_id, status_code, response.content)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(u'Failed to publish commerce data for [%s] to LMS.', course_id)
+            response = requests.put(url, data=json.dumps(data), headers=headers, timeout=timeout)
+        except Exception as e:  # pylint: disable=broad-except
+            error_message = (
+                u'Failed to publish commerce data for [{course_id}] to LMS. Error was [{error}]').format(
+                    course_id=course_id,
+                    error=e.message
+            )
 
-        return False
+            logger.exception(error_message)
+            return False, error_message
+
+        status_code = response.status_code
+        if status_code in (200, 201):
+            success_msg = (
+                u'Successfully published commerce data for [{course_id}].').format(
+                    course_id=course_id
+            )
+            logger.info(success_msg)
+            return True, success_msg
+
+        try:
+            data = json.loads(response.content)
+        except Exception:  # pylint: disable=broad-except
+            error_message = (
+                u'Failed to publish commerce data for [{course_id}] to LMS. Json was invalid.').format(
+                    course_id=course_id
+            )
+            logger.exception(error_message)
+            return False, error_message
+
+        error_dict = data.get('id', None)
+        if error_dict:
+            error_message = error_dict
+        else:
+            error_message = (
+                u"Failed to publish commerce data for [{course_id}] to LMS. "
+                u"Status was [{status_code}]. Body was [{response}].").format(
+                    course_id=course_id,
+                    status_code=status_code,
+                    response=response.content
+            )
+        logger.error(error_message)
+
+        return False, error_message

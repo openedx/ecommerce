@@ -71,11 +71,18 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
-        with mock.patch('requests.put', side_effect=Timeout):
+        error = 'time out error'
+        with mock.patch('requests.put', side_effect=Timeout(error)):
             with LogCapture(LOGGER_NAME) as l:
                 self.publisher.publish(self.course)
                 l.check(
-                    (LOGGER_NAME, 'ERROR', 'Failed to publish commerce data for [{}] to LMS.'.format(self.course.id)))
+                    (
+                        LOGGER_NAME, 'ERROR', 'Failed to publish commerce data for [{}] to LMS. Error was [{}]'.format(
+                            self.course.id,
+                            error
+                        )
+                    )
+                )
 
     @httpretty.activate
     @ddt.data(401, 403, 404, 500)
@@ -240,3 +247,57 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
             published = self.publisher.publish(self.course, access_token='access_token')
             self.assertFalse(published)
+
+    @httpretty.activate
+    @ddt.data(401, 403, 404, 500)
+    def test_api_bad_status_with_invalid_json(self, status):
+        """ If the Commerce API returns a non-successful status, with invalid json. """
+        body = 'invalid json data'
+        url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
+        httpretty.register_uri(httpretty.PUT, url, status=status, body=body)
+
+        with LogCapture(LOGGER_NAME) as l:
+            self.publisher.publish(self.course)
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'ERROR',
+                    u'Failed to publish commerce data for [{}] to LMS. Json was invalid.'.format(
+                        self.course.id
+                    )
+                )
+            )
+
+    @httpretty.activate
+    @ddt.data(401, 403, 404, 500)
+    def test_api_bad_status_with_error_message_dict(self, status):
+        """ If the Commerce API returns a non-successful status, with error dict. """
+        error_msg = u'course does not exists.'
+        body = {u'id': error_msg}
+        self._mock_commerce_api(status, body)
+
+        with LogCapture(LOGGER_NAME) as l:
+            self.publisher.publish(self.course)
+            l.check(
+                (LOGGER_NAME, 'ERROR', error_msg)
+            )
+
+    @httpretty.activate
+    @ddt.data(401, 403, 404, 500)
+    def test_api_bad_status_without_error_message_dict(self, status):
+        """ If the Commerce API returns a non-successful status, without error dict. Default error
+        message will return.
+        """
+        body = {u'error': u'Testing!'}
+        self._mock_commerce_api(status, body)
+        with LogCapture(LOGGER_NAME) as l:
+            self.publisher.publish(self.course)
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'ERROR',
+                    u'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
+                        self.course.id, status, json.dumps(body)
+                    )
+                )
+            )
