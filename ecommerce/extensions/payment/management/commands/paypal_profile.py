@@ -106,7 +106,13 @@ class Command(BaseCommand):
     def handle_list(self, args):  # pylint: disable=unused-argument
         """Wrapper for paypalrestsdk List operation."""
         profiles = WebProfile.all()
-        self.print_json([profile.to_dict() for profile in profiles])
+        result = []
+        try:
+            result = [profile.to_dict() for profile in profiles]
+        except KeyError:
+            # weird internal paypal sdk behavior; it means the result was empty.
+            pass
+        self.print_json(result)
 
     def handle_create(self, args):
         """Wrapper for paypalrestsdk Create operation."""
