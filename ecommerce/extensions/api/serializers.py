@@ -70,8 +70,9 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
         return None
 
     def _get_info(self, product):
-        info = Selector().strategy().fetch_for_product(product)
-        return info
+        return Selector().strategy(
+            request=self.context.get('request')
+        ).fetch_for_product(product)
 
     def get_is_available_to_buy(self, product):
         info = self._get_info(product)
