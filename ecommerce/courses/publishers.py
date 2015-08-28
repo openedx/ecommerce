@@ -1,8 +1,9 @@
 import json
 import logging
+import requests
 
 from django.conf import settings
-import requests
+from django.utils.translation import ugettext_lazy as _
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.settings import get_lms_url
@@ -75,14 +76,18 @@ class LMSPublisher(object):
             access_token (str): Access token used when publishing CreditCourse data to the LMS.
 
         Returns:
-            True, if publish operation succeeded; otherwise, False.
+            None, if publish operation succeeded; otherwise, error message.
         """
+
+        course_id = course.id
+        error_message = _(u'Failed to publish commerce data for {course_id} to LMS.').format(
+            course_id=course_id
+        )
 
         if not settings.COMMERCE_API_URL:
             logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
-            return False
+            return error_message
 
-        course_id = course.id
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
         modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
@@ -101,16 +106,17 @@ class LMSPublisher(object):
                             response.status_code,
                             response.content
                         )
-                        return False
-                except:  # pylint: disable=bare-except
+
+                        return self._parse_error(response, error_message)
+                except Exception:  # pylint: disable=broad-except
                     logger.exception(u'Failed to publish CreditCourse for [%s] to LMS.', course_id)
-                    return False
+                    return error_message
             else:
                 logger.error(
                     u'Unable to publish CreditCourse for [%s] to LMS. No access token available.',
                     course_id
                 )
-                return False
+                return error_message
 
         data = {
             'id': course_id,
@@ -131,11 +137,45 @@ class LMSPublisher(object):
             status_code = response.status_code
             if status_code in (200, 201):
                 logger.info(u'Successfully published commerce data for [%s].', course_id)
-                return True
+                return
             else:
                 logger.error(u'Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
                              course_id, status_code, response.content)
+
+                return self._parse_error(response, error_message)
+
         except Exception:  # pylint: disable=broad-except
             logger.exception(u'Failed to publish commerce data for [%s] to LMS.', course_id)
 
-        return False
+        return error_message
+
+    def _parse_error(self, response, default_error_message):
+        """When validation errors occur during publication, the LMS is expected
+         to return an error message.
+
+        Arguments:
+            response (Response): A 'Response' object which contains json error message.
+            default_error_message (str) : default error message in case of exception.
+
+        Returns:
+            string: Returns the error message extracted from response.content
+            along with default message. If no message is available in response
+            then default message will be return.
+
+        """
+        message = None
+        try:
+            data = response.json()
+            if isinstance(data, basestring):
+                message = data
+            elif isinstance(data, dict) and len(data) > 0:
+                message = data.values()[0]
+            if isinstance(message, list):
+                message = message[0]
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        if message:
+            return ' '.join([default_error_message, message])
+        else:
+            return default_error_message
