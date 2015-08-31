@@ -17,8 +17,8 @@ define([
 
         var model,
             honorSeat = {
-                id: 9,
-                url: 'http://ecommerce.local:8002/api/v2/products/9/',
+                id: 8,
+                url: 'http://ecommerce.local:8002/api/v2/products/8/',
                 structure: 'child',
                 product_class: 'Seat',
                 title: 'Seat in edX Demonstration Course with honor certificate',
@@ -41,8 +41,8 @@ define([
                 is_available_to_buy: true
             },
             verifiedSeat = {
-                id: 8,
-                url: 'http://ecommerce.local:8002/api/v2/products/8/',
+                id: 9,
+                url: 'http://ecommerce.local:8002/api/v2/products/9/',
                 structure: 'child',
                 product_class: 'Seat',
                 title: 'Seat in edX Demonstration Course with verified certificate (and ID verification)',
@@ -64,17 +64,83 @@ define([
                 ],
                 is_available_to_buy: true
             },
+            creditSeat = {
+                id: 10,
+                url: 'http://ecommerce.local:8002/api/v2/products/10/',
+                structure: 'child',
+                product_class: 'Seat',
+                title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                price: '200.00',
+                expires: null,
+                attribute_values: [
+                    {
+                        name: 'certificate_type',
+                        value: 'credit'
+                    },
+                    {
+                        name: 'course_key',
+                        value: 'edX/DemoX/Demo_Course'
+                    },
+                    {
+                        name: 'id_verification_required',
+                        value: true
+                    },
+                    {
+                        name: 'credit_provider',
+                        value: 'Harvard'
+                    },
+                    {
+                        name: 'credit_hours',
+                        value: 1
+                    }
+                ],
+                is_available_to_buy: true
+            },
+            alternateCreditSeat = {
+                id: 11,
+                url: 'http://ecommerce.local:8002/api/v2/products/11/',
+                structure: 'child',
+                product_class: 'Seat',
+                title: 'Seat in edX Demonstration Course with credit certificate (and ID verification)',
+                price: '300.00',
+                expires: null,
+                attribute_values: [
+                    {
+                        name: 'certificate_type',
+                        value: 'credit'
+                    },
+                    {
+                        name: 'course_key',
+                        value: 'edX/DemoX/Demo_Course'
+                    },
+                    {
+                        name: 'id_verification_required',
+                        value: true
+                    },
+                    {
+                        name: 'credit_provider',
+                        value: 'MIT'
+                    },
+                    {
+                        name: 'credit_hours',
+                        value: 2
+                    }
+                ],
+                is_available_to_buy: true
+            },
             data = {
                 id: 'edX/DemoX/Demo_Course',
                 url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/',
                 name: 'edX Demonstration Course',
                 verification_deadline: '2015-10-01T00:00:00Z',
-                type: 'verified',
+                type: 'credit',
                 products_url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/products/',
                 last_edited: '2015-07-27T00:27:23Z',
                 products: [
                     honorSeat,
                     verifiedSeat,
+                    creditSeat,
+                    alternateCreditSeat,
                     {
                         id: 7,
                         url: 'http://ecommerce.local:8002/api/v2/products/7/',
@@ -111,14 +177,14 @@ define([
 
                     // Sanity check to ensure the products were properly parsed
                     products = model.get('products');
-                    expect(products.length).toEqual(3);
+                    expect(products.length).toEqual(5);
 
                     // Remove the parent products
                     model.removeParentProducts();
 
                     // Only the children survived...
-                    expect(products.length).toEqual(2);
-                    expect(products.where({structure: 'child'}).length).toEqual(2);
+                    expect(products.length).toEqual(4);
+                    expect(products.where({structure: 'child'}).length).toEqual(4);
                 });
             });
 
@@ -190,31 +256,37 @@ define([
                 });
             });
 
-            describe('getOrCreateSeat', function () {
+            describe('getOrCreateSeats', function () {
                 it('should return existing seats', function () {
                     var mapping = {
-                        'honor': honorSeat,
-                        'verified': verifiedSeat
-                    };
+                            'honor': [honorSeat],
+                            'verified': [verifiedSeat],
+                            'credit': [creditSeat, alternateCreditSeat]
+                        },
+                        seats;
 
                     _.each(mapping, function (expected, seatType) {
-                        expect(model.getOrCreateSeat(seatType).toJSON()).toEqual(expected);
+                        seats = model.getOrCreateSeats(seatType);
+
+                        _.each(seats, function (seat) {
+                            expect(expected).toContain(seat.toJSON());
+                        });
                     });
                 });
 
-                it('should return null if an audit seat does not already exist', function () {
-                    expect(model.getOrCreateSeat('audit')).toBeUndefined();
+                it('should return an empty array if an audit seat does not already exist', function () {
+                    expect(model.getOrCreateSeats('audit')).toEqual([]);
                 });
 
                 it('should create a new CourseSeat if one does not exist', function () {
                     var seat;
 
                     // Sanity check to confirm a new seat is created later
-                    expect(model.seats().length).toEqual(2);
+                    expect(model.seats().length).toEqual(4);
 
                     // A new seat should be created
-                    seat = model.getOrCreateSeat('professional');
-                    expect(model.seats().length).toEqual(3);
+                    seat = model.getOrCreateSeats('professional')[0];
+                    expect(model.seats().length).toEqual(5);
 
                     // The new seat's class/type should correspond to the passed in seat type
                     expect(seat).toEqual(jasmine.any(ProfessionalSeat));
@@ -229,7 +301,7 @@ define([
 
             describe('verification deadline validation', function () {
                 it('succeeds if the verification deadline is after the course seats\' expiration dates', function () {
-                    var seat = model.getOrCreateSeat('verified');
+                    var seat = model.getOrCreateSeats('verified')[0];
                     model.set('verification_deadline', '2016-01-01T00:00:00Z');
                     seat.set('expires', '2015-01-01T00:00:00Z');
 
@@ -238,7 +310,7 @@ define([
                 });
 
                 it('fails if the verification deadline is before the course seats\' expiration dates', function () {
-                    var seat = model.getOrCreateSeat('verified'),
+                    var seat = model.getOrCreateSeats('verified')[0],
                         msg = 'The verification deadline must occur AFTER the upgrade deadline.';
                     model.set('verification_deadline', '2014-01-01T00:00:00Z');
                     seat.set('expires', '2015-01-01T00:00:00Z');

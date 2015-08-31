@@ -54,9 +54,9 @@ define([
                             name: attribute,
                             value: this.get(attribute)
                         });
-
-                        delete data[attribute];
                     }
+
+                    delete data[attribute];
                 }, this);
 
                 // Restore the timezone component, and output the ISO 8601 format expected by the server.

@@ -4,14 +4,16 @@ define([
         'models/course_seats/course_seat',
         'models/course_seats/honor_seat',
         'models/course_seats/professional_seat',
-        'models/course_seats/verified_seat'
+        'models/course_seats/verified_seat',
+        'models/course_seats/credit_seat'
     ],
     function (_,
               AuditSeat,
               CourseSeat,
               HonorSeat,
               ProfessionalSeat,
-              VerifiedSeat) {
+              VerifiedSeat,
+              CreditSeat) {
         'use strict';
 
         return {
@@ -27,7 +29,7 @@ define([
              * @returns {CourseSeat[]}
              */
             getSeatModelMap: _.memoize(function () {
-                return _.indexBy([AuditSeat, HonorSeat, ProfessionalSeat, VerifiedSeat], 'seatType');
+                return _.indexBy([AuditSeat, HonorSeat, ProfessionalSeat, VerifiedSeat, CreditSeat], 'seatType');
             }),
 
             /**
@@ -74,7 +76,7 @@ define([
 
                     return 'residual';
                 });
-            },
+            }
         };
     }
 );
