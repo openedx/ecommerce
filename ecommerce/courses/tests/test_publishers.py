@@ -13,6 +13,8 @@ from testfixtures import LogCapture
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.settings.base import get_lms_url
+
 
 EDX_API_KEY = 'edx'
 JSON = 'application/json'
@@ -36,6 +38,28 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
                                content_type=JSON)
+
+    def _mock_credit_api(self, creation_status, update_status):
+        self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock Credit API calls.')
+
+        url = get_lms_url('api/credit/v1/courses/')
+        httpretty.register_uri(
+            httpretty.POST,
+            url,
+            status=creation_status,
+            body='{}',
+            content_type=JSON
+        )
+
+        if update_status is not None:
+            url += self.course.id.strip('/') + '/'
+            httpretty.register_uri(
+                httpretty.PUT,
+                url,
+                status=update_status,
+                body='{}',
+                content_type=JSON
+            )
 
     @ddt.data('', None)
     def test_commerce_api_url_not_set(self, setting_value):
@@ -139,3 +163,80 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             'expires': None
         }
         self.assertDictEqual(actual, expected)
+
+    @httpretty.activate
+    @ddt.data(
+        (201, None, 201),
+        (400, 200, 200)
+    )
+    @ddt.unpack
+    def test_credit_publication_success(self, creation_status, update_status, commerce_status):
+        """
+        Verify that course publication succeeds if the Credit API responds
+        with 2xx status codes when publishing CreditCourse data to the LMS.
+        """
+        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+
+        self._mock_credit_api(creation_status, update_status)
+        self._mock_commerce_api(commerce_status)
+
+        access_token = 'access_token'
+        published = self.publisher.publish(self.course, access_token=access_token)
+        self.assertTrue(published)
+
+        # Retrieve the latest request to the Credit API.
+        if creation_status == 400:
+            latest_request = httpretty.httpretty.latest_requests[1]
+        else:
+            latest_request = httpretty.httpretty.latest_requests[0]
+
+        # Verify the headers passed to the Credit API were correct.
+        expected = {
+            'Content-Type': JSON,
+            'Authorization': 'Bearer ' + access_token
+        }
+        self.assertDictContainsSubset(expected, latest_request.headers)
+
+        # Verify the data passed to the Credit API was correct.
+        expected = {
+            'course_key': self.course.id,
+            'enabled': True
+        }
+        actual = json.loads(latest_request.body)
+        self.assertEqual(expected, actual)
+
+    @httpretty.activate
+    def test_credit_publication_failure(self):
+        """
+        Verify that course publication fails if the Credit API does not respond
+        with 2xx status codes when publishing CreditCourse data to the LMS.
+        """
+        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+
+        self._mock_credit_api(400, 418)
+
+        published = self.publisher.publish(self.course, access_token='access_token')
+        self.assertFalse(published)
+
+    def test_credit_publication_no_access_token(self):
+        """
+        Verify that course publication fails if no access token is provided
+        when publishing CreditCourse data to the LMS.
+        """
+        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+
+        published = self.publisher.publish(self.course, access_token=None)
+        self.assertFalse(published)
+
+    def test_credit_publication_exception(self):
+        """
+        Verify that course publication fails if an exception is raised
+        while publishing CreditCourse data to the LMS.
+        """
+        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+
+        with mock.patch.object(LMSPublisher, '_publish_creditcourse') as mock_publish_creditcourse:
+            mock_publish_creditcourse.side_effect = Exception
+
+            published = self.publisher.publish(self.course, access_token='access_token')
+            self.assertFalse(published)

@@ -74,6 +74,29 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
                             'value': True
                         }
                     ]
+                },
+                {
+                    'product_class': 'Seat',
+                    'expires': EXPIRES_STRING,
+                    'price': 100.00,
+                    'attribute_values': [
+                        {
+                            'name': 'certificate_type',
+                            'value': 'credit'
+                        },
+                        {
+                            'name': 'id_verification_required',
+                            'value': True
+                        },
+                        {
+                            'name': 'credit_provider',
+                            'value': 'Harvard'
+                        },
+                        {
+                            'name': 'credit_hours',
+                            'value': 1
+                        }
+                    ]
                 }
             ]
         }

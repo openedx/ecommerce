@@ -514,7 +514,8 @@ class CourseViewSet(NonDestroyableModelViewSet):
               'because the switch [publish_course_modes_to_lms] is disabled.'
 
         if waffle.switch_is_active('publish_course_modes_to_lms'):
-            published = course.publish_to_lms()
+            access_token = getattr(request.user, 'access_token', None)
+            published = course.publish_to_lms(access_token=access_token)
             if published:
                 msg = 'Course [{course_id}] was successfully published to LMS.'
             else:
@@ -537,6 +538,11 @@ class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
     """
     permission_classes = (IsAuthenticated, IsAdminUser,)
     serializer_class = serializers.AtomicPublicationSerializer
+
+    def get_serializer_context(self):
+        context = super(AtomicPublicationView, self).get_serializer_context()
+        context['access_token'] = self.request.user.access_token
+        return context
 
     def post(self, request, *args, **kwargs):
         return self._save_and_publish(request.data)

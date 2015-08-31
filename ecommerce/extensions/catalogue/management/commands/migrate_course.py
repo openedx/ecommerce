@@ -202,7 +202,7 @@ class Command(BaseCommand):
                     if options.get('commit', False):
                         logger.info('Course [%s] was saved to the database.', course.id)
                         if waffle.switch_is_active('publish_course_modes_to_lms'):
-                            course.publish_to_lms()
+                            course.publish_to_lms(access_token=access_token)
                         else:
                             logger.info('Data was not published to LMS because the switch '
                                         '[publish_course_modes_to_lms] is disabled.')
