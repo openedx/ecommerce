@@ -1,8 +1,8 @@
 # Packages required for local development
 -r test.txt
 
-django-debug-toolbar==1.3.0
+django-debug-toolbar==1.3.2
 
 # i18n
 transifex-client==0.10
-git+https://github.com/edx/i18n-tools.git@27e90296411f56b3e856492f1c465f265b2916fa#egg=i18n_tools
+git+https://github.com/edx/i18n-tools.git@v0.1.3#egg=i18n_tools==0.1.3

@@ -30,7 +30,6 @@ requirements.js:
 
 requirements: requirements.js
 	pip install -qr requirements/local.txt --exists-action w
-	pip install -qr requirements/test.txt --exists-action w
 
 migrate:
 	python manage.py migrate
@@ -93,7 +92,7 @@ fake_translations: extract_translations dummy_translations compile_translations
 pull_translations:
 	cd ecommerce && tx pull -a
 
-update_translations: pull_translations generate_fake_translations
+update_translations: pull_translations fake_translations
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage accept \
