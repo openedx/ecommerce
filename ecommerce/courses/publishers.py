@@ -95,12 +95,7 @@ class LMSPublisher(object):
                 try:
                     response = self._publish_creditcourse(course_id, access_token)
                     if response.status_code in (200, 201):
-                        success_msg = (
-                            u'Successfully published CreditCourse for [{course_id}] to LMS.').format(
-                                course_id=course_id
-                        )
-                        logger.info(success_msg)
-                        return True, success_msg
+                        logger.info(u'Successfully published CreditCourse for [%s] to LMS.', course_id)
                     else:
                         error_message = (
                             u'Failed to publish CreditCourse for [{course_id}] to LMS. '
