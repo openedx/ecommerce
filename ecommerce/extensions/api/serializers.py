@@ -248,7 +248,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 else:
                     raise LMSPublisherException(resp_message)
 
-        except (Exception, LMSPublisherException) as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
             return False, e, e.message
 

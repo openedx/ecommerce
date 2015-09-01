@@ -32,5 +32,5 @@ class BadRequestException(APIException):
 
 
 class LMSPublisherException(ApiError):
-    """Raised when the publish course to LMS fails."""
+    """Raised when LMSPublisher fails to publish a course."""
     pass
