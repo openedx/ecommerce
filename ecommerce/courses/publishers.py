@@ -122,7 +122,6 @@ class LMSPublisher(object):
         }
 
         url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
-        timeout = settings.COMMERCE_API_TIMEOUT
 
         headers = {
             'Content-Type': 'application/json',
@@ -130,7 +129,7 @@ class LMSPublisher(object):
         }
 
         try:
-            response = requests.put(url, data=json.dumps(data), headers=headers, timeout=timeout)
+            response = requests.put(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
         except Exception as e:  # pylint: disable=broad-except
             error_message = (
                 u'Failed to publish commerce data for [{course_id}] to LMS. Error was [{error}]').format(
