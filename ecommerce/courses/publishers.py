@@ -95,24 +95,39 @@ class LMSPublisher(object):
                 try:
                     response = self._publish_creditcourse(course_id, access_token)
                     if response.status_code in (200, 201):
-                        logger.info(u'Successfully published CreditCourse for [%s] to LMS.', course_id)
-                    else:
-                        logger.error(
-                            u'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was [%s].',
-                            course_id,
-                            response.status_code,
-                            response.content
+                        success_msg = (
+                            u'Successfully published CreditCourse for [{course_id}] to LMS.').format(
+                                course_id=course_id
                         )
-                        return False
+                        logger.info(success_msg)
+                        return True, success_msg
+                    else:
+                        error_message = (
+                            u'Failed to publish CreditCourse for [{course_id}] to LMS. '
+                            u'Status was [{status}]. Body was [{body}].'.format(
+                                course_id=course_id,
+                                status=response.status_code,
+                                body=response.content
+                            )
+                        )
+                        logger.error(error_message)
+                        return False, error_message
                 except:  # pylint: disable=bare-except
-                    logger.exception(u'Failed to publish CreditCourse for [%s] to LMS.', course_id)
-                    return False
+                    error_message = (
+                        u'Failed to publish CreditCourse for [{course_id}] to LMS.'.format(
+                            course_id=course_id
+                        )
+                    )
+                    logger.exception(error_message)
+                    return False, error_message
             else:
-                logger.error(
-                    u'Unable to publish CreditCourse for [%s] to LMS. No access token available.',
-                    course_id
+                error_message= (
+                    u'Unable to publish CreditCourse for [{course_id}] to LMS. No access token available.'.format(
+                        course_id=course_id
+                    )
                 )
-                return False
+                logger.error(error_message)
+                return False, error_message
 
         data = {
             'id': course_id,

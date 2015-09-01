@@ -222,7 +222,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
         self._mock_credit_api(400, 418)
 
-        published = self.publisher.publish(self.course, access_token='access_token')
+        published, error_message = self.publisher.publish(self.course, access_token='access_token')
         self.assertFalse(published)
 
     def test_credit_publication_no_access_token(self):
@@ -232,8 +232,15 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         """
         self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
 
-        published = self.publisher.publish(self.course, access_token=None)
+        published, error_message = self.publisher.publish(self.course, access_token=None)
+
         self.assertFalse(published)
+        self.assertEqual(
+            error_message,
+            u'Unable to publish CreditCourse for [{course_id}] to LMS. No access token available.'.format(
+                course_id=self.course.id
+            )
+        )
 
     def test_credit_publication_exception(self):
         """
@@ -245,7 +252,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         with mock.patch.object(LMSPublisher, '_publish_creditcourse') as mock_publish_creditcourse:
             mock_publish_creditcourse.side_effect = Exception
 
-            published = self.publisher.publish(self.course, access_token='access_token')
+            published, error_message = self.publisher.publish(self.course, access_token='access_token')
             self.assertFalse(published)
 
     @httpretty.activate
