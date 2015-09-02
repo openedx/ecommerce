@@ -1,15 +1,18 @@
 import datetime
+import ddt
 
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from oscar.apps.partner import availability
 import pytz
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy, Selector
+from ecommerce.tests.mixins import UserMixin
 
 
-class DefaultStrategyTests(CourseCatalogTestMixin, TestCase):
+@ddt.ddt
+class DefaultStrategyTests(CourseCatalogTestMixin, UserMixin, TestCase):
     def setUp(self):
         super(DefaultStrategyTests, self).setUp()
         self.strategy = DefaultStrategy()
@@ -39,6 +42,28 @@ class DefaultStrategyTests(CourseCatalogTestMixin, TestCase):
         stock_record = product.stockrecords.first()
         actual = self.strategy.availability_policy(product, stock_record)
         self.assertIsInstance(actual, availability.Unavailable)
+
+    @ddt.unpack
+    @ddt.data(
+        (True, availability.Available),
+        (False, availability.Unavailable),
+    )
+    def test_expired_seats_availability_for_users(self, is_staff, available):
+        """ A product is unavailable for students if the current date
+        is beyond the product's expiration date. But for Admin products
+        are always available.
+        """
+        self.assert_expired_product_availability(is_staff, available)
+
+    def assert_expired_product_availability(self, is_staff, available):
+        request = RequestFactory()
+        request.user = self.create_user(is_staff=is_staff)
+        strategy = DefaultStrategy(request)
+        product = self.honor_seat
+        product.expires = pytz.utc.localize(datetime.datetime.min)
+        stock_record = product.stockrecords.first()
+        actual = strategy.availability_policy(product, stock_record)
+        self.assertIsInstance(actual, available)
 
 
 class SelectorTests(TestCase):

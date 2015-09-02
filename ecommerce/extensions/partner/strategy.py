@@ -18,11 +18,16 @@ class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
         return ProductClass.objects.get(slug='seat')
 
     def availability_policy(self, product, stockrecord):
-        """ A seat is unavailable if the current date is beyond the seat's expiration date. """
-        if product.expires and timezone.now() > product.expires:
-            return availability.Unavailable()
+        """ A product is unavailable for non-admin users if the current date is
+        beyond the product's expiration date. Products are always available for admin users.
+        """
 
-        return super(CourseSeatAvailabilityPolicyMixin, self).availability_policy(product, stockrecord)
+        is_staff = getattr(self.user, 'is_staff', False)
+        is_available = product.expires is None or (product.expires >= timezone.now())
+        if is_staff or is_available:
+            return super(CourseSeatAvailabilityPolicyMixin, self).availability_policy(product, stockrecord)
+        else:
+            return availability.Unavailable()
 
 
 class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicyMixin,
@@ -32,4 +37,4 @@ class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicy
 
 class Selector(object):
     def strategy(self, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
-        return DefaultStrategy()
+        return DefaultStrategy(request if hasattr(request, 'user') else None)
