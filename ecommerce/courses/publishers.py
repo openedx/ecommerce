@@ -78,19 +78,19 @@ class LMSPublisher(object):
             True, if publish operation succeeded; otherwise, False.
         """
 
+        course_id = course.id
+        error_message = (
+            u'Failed to publish commerce data for [{course_id}] to LMS.').format(
+                course_id=course_id
+        )
+
         if not settings.COMMERCE_API_URL:
             logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
-            return False
+            return False, error_message
 
-        course_id = course.id
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
         modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
-
-        error_message = (
-            u'Failed to publish CreditCourse [{course_id}] to LMS.').format(
-                course_id=course_id
-        )
 
         has_credit = 'credit' in [mode['name'] for mode in modes]
         if has_credit:
@@ -131,11 +131,6 @@ class LMSPublisher(object):
             'Content-Type': 'application/json',
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
-
-        error_message = (
-            u'Failed to publish commerce data for [{course_id}] to LMS.').format(
-                course_id=course_id
-        )
 
         try:
             response = requests.put(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
