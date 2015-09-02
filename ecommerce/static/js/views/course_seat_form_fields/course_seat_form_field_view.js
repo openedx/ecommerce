@@ -29,7 +29,12 @@ define([
                         validate: true
                     }
                 },
-                'input[name=expires]': 'expires',
+                'input[name=expires]': {
+                    observe: 'expires',
+                    setOptions: {
+                        validate: true
+                    }
+                },
                 'input[name=id_verification_required]': {
                     observe: 'id_verification_required',
                     onSet: 'cleanIdVerificationRequired'

@@ -19,16 +19,21 @@
     </div>
 
     <div class="expires">
-        <label for="expires"><%= gettext('Upgrade Deadline') %></label>
+        <div class="form-group">
+            <label for="expires"><%= gettext('Upgrade Deadline') %></label>
 
-        <div class="input-group" data-toggle="tooltip" title="<%= gettext('Professional education courses have no upgrade deadline.') %>">
-            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
-            <input type="datetime-local" id="expires" name="expires" class="form-control" value=""
-                   aria-describedby="expiresHelpBlock" disabled="disabled">
-        </div>
+            <div class="input-group" data-toggle="tooltip"
+                 title="<%= gettext('Professional education courses have no upgrade deadline.') %>">
+                <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+                <input type="datetime-local" id="expires" name="expires" class="form-control"
+                       aria-describedby="expiresHelpBlock" disabled="disabled">
+            </div>
+            <!-- NOTE: This help-block is here for validation messages. -->
+            <span class="help-block"></span>
         <span id="expiresHelpBlock" class="help-block">
             <%= gettext('After this date/time, students can no longer enroll in this track.') %>
         </span>
+        </div>
     </div>
 </div>
 <div class="col-sm-4 seat-certificate-type">
