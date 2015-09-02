@@ -3,7 +3,7 @@ import requests
 
 from django.conf import settings
 
-from ecommerce.settings.base import get_lms_url
+from ecommerce.settings import get_lms_url
 
 
 logger = logging.getLogger(__name__)

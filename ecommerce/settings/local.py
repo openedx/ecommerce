@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import os
 from os.path import join, normpath
 
+from ecommerce.settings import get_lms_url
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 

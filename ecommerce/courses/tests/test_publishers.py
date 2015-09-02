@@ -13,7 +13,7 @@ from testfixtures import LogCapture
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.settings.base import get_lms_url
+from ecommerce.settings import get_lms_url
 
 
 EDX_API_KEY = 'edx'

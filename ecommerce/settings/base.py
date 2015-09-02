@@ -2,9 +2,7 @@
 import os
 from os.path import basename, normpath
 from sys import path
-from urlparse import urljoin
 
-from django.conf import settings
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.settings._oscar import *
@@ -29,9 +27,6 @@ path.append(DJANGO_ROOT)
 # DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = False
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#template-debug
-TEMPLATE_DEBUG = DEBUG
 # END DEBUG CONFIGURATION
 
 
@@ -150,40 +145,37 @@ FIXTURE_DIRS = (
 
 # TEMPLATE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-context-processors
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request',
-    'oscar.apps.search.context_processors.search_form',
-    'oscar.apps.promotions.context_processors.promotions',
-    'oscar.apps.checkout.context_processors.checkout',
-    'oscar.apps.customer.notifications.context_processors.notifications',
-    'oscar.core.context_processors.metadata',
-    'ecommerce.core.context_processors.core',
-)
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
-TEMPLATE_DIRS = (
-    normpath(join(DJANGO_ROOT, 'templates')),
-    # Templates which override default Oscar templates
-    normpath(join(DJANGO_ROOT, 'templates/oscar')),
-    OSCAR_MAIN_TEMPLATE_DIR,
-)
-
-ALLOWED_INCLUDE_ROOTS = (
-    normpath(join(SITE_ROOT, 'templates')),
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'DIRS': (
+            normpath(join(DJANGO_ROOT, 'templates')),
+            # Templates which override default Oscar templates
+            normpath(join(DJANGO_ROOT, 'templates/oscar')),
+            OSCAR_MAIN_TEMPLATE_DIR,
+        ),
+        'OPTIONS': {
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+                'oscar.apps.search.context_processors.search_form',
+                'oscar.apps.promotions.context_processors.promotions',
+                'oscar.apps.checkout.context_processors.checkout',
+                'oscar.apps.customer.notifications.context_processors.notifications',
+                'oscar.core.context_processors.metadata',
+                'ecommerce.core.context_processors.core',
+            ),
+            'debug': True,  # Django will only display debug pages if the global DEBUG setting is set to True.
+        }
+    },
+]
 # END TEMPLATE CONFIGURATION
 
 
@@ -215,13 +207,6 @@ ECOMMERCE_URL_ROOT = None
 
 # Absolute URL used to construct LMS URLs.
 LMS_URL_ROOT = None
-
-
-def get_lms_url(path):
-    # This function accesses Django settings because other settings modules override
-    # LMS_URL_ROOT; we don't always want this function to use the value of LMS_URL_ROOT
-    # defined in this module.
-    return urljoin(settings.LMS_URL_ROOT, path)
 
 # The location of the LMS heartbeat page
 LMS_HEARTBEAT_URL = None
@@ -383,8 +368,6 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
 # Redirect successfully authenticated users to the Oscar dashboard.
 LOGIN_REDIRECT_URL = '/dashboard/'
-
-EXTRA_SCOPE = ['permissions']
 # END AUTHENTICATION
 
 

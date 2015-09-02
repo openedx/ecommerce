@@ -9,7 +9,7 @@ from waffle.models import Switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
-from ecommerce.settings.base import get_lms_url
+from ecommerce.settings import get_lms_url
 
 
 class SignalTests(CourseCatalogTestMixin, TestCase):
