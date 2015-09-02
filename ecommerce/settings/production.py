@@ -15,6 +15,9 @@ from ecommerce.settings.logger import get_logger_config
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 
+# Email configuration
+EMAIL_BACKEND = 'django_ses.SESBackend'
+
 # Minify CSS
 COMPRESS_CSS_FILTERS += [
     'compressor.filters.cssmin.CSSMinFilter',
