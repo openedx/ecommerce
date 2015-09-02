@@ -30,6 +30,10 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.course.create_or_update_seat('honor', False, 0)
         self.course.create_or_update_seat('verified', True, 50)
         self.publisher = LMSPublisher()
+        self.error_msg_credit_course = (
+            u'Failed to publish CreditCourse [{course_id}] to LMS.').format(
+                course_id=self.course.id
+        )
 
     def _mock_commerce_api(self, status, body=None):
         self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock Commerce API calls.')
@@ -71,18 +75,11 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
-        error = 'time out error'
-        with mock.patch('requests.put', side_effect=Timeout(error)):
+        with mock.patch('requests.put', side_effect=Timeout):
             with LogCapture(LOGGER_NAME) as l:
                 self.publisher.publish(self.course)
                 l.check(
-                    (
-                        LOGGER_NAME, 'ERROR', 'Failed to publish commerce data for [{}] to LMS. Error was [{}]'.format(
-                            self.course.id,
-                            error
-                        )
-                    )
-                )
+                    (LOGGER_NAME, 'ERROR', 'Failed to publish commerce data for [{}] to LMS.'.format(self.course.id)))
 
     @httpretty.activate
     @ddt.data(401, 403, 404, 500)
@@ -222,8 +219,10 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
         self._mock_credit_api(400, 418)
 
-        published, error_message = self.publisher.publish(self.course, access_token='access_token')
+        published, error_msg = self.publisher.publish(self.course, access_token='access_token')
+
         self.assertFalse(published)
+        self.assertEqual(error_msg, self.error_msg_credit_course)
 
     def test_credit_publication_no_access_token(self):
         """
@@ -232,15 +231,9 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         """
         self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
 
-        published, error_message = self.publisher.publish(self.course, access_token=None)
-
+        published, error_msg = self.publisher.publish(self.course, access_token=None)
         self.assertFalse(published)
-        self.assertEqual(
-            error_message,
-            u'Unable to publish CreditCourse for [{course_id}] to LMS. No access token available.'.format(
-                course_id=self.course.id
-            )
-        )
+        self.assertEqual(error_msg, self.error_msg_credit_course)
 
     def test_credit_publication_exception(self):
         """
@@ -250,61 +243,11 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
 
         with mock.patch.object(LMSPublisher, '_publish_creditcourse') as mock_publish_creditcourse:
-            mock_publish_creditcourse.side_effect = Exception
+            mock_publish_creditcourse.side_effect = Exception(self.error_msg_credit_course)
 
-            published, error_message = self.publisher.publish(self.course, access_token='access_token')
+            published, error_msg = self.publisher.publish(self.course, access_token='access_token')
             self.assertFalse(published)
-
-    @httpretty.activate
-    @ddt.data(401, 403, 404, 500)
-    def test_api_bad_status_with_invalid_json(self, status):
-        """ If the Commerce API returns a non-successful status, with invalid json. """
-        body = 'invalid json data'
-        url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
-        httpretty.register_uri(httpretty.PUT, url, status=status, body=body)
-
-        with LogCapture(LOGGER_NAME) as l:
-            self.publisher.publish(self.course)
-            l.check(
-                (
-                    LOGGER_NAME,
-                    'ERROR',
-                    u'Failed to publish commerce data for [{}] to LMS. Json was invalid.'.format(
-                        self.course.id
-                    )
-                )
-            )
-
-    @httpretty.activate
-    @ddt.data(401, 403, 404, 500)
-    def test_api_bad_status_with_error_message_dict(self, status):
-        """ If the Commerce API returns a non-successful status, with error dict. """
-        error_msg = u'course does not exists.'
-        body = {u'id': error_msg}
-        self._mock_commerce_api(status, body)
-
-        with LogCapture(LOGGER_NAME) as l:
-            self.publisher.publish(self.course)
-            l.check(
-                (LOGGER_NAME, 'ERROR', error_msg)
-            )
-
-    @httpretty.activate
-    @ddt.data(401, 403, 404, 500)
-    def test_api_bad_status_without_error_message_dict(self, status):
-        """ If the Commerce API returns a non-successful status, without error dict. Default error
-        message will return.
-        """
-        body = {u'error': u'Testing!'}
-        self._mock_commerce_api(status, body)
-        with LogCapture(LOGGER_NAME) as l:
-            self.publisher.publish(self.course)
-            l.check(
-                (
-                    LOGGER_NAME,
-                    'ERROR',
-                    u'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
-                        self.course.id, status, json.dumps(body)
-                    )
-                )
+            self.assertEqual(
+                error_msg,
+                self.error_msg_credit_course
             )
