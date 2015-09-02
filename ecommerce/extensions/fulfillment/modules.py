@@ -13,7 +13,7 @@ import requests
 from requests.exceptions import ConnectionError, Timeout
 from ecommerce.courses.utils import mode_for_seat
 
-from ecommerce.extensions.analytics.utils import audit_log
+from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
 
 
@@ -93,7 +93,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     Allows the enrollment of a student via purchase of a 'seat'.
     """
 
-    def _post_to_enrollment_api(self, data):
+    def _post_to_enrollment_api(self, data, client_id=None):
         enrollment_api_url = settings.ENROLLMENT_API_URL
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
 
@@ -101,6 +101,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             'Content-Type': 'application/json',
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
+        if client_id:
+            headers['X-Edx-Ga-Client-Id'] = client_id
 
         return requests.post(enrollment_api_url, data=json.dumps(data), headers=headers, timeout=timeout)
 
@@ -184,7 +186,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     }
                 )
             try:
-                response = self._post_to_enrollment_api(data)
+                __, client_id = parse_tracking_context(order.user)
+                response = self._post_to_enrollment_api(data, client_id=client_id)
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
@@ -239,7 +242,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            response = self._post_to_enrollment_api(data)
+            __, client_id = parse_tracking_context(line.order.user)
+            response = self._post_to_enrollment_api(data, client_id=client_id)
 
             if response.status_code == status.HTTP_200_OK:
                 audit_log(

@@ -284,3 +284,31 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             ]
         }
         self.assertEqual(actual, expected)
+
+    def test_enrollment_headers(self):
+        """ Test that the enrollment module 'EnrollmentFulfillmentModule' is
+        sending enrollment request over to the LMS with proper headers.
+        """
+        # Create a dummy data for the enrollment request.
+        data = {
+            'user': 'test',
+            'is_active': True,
+            'mode': 'honor',
+            'course_details': {
+                'course_id': self.course_id
+            },
+            'enrollment_attributes': []
+        }
+
+        # Now call the enrollment api to send POST request to LMS and verify
+        # that the header of the request being sent contains the analytics
+        # header 'x-edx-ga-client-id'.
+        # This will raise the exception 'ConnectionError' because the LMS is
+        # not available for ecommerce tests.
+        try:
+            # pylint: disable=protected-access
+            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, client_id='123.123')
+        except ConnectionError as exp:
+            # Check that the enrollment request object has the analytics header
+            # 'x-edx-ga-client-id'.
+            self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), '123.123')
