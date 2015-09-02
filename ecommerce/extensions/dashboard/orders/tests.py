@@ -77,7 +77,7 @@ class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, LiveServerTestCas
         button.click()
 
         # Wait for the AJAX call to finish and display an alert
-        WebDriverWait(self.selenium, 0.5).until(lambda d: d.find_element_by_css_selector('#messages .alert'))
+        WebDriverWait(self.selenium, 1.0).until(lambda d: d.find_element_by_css_selector('#messages .alert'))
 
     def assertAlertDisplayed(self, alert_class, text):
         """ Verifies that the most recent alert has the given class and message. """
