@@ -11,7 +11,7 @@ from oscar.test import factories
 
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
-from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
+from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
 
@@ -95,9 +95,10 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
 
 @ddt.ddt
 class OrderFulfillViewTests(UserMixin, TestCase):
+
     def setUp(self):
         super(OrderFulfillViewTests, self).setUp()
-        ShippingEventType.objects.get_or_create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
         self.user = self.create_user(is_superuser=True)
         self.client.login(username=self.user.username, password=self.password)

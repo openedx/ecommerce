@@ -11,7 +11,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
-from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
+from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import UserMixin
@@ -63,7 +63,7 @@ class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, LiveServerTestCas
         self.order.save()
         self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)
 
-        ShippingEventType.objects.get_or_create(name=FulfillmentMixin.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
     def _login(self):
         """ Log into the service and navigate to the order list view. """
