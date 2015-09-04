@@ -14,7 +14,7 @@ from oscar.core.loading import get_model, get_class
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
+from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 
 
 Basket = get_model('basket', 'Basket')
@@ -65,7 +65,6 @@ class JwtMixin(object):
 class BasketCreationMixin(JwtMixin):
     """Provides utility methods for creating baskets in test cases."""
     PATH = reverse('api:v2:baskets:create')
-    SHIPPING_EVENT_NAME = FulfillmentMixin.SHIPPING_EVENT_NAME
     FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
     USERNAME = 'sgoodman'
     USER_DATA = {
@@ -131,7 +130,7 @@ class BasketCreationMixin(JwtMixin):
     ):
         """Verify that basket creation succeeded."""
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
-        ShippingEventType.objects.get_or_create(name=self.SHIPPING_EVENT_NAME)
+        ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
         with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
             response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)

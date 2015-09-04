@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 from rest_framework import status, generics, viewsets, mixins
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ParseError
@@ -20,7 +20,6 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.fulfillment.mixins import FulfillmentMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_processor_class, get_default_processor_class,
                                                   get_processor_class_by_name)
@@ -365,7 +364,7 @@ class OrderByBasketRetrieveView(OrderRetrieveView):
     lookup_field = 'basket_id'
 
 
-class OrderFulfillView(FulfillmentMixin, generics.UpdateAPIView):
+class OrderFulfillView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, DjangoModelPermissions,)
     lookup_field = 'number'
     queryset = Order.objects.all()
@@ -378,7 +377,8 @@ class OrderFulfillView(FulfillmentMixin, generics.UpdateAPIView):
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
         logger.info('Retrying fulfillment of order [%s]...', order.number)
-        order = self.fulfill_order(order)
+        post_checkout = get_class('checkout.signals', 'post_checkout')
+        post_checkout.send(sender=post_checkout, order=order)
 
         if order.can_retry_fulfillment:
             logger.warning('Fulfillment of order [%s] failed!', order.number)
