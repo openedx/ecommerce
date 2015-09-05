@@ -1,0 +1,188 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Adem Özgür <admozgur@gmail.com>, 2015
+# ali selek <aliselek01@gmail.com>, 2015
+# Emrah Emirtekin <eemirtekin@gmail.com>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version: edx-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-09-01 14:31-0400\n"
+"PO-Revision-Date: 2015-09-04 09:46+0000\n"
+"Last-Translator: ali selek <aliselek01@gmail.com>\n"
+"Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
+"Language: tr_TR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: static/js/models/course_model.js
+msgid "You must select a course type."
+msgstr "Kurs tipinizi seçmelisiniz."
+
+#: static/js/models/course_model.js
+msgid "The verification deadline must occur AFTER the upgrade deadline."
+msgstr ""
+
+#: static/js/models/course_model.js
+msgid "Product validation failed."
+msgstr "Ürün doğrulama başarısız oldu."
+
+#: static/js/models/course_model.js
+msgid "Course ID"
+msgstr "Ders No"
+
+#: static/js/models/course_model.js
+msgid "Course Name"
+msgstr "Ders Adı"
+
+#: static/js/models/course_model.js static/js/views/course_list_view.js
+msgid "Course Type"
+msgstr "Ders Türü"
+
+#: static/js/models/course_model.js
+msgid "Verification Deadline"
+msgstr "Doğrulama için son tarih"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "All course seats must have a price."
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+#: static/js/views/course_form_view.js
+msgid "Verified"
+msgstr "Onaylandı"
+
+#: static/js/models/course_seats/course_seat.js
+#: static/js/views/course_form_view.js
+msgid "Credit"
+msgstr "Kredi"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Professional"
+msgstr "Profesyonel"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Honor"
+msgstr "Onur"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Audit"
+msgstr "Denetim"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Verified Certificate"
+msgstr "Doğrulanmış Sertifika"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Professional Certificate"
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Honor Certificate"
+msgstr "Onur Sertifikası"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "No Certificate"
+msgstr "Sertifika Yok"
+
+#: static/js/models/course_seats/credit_seat.js
+msgid "All credit seats must have a credit provider."
+msgstr ""
+
+#: static/js/models/course_seats/credit_seat.js
+msgid "All credit seats must designate a number of credit hours."
+msgstr ""
+
+#: static/js/pages/course_detail_page.js
+msgid "View Course"
+msgstr "Derse Gözat"
+
+#: static/js/pages/course_edit_page.js
+msgid "Edit Course"
+msgstr "Dersi Düzenle"
+
+#: static/js/views/course_form_view.js
+msgid "Free (Honor)"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Free honor track with Honor Certificate"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Professional Education"
+msgstr "Profesyonel Eğitim"
+
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Error!"
+msgstr "Hata!"
+
+#: static/js/views/course_form_view.js
+msgid "Saving..."
+msgstr "Kaydediliyor..."
+
+#: static/js/views/course_form_view.js
+msgid "Please complete all required fields."
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "An error occurred while saving the data."
+msgstr ""
+
+#: static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "Arama..."
+
+#: static/js/views/course_list_view.js
+msgid "Next"
+msgstr "Sonraki"
+
+#: static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "Önceki"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/course_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
+msgstr ""
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/course_list_view.js
+msgid "(filtered from _MAX_ total courses)"
+msgstr ""
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/course_list_view.js
+msgid "Display _MENU_ courses"
+msgstr ""
+
+#: static/js/views/course_list_view.js
+msgid "Course"
+msgstr "Ders"
+
+#: static/js/views/course_list_view.js
+msgid "Last Edited"
+msgstr "Son değiştirilme"

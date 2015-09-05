@@ -1,0 +1,186 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Weyedide <weyedide@gmail.com>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version: edx-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-09-01 14:31-0400\n"
+"PO-Revision-Date: 2015-09-01 18:43+0000\n"
+"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: static/js/models/course_model.js
+msgid "You must select a course type."
+msgstr ""
+
+#: static/js/models/course_model.js
+msgid "The verification deadline must occur AFTER the upgrade deadline."
+msgstr ""
+
+#: static/js/models/course_model.js
+msgid "Product validation failed."
+msgstr ""
+
+#: static/js/models/course_model.js
+msgid "Course ID"
+msgstr "Идентификатор курса"
+
+#: static/js/models/course_model.js
+msgid "Course Name"
+msgstr "Название курса"
+
+#: static/js/models/course_model.js static/js/views/course_list_view.js
+msgid "Course Type"
+msgstr "Вид курса"
+
+#: static/js/models/course_model.js
+msgid "Verification Deadline"
+msgstr "Срок подтверждения данных"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "All course seats must have a price."
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+#: static/js/views/course_form_view.js
+msgid "Verified"
+msgstr "Подтверждено"
+
+#: static/js/models/course_seats/course_seat.js
+#: static/js/views/course_form_view.js
+msgid "Credit"
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Professional"
+msgstr "Профессиональный"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Honor"
+msgstr "Сертификат Кодекса чести"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Audit"
+msgstr "Слушатели"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Verified Certificate"
+msgstr "Подтверждённый сертификат"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Professional Certificate"
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "Honor Certificate"
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "No Certificate"
+msgstr ""
+
+#: static/js/models/course_seats/credit_seat.js
+msgid "All credit seats must have a credit provider."
+msgstr ""
+
+#: static/js/models/course_seats/credit_seat.js
+msgid "All credit seats must designate a number of credit hours."
+msgstr ""
+
+#: static/js/pages/course_detail_page.js
+msgid "View Course"
+msgstr "Посмотреть курс"
+
+#: static/js/pages/course_edit_page.js
+msgid "Edit Course"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Free (Honor)"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Free honor track with Honor Certificate"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Professional Education"
+msgstr "Профессиональное образование"
+
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Error!"
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "Saving..."
+msgstr "Сохранение..."
+
+#: static/js/views/course_form_view.js
+msgid "Please complete all required fields."
+msgstr ""
+
+#: static/js/views/course_form_view.js
+msgid "An error occurred while saving the data."
+msgstr ""
+
+#: static/js/views/course_list_view.js
+msgid "Search..."
+msgstr ""
+
+#: static/js/views/course_list_view.js
+msgid "Next"
+msgstr "Следующее"
+
+#: static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "Предыдущее"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/course_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
+msgstr ""
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/course_list_view.js
+msgid "(filtered from _MAX_ total courses)"
+msgstr ""
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/course_list_view.js
+msgid "Display _MENU_ courses"
+msgstr ""
+
+#: static/js/views/course_list_view.js
+msgid "Course"
+msgstr "Курс"
+
+#: static/js/views/course_list_view.js
+msgid "Last Edited"
+msgstr ""
