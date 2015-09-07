@@ -2,6 +2,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 import requests
 
 from ecommerce.courses.utils import mode_for_seat
@@ -79,7 +80,7 @@ class LMSPublisher(object):
         """
 
         course_id = course.id
-        error_message = (
+        error_message = _(
             u'Failed to publish commerce data for [{course_id}] to LMS.').format(
                 course_id=course_id
         )

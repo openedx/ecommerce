@@ -203,7 +203,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         try:
             if not waffle.switch_is_active('publish_course_modes_to_lms'):
-                message = (
+                message = _(
                     u'Course [{course_id}] was not published to LMS '
                     u'because the switch [publish_course_modes_to_lms] is disabled. '
                     u'To avoid ghost SKUs, data has not been saved.'
