@@ -31,6 +31,6 @@ class BadRequestException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
 
 
-class LMSPublisherException(ApiError):
+class LMSPublisherError(ApiError):
     """Raised when LMSPublisher fails to publish a course."""
     pass

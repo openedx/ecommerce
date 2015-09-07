@@ -12,7 +12,7 @@ import waffle
 
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.courses.models import Course
-from ecommerce.extensions.api.exceptions import LMSPublisherException
+from ecommerce.extensions.api.exceptions import LMSPublisherError
 
 
 logger = logging.getLogger(__name__)
@@ -242,11 +242,13 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                     )
 
-                published, resp_message = course.publish_to_lms(access_token=self.access_token)
+                resp_message = course.publish_to_lms(access_token=self.access_token)
+                published = (resp_message is None)
+
                 if published:
                     return created, None, None
                 else:
-                    raise LMSPublisherException(resp_message)
+                    raise LMSPublisherError(resp_message)
 
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
