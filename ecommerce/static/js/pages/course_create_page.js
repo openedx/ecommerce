@@ -9,7 +9,7 @@ define([
         'use strict';
 
         return Page.extend({
-            title: 'Create New Course',
+            title: gettext('Create New Course'),
 
             initialize: function () {
                 this.model = new Course({});

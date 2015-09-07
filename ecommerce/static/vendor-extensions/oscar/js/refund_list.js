@@ -3,7 +3,8 @@ $(document).ready(function () {
     var processRefund = function (e) {
         var $btn = $(e.target),
             refund_id = $btn.data('refund-id'),
-            decision = $btn.data('decision');
+            decision = $btn.data('decision'),
+            message = '';
 
         // Disable button
         e.preventDefault();
@@ -18,19 +19,28 @@ $(document).ready(function () {
             headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')}
         }).success(function (data) {
             $('tr[data-refund-id=' + refund_id + '] .refund-status').text(data.status);
-            addMessage('alert-success', 'icon-check-sign', 'Refund #' + refund_id + ' has been processed.');
+
+            message = interpolate(
+                gettext('Refund #%(refund_id)s has been processed.'), {refund_id: refund_id}, true
+            );
+            addMessage('alert-success', 'icon-check-sign', message);
             $('tr[data-refund-id=' + refund_id + '] [data-action=process-refund]').remove();
         }).fail(function (jqXHR, textStatus, errorThrown) {
             // NOTE (RFL): For an MVP, changing the displayed refund state on any error may be viable.
             // Ideally, the displayed refund state would only change if the refund were to enter an
             // error state. This would be easiest if the processing endpoint returned 200 and a serialized
             // refund, even when the refund has entered an error state during processing.
-            $('tr[data-refund-id=' + refund_id + '] .refund-status').text('Error');
+            $('tr[data-refund-id=' + refund_id + '] .refund-status').text(gettext('Error'));
 
+            message = interpolate(
+                gettext('Failed to process refund #%(refund_id)s: %(error)s. Please try again, or contact the E-Commerce Development Team.'),
+                {refund_id: refund_id, error: errorThrown},
+                true
+            );
             addMessage(
                 'alert-error',
                 'icon-exclamation-sign',
-                'Failed to process refund #' + refund_id + ': ' + errorThrown + '. Please try again, or contact the E-Commerce Development Team.'
+                message
             );
         }).always(function () {
             // Re-enable the button

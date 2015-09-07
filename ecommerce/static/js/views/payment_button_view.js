@@ -85,7 +85,7 @@ define([
             },
 
             handleCreateOrderError: function (xhr) {
-                var errorMsg = 'An error has occurred. Please try again.';
+                var errorMsg = gettext('An error has occurred. Please try again.');
 
                 if (xhr.status === 400) {
                     errorMsg = xhr.responseText;

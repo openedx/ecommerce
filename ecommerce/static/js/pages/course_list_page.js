@@ -9,7 +9,7 @@ define([
         'use strict';
 
         return Page.extend({
-            title: 'Courses',
+            title: gettext('Courses'),
 
             initialize: function () {
                 this.collection = new CourseCollection();
