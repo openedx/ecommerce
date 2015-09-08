@@ -7,6 +7,13 @@
 
 {% block title %}{{ customer.username }} | {{ block.super }}{% endblock %}
 
+{% block extrascripts %}
+    {{ block.super }}
+
+    {# Translation support for JavaScript strings. #}
+    <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+{% endblock extrascripts %}
+
 {% block breadcrumbs %}
     <ul class="breadcrumb">
         <li>

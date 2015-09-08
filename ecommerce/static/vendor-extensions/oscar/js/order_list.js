@@ -1,7 +1,8 @@
 $(document).ready(function () {
     var retryFulfillment = function (e) {
         var $btn = $(e.target),
-            order_number = $btn.data('order-number');
+            order_number = $btn.data('order-number'),
+            message = '';
 
         // Disable button
         e.preventDefault();
@@ -15,10 +16,19 @@ $(document).ready(function () {
             headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')}
         }).success(function (data) {
             $('tr[data-order-number=' + order_number + '] .order-status').text(data.status);
-            addMessage('alert-success', 'icon-check-sign', 'Order ' + order_number + ' has been fulfilled.');
+
+            message = interpolate(
+                gettext('Order %(order_number)s has been fulfilled.'), {order_number: order_number}, true
+            );
+            addMessage('alert-success', 'icon-check-sign', message);
             $btn.remove();
         }).fail(function (jqXHR, textStatus, errorThrown) {
-            addMessage('alert-error', 'icon-exclamation-sign', 'Failed to fulfill order ' + order_number + ': ' + errorThrown);
+            message = interpolate(
+                gettext('Failed to fulfill order %(order_number)s: %(error)s'),
+                {order_number: order_number, error: errorThrown},
+                true
+            );
+            addMessage('alert-error', 'icon-exclamation-sign', message);
 
             // Re-enable the button
             $btn.click(retryFulfillment);
