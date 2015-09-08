@@ -5,7 +5,7 @@ from django.conf import settings
 import requests
 
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.settings.base import get_lms_url
+from ecommerce.settings import get_lms_url
 
 
 logger = logging.getLogger(__name__)

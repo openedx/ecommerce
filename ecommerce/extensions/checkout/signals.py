@@ -8,7 +8,7 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
 from ecommerce.extensions.checkout.utils import get_provider_data
 from ecommerce.notifications.notifications import send_notification
-from ecommerce.settings.base import get_lms_url
+from ecommerce.settings import get_lms_url
 from oscar.core.loading import get_class
 
 

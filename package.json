@@ -2,7 +2,7 @@
   "name": "edx-ecommerce",
   "repository": {
     "type": "git",
-    "url": "git://github.com/edx/edx-ecommerce"
+    "url": "git://github.com/edx/ecommerce"
   },
   "dependencies": {
     "bower": "^1.4.1",

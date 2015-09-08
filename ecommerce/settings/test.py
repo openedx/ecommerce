@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
-import os
-
+from ecommerce.settings import get_lms_url
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 
@@ -30,6 +29,7 @@ class DisableMigrations(object):
 
     For more context, see http://goo.gl/Fr4qyE.
     """
+
     def __contains__(self, item):
         """Make it appear as if all apps are contained in the dictionary."""
         return True
@@ -37,6 +37,7 @@ class DisableMigrations(object):
     def __getitem__(self, item):
         """Force Django to look for migrations in a nonexistent package."""
         return 'notmigrations'
+
 
 if str(os.environ.get('DISABLE_MIGRATIONS')) == 'True':
     MIGRATION_MODULES = DisableMigrations()

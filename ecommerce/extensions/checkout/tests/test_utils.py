@@ -6,7 +6,7 @@ import requests
 from requests import ConnectionError, Timeout
 
 from ecommerce.extensions.checkout.utils import get_provider_data
-from ecommerce.settings.base import get_lms_url
+from ecommerce.settings import get_lms_url
 
 
 @ddt.ddt
