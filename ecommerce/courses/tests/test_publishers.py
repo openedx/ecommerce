@@ -83,6 +83,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
                 l.check(
                     (LOGGER_NAME, 'ERROR', 'Failed to publish commerce data for [{}] to LMS.'.format(self.course.id)))
                 self.assertFalse(error_message is None)
+                self.assertEqual(error, error_message)
 
     @httpretty.activate
     @ddt.data(401, 403, 404, 500)

@@ -112,7 +112,7 @@ class LMSPublisher(object):
                         return error_message
                 except Exception as e:  # pylint: disable=bare-except
                     logger.exception(u'Failed to publish CreditCourse for [%s] to LMS.', course_id)
-                    return e.message
+                    return str(e.message)
             else:
                 logger.error(
                     u'Unable to publish CreditCourse for [%s] to LMS. No access token available.',
@@ -148,6 +148,6 @@ class LMSPublisher(object):
                 return error_message
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to publish commerce data for [%s] to LMS.', course_id)
-            error_message = e.message
+            error_message = str(e.message)
 
         return error_message
