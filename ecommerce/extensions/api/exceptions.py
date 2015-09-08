@@ -29,3 +29,8 @@ class ProductNotFoundError(ApiError):
 
 class BadRequestException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
+
+
+class LMSPublisherError(ApiError):
+    """Raised when LMSPublisher fails to publish a course."""
+    pass

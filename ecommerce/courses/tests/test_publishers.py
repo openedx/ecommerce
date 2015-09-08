@@ -30,6 +30,10 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.course.create_or_update_seat('honor', False, 0)
         self.course.create_or_update_seat('verified', True, 50)
         self.publisher = LMSPublisher()
+        self.error_message = (
+            u'Failed to publish commerce data for [{course_id}] to LMS.').format(
+                course_id=self.course.id
+        )
 
     def _mock_commerce_api(self, status, body=None):
         self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock Commerce API calls.')
@@ -66,16 +70,20 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         """ If the Commerce API is not setup, the method should log an INFO message and return """
         with override_settings(COMMERCE_API_URL=setting_value):
             with LogCapture(LOGGER_NAME) as l:
-                self.publisher.publish(self.course)
+                error_message = self.publisher.publish(self.course)
                 l.check((LOGGER_NAME, 'ERROR', 'COMMERCE_API_URL is not set. Commerce data will not be published!'))
+                self.assertFalse(error_message is None)
 
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
-        with mock.patch('requests.put', side_effect=Timeout):
+        error = 'time out error'
+        with mock.patch('requests.put', side_effect=Timeout(error)):
             with LogCapture(LOGGER_NAME) as l:
-                self.publisher.publish(self.course)
+                error_message = self.publisher.publish(self.course)
                 l.check(
                     (LOGGER_NAME, 'ERROR', 'Failed to publish commerce data for [{}] to LMS.'.format(self.course.id)))
+                self.assertFalse(error_message is None)
+                self.assertEqual(error, error_message)
 
     @httpretty.activate
     @ddt.data(401, 403, 404, 500)
@@ -85,10 +93,11 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self._mock_commerce_api(status, body)
 
         with LogCapture(LOGGER_NAME) as l:
-            self.publisher.publish(self.course)
+            error_message = self.publisher.publish(self.course)
             l.check((LOGGER_NAME, 'ERROR',
                      u'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
                          self.course.id, status, json.dumps(body))))
+            self.assertFalse(error_message is None)
 
     @httpretty.activate
     @ddt.data(200, 201)
@@ -97,8 +106,11 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self._mock_commerce_api(status)
 
         with LogCapture(LOGGER_NAME) as l:
-            self.publisher.publish(self.course)
+
+            error_message = self.publisher.publish(self.course)
+            published = (error_message is None)
             l.check((LOGGER_NAME, 'INFO', 'Successfully published commerce data for [{}].'.format(self.course.id)))
+            self.assertTrue(published)
 
         last_request = httpretty.last_request()
 
@@ -181,7 +193,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self._mock_commerce_api(commerce_status)
 
         access_token = 'access_token'
-        published = self.publisher.publish(self.course, access_token=access_token)
+        error_message = self.publisher.publish(self.course, access_token=access_token)
+        published = (error_message is None)
         self.assertTrue(published)
 
         # Retrieve the latest request to the Credit API.
@@ -215,8 +228,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
         self._mock_credit_api(400, 418)
 
-        published = self.publisher.publish(self.course, access_token='access_token')
-        self.assertFalse(published)
+        error_message = self.publisher.publish(self.course, access_token='access_token')
+        self.assertFalse(error_message is None)
 
     def test_credit_publication_no_access_token(self):
         """
@@ -225,8 +238,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         """
         self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
 
-        published = self.publisher.publish(self.course, access_token=None)
-        self.assertFalse(published)
+        error_message = self.publisher.publish(self.course, access_token=None)
+        self.assertFalse(error_message is None)
 
     def test_credit_publication_exception(self):
         """
@@ -236,7 +249,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
 
         with mock.patch.object(LMSPublisher, '_publish_creditcourse') as mock_publish_creditcourse:
-            mock_publish_creditcourse.side_effect = Exception
+            mock_publish_creditcourse.side_effect = Exception(self.error_message)
 
-            published = self.publisher.publish(self.course, access_token='access_token')
-            self.assertFalse(published)
+            error_message = self.publisher.publish(self.course, access_token='access_token')
+            self.assertFalse(error_message is None)
+
