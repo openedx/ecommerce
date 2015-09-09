@@ -19,6 +19,7 @@ from oscar.test import factories
 import paypalrestsdk
 from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
+from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.courses.models import Course
@@ -33,8 +34,10 @@ from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
+
 
 log = logging.getLogger(__name__)
 
@@ -437,6 +440,52 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                 basket=self.basket
             )
 
+    @httpretty.activate
+    @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
+    def test_unexpected_payment_execution_with_retry_attempt(self):
+        """Verify that failure to execute a payment with retry attempt results
+        in a GatewayError.
+        """
+        self.mock_oauth2_response()
+        self.mock_payment_creation_response(self.basket, find=True)
+        self.mock_payment_execution_response(self.basket)
+
+        processor_response_log = (
+            u"Failed to execute PayPal payment on attempt [{attempt_count}]."
+            u"PayPal's response was recorded in entry [{entry_id}]."
+        )
+
+        with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
+            logger_name = 'ecommerce.extensions.payment.processors.paypal'
+            with LogCapture(logger_name) as paypal_logger:
+                self.assertRaises(GatewayError, self.processor.handle_processor_response, self.RETURN_DATA, self.basket)
+
+                # Each failure response is saved into db.
+                payment_processor_responses = self.assert_processor_multiple_response_recorded()
+
+                paypal_logger.check(
+                    (
+                        logger_name, 'WARNING', processor_response_log.format(
+                            attempt_count=1,
+                            entry_id=payment_processor_responses[0]
+                        )
+                    ),
+                    (
+                        logger_name, 'WARNING', processor_response_log.format(
+                            attempt_count=2,
+                            entry_id=payment_processor_responses[1]
+                        )
+                    ),
+                    (
+                        logger_name, 'ERROR',
+                        u"Failed to execute PayPal payment [{payment_id}]."
+                        u"PayPal's response was recorded in entry [{entry_id}].".format(
+                            payment_id=self.PAYMENT_ID,
+                            entry_id=payment_processor_responses[1]
+                        )
+                    ),
+                )
+
     def test_issue_credit(self):
         refund = self.create_refund(self.processor_name)
         order = refund.order
@@ -497,3 +546,19 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
         # Verify Source unchanged
         self.assertEqual(source.amount_refunded, 0)
+
+    def assert_processor_multiple_response_recorded(self):
+        """ Ensures a multiple PaymentProcessorResponse can store in db for the
+        corresponding processor and response.
+        """
+        payment_processor_responses = PaymentProcessorResponse.objects.filter(
+            processor_name=self.processor_name,
+            transaction_id=self.ERROR['debug_id']
+        )
+        ids = []
+        for payment_response in payment_processor_responses:
+            self.assertEqual(payment_response.response, self.ERROR)
+            self.assertEqual(payment_response.basket, self.basket)
+            ids.append(payment_response.id)
+
+        return ids

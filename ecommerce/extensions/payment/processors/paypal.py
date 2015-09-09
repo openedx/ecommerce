@@ -47,6 +47,9 @@ class Paypal(BasePaymentProcessor):
         self.receipt_url = configuration['receipt_url']
         self.cancel_url = configuration['cancel_url']
 
+        # Number of times payment execution is retried after failure.
+        self.retry_attempts = configuration.get('retry_attempts', 1)
+
         self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
 
     def get_transaction_parameters(self, basket, request=None):
@@ -161,22 +164,36 @@ class Paypal(BasePaymentProcessor):
         """
         data = {'payer_id': response.get('PayerID')}
 
-        payment = paypalrestsdk.Payment.find(response.get('paymentId'))
-        payment.execute(data)
+        for attempt_count in range(0, self.retry_attempts + 1):
 
-        # Raise an exception for payments that were not successfully executed. Consuming code is
-        # responsible for handling the exception.
-        if not payment.success():
+            payment = paypalrestsdk.Payment.find(response.get('paymentId'))
+            payment.execute(data)
+
+            if payment.success():
+                # On success break the loop.
+                break
+
+            # Raise an exception for payments that were not successfully executed. Consuming code is
+            # responsible for handling the exception
             error = self._get_error(payment)
             entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
 
-            logger.error(
-                u"Failed to execute PayPal payment [%s]. PayPal's response was recorded in entry [%d].",
-                payment.id,
+            logger.warning(
+                u"Failed to execute PayPal payment on attempt [%d]."
+                u"PayPal's response was recorded in entry [%d].",
+                attempt_count + 1,
                 entry.id
             )
 
-            raise GatewayError
+            # After utilizing all retry attempts, raise the exception 'GatewayError'
+            if attempt_count == self.retry_attempts:
+                logger.error(
+                    u"Failed to execute PayPal payment [%s]."
+                    u"PayPal's response was recorded in entry [%d].",
+                    payment.id,
+                    entry.id
+                )
+                raise GatewayError
 
         self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
         logger.info(u"Successfully executed PayPal payment [%s] for basket [%d].", payment.id, basket.id)
