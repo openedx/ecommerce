@@ -79,6 +79,8 @@ switches exist:
 | ENABLE_NOTIFICATIONS           | Enable email notification for the different task generated e.g. course    |
 |                                | purchase.                                                                 |
 +--------------------------------+---------------------------------------------------------------------------+
+| PAYPAL_RETRY_ATTEMPTS          | Enable retry mechanism for failed PayPal payment executions.              |
++--------------------------------+---------------------------------------------------------------------------+
 
 .. _Waffle: https://waffle.readthedocs.org/
 
