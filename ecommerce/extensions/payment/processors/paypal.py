@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 import paypalrestsdk
+import waffle
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
@@ -164,7 +165,15 @@ class Paypal(BasePaymentProcessor):
         """
         data = {'payer_id': response.get('PayerID')}
 
-        for attempt_count in range(0, self.retry_attempts + 1):
+        # By default PayPal payment will be executed only once.
+        available_attempts = 1
+
+        # Add retry attempts (provided in the configuration)
+        # if the waffle switch 'ENABLE_PAYPAL_RETRY' is set
+        if waffle.switch_is_active('PAYPAL_RETRY_ATTEMPTS'):
+            available_attempts = available_attempts + self.retry_attempts
+
+        for attempt_count in range(1, available_attempts + 1):
 
             payment = paypalrestsdk.Payment.find(response.get('paymentId'))
             payment.execute(data)
@@ -179,16 +188,16 @@ class Paypal(BasePaymentProcessor):
             entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
 
             logger.warning(
-                u"Failed to execute PayPal payment on attempt [%d]."
+                u"Failed to execute PayPal payment on attempt [%d]. "
                 u"PayPal's response was recorded in entry [%d].",
-                attempt_count + 1,
+                attempt_count,
                 entry.id
             )
 
             # After utilizing all retry attempts, raise the exception 'GatewayError'
-            if attempt_count == self.retry_attempts:
+            if attempt_count == available_attempts:
                 logger.error(
-                    u"Failed to execute PayPal payment [%s]."
+                    u"Failed to execute PayPal payment [%s]. "
                     u"PayPal's response was recorded in entry [%d].",
                     payment.id,
                     entry.id

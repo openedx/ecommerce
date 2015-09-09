@@ -13,6 +13,8 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 import httpretty
 import mock
+from waffle.models import Switch
+
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -322,6 +324,10 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         # Dummy request from which an HTTP Host header can be extracted during
         # construction of absolute URLs
         self.request = RequestFactory().post('/')
+        self.processor_response_log = (
+            u"Failed to execute PayPal payment on attempt [{attempt_count}]. "
+            u"PayPal's response was recorded in entry [{entry_id}]."
+        )
 
     def _assert_transaction_parameters(self):
         """DRY helper for verifying transaction parameters."""
@@ -432,28 +438,44 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.mock_payment_execution_response(self.basket)
 
         with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
-            self.assertRaises(GatewayError, self.processor.handle_processor_response, self.RETURN_DATA, self.basket)
-            self.assert_processor_response_recorded(
-                self.processor.NAME,
-                self.ERROR['debug_id'],
-                self.ERROR,
-                basket=self.basket
-            )
+            logger_name = 'ecommerce.extensions.payment.processors.paypal'
+            with LogCapture(logger_name) as paypal_logger:
+                self.assertRaises(GatewayError, self.processor.handle_processor_response, self.RETURN_DATA, self.basket)
+                payment_processor_response = self.assert_processor_response_recorded(
+                    self.processor.NAME,
+                    self.ERROR['debug_id'],
+                    self.ERROR,
+                    basket=self.basket
+                )
+
+                paypal_logger.check(
+                    (
+                        logger_name, 'WARNING', self.processor_response_log.format(
+                            attempt_count=1,
+                            entry_id=payment_processor_response
+                        )
+                    ),
+                    (
+                        logger_name, 'ERROR',
+                        u"Failed to execute PayPal payment [{payment_id}]. "
+                        u"PayPal's response was recorded in entry [{entry_id}].".format(
+                            payment_id=self.PAYMENT_ID,
+                            entry_id=payment_processor_response
+                        )
+                    ),
+                )
 
     @httpretty.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_execution_with_retry_attempt(self):
-        """Verify that failure to execute a payment with retry attempt results
-        in a GatewayError.
+        """Verify that, when the switch is active, failure to execute a payment
+        results in one, or more, retry attempts. If all attempts fail, verify a
+        GatewayError is raised.
         """
+        Switch.objects.get_or_create(name='PAYPAL_RETRY_ATTEMPTS', active=True)
         self.mock_oauth2_response()
         self.mock_payment_creation_response(self.basket, find=True)
         self.mock_payment_execution_response(self.basket)
-
-        processor_response_log = (
-            u"Failed to execute PayPal payment on attempt [{attempt_count}]."
-            u"PayPal's response was recorded in entry [{entry_id}]."
-        )
 
         with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
             logger_name = 'ecommerce.extensions.payment.processors.paypal'
@@ -465,20 +487,20 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
                 paypal_logger.check(
                     (
-                        logger_name, 'WARNING', processor_response_log.format(
+                        logger_name, 'WARNING', self.processor_response_log.format(
                             attempt_count=1,
                             entry_id=payment_processor_responses[0]
                         )
                     ),
                     (
-                        logger_name, 'WARNING', processor_response_log.format(
+                        logger_name, 'WARNING', self.processor_response_log.format(
                             attempt_count=2,
                             entry_id=payment_processor_responses[1]
                         )
                     ),
                     (
                         logger_name, 'ERROR',
-                        u"Failed to execute PayPal payment [{payment_id}]."
+                        u"Failed to execute PayPal payment [{payment_id}]. "
                         u"PayPal's response was recorded in entry [{entry_id}].".format(
                             payment_id=self.PAYMENT_ID,
                             entry_id=payment_processor_responses[1]
