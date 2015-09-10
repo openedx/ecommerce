@@ -368,6 +368,8 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
 # Redirect successfully authenticated users to the Oscar dashboard.
 LOGIN_REDIRECT_URL = '/dashboard/'
+
+EXTRA_SCOPE = ['permissions']
 # END AUTHENTICATION
 
 
