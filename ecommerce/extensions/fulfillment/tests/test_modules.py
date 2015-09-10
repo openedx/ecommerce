@@ -27,27 +27,44 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 User = get_user_model()
 
 
-class EnrollmentFulfillmentTestMixin(CourseCatalogTestMixin, FulfillmentTestMixin):
-    certificate_type = 'test-certificate-type'
+@ddt.ddt
+@override_settings(EDX_API_KEY='foo')
+class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+    """Test course seat fulfillment."""
+
     course_id = 'edX/DemoX/Demo_Course'
+    certificate_type = 'test-certificate-type'
     provider = None
 
     def setUp(self):
-        super(EnrollmentFulfillmentTestMixin, self).setUp()
+        super(EnrollmentFulfillmentModuleTests, self).setUp()
 
-        user = UserFactory()
-        course = Course.objects.create(id=self.course_id, name='Demo Course')
-        self.seat = course.create_or_update_seat(self.certificate_type, False, 100, self.provider)
+        self.user = UserFactory()
+        self.course = Course.objects.create(id=self.course_id, name='Demo Course')
+
+        self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.provider)
 
         basket = BasketFactory()
         basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=1, basket=basket, user=user)
+        self.order = factories.create_order(number=1, basket=basket, user=self.user)
 
+    # pylint: disable=attribute-defined-outside-init
+    def create_seat_and_order(self, certificate_type='test-certificate-type', provider=None):
+        """ Create the certificate of given type and seat of given provider.
 
-@ddt.ddt
-@override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(EnrollmentFulfillmentTestMixin, TestCase):
-    """Test course seat fulfillment."""
+        Arguments:
+            certificate_type(str): The type of certificate
+            provider(str): The provider ID.
+        Returns:
+            None
+        """
+        self.certificate_type = certificate_type
+        self.provider = provider
+        self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.provider)
+
+        basket = BasketFactory()
+        basket.add_product(self.seat, 1)
+        self.order = factories.create_order(number=2, basket=basket, user=self.user)
 
     def test_enrollment_module_support(self):
         """Test that we get the correct values back for supported product lines."""
@@ -219,17 +236,11 @@ class EnrollmentFulfillmentModuleTests(EnrollmentFulfillmentTestMixin, TestCase)
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [{}].'.format(line.id))
             )
 
-
-@ddt.ddt
-@override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentCreditSeatModuleTests(EnrollmentFulfillmentTestMixin, TestCase):
-    """Test course seat fulfillment."""
-    certificate_type = 'credit'
-    provider = 'MIT'
-
     @httpretty.activate
-    def test_enrollment_module_fulfill(self):
+    def test_credit_enrollment_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill enrollments."""
+        # Create the credit certificate type and order for the credit certificate type.
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
 
         # Attempt to enroll.
