@@ -6,7 +6,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import PartnerMixin, UserMixin
+from ecommerce.tests.mixins import UserMixin
 
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -15,7 +15,7 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class PartnerCatalogViewSetTest(PartnerMixin, CourseCatalogTestMixin, UserMixin, TestCase):
+class PartnerCatalogViewSetTest(CourseCatalogTestMixin, UserMixin, TestCase):
 
     def setUp(self):
         super(PartnerCatalogViewSetTest, self).setUp()
@@ -25,9 +25,8 @@ class PartnerCatalogViewSetTest(PartnerMixin, CourseCatalogTestMixin, UserMixin,
         self.client.login(username=self.user.username, password=self.password)
 
         # Create partner and add course seat for that partner
-        self.edx_partner = self.create_partner('edx')
         self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
-        self.seat = self.course.create_or_update_seat('honor', False, 0, self.edx_partner)
+        self.seat = self.course.create_or_update_seat('honor', False, 0, self.partner)
 
         # Create stock record and add it to a catalog.
         stock_record = StockRecord.objects.get(partner=self.partner)
@@ -37,7 +36,7 @@ class PartnerCatalogViewSetTest(PartnerMixin, CourseCatalogTestMixin, UserMixin,
         # URL for getting catalog for partner.
         self.url = reverse(
             'api:v2:partner-catalogs-list',
-            kwargs={'parent_lookup_partner_id': self.edx_partner.id},
+            kwargs={'parent_lookup_partner_id': self.partner.id},
         )
 
     def serialize_catalog(self, catalog):

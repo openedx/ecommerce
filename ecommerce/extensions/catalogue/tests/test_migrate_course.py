@@ -43,7 +43,6 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
     commerce_api_url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
     course_structure_url = urljoin(settings.LMS_URL_ROOT, 'api/course_structure/v0/courses/{}/'.format(course_id))
     enrollment_api_url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(course_id))
-    partner_short_code = 'edx'
 
     prices = {
         'honor': 0,
@@ -134,6 +133,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(MigratedCourseTests, self).setUp()
         toggle_switch('publish_course_modes_to_lms', True)
+        self.partner_short_code = self.partner.short_code
 
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
@@ -259,6 +259,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(CommandTests, self).setUp()
         toggle_switch('publish_course_modes_to_lms', True)
+        self.partner_short_code = self.partner.short_code
 
     @httpretty.activate
     def test_handle(self):

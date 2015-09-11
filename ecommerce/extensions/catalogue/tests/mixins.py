@@ -3,6 +3,7 @@ import logging
 
 from oscar.core.loading import get_model
 from oscar.test import factories
+from ecommerce.extensions.test.factories import PartnerFactory
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class CourseCatalogTestMixin(object):
 
         # Force the creation of a seat ProductClass
         self.seat_product_class  # pylint: disable=pointless-statement
-        self.partner, _created = Partner.objects.get_or_create(short_code='edx', name='edx')
+        self.partner = PartnerFactory(name='edx')
         self.category, _created = Category.objects.get_or_create(name='Seats', defaults={'depth': 1})
 
     @property

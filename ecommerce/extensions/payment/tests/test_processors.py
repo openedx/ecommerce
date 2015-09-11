@@ -15,7 +15,6 @@ import httpretty
 import mock
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
 from oscar.core.loading import get_model
-from oscar.test import factories
 import paypalrestsdk
 from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
@@ -33,6 +32,7 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import PartnerMixin
+from ecommerce.extensions.test import factories
 
 
 PaymentEvent = get_model('order', 'PaymentEvent')

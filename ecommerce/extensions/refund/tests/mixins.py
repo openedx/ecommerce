@@ -5,16 +5,14 @@ from django.test import override_settings
 import mock
 from mock_django import mock_signal_receiver
 from oscar.core.loading import get_model, get_class
-from oscar.test.factories import create_order
-from oscar.test.newfactories import BasketFactory
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.tests.mixins import PartnerMixin
+from ecommerce.extensions.test.factories import BasketFactory, create_order, RefundFactory
 
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')

@@ -1,6 +1,6 @@
 from django.test import TestCase
 from oscar.core.loading import get_class
-from oscar.test import factories
+from ecommerce.extensions.test import factories
 
 
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')

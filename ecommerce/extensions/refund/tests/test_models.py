@@ -11,8 +11,8 @@ from testfixtures import LogCapture
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import RefundFactory, RefundLineFactory
 
 
 post_refund = get_class('refund.signals', 'post_refund')

@@ -12,7 +12,7 @@ from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.fulfillment.tests.modules import FakeFulfillmentModule
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.extensions.test.factories import RefundFactory
 
 
 @ddt.ddt
