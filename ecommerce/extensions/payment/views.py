@@ -11,7 +11,6 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
@@ -125,31 +124,33 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             return HttpResponse(status=500)
 
         try:
-            with transaction.atomic():
-                # Note (CCB): In the future, if we do end up shipping physical products, we will need to
-                # properly implement shipping methods. For more, see
-                # http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
-                shipping_method = NoShippingRequired()
-                shipping_charge = shipping_method.calculate(basket)
+            # Note (CCB): In the future, if we do end up shipping physical products, we will need to
+            # properly implement shipping methods. For more, see
+            # http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
+            shipping_method = NoShippingRequired()
+            shipping_charge = shipping_method.calculate(basket)
 
-                # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
-                # thus we use the amounts stored in the database rather than those received from the payment processor.
-                order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+            # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
+            # thus we use the amounts stored in the database rather than those received from the payment processor.
+            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+            billing_address = self._get_billing_address(cybersource_response)
 
-                billing_address = self._get_billing_address(cybersource_response)
+            user = basket.owner
 
-                try:
-                    user = basket.owner
-                    self.handle_order_placement(order_number, user, basket, None, shipping_method, shipping_charge,
-                                                billing_address, order_total)
-                except UnableToPlaceOrder:
-                    logger.exception('Payment was received, but an order was not created for basket [%d].', basket.id)
-                    # Ensure we return, in case future changes introduce post-order placement functionality.
-                    return HttpResponse(status=500)
+            self.handle_order_placement(
+                order_number,
+                user,
+                basket,
+                None,
+                shipping_method,
+                shipping_charge,
+                billing_address,
+                order_total
+            )
 
-                return HttpResponse()
+            return HttpResponse()
         except:  # pylint: disable=bare-except
-            logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
+            logger.exception(self.order_placement_failure_msg, basket.id)
             return HttpResponse(status=500)
 
 
@@ -190,34 +191,30 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             return redirect(receipt_url)
 
         try:
-            with transaction.atomic():
-                shipping_method = NoShippingRequired()
-                shipping_charge = shipping_method.calculate(basket)
-                order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+            shipping_method = NoShippingRequired()
+            shipping_charge = shipping_method.calculate(basket)
+            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
 
-                try:
-                    user = basket.owner
-                    # Given a basket, order number generation is idempotent. Although we've already
-                    # generated this order number once before, it's faster to generate it again
-                    # than to retrieve an invoice number from PayPal.
-                    order_number = basket.order_number
+            user = basket.owner
+            # Given a basket, order number generation is idempotent. Although we've already
+            # generated this order number once before, it's faster to generate it again
+            # than to retrieve an invoice number from PayPal.
+            order_number = basket.order_number
 
-                    self.handle_order_placement(
-                        order_number=order_number,
-                        user=user,
-                        basket=basket,
-                        shipping_address=None,
-                        shipping_method=shipping_method,
-                        shipping_charge=shipping_charge,
-                        billing_address=None,
-                        order_total=order_total
-                    )
-                except UnableToPlaceOrder:
-                    logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+            self.handle_order_placement(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=None,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                billing_address=None,
+                order_total=order_total
+            )
 
-                return redirect(receipt_url)
+            return redirect(receipt_url)
         except:  # pylint: disable=bare-except
-            logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
+            logger.exception(self.order_placement_failure_msg, basket.id)
             return redirect(receipt_url)
 
 

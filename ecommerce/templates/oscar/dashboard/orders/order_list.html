@@ -148,7 +148,7 @@
                         <td>
                             <a class="btn btn-info"
                                href="{% url 'dashboard:order-detail' number=order.number %}">{% trans "View" %}</a>
-                          {% if order.can_retry_fulfillment %}
+                          {% if order.is_fulfillable %}
                               <a class="btn btn-warning" data-order-number="{{ order.number }}"
                                  data-action="retry-fulfillment">{% trans "Retry Fulfillment" %}</a>
                           {% endif %}

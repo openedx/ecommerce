@@ -7,7 +7,7 @@ import logging
 import ddt
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
+from django.test import TransactionTestCase, override_settings
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -35,7 +35,8 @@ LOGGER_NAME = 'ecommerce.extensions.api.v2.views'
 @override_settings(
     FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule']
 )
-class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
+# Why TransactionTestCase? See http://stackoverflow.com/a/23326971.
+class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTestCase):
     FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
     PAID_SKU = u'𝑷𝑨𝑰𝑫-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
     ALTERNATE_FREE_SKU = u'𝑨𝑳𝑻𝑬𝑹𝑵𝑨𝑻𝑬-𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'

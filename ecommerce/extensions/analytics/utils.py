@@ -36,12 +36,15 @@ def parse_tracking_context(user):
     return user_tracking_id, lms_client_id
 
 
-def log_exceptions(msg):
-    """Log exceptions (avoiding clutter/indentation).
+def silence_exceptions(msg):
+    """Silences exceptions raised by the decorated function.
 
-    Exceptions are still raised. This module assumes that signal receivers are
-    being invoked with `send_robust`, or that callers will otherwise mute
-    exceptions as needed.
+    Also logs the provided message. Used to silence exceptions raised by
+    non-essential signal receivers invoked with `send()`, to prevent critical
+    program flow from being interrupted.
+
+    Arguments:
+        msg (str): A message to be logged when an exception is raised.
     """
     def decorator(func):  # pylint: disable=missing-docstring
         @wraps(func)
@@ -50,7 +53,6 @@ def log_exceptions(msg):
                 return func(*args, **kwargs)
             except:  # pylint: disable=bare-except
                 logger.exception(msg)
-                raise
         return wrapper
     return decorator
 

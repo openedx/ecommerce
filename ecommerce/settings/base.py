@@ -413,5 +413,23 @@ LANGUAGE_COOKIE_NAME = 'ecommerce_language'
 # END COOKIE CONFIGURATION
 
 
+# CELERY
+# Default broker URL. See http://celery.readthedocs.org/en/latest/configuration.html#broker-url.
+# In order for tasks to be visible to the ecommerce worker, this must match the value of BROKER_URL
+# configured for the ecommerce worker!
+BROKER_URL = None
+
+# A sequence of modules to import when the worker starts.
+# See http://celery.readthedocs.org/en/latest/configuration.html#celery-imports.
+CELERY_IMPORTS = (
+    'ecommerce_worker.fulfillment.v1.tasks',
+)
+
+# Execute tasks locally (synchronously) instead of sending them to the queue.
+# See http://celery.readthedocs.org/en/latest/configuration.html#celery-always-eager.
+CELERY_ALWAYS_EAGER = False
+# END CELERY
+
+
 PLATFORM_NAME = 'Your Platform Name Here'
 THEME_SCSS = 'sass/themes/default.scss'

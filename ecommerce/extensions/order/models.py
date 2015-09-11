@@ -11,9 +11,9 @@ class Order(AbstractOrder):
     history = HistoricalRecords()
 
     @property
-    def can_retry_fulfillment(self):
-        """ Returns a boolean indicating if order is eligible to retry fulfillment. """
-        return self.status == ORDER.FULFILLMENT_ERROR
+    def is_fulfillable(self):
+        """Returns a boolean indicating if order can be fulfilled."""
+        return self.status in (ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
 
 
 class PaymentEvent(AbstractPaymentEvent):

@@ -83,6 +83,7 @@ PAYMENT_PROCESSOR_CONFIG = {
 }
 # END PAYMENT PROCESSING
 
+
 # Use production settings for asset compression so that asset compilation can be tested on the CI server.
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True

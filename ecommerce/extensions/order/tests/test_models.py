@@ -11,15 +11,19 @@ class OrderTests(TestCase):
         super(OrderTests, self).setUp()
         self.order = factories.create_order()
 
-    def test_can_retry_fulfillment_with_fulfillment_error(self):
-        """ Order.can_retry_fulfillment should return True if the order's status is ORDER.FULFILLMENT_ERROR. """
-        self.order.status = ORDER.FULFILLMENT_ERROR
-        self.order.save()
-        self.assertTrue(self.order.can_retry_fulfillment)
-
-    @ddt.data(ORDER.OPEN)
-    def test_can_retry_fulfillment_without_fulfillment_error(self, status):
-        """ Order.can_retry_fulfillment should return False if the order's status is *not* ORDER.FULFILLMENT_ERROR. """
+    @ddt.data(ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
+    def test_is_fulfillable(self, status):
+        """
+        Order.is_fulfillable should return True if the order's status is
+        ORDER.OPEN or ORDER.FULFILLMENT_ERROR.
+        """
         self.order.status = status
         self.order.save()
-        self.assertFalse(self.order.can_retry_fulfillment)
+        self.assertTrue(self.order.is_fulfillable)
+
+    @ddt.data(ORDER.COMPLETE)
+    def test_is_not_fulfillable(self, status):
+        """Order.is_fulfillable should return False if the order's status is ORDER.COMPLETE."""
+        self.order.status = status
+        self.order.save()
+        self.assertFalse(self.order.is_fulfillable)

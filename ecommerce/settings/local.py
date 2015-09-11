@@ -127,6 +127,14 @@ PAYMENT_PROCESSOR_CONFIG = {
 # END PAYMENT PROCESSING
 
 
+# CELERY
+BROKER_URL = 'amqp://'
+
+# Uncomment this to run tasks in-process (i.e., synchronously).
+# CELERY_ALWAYS_EAGER = True
+# END CELERY
+
+
 ENABLE_AUTO_AUTH = True
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
 
