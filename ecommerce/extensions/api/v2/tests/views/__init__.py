@@ -1,11 +1,10 @@
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
 from oscar.core.loading import get_class
-from oscar.test import factories
-from oscar.test.newfactories import ProductAttributeValueFactory
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.test import factories
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
 
 JSON_CONTENT_TYPE = 'application/json'
@@ -23,7 +22,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin, UserMixin):
         self.order = factories.create_order(user=user)
 
         # Add a product attribute to one of the order items
-        ProductAttributeValueFactory(product=self.order.lines.first().product)
+        factories.ProductAttributeValueFactory(product=self.order.lines.first().product)
 
         self.token = self.generate_jwt_token_header(user)
 

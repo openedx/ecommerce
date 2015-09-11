@@ -3,6 +3,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.shortcuts import get_current_site
 from oscar.core.loading import get_model, get_class
 from rest_framework import status, generics, viewsets, mixins
 from rest_framework.decorators import detail_route
@@ -126,7 +127,11 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 }
             }
         """
-        basket = data_api.get_basket(request.user)
+        # The multi-tenant implementation has one site per partner
+        site = get_current_site(request)
+        partner = site.siteconfiguration.partner
+
+        basket = data_api.get_basket(request.user, partner)
 
         requested_products = request.data.get(AC.KEYS.PRODUCTS)
         if requested_products:

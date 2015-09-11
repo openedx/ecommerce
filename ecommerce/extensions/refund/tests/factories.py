@@ -3,8 +3,7 @@ from decimal import Decimal
 from django.conf import settings
 import factory
 from oscar.core.loading import get_model
-from oscar.test import factories
-from oscar.test.newfactories import UserFactory
+from ecommerce.extensions.test import factories
 
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
@@ -18,7 +17,7 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 class RefundFactory(factory.DjangoModelFactory):
     status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
-    user = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(factories.UserFactory)
     total_credit_excl_tax = Decimal(1.00)
 
     @factory.lazy_attribute

@@ -23,6 +23,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.tests.mixins import ThrottlingMixin, BasketCreationMixin
 
 Basket = get_model('basket', 'Basket')
+Partner = get_model('partner', 'Partner')
 Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Refund = get_model('refund', 'Refund')
@@ -73,6 +74,8 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             stockrecords__partner__short_code='dummy',
         )
 
+        self.partner, __ = Partner.objects.get_or_create(short_code='edx', name='edx')
+
     @ddt.data(
         ([FREE_SKU], False, None, False),
         ([FREE_SKU], True, None, False),
@@ -96,7 +99,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
 
         # Create two editable baskets for the user
         for _ in xrange(2):
-            basket = Basket(owner=user, status='Open')
+            basket = Basket(owner=user, status='Open', partner=self.partner)
             basket.save()
 
         response = self.create_basket(skus=[self.PAID_SKU], checkout=True)
