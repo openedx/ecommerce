@@ -222,6 +222,20 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ]
     },
     {
+        'label': _('Offers'),
+        'icon': 'icon-bullhorn',
+        'children': [
+            {
+                'label': _('Offers'),
+                'url_name': 'dashboard:offer-list',
+            },
+            {
+                'label': _('Vouchers'),
+                'url_name': 'dashboard:voucher-list',
+            },
+        ],
+    },
+    {
         'label': _('Reports'),
         'icon': 'icon-bar-chart',
         'url_name': 'dashboard:reports-index',
