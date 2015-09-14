@@ -54,6 +54,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             title=u'𝐋𝐏 𝟓𝟔𝟎-𝟒',
             stockrecords__partner_sku=self.PAID_SKU,
             stockrecords__price_excl_tax=Decimal('180000.00'),
+            stockrecords__partner__short_code='oscr',
         )
         factories.ProductFactory(
             structure='child',
@@ -61,6 +62,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             title=u'Papier-mâché',
             stockrecords__partner_sku=self.ALTERNATE_FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
+            stockrecords__partner__short_code='otto',
         )
         factories.ProductFactory(
             structure='child',
@@ -68,6 +70,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TestCase):
             title=u'𝐋𝐏 𝟓𝟕𝟎-𝟒 𝐒𝐮𝐩𝐞𝐫𝐥𝐞𝐠𝐠𝐞𝐫𝐚',
             stockrecords__partner_sku=self.ALTERNATE_PAID_SKU,
             stockrecords__price_excl_tax=Decimal('240000.00'),
+            stockrecords__partner__short_code='dummy',
         )
 
     @ddt.data(
