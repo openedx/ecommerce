@@ -9,6 +9,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 
 class Order(AbstractOrder):
     history = HistoricalRecords()
+    partner = models.ForeignKey('partner.Partner', related_name='orders')
 
     @property
     def is_fulfillable(self):

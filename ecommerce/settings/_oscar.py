@@ -36,11 +36,6 @@ OSCAR_APPS = [
 ])
 # END APP CONFIGURATION
 
-
-# ORDER PROCESSING
-# Prefix appended to every newly created order number.
-ORDER_NUMBER_PREFIX = 'OSCR'
-
 # The initial status for an order, or an order line.
 OSCAR_INITIAL_ORDER_STATUS = ORDER.OPEN
 OSCAR_INITIAL_LINE_STATUS = LINE.OPEN
