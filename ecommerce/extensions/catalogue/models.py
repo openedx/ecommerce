@@ -15,5 +15,19 @@ class Product(AbstractProduct):
 class ProductAttributeValue(AbstractProductAttributeValue):
     history = HistoricalRecords()
 
+
+class Catalog(models.Model):
+    name = models.CharField(max_length=255)
+    partner = models.ForeignKey('partner.Partner', related_name='catalogs')
+    stock_records = models.ManyToManyField('partner.StockRecord', blank=True)
+
+    def __unicode__(self):
+        return u'{id}: {partner_code}-{catalog_name}'.format(
+            id=self.id,
+            partner_code=self.partner.short_code,
+            catalog_name=self.name
+        )
+
+
 # noinspection PyUnresolvedReferences
 from oscar.apps.catalogue.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
