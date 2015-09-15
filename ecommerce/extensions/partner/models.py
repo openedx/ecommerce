@@ -11,7 +11,7 @@ class StockRecord(AbstractStockRecord):
 
 class Partner(AbstractPartner):
     # short_code is the unique identifier for the 'Partner'
-    short_code = models.CharField(max_length=8, unique=True, null=True)
+    short_code = models.CharField(max_length=8, unique=True, null=False, blank=False)
 
     class Meta(object):
         # Model name that will appear in the admin panel

@@ -227,14 +227,21 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # finds the first seat added, when there's more than one.
         basket = factories.create_basket(empty=True)
-        other_seat = factories.ProductFactory(product_class=self.seat_product_class, stockrecords__price_currency='USD')
+        other_seat = factories.ProductFactory(
+            product_class=self.seat_product_class,
+            stockrecords__price_currency='USD',
+            stockrecords__partner__short_code='test',
+        )
         basket.add_product(self.product)
         basket.add_product(other_seat)
         self.assertEqual(get_single_seat(basket), self.product)
 
         # finds the seat when there's a mixture of product classes.
         basket = factories.create_basket(empty=True)
-        other_product = factories.ProductFactory(stockrecords__price_currency='USD')
+        other_product = factories.ProductFactory(
+            stockrecords__price_currency='USD',
+            stockrecords__partner__short_code='test2',
+        )
         basket.add_product(other_product)
         basket.add_product(self.product)
         self.assertEqual(get_single_seat(basket), self.product)
