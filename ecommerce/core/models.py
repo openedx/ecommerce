@@ -12,7 +12,7 @@ class SiteConfiguration(models.Model):
     The multi-tenant implementation has one site per partner.
     """
 
-    site = models.ForeignKey('sites.Site', null=False, blank=False)
+    site = models.OneToOneField('sites.Site', null=False, blank=False)
     partner = models.ForeignKey('partner.Partner', null=False, blank=False)
     lms_url_root = models.URLField(
         verbose_name=_('LMS base url for custom site/microsite'),
