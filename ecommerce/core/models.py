@@ -1,7 +1,42 @@
 from django.contrib.auth.models import AbstractUser
-from jsonfield.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from jsonfield.fields import JSONField
+
+
+class SiteConfiguration(models.Model):
+    """Custom Site model for custom sites/microsites.
+
+    This model will enable the basic theming and payment processor
+    configuration for each custom site.
+    The multi-tenant implementation has one site per partner.
+    """
+
+    site = models.ForeignKey('sites.Site', null=False, blank=False)
+    partner = models.ForeignKey('partner.Partner', null=False, blank=False)
+    lms_url_root = models.URLField(
+        verbose_name=_('LMS base url for custom site/microsite'),
+        help_text=_("Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"),
+        null=False,
+        blank=False
+    )
+    theme_scss_path = models.CharField(
+        verbose_name=_('Path to custom site theme'),
+        help_text=_('Path to scss files of the custom site theme'),
+        max_length=255,
+        null=False,
+        blank=False
+    )
+    payment_processors = models.CharField(
+        verbose_name=_('Payment processors'),
+        help_text=_("Comma-separated list of processor names: 'cybersource,paypal'"),
+        max_length=255,
+        null=False,
+        blank=False
+    )
+
+    class Meta(object):
+        unique_together = ('site', 'partner')
 
 
 class User(AbstractUser):

@@ -2,7 +2,12 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
 
-from ecommerce.core.models import User
+from ecommerce.core.models import SiteConfiguration, User
+
+
+class SiteConfigurationAdmin(admin.ModelAdmin):
+    list_display = ('site', 'partner', 'lms_url_root', 'theme_scss_path', 'payment_processors')
+    search_fields = ['site__name']
 
 
 class EcommerceUserAdmin(UserAdmin):
@@ -16,4 +21,5 @@ class EcommerceUserAdmin(UserAdmin):
     )
 
 
+admin.site.register(SiteConfiguration, SiteConfigurationAdmin)
 admin.site.register(User, EcommerceUserAdmin)
