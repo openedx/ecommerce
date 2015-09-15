@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    fulfillment
+   partner_config
 
 
 
