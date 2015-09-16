@@ -1,3 +1,28 @@
+
+======================
+Partner Configuration
+======================
+
+
+This additional configuration in the ``Partner`` model allows users to specify a short code that serves as a unique identifier for that partner.
+This required configuration creates a new **Partner** object that will be used throughout the platform, such as in the ``SiteConfiguration`` model for specific theming.
+
+
+---------------------------------------------
+Partner Configuration Model | Django Admin
+---------------------------------------------
+
+``Partners`` can be created or modified in the Django administration site located at http://localhost:8002/admin/partner/partner/.
+
+The following image shows the ``Partner`` model in the Django administration panel for a configured partner.
+
+.. image:: images/partner_configuration.png
+    :width: 600px
+    :alt: Populated partner model
+
+.. note::  The **Short code** field must be unique across all partners. This value is presently used as the order number prefix (e.g. "EDX" in EDX-1000).
+
+
 ======================
 Site Configuration
 ======================
