@@ -14,6 +14,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.settings import get_lms_url
+from ecommerce.tests.mixins import PartnerMixin
 
 
 EDX_API_KEY = 'edx'
@@ -23,12 +24,13 @@ LOGGER_NAME = 'ecommerce.courses.publishers'
 
 @ddt.ddt
 @override_settings(COMMERCE_API_URL='http://example.com/commerce/api/v1/', EDX_API_KEY=EDX_API_KEY)
-class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
+class LMSPublisherTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
         self.course = G(Course)
-        self.course.create_or_update_seat('honor', False, 0)
-        self.course.create_or_update_seat('verified', True, 50)
+        self.partner = self.create_partner('edx')
+        self.course.create_or_update_seat('honor', False, 0, self.partner)
+        self.course.create_or_update_seat('verified', True, 50, self.partner)
         self.publisher = LMSPublisher()
         self.error_message = u'Failed to publish commerce data for {course_id} to LMS.'.format(
             course_id=self.course.id
@@ -184,7 +186,9 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         Verify that (a) professional seats NEVER have an expiration date and (b) the name/mode is properly set for
         no-id-professional seats.
         """
-        seat = self.course.create_or_update_seat('professional', is_verified, 500, expires=datetime.datetime.utcnow())
+        seat = self.course.create_or_update_seat(
+            'professional', is_verified, 500, self.partner, expires=datetime.datetime.utcnow()
+        )
         stock_record = seat.stockrecords.first()
         actual = self.publisher.serialize_seat_for_commerce_api(seat)
         expected = {
@@ -207,7 +211,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         Verify that course publication succeeds if the Credit API responds
         with 2xx status codes when publishing CreditCourse data to the LMS.
         """
-        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
 
         self._mock_credit_api(creation_status, update_status)
         self._mock_commerce_api(commerce_status)
@@ -250,7 +254,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         Verify that course publication fails if the Credit API does not respond
         with 2xx status codes when publishing CreditCourse data to the LMS.
         """
-        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
 
         self._mock_credit_api(400, 418, error_message)
 
@@ -262,7 +266,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         Verify that course publication fails if no access token is provided
         when publishing CreditCourse data to the LMS.
         """
-        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
 
         response = self.publisher.publish(self.course, access_token=None)
         self.assertIsNotNone(response)
@@ -273,7 +277,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         Verify that course publication fails if an exception is raised
         while publishing CreditCourse data to the LMS.
         """
-        self.course.create_or_update_seat('credit', True, 100, credit_provider='Harvard', credit_hours=1)
+        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
 
         with mock.patch.object(LMSPublisher, '_publish_creditcourse') as mock_publish_creditcourse:
             mock_publish_creditcourse.side_effect = Exception(self.error_message)

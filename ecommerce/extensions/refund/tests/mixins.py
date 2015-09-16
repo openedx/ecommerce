@@ -14,6 +14,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.tests.mixins import PartnerMixin
 
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
@@ -21,12 +22,13 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class RefundTestMixin(CourseCatalogTestMixin):
+class RefundTestMixin(CourseCatalogTestMixin, PartnerMixin):
     def setUp(self):
         super(RefundTestMixin, self).setUp()
         self.course, __ = Course.objects.get_or_create(id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course')
-        self.honor_product = self.course.create_or_update_seat('honor', False, 0)
-        self.verified_product = self.course.create_or_update_seat('verified', True, 10)
+        self.partner = self.create_partner('edx')
+        self.honor_product = self.course.create_or_update_seat('honor', False, 0, self.partner)
+        self.verified_product = self.course.create_or_update_seat('verified', True, 10, self.partner)
 
     def create_order(self, user=None, multiple_lines=False, free=False, status=ORDER.COMPLETE):
         user = user or self.user

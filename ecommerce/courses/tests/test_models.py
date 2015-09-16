@@ -7,13 +7,14 @@ from oscar.core.loading import get_model
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.tests.mixins import PartnerMixin
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
 @ddt.ddt
-class CourseTests(CourseCatalogTestMixin, TestCase):
+class CourseTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
     def test_unicode(self):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'
@@ -28,12 +29,13 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         """
         # Create a new course and verify it has a parent product, but no children.
         course = G(Course)
+        self.partner = self.create_partner('edx')
         self.assertEqual(course.products.count(), 1)
         self.assertEqual(len(course.seat_products), 0)
 
         # Create the seat products
-        seats = [course.create_or_update_seat('honor', False, 0),
-                 course.create_or_update_seat('verified', True, 50)]
+        seats = [course.create_or_update_seat('honor', False, 0, self.partner),
+                 course.create_or_update_seat('verified', True, 50, self.partner)]
         self.assertEqual(course.products.count(), 3)
 
         # The property should return only the child seats.
@@ -111,7 +113,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         certificate_type = 'verified'
         id_verification_required = True
         price = 5
-        course.create_or_update_seat(certificate_type, id_verification_required, price)
+        course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
 
         # Two seats: one verified, the other the parent seat product
         self.assertEqual(course.products.count(), 2)
@@ -120,7 +122,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
         # Test seat update
         price = 10
-        course.create_or_update_seat(certificate_type, id_verification_required, price)
+        course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
 
         # Again, only two seats with one being the parent seat product.
         self.assertEqual(course.products.count(), 2)
@@ -141,6 +143,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
                 certificate_type,
                 id_verification_required,
                 price,
+                self.partner,
                 credit_provider=credit_provider,
                 credit_hours=credit_hours
             )
@@ -169,8 +172,8 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         certificate_type = 'honor'
         id_verification_required = False
         price = 0
-        dotted_course.create_or_update_seat(certificate_type, id_verification_required, price)
-        regular_course.create_or_update_seat(certificate_type, id_verification_required, price)
+        dotted_course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
+        regular_course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
 
         child_products = Product.objects.filter(structure=Product.CHILD).count()
         self.assertEqual(child_products, 2)
@@ -180,19 +183,19 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         course = Course.objects.create(id='a/b/c', name='Test Course')
         self.assertEqual(course.type, 'honor')
 
-        course.create_or_update_seat('honor', False, 0)
+        course.create_or_update_seat('honor', False, 0, self.partner)
         self.assertEqual(course.type, 'honor')
 
-        course.create_or_update_seat('verified', True, 10)
+        course.create_or_update_seat('verified', True, 10, self.partner)
         self.assertEqual(course.type, 'verified')
 
-        seat = course.create_or_update_seat('professional', True, 100)
+        seat = course.create_or_update_seat('professional', True, 100, self.partner)
         self.assertEqual(course.type, 'professional')
 
         seat.delete()
         self.assertEqual(course.type, 'verified')
-        course.create_or_update_seat('no-id-professional', False, 100)
+        course.create_or_update_seat('no-id-professional', False, 100, self.partner)
         self.assertEqual(course.type, 'professional')
 
-        course.create_or_update_seat('credit', True, 1000, credit_provider='SMU')
+        course.create_or_update_seat('credit', True, 1000, self.partner, credit_provider='SMU')
         self.assertEqual(course.type, 'credit')

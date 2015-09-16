@@ -21,6 +21,7 @@ Basket = get_model('basket', 'Basket')
 Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
+Partner = get_model('partner', 'Partner')
 User = get_user_model()
 
 
@@ -217,3 +218,13 @@ class BusinessIntelligenceMixin(object):
         else:
             # Payload validation is currently limited to order and refund events
             self.fail()
+
+
+class PartnerMixin(object):
+    """Provides utility methods for creating partners in test cases."""
+    def create_partner(self, name):
+        """Create Partner object and return it"""
+        # For testing we are making 'short_code' parameter value same as name.
+        # Please make sure that 'name' is not longer than 8 characters.
+        partner, __ = Partner.objects.get_or_create(short_code=name, name=name)
+        return partner

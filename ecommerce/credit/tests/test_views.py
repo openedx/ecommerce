@@ -4,23 +4,22 @@ Tests for the checkout page.
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from oscar.core.loading import get_model
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
-from ecommerce.tests.mixins import UserMixin
-
-Partner = get_model('partner', 'Partner')
+from ecommerce.tests.mixins import UserMixin, PartnerMixin
 
 
-class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
+class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, PartnerMixin, TestCase):
     """Test for Checkout page"""
 
     def setUp(self):
         super(CheckoutPageTest, self).setUp()
         self.switch = toggle_switch('ENABLE_CREDIT_APP', True)
+        self.partner = self.create_partner('edx')
+
         user = self.create_user(is_superuser=False)
         self.client.login(username=user.username, password=self.password)
         self.course_name = 'credit course'
@@ -37,7 +36,7 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
 
         # Create the credit seat
         self.seat = self.course.create_or_update_seat(
-            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
         )
 
     @property

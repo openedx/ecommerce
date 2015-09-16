@@ -8,16 +8,17 @@ import pytz
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy, Selector
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.mixins import UserMixin, PartnerMixin
 
 
 @ddt.ddt
-class DefaultStrategyTests(CourseCatalogTestMixin, UserMixin, TestCase):
+class DefaultStrategyTests(CourseCatalogTestMixin, UserMixin, PartnerMixin, TestCase):
     def setUp(self):
         super(DefaultStrategyTests, self).setUp()
         self.strategy = DefaultStrategy()
         course = Course.objects.create(id='a/b/c', name='Demo Course')
-        self.honor_seat = course.create_or_update_seat('honor', False, 0)
+        partner = self.create_partner('edx')
+        self.honor_seat = course.create_or_update_seat('honor', False, 0, partner)
 
     def test_seat_class(self):
         """ Verify the property returns the course seat Product Class. """

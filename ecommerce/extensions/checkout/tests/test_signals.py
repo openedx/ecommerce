@@ -10,9 +10,10 @@ from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
 from ecommerce.settings import get_lms_url
+from ecommerce.tests.mixins import PartnerMixin
 
 
-class SignalTests(CourseCatalogTestMixin, TestCase):
+class SignalTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
     @httpretty.activate
     def test_post_checkout_callback(self):
         """
@@ -27,7 +28,8 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
         toggle_switch('ENABLE_NOTIFICATIONS', True)
         user = UserFactory()
         course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
-        seat = course.create_or_update_seat('credit', False, 50, 'ASU', None, 2)
+        partner = self.create_partner('edx')
+        seat = course.create_or_update_seat('credit', False, 50, partner, 'ASU', None, 2)
 
         basket = BasketFactory()
         basket.add_product(seat, 1)
