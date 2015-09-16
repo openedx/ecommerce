@@ -5,4 +5,4 @@ django-debug-toolbar==1.3.2
 
 # i18n
 transifex-client==0.10
-git+https://github.com/edx/i18n-tools.git@clintonb/domain-fix#egg=i18n_tools==0.1.4
+git+https://github.com/edx/i18n-tools.git@v0.1.4#egg=i18n_tools==0.1.4
