@@ -105,6 +105,14 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
 
         self.publication_switch = Switch.objects.create(name='publish_course_modes_to_lms', active=False)
+        self.error_message = u'Failed to publish commerce data for [{course_id}] to LMS.'.format(
+            course_id=self.course_id
+        )
+        self.switch_disable_error = (
+            u'Course [{course_id}] was not published to LMS '
+            u'because the switch [publish_course_modes_to_lms] is disabled. '
+            u'To avoid ghost SKUs, data has not been saved.'
+        ).format(course_id=self.course_id)
 
     def _toggle_publication(self, is_enabled):
         """Toggle LMS publication."""
@@ -204,18 +212,21 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 500)
         self._assert_course_saved(self.course_id)
-
         self._toggle_publication(True)
+
+        self.assertEqual(response.data.get('error'), self.switch_disable_error)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             # If publication fails, the view should return a 500 and data should NOT be saved.
-            mock_publish.return_value = False
+            mock_publish.return_value = self.switch_disable_error
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+
             self.assertEqual(response.status_code, 500)
             self._assert_course_saved(self.course_id)
+            self.assertEqual(response.data.get('error'), self.switch_disable_error)
 
             # If publication succeeds, the view should return a 201 and data should be saved.
-            mock_publish.return_value = True
+            mock_publish.return_value = None
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
             self._assert_course_saved(self.course_id, expected=self.data)
@@ -228,19 +239,22 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         # If LMS publication is disabled, the view should return a 500 and data should NOT be saved.
         response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 500)
+
+        self.assertEqual(response.data.get('error'), self.switch_disable_error)
         self._assert_course_saved(self.course_id, expected=self.data)
 
         self._toggle_publication(True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             # If publication fails, the view should return a 500 and data should NOT be saved.
-            mock_publish.return_value = False
+            mock_publish.return_value = self.error_message
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.data.get('error'), self.error_message)
             self._assert_course_saved(self.course_id, expected=self.data)
 
             # If publication succeeds, the view should return a 200 and data should be saved.
-            mock_publish.return_value = True
+            mock_publish.return_value = None
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 200)
             self._assert_course_saved(self.course_id, expected=updated_data)
@@ -255,18 +269,31 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
     def test_invalid_product_class(self):
         """Verify that attempting to save a product with a product class other than 'Seat' yields a 400."""
-        self.data['products'][0]['product_class'] = 'Not a Seat'
+        product_class = 'Not a Seat'
+        self.data['products'][0]['product_class'] = product_class
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
         self._assert_course_saved(self.course_id)
+
+        self.assertEqual(
+            response.data.get('products')[0],
+            u'Invalid product class [{product_class}] requested.'.format(
+                product_class=product_class
+            )
+        )
 
     def test_incomplete_product_attributes(self):
         """Verify that submitting incomplete product attributes yields a 400."""
         self.data['products'][0]['attribute_values'].pop()
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data.get('products')[0],
+            u'Products must indicate whether ID verification is required.'
+        )
         self._assert_course_saved(self.course_id)
 
     def test_missing_product_price(self):
@@ -275,6 +302,11 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(
+            response.data.get('products')[0],
+            u'Products must have a price.'
+        )
         self._assert_course_saved(self.course_id)
 
     def test_verification_deadline_optional(self):
@@ -283,7 +315,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self._toggle_publication(True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            mock_publish.return_value = True
+            mock_publish.return_value = None
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
             self._assert_course_saved(self.course_id, expected=self.data)

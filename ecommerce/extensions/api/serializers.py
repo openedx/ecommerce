@@ -203,7 +203,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         try:
             if not waffle.switch_is_active('publish_course_modes_to_lms'):
-                message = (
+                message = _(
                     u'Course [{course_id}] was not published to LMS '
                     u'because the switch [publish_course_modes_to_lms] is disabled. '
                     u'To avoid ghost SKUs, data has not been saved.'
@@ -242,24 +242,17 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                     )
 
-                published = course.publish_to_lms(access_token=self.access_token)
+                resp_message = course.publish_to_lms(access_token=self.access_token)
+                published = (resp_message is None)
+
                 if published:
                     return created, None, None
                 else:
-                    message = (
-                        u'An error occurred while publishing [{course_id}] to LMS. '
-                        u'No data has been saved or published.'
-                    ).format(course_id=course_id)
+                    raise Exception(resp_message)
 
-                    raise Exception(message)
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
-
-            user_message = (
-                u'Publication of course data to the LMS failed. '
-                u'To avoid checkout failures, this data has NOT been saved.'
-            )
-            return False, e, user_message
+            return False, e, e.message
 
     def _flatten(self, attrs):
         """Transform a list of attribute names and values into a dictionary keyed on the names."""
