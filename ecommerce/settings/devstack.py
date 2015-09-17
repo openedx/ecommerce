@@ -3,6 +3,7 @@ from os import environ
 
 import yaml
 
+from ecommerce.settings import get_lms_url
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 
