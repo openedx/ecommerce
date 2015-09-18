@@ -1,4 +1,5 @@
 """Order Utility Classes. """
+from oscar.core.loading import get_model
 
 
 class OrderNumberGenerator(object):
@@ -25,7 +26,9 @@ class OrderNumberGenerator(object):
 
         # TODO add partner code instead of hard coded value
         # after updating basket modal
-        # partner_code = basket.Basket.objects.get(pk=basket.id).parnter.short_code
+        # import here to avoid circular imports between 'order' and 'basket' apps
+        # Basket = get_model('basket', 'Basket')
+        # partner_code = Basket.objects.get(pk=basket.id).partner.short_code
 
         partner_code = 'edx'
         order_number = u'{partner_code}-{order_id}'.format(partner_code=partner_code, order_id=order_id)
