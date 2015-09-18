@@ -1,5 +1,4 @@
 """Order Utility Classes. """
-from django.conf import settings
 
 
 class OrderNumberGenerator(object):
@@ -23,7 +22,13 @@ class OrderNumberGenerator(object):
 
         """
         order_id = basket.id + self.OFFSET
-        order_number = u'{prefix}-{order_id}'.format(prefix=settings.ORDER_NUMBER_PREFIX, order_id=order_id)
+
+        # TODO add partner code instead of hard coded value
+        # after updating basket modal
+        # partner_code = basket.Basket.objects.get(pk=basket.id).parnter.short_code
+
+        partner_code = 'edx'
+        order_number = u'{partner_code}-{order_id}'.format(partner_code=partner_code, order_id=order_id)
 
         return order_number
 
@@ -38,7 +43,8 @@ class OrderNumberGenerator(object):
         Returns:
             int: The basket ID used to generate the provided order number.
         """
-        order_id = int(order_number.lstrip(u'{prefix}-'.format(prefix=settings.ORDER_NUMBER_PREFIX)))
+
+        order_id = int(order_number.rsplit('-', 1)[1])
         basket_id = order_id - self.OFFSET
 
         return basket_id
