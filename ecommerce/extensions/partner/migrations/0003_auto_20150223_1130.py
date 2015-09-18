@@ -4,37 +4,13 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 
 
-def create_catalog(apps, schema_editor):
-    """
-
-    Create all Product Catalog data for a sandbox, such as our Partner and Product Stock.
-
-    """
-    # Create all our Product Types.
-    Partner = apps.get_model("partner", "Partner")
-    edx = Partner(code="edx", name="edX")
-    edx.save()
-
-    StockRecord = apps.get_model("partner", "StockRecord")
-    Product = apps.get_model("catalogue", "Product")
-    honor_seat = Product.objects.get(upc="000000000002")
-    honor_stock = StockRecord(
-        product=honor_seat,
-        partner_sku="SEAT-HONOR-EDX-DEMOX-DEMO-COURSE",
-        price_retail="0",
-        partner=edx,
-        price_excl_tax="0",
-        cost_price="0"
-    )
-    honor_stock.save()
-
-
+# NOTE (CCB): This migration used to create a partner and product. Our Partner and Product models
+# have expanded, and this migration is no longer needed. It should be removed when we eventually
+# squash migrations: https://docs.djangoproject.com/en/1.8/topics/migrations/#squashing-migrations.
 class Migration(migrations.Migration):
 
     dependencies = [
         ('partner', '0002_auto_20141007_2032'),
     ]
 
-    operations = [
-        migrations.RunPython(create_catalog),
-    ]
+    operations = []
