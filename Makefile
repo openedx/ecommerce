@@ -50,14 +50,14 @@ validate_js:
 
 validate_python: clean
 	python manage.py compress --settings=ecommerce.settings.test -v0
-	DISABLE_MIGRATIONS=True coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+	REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 	make quality
 
 fast_validate_python: clean
 	python manage.py compress --settings=ecommerce.settings.test -v0
-	DISABLE_MIGRATIONS=True DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
+	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
 	make quality
 

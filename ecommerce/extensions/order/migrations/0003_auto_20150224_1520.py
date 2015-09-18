@@ -13,8 +13,7 @@ def create_shipping_event(apps, schema_editor):
     """
     # Create all our Product Types.
     ShippingEventType = apps.get_model("order", "ShippingEventType")
-    shipped_event = ShippingEventType(code="shipped", name="Shipped")
-    shipped_event.save()
+    ShippingEventType.objects.create(code="shipped", name="Shipped")
 
 
 class Migration(migrations.Migration):

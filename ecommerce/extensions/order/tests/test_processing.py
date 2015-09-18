@@ -15,7 +15,7 @@ class EventHandlerTests(TestCase):
 
     def setUp(self):
         super(EventHandlerTests, self).setUp()
-        self.shipping_event_type = ShippingEventType.objects.create(name=SHIPPING_EVENT_NAME)
+        self.shipping_event_type, __ = ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
         self.order = factories.create_order()
 
     def test_create_shipping_event_all_lines_complete(self):
