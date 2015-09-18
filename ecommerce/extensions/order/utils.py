@@ -24,13 +24,10 @@ class OrderNumberGenerator(object):
         """
         order_id = basket.id + self.OFFSET
 
-        # TODO add partner code instead of hard coded value
-        # after updating basket modal
-        # import here to avoid circular imports between 'order' and 'basket' apps
-        # Basket = get_model('basket', 'Basket')
-        # partner_code = Basket.objects.get(pk=basket.id).partner.short_code
+        # Import here to avoid circular imports between 'order' and 'basket' apps
+        Basket = get_model('basket', 'Basket')
+        partner_code = Basket.objects.get(pk=basket.id).partner.short_code
 
-        partner_code = 'edx'
         order_number = u'{partner_code}-{order_id}'.format(partner_code=partner_code, order_id=order_id)
 
         return order_number

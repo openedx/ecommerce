@@ -19,10 +19,8 @@ class UtilsTest(TestCase):
         first_order_number = OrderNumberGenerator().order_number(first_basket)
         second_order_number = OrderNumberGenerator().order_number(second_basket)
 
-        # TODO add partner code instead of hard coded value
-
-        # self.assertIn(first_basket.short_code, first_order_number)
-        # self.assertIn(second_basket.short_code, second_order_number)
+        self.assertIn(first_basket.short_code, first_order_number)
+        self.assertIn(second_basket.short_code, second_order_number)
         self.assertNotEqual(first_order_number, second_order_number)
 
         first_basket_id = OrderNumberGenerator().basket_id(first_order_number)
