@@ -206,6 +206,8 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                         order_number=order_number,
                         user=user,
                         basket=basket,
+                        #TODO add partner from basket
+                        # partner=basket.partner,
                         shipping_address=None,
                         shipping_method=shipping_method,
                         shipping_charge=shipping_charge,
