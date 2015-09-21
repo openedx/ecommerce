@@ -1,10 +1,10 @@
-edX E-Commerce Service  |Travis|_ |Coveralls|_
-==============================================
+edX E-Commerce Service  |Travis|_ |Codecov|_
+============================================
 .. |Travis| image:: https://travis-ci.org/edx/ecommerce.svg?branch=master
 .. _Travis: https://travis-ci.org/edx/ecommerce
 
-.. |Coveralls| image:: https://coveralls.io/repos/edx/ecommerce/badge.svg?branch=master
-.. _Coveralls: https://coveralls.io/r/edx/ecommerce?branch=master
+.. |Codecov| image:: http://codecov.io/github/edx/ecommerce/coverage.svg?branch=master
+.. _Codecov: http://codecov.io/github/edx/ecommerce?branch=master
 
 This repository contains the edX E-Commerce Service, which relies heavily on `django-oscar <https://github.com/edx/django-oscar>`_, as well as all frontend and backend code used to manage edX's product catalog and handle orders for those products.
 
