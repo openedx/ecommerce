@@ -5,7 +5,7 @@ from django.dispatch import receiver
 import waffle
 
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
+from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
 from ecommerce.extensions.checkout.utils import get_provider_data
 from ecommerce.notifications.notifications import send_notification
 from ecommerce.settings import get_lms_url
@@ -20,7 +20,7 @@ ORDER_LINE_COUNT = 1
 
 
 @receiver(post_checkout, dispatch_uid='tracking.post_checkout_callback')
-@log_exceptions("Failed to emit tracking event upon order completion.")
+@silence_exceptions("Failed to emit tracking event upon order completion.")
 def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unused-argument
     """Emit a tracking event when an order is placed."""
     if not (is_segment_configured() and order.total_excl_tax > 0):
@@ -59,7 +59,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
 
 @receiver(post_checkout, dispatch_uid='send_completed_order_email')
-@log_exceptions("Failed to send order completion email.")
+@silence_exceptions("Failed to send order completion email.")
 def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable=unused-argument
     """Send course purchase notification email when a course is purchased."""
     if waffle.switch_is_active('ENABLE_NOTIFICATIONS'):

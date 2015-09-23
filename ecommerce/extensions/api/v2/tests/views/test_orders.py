@@ -12,7 +12,7 @@ from oscar.test import factories
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
-from ecommerce.extensions.fulfillment.status import LINE, ORDER
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
 
 Order = get_model('order', 'Order')
@@ -104,10 +104,6 @@ class OrderFulfillViewTests(UserMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
 
         self.order = factories.create_order(user=self.user)
-        self.order.status = ORDER.FULFILLMENT_ERROR
-        self.order.save()
-        self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)
-
         self.url = reverse('api:v2:orders:fulfill', kwargs={'number': self.order.number})
 
     def _put_to_view(self):
@@ -143,19 +139,20 @@ class OrderFulfillViewTests(UserMixin, TestCase):
         self.user.user_permissions.add(permission)
         self.assertNotEqual(403, self._put_to_view().status_code)
 
-    @ddt.data(ORDER.OPEN, ORDER.COMPLETE)
-    def test_order_fulfillment_error_state_required(self, order_status):
-        """ If the order is not in the Fulfillment Error state, the view must return an HTTP 406. """
-        self.order.status = order_status
+    def test_order_complete_state_disallowed(self):
+        """ If the order is Complete, the view must return an HTTP 406. """
+        self.order.status = ORDER.COMPLETE
         self.order.save()
         self.assertEqual(406, self._put_to_view().status_code)
 
-    def test_ideal_conditions(self):
+    @ddt.data(ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
+    def test_ideal_conditions(self, order_status):
         """
-        If the user is authenticated/authorized, and the order is in the Fulfillment Error state, the view should
-        attempt to fulfill the order. The view should return HTTP 200.
+        If the user is authenticated/authorized, and the order is in the Open or Fulfillment Error
+        states, the view should attempt to fulfill the order. The view should return HTTP 200.
         """
-        self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
+        self.order.status = order_status
+        self.order.save()
 
         with mock.patch('ecommerce.extensions.order.processing.EventHandler.handle_shipping_event') as mocked:
             def handle_shipping_event(order, _event_type, _lines, _line_quantities, **_kwargs):
@@ -176,7 +173,9 @@ class OrderFulfillViewTests(UserMixin, TestCase):
 
     def test_fulfillment_failed(self):
         """ If fulfillment fails, the view should return HTTP 500. """
-        self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
+        self.order.status = ORDER.FULFILLMENT_ERROR
+        self.order.save()
+
         response = self._put_to_view()
         self.assertEqual(500, response.status_code)
 

@@ -2,7 +2,7 @@ import analytics
 from django.dispatch import receiver, Signal
 
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, log_exceptions
+from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
 
 
 # This signal should be emitted after a refund is completed - payment credited AND fulfillment revoked.
@@ -10,7 +10,7 @@ post_refund = Signal(providing_args=["refund"])
 
 
 @receiver(post_refund, dispatch_uid='tracking.post_refund_callback')
-@log_exceptions("Failed to emit tracking event upon refund completion.")
+@silence_exceptions("Failed to emit tracking event upon refund completion.")
 def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=unused-argument
     """Emit a tracking event when a refund is completed."""
     if not (is_segment_configured() and refund.total_credit_excl_tax > 0):

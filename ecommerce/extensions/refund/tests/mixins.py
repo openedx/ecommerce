@@ -28,7 +28,7 @@ class RefundTestMixin(CourseCatalogTestMixin):
         self.honor_product = self.course.create_or_update_seat('honor', False, 0)
         self.verified_product = self.course.create_or_update_seat('verified', True, 10)
 
-    def create_order(self, user=None, multiple_lines=False, free=False):
+    def create_order(self, user=None, multiple_lines=False, free=False, status=ORDER.COMPLETE):
         user = user or self.user
         basket = BasketFactory(owner=user)
 
@@ -41,7 +41,7 @@ class RefundTestMixin(CourseCatalogTestMixin):
             basket.add_product(self.verified_product)
 
         order = create_order(basket=basket, user=user)
-        order.status = ORDER.COMPLETE
+        order.status = status
         order.save()
         return order
 

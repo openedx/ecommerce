@@ -9,6 +9,7 @@ from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 
@@ -26,7 +27,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         super(EdxOrderPlacementMixinTests, self).setUp()
 
         self.user = UserFactory()
-        self.order = self.create_order()
+        self.order = self.create_order(status=ORDER.OPEN)
 
     def test_handle_payment_logging(self, __):
         """
@@ -110,7 +111,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
 
     def test_handle_successful_free_order(self, mock_track):
         """Verify that tracking events are not emitted for free orders."""
-        order = self.create_order(free=True)
+        order = self.create_order(free=True, status=ORDER.OPEN)
         EdxOrderPlacementMixin().handle_successful_order(order)
 
         # Verify that no event was emitted.

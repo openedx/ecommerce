@@ -1,8 +1,11 @@
 # Note: If future versions of django-oscar include new mixins, they will need to be imported here.
 import abc
 
+from django.db import transaction
+from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class
+import waffle
 
 from ecommerce.extensions.analytics.utils import audit_log
 
@@ -15,6 +18,8 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.
     payment_processor = None
+
+    order_placement_failure_msg = 'Payment was received, but an order for basket [%d] could not be placed.'
 
     __metaclass__ = abc.ABCMeta
 
@@ -48,6 +53,40 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             user_id=basket.owner.id
         )
 
+    def handle_order_placement(self,
+                               order_number,
+                               user,
+                               basket,
+                               shipping_address,
+                               shipping_method,
+                               shipping_charge,
+                               billing_address,
+                               order_total,
+                               **kwargs):
+        """
+        Place an order and mark the corresponding basket as submitted.
+
+        Differs from the superclass' method by wrapping order placement
+        and basket submission in a transaction. Should be used only in
+        the context of an exception handler.
+        """
+        with transaction.atomic():
+            order = self.place_order(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=shipping_address,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                order_total=order_total,
+                billing_address=billing_address,
+                **kwargs
+            )
+
+            basket.submit()
+
+        return self.handle_successful_order(order)
+
     def handle_successful_order(self, order):
         """Send a signal so that receivers can perform relevant tasks (e.g., fulfill the order)."""
         audit_log(
@@ -59,6 +98,13 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             user_id=order.user.id
         )
 
-        post_checkout.send_robust(sender=self, order=order)
+        if waffle.switch_is_active('async_order_fulfillment'):
+            # Always commit transactions before sending tasks depending on state from the current transaction!
+            # There's potential for a race condition here if the task starts executing before the active
+            # transaction has been committed; the necessary order doesn't exist in the database yet.
+            # See http://celery.readthedocs.org/en/latest/userguide/tasks.html#database-transactions.
+            fulfill_order.delay(order.number)
+        else:
+            post_checkout.send(sender=self, order=order)
 
         return order

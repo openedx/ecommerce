@@ -3,6 +3,8 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils.decorators import method_decorator
 from oscar.core.loading import get_model, get_class
 from rest_framework import status, generics, viewsets, mixins
 from rest_framework.decorators import detail_route
@@ -41,6 +43,14 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
     the contents of the basket are free, and generating payment parameters otherwise.
     """
     permission_classes = (IsAuthenticated,)
+
+    # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
+    # until the request had concluded; Django will refuse to commit when an atomic() block
+    # is active, since that would break atomicity. Without an order present in the database
+    # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
+    @method_decorator(transaction.non_atomic_requests)
+    def dispatch(self, request, *args, **kwargs):
+        return super(BasketCreateView, self).dispatch(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """Add products to the authenticated user's basket.
@@ -126,43 +136,51 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 }
             }
         """
-        basket = data_api.get_basket(request.user)
+        # Explicitly delimit operations which will be rolled back if an exception occurs.
+        # atomic() context managers restore atomicity at points where we are modifying data
+        # (baskets, then orders) to ensure that we don't leave the system in a dirty state
+        # in the event of an error.
+        with transaction.atomic():
+            basket = data_api.get_basket(request.user)
 
-        requested_products = request.data.get(AC.KEYS.PRODUCTS)
-        if requested_products:
-            for requested_product in requested_products:
-                # Ensure the requested products exist
-                sku = requested_product.get(AC.KEYS.SKU)
-                if sku:
-                    try:
-                        product = data_api.get_product(sku)
-                    except api_exceptions.ProductNotFoundError as error:
-                        return self._report_bad_request(error.message, api_exceptions.PRODUCT_NOT_FOUND_USER_MESSAGE)
-                else:
-                    return self._report_bad_request(
-                        api_exceptions.SKU_NOT_FOUND_DEVELOPER_MESSAGE,
-                        api_exceptions.SKU_NOT_FOUND_USER_MESSAGE
-                    )
+            requested_products = request.data.get(AC.KEYS.PRODUCTS)
+            if requested_products:
+                for requested_product in requested_products:
+                    # Ensure the requested products exist
+                    sku = requested_product.get(AC.KEYS.SKU)
+                    if sku:
+                        try:
+                            product = data_api.get_product(sku)
+                        except api_exceptions.ProductNotFoundError as error:
+                            return self._report_bad_request(
+                                error.message,
+                                api_exceptions.PRODUCT_NOT_FOUND_USER_MESSAGE
+                            )
+                    else:
+                        return self._report_bad_request(
+                            api_exceptions.SKU_NOT_FOUND_DEVELOPER_MESSAGE,
+                            api_exceptions.SKU_NOT_FOUND_USER_MESSAGE
+                        )
 
-                # Ensure the requested products are available for purchase before adding them to the basket
-                availability = basket.strategy.fetch_for_product(product).availability
-                if not availability.is_available_to_buy:
-                    return self._report_bad_request(
-                        api_exceptions.PRODUCT_UNAVAILABLE_DEVELOPER_MESSAGE.format(
-                            sku=sku,
-                            availability=availability.message
-                        ),
-                        api_exceptions.PRODUCT_UNAVAILABLE_USER_MESSAGE
-                    )
+                    # Ensure the requested products are available for purchase before adding them to the basket
+                    availability = basket.strategy.fetch_for_product(product).availability
+                    if not availability.is_available_to_buy:
+                        return self._report_bad_request(
+                            api_exceptions.PRODUCT_UNAVAILABLE_DEVELOPER_MESSAGE.format(
+                                sku=sku,
+                                availability=availability.message
+                            ),
+                            api_exceptions.PRODUCT_UNAVAILABLE_USER_MESSAGE
+                        )
 
-                basket.add_product(product)
-                logger.info(u"Added product with SKU [%s] to basket [%d]", sku, basket.id)
-        else:
-            # If no products were included in the request, we cannot checkout.
-            return self._report_bad_request(
-                api_exceptions.PRODUCT_OBJECTS_MISSING_DEVELOPER_MESSAGE,
-                api_exceptions.PRODUCT_OBJECTS_MISSING_USER_MESSAGE
-            )
+                    basket.add_product(product)
+                    logger.info(u"Added product with SKU [%s] to basket [%d]", sku, basket.id)
+            else:
+                # If no products were included in the request, we cannot checkout.
+                return self._report_bad_request(
+                    api_exceptions.PRODUCT_OBJECTS_MISSING_DEVELOPER_MESSAGE,
+                    api_exceptions.PRODUCT_OBJECTS_MISSING_USER_MESSAGE
+                )
 
         if request.data.get(AC.KEYS.CHECKOUT) is True:
             # Begin the checkout process, if requested, with the requested payment processor.
@@ -229,7 +247,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 basket.id,
             )
 
-            # Place an order, attempting to fulfill it immediately
+            # Place an order. If order placement succeeds, the order is committed
+            # to the database so that it can be fulfilled asynchronously.
             order = self.handle_order_placement(
                 order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
                 user=basket.owner,
@@ -373,14 +392,14 @@ class OrderFulfillView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         order = self.get_object()
 
-        if not order.can_retry_fulfillment:
+        if not order.is_fulfillable:
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        logger.info('Retrying fulfillment of order [%s]...', order.number)
+        logger.info('Attempting fulfillment of order [%s]...', order.number)
         post_checkout = get_class('checkout.signals', 'post_checkout')
         post_checkout.send(sender=post_checkout, order=order)
 
-        if order.can_retry_fulfillment:
+        if order.is_fulfillable:
             logger.warning('Fulfillment of order [%s] failed!', order.number)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
