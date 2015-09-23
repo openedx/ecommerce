@@ -8,8 +8,6 @@ from django.test import TestCase, override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
-from oscar.test import factories
-from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
@@ -19,7 +17,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
-
+from ecommerce.extensions.test.factories import UserFactory, BasketFactory, create_order
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
@@ -46,7 +44,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
         basket = BasketFactory()
         basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=1, basket=basket, user=self.user)
+        self.order = create_order(number=1, basket=basket, user=self.user)
 
     # pylint: disable=attribute-defined-outside-init
     def create_seat_and_order(self, certificate_type='test-certificate-type', provider=None):
@@ -64,7 +62,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
         basket = BasketFactory()
         basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=2, basket=basket, user=self.user)
+        self.order = create_order(number=2, basket=basket, user=self.user)
 
     def test_enrollment_module_support(self):
         """Test that we get the correct values back for supported product lines."""

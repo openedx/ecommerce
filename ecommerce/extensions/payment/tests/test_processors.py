@@ -17,7 +17,6 @@ from waffle.models import Switch
 
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
 from oscar.core.loading import get_model
-from oscar.test import factories
 import paypalrestsdk
 from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
@@ -33,6 +32,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource, sud
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test import factories
 
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
