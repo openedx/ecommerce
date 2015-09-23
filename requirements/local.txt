@@ -1,5 +1,6 @@
 # Packages required for local development
 -r test.txt
+-r docs.txt
 
 django-debug-toolbar==1.3.2
 

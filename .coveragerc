@@ -1,6 +1,8 @@
 [run]
 data_file = .coverage
-omit = ecommerce/settings*
+omit =
+    docs/*
+    ecommerce/settings*
     ecommerce/conf*
     *wsgi.py
     *migrations*

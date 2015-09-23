@@ -16,7 +16,7 @@ Partner Configuration Model | Django Admin
 
 The following image shows the ``Partner`` model in the Django administration panel for a configured partner.
 
-.. image:: images/partner_configuration.png
+.. image:: _static/images/partner_configuration.png
     :width: 600px
     :alt: Populated partner model
 
@@ -43,7 +43,7 @@ This panel is located at http://localhost:8002/admin/core/siteconfiguration/.
 
 The following image shows the ``SiteConfiguration`` model in the Django administration panel for a configured site.
 
-.. image:: images/site_configuration.png
+.. image:: _static/images/site_configuration.png
     :width: 600px
     :alt: Populated site configuration model
 

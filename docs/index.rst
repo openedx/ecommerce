@@ -1,25 +1,25 @@
 .. ecommerce documentation master file, created by
-   sphinx-quickstart on Fri Feb 13 11:47:02 2015.
+   sphinx-quickstart on Sun Feb 17 11:46:20 2013.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Documentation for the edX Ecommerce Service
-===========================================
+Documentation for the edX E-Commerce Service
+============================================
 
-Contents:
+These are the developer docs for the edX E-Commerce Service.
 
 .. toctree::
    :maxdepth: 2
 
-   fulfillment
+   getting_started
    partner_config
+   testing
+   features
+   internationalization
+   fulfillment
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+TODO
+   - Oscar Dashboard
+   - Payment processors
+   - API
+   - Course Administration Tool
