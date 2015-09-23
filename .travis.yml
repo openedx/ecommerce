@@ -24,11 +24,13 @@ install:
     - pip install -r requirements/docs.txt
     - make requirements.js
 script:
-    - make static -e DJANGO_SETTINGS_MODULE="ecommerce.settings.test"
-    - make validate
-
     # Ensure documentation can be compiled
     - cd docs && make html
+    - cd ..
+
+    # Compile assets and run validation
+    - make static -e DJANGO_SETTINGS_MODULE="ecommerce.settings.test"
+    - make validate
 branches:
     only:
         - master
