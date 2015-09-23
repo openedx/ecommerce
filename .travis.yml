@@ -21,10 +21,14 @@ install:
     - pip install -U codecov
     - pip install -U pip wheel
     - pip install -r requirements/test.txt
+    - pip install -r requirements/docs.txt
     - make requirements.js
 script:
     - make static -e DJANGO_SETTINGS_MODULE="ecommerce.settings.test"
     - make validate
+
+    # Ensure documentation can be compiled
+    - cd docs && make html
 branches:
     only:
         - master
