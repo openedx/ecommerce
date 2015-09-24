@@ -8,8 +8,8 @@ import httpretty
 import mock
 from requests import Timeout
 from testfixtures import LogCapture
-from waffle.models import Switch
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.dashboard.users.views import UserDetailView
 from ecommerce.tests.mixins import UserMixin
@@ -20,7 +20,7 @@ LOGGER_NAME = 'ecommerce.extensions.dashboard.users.views'
 class UserDetailViewTests(DashboardViewTestMixin, UserMixin, TestCase):
     def setUp(self):
         super(UserDetailViewTests, self).setUp()
-        self.switch, __ = Switch.objects.get_or_create(name='user_enrollments_on_dashboard', active=True)
+        self.switch = toggle_switch('user_enrollments_on_dashboard', True)
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.data = [{'course_id': 'a/b/c'}]

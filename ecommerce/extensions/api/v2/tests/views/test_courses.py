@@ -5,9 +5,9 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
 from oscar.core.loading import get_model, get_class
-from waffle.models import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
@@ -141,14 +141,14 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMix
         path = reverse('api:v2:course-publish', kwargs={'pk': course_id})
 
         # Method should return a 500 if the switch is inactive
-        switch, _created = Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=False)
+        toggle_switch('publish_course_modes_to_lms', False)
+
         response = self.client.post(path)
         msg = 'Course [{course_id}] was not published to LMS ' \
               'because the switch [publish_course_modes_to_lms] is disabled.'
         self.assert_publish_response(response, 500, msg)
 
-        switch.active = True
-        switch.save()
+        toggle_switch('publish_course_modes_to_lms', True)
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             # If publish fails, return a 500

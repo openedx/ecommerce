@@ -7,15 +7,14 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
 import pytz
-from waffle.models import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.mixins import UserMixin
-
 
 EXPIRES = datetime(year=1992, month=4, day=24, tzinfo=pytz.utc)
 EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
@@ -104,7 +103,8 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        self.publication_switch = Switch.objects.create(name='publish_course_modes_to_lms', active=False)
+        self.publication_switch = toggle_switch('publish_course_modes_to_lms', False)
+
         self.error_message = u'Failed to publish commerce data for [{course_id}] to LMS.'.format(
             course_id=self.course_id
         )

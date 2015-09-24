@@ -5,8 +5,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from oscar.core.loading import get_model
-from waffle.models import Switch
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
@@ -20,7 +20,7 @@ class CheckoutPageTest(UserMixin, CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(CheckoutPageTest, self).setUp()
-        self.switch, __ = Switch.objects.get_or_create(name='ENABLE_CREDIT_APP', active=True)
+        self.switch = toggle_switch('ENABLE_CREDIT_APP', True)
         user = self.create_user(is_superuser=False)
         self.client.login(username=user.username, password=self.password)
         self.course_name = 'credit course'

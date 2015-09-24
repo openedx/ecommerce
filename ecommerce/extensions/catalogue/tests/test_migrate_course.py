@@ -13,9 +13,9 @@ import httpretty
 import mock
 from oscar.core.loading import get_model
 import pytz
-from waffle.models import Switch
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.utils import mode_for_seat
@@ -130,7 +130,7 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
 class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(MigratedCourseTests, self).setUp()
-        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=True)
+        toggle_switch('publish_course_modes_to_lms', True)
 
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
@@ -255,7 +255,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 class CommandTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(CommandTests, self).setUp()
-        Switch.objects.get_or_create(name='publish_course_modes_to_lms', active=True)
+        toggle_switch('publish_course_modes_to_lms', True)
 
     @httpretty.activate
     def test_handle(self):
