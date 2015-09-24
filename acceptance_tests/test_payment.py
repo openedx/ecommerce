@@ -1,3 +1,5 @@
+from unittest import skipUnless
+
 from bok_choy.web_app_test import WebAppTest
 import ddt
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -6,7 +8,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.config import VERIFIED_COURSE_ID, HTTPS_RECEIPT_PAGE, PAYPAL_PASSWORD, PAYPAL_EMAIL
+from acceptance_tests.config import (
+    VERIFIED_COURSE_ID, LMS_HTTPS, PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS
+)
 from acceptance_tests.mixins import LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin, UnenrollmentMixin
 from acceptance_tests.pages import LMSCourseModePage
 
@@ -57,7 +61,7 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         If we are testing locally with a non-HTTPS LMS instance, a security alert may appear when transitioning to
         secure pages. This method dismisses them.
         """
-        if not HTTPS_RECEIPT_PAGE:
+        if not LMS_HTTPS:
             try:
                 WebDriverWait(self.browser, 2).until(EC.alert_is_present())
                 self.browser.switch_to_alert().accept()
@@ -110,6 +114,7 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
 
         self._dismiss_alert()
 
+    @skipUnless(ENABLE_CYBERSOURCE_TESTS, 'CyberSource tests are not enabled.')
     @ddt.data(
         {
             'country': 'US',
