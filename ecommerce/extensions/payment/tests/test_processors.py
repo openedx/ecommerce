@@ -13,8 +13,6 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 import httpretty
 import mock
-from waffle.models import Switch
-
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -24,6 +22,7 @@ from paypalrestsdk.resource import Resource
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
@@ -39,7 +38,6 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
-
 
 log = logging.getLogger(__name__)
 
@@ -479,7 +477,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         results in one, or more, retry attempts. If all attempts fail, verify a
         GatewayError is raised.
         """
-        Switch.objects.get_or_create(name='PAYPAL_RETRY_ATTEMPTS', active=True)
+        toggle_switch('PAYPAL_RETRY_ATTEMPTS', True)
         self.mock_oauth2_response()
         self.mock_payment_creation_response(self.basket, find=True)
         self.mock_payment_execution_response(self.basket)

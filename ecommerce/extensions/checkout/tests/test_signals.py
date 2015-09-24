@@ -4,8 +4,8 @@ from django.test import TestCase
 import httpretty
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory, UserFactory
-from waffle.models import Switch
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
@@ -24,7 +24,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
             body='{"display_name": "Hogwarts"}',
             content_type="application/json"
         )
-        Switch.objects.get_or_create(name='ENABLE_NOTIFICATIONS', active=True)
+        toggle_switch('ENABLE_NOTIFICATIONS', True)
         user = UserFactory()
         course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
         seat = course.create_or_update_seat('credit', False, 50, 'ASU', None, 2)
