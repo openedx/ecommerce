@@ -39,6 +39,7 @@ class UserMixin(object):
         payload = {
             'username': user.username,
             'email': user.email,
+            'iss': settings.JWT_ISSUERS[0]
         }
         return "JWT {token}".format(token=jwt.encode(payload, secret))
 
@@ -59,7 +60,7 @@ class JwtMixin(object):
     def generate_token(self, payload, secret=None):
         """Generate a JWT token with the provided payload."""
         secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(payload, secret)
+        token = jwt.encode(dict(payload, iss=settings.JWT_ISSUERS[0]), secret)
         return token
 
 

@@ -50,6 +50,8 @@ COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
 ENABLE_AUTO_AUTH = True
 
 JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-secret-key'
+
+JWT_ISSUERS = ('test-issuer',)
 # END AUTHENTICATION
 
 

@@ -21,6 +21,7 @@ from ecommerce.extensions.api import data as data_api, exceptions as api_excepti
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
+from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment import exceptions as payment_exceptions
@@ -386,6 +387,7 @@ class OrderByBasketRetrieveView(OrderRetrieveView):
 
 class OrderFulfillView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, DjangoModelPermissions,)
+    throttle_classes = (ServiceUserThrottle,)
     lookup_field = 'number'
     queryset = Order.objects.all()
     serializer_class = serializers.OrderSerializer

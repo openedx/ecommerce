@@ -94,13 +94,16 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
 
 
 @ddt.ddt
+@override_settings(ECOMMERCE_SERVICE_WORKER_USERNAME='test-service-user')
 class OrderFulfillViewTests(UserMixin, TestCase):
 
     def setUp(self):
         super(OrderFulfillViewTests, self).setUp()
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
-        self.user = self.create_user(is_superuser=True)
+        # Use the ecommerce worker service user in order to cover
+        # request throttling code in extensions/api/throttles.py
+        self.user = self.create_user(is_superuser=True, username='test-service-user')
         self.client.login(username=self.user.username, password=self.password)
 
         self.order = factories.create_order(user=self.user)
