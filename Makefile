@@ -40,7 +40,7 @@ serve:
 clean:
 	find . -name '*.pyc' -delete
 	coverage erase
-	rm -rf assets/ ecommerce/static/build coverage
+	rm -rf assets/ ecommerce/static/build coverage htmlcov
 
 validate_js:
 	rm -rf coverage

@@ -1,181 +1,124 @@
-Acceptance Testing
+E-Commerce Acceptance Testing
+=============================
+
+The acceptance tests contained herein verify behavior which relies on external systems like the LMS and payment processors. At a minimum, these tests should be run against a staging environment before deploying code to production to verify that critical user workflows are functioning as expected. With the right configuration in place, the tests can also be run locally.
+
+Definitions
+-----------
+
+Definitions of commonly used terms:
+
+* LMS: The edX Learning Management System. Course content is found here.
+* Otto: Nickname used to refer to the edX E-Commerce Service, a Django application used to manage edX's product catalog and handle orders for those products.
+* CAT: The Course Administration Tool, part of Otto. Provides a UI which can be used to configure and otherwise manage products associated with courses available on the LMS.
+
+LMS Configuration
+-----------------
+
+Running the acceptance tests successfully requires that you first correctly configure the LMS and Otto. We'll start with the LMS.
+
+#. Verify that the following settings in ``lms.env.json`` are correct::
+
+    "ECOMMERCE_API_URL": "http://localhost:8002/api/v2/"
+    "ECOMMERCE_PUBLIC_URL_ROOT": "http://localhost:8002/"
+    "JWT_ISSUER": "http://127.0.0.1:8000/oauth2" // Must match Otto's JWT_ISSUER setting
+    "OAUTH_ENFORCE_SECURE": false
+    "OAUTH_OIDC_ISSUER": "http://127.0.0.1:8000/oauth2"
+
+#. Verify that the following settings in ``lms.auth.json`` are correct::
+
+    "EDX_API_KEY": "replace-me" // Must match Otto's EDX_API_KEY setting
+    "ECOMMERCE_API_SIGNING_KEY": "insecure-secret-key" // Must match Otto's JWT_SECRET_KEY setting
+
+#. To faciliate the following configuration steps, verify that an LMS account with staff and superuser permissions exists. On most LMS instances, a user with the username ``staff``, the email address ``staff@example.com``, and the password ``edx`` will already have staff permissions. Grant the account superuser privileges as follows::
+
+    $ ``./manage.py lms shell --settings=devstack``
+    >>> from django.contrib.auth.models import User
+    >>> u = User.objects.get(username='staff')
+    >>> u.is_superuser = True
+    >>> u.save()
+
+#. Navigate to the Django admin and verify that an OAuth2 client with the following attributes exists. If one doesn't already exist, create a new one. The client ID and secret must match the values of Otto's ``SOCIAL_AUTH_EDX_OIDC_KEY`` and ``SOCIAL_AUTH_EDX_OIDC_SECRET`` settings, respectively. ::
+
+    URL:  http://localhost:8002/
+    Redirect URI: http://localhost:8002/complete/edx-oidc/
+    Client ID: 'replace-me'
+    Client Secret: 'replace-me'
+    Client Type: Confidential
+
+#. In the Django admin, verify that the OAuth2 client referred to above is designated as a trusted client. If this isn't already the case, add the client created above as a new trusted client.
+
+#. In the Django admin, create a new access token for the superuser referred to previously. Set the client to the OAuth2 client referred to above. Make note of this token; it is required to run the acceptance tests.
+
+#. At a minimum, the acceptance tests require the existence of two courses on the LMS instance being used for testing. The edX Demonstration Course should be present by default on most LMS instances. Use Studio to create a second course now.
+
+Otto Configuration
 ------------------
 
-In order to run the acceptance tests, complete all of the steps outlined
-below, then run the following command:
+#. Use the CAT to finish configuring the courses you created above. You can find the CAT at ``http://localhost:8002/courses/``. Add both of the courses present on your LMS instance to Otto. Configure one as "Free (Honor)" course, and the second as a "Verified" course.
 
-::
+#. Testing integration with external payment processors requires updating the contents of the ``PAYMENT_PROCESSOR_CONFIG`` dictionary found in the settings with valid credentials. To override the default values for development, create a private settings module, ``private.py``, and add set ``PAYMENT_PROCESSOR_CONFIG`` within.
 
-    APP_SERVER_URL="http://localhost:8002" LMS_URL="http://127.0.0.1:8000" LMS_USERNAME="<LMS-USERNAME>" LMS_EMAIL="<LMS-EMAIL>" LMS_PASSWORD="<LMS-PASSWORD>" ACCESS_TOKEN="<ACCESS-TOKEN>" HTTPS_RECEIPT_PAGE=False ENABLE_LMS_AUTO_AUTH=True PAYPAL_EMAIL="<PAYPAL-EMAIL>" PAYPAL_PASSWORD="<PAYPAL-PASSWORD>" VERIFIED_COURSE_ID="<VERIFIED-COURSE-ID>" make accept
+Environment Variables
+---------------------
 
-In order to run an individual test, simply replace ``make accept`` with
-``nosetests -v path/to/the/test/file``. For an explanation of what each
-of these environment variables mean, see "Running in a Production
-Environment".
+Our acceptance tests rely on configuration which can be specified using environment variables.
 
-Learning Management System (LMS) Settings
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| Variable                  | Purpose                                                                  | Required? | Default Value                        |
++===========================+==========================================================================+===========+======================================+
+| ACCESS\_TOKEN             | OAuth2 access token used to authenticate requests                        | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ENABLE\_OAUTH2\_TESTS     | Whether to run tests verifying that the LMS can be used to sign into Otto| No        | True                                 |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| HONOR\_COURSE\_ID         | The ID of a Free (Honor) course                                          | No        | 'edX/DemoX/Demo_Course'              |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| VERIFIED\_COURSE\_ID      | The ID of a Verified course                                              | No        | 'edX/victor101/Victor_s_test_course' |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ECOMMERCE\_URL\_ROOT      | URL root for the E-Commerce Service                                      | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ECOMMERCE\_API\_URL       | URL for the E-Commerce API, used to initialize an API client             | No        | ECOMMERCE\_URL\_ROOT + '/api/v2'     |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ECOMMERCE\_API\_TOKEN     | Token used to authenticate against the E-Commerce API                    | No        | ACCESS\_TOKEN                        |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| PAYPAL\_EMAIL             | Email address used to sign into PayPal during payment                    | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| PAYPAL\_PASSWORD          | Password used to sign into PayPal during payment                         | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ENABLE\_CYBERSOURCE\_TESTS| Whether to run tests verifying the CyberSource payment flow              | No        | True                                 |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| LMS\_URL\_ROOT            | URL root for the LMS                                                     | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| LMS\_USERNAME             | Username belonging to an LMS user to use during testing                  | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| LMS\_EMAIL                | Email address used to sign into the LMS                                  | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| LMS\_PASSWORD             | Password used to sign into the LMS                                       | Yes       | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| LMS\_AUTO\_AUTH           | Whether auto-auth is enabled on the LMS                                  | No        | False                                |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| LMS\_HTTPS                | Whether HTTPS is enabled on the LMS                                      | No        | True                                 |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ENROLLMENT\_API\_URL      | URL for the LMS Enrollment API                                           | No        | LMS\_URL\_ROOT + '/api/enrollment/v1'|
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| ENROLLMENT\_API\_TOKEN    | Token used to authenticate against the Enrollment API                    | No        | ACCESS\_TOKEN                        |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| BASIC\_AUTH\_USERNAME     | Username used to bypass HTTP basic auth on the LMS                       | No        | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| BASIC\_AUTH\_PASSWORD     | Password used to bypass HTTP basic auth on the LMS                       | No        | N/A                                  |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
 
-1. In order to begin testing user authentication and course enrollment,
-   modify the settings of the LMS server to reflect these changes:
+Running Tests
+-------------
 
-   ::
+Run all acceptance tests by executing ``make accept``. To run a specific test, execute::
 
-       ENABLE_OAUTH2_PROVIDER: True,
-       OAUTH_ENFORCE_SECURE: False,
-       OAUTH_ENFORCE_CLIENT_SECURE: False,
-       OAUTH_OIDC_ISSUER: "http://127.0.0.1:8000/oauth2"
+    $ nosetests -v <path/to/the/test/module>
 
-   The E-Commerce API URL is often in the following form:
-   ``http://{IP Address of VirtualBox}:8002/api/v2``.
+As discussed above, the acceptance tests rely on configuration which can be specified using environment variables. For example, when running the acceptance tests against local instances of Otto and the LMS, you might run::
 
-2. Next, a Django superuser account must be created if one does not
-   currently exist. This can be done by assigning superuser privileges
-   to a new edX account. Once a new account has been created, the user
-   can be granted superuser status by following the steps below:
+    $ ECOMMERCE_URL_ROOT="http://localhost:8002" LMS_URL_ROOT="http://127.0.0.1:8000" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="False" LMS_AUTO_AUTH="True" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" ENABLE_CYBERSOURCE_TESTS="False" VERIFIED_COURSE_ID="<course ID>" make accept
 
-   1. Open the Django shell on the LMS server:
+When running against a production-like staging environment, you might run::
 
-      ``./manage.py lms shell --settings=devstack``
-
-   2. In the Django shell, run the following commands:
-
-      ::
-
-          >>> from django.contrib.auth.models import User
-          >>> u=User.objects.get(email='{email of new user}')
-          >>> u.is_staff = True
-          >>> u.is_superuser = True
-          >>> u.save()
-
-   3. Exit the Python shell by calling ``exit()``.
-
-3. Once superuser status is in place, navigate to the Django admin panel
-   and log in with the new credentials. From here, add a new client with
-   the following properties:
-
-   ::
-
-       User: {ID of superuser}
-       Url:  http://localhost:8002/
-       Redirect url: http://localhost:8002/complete/edx-oidc/
-       Client type: Confidential
-
-   Click *Save*.
-
-4. Add this client as a trusted client by clicking on the *Add* button
-   next to "Trusted Clients".
-
-5. Add an access token for the superuser by clicking the *Add* button
-   next to "Access Tokens". Set the "Client" of the access token to the
-   client just created, and make sure that the expiration date is sometime
-   into the future.  Make note of this access token, as it will be
-   required to run the acceptance tests. Once this step is completed,
-   close out of the admin panel.
-
-6. After these settings are confirmed, open
-   ``ecommerce/settings/local.py``. Ensure that
-   ``SOCIAL_AUTH_EDX_OIDC_KEY`` is set to the client ID of the superuser
-   client and that ``SOCIAL_AUTH_EDX_OIDC_SECRET`` is set to the
-   superuser's client secret (both of these values can be found in the
-   Django admin panel under "Clients"). ``EDX_API_KEY`` should match the
-   corresponding value specified on the LMS server.
-
-Oscar E-Commerce Settings
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-1. To ensure Oscar functions correctly with Paypal and Cybersource,
-   developer accounts on both sites are required. Once the accounts are
-   setup, update the ``PAYMENT_PROCESSOR_CONFIG`` setting in
-   ``local.py``.
-
-2. Create a new course in edX Studio and record the course key, which will
-   be used later.
-
-3. Navigate back to the LMS Django admin site. Select "Course Modes"
-   and click "Add course mode". Add two course modes with the following attributes:
-
-   +--------------------+-----------------------------------+---------------------------------+
-   | Attribute          | First Course Mode                 | Second Course Mode              |
-   +====================+===================================+=================================+
-   | Course id          | {*the course key from earlier*}   | {*the course key from earlier*} |
-   +--------------------+-----------------------------------+---------------------------------+
-   | Mode slug          | honor                             | verified                        |
-   +--------------------+-----------------------------------+---------------------------------+
-   | Mode display name  | Honor                             | Verified                        |
-   +--------------------+-----------------------------------+---------------------------------+
-   | Min price          | 0                                 | {*any # greater than 0*}        |
-   +--------------------+-----------------------------------+---------------------------------+
-   | SKU                | honor-variant                     | verified-variant                |
-   +--------------------+-----------------------------------+---------------------------------+
-
-4. Login to the Oscar dashboard as the superuser.
-
-5. Create a new product:
-
-   1. From the menu, select Products > Catalogue.
-   2. Add a new product of type "Seat" and fill it out with the new
-      course information.
-   3. Under the "Categories" tab, set the category to type "Seat".
-   4. Under the "Attributes" tab, set the course key to the course key
-      of the new course.
-   5. Set the certificate type to type "verified".
-
-6. Under the "Variants" tab, add two course variants, each with the
-   following settings:
-
-   +--------------------+-----------------------------------+-----------------------------------+
-   | Attribute          | First Variant                     | Second Variant                    |
-   +====================+===================================+===================================+
-   | Name               | Honor                             | Verified                          |
-   +--------------------+-----------------------------------+-----------------------------------+
-   | Certificate Type   | honor                             | verified                          |
-   +--------------------+-----------------------------------+-----------------------------------+
-   | Course Key         | (*the course key from earlier*)   | (*the course key from earlier*)   |
-   +--------------------+-----------------------------------+-----------------------------------+
-   | Partner            | edX                               | edX                               |
-   +--------------------+-----------------------------------+-----------------------------------+
-   | Price (excl tax)   | 0                                 | (*any # greater than 0*)          |
-   +--------------------+-----------------------------------+-----------------------------------+
-   | SKU                | honor-variant                     | verified-variant                  |
-   +--------------------+-----------------------------------+-----------------------------------+
-
-   Be sure that the currency between the variants and the course modes match before continuing.
-
-Running in a Production Environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If the acceptance tests are to be run in a production environment, the
-below table should be used to determine the appropriate environment
-variables that should be set.
-
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| Variable                  | Purpose                                                                  | Example                                   |
-+===========================+==========================================================================+===========================================+
-| BASIC\_AUTH\_USERNAME     | Username for basic server authentication                                 | MyUsername                                |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| BASIC\_AUTH\_PASSWORD     | Password for basic server authentication                                 | my\_pass1234                              |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| APP\_SERVER\_URL          | The URL of the E-Commerce server                                         | https://ecommerce.example.com             |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| LMS\_URL                  | URL of the LMS server                                                    | https://courses.example.com               |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| LMS\_USERNAME             | Username of the LMS user account                                         | MyUsername                                |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| LMS\_EMAIL                | Email of the LMS user account                                            | MyEmail@example.com                       |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| LMS\_PASSWORD             | Password of the LMS user account                                         | my\_pass1234                              |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| ACCESS\_TOKEN             | Access token for the LMS user account                                    | abcd1234                                  |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| HTTPS\_RECEIPT\_PAGE      | Indicates whether the receipt page uses SSL                              | True                                      |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| ENABLE\_LMS\_AUTO\_AUTH   | | Indicates whether auto auth should be used when testing registration   | False                                     |
-|                           | | If auto auth is used, LMS credentials can be omitted.                  |                                           |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| PAYPAL\_EMAIL             | Email address for the PayPal account to use                              | testUser-buyer@example.com                |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| PAYPAL\_PASSWORD          | Password for the PayPal account to use                                   | test\_pass1234                            |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
-| VERIFIED\_COURSE\_ID      | Course ID of a verified course                                           | edx/verified-course/verified\_course\_1   |
-+---------------------------+--------------------------------------------------------------------------+-------------------------------------------+
+    $ ECOMMERCE_URL_ROOT="https://ecommerce.stage.edx.org" LMS_URL_ROOT="https://courses.stage.edx.org" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="True" LMS_AUTO_AUTH="False" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" BASIC_AUTH_USERNAME="<username>" BASIC_AUTH_PASSWORD="<password>" HONOR_COURSE_ID="<course ID>" VERIFIED_COURSE_ID="<course ID>" make accept
