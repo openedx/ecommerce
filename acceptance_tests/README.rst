@@ -81,6 +81,8 @@ Our acceptance tests rely on configuration which can be specified using environm
 +---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
 | ECOMMERCE\_API\_TOKEN     | Token used to authenticate against the E-Commerce API                    | No        | ACCESS\_TOKEN                        |
 +---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+| MAX\_COMPLETION\_RETRIES  | Number of times to retry checking for an order's completion              | No        | 3                                    |
++---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
 | PAYPAL\_EMAIL             | Email address used to sign into PayPal during payment                    | Yes       | N/A                                  |
 +---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
 | PAYPAL\_PASSWORD          | Password used to sign into PayPal during payment                         | Yes       | N/A                                  |
