@@ -90,3 +90,35 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMi
         results = [self.serialize_product(p) for p in self.course.products.all()]
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
         self.assertDictEqual(json.loads(response.content), expected)
+
+    def test_get_partner_products(self):
+        """Verify the endpoint returns the list of products associated with a
+        partner.
+        """
+        url = reverse(
+            'api:v2:partner-product-list',
+            kwargs={'parent_lookup_stockrecords__partner_id': self.partner.id}
+        )
+        response = self.client.get(url)
+        expected_data = self.serialize_product(self.seat)
+        self.assertEqual(response.status_code, 200)
+        self.assertListEqual(json.loads(response.content)['results'], [expected_data])
+
+    def test_no_partner_product(self):
+        """Verify the endpoint returns an empty list if no products are
+        associated with a partner.
+        """
+        Product.objects.all().delete()
+        url = reverse(
+            'api:v2:partner-product-list',
+            kwargs={'parent_lookup_stockrecords__partner_id': self.partner.id}
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        expected = {
+            'count': 0,
+            'next': None,
+            'previous': None,
+            'results': []
+        }
+        self.assertDictEqual(json.loads(response.content), expected)
