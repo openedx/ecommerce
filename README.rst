@@ -14,6 +14,13 @@ Prerequisites
 * `gettext <http://www.gnu.org/software/gettext/>`_
 * `npm <https://www.npmjs.org/>`_
 
+Documentation |ReadtheDocs|_
+----------------------------
+.. |ReadtheDocs| image:: https://readthedocs.org/projects/open-edx-ecommerce-guide/badge/?version=latest
+.. _ReadtheDocs: https://open-edx-ecommerce-guide.readthedocs.org/en/latest/
+
+`Documentation <https://open-edx-ecommerce-guide.readthedocs.org/en/latest/>`_ is hosted on Read the Docs.
+
 Getting Started
 ---------------
 
@@ -163,11 +170,6 @@ For instructions on how to run the acceptance tests, please consult the
 README file located in the `acceptance tests README`_.
 
 .. _acceptance tests README: acceptance_tests/README.rst
-
-Documentation |ReadtheDocs|_
-----------------------------
-.. |ReadtheDocs| image:: https://readthedocs.org/projects/edx-ecommerce/badge/?version=latest
-.. _ReadtheDocs: http://edx-ecommerce.readthedocs.org/en/latest/
 
 License
 -------
