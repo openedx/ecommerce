@@ -1,13 +1,13 @@
 Testing
 =======
 
-The command below runs the Python tests and code quality validation—Pylint and PEP8.
+To run the unit test suite followed by quality checks, run:
 
 .. code-block:: bash
 
     $ make validate
 
-Code quality validation can be run independently with:
+Code quality validation can be performed independently with:
 
 .. code-block:: bash
 
@@ -139,3 +139,8 @@ As discussed above, the acceptance tests rely on configuration which can be spec
 When running against a production-like staging environment, you might run::
 
     $ ECOMMERCE_URL_ROOT="https://ecommerce.stage.edx.org" LMS_URL_ROOT="https://courses.stage.edx.org" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="True" LMS_AUTO_AUTH="False" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" BASIC_AUTH_USERNAME="<username>" BASIC_AUTH_PASSWORD="<password>" HONOR_COURSE_ID="<course ID>" VERIFIED_COURSE_ID="<course ID>" make accept
+
+JavaScript Testing
+------------------
+
+This project uses `Jasmine <http://jasmine.github.io/2.3/introduction.html>`_ for JavaScript unit testing. Tests should be placed in ``ecommerce/static/js/test/specs`` and suffixed with ``_spec``. For example, ``ecommerce/static/js/test/specs/course_list_view_spec.js``. All JavaScript code should adhere to the `edX JavaScript standards <https://github.com/edx/edx-platform/wiki/Javascript-standards-for-the-edx-platform>`_. These standards are enforced using `JSHint <http://www.jshint.com/>`_ and `jscs <https://www.npmjs.org/package/jscs>`_.

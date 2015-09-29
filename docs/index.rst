@@ -12,11 +12,13 @@ These are the developer docs for the edX E-Commerce Service.
    :maxdepth: 2
 
    getting_started
-   partner_config
+   asset_pipeline
    testing
    features
-   internationalization
+   partner_config
    fulfillment
+   notifications
+   internationalization
 
 TODO
    - Oscar Dashboard
