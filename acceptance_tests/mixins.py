@@ -5,9 +5,19 @@ from ecommerce_api_client.client import EcommerceApiClient
 import requests
 
 from acceptance_tests.api import EnrollmentApiClient
-from acceptance_tests.config import (ENABLE_LMS_AUTO_AUTH, APP_SERVER_URL, LMS_PASSWORD, LMS_EMAIL, LMS_URL,
-                                     BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ECOMMERCE_API_SERVER_URL,
-                                     LMS_USERNAME, ECOMMERCE_API_TOKEN)
+from acceptance_tests.config import (
+    LMS_AUTO_AUTH,
+    ECOMMERCE_URL_ROOT,
+    LMS_PASSWORD,
+    LMS_EMAIL,
+    LMS_URL_ROOT,
+    BASIC_AUTH_USERNAME,
+    BASIC_AUTH_PASSWORD,
+    ECOMMERCE_API_URL,
+    LMS_USERNAME,
+    ECOMMERCE_API_TOKEN,
+    MAX_COMPLETION_RETRIES,
+)
 from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage
 
 log = logging.getLogger(__name__)
@@ -17,7 +27,7 @@ class LmsUserMixin(object):
     password = 'edx'
 
     def get_lms_user(self):
-        if ENABLE_LMS_AUTO_AUTH:
+        if LMS_AUTO_AUTH:
             return self.create_lms_user()
 
         return LMS_USERNAME, LMS_PASSWORD, LMS_EMAIL
@@ -32,7 +42,11 @@ class LmsUserMixin(object):
         username, email, password = self.generate_user_credentials(username_prefix='auto_auth_')
 
         url = '{host}/auto_auth?no_login=true&username={username}&password={password}&email={email}'.format(
-            host=LMS_URL, username=username, password=password, email=email)
+            host=LMS_URL_ROOT,
+            username=username,
+            password=password,
+            email=email
+        )
         auth = None
 
         if BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD:
@@ -73,7 +87,7 @@ class LogistrationMixin(LmsUserMixin):
 
 class LogoutMixin(object):
     def logout(self):
-        url = '{}/accounts/logout/'.format(APP_SERVER_URL)
+        url = '{}/accounts/logout/'.format(ECOMMERCE_URL_ROOT)
         self.browser.get(url)
 
 
@@ -104,7 +118,7 @@ class EnrollmentApiMixin(object):
 class EcommerceApiMixin(object):
     @property
     def ecommerce_api_client(self):
-        return EcommerceApiClient(ECOMMERCE_API_SERVER_URL, oauth_access_token=ECOMMERCE_API_TOKEN)
+        return EcommerceApiClient(ECOMMERCE_API_URL, oauth_access_token=ECOMMERCE_API_TOKEN)
 
     def assert_order_created_and_completed(self):
         orders = self.ecommerce_api_client.orders.get()['results']
@@ -112,8 +126,22 @@ class EcommerceApiMixin(object):
 
         # TODO Validate this is the correct order.
         order = orders[0]
+        self.assertTrue(self._verify_completion(order))
 
-        self.assertEqual(order['status'], 'Complete')
+    def _verify_completion(self, order):
+        """Check a configurable number of times to see if the order is complete."""
+        is_complete = True if order['status'] == 'Complete' else False
+        retries = 0
+        number = order['number']
+
+        while not is_complete and retries < MAX_COMPLETION_RETRIES:
+            order = self.ecommerce_api_client.orders(number).get()
+            if order['status'] == 'Complete':
+                is_complete = True
+            else:
+                retries += 1
+
+        return is_complete
 
 
 class UnenrollmentMixin(object):

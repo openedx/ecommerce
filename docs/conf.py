@@ -11,6 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from datetime import datetime
 import os
 
 # on_rtd is whether we are on readthedocs.org
@@ -49,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'E-Commerce Service'
-copyright = u'2015, edX'
+copyright = u'{year}, edX'.format(year=datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

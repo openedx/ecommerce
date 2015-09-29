@@ -3,9 +3,10 @@ import urllib
 
 from bok_choy.page_object import PageObject
 from bok_choy.promise import EmptyPromise
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 
-from acceptance_tests.config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, APP_SERVER_URL, LMS_URL
+from acceptance_tests.config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ECOMMERCE_URL_ROOT, LMS_URL_ROOT
 
 
 class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method
@@ -18,8 +19,8 @@ class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method
     def __init__(self, browser, path=None):
         super(EcommerceAppPage, self).__init__(browser)
         path = path or self.path
-        self.server_url = APP_SERVER_URL
-        self.page_url = '{0}/{1}'.format(self.server_url, path)
+        self.server_url = ECOMMERCE_URL_ROOT
+        self.page_url = '{}/{}'.format(self.server_url, path)
 
 
 class DashboardHomePage(EcommerceAppPage):
@@ -33,10 +34,10 @@ class LMSPage(PageObject):  # pylint: disable=abstract-method
     __metaclass__ = abc.ABCMeta
 
     def _build_url(self, path):
-        url = '{0}/{1}'.format(LMS_URL, path)
+        url = '{}/{}'.format(LMS_URL_ROOT, path)
 
         if BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD:
-            url = url.replace('://', '://{0}:{1}@'.format(BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD))
+            url = url.replace('://', '://{}:{}@'.format(BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD))
 
         return url
 
@@ -50,7 +51,7 @@ class LMSLoginPage(LMSPage):
 
         if course_id:
             params = {'enrollment_action': 'enroll', 'course_id': course_id}
-            url = '{0}?{1}'.format(url, urllib.urlencode(params))
+            url = '{}?{}'.format(url, urllib.urlencode(params))
 
         return url
 
@@ -72,7 +73,7 @@ class LMSRegistrationPage(LMSPage):
 
         if course_id:
             params = {'enrollment_action': 'enroll', 'course_id': course_id}
-            url = '{0}?{1}'.format(url, urllib.urlencode(params))
+            url = '{}?{}'.format(url, urllib.urlencode(params))
 
         return url
 
@@ -85,8 +86,11 @@ class LMSRegistrationPage(LMSPage):
         self.q(css='input#register-email').fill(email)
         self.q(css='input#register-password').fill(password)
 
-        select = Select(self.browser.find_element_by_css_selector('select#register-country'))
-        select.select_by_value('US')
+        try:
+            select = Select(self.browser.find_element_by_css_selector('select#register-country'))
+            select.select_by_value('US')
+        except NoSuchElementException:
+            pass
 
         self.q(css='input#register-honor_code').click()
         self.q(css='button.register-button').click()
