@@ -17,7 +17,7 @@ define([
         return Backbone.View.extend({
 
             /**
-             * Reference to segment.io analytics library.  This is set after
+             * Reference to Segment analytics library.  This is set after
              * loading.
              */
 
@@ -49,7 +49,7 @@ define([
             },
 
             /**
-             * This sets up segment.io for our application and loads the initial
+             * This sets up Segment for our application and loads the initial
              * page load.
              *
              * this.segment is set for convenience.
@@ -97,7 +97,7 @@ define([
 
             /**
              * Catch 'segment:track' events and create events and send
-             * to segment.io.
+             * to Segment.
              *
              * @param eventType String event type.
              */
