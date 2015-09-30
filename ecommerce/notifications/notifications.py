@@ -22,10 +22,10 @@ def send_notification(user, commtype_code, context):
 
     """
 
-    tracking_id, client_id = parse_tracking_context(user)
+    tracking_id, client_id, ip = parse_tracking_context(user)
 
     tracking_pixel = 'https://www.google-analytics.com/collect?v=1&t=event&ec=email&ea=open&tid={tracking_id}' \
-                     '&cid={client_id}'.format(tracking_id=tracking_id, client_id=client_id)
+                     '&cid={client_id}&uip={ip}'.format(tracking_id=tracking_id, client_id=client_id, ip=ip)
     full_name = user.get_full_name()
     context.update({
         'full_name': full_name,

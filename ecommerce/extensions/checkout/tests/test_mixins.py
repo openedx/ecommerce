@@ -77,7 +77,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         Ensure that tracking events are fired with correct content when order
         placement event handling is invoked.
         """
-        tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id'}
+        tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id', 'lms_ip': '127.0.0.1'}
         self.user.tracking_context = tracking_context
         self.user.save()
 
@@ -91,6 +91,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
                 self.order,
                 tracking_context['lms_user_id'],
                 tracking_context['lms_client_id'],
+                tracking_context['lms_ip'],
                 self.order.number,
                 self.order.currency,
                 self.order.total_excl_tax
@@ -130,6 +131,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
             mock_track,
             self.order,
             'ecommerce-{}'.format(self.user.id),
+            None,
             None,
             self.order.number,
             self.order.currency,

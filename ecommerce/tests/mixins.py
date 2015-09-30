@@ -171,13 +171,13 @@ class BusinessIntelligenceMixin(object):
     """Provides assertions for test cases validating the emission of business intelligence events."""
 
     def assert_correct_event(
-            self, mock_track, instance, expected_user_id, expected_client_id, order_number, currency, total
+            self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency, total
     ):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
         self.assertEqual(event_user_id, expected_user_id)
         self.assertEqual(event_name, 'Completed Order')
-        self.assertEqual(kwargs['context'], {'Google Analytics': {'clientId': expected_client_id}})
+        self.assertEqual(kwargs['context'], {'ip': expected_ip, 'Google Analytics': {'clientId': expected_client_id}})
         self.assert_correct_event_payload(instance, event_payload, order_number, currency, total)
 
     def assert_correct_event_payload(self, instance, event_payload, order_number, currency, total):

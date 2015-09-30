@@ -186,7 +186,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     }
                 )
             try:
-                __, client_id = parse_tracking_context(order.user)
+                __, client_id, __ = parse_tracking_context(order.user)
                 response = self._post_to_enrollment_api(data, client_id=client_id)
 
                 if response.status_code == status.HTTP_200_OK:
@@ -242,7 +242,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            __, client_id = parse_tracking_context(line.order.user)
+            __, client_id, __ = parse_tracking_context(line.order.user)
             response = self._post_to_enrollment_api(data, client_id=client_id)
 
             if response.status_code == status.HTTP_200_OK:
