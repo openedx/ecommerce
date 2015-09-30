@@ -3,24 +3,27 @@ from copy import deepcopy
 from decimal import Decimal
 import json
 
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 import mock
 import pytz
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.models import SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.mixins import UserMixin, PartnerMixin
+
 
 EXPIRES = datetime(year=1992, month=4, day=24, tzinfo=pytz.utc)
 EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
 
 
-class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
+class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, PartnerMixin, TestCase):
     def setUp(self):
         super(AtomicPublicationTests, self).setUp()
 
@@ -108,6 +111,16 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         self.error_message = u'Failed to publish commerce data for [{course_id}] to LMS.'.format(
             course_id=self.course_id
         )
+        self.partner = self.create_partner('dummy')
+        self.site, __ = Site.objects.get_or_create(domain='example.com')
+
+        SiteConfiguration.objects.create(
+            site=self.site,
+            partner=self.partner,
+            lms_url_root='https://courses.stage.edx.org',
+            theme_scss_path='/css/path/',
+            payment_processors='paypal'
+        )
         self.switch_disable_error = (
             u'Course [{course_id}] was not published to LMS '
             u'because the switch [publish_course_modes_to_lms] is disabled. '
@@ -138,6 +151,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
 
                 attrs['expires'] = EXPIRES if product['expires'] else None
                 attrs['price'] = Decimal(product['price'])
+                attrs['partner'] = self.partner
 
                 course.create_or_update_seat(**attrs)
 
@@ -266,6 +280,32 @@ class AtomicPublicationTests(CourseCatalogTestMixin, UserMixin, TestCase):
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
         self._assert_course_saved(self.course_id)
+
+    def test_create_without_site(self):
+        """Verify that when site is not present still Course and associated
+        products can be created and published using the first partner in database."""
+        Site.objects.filter(domain='example.com').delete()
+        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 500)
+        self._assert_course_saved(self.course_id)
+        self._toggle_publication(True)
+
+        self.assertEqual(response.data.get('error'), self.switch_disable_error)
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            # If publication fails, the view should return a 500 and data should NOT be saved.
+            mock_publish.return_value = self.switch_disable_error
+            response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+
+            self.assertEqual(response.status_code, 500)
+            self._assert_course_saved(self.course_id)
+            self.assertEqual(response.data.get('error'), self.switch_disable_error)
+
+            # If publication succeeds, the view should return a 201 and data should be saved.
+            mock_publish.return_value = None
+            response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+            self.assertEqual(response.status_code, 201)
+            self._assert_course_saved(self.course_id, expected=self.data)
 
     def test_invalid_product_class(self):
         """Verify that attempting to save a product with a product class other than 'Seat' yields a 400."""

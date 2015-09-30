@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.db import transaction
+from oscar.core.loading import get_model
 import requests
 import waffle
 
@@ -13,11 +14,13 @@ from ecommerce.courses.models import Course
 
 
 logger = logging.getLogger(__name__)
+Partner = get_model('partner', 'Partner')
 
 
 class MigratedCourse(object):
-    def __init__(self, course_id):
+    def __init__(self, course_id, partner_short_code):
         self.course, _created = Course.objects.get_or_create(id=course_id)
+        self.partner, __ = Partner.objects.get_or_create(short_code=partner_short_code)
 
     def load_from_lms(self, access_token):
         """
@@ -147,7 +150,9 @@ class MigratedCourse(object):
             price = mode['min_price']
             expires = mode.get('expiration_datetime')
             expires = parse(expires) if expires else None
-            self.course.create_or_update_seat(certificate_type, id_verification_required, price, expires=expires)
+            self.course.create_or_update_seat(
+                certificate_type, id_verification_required, price, self.partner, expires=expires
+            )
 
 
 class Command(BaseCommand):
@@ -165,20 +170,30 @@ class Command(BaseCommand):
                     default=False,
                     help='Save the migrated data to the database. If this is not set, '
                          'migrated data will NOT be saved to the database.'),
+        make_option('--partner',
+                    action='store',
+                    dest='partner_short_code',
+                    default=None,
+                    help='Short code for the partner providing the course.'),
     )
 
     def handle(self, *args, **options):
         course_ids = args
         access_token = options.get('access_token')
+        partner_short_code = options.get('partner')
         if not access_token:
             logger.error('Courses cannot be migrated if no access token is supplied.')
+            return
+
+        if not partner_short_code:
+            logger.error('Courses cannot be migrated without providing a partner short code.')
             return
 
         for course_id in course_ids:
             course_id = unicode(course_id)
             try:
                 with transaction.atomic():
-                    migrated_course = MigratedCourse(course_id)
+                    migrated_course = MigratedCourse(course_id, partner_short_code)
                     migrated_course.load_from_lms(access_token)
 
                     course = migrated_course.course

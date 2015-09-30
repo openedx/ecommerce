@@ -112,8 +112,8 @@ class Course(models.Model):
 
         return name
 
-    def create_or_update_seat(self, certificate_type, id_verification_required, price, credit_provider=None,
-                              expires=None, credit_hours=None):
+    def create_or_update_seat(self, certificate_type, id_verification_required, price, partner,
+                              credit_provider=None, expires=None, credit_hours=None):
         """
         Creates course seat products.
 
@@ -191,8 +191,6 @@ class Course(models.Model):
 
         seat.save()
 
-        # TODO Expose via setting
-        partner = Partner.objects.get(code='edx')
         try:
             stock_record = StockRecord.objects.get(product=seat, partner=partner)
             logger.info(
@@ -201,7 +199,7 @@ class Course(models.Model):
                 course_id
             )
         except StockRecord.DoesNotExist:
-            partner_sku = generate_sku(seat)
+            partner_sku = generate_sku(seat, partner)
             stock_record = StockRecord(product=seat, partner=partner, partner_sku=partner_sku)
             logger.info(
                 'Course seat product stock record with certificate type [%s] for [%s] does not exist. '

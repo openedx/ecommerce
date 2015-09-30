@@ -1,12 +1,26 @@
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.core.models import SiteConfiguration
+from ecommerce.tests.mixins import UserMixin, PartnerMixin
 
 
-class CourseMigrationViewTests(UserMixin, TestCase):
+class CourseMigrationViewTests(UserMixin, PartnerMixin, TestCase):
     path = reverse('courses:migrate')
+
+    def setUp(self):
+        self.partner = self.create_partner('edx')
+        self.site, __ = Site.objects.get_or_create(domain='example.com')
+
+        SiteConfiguration.objects.create(
+            site=self.site,
+            partner=self.partner,
+            lms_url_root='https://courses.stage.edx.org',
+            theme_scss_path='/css/path/',
+            payment_processors='paypal'
+        )
 
     def test_superuser_required(self):
         """ Verify the view is only accessible to superusers. """

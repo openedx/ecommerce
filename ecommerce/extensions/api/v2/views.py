@@ -22,6 +22,7 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_processor_class, get_default_processor_class,
                                                   get_processor_class_by_name)
@@ -561,6 +562,7 @@ class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
     def get_serializer_context(self):
         context = super(AtomicPublicationView, self).get_serializer_context()
         context['access_token'] = self.request.user.access_token
+        context['partner'] = get_partner_for_site(self.request)
         return context
 
     def post(self, request, *args, **kwargs):

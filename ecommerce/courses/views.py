@@ -8,6 +8,9 @@ from django.http import Http404, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView
 
+from ecommerce.extensions.partner.shortcuts import get_partner_for_site
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,6 +38,7 @@ class CourseMigrationView(View):
         course_ids = request.GET.get('course_ids')
         commit = request.GET.get('commit', False)
         commit = commit in ('1', 'true')
+        partner = get_partner_for_site(request)
 
         # Capture all output and logging
         out = StringIO()
@@ -64,7 +68,8 @@ class CourseMigrationView(View):
             course_ids = course_ids.split(',')
 
             call_command('migrate_course', *course_ids, access_token=user.access_token, commit=commit,
-                         settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
+                         partner_short_code=partner.short_code, settings=os.environ['DJANGO_SETTINGS_MODULE'],
+                         stdout=out, stderr=err)
 
             # Format the output for display
             output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),

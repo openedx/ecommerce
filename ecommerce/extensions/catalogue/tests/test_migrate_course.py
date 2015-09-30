@@ -13,6 +13,7 @@ import httpretty
 import mock
 from oscar.core.loading import get_model
 import pytz
+from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.tests import toggle_switch
@@ -28,6 +29,7 @@ EDX_API_KEY = ACCESS_TOKEN = 'edx'
 EXPIRES = datetime.datetime(year=1985, month=10, day=26, hour=1, minute=20, tzinfo=pytz.utc)
 EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
 
+LOGGER_NAME = 'ecommerce.extensions.catalogue.management.commands.migrate_course'
 logger = logging.getLogger(__name__)
 
 Category = get_model('catalogue', 'Category')
@@ -41,6 +43,7 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
     commerce_api_url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
     course_structure_url = urljoin(settings.LMS_URL_ROOT, 'api/course_structure/v0/courses/{}/'.format(course_id))
     enrollment_api_url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(course_id))
+    partner_short_code = 'edx'
 
     prices = {
         'honor': 0,
@@ -78,7 +81,7 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
         self.assertEqual(stock_record.partner, self.partner)
         self.assertEqual(stock_record.price_excl_tax, price)
         self.assertEqual(stock_record.price_currency, 'USD')
-        self.assertEqual(stock_record.partner_sku, generate_sku(seat))
+        self.assertEqual(stock_record.partner_sku, generate_sku(seat, self.partner))
 
     def assert_seat_valid(self, seat, mode):
         """ Verify the given seat is configured correctly. """
@@ -135,7 +138,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
         self._mock_lms_apis()
-        migrated_course = MigratedCourse(self.course_id)
+        migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
         migrated_course.load_from_lms(ACCESS_TOKEN)
         return migrated_course
 
@@ -180,7 +183,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         # Try migrating the course, which should fail.
         try:
-            migrated_course = MigratedCourse(self.course_id)
+            migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
             migrated_course.load_from_lms(ACCESS_TOKEN)
         except Exception as ex:  # pylint: disable=broad-except
             self.assertEqual(ex.message, 'Aborting migration. No name is available for {}.'.format(self.course_id))
@@ -206,7 +209,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             content_type=JSON
         )
 
-        migrated_course = MigratedCourse(self.course_id)
+        migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
         migrated_course.load_from_lms(ACCESS_TOKEN)
         course = migrated_course.course
 
@@ -240,7 +243,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         }
         httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
 
-        migrated_course = MigratedCourse(self.course_id)
+        migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
         migrated_course.load_from_lms(ACCESS_TOKEN)
         course = migrated_course.course
 
@@ -267,7 +270,9 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             mock_publish.return_value = True
-            call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN)
+            call_command(
+                'migrate_course', self.course_id, access_token=ACCESS_TOKEN, partner_short_code=self.partner_short_code
+            )
 
             # Verify that the migrated course was not published back to the LMS
             self.assertFalse(mock_publish.called)
@@ -286,9 +291,70 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         self._mock_lms_apis()
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            call_command('migrate_course', self.course_id, access_token=ACCESS_TOKEN, commit=True)
+            call_command(
+                'migrate_course',
+                self.course_id,
+                access_token=ACCESS_TOKEN,
+                commit=True,
+                partner=self.partner_short_code
+            )
 
             # Verify that the migrated course was published back to the LMS
             self.assertTrue(mock_publish.called)
 
         self.assert_course_migrated()
+
+    @httpretty.activate
+    def test_handle_with_no_partner(self):
+        """ Verify the management command does not run if no partner short code
+        is provided.
+        """
+        self._mock_lms_apis()
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            with LogCapture(LOGGER_NAME, level=logging.ERROR) as l:
+                call_command(
+                    'migrate_course',
+                    self.course_id,
+                    access_token=ACCESS_TOKEN,
+                    commit=True
+                )
+
+                l.check((LOGGER_NAME, 'ERROR', 'Courses cannot be migrated without providing a partner short code.'))
+                # Verify that the migrated course was published back to the LMS
+                self.assertFalse(mock_publish.called)
+
+    @httpretty.activate
+    def test_handle_with_commit_false(self):
+        """ Verify the management command does not save data to the database if commit is false"""
+        self._mock_lms_apis()
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            call_command(
+                'migrate_course',
+                self.course_id,
+                access_token=ACCESS_TOKEN,
+                commit=False,
+                partner=self.partner_short_code
+            )
+
+            # Verify that the migrated course was published back to the LMS
+            self.assertFalse(mock_publish.called)
+
+    @httpretty.activate
+    def test_handle_with_false_switch(self):
+        """ Verify the management command does not save data to the database if commit is false"""
+        self._mock_lms_apis()
+        toggle_switch('publish_course_modes_to_lms', False)
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            call_command(
+                'migrate_course',
+                self.course_id,
+                access_token=ACCESS_TOKEN,
+                commit=True,
+                partner=self.partner_short_code
+            )
+
+            # Verify that the migrated course was published back to the LMS
+            self.assertFalse(mock_publish.called)

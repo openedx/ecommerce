@@ -20,6 +20,7 @@ BillingAddress = get_model('order', 'BillingAddress')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
+Partner = get_model('partner', 'Partner')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
@@ -167,6 +168,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
 
         self.access_token = kwargs['context'].pop('access_token')
+        self.partner = kwargs['context'].pop('partner', None)
 
     def validate_products(self, products):
         """Validate product data."""
@@ -189,6 +191,14 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         return products
 
+    def get_partner(self):
+        """Validate partner"""
+        if not self.partner:
+            partner = Partner.objects.get(id=1)
+            return partner
+
+        return self.partner
+
     def save(self):
         """Save and publish Course and associated products."
 
@@ -200,6 +210,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
         products = self.validated_data['products']
+        partner = self.get_partner()
 
         try:
             if not waffle.switch_is_active('publish_course_modes_to_lms'):
@@ -237,6 +248,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         certificate_type,
                         id_verification_required,
                         price,
+                        partner,
                         expires=expires,
                         credit_provider=credit_provider,
                         credit_hours=credit_hours,

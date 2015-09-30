@@ -10,13 +10,13 @@ import pytz
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.mixins import UserMixin, PartnerMixin
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
-class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMixin, TestCase):
+class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMixin, PartnerMixin, TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -24,10 +24,11 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMi
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
+        self.partner = self.create_partner('edx')
 
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)
-        self.seat = self.course.create_or_update_seat('honor', False, 0, expires=expires)
+        self.seat = self.course.create_or_update_seat('honor', False, 0, self.partner, expires=expires)
 
     def test_list(self):
         """ Verify a list of products is returned. """
@@ -81,7 +82,7 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMi
         """ Verify the view supports listing products for a single course. """
         # Create another course and seat to confirm filtering.
         other_course = Course.objects.create(id='edX/DemoX/XYZ', name='Test Course 2')
-        other_course.create_or_update_seat('honor', False, 0)
+        other_course.create_or_update_seat('honor', False, 0, self.partner)
 
         path = reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': self.course.id})
         response = self.client.get(path)
