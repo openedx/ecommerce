@@ -57,6 +57,23 @@
     </div>
 </div>
 
+<div class="voucher">
+    <label class="hd-4" for="vouchers"><%= gettext('Create vouchers') %></label>
+    <div class="form-group">
+        <label class="hd-7" for="vouchers"><%= gettext('Name') %></label>
+        <input type="text" class="form-control" name="name" placeholder="Name">
+    </div>
+    <div class="form-group">
+        <label class="hd-7" for="vouchers"><%= gettext('Code') %></label>
+        <input type="text" class="form-control" name="name" placeholder="Code">
+    </div>
+    <div class="form-group">
+        <label class="hd-7" for="vouchers"><%= gettext('Discount') %></label>
+        <input type="text" class="form-control" name="name" placeholder="Discount">
+    </div>
+    </div>
+</div>
+
 <div class="form-actions">
     <button type="submit" class="btn btn-primary"><%= gettext(editing ? 'Save Changes' : 'Create Course') %></button>
     <a class="btn btn-default" href="/courses/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
