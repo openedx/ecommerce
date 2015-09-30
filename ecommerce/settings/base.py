@@ -309,8 +309,13 @@ JWT_AUTH = {
     'JWT_SECRET_KEY': None,
     'JWT_ALGORITHM': 'HS256',
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_ISSUER': None
+    'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
 }
+
+JWT_ISSUERS = ()
+
+# Service user for worker processes.
+ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
 
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
 EDX_API_KEY = None

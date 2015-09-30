@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from datetime import datetime
 import json
 from logging import Logger
@@ -128,21 +128,22 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
         self.assertEqual(self.auth.authenticate(request), (user, self.DEFAULT_TOKEN))
 
 
-@override_settings(ROOT_URLCONF='ecommerce.extensions.api.tests.test_authentication')
+@override_settings(
+    ROOT_URLCONF='ecommerce.extensions.api.tests.test_authentication',
+    JWT_ISSUERS=('http://example.com/oauth',)
+)
 class JwtAuthenticationTests(JwtMixin, UserMixin, TestCase):
     def setUp(self):
-        api_settings.JWT_ISSUER = 'http://example.com/oauth'
         api_settings.JWT_VERIFY_EXPIRATION = True
 
     def tearDown(self):
-        api_settings.JWT_ISSUER = DEFAULTS['JWT_ISSUER']
         api_settings.JWT_VERIFY_EXPIRATION = DEFAULTS['JWT_VERIFY_EXPIRATION']
 
     def assert_jwt_status(self, issuer=None, expires=None, status_code=200):
         """ Assert that the payload has a valid issuer and has not expired. """
 
         staff_user = self.create_user(is_staff=True)
-        issuer = issuer or api_settings.JWT_ISSUER
+        issuer = issuer or settings.JWT_ISSUERS[0]
 
         payload = {
             'iss': issuer,
