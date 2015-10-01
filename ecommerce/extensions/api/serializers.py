@@ -24,6 +24,7 @@ Partner = get_model('partner', 'Partner')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
+StockRecord = get_model('partner', 'StockRecord')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
@@ -54,12 +55,20 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
         fields = ('name', 'value',)
 
 
+class StockRecordSerializer(serializers.ModelSerializer):
+    """ Serializer for StockRecordsSerializer objects. """
+    class Meta(object):
+        model = StockRecord
+        fields = ('id', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
+
+
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
     """ Serializer for Products. """
     attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
     product_class = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
+    stockrecords = StockRecordSerializer(many=True, read_only=True)
 
     def get_product_class(self, product):
         return product.get_product_class().name
@@ -82,7 +91,7 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
     class Meta(object):
         model = Product
         fields = ('id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
-                  'is_available_to_buy',)
+                  'is_available_to_buy', 'stockrecords',)
         extra_kwargs = {
             'url': {'view_name': PRODUCT_DETAIL_VIEW},
         }
