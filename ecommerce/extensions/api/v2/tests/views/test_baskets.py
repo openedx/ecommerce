@@ -17,7 +17,7 @@ from testfixtures import LogCapture
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin, JSON_CONTENT_TYPE
-from ecommerce.extensions.api.v2.views import BasketCreateView
+from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.tests.mixins import ThrottlingMixin, BasketCreationMixin
@@ -28,7 +28,7 @@ ShippingEventType = get_model('order', 'ShippingEventType')
 Refund = get_model('refund', 'Refund')
 User = get_user_model()
 
-LOGGER_NAME = 'ecommerce.extensions.api.v2.views'
+LOGGER_NAME = 'ecommerce.extensions.api.v2.views.baskets'
 
 
 @ddt.ddt
