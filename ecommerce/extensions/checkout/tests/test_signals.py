@@ -39,21 +39,25 @@ class SignalTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
         self.assertEqual(mail.outbox[0].subject, 'Order Receipt')
         self.assertEqual(
             mail.outbox[0].body,
-            '\nReceipt Confirmation for: {course_name}'
-            '\n\nHi {full_name},\n\n'
-            'Thank you for purchasing {credit_hour} credit hours from {provider_name} for {course_name}.'
-            ' The charge below will appear on your next credit or debit card statement with a '
-            'company name of {platform_name}.\n\nYou can see the status the status of your credit request or '
-            'complete the credit request process on your {platform_name} dashboard\nTo browse other '
-            'credit-eligible courses visit the edX website. More courses are added all the time.\n\n'
-            'Thank you and congratulation on your achievement. We hope you enjoy the course!\n\n'
-            'To view receipt please visit the link below'
-            '\n\n{receipt_url}\n\n'
-            '{platform_name} team\n\nThe edX team\n'.format(
-                course_name=order.lines.first().product.title,
+            '\nPayment confirmation for: {course_title}'
+            '\n\nDear {full_name},'
+            '\n\nThank you for purchasing {credit_hours} credit hours from {credit_provider} for {course_title}. '
+            'A charge will appear on your credit or debit card statement with a company name of "{platform_name}".'
+            '\n\nTo receive your course credit, you must also request credit at the {credit_provider} website. '
+            'For a link to request credit from {credit_provider}, or to see the status of your credit request, '
+            'go to your {platform_name} dashboard.'
+            '\n\nTo explore other credit-eligible courses, visit the {platform_name} website. '
+            'We add new courses frequently!'
+            '\n\nTo view your payment information, visit the following website.'
+            '\n{receipt_url}'
+            '\n\nThank you. We hope you enjoyed your course!'
+            '\nThe {platform_name} team'
+            '\n\nYou received this message because you purchased credit hours for {course_title}, '
+            'an {platform_name} course.\n'.format(
+                course_title=order.lines.first().product.title,
                 full_name=user.get_full_name(),
-                credit_hour=2,
-                provider_name='Hogwarts',
+                credit_hours=2,
+                credit_provider='Hogwarts',
                 platform_name=settings.PLATFORM_NAME,
                 receipt_url=get_lms_url('/commerce/checkout/receipt/?basket_id={}'.format(order.basket.id))
             )
