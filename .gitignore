@@ -83,3 +83,4 @@ override.cfg
 
 *.trace
 private.py
+docs/_build
