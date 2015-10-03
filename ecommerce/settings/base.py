@@ -118,6 +118,9 @@ COMPRESS_PRECOMPILERS = (
 )
 
 COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
+COMPRESS_JS_FILTERS = ['compressor.filters.closure.ClosureCompilerFilter']
+COMPRESS_CLOSURE_COMPILER_BINARY = 'java -jar scripts/closure-compiler.jar'
+COMPRESS_CLOSURE_COMPILER_ARGUMENTS = '--compilation_level ADVANCED --language_in ECMASCRIPT5'
 # END STATIC FILE CONFIGURATION
 
 

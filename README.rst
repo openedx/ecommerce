@@ -13,6 +13,7 @@ Prerequisites
 * Python 2.7.x (not tested with Python 3.x)
 * `gettext <http://www.gnu.org/software/gettext/>`_
 * `npm <https://www.npmjs.org/>`_
+* `JDK 7+ <http://openjdk.java.net/>`_
 
 Documentation |ReadtheDocs|_
 ----------------------------
