@@ -3,7 +3,7 @@ import logging
 
 from django.db import transaction
 from django.utils.decorators import method_decorator
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -16,6 +16,8 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_default_processor_class, get_processor_class_by_name)
 
+
+Basket = get_model('basket', 'Basket')
 logger = logging.getLogger(__name__)
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
@@ -125,7 +127,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         # (baskets, then orders) to ensure that we don't leave the system in a dirty state
         # in the event of an error.
         with transaction.atomic():
-            basket = data_api.get_basket(request.user)
+            basket = Basket.get_basket(request.user)
 
             requested_products = request.data.get(AC.KEYS.PRODUCTS)
             if requested_products:
