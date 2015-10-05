@@ -5,20 +5,20 @@ from django.db import migrations
 
 
 def create_switch(apps, schema_editor):
-    """Create and activate the publish_course_modes_to_lms switch if it does not already exist."""
+    """Create the async_order_fulfillment switch if it does not already exist."""
     Switch = apps.get_model('waffle', 'Switch')
-    Switch.objects.get_or_create(name='publish_course_modes_to_lms', defaults={'active': True})
+    Switch.objects.get_or_create(name='async_order_fulfillment', defaults={'active': False})
 
 
 def delete_switch(apps, schema_editor):
-    """Delete the publish_course_modes_to_lms switch."""
+    """Delete the async_order_fulfillment switch."""
     Switch = apps.get_model('waffle', 'Switch')
-    Switch.objects.filter(name='publish_course_modes_to_lms').delete()
+    Switch.objects.filter(name='async_order_fulfillment').delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0004_auto_20150915_1023'),
+        ('core', '0006_add_service_user'),
         ('waffle', '0001_initial'),
     ]
 
