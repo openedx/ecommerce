@@ -165,7 +165,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             try:
                 provider = line.product.attr.credit_provider
             except AttributeError:
-                logger.info("Supported Seat Product does not have a credit provider.")
+                logger.debug("Seat [%d] has no credit_provider attribute. Defaulted to None.", line.product.id)
                 provider = None
 
             data = {
