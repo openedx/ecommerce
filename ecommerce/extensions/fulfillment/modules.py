@@ -93,16 +93,21 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     Allows the enrollment of a student via purchase of a 'seat'.
     """
 
-    def _post_to_enrollment_api(self, data, client_id=None):
+    def _post_to_enrollment_api(self, data, user):
         enrollment_api_url = settings.ENROLLMENT_API_URL
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
-
         headers = {
             'Content-Type': 'application/json',
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
+
+        __, client_id, ip = parse_tracking_context(user)
+
         if client_id:
             headers['X-Edx-Ga-Client-Id'] = client_id
+
+        if ip:
+            headers['X-Forwarded-For'] = ip
 
         return requests.post(enrollment_api_url, data=json.dumps(data), headers=headers, timeout=timeout)
 
@@ -186,8 +191,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     }
                 )
             try:
-                __, client_id, __ = parse_tracking_context(order.user)
-                response = self._post_to_enrollment_api(data, client_id=client_id)
+                response = self._post_to_enrollment_api(data, user=order.user)
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
@@ -242,8 +246,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            __, client_id, __ = parse_tracking_context(line.order.user)
-            response = self._post_to_enrollment_api(data, client_id=client_id)
+            response = self._post_to_enrollment_api(data, user=line.order.user)
 
             if response.status_code == status.HTTP_200_OK:
                 audit_log(

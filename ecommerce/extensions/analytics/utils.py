@@ -13,7 +13,7 @@ def is_segment_configured():
 
 
 def parse_tracking_context(user):
-    """Extract user and client IDs from a user's tracking context.
+    """Extract user ID, client ID, and IP address from a user's tracking context.
 
     Arguments:
         user (User): An instance of the User model.
