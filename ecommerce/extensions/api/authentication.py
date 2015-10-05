@@ -43,6 +43,15 @@ class JwtAuthentication(JSONWebTokenAuthentication):
         200
     """
 
+    def authenticate(self, request):
+        try:
+            return super(JwtAuthentication, self).authenticate(request)
+        except Exception as ex:
+            # Errors in production do not need to be logged (as they may be noisy),
+            # but debug logging can help quickly resolve issues during development.
+            logger.debug(ex)
+            raise
+
     def authenticate_credentials(self, payload):
         """Get or create an active user with the username contained in the payload."""
         username = payload.get('username')
