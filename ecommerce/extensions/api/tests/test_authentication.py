@@ -15,7 +15,6 @@ from rest_framework import permissions
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework_jwt import utils
-from rest_framework_jwt.settings import api_settings, DEFAULTS
 
 from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAuthentication
 from ecommerce.tests.mixins import JwtMixin, UserMixin
@@ -130,20 +129,12 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
 
 @override_settings(
     ROOT_URLCONF='ecommerce.extensions.api.tests.test_authentication',
-    JWT_ISSUERS=('http://example.com/oauth',)
 )
 class JwtAuthenticationTests(JwtMixin, UserMixin, TestCase):
-    def setUp(self):
-        api_settings.JWT_VERIFY_EXPIRATION = True
-
-    def tearDown(self):
-        api_settings.JWT_VERIFY_EXPIRATION = DEFAULTS['JWT_VERIFY_EXPIRATION']
-
     def assert_jwt_status(self, issuer=None, expires=None, status_code=200):
-        """ Assert that the payload has a valid issuer and has not expired. """
-
+        """Assert that the payload has a valid issuer and has not expired."""
         staff_user = self.create_user(is_staff=True)
-        issuer = issuer or settings.JWT_ISSUERS[0]
+        issuer = issuer or settings.JWT_AUTH['JWT_ISSUERS'][0]
 
         payload = {
             'iss': issuer,

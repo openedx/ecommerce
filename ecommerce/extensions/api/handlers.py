@@ -9,19 +9,23 @@ def jwt_decode_handler(token):
     """Attempt to decode the given token with each of the configured JWT issuers.
 
     Args:
-        token (str): the JWT to decode.
+        token (str): The JWT to decode.
 
     Returns:
         dict: The JWT's payload.
 
     Raises:
-        InvalidIssuerError: if the provided token does not match a configured JWT
-            issuer.
+        InvalidIssuerError: If the issuer claim in the provided token does not match
+            any configured JWT issuers.
         """
     options = {
         'verify_exp': api_settings.JWT_VERIFY_EXPIRATION,
     }
-    for issuer in settings.JWT_ISSUERS:
+
+    # JWT_ISSUERS is not one of DRF-JWT's default settings, and cannot be accessed
+    # using the `api_settings` object without overriding DRF-JWT's defaults.
+    issuers = settings.JWT_AUTH['JWT_ISSUERS']
+    for issuer in issuers:
         try:
             return jwt.decode(
                 token,

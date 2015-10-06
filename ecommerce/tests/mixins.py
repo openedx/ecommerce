@@ -35,11 +35,11 @@ class UserMixin(object):
 
     def generate_jwt_token_header(self, user, secret=None):
         """Generate a valid JWT token header for authenticated requests."""
-        secret = secret or getattr(settings, 'JWT_AUTH')['JWT_SECRET_KEY']
+        secret = secret or settings.JWT_AUTH['JWT_SECRET_KEY']
         payload = {
             'username': user.username,
             'email': user.email,
-            'iss': settings.JWT_ISSUERS[0]
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]
         }
         return "JWT {token}".format(token=jwt.encode(payload, secret))
 
@@ -55,12 +55,13 @@ class ThrottlingMixin(object):
 
 class JwtMixin(object):
     """ Mixin with JWT-related helper functions. """
-    JWT_SECRET_KEY = getattr(settings, 'JWT_AUTH')['JWT_SECRET_KEY']
+    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_SECRET_KEY']
+    issuer = settings.JWT_AUTH['JWT_ISSUERS'][0]
 
     def generate_token(self, payload, secret=None):
         """Generate a JWT token with the provided payload."""
         secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(dict(payload, iss=settings.JWT_ISSUERS[0]), secret)
+        token = jwt.encode(dict(payload, iss=self.issuer), secret)
         return token
 
 

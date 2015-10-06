@@ -310,9 +310,9 @@ JWT_AUTH = {
     'JWT_ALGORITHM': 'HS256',
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
+    # This setting is not one of DRF-JWT's defaults.
+    'JWT_ISSUERS': (),
 }
-
-JWT_ISSUERS = ()
 
 # Service user for worker processes.
 ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
