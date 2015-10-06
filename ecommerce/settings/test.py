@@ -49,9 +49,10 @@ COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
 # AUTHENTICATION
 ENABLE_AUTO_AUTH = True
 
-JWT_AUTH['JWT_SECRET_KEY'] = 'insecure-secret-key'
-
-JWT_ISSUERS = ('test-issuer',)
+JWT_AUTH.update({
+    'JWT_SECRET_KEY': 'insecure-secret-key',
+    'JWT_ISSUERS': ('test-issuer',),
+})
 # END AUTHENTICATION
 
 
