@@ -59,7 +59,8 @@ class ProductSerializerMixin(TestServerUrlMixin):
             'product_class': unicode(product.get_product_class()),
             'title': product.title,
             'expires': product.expires.strftime(ISO_8601_FORMAT) if product.expires else None,
-            'attribute_values': attribute_values
+            'attribute_values': attribute_values,
+            'stockrecords': self.serialize_stock_records(product.stockrecords.all())
         }
 
         info = Selector().strategy().fetch_for_product(product)
@@ -69,3 +70,15 @@ class ProductSerializerMixin(TestServerUrlMixin):
         })
 
         return data
+
+    def serialize_stock_records(self, stock_records):
+        return [
+            {
+                'id': record.id,
+                'partner': record.partner.id,
+                'partner_sku': record.partner_sku,
+                'price_currency': record.price_currency,
+                'price_excl_tax': str(record.price_excl_tax),
+
+            } for record in stock_records
+        ]
