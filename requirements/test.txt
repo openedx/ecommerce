@@ -4,7 +4,7 @@
 bok-choy==0.4.3
 coverage==3.7.1
 ddt==1.0.0
-django-nose==1.4.1
+django-nose==1.4.2
 django_dynamic_fixture==1.8.5
 edx-ecommerce-api-client==1.1.0
 httpretty==0.8.10
