@@ -111,8 +111,8 @@
             <strong>{% trans "Questions?" %}</strong>
         </div>
         <div class="row center-block">
-            {% blocktrans with link='<a href="https://www.edx.org/gfa">our FAQs to view common quistions about our certificates.</a>' %}
-                Please read {{ link }}
+            {% blocktrans with link_start='<a href="https://www.edx.org/gfa">' link_end='</a>' %}
+                Please read {{ link_start }}our FAQs to view common questions about our certificates.{{ link_end }}
             {% endblocktrans %}
         </div>
     </div>
