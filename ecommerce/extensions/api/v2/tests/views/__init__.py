@@ -1,6 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.newfactories import ProductAttributeValueFactory
 
@@ -9,6 +9,7 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
 
 JSON_CONTENT_TYPE = 'application/json'
+Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 
 
@@ -60,7 +61,7 @@ class ProductSerializerMixin(TestServerUrlMixin):
             'title': product.title,
             'expires': product.expires.strftime(ISO_8601_FORMAT) if product.expires else None,
             'attribute_values': attribute_values,
-            'stockrecords': self.serialize_stock_records(product.stockrecords.all())
+            'stockrecords': [self.serialize_stockrecord(record) for record in product.stockrecords.all()]
         }
 
         info = Selector().strategy().fetch_for_product(product)
@@ -71,14 +72,13 @@ class ProductSerializerMixin(TestServerUrlMixin):
 
         return data
 
-    def serialize_stock_records(self, stock_records):
-        return [
-            {
-                'id': record.id,
-                'partner': record.partner.id,
-                'partner_sku': record.partner_sku,
-                'price_currency': record.price_currency,
-                'price_excl_tax': str(record.price_excl_tax),
-
-            } for record in stock_records
-        ]
+    def serialize_stockrecord(self, stockrecord):
+        """ Serialize a stock record to a python dict. """
+        return {
+            'id': stockrecord.id,
+            'partner': stockrecord.partner.id,
+            'product': stockrecord.product.id,
+            'partner_sku': stockrecord.partner_sku,
+            'price_currency': stockrecord.price_currency,
+            'price_excl_tax': unicode(stockrecord.price_excl_tax),
+        }
