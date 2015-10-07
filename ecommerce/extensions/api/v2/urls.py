@@ -6,7 +6,9 @@ from ecommerce.core.constants import COURSE_ID_PATTERN
 from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments as payment_views,
                                                orders as order_views, refunds as refund_views,
                                                products as product_views, courses as course_views,
-                                               publication as publication_views)
+                                               publication as publication_views, partners as partner_views,
+                                               catalog as catalog_views)
+
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -65,6 +67,12 @@ router = ExtendedSimpleRouter()
 router.register(r'courses', course_views.CourseViewSet) \
     .register(r'products', product_views.ProductViewSet,
               base_name='course-product', parents_query_lookups=['course_id'])
+router.register(r'partners', partner_views.PartnerViewSet) \
+    .register(r'products', product_views.ProductViewSet,
+              base_name='partner-product', parents_query_lookups=['stockrecords__partner_id'])
+router.register(r'partners', partner_views.PartnerViewSet) \
+    .register(r'catalogs', catalog_views.CatalogViewSet,
+              base_name='partner-catalogs', parents_query_lookups=['partner_id'])
 router.register(r'products', product_views.ProductViewSet)
 
 urlpatterns += router.urls

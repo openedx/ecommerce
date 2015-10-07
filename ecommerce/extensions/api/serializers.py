@@ -17,6 +17,7 @@ from ecommerce.courses.models import Course
 logger = logging.getLogger(__name__)
 
 BillingAddress = get_model('order', 'BillingAddress')
+Catalog = get_model('catalogue', 'Catalog')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -278,3 +279,33 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     def _flatten(self, attrs):
         """Transform a list of attribute names and values into a dictionary keyed on the names."""
         return {attr['name']: attr['value'] for attr in attrs}
+
+
+class PartnerSerializer(serializers.ModelSerializer):
+    """Serializer for the Partner object"""
+    catalogs = serializers.SerializerMethodField()
+    products = serializers.SerializerMethodField()
+
+    def get_products(self, obj):
+        return reverse(
+            'api:v2:partner-product-list',
+            kwargs={'parent_lookup_stockrecords__partner_id': obj.id},
+            request=self.context['request']
+        )
+
+    def get_catalogs(self, obj):
+        return reverse(
+            'api:v2:partner-catalogs-list',
+            kwargs={'parent_lookup_partner_id': obj.id},
+            request=self.context['request']
+        )
+
+    class Meta(object):
+        model = Partner
+        fields = ('id', 'name', 'short_code', 'catalogs', 'products')
+
+
+class CatalogSerializer(serializers.ModelSerializer):
+    """Serializer for the Catalog object"""
+    class Meta(object):
+        model = Catalog
