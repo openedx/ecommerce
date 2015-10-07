@@ -12,7 +12,11 @@ Both tools should operate seamlessly in a local development environment. When de
 
 When creating new pages that utilize RequireJS dependencies, remember new modules to ``build.js``.
 
-NOTE: The static file directories are setup such that the build output directory of ``r.js`` is read before checking
+NOTE 1: django-compressor uses `Closure Compiler <https://developers.google.com/closure/compiler/>`_ to minify assets.
+Closure Compiler requires `JDK 7+ <http://openjdk.java.net/>`_ to be installed on your system, and the ``java``
+command available on your ``PATH``.
+
+NOTE 2: The static file directories are setup such that the build output directory of ``r.js`` is read before checking
 for assets in ``ecommerce\static\``. If you run ``make static`` or ``r.js`` locally (which you should not need to),
 make sure you delete ``ecommerce/static/build`` or run ``make static`` before continuing with development. If you do not
 all changes made to static files will be ignored.
