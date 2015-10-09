@@ -10,18 +10,15 @@ class Voucher(AbstractVoucher):
     enrollment_code = models.CharField(null=True, unique=True, max_length=255)
     active = models.BooleanField(default=False)
     created_at = models.DateTimeField(null=True)
-    price = models.FloatField(null=True)
+    total_price = models.FloatField(null=True, default=0)
 
     def generate_code(self):
         return uuid.uuid4().hex[:6].lower()
 
-    def calculate_price(self):
-        pass
-
     @transaction.atomic
     def save(self, *args, **kwargs):  # pylint: disable=bad-super-call
         self.created_at = timezone.now()
-        self.enrollment_code = generate_code()
+        self.enrollment_code = self.generate_code()
         return super(Voucher, self).save(*args, **kwargs)
 
 
