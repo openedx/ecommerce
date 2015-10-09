@@ -1,0 +1,59 @@
+#app {
+  padding-bottom: spacing-vertical(x-small);
+
+  .container {
+    padding-bottom: spacing-vertical(small);
+  }
+
+  .breadcrumb {
+    background-color: $breadcrumb-bg;
+    padding-left: 0;
+    margin-top: spacing-vertical(small);
+  }
+
+  .voucher-detail-view,
+  .voucher-create-view {
+    .page-header {
+      margin-top: 0;
+    }
+
+    .voucher-information {
+      margin-bottom: spacing-vertical(small);
+
+      .info-item {
+        margin-bottom: 10px;
+
+        .heading {
+          font-weight: bold;
+        }
+      }
+    }
+
+    .voucher-seats {
+      .voucher-seat {
+        margin-bottom: spacing-vertical(mid-small);
+      }
+
+      .seat-type {
+        margin-bottom: 5px;
+        border-bottom: 1px solid $page-header-border-color;
+        padding-bottom: 3px;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .voucher-create-view {
+    .fields {
+      width: 50%;
+    }
+
+    .form-actions {
+      margin-top: spacing-vertical(large);
+    }
+
+    .price-label {
+      @extend label;
+    }
+  }
+}
