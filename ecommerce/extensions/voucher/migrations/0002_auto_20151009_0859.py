@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='voucher',
-            name='course_id',
+            name='course',
             field=models.ForeignKey(related_name='course', to='courses.Course', null=True),
         ),
         migrations.AddField(
@@ -34,12 +34,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='voucher',
-            name='enrollment_code',
-            field=models.CharField(max_length=255, unique=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='voucher',
-            name='price',
-            field=models.FloatField(null=True),
+            name='total_price',
+            field=models.FloatField(default=0, null=True),
         ),
     ]
