@@ -26,6 +26,7 @@ ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
@@ -131,6 +132,12 @@ class RefundSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Refund
+
+
+class VoucherSerializer(serializers.ModelSerializer):
+
+    class Meta(object):
+        model = Voucher
 
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
