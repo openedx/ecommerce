@@ -57,6 +57,7 @@ urlpatterns = [
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
+    url(r'^enrollment-codes/', include('ecommerce.extensions.voucher.urls', namespace='voucher')),
 ]
 
 # Install Oscar extension URLs
