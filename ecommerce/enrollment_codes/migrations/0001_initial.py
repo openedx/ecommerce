@@ -18,11 +18,12 @@ class Migration(migrations.Migration):
             name='EnrollmentCode',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('enrollment_code', models.CharField(default=b'', max_length=255)),
                 ('created_at', models.DateTimeField()),
                 ('discount', models.IntegerField(default=100)),
                 ('author_id', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
                 ('course', models.ForeignKey(related_name='course', to='courses.Course')),
-                ('voucher', models.ForeignKey(to='voucher.Voucher', null=True)),
+                ('voucher', models.ForeignKey(related_name='voucher', to='voucher.Voucher', null=True)),
             ],
         ),
     ]
