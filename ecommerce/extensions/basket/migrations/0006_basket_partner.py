@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='basket',
             name='partner',
-            field=models.ForeignKey(related_name='baskets', blank=True, to='partner.Partner', null=True),
+            field=models.ForeignKey(related_name='baskets', default=None, blank=True, to='partner.Partner', null=True),
         ),
     ]
