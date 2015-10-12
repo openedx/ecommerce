@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+EnrollmentCode = get_model('enrollment_codes', 'EnrollmentCode')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -131,6 +132,13 @@ class RefundSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Refund
+
+
+class EnrollmentCodeSerializer(serializers.ModelSerializer):
+    """ Serializer for EnrollmentCode objects. """
+
+    class Meta(object):
+        model = EnrollmentCode
 
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
