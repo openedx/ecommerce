@@ -119,14 +119,14 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 }
             }
         """
-        # Explicitly delimit operations which will be rolled back if an exception occurs.
-        # atomic() context managers restore atomicity at points where we are modifying data
-        # (baskets, then orders) to ensure that we don't leave the system in a dirty state
-        # in the event of an error.
         # The multi-tenant implementation has one site per partner
         site = get_current_site(request)
         partner = site.siteconfiguration.partner
 
+        # Explicitly delimit operations which will be rolled back if an exception occurs.
+        # atomic() context managers restore atomicity at points where we are modifying data
+        # (baskets, then orders) to ensure that we don't leave the system in a dirty state
+        # in the event of an error.
         with transaction.atomic():
             basket = data_api.get_basket(request.user, partner)
 

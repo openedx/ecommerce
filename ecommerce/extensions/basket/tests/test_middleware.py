@@ -41,14 +41,14 @@ class TestBasketMiddleware(TestCase):
         self.assertEqual(None, cookie_basket)
         self.assertIn('oscar_open_basket', request.cookies_to_delete)
 
+    def test_get_basket_with_anonymous_user(self):
+        basket = self.middleware.get_basket(self.request)
+        self.assertIsNone(basket.partner)
+
     def test_get_basket_with_authenticated_user(self):
         self.request.user = factories.UserFactory()
         basket = self.middleware.get_basket(self.request)
-        self.assertTrue(hasattr(basket, 'partner'))
-
-    def test_get_basket_with_anonymous_user(self):
-        basket = self.middleware.get_basket(self.request)
-        self.assertFalse(hasattr(basket, 'partner'))
+        self.assertIsNotNone(basket.partner)
 
     def test_get_cookie_basket_with_ananoymous_user(self):
         basket = BasketFactory()
