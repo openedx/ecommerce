@@ -21,7 +21,7 @@ class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
 
     def test_successful_refund_tracking(self, mock_track):
         """Verify that a successfully placed refund is tracked when Segment is enabled."""
-        tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id'}
+        tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id', 'lms_ip': '127.0.0.1'}
         self.refund.user.tracking_context = tracking_context
         self.refund.user.save()
 
@@ -37,6 +37,7 @@ class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
             self.refund,
             tracking_context['lms_user_id'],
             tracking_context['lms_client_id'],
+            tracking_context['lms_ip'],
             self.order.number,
             self.refund.currency,
             self.refund.total_credit_excl_tax
@@ -67,6 +68,7 @@ class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
             mock_track,
             self.refund,
             'ecommerce-{}'.format(self.user.id),
+            None,
             None,
             self.order.number,
             self.refund.currency,

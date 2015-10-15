@@ -74,9 +74,11 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         self.assertEqual(1, len(supported_lines))
 
     @httpretty.activate
-    def test_enrollment_module_fulfill(self):
+    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
+    def test_enrollment_module_fulfill(self, parse_tracking_context):
         """Happy path test to ensure we can properly fulfill enrollments."""
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
+        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         # Attempt to enroll.
         with LogCapture(LOGGER_NAME) as l:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
@@ -101,8 +103,11 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
         self.assertEqual(LINE.COMPLETE, line.status)
 
-        actual = json.loads(httpretty.last_request().body)
-        expected = {
+        last_request = httpretty.last_request()
+        actual_body = json.loads(last_request.body)
+        actual_headers = last_request.headers
+
+        expected_body = {
             'user': self.order.user.username,
             'is_active': True,
             'mode': self.certificate_type,
@@ -111,7 +116,14 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             },
             'enrollment_attributes': []
         }
-        self.assertEqual(actual, expected)
+
+        expected_headers = {
+            'X-Edx-Ga-Client-Id': 'GA-123456789',
+            'X-Forwarded-For': '11.22.33.44',
+        }
+
+        self.assertDictContainsSubset(expected_headers, actual_headers)
+        self.assertEqual(expected_body, actual_body)
 
     @override_settings(ENROLLMENT_API_URL='')
     def test_enrollment_module_not_configured(self):
@@ -148,9 +160,11 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         self.assertEqual(LINE.FULFILLMENT_SERVER_ERROR, self.order.lines.all()[0].status)
 
     @httpretty.activate
-    def test_revoke_product(self):
+    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
+    def test_revoke_product(self, parse_tracking_context):
         """ The method should call the Enrollment API to un-enroll the student, and return True. """
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200, body='{}', content_type=JSON)
+        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         line = self.order.lines.first()
 
         with LogCapture(LOGGER_NAME) as l:
@@ -172,8 +186,11 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
                 )
             )
 
-        actual = json.loads(httpretty.last_request().body)
-        expected = {
+        last_request = httpretty.last_request()
+        actual_body = json.loads(last_request.body)
+        actual_headers = last_request.headers
+
+        expected_body = {
             'user': self.order.user.username,
             'is_active': False,
             'mode': self.certificate_type,
@@ -181,7 +198,14 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
                 'course_id': self.course_id,
             },
         }
-        self.assertEqual(actual, expected)
+
+        expected_headers = {
+            'X-Edx-Ga-Client-Id': 'GA-123456789',
+            'X-Forwarded-For': '11.22.33.44',
+        }
+
+        self.assertDictContainsSubset(expected_headers, actual_headers)
+        self.assertEqual(expected_body, actual_body)
 
     @httpretty.activate
     def test_revoke_product_expected_error(self):
@@ -302,6 +326,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             'enrollment_attributes': []
         }
 
+        # Create a dummy user and attach the tracking_context
+        user = UserFactory()
+        user.tracking_context = {'lms_user_id': '1', 'lms_client_id': '123.123', 'lms_ip': '11.22.33.44'}
+
         # Now call the enrollment api to send POST request to LMS and verify
         # that the header of the request being sent contains the analytics
         # header 'x-edx-ga-client-id'.
@@ -309,8 +337,9 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         # not available for ecommerce tests.
         try:
             # pylint: disable=protected-access
-            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, client_id='123.123')
+            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, user=user)
         except ConnectionError as exp:
             # Check that the enrollment request object has the analytics header
-            # 'x-edx-ga-client-id'.
+            # 'x-edx-ga-client-id' and 'x-forwarded-for'.
             self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), '123.123')
+            self.assertEqual(exp.request.headers.get('x-forwarded-for'), '11.22.33.44')

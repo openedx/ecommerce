@@ -13,13 +13,13 @@ def is_segment_configured():
 
 
 def parse_tracking_context(user):
-    """Extract user and client IDs from a user's tracking context.
+    """Extract user ID, client ID, and IP address from a user's tracking context.
 
     Arguments:
         user (User): An instance of the User model.
 
     Returns:
-        Tuple of strings, user_tracking_id and lms_client_id
+        Tuple of strings: user_tracking_id, lms_client_id, lms_ip
     """
     tracking_context = user.tracking_context or {}
 
@@ -32,8 +32,9 @@ def parse_tracking_context(user):
         user_tracking_id = 'ecommerce-{}'.format(user.id)
 
     lms_client_id = tracking_context.get('lms_client_id')
+    lms_ip = tracking_context.get('lms_ip')
 
-    return user_tracking_id, lms_client_id
+    return user_tracking_id, lms_client_id, lms_ip
 
 
 def silence_exceptions(msg):

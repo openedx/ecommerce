@@ -26,7 +26,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     if not (is_segment_configured() and order.total_excl_tax > 0):
         return
 
-    user_tracking_id, lms_client_id = parse_tracking_context(order.user)
+    user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(order.user)
 
     analytics.track(
         user_tracking_id,
@@ -51,6 +51,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             ],
         },
         context={
+            'ip': lms_ip,
             'Google Analytics': {
                 'clientId': lms_client_id
             }

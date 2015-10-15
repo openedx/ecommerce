@@ -16,7 +16,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
     if not (is_segment_configured() and refund.total_credit_excl_tax > 0):
         return
 
-    user_tracking_id, lms_client_id = parse_tracking_context(refund.user)
+    user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(refund.user)
 
     # Ecommerce transaction reversal, performed by emitting an event which is the inverse of an
     # order completion event emitted previously.
@@ -44,6 +44,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
             ],
         },
         context={
+            'ip': lms_ip,
             'Google Analytics': {
                 'clientId': lms_client_id
             }
