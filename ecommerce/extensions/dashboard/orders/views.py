@@ -7,11 +7,35 @@ from oscar.apps.dashboard.orders.views import (
 )
 from oscar.core.loading import get_model
 
-
+Order = get_model('order', 'Order')
+Partner = get_model('partner', 'Partner')
 Refund = get_model('refund', 'Refund')
 
 
+def queryset_orders_for_user(user):  # pylint: disable=unused-argument
+    """
+    Returns a queryset of all orders that a user is allowed to access.
+    A staff user may access all orders.
+    To allow access to an order for a non-staff user, at least one line's
+    partner has to have the user in the partner's list.
+
+    This customization removes the selection of the related address data, as it drastically decreases
+    query response time. Support for non-staff users is also removed.
+    """
+    return Order._default_manager.select_related('user').prefetch_related('lines')  # pylint: disable=protected-access
+
+
 class OrderListView(CoreOrderListView):
+    def dispatch(self, request, *args, **kwargs):
+        # NOTE: This method is overridden so that we can use our override of `queryset_orders_for_user`.
+
+        # pylint: disable=attribute-defined-outside-init
+        # base_queryset is equal to all orders the user is allowed to access
+        self.base_queryset = queryset_orders_for_user(request.user).order_by('-date_placed')
+
+        # Bypass the CoreOrderListView.dispatch()
+        return super(CoreOrderListView, self).dispatch(request, *args, **kwargs)  # pylint: disable=bad-super-call
+
     def get_queryset(self):
         queryset = super(OrderListView, self).get_queryset()
 
