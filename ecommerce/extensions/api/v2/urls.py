@@ -7,8 +7,8 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments
                                                orders as order_views, refunds as refund_views,
                                                products as product_views, courses as course_views,
                                                publication as publication_views, partners as partner_views,
-                                               catalog as catalog_views)
-
+                                               catalog as catalog_views,
+                                               stockrecords as stockrecords_views)
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -74,5 +74,5 @@ router.register(r'partners', partner_views.PartnerViewSet) \
     .register(r'catalogs', catalog_views.CatalogViewSet,
               base_name='partner-catalogs', parents_query_lookups=['partner_id'])
 router.register(r'products', product_views.ProductViewSet)
-
+router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
 urlpatterns += router.urls
