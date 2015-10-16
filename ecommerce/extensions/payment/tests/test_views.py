@@ -10,7 +10,6 @@ import mock
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
@@ -19,6 +18,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
+from ecommerce.extensions.test import factories
 from ecommerce.tests.mixins import UserMixin
 
 

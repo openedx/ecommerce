@@ -1,8 +1,8 @@
 """Test Order Utility classes """
 from django.test import TestCase, override_settings
-from oscar.test.newfactories import BasketFactory
 
 from ecommerce.extensions.order.utils import OrderNumberGenerator
+from ecommerce.extensions.test.factories import BasketFactory
 
 
 class UtilsTest(TestCase):

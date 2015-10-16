@@ -1,5 +1,5 @@
 from django.test import TestCase
-from oscar.test.newfactories import UserFactory
+from ecommerce.extensions.test.factories import UserFactory
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory, force_authenticate
 

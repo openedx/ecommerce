@@ -6,18 +6,21 @@ from decimal import Decimal as D
 import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from mock import patch
 from oscar.test import factories
 from oscar.core.loading import get_model, get_class
 
+from ecommerce.core.models import SiteConfiguration
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 
 
 Basket = get_model('basket', 'Basket')
+Partner = get_model('partner', 'Partner')
 Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
@@ -95,6 +98,17 @@ class BasketCreationMixin(JwtMixin):
             title=u'𝑪𝒂𝒓𝒅𝒃𝒐𝒂𝒓𝒅 𝑪𝒖𝒕𝒐𝒖𝒕',
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=D('0.00'),
+        )
+
+        site, __ = Site.objects.get_or_create(domain='example.com')
+        partner, __ = Partner.objects.get_or_create(short_code='edx', name='edx')
+
+        SiteConfiguration.objects.create(
+            site=site,
+            partner=partner,
+            lms_url_root='https://lms.example.com',
+            theme_scss_path='/css/path/',
+            payment_processors='paypal'
         )
 
     def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):

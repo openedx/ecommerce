@@ -2,6 +2,7 @@
 import logging
 
 from django.db import transaction
+from django.contrib.sites.shortcuts import get_current_site
 from django.utils.decorators import method_decorator
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
@@ -118,12 +119,16 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 }
             }
         """
+        # The multi-tenant implementation has one site per partner
+        site = get_current_site(request)
+        partner = site.siteconfiguration.partner
+
         # Explicitly delimit operations which will be rolled back if an exception occurs.
         # atomic() context managers restore atomicity at points where we are modifying data
         # (baskets, then orders) to ensure that we don't leave the system in a dirty state
         # in the event of an error.
         with transaction.atomic():
-            basket = data_api.get_basket(request.user)
+            basket = data_api.get_basket(request.user, partner)
 
             requested_products = request.data.get(AC.KEYS.PRODUCTS)
             if requested_products:

@@ -2,13 +2,12 @@ from django.conf import settings
 from django.core import mail
 from django.test import TestCase
 import httpretty
-from oscar.test import factories
-from oscar.test.newfactories import BasketFactory, UserFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
+from ecommerce.extensions.test.factories import BasketFactory, UserFactory, create_order
 from ecommerce.settings import get_lms_url
 from ecommerce.tests.mixins import PartnerMixin
 
@@ -33,7 +32,7 @@ class SignalTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
 
         basket = BasketFactory()
         basket.add_product(seat, 1)
-        order = factories.create_order(number=1, basket=basket, user=user)
+        order = create_order(number=1, basket=basket, user=user)
         send_course_purchase_email(None, order=order)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Order Receipt')

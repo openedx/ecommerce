@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, LiveServerTestCase, override_settings
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
-from oscar.test import factories
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -15,6 +14,7 @@ from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test import factories
 from ecommerce.tests.mixins import UserMixin
 
 Order = get_model('order', 'Order')

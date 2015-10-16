@@ -12,15 +12,16 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
-def get_basket(user):
-    """Retrieve the basket belonging to the indicated user.
+def get_basket(user, partner):
+    """Retrieve the basket belonging to the indicated user and partner.
 
     If no such basket exists, create a new one. If multiple such baskets exist,
     merge them into one.
     """
-    editable_baskets = Basket.objects.filter(owner=user, status__in=Basket.editable_statuses)
+
+    editable_baskets = Basket.objects.filter(owner=user, partner=partner, status__in=Basket.editable_statuses)
     if len(editable_baskets) == 0:
-        basket = Basket.objects.create(owner=user)
+        basket = Basket.objects.create(owner=user, partner=partner)
     else:
         stale_baskets = list(editable_baskets)
         basket = stale_baskets.pop(0)

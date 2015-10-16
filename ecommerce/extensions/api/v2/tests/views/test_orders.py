@@ -7,12 +7,12 @@ from django.test import TestCase, override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
-from oscar.test import factories
 
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.test import factories
 from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
 
 Order = get_model('order', 'Order')

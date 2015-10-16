@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from ecommerce.extensions.refund.status import REFUND
-from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.extensions.test.factories import RefundFactory
 from ecommerce.tests.mixins import UserMixin
 
 

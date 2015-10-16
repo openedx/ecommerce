@@ -1,6 +1,5 @@
-from oscar.test import factories
-
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.test import factories
 from ecommerce.tests.mixins import UserMixin
 
 

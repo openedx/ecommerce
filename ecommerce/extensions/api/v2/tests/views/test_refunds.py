@@ -6,14 +6,14 @@ from django.test import TestCase, override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
-from oscar.test import factories
 from rest_framework import status
 
 from ecommerce.extensions.api.serializers import RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
-from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test import factories
+from ecommerce.extensions.test.factories import RefundFactory, RefundLineFactory
 from ecommerce.tests.mixins import UserMixin, JwtMixin
 
 Refund = get_model('refund', 'Refund')
