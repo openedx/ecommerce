@@ -100,8 +100,11 @@ class LMSPublisher(object):
                     if response.status_code in (200, 201):
                         logger.info(u'Successfully published CreditCourse for [%s] to LMS.', course_id)
                     else:
+                        # Note that %r is used to log the repr() of the response content, which may sometimes
+                        # contain non-ASCII Unicode. %s would call str() on the response content, sometimes
+                        # resulting in a UnicodeDecodeError.
                         logger.error(
-                            u'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was [%s].',
+                            u'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was %r.',
                             course_id,
                             response.status_code,
                             response.content
