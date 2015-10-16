@@ -217,6 +217,10 @@ LMS_DASHBOARD_URL = None
 # URL to which enrollment requests should be made
 ENROLLMENT_API_URL = None
 
+# URL to check the user eligibility on LMS.
+CREDIT_API_URL = None
+CREDIT_FULFILLMENT_TIMEOUT = 15
+
 # Commerce API settings used for publishing information to LMS.
 COMMERCE_API_TIMEOUT = 7
 COMMERCE_API_URL = None

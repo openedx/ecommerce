@@ -5,13 +5,11 @@ require([
         'models/tracking_model',
         'models/course_model',
         'collections/credit_provider_collection',
-        'collections/credit_eligibility_collection',
         'views/clickable_view',
         'views/analytics_view',
         'views/payment_button_view',
         'utils/utils',
-        'views/credit_provider_view',
-        'views/credit_eligibility_view'
+        'views/credit_provider_view'
     ],
     function ($,
               Backbone,
@@ -19,23 +17,16 @@ require([
               TrackingModel,
               CourseModel,
               CreditProviderCollection,
-              CreditEligibilityCollection,
               ClickableView,
               AnalyticsView,
               PaymentButtonView,
               Utils,
-              CreditProviderView,
-              CreditEligibilityView) {
+              CreditProviderView) {
         'use strict';
 
         var $container = $('.credit-checkout'),
-            $courseDetails = $container.find('#course-name'),
             $providerDetails = $container.find('.provider-details'),
             lmsRootUrl = $container.data('lms-root-url');
-
-        new PaymentButtonView({
-            el: $('#payment-buttons')
-        });
 
         new CreditProviderView({
             el: $providerDetails,
@@ -45,12 +36,8 @@ require([
             })
         });
 
-        new CreditEligibilityView({
-            collection: new CreditEligibilityCollection({
-                lmsRootUrl: lmsRootUrl,
-                username: $courseDetails.data('username'),
-                courseKey: $courseDetails.data('course_key')
-            })
+        new PaymentButtonView({
+            el: $('#payment-buttons')
         });
 
         var courseModel = new CourseModel(),

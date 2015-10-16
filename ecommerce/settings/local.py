@@ -78,8 +78,11 @@ LMS_DASHBOARD_URL = get_lms_url('/dashboard')
 OAUTH2_PROVIDER_URL = get_lms_url('/oauth2')
 
 COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
+
+CREDIT_API_URL = get_lms_url('/api/credit/v1/eligibility/')
 # END URL CONFIGURATION
 
+CREDIT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 
 # AUTHENTICATION
 # Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
@@ -98,6 +101,7 @@ JWT_AUTH.update({
 # ORDER PROCESSING
 ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
 ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
+
 
 EDX_API_KEY = 'replace-me'
 # END ORDER PROCESSING

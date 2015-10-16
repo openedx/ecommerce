@@ -5,7 +5,16 @@
 {% block title %}{% trans "Credit Checkout" %}{% endblock title %}
 
 {% block content %}
-    <div class="container credit-checkout" data-lms-root-url="{{ lms_url_root }}">
+    <div class="container credit-checkout" data-lms-root-url="{{ lms_url_root }}" data-is-eligible="{{ is_eligible }}">
+        {% if is_eligible == None %}
+            <div class="alert alert-danger" role="alert">
+                {% trans "Something went wrong. Please try again later." %}
+            </div>
+        {% elif is_eligible == False %}
+            <div class="alert alert-danger" role="alert">
+                {% trans "You are not eligible to buy this course." %}
+            </div>
+        {% endif %}
         <div class="row center-block course-details">
             <div class="col-sm-11">
                 <h3 class="title">
@@ -37,6 +46,7 @@
                         ${{ credit_seats.0.stockrecords.first.price_excl_tax }}</div>
                 </div>
 
+                {% if is_eligible %}
                 <div id="payment-buttons" class="row checkout-controls center-block text-right">
                     <div class="col-sm-12">
                         {% for processor_name, button_text in payment_processors.items %}
@@ -58,12 +68,13 @@
                     <div class="col-sm-12">
                         {# date will be added with ajax call #}
                         <small>
-                            {% blocktrans with date='<span class="deadline-date"></span>' %}
+                            {% blocktrans with date=deadline %}
                                 Credit eligibility expires on {{ date }}
                             {% endblocktrans %}
                         </small>
                     </div>
                 </div>
+            {% endif %}
             </div>
         </div>
 
