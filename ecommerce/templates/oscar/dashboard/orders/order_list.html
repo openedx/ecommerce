@@ -119,8 +119,6 @@
                     <th>{% trans "Number of items" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Username" %}</th>
-                    <th>{% trans "Shipping address" %}</th>
-                    <th>{% trans "Billing address" %}</th>
                     <th>{% trans "Date of purchase" %}</th>
                     <th></th>
                 </tr>
@@ -142,8 +140,6 @@
                                 &lt;{% trans "Deleted" %}&gt;
                             {% endif %}
                         </td>
-                        <td>{{ order.shipping_address|default:"-" }}</td>
-                        <td>{{ order.billing_address|default:"-" }}</td>
                         <td>{{ order.date_placed }}</td>
                         <td>
                             <a class="btn btn-info"

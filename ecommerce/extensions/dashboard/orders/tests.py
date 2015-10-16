@@ -10,6 +10,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
+from ecommerce.extensions.dashboard.orders.views import queryset_orders_for_user
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
@@ -153,6 +154,14 @@ class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, LiveServerTestCas
         ))
         self.assert_successful_response(response, [new_order])
 
+    def test_address_not_displayed(self):
+        """ Verify no address data is displayed when the view is rendered. """
+        self.client.login(username=self.user.username, password=self.password)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('address', response.content)
+
 
 class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTestMixin, TestCase):
     def _request_refund(self, order):
@@ -216,3 +225,11 @@ class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTe
         self.assert_message_equals(response,
                                    'A refund cannot be created for these lines. They may have already been refunded.',
                                    MSG.ERROR)
+
+
+class HelperMethodTests(UserMixin, TestCase):
+    def test_queryset_orders_for_user_select_related(self):
+        """ Verify the method only selects the related user. """
+        user = self.create_user(is_staff=True)
+        queryset = queryset_orders_for_user(user)
+        self.assertDictEqual(queryset.query.select_related, {'user': {}})
