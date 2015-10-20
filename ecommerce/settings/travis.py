@@ -1,4 +1,6 @@
 # noinspection PyUnresolvedReferences
+from ecommerce.settings.base import *
+# noinspection PyUnresolvedReferences
 from ecommerce.settings.test import *
 
 DATABASES = {

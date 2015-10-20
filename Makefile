@@ -1,3 +1,4 @@
+DJANGO_SETTINGS_MODULE=ecommerce.settings.test
 NODE_BIN=./node_modules/.bin
 
 help:
@@ -54,14 +55,14 @@ validate_js:
 	$(NODE_BIN)/gulp jscs
 
 validate_python: clean
-	REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
-	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
+	REUSE_DB=1 coverage run --branch --source=ecommerce \
+	./manage.py test ecommerce --settings=$(DJANGO_SETTINGS_MODULE) --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 	make quality
 
 fast_validate_python: clean
-	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
-	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
+	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True \
+	./manage.py test ecommerce --settings=$(DJANGO_SETTINGS_MODULE) --processes=4 --with-ignore-docstrings --logging-level=DEBUG
 	make quality
 
 quality:
