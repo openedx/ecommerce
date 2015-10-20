@@ -22,6 +22,8 @@ help:
 	@echo '    make fake_translations            install fake translations                      		'
 	@echo '    make pull_translations            pull translations from Transifex               		'
 	@echo '    make update_translations          install new translations from Transifex        		'
+	@echo '    make clean_static                 delete compiled/compressed static assets'
+	@echo '    make static                       compile and compress static assets'
 	@echo '                                                                                     		'
 
 requirements.js:
@@ -40,7 +42,10 @@ serve:
 clean:
 	find . -name '*.pyc' -delete
 	coverage erase
-	rm -rf assets/ ecommerce/static/build coverage htmlcov
+	rm -rf coverage htmlcov
+
+clean_static:
+	rm -rf assets/ ecommerce/static/build
 
 validate_js:
 	rm -rf coverage
@@ -49,14 +54,12 @@ validate_js:
 	$(NODE_BIN)/gulp jscs
 
 validate_python: clean
-	python manage.py compress --settings=ecommerce.settings.test -v0
 	REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 	make quality
 
 fast_validate_python: clean
-	python manage.py compress --settings=ecommerce.settings.test -v0
 	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
 	make quality
@@ -70,7 +73,7 @@ validate: validate_python validate_js
 static:
 	$(NODE_BIN)/r.js -o build.js
 	python manage.py collectstatic --noinput -v0
-	python manage.py compress -v0
+	python manage.py compress -v0 --force
 
 html_coverage:
 	coverage html && open htmlcov/index.html
@@ -97,4 +100,4 @@ update_translations: pull_translations fake_translations
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage accept \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
-	update_translations fast_validate_python
+	update_translations fast_validate_python clean_static

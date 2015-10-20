@@ -17,6 +17,7 @@ addons:
 before_install:
     - "export DISPLAY=:99.0"
     - "sh -e /etc/init.d/xvfb start"
+    - "export DJANGO_SETTINGS_MODULE=ecommerce.settings.test"
 install:
     - pip install -U codecov
     - pip install -U pip wheel
@@ -29,8 +30,10 @@ script:
     - cd ..
 
     # Compile assets and run validation
-    - make static -e DJANGO_SETTINGS_MODULE="ecommerce.settings.test"
-    - make validate
+    - make clean_static
+    - make static
+    - make validate_python
+    - make validate_js
 branches:
     only:
         - master
