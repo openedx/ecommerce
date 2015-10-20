@@ -2,28 +2,31 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.db import models, migrations
+from django.db import migrations
+
+service_worker_username = settings.ECOMMERCE_SERVICE_WORKER_USERNAME
 
 
-User = get_user_model()
+def add_service_user(apps, schema_editor):
+    User = apps.get_model('core', 'User')
+
+    service_user = User.objects.create(
+        username=service_worker_username,
+        is_superuser=True
+    )
+    service_user.set_unusable_password()
+    service_user.save()
+
+
+def remove_service_user(apps, schema_editor):
+    User = apps.get_model('core', 'User')
+    User.objects.get(username=settings.service_worker_username).delete()
 
 
 class Migration(migrations.Migration):
-
-    def add_service_user(apps, schema_editor):
-        service_user = User.objects.create(
-            username=settings.ECOMMERCE_SERVICE_WORKER_USERNAME,
-            is_superuser=True
-        )
-        service_user.set_unusable_password()
-        service_user.save()
-
-    def remove_service_user(apps, schema_editor):
-        User.objects.get(username=settings.ECOMMERCE_SERVICE_WORKER_USERNAME).delete()
-
     dependencies = [
         ('core', '0005_auto_20150924_0123'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
