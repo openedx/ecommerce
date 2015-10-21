@@ -218,7 +218,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
 
     def test_invalid_basket(self):
         """ When payment is accepted for a non-existent basket, log an error and record the response. """
-        order_number = '{}-{}'.format(settings.ORDER_NUMBER_PREFIX, 101986)
+        order_number = '{}-{}'.format('edx', 101986)
 
         notification = self.generate_notification(
             self.processor.secret_key,
