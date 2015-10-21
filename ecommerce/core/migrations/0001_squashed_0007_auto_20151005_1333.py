@@ -36,7 +36,7 @@ def remove_service_user(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'core', '0001_initial'), (b'core', '0002_auto_20150826_1455'), (b'core', '0003_auto_20150914_1120'), (b'core', '0004_auto_20150915_1023'), (b'core', '0005_auto_20150924_0123'), (b'core', '0006_add_service_user'), (b'core', '0007_auto_20151005_1333')]
+    replaces = [(b'core', '0001_initial'), (b'core', '0002_auto_20150826_1455'), (b'core', '0005_auto_20150924_0123'), (b'core', '0006_add_service_user'), (b'core', '0007_auto_20151005_1333')]
 
     dependencies = [
         ('auth', '0001_initial'),

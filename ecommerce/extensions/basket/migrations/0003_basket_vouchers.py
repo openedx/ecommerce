@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('voucher', '0001_initial'),
-        ('basket', '0002_auto_20140827_1705'),
+        ('basket', '0001_squashed_0005_auto_20150709_1205'),
     ]
 
     operations = [

@@ -8,7 +8,7 @@ import oscar.core.utils
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'basket', '0001_initial'), (b'basket', '0002_auto_20140827_1705'), (b'basket', '0003_basket_vouchers'), (b'basket', '0004_auto_20141007_2032'), (b'basket', '0005_auto_20150709_1205')]
+    replaces = [(b'basket', '0001_initial'), (b'basket', '0002_auto_20140827_1705'), (b'basket', '0004_auto_20141007_2032'), (b'basket', '0005_auto_20150709_1205')]
 
     dependencies = [
         ('partner', '0001_squashed_0008_auto_20150914_1057'),

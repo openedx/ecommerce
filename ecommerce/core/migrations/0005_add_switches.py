@@ -23,7 +23,7 @@ def remove_switches(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0002_create_site_configuration'),
+        ('core', '0004_auto_20150915_1023'),
         ('waffle', '0001_initial'),
     ]
 
