@@ -6,10 +6,8 @@ from django.db import models, migrations
 
 def create_shipping_event(apps, schema_editor):
     """
-
     Create a single new shipping event type that can be applied to an order. This will allow us to initiate order
     shipment.
-
     """
     # Create all our Product Types.
     ShippingEventType = apps.get_model("order", "ShippingEventType")
