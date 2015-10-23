@@ -6,18 +6,28 @@ in an Order.
 import abc
 import json
 import logging
-
-from django.conf import settings
-from rest_framework import status
+import string
+import random
 import requests
-from requests.exceptions import ConnectionError, Timeout
-from ecommerce.courses.utils import mode_for_seat
 
+from datetime import datetime
+from django.conf import settings
+from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout
+from rest_framework import status
+
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
 
-
 logger = logging.getLogger(__name__)
+
+Benefit = get_model('offer', 'Benefit')
+Condition = get_model('offer', 'Condition')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
+EnrollmentCode = get_model('order', 'EnrollmentCode')
+Range = get_model('offer', 'Range')
+Voucher = get_model('voucher', 'Voucher')
 
 
 class BaseFulfillmentModule(object):  # pragma: no cover
@@ -280,4 +290,220 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 
+        return False
+
+
+class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
+    """ Fulfillment Module for creating vouchers after a product purchase.
+
+    Allows the enrollment of a student via purchase of an 'enrollment code'.
+    """
+
+    def generate_code_string(self, length):
+        """
+        Create a string of random characters of specified length
+
+        Args:
+            length: Defines the length of randomly generated string
+
+        Returns:
+            Randomly generated string that will be used as a voucher code
+        """
+        chars = [
+            char for char in string.ascii_uppercase + string.digits + string.ascii_lowercase
+            if char not in 'aAeEiIoOuU1l'
+        ]
+
+        return string.join((random.choice(chars) for i in range(length)), '')
+
+    def supports_line(self, line):
+        """
+        Check whether the product in line is an Enrollment Code
+
+        Args:
+            line: Defines the length of randomly generated string
+
+        Returns:
+            Randomly generated string that will be used as a voucher code
+        """
+        return line.product.get_product_class().name == 'Enrollment Code'
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines that can be fulfilled through enrollment code.
+
+        Checks each line to determine if it is an "Enrollment Code". Enrollment codes are fulfilled
+        by creating a voucher, which is the sole functionality of this module.
+        Any Enrollment Code product will be returned as a supported line.
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            A supported list of unmodified lines associated with "Enrollment Code" products.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def get_or_create_range_of_products(self, catalog):
+        """ Return a range of Enrollment Code products that are part of a specific catalog.
+
+        If range of products doesn't exist, new range will be created and associated with
+        provided catalog ID.
+
+        Args:
+            catalog_ID: ID of the catalog associated with range
+
+        Returns:
+            Range of products associated with provided Catalog ID.
+        """
+        range_name = 'Range for {}'.format(unicode(catalog))
+        product_range, created = Range.objects.get_or_create(
+            name=range_name,
+            catalog=catalog,
+        )
+        return product_range
+
+    def create_new_voucher(self, offer, line):
+        """ Return a newly created voucher code that represents the offer.
+
+        If randomly generated voucher code already exists, new code will be generated and reverified.
+
+        Args:
+            offer: offer associated with voucher
+        """
+        voucher_name = 'Enrollment Code for {}'.format(unicode(offer.condition.range.catalog))
+
+        existing_voucher_codes = Voucher.objects.values('code')
+
+        while True:
+            voucher_code = self.generate_code_string(settings.REGISTRATION_CODE_LENGTH)
+            if voucher_code not in existing_voucher_codes:
+                break
+
+        voucher = Voucher.objects.create(
+            name=voucher_name,
+            code=voucher_code,
+            usage=Voucher.SINGLE_USE,
+            start_datetime=line.product.attr.start_date,
+            end_datetime=line.product.attr.end_date
+        )
+        voucher.offers.add(offer)
+        voucher.save()
+
+        return voucher
+
+    def get_or_create_enrollment_code(self, line):
+        """ Return an enrollment code associated with the line item
+
+        Args:
+            line: line item associated with enrollment code
+        """
+        enrollment_code, created = EnrollmentCode.objects.get_or_create(
+            order_line=line,
+        )
+        return enrollment_code
+
+    def get_or_create_offer_condition(self, product_range):
+        """ Return an offer condition for a product range.
+
+        If offer condition doesn't exist, new condition will be created and associated with
+        provided product range.
+
+        Args:
+            product range: Product range associated with the condition
+
+        Returns:
+            Offer Condition associated with provided Product Range.
+        """
+        offer_condition, created = Condition.objects.get_or_create(
+            range=product_range,
+            type=Condition.VALUE,
+        )
+        return offer_condition
+
+    def get_or_create_offer_benefit(self, product_range):
+        """ Return an offer benefit for a product range.
+
+        If offer benefit doesn't exist, new benefit will be created and associated with
+        provided product range.
+
+        Args:
+            product range: Product range associated with the benefit
+
+        Returns:
+            Offer Benefit associated with provided Product Range.
+        """
+        offer_benefit, created = Benefit.objects.get_or_create(
+            range=product_range,
+            type=Condition.VALUE,
+            value=100,
+        )
+        return offer_benefit
+
+    def get_or_create_offer(self, catalog_id, offer_condition, offer_benefit):
+        """ Return an offer for a catalog with condition and benefit.
+
+        If offer doesn't exist, new offer will be created and associated with
+        provided Offer condition and benefit.
+
+        Args:
+            offer condition: Offer condition associated with the offer
+            offer benefit: Offer benefit associated with the offer
+
+        Returns:
+            Offer associated with provided Offer condition and benefit.
+        """
+        offer_name = "{} {}".format(settings.OFFER_NAME_PREFIX, catalog_id)
+        offer, created = ConditionalOffer.objects.get_or_create(
+            name=offer_name,
+            offer_type=ConditionalOffer.VOUCHER,
+            condition=offer_condition,
+            benefit=offer_benefit,
+        )
+        return offer
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of an 'enrollment code' by creating a voucher.
+
+        Uses the order and the lines to determine which courses to create a voucher for.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled. The client associated with the order
+                will be the client to own a voucher.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be "Enrollment Code" products.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+
+        """
+        logger.info("Attempting to fulfill 'Enrollment Code' product types for order [%s]", order.number)
+
+        for line in lines:
+            catalog = line.product.attr.catalog
+            product_range = self.get_or_create_range_of_products(catalog)
+            offer_condition = self.get_or_create_offer_condition(product_range)
+            offer_benefit = self.get_or_create_offer_benefit(product_range)
+            offer = self.get_or_create_offer(catalog.id, offer_condition, offer_benefit)
+            for i in range(line.quantity):
+                voucher = self.create_new_voucher(offer, line)
+                enrollment_code = self.get_or_create_enrollment_code(line)
+                enrollment_code.vouchers.add(voucher)
+
+        logger.info("Finished fulfilling 'Enrollment Code' product types for order [%s]", order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        """ Revokes the specified line. Makes the voucher associated with the line inactive.
+
+        Args:
+            line (Line): Order Line to be revoked.
+
+        Returns:
+            True, if the voucher is deactivated; otherwise, False.
+        """
+        enrollment_code = self.get_or_create_enrollment_code(line)
+        vouchers = enrollment_code.vouchers.all()
+        if vouchers:
+            vouchers.update(end_datetime=datetime.now())
+            return True
         return False
