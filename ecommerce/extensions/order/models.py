@@ -23,6 +23,7 @@ class PaymentEvent(AbstractPaymentEvent):
 class Line(AbstractLine):
     history = HistoricalRecords()
 
+
 # If two models with the same name are declared within an app, Django will only use the first one.
 # noinspection PyUnresolvedReferences
 from oscar.apps.order.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

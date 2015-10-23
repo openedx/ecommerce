@@ -30,9 +30,11 @@ OSCAR_APPS = [
     'ecommerce.extensions.dashboard',
     'ecommerce.extensions.dashboard.orders',
     'ecommerce.extensions.dashboard.users',
+    'ecommerce.extensions.offer',
     'ecommerce.extensions.order',
     'ecommerce.extensions.partner',
     'ecommerce.extensions.payment',
+    'ecommerce.extensions.voucher',
 ])
 # END APP CONFIGURATION
 
@@ -246,5 +248,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
 
 # Default timeout for Enrollment API calls
 ENROLLMENT_FULFILLMENT_TIMEOUT = 7
+
+# Coupon code length
+VOUCHER_CODE_LENGTH = 8
 
 THUMBNAIL_DEBUG = False
