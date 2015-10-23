@@ -23,6 +23,12 @@ class PaymentEvent(AbstractPaymentEvent):
 class Line(AbstractLine):
     history = HistoricalRecords()
 
+
+class EnrollmentCode(models.Model):
+    date_created = models.DateField(auto_now_add=True)
+    vouchers = models.ManyToManyField('voucher.Voucher', blank=True, related_name='enrollment_codes')
+    order_line = models.ForeignKey('order.Line', related_name='enrollment_codes')
+
 # If two models with the same name are declared within an app, Django will only use the first one.
 # noinspection PyUnresolvedReferences
 from oscar.apps.order.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
