@@ -13,6 +13,19 @@ INSTALLED_APPS += (
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
+
+if os.getenv('DISABLE_MIGRATIONS'):
+
+    class DisableMigrations(object):
+
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return "notmigrations"
+
+
+    MIGRATION_MODULES = DisableMigrations()
 # END TEST SETTINGS
 
 
@@ -53,6 +66,10 @@ JWT_AUTH.update({
     'JWT_SECRET_KEY': 'insecure-secret-key',
     'JWT_ISSUERS': ('test-issuer',),
 })
+
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
 # END AUTHENTICATION
 
 

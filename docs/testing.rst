@@ -7,6 +7,13 @@ To run the unit test suite followed by quality checks, run:
 
     $ make validate
 
+The unit tests run database migrations by default. These migrations can take up to two minutes to run. Most local development
+won't require migrations. You can save time by disabling migrations when running tests locally with the command below:
+
+.. code-block:: bash
+
+    $ DISABLE_MIGRATIONS=1 make validate
+
 Code quality validation can be performed independently with:
 
 .. code-block:: bash
