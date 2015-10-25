@@ -178,7 +178,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
         paypal_response = request.GET.dict()
         basket = self._get_basket(payment_id)
-        receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_url, basket.id)
+        receipt_url = u'{}?orderNum={}'.format(self.payment_processor.receipt_url, basket.order_number)
 
         try:
             with transaction.atomic():

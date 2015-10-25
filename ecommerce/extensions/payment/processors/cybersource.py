@@ -88,7 +88,7 @@ class Cybersource(BasePaymentProcessor):
             u'currency': basket.currency,
             u'consumer_id': basket.owner.username,
             # TODO: Update once LMS receipt page is able to look up orders by order number.
-            u'override_custom_receipt_page': u'{}?basket_id={}'.format(self.receipt_page_url, basket.id),
+            u'override_custom_receipt_page': u'{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
             u'override_custom_cancel_page': self.cancel_page_url,
         }
 

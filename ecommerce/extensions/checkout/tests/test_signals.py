@@ -57,6 +57,6 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                 credit_hours=2,
                 credit_provider='Hogwarts',
                 platform_name=settings.PLATFORM_NAME,
-                receipt_url=get_lms_url('/commerce/checkout/receipt/?basket_id={}'.format(order.basket.id))
+                receipt_url=get_lms_url('/commerce/checkout/receipt/?orderNum={}'.format(order.number))
             )
         )

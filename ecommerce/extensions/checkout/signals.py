@@ -82,7 +82,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                         {
                             'course_title': product.title,
                             'receipt_page_url': get_lms_url(
-                                '/commerce/checkout/receipt/?basket_id={}'.format(order.basket.id)
+                                '/commerce/checkout/receipt/?orderNum={}'.format(order.number)
                             ),
                             'credit_hours': product.attr.credit_hours,
                             'credit_provider': provider_data['display_name'],
