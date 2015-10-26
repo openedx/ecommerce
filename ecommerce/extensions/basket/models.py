@@ -1,3 +1,4 @@
+from django.db import models
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
 
@@ -6,6 +7,8 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
 class Basket(AbstractBasket):
+    partner = models.ForeignKey('partner.Partner', default=1, null=False, blank=False, related_name='baskets')
+
     @property
     def order_number(self):
         return OrderNumberGenerator().order_number(self)
