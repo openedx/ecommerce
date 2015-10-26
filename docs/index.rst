@@ -19,6 +19,7 @@ These are the developer docs for the edX E-Commerce Service.
    fulfillment
    notifications
    internationalization
+   maintenance
 
 TODO
    - Oscar Dashboard
