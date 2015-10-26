@@ -10,7 +10,6 @@ from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
 
-
 logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
@@ -79,15 +78,6 @@ class OrderRetrieveView(generics.RetrieveAPIView):
         This ensures we do not allow one user to view the data of another user.
         """
         return self.request.user.orders
-
-
-class OrderByBasketRetrieveView(OrderRetrieveView):
-    """Allow the viewing of Orders by Basket.
-
-    Works exactly the same as OrderRetrieveView, except that orders are looked
-    up via the id of the related basket.
-    """
-    lookup_field = 'basket_id'
 
 
 class OrderFulfillView(generics.UpdateAPIView):

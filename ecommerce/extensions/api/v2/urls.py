@@ -17,7 +17,7 @@ BASKET_URLS = [
     url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
     url(
         r'^{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
-        order_views.OrderByBasketRetrieveView.as_view(),
+        basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
 ]

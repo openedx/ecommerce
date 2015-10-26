@@ -1,4 +1,5 @@
 """Order Utility Classes. """
+from __future__ import unicode_literals
 from django.conf import settings
 
 
@@ -11,21 +12,20 @@ class OrderNumberGenerator(object):
     OFFSET = 100000
 
     def order_number(self, basket):
-        """Create an order number with a configured prefix.
+        return self.order_number_from_basket_id(basket.id)
 
-        Creates a unique order number with a configured prefix.
+    def order_number_from_basket_id(self, basket_id):
+        """
+        Return an order number for a given basket ID.
 
         Arguments:
-            basket (Basket): Used to construct the order ID.
+            basket_id (int): Basket identifier.
 
         Returns:
-            str: Representation of the order 'number' with a configured prefix.
-
+            string: Order number.
         """
-        order_id = basket.id + self.OFFSET
-        order_number = u'{prefix}-{order_id}'.format(prefix=settings.ORDER_NUMBER_PREFIX, order_id=order_id)
-
-        return order_number
+        order_id = int(basket_id) + self.OFFSET
+        return u'{prefix}-{order_id}'.format(prefix=settings.ORDER_NUMBER_PREFIX, order_id=order_id)
 
     def basket_id(self, order_number):
         """Inverse of order number generation.
