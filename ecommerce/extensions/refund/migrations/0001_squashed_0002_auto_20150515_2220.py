@@ -12,8 +12,6 @@ import django_extensions.db.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'refund', '0001_initial'), (b'refund', '0002_auto_20150515_2220')]
-
     dependencies = [
         ('order', '0008_delete_order_payment_processor'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
