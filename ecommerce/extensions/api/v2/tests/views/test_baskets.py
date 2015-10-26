@@ -7,7 +7,7 @@ import logging
 import ddt
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase, override_settings
+from django.test import TransactionTestCase, override_settings, RequestFactory, TestCase
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -16,6 +16,7 @@ from testfixtures import LogCapture
 
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin, JSON_CONTENT_TYPE
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
@@ -245,9 +246,19 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         self.assertDictEqual(actual, expected)
 
 
-class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin):
+class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):
     """Test cases for getting orders using the basket id. """
 
     @property
     def url(self):
         return reverse('api:v2:baskets:retrieve_order', kwargs={'basket_id': self.order.basket.id})
+
+    def test_deleted_basket(self):
+        """ Verify the endpoint can retrieve an order even if the basket has been deleted. """
+        url = self.url
+        self.order.basket.delete()
+
+        request = RequestFactory().get(url)
+        response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, OrderSerializer(self.order, context={'request': request}).data)

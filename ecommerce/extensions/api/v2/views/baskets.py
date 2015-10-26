@@ -3,6 +3,7 @@ import logging
 
 from django.db import transaction
 from django.utils.decorators import method_decorator
+from oscar.core.loading import get_class
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,12 +11,13 @@ from rest_framework.response import Response
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.v2.views.orders import OrderRetrieveView
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_default_processor_class, get_processor_class_by_name)
 
-
 logger = logging.getLogger(__name__)
+OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
 class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
@@ -288,3 +290,16 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class OrderByBasketRetrieveView(OrderRetrieveView):
+    """Allow the viewing of Orders by Basket.
+
+    Works exactly the same as OrderRetrieveView, except that orders are looked
+    up via the id of the related basket.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        # Change the basket ID to an order number.
+        kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(kwargs['basket_id'])
+        return super(OrderByBasketRetrieveView, self).dispatch(request, *args, **kwargs)
