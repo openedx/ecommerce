@@ -56,8 +56,11 @@ LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
 LMS_DASHBOARD_URL = get_lms_url('/dashboard')
 
 COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
+
+CREDIT_API_URL = get_lms_url('/api/credit/v1/eligibility/')
 # END URL CONFIGURATION
 
+CREDIT_FULFILLMENT_TIMEOUT = 15
 
 # AUTHENTICATION
 ENABLE_AUTO_AUTH = True
