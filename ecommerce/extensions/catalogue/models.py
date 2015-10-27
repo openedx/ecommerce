@@ -19,7 +19,7 @@ class ProductAttributeValue(AbstractProductAttributeValue):
 class Catalog(models.Model):
     name = models.CharField(max_length=255)
     partner = models.ForeignKey('partner.Partner', related_name='catalogs')
-    stock_records = models.ManyToManyField('partner.StockRecord', blank=True)
+    stock_records = models.ManyToManyField('partner.StockRecord', blank=True, related_name='catalogs')
 
     def __unicode__(self):
         return u'{id}: {partner_code}-{catalog_name}'.format(

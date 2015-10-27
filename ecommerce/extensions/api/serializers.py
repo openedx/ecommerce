@@ -318,6 +318,17 @@ class PartnerSerializer(serializers.ModelSerializer):
 
 
 class CatalogSerializer(serializers.ModelSerializer):
-    """Serializer for the Catalog object"""
+    """ Serializer for Catalogs. """
+
+    products = serializers.SerializerMethodField()
+
     class Meta(object):
         model = Catalog
+        fields = ('id', 'partner', 'name', 'products')
+
+    def get_products(self, obj):
+        return reverse(
+            'api:v2:catalog-product-list',
+            kwargs={'parent_lookup_stockrecords__catalogs': obj.id},
+            request=self.context['request']
+        )
