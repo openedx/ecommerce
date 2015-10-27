@@ -1,2 +1,2 @@
 # Optional packages
-newrelic==2.46.0.37
+newrelic==2.56.0.42
