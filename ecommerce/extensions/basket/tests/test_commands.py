@@ -31,7 +31,7 @@ class DeleteOrderedBasketsCommandTests(TestCase):
         self.assertEqual(Basket.objects.count(), expected)
 
         # Verify the number of baskets expected to be deleted was printed to stderr
-        expected = 'This is a dry run. Had the --commit flag been included, [{}] baskets would have been deleted.'.\
+        expected = 'This is a dry run. Had the --commit flag been included, [{}] baskets would have been deleted.'. \
             format(len(self.orders))
         self.assertEqual(out.getvalue().strip(), expected)
 
@@ -48,5 +48,17 @@ class DeleteOrderedBasketsCommandTests(TestCase):
         self.assertEqual(list(Basket.objects.all()), self.unordered_baskets)
 
         # Verify info was output to stderr
-        expected = 'Deleting [{}] baskets...\nDone.'.format(len(self.orders))
-        self.assertEqual(out.getvalue().strip(), expected)
+        actual = out.getvalue().strip()
+        self.assertTrue(actual.startswith('Deleting [{}] baskets...'.format(len(self.orders))))
+        self.assertTrue(actual.endswith('Done.'))
+
+    def test_commit_without_baskets(self):
+        """ Verify the command does nothing if there are no baskets to delete. """
+        # Delete all baskets
+        Basket.objects.all().delete()
+
+        # Call the command with the commit flag
+        out = StringIO()
+        call_command(self.command, commit=True, stderr=out)
+
+        self.assertEqual(out.getvalue().strip(), 'No baskets to delete.')
