@@ -31,8 +31,8 @@ class DeleteOrderedBasketsCommandTests(TestCase):
         self.assertEqual(Basket.objects.count(), expected)
 
         # Verify the number of baskets expected to be deleted was printed to stderr
-        expected = 'This is a dry run. Had the --commit flag been included, [{}] baskets would have been deleted.'. \
-            format(len(self.orders))
+        expected = 'This has been an example operation. If the --commit flag had been included, the command ' \
+                   'would have deleted [{}] baskets.'.format(len(self.orders))
         self.assertEqual(out.getvalue().strip(), expected)
 
     def test_with_commit(self):

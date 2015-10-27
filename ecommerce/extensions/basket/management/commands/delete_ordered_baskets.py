@@ -46,6 +46,6 @@ class Command(BaseCommand):
             else:
                 self.stderr.write('No baskets to delete.')
         else:
-            msg = 'This is a dry run. Had the --commit flag been included, [{}] baskets would have been deleted.'. \
-                format(count)
+            msg = 'This has been an example operation. If the --commit flag had been included, the command ' \
+                  'would have deleted [{}] baskets.'.format(count)
             self.stderr.write(msg)
