@@ -127,7 +127,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         # (baskets, then orders) to ensure that we don't leave the system in a dirty state
         # in the event of an error.
         with transaction.atomic():
-            basket = Basket.get_basket(request.user)
+            basket = Basket.get_basket(request.user, request.site)
 
             requested_products = request.data.get(AC.KEYS.PRODUCTS)
             if requested_products:
