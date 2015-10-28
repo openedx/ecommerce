@@ -4,51 +4,100 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from oscar.core.loading import get_model
 
-from ecommerce.courses.models import Course
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import PartnerMixin, UserMixin
+from ecommerce.extensions.api.serializers import ProductSerializer
+from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
 
 
 Catalog = get_model('catalogue', 'Catalog')
-Partner = get_model('partner', 'Partner')
-Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class PartnerCatalogViewSetTest(PartnerMixin, CourseCatalogTestMixin, UserMixin, TestCase):
+class CatalogViewSetTest(CatalogMixin, TestCase):
+    """Test the Catalog and related products APIs."""
+
+    catalog_list_path = reverse('api:v2:catalog-list')
+
+    def setUp(self):
+        super(CatalogViewSetTest, self).setUp()
+
+        self.client.login(username=self.user.username, password=self.password)
+
+    def test_staff_authorization_required(self):
+        """Verify that only users with staff permissions can access the API. """
+        response = self.client.get(self.catalog_list_path)
+
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        response = self.client.get(self.catalog_list_path)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authentication_required(self):
+        """Verify that the unauthenticated users don't have access to the API"""
+        user = self.create_user(is_staff=False)
+        self.client.login(username=user.username, password=self.password)
+
+        response = self.client.get(self.catalog_list_path)
+        self.assertEqual(response.status_code, 403)
+
+    def test_catalog_list(self):
+        """Verify the endpoint returns all catalogs."""
+        response = self.client.get(self.catalog_list_path)
+        expected_data = self.serialize_catalog(self.catalog)
+        response_data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_data['count'], 1)
+        self.assertListEqual(response_data['results'], [expected_data])
+
+    def test_catalog_detail(self):
+        """ Verify the view returns a single catalog details. """
+        # The view should return a 404 if the catalog does not exist.
+        path = reverse('api:v2:catalog-detail', kwargs={'pk': 'abc'})
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 404)
+
+        path = reverse('api:v2:catalog-detail', kwargs={'pk': self.catalog.id})
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(json.loads(response.content), self.serialize_catalog(self.catalog))
+
+    def test_catalog_products(self):
+        """Verify the endpoint returns all products associated with a specific catalog."""
+        path = reverse(
+            'api:v2:catalog-product-list',
+            kwargs={'parent_lookup_stockrecords__catalogs': self.catalog.id}
+        )
+        response = self.client.get(path)
+        response_data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_data['count'], 0)
+        self.assertListEqual(response_data['results'], [])
+
+        self.catalog.stock_records.add(self.stock_record)
+
+        response = self.client.get(path)
+        response_data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_data['count'], 1)
+
+        expected_data = ProductSerializer(self.stock_record.product, context={'request': response.wsgi_request}).data
+        self.assertListEqual(response_data['results'], [expected_data])
+
+
+class PartnerCatalogViewSetTest(CatalogMixin, TestCase):
 
     def setUp(self):
         super(PartnerCatalogViewSetTest, self).setUp()
 
-        # Create and login the user with staff access.
-        self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        # Create partner and add course seat for that partner
-        self.edx_partner = self.create_partner('edx')
-        self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
-        self.seat = self.course.create_or_update_seat('honor', False, 0, self.edx_partner)
-
-        # Create stock record and add it to a catalog.
-        stock_record = StockRecord.objects.get(partner=self.partner)
-        self.catalog = Catalog.objects.create(name='dummy', partner=self.partner)
-        self.catalog.stock_records.add(stock_record)
+        self.catalog.stock_records.add(self.stock_record)
 
         # URL for getting catalog for partner.
         self.url = reverse(
             'api:v2:partner-catalogs-list',
-            kwargs={'parent_lookup_partner_id': self.edx_partner.id},
+            kwargs={'parent_lookup_partner_id': self.partner.id},
         )
-
-    def serialize_catalog(self, catalog):
-        """Serialize catalog data for expected API response."""
-        data = {
-            'id': catalog.id,
-            'name': catalog.name,
-            'partner': catalog.partner.id,
-            'stock_records': [catalog.stock_records.count()]
-        }
-        return data
 
     def test_get_partner_catalogs(self):
         """Verify the endpoint returns all catalogs associated with a specific partner."""
@@ -57,11 +106,21 @@ class PartnerCatalogViewSetTest(PartnerMixin, CourseCatalogTestMixin, UserMixin,
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(json.loads(response.content)['results'], [expected_data])
 
-    def test_access_catalog_api(self):
-        """Verify only staff users can access the endpoint."""
+    def test_staff_authorization_catalog_api(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
         self.client.logout()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authentication_catalog_api(self):
+        """Verify only staff users can access the endpoint."""
+
         user = self.create_user(is_staff=False)
         self.client.login(username=user.username, password=self.password)
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 

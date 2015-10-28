@@ -75,4 +75,9 @@ router.register(r'partners', partner_views.PartnerViewSet) \
               base_name='partner-catalogs', parents_query_lookups=['partner_id'])
 router.register(r'products', product_views.ProductViewSet)
 router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
+
+router.register(r'catalogs', catalog_views.CatalogViewSet) \
+    .register(r'products', product_views.ProductViewSet, base_name='catalog-product',
+              parents_query_lookups=['stockrecords__catalogs'])
+
 urlpatterns += router.urls
