@@ -14,6 +14,13 @@ class Basket(AbstractBasket):
     def order_number(self):
         return OrderNumberGenerator().order_number(self)
 
+    def __unicode__(self):
+        return _(u"{id} - {status} basket (owner: {owner}, lines: {num_lines})").format(
+            id=self.id,
+            status=self.status,
+            owner=self.owner,
+            num_lines=self.num_lines)
+
 
 # noinspection PyUnresolvedReferences
 from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
