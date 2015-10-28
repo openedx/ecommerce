@@ -152,6 +152,14 @@ class UnenrollmentMixin(object):
     def unenroll_via_dashboard(self, course_id):
         """ Unenroll the current user from a course via the LMS dashboard. """
         LMSDashboardPage(self.browser).visit()
-        self.browser.find_element_by_css_selector('a.action-more').click()
-        self.browser.find_element_by_css_selector('a.action-unenroll[data-course-id="{}"]'.format(course_id)).click()
+
+        # Find the (hidden) unenroll link
+        unenroll_link = self.browser.find_element_by_css_selector(
+            'a.action-unenroll[data-course-id="{}"]'.format(course_id))
+
+        # Show the link by clicking on the parent element
+        unenroll_link.find_element_by_xpath(".//ancestor::div[contains(@class, 'wrapper-action-more')]/a").click()
+
+        # Unenroll
+        unenroll_link.click()
         self.browser.find_element_by_css_selector('#unenroll_form input[name=submit]').click()
