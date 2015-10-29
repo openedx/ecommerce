@@ -15,3 +15,16 @@ much value and can be deleted. The `delete_ordered_baskets` management command p
 
     # Delete all baskets that have been ordered
     $ ./manage.py delete_ordered_baskets --commit
+
+
+Prior to our adding multi-tenancy support, baskets were not associated with a Site. If you have baskets in such a state
+the `add_site_to_baskets` management command can be used to update them. The command requires that a Site ID be
+specified with the `-s` option.
+
+.. code-block:: bash
+
+    # Display number of baskets to be updated
+    $ ./manage.py add_site_to_baskets -s <site-id>
+
+    # Update baskets
+    $ ./manage.py add_site_to_baskets -s <site-id> --commit
