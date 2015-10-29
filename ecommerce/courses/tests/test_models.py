@@ -1,20 +1,19 @@
 import ddt
-from django.test import TestCase
-from django_dynamic_fixture import G
 import mock
 from oscar.core.loading import get_model
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import PartnerMixin
+from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
 @ddt.ddt
-class CourseTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
+class CourseTests(CourseCatalogTestMixin, TestCase):
     def test_unicode(self):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'
@@ -28,8 +27,7 @@ class CourseTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
         These seats should be the child products.
         """
         # Create a new course and verify it has a parent product, but no children.
-        course = G(Course)
-        self.partner = self.create_partner('edx')
+        course = CourseFactory()
         self.assertEqual(course.products.count(), 1)
         self.assertEqual(len(course.seat_products), 0)
 
@@ -71,7 +69,7 @@ class CourseTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
 
     def test_publish_to_lms(self):
         """ Verify the method publishes data to LMS. """
-        course = G(Course)
+        course = CourseFactory()
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             course.publish_to_lms()
             self.assertTrue(mock_publish.called)

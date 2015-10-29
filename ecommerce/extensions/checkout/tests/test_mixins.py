@@ -3,7 +3,7 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 """
 from decimal import Decimal
 
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from mock import Mock, patch
 from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
@@ -12,7 +12,7 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
-
+from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
@@ -23,6 +23,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
     """
+
     def setUp(self):
         super(EdxOrderPlacementMixinTests, self).setUp()
 
@@ -49,10 +50,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         mock_handle_processor_response = Mock(return_value=(mock_source, mock_payment_event))
         mock_payment_processor = Mock(handle_processor_response=mock_handle_processor_response)
 
-        with patch(
-            'ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.payment_processor',
-            mock_payment_processor
-        ):
+        with patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.payment_processor',
+                   mock_payment_processor):
             mock_basket = Mock(id=basket_id, owner=Mock(id=user_id))
             with LogCapture(LOGGER_NAME) as l:
                 EdxOrderPlacementMixin().handle_payment(Mock(), mock_basket)

@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from oscar.test.factories import OrderFactory, UserFactory
+
+from ecommerce.tests.testcases import TestCase
 
 
 class DashboardViewTestMixin(object):

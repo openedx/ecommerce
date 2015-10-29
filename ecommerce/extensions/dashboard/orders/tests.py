@@ -2,7 +2,7 @@ import os
 
 from django.contrib.messages import constants as MSG
 from django.core.urlresolvers import reverse
-from django.test import TestCase, LiveServerTestCase, override_settings
+from django.test import override_settings
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -15,14 +15,19 @@ from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.testcases import LiveServerTestCase, TestCase
 
 Order = get_model('order', 'Order')
 Refund = get_model('refund', 'Refund')
 ShippingEventType = get_model('order', 'ShippingEventType')
 
 
-class OrderViewTestsMixin(UserMixin):
+class OrderViewTestsMixin(object):
+    """
+    Mixin for testing dashboard order views.
+
+    Inheriting classes should have a `create_user` method.
+    """
     def setUp(self):
         super(OrderViewTestsMixin, self).setUp()
 
@@ -227,7 +232,7 @@ class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTe
                                    MSG.ERROR)
 
 
-class HelperMethodTests(UserMixin, TestCase):
+class HelperMethodTests(TestCase):
     def test_queryset_orders_for_user_select_related(self):
         """ Verify the method only selects the related user. """
         user = self.create_user(is_staff=True)

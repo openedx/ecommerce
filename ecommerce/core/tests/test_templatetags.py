@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.template import Template, Context, TemplateSyntaxError
-from django.test import TestCase
+
+from ecommerce.tests.testcases import TestCase
 
 
 class CoreExtrasTests(TestCase):

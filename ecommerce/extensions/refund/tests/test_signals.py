@@ -1,10 +1,11 @@
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from mock import patch
 from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
+from ecommerce.tests.testcases import TestCase
 
 
 @override_settings(SEGMENT_KEY='dummy-key')

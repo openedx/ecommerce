@@ -3,14 +3,12 @@ from oscar.core.loading import get_model
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin
-
 
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CatalogMixin(CourseCatalogTestMixin, UserMixin):
+class CatalogMixin(CourseCatalogTestMixin):
     """Provide methods for Catalog test cases."""
 
     def setUp(self):
@@ -32,9 +30,7 @@ class CatalogMixin(CourseCatalogTestMixin, UserMixin):
             'id': catalog.id,
             'partner': catalog.partner.id,
             'name': catalog.name,
-            'products': 'http://testserver' + reverse(
-                'api:v2:catalog-product-list',
-                kwargs={'parent_lookup_stockrecords__catalogs': catalog.id},
-            )
+            'products': self.get_full_url(reverse('api:v2:catalog-product-list',
+                                                  kwargs={'parent_lookup_stockrecords__catalogs': catalog.id}))
         }
         return data

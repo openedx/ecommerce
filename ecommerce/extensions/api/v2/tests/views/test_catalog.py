@@ -1,11 +1,11 @@
 import json
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
+from ecommerce.tests.testcases import TestCase
 
 
 Catalog = get_model('catalogue', 'Catalog')

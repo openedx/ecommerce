@@ -2,19 +2,19 @@ import json
 
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from oscar.core.loading import get_model
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
+from ecommerce.tests.mixins import ThrottlingMixin
+from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class StockRecordViewSetTests(ProductSerializerMixin, UserMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
+class StockRecordViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
     maxDiff = None
     list_path = reverse('api:v2:stockrecords-list')
     detail_path = 'api:v2:stockrecords-detail'

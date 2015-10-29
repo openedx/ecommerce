@@ -1,5 +1,4 @@
 import ddt
-from django.test import TestCase
 import httpretty
 import mock
 import requests
@@ -7,6 +6,7 @@ from requests import ConnectionError, Timeout
 
 from ecommerce.extensions.checkout.utils import get_provider_data
 from ecommerce.settings import get_lms_url
+from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt

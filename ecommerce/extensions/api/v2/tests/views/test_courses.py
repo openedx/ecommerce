@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 import json
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 import mock
 from oscar.core.loading import get_model, get_class
 
@@ -12,14 +11,14 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Selector = get_class('partner.strategy', 'Selector')
 
 
-class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMixin, TestCase):
+class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
     maxDiff = None
     list_path = reverse('api:v2:course-list')
 

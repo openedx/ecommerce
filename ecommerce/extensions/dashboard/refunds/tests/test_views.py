@@ -1,13 +1,11 @@
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.testcases import TestCase
 
 
-class RefundViewTestMixin(UserMixin):
-
+class RefundViewTestMixin(object):
     def setUp(self):
         super(RefundViewTestMixin, self).setUp()
         self.user = self.create_user(is_superuser=True, is_staff=True)
@@ -107,7 +105,6 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
 
 
 class RefundDetailViewTests(RefundViewTestMixin, TestCase):
-
     def setUp(self):
         super(RefundDetailViewTests, self).setUp()
         self.user = self.create_user(is_superuser=True, is_staff=True)

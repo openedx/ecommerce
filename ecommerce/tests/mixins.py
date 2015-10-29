@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
-import json
 from decimal import Decimal
+import json
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -13,10 +13,10 @@ from mock import patch
 from oscar.core.loading import get_model, get_class
 from oscar.test import factories
 
-from ecommerce.core.models import SiteConfiguration
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
+from ecommerce.tests.factories import SiteConfigurationFactory
 
 Basket = get_model('basket', 'Basket')
 Selector = get_class('partner.strategy', 'Selector')
@@ -224,17 +224,6 @@ class BusinessIntelligenceMixin(object):
             self.fail()
 
 
-class PartnerMixin(object):
-    """Provides utility methods for creating partners in test cases."""
-
-    def create_partner(self, name):
-        """Create Partner object and return it"""
-        # For testing we are making 'short_code' parameter value same as name.
-        # Please make sure that 'name' is not longer than 8 characters.
-        partner, __ = Partner.objects.get_or_create(short_code=name, name=name)
-        return partner
-
-
 class SiteMixin(object):
     def setUp(self):
         super(SiteMixin, self).setUp()
@@ -243,16 +232,18 @@ class SiteMixin(object):
         domain = 'testserver.fake'
         self.client = self.client_class(SERVER_NAME=domain)
 
-        # Create and configure the default site
-        Site.objects.all().delete()
-        self.site = Site.objects.create(id=1, domain=domain)
-
-        self.partner, _created = Partner.objects.get_or_create(short_code='edx', name='edx')
-
-        SiteConfiguration.objects.create(
-            site=self.site,
-            partner=self.partner,
-            lms_url_root='https://lms.{}'.format(domain),
-            theme_scss_path='/css/path/',
-            payment_processors='fake_processor'
+        Site.objects.get_current().delete()
+        site_configuration = SiteConfigurationFactory(
+            partner__name='edX',
+            site__id=settings.SITE_ID,
+            site__domain=domain
         )
+        self.partner = site_configuration.partner
+        self.site = site_configuration.site
+
+
+class TestServerUrlMixin(object):
+    def get_full_url(self, path, site=None):
+        """ Returns a complete URL with the given path. """
+        site = site or self.site
+        return 'http://{domain}{path}'.format(domain=site.domain, path=path)

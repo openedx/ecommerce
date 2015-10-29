@@ -3,7 +3,6 @@ from unittest import skip
 
 import ddt
 from django.core.urlresolvers import reverse
-from django.test import LiveServerTestCase
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -13,6 +12,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.testcases import LiveServerTestCase
 
 Refund = get_model('refund', 'Refund')
 

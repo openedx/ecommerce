@@ -1,24 +1,23 @@
 import datetime
-import ddt
 
-from django.test import TestCase, RequestFactory
+import ddt
+from django.test import RequestFactory
 from oscar.apps.partner import availability
 import pytz
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy, Selector
-from ecommerce.tests.mixins import UserMixin, PartnerMixin
+from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-class DefaultStrategyTests(CourseCatalogTestMixin, UserMixin, PartnerMixin, TestCase):
+class DefaultStrategyTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(DefaultStrategyTests, self).setUp()
         self.strategy = DefaultStrategy()
         course = Course.objects.create(id='a/b/c', name='Demo Course')
-        partner = self.create_partner('edx')
-        self.honor_seat = course.create_or_update_seat('honor', False, 0, partner)
+        self.honor_seat = course.create_or_update_seat('honor', False, 0, self.partner)
 
     def test_seat_class(self):
         """ Verify the property returns the course seat Product Class. """

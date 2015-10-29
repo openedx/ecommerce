@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.core import mail
-from django.test import TestCase
 import httpretty
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory, UserFactory
@@ -10,10 +9,10 @@ from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
 from ecommerce.settings import get_lms_url
-from ecommerce.tests.mixins import PartnerMixin
+from ecommerce.tests.testcases import TestCase
 
 
-class SignalTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
+class SignalTests(CourseCatalogTestMixin, TestCase):
     @httpretty.activate
     def test_post_checkout_callback(self):
         """
@@ -28,8 +27,7 @@ class SignalTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
         toggle_switch('ENABLE_NOTIFICATIONS', True)
         user = UserFactory()
         course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
-        partner = self.create_partner('edx')
-        seat = course.create_or_update_seat('credit', False, 50, partner, 'ASU', None, 2)
+        seat = course.create_or_update_seat('credit', False, 50, self.partner, 'ASU', None, 2)
 
         basket = BasketFactory()
         basket.add_product(seat, 1)

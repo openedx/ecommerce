@@ -1,6 +1,5 @@
 """Tests for the Fulfillment API"""
 import ddt
-from django.test import TestCase
 from django.test.utils import override_settings
 from nose.tools import raises
 from testfixtures import LogCapture
@@ -13,6 +12,7 @@ from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.fulfillment.tests.modules import FakeFulfillmentModule
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt

@@ -1,8 +1,8 @@
 import ddt
-from django.test import TestCase
 from oscar.test import factories
 
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt

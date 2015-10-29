@@ -3,20 +3,19 @@ import datetime
 import json
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from oscar.core.loading import get_model
 import pytz
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin, PartnerMixin
+from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
-class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMixin, PartnerMixin, TestCase):
+class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -24,7 +23,6 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, UserMi
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
-        self.partner = self.create_partner('edx')
 
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)

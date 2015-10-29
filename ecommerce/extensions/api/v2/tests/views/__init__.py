@@ -6,14 +6,14 @@ from oscar.test.newfactories import ProductAttributeValueFactory
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.test import factories
-from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
+from ecommerce.tests.mixins import ThrottlingMixin
 
 JSON_CONTENT_TYPE = 'application/json'
 Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 
 
-class OrderDetailViewTestMixin(ThrottlingMixin, UserMixin):
+class OrderDetailViewTestMixin(ThrottlingMixin):
     def url(self):
         raise NotImplementedError
 
@@ -28,12 +28,15 @@ class OrderDetailViewTestMixin(ThrottlingMixin, UserMixin):
 
         self.token = self.generate_jwt_token_header(user)
 
+    def serialize_order(self, order):
+        request = RequestFactory(SERVER_NAME=self.site.domain).get('/')
+        return OrderSerializer(order, context={'request': request}).data
+
     def test_get_order(self):
         """Test successful order retrieval."""
-        request = RequestFactory().get(self.url)
         response = self.client.get(self.url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, OrderSerializer(self.order, context={'request': request}).data)
+        self.assertEqual(response.data, self.serialize_order(self.order))
 
     def test_order_wrong_user(self):
         """Test scenarios where an order should return a 404 due to the wrong user."""
@@ -43,13 +46,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin, UserMixin):
         self.assertEqual(response.status_code, 404)
 
 
-class TestServerUrlMixin(object):
-    def get_full_url(self, path):
-        """ Returns a complete URL with the given path. """
-        return 'http://testserver' + path
-
-
-class ProductSerializerMixin(TestServerUrlMixin):
+class ProductSerializerMixin(object):
     def serialize_product(self, product):
         """ Serializes a Product to a Python dict. """
         attribute_values = [{'name': av.attribute.name, 'value': av.value} for av in product.attribute_values.all()]

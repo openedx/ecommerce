@@ -3,19 +3,17 @@ import json
 
 import ddt
 from django.conf import settings
-from django.test import TestCase, override_settings
-from django_dynamic_fixture import G
+from django.test import override_settings
 import httpretty
 import mock
 from requests import Timeout
 from testfixtures import LogCapture
 
-from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.settings import get_lms_url
-from ecommerce.tests.mixins import PartnerMixin
-
+from ecommerce.tests.testcases import TestCase
 
 EDX_API_KEY = 'edx'
 JSON = 'application/json'
@@ -24,11 +22,10 @@ LOGGER_NAME = 'ecommerce.courses.publishers'
 
 @ddt.ddt
 @override_settings(COMMERCE_API_URL='http://example.com/commerce/api/v1/', EDX_API_KEY=EDX_API_KEY)
-class LMSPublisherTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
+class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
-        self.course = G(Course)
-        self.partner = self.create_partner('edx')
+        self.course = CourseFactory(verification_deadline=datetime.datetime.now() + datetime.timedelta(days=7))
         self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.course.create_or_update_seat('verified', True, 50, self.partner)
         self.publisher = LMSPublisher()
@@ -128,7 +125,6 @@ class LMSPublisherTests(CourseCatalogTestMixin, PartnerMixin, TestCase):
         self._mock_commerce_api(status)
 
         with LogCapture(LOGGER_NAME) as l:
-
             response = self.publisher.publish(self.course)
             self.assertIsNone(response)
 

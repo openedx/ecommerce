@@ -3,7 +3,7 @@ import json
 import ddt
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
+from django.test import override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -13,13 +13,14 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin,
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.tests.mixins import UserMixin, ThrottlingMixin
+from ecommerce.tests.mixins import ThrottlingMixin
+from ecommerce.tests.testcases import TestCase
 
 Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
 
 
-class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase):
+class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def setUp(self):
         super(OrderListViewTests, self).setUp()
         self.path = reverse('api:v2:orders:list')
@@ -95,8 +96,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, UserMixin, TestCase)
 
 @ddt.ddt
 @override_settings(ECOMMERCE_SERVICE_WORKER_USERNAME='test-service-user')
-class OrderFulfillViewTests(UserMixin, TestCase):
-
+class OrderFulfillViewTests(TestCase):
     def setUp(self):
         super(OrderFulfillViewTests, self).setUp()
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)

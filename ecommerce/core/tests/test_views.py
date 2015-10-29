@@ -3,7 +3,6 @@ import json
 
 from django.db import DatabaseError
 from django.conf import settings
-from django.test import TestCase
 from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
@@ -14,6 +13,7 @@ from rest_framework import status
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import Status, UnavailabilityMessage
+from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.core.views'
 User = get_user_model()

@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 """Unit tests for the analytics app."""
 from django.apps import apps
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from oscar.core.loading import get_model
 
 from ecommerce.tests.mixins import BasketCreationMixin
-
+from ecommerce.tests.testcases import TestCase
 
 ProductRecord = get_model('analytics', 'ProductRecord')
 
 
 class AnalyticsTests(BasketCreationMixin, TestCase):
     """Test analytics behavior in controlled scenarios."""
+
     def setUp(self):
         super(AnalyticsTests, self).setUp()
 

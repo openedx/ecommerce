@@ -20,10 +20,31 @@ Code quality validation can be performed independently with:
 
     $ make quality
 
+Writing Tests
+-------------
+Tests should be written for all new features. The `Django docs`_ are a good resource to learn how to test Django code.
+When creating tests, use the ``TestCase`` class in ``ecommerce/tests/testcases.py`` to ensure every test has ``Site`` and
+``Partner`` objects configured. This will aid testing any code that might rely on these models (which are used for
+multi-tenancy).
+
+.. _Django docs: https://docs.djangoproject.com/en/1.8/topics/testing/
+
+This project uses `Jasmine <http://jasmine.github.io/2.3/introduction.html>`_ for JavaScript unit testing.
+Tests should be placed in ``ecommerce/static/js/test/specs`` and suffixed with ``_spec``.
+For example, ``ecommerce/static/js/test/specs/course_list_view_spec.js``. All JavaScript code should adhere to the
+`edX JavaScript standards <https://github.com/edx/edx-platform/wiki/Javascript-standards-for-the-edx-platform>`_.
+These standards are enforced using `JSHint <http://www.jshint.com/>`_ and `jscs <https://www.npmjs.org/package/jscs>`_.
+
+
+
 Acceptance Testing
 ------------------
 
-The project also includes acceptance tests used to verify behavior which relies on external systems like the LMS and payment processors. At a minimum, these tests should be run against a staging environment before deploying code to production to verify that critical user workflows are functioning as expected. With the right configuration in place, the tests can also be run locally. Below you'll find an explanation of how to configure the LMS and the E-Commerce Service so that the acceptance tests can be run successfully.
+The project also includes acceptance tests used to verify behavior which relies on external systems like the LMS
+and payment processors. At a minimum, these tests should be run against a staging environment before deploying
+code to production to verify that critical user workflows are functioning as expected. With the right configuration
+in place, the tests can also be run locally. Below you'll find an explanation of how to configure the LMS and the
+E-Commerce Service so that the acceptance tests can be run successfully.
 
 Definitions
 ***********
@@ -147,7 +168,4 @@ When running against a production-like staging environment, you might run::
 
     $ ECOMMERCE_URL_ROOT="https://ecommerce.stage.edx.org" LMS_URL_ROOT="https://courses.stage.edx.org" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="True" LMS_AUTO_AUTH="False" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" BASIC_AUTH_USERNAME="<username>" BASIC_AUTH_PASSWORD="<password>" HONOR_COURSE_ID="<course ID>" VERIFIED_COURSE_ID="<course ID>" make accept
 
-JavaScript Testing
-------------------
 
-This project uses `Jasmine <http://jasmine.github.io/2.3/introduction.html>`_ for JavaScript unit testing. Tests should be placed in ``ecommerce/static/js/test/specs`` and suffixed with ``_spec``. For example, ``ecommerce/static/js/test/specs/course_list_view_spec.js``. All JavaScript code should adhere to the `edX JavaScript standards <https://github.com/edx/edx-platform/wiki/Javascript-standards-for-the-edx-platform>`_. These standards are enforced using `JSHint <http://www.jshint.com/>`_ and `jscs <https://www.npmjs.org/package/jscs>`_.

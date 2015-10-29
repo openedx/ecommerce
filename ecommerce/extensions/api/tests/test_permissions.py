@@ -1,9 +1,9 @@
-from django.test import TestCase
 from oscar.test.newfactories import UserFactory
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from ecommerce.extensions.api.permissions import CanActForUser
+from ecommerce.tests.testcases import TestCase
 
 
 class CanActForUserTests(TestCase):
