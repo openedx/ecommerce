@@ -14,7 +14,6 @@ from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 
-
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
 
@@ -259,6 +258,22 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         self.assertTrue(refund.deny())
         self.assertEqual(refund.status, REFUND.DENIED)
         self.assert_line_status(refund, REFUND_LINE.DENIED)
+
+    def test_deny_with_exception(self):
+        """
+        If denial of a line results in an exception being raised, the exception should be logged, and the method
+        should return False.
+        """
+        # Create a Refund
+        refund = self._get_instance()
+
+        # Make RefundLine.deny() raise an exception
+        with mock.patch('ecommerce.extensions.refund.models.RefundLine.deny', side_effect=Exception):
+            logger_name = 'ecommerce.extensions.refund.models'
+
+            with LogCapture(logger_name) as l:
+                self.assertFalse(refund.deny())
+                l.check((logger_name, 'ERROR', 'Failed to deny RefundLine [{}].'.format(refund.lines.first().id)))
 
     @ddt.data(REFUND.REVOCATION_ERROR, REFUND.PAYMENT_REFUNDED, REFUND.PAYMENT_REFUND_ERROR, REFUND.COMPLETE)
     def test_deny_wrong_state(self, status):
