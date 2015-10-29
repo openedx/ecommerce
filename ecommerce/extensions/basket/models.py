@@ -16,15 +16,15 @@ class Basket(AbstractBasket):
         return OrderNumberGenerator().order_number(self)
 
     @classmethod
-    def get_basket(cls, user):
+    def get_basket(cls, user, site):
         """Retrieve the basket belonging to the indicated user.
 
         If no such basket exists, create a new one. If multiple such baskets exist,
         merge them into one.
         """
-        editable_baskets = cls.objects.filter(owner=user, status__in=Basket.editable_statuses)
+        editable_baskets = cls.objects.filter(site=site, owner=user, status__in=Basket.editable_statuses)
         if len(editable_baskets) == 0:
-            basket = cls.objects.create(owner=user)
+            basket = cls.objects.create(site=site, owner=user)
         else:
             stale_baskets = list(editable_baskets)
             basket = stale_baskets.pop(0)

@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
 import json
-from decimal import Decimal as D
+from decimal import Decimal
 
-import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
+import jwt
 from mock import patch
-from oscar.test import factories
 from oscar.core.loading import get_model, get_class
+from oscar.test import factories
 
+from ecommerce.core.models import SiteConfiguration
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
-
 
 Basket = get_model('basket', 'Basket')
 Selector = get_class('partner.strategy', 'Selector')
@@ -46,6 +47,7 @@ class UserMixin(object):
 
 class ThrottlingMixin(object):
     """Provides utility methods for test cases validating the behavior of rate-limited endpoints."""
+
     def setUp(self):
         super(ThrottlingMixin, self).setUp()
 
@@ -94,7 +96,7 @@ class BasketCreationMixin(JwtMixin):
             parent=self.base_product,
             title=u'𝑪𝒂𝒓𝒅𝒃𝒐𝒂𝒓𝒅 𝑪𝒖𝒕𝒐𝒖𝒕',
             stockrecords__partner_sku=self.FREE_SKU,
-            stockrecords__price_excl_tax=D('0.00'),
+            stockrecords__price_excl_tax=Decimal('0.00'),
         )
 
     def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
@@ -224,9 +226,33 @@ class BusinessIntelligenceMixin(object):
 
 class PartnerMixin(object):
     """Provides utility methods for creating partners in test cases."""
+
     def create_partner(self, name):
         """Create Partner object and return it"""
         # For testing we are making 'short_code' parameter value same as name.
         # Please make sure that 'name' is not longer than 8 characters.
         partner, __ = Partner.objects.get_or_create(short_code=name, name=name)
         return partner
+
+
+class SiteMixin(object):
+    def setUp(self):
+        super(SiteMixin, self).setUp()
+
+        # Set the domain used for all test requests
+        domain = 'testserver.fake'
+        self.client = self.client_class(SERVER_NAME=domain)
+
+        # Create and configure the default site
+        Site.objects.all().delete()
+        self.site = Site.objects.create(id=1, domain=domain)
+
+        self.partner, _created = Partner.objects.get_or_create(short_code='edx', name='edx')
+
+        SiteConfiguration.objects.create(
+            site=self.site,
+            partner=self.partner,
+            lms_url_root='https://lms.{}'.format(domain),
+            theme_scss_path='/css/path/',
+            payment_processors='fake_processor'
+        )
