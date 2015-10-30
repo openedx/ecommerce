@@ -2,7 +2,7 @@ import json
 
 import ddt
 from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
+from django.test import override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -14,12 +14,13 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin,
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.tests.mixins import UserMixin, JwtMixin
+from ecommerce.tests.mixins import JwtMixin
+from ecommerce.tests.testcases import TestCase
 
 Refund = get_model('refund', 'Refund')
 
 
-class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, UserMixin, TestCase):
+class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
     path = reverse('api:v2:refunds:create')
 
     def setUp(self):
@@ -178,7 +179,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, UserMix
 
 
 @ddt.ddt
-class RefundProcessViewTests(UserMixin, TestCase):
+class RefundProcessViewTests(TestCase):
     def setUp(self):
         super(RefundProcessViewTests, self).setUp()
 

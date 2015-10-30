@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 import ddt
 from django.test import override_settings
 from oscar.core.loading import get_model
@@ -9,7 +7,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-
+from ecommerce.tests.testcases import TestCase
 
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductClass = get_model("catalogue", "ProductClass")

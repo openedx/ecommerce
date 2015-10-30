@@ -3,9 +3,10 @@ from StringIO import StringIO
 
 from django.contrib.sites.models import Site
 from django.core.management import call_command, CommandError
-from django.test import TestCase
 from oscar.core.loading import get_model
 from oscar.test import factories
+
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 

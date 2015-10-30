@@ -1,9 +1,10 @@
 import itertools
 
 from django.contrib.sites.models import Site
-from django.test import TestCase
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
+
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')

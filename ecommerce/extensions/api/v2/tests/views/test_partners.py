@@ -1,31 +1,28 @@
 import json
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.api.v2.tests.views import TestServerUrlMixin
-from ecommerce.tests.mixins import PartnerMixin, UserMixin
-
+from ecommerce.tests.factories import PartnerFactory
+from ecommerce.tests.testcases import TestCase
 
 Partner = get_model('partner', 'Partner')
 
 
-class PartnerViewTest(PartnerMixin, UserMixin, TestServerUrlMixin, TestCase):
+class PartnerViewTest(TestCase):
     def setUp(self):
         super(PartnerViewTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.edx_partner = self.create_partner('edx')
-        self.dummy_partner = self.create_partner('dummy')
+        self.dummy_partner = PartnerFactory(name='dummy')
 
     def serialize_partner(self, partner):
         """Serialize the the data for the partner provided and return the
         expected partner data from API endpoint.
         """
         product_path = reverse('api:v2:partner-product-list',
-                               kwargs={'parent_lookup_stockrecords__partner_id': partner.id},)
-        catalog_path = reverse('api:v2:partner-catalogs-list', kwargs={'parent_lookup_partner_id': partner.id},)
+                               kwargs={'parent_lookup_stockrecords__partner_id': partner.id}, )
+        catalog_path = reverse('api:v2:partner-catalogs-list', kwargs={'parent_lookup_partner_id': partner.id}, )
         data = {
             'id': partner.id,
             'name': partner.name,
@@ -38,7 +35,7 @@ class PartnerViewTest(PartnerMixin, UserMixin, TestServerUrlMixin, TestCase):
     def test_get_partner_list(self):
         """Verify the endpoint returns a list of all partners."""
         url = reverse('api:v2:partner-list')
-        edx_partner_data = self.serialize_partner(self.edx_partner)
+        edx_partner_data = self.serialize_partner(self.partner)
         dummy_partner_data = self.serialize_partner(self.dummy_partner)
         expected_data = list()
         expected_data.append(edx_partner_data)
@@ -50,9 +47,9 @@ class PartnerViewTest(PartnerMixin, UserMixin, TestServerUrlMixin, TestCase):
 
     def test_get_partner_detail(self):
         """Verify the endpoint returns the details for a specific partner."""
-        url = reverse('api:v2:partner-detail', kwargs={'pk': self.edx_partner.id})
+        url = reverse('api:v2:partner-detail', kwargs={'pk': self.partner.id})
         response = self.client.get(url)
-        expected_data = self.serialize_partner(self.edx_partner)
+        expected_data = self.serialize_partner(self.partner)
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(json.loads(response.content), expected_data)
 

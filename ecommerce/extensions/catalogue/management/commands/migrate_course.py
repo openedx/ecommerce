@@ -20,7 +20,7 @@ Partner = get_model('partner', 'Partner')
 class MigratedCourse(object):
     def __init__(self, course_id, partner_short_code):
         self.course, _created = Course.objects.get_or_create(id=course_id)
-        self.partner, __ = Partner.objects.get_or_create(short_code=partner_short_code)
+        self.partner = Partner.objects.get(short_code=partner_short_code)
 
     def load_from_lms(self, access_token):
         """

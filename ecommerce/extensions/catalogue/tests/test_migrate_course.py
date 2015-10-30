@@ -8,7 +8,7 @@ from urlparse import urljoin, urlparse
 
 from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -23,6 +23,7 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.management.commands.migrate_course import MigratedCourse
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku
+from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
 EDX_API_KEY = ACCESS_TOKEN = 'edx'
@@ -43,7 +44,6 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
     commerce_api_url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
     course_structure_url = urljoin(settings.LMS_URL_ROOT, 'api/course_structure/v0/courses/{}/'.format(course_id))
     enrollment_api_url = urljoin(settings.LMS_URL_ROOT, 'api/enrollment/v1/course/{}'.format(course_id))
-    partner_short_code = 'edx'
 
     prices = {
         'honor': 0,
@@ -138,7 +138,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
         self._mock_lms_apis()
-        migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
+        migrated_course = MigratedCourse(self.course_id, self.partner.short_code)
         migrated_course.load_from_lms(ACCESS_TOKEN)
         return migrated_course
 
@@ -183,7 +183,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
         # Try migrating the course, which should fail.
         try:
-            migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
+            migrated_course = MigratedCourse(self.course_id, self.partner.short_code)
             migrated_course.load_from_lms(ACCESS_TOKEN)
         except Exception as ex:  # pylint: disable=broad-except
             self.assertEqual(ex.message, 'Aborting migration. No name is available for {}.'.format(self.course_id))
@@ -209,7 +209,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             content_type=JSON
         )
 
-        migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
+        migrated_course = MigratedCourse(self.course_id, self.partner.short_code)
         migrated_course.load_from_lms(ACCESS_TOKEN)
         course = migrated_course.course
 
@@ -243,7 +243,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         }
         httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
 
-        migrated_course = MigratedCourse(self.course_id, self.partner_short_code)
+        migrated_course = MigratedCourse(self.course_id, self.partner.short_code)
         migrated_course.load_from_lms(ACCESS_TOKEN)
         course = migrated_course.course
 
@@ -271,7 +271,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             mock_publish.return_value = True
             call_command(
-                'migrate_course', self.course_id, access_token=ACCESS_TOKEN, partner_short_code=self.partner_short_code
+                'migrate_course', self.course_id, access_token=ACCESS_TOKEN, partner_short_code=self.partner.short_code
             )
 
             # Verify that the migrated course was not published back to the LMS
@@ -296,7 +296,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
                 self.course_id,
                 access_token=ACCESS_TOKEN,
                 commit=True,
-                partner=self.partner_short_code
+                partner=self.partner.short_code
             )
 
             # Verify that the migrated course was published back to the LMS
@@ -306,9 +306,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
 
     @httpretty.activate
     def test_handle_with_no_partner(self):
-        """ Verify the management command does not run if no partner short code
-        is provided.
-        """
+        """ Verify the management command does not run if no partner short code is provided. """
         self._mock_lms_apis()
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
@@ -335,7 +333,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
                 self.course_id,
                 access_token=ACCESS_TOKEN,
                 commit=False,
-                partner=self.partner_short_code
+                partner=self.partner.short_code
             )
 
             # Verify that the migrated course was published back to the LMS
@@ -353,7 +351,7 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
                 self.course_id,
                 access_token=ACCESS_TOKEN,
                 commit=True,
-                partner=self.partner_short_code
+                partner=self.partner.short_code
             )
 
             # Verify that the migrated course was published back to the LMS

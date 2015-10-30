@@ -7,7 +7,7 @@ import logging
 import ddt
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase, override_settings, RequestFactory, TestCase
+from django.test import TransactionTestCase, override_settings
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -16,12 +16,12 @@ from testfixtures import LogCapture
 
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin, JSON_CONTENT_TYPE
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.tests.mixins import ThrottlingMixin, BasketCreationMixin
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
@@ -258,7 +258,6 @@ class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):
         url = self.url
         self.order.basket.delete()
 
-        request = RequestFactory().get(url)
         response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, OrderSerializer(self.order, context={'request': request}).data)
+        self.assertEqual(response.data, self.serialize_order(self.order))

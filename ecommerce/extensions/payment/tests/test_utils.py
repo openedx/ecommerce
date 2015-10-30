@@ -1,6 +1,5 @@
-from django.test import TestCase
-
 from ecommerce.extensions.payment.utils import middle_truncate
+from ecommerce.tests.testcases import TestCase
 
 
 class UtilsTests(TestCase):

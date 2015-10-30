@@ -4,7 +4,7 @@ import json
 import ddt
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -19,7 +19,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
-from ecommerce.tests.mixins import PartnerMixin
+from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
@@ -30,7 +30,7 @@ User = get_user_model()
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, PartnerMixin, TestCase):
+class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
 
     course_id = 'edX/DemoX/Demo_Course'
@@ -42,7 +42,6 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
         self.user = UserFactory()
         self.course = Course.objects.create(id=self.course_id, name='Demo Course')
-        self.partner = self.create_partner('edx')
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 

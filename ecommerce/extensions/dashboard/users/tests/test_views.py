@@ -3,7 +3,6 @@ import json
 from django.conf import settings
 from django.contrib.messages import constants as MSG
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 import httpretty
 import mock
 from requests import Timeout
@@ -12,12 +11,12 @@ from testfixtures import LogCapture
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.dashboard.users.views import UserDetailView
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.dashboard.users.views'
 
 
-class UserDetailViewTests(DashboardViewTestMixin, UserMixin, TestCase):
+class UserDetailViewTests(DashboardViewTestMixin, TestCase):
     def setUp(self):
         super(UserDetailViewTests, self).setUp()
         self.switch = toggle_switch('user_enrollments_on_dashboard', True)

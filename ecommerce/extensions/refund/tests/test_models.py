@@ -1,6 +1,5 @@
 import ddt
 from django.conf import settings
-from django.test import TestCase
 import httpretty
 import mock
 from oscar.apps.payment.exceptions import PaymentError
@@ -13,6 +12,7 @@ from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.testcases import TestCase
 
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')

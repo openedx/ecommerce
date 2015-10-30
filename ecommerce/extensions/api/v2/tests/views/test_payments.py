@@ -2,13 +2,13 @@ import json
 
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
+from django.test import override_settings
 
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.testcases import TestCase
 
 
-class PaymentProcessorListViewTests(TestCase, UserMixin):
+class PaymentProcessorListViewTests(TestCase):
     """ Ensures correct behavior of the payment processors list view."""
 
     def setUp(self):

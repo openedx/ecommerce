@@ -1,18 +1,16 @@
-from django.test import TestCase
 from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.order.processing import EventHandler
-
+from ecommerce.tests.testcases import TestCase
 
 ShippingEventType = get_model('order', 'ShippingEventType')
 ShippingEvent = get_model('order', 'ShippingEvent')
 
 
 class EventHandlerTests(TestCase):
-
     def setUp(self):
         super(EventHandlerTests, self).setUp()
         self.shipping_event_type, __ = ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)

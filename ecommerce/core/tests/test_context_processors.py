@@ -1,6 +1,7 @@
-from django.test import TestCase, override_settings, RequestFactory
+from django.test import override_settings, RequestFactory
 
 from ecommerce.core.context_processors import core
+from ecommerce.tests.testcases import TestCase
 
 PLATFORM_NAME = 'Test Platform'
 

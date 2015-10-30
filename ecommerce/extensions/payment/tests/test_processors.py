@@ -9,7 +9,6 @@ from uuid import UUID
 import ddt
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from django.test.client import RequestFactory
 import httpretty
 import mock
@@ -32,8 +31,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource, sud
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.tests.mixins import PartnerMixin
-
+from ecommerce.tests.testcases import TestCase
 
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
@@ -44,7 +42,7 @@ SourceType = get_model('payment', 'SourceType')
 log = logging.getLogger(__name__)
 
 
-class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, PartnerMixin, PaymentEventsMixin):
+class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, PaymentEventsMixin):
     """ Mixin for payment processor tests. """
 
     # Subclasses should set this value. It will be used to instantiate the processor in setUp.
@@ -59,7 +57,6 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Par
         super(PaymentProcessorTestCaseMixin, self).setUp()
 
         self.course = Course.objects.create(id='a/b/c', name='Demo Course')
-        self.partner = self.create_partner('edx')
         self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
 
         self.processor = self.processor_class()  # pylint: disable=not-callable

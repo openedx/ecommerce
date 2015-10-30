@@ -2,7 +2,6 @@
 import ddt
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from django.test.client import RequestFactory
 from factory.django import mute_signals
 import httpretty
@@ -19,8 +18,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
-from ecommerce.tests.mixins import UserMixin
-
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
@@ -173,11 +171,9 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
 
         with mock.patch.object(CybersourceNotifyView, 'handle_payment',
                                side_effect=PaymentError) as fake_handle_payment:
-            error_message = 'CyberSource payment failed for basket [{basket_id}]. '\
-                            'The payment response was recorded in entry [{response_id}].'.format(
-                                basket_id=self.basket.id,
-                                response_id=1
-                            )
+            error_message = 'CyberSource payment failed for basket [{basket_id}]. ' \
+                            'The payment response was recorded in entry [{response_id}].'.\
+                format(basket_id=self.basket.id, response_id=1)
             self._assert_processing_failure(notification, 200, error_message)
             self.assertTrue(fake_handle_payment.called)
 
@@ -459,8 +455,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
 
 @mock.patch('ecommerce.extensions.payment.views.call_command')
-class PaypalProfileAdminViewTests(UserMixin, TestCase):
-
+class PaypalProfileAdminViewTests(TestCase):
     path = reverse('paypal_profiles')
 
     def get_response(self, is_superuser, expected_status, data=None):

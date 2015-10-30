@@ -1,10 +1,14 @@
 from oscar.test import factories
 
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
-from ecommerce.tests.mixins import UserMixin
 
 
-class FulfillmentTestMixin(UserMixin):
+class FulfillmentTestMixin(object):
+    """
+    Mixin for fulfillment tests.
+
+    Inheriting classes should have a `create_user` method.
+    """
     def generate_open_order(self):
         """ Returns an open order, ready to be fulfilled. """
         user = self.create_user()

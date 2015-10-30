@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.conf.urls import url
-from django.test import TestCase, override_settings, RequestFactory
+from django.test import override_settings, RequestFactory
 import httpretty
 import mock
 from oscar.test import factories
@@ -17,7 +17,8 @@ from rest_framework.views import APIView
 from rest_framework_jwt import utils
 
 from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAuthentication
-from ecommerce.tests.mixins import JwtMixin, UserMixin
+from ecommerce.tests.mixins import JwtMixin
+from ecommerce.tests.testcases import TestCase
 
 OAUTH2_PROVIDER_URL = 'https://example.com/oauth2'
 
@@ -130,7 +131,7 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
 @override_settings(
     ROOT_URLCONF='ecommerce.extensions.api.tests.test_authentication',
 )
-class JwtAuthenticationTests(JwtMixin, UserMixin, TestCase):
+class JwtAuthenticationTests(JwtMixin, TestCase):
     def assert_jwt_status(self, issuer=None, expires=None, status_code=200):
         """Assert that the payload has a valid issuer and has not expired."""
         staff_user = self.create_user(is_staff=True)

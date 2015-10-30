@@ -4,17 +4,16 @@ import json
 import ddt
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
 import mock
 
 from ecommerce.extensions.payment.management.commands.paypal_profile import Command as PaypalProfileCommand
 from ecommerce.extensions.payment.models import PaypalWebProfile
+from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
 @mock.patch('ecommerce.extensions.payment.management.commands.paypal_profile.WebProfile')
 class TestPaypalProfileCommand(TestCase):
-
     TEST_ID = 'test-id'
     TEST_JSON = '{"test": "json"}'
     TEST_NAME = 'test-name'

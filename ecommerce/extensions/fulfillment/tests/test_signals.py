@@ -1,8 +1,8 @@
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from oscar.core.loading import get_class
 
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
-
+from ecommerce.tests.testcases import TestCase
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
