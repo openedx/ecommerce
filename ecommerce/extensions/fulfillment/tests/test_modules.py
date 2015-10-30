@@ -114,7 +114,13 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             'course_details': {
                 'course_id': self.course_id,
             },
-            'enrollment_attributes': []
+            'enrollment_attributes': [
+                {
+                    'namespace': 'order',
+                    'name': 'order_number',
+                    'value': self.order.number
+                }
+            ]
         }
 
         expected_headers = {
@@ -302,6 +308,11 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
                 'course_id': self.course_id,
             },
             'enrollment_attributes': [
+                {
+                    'namespace': 'order',
+                    'name': 'order_number',
+                    'value': self.order.number
+                },
                 {
                     'namespace': 'credit',
                     'name': 'provider_id',

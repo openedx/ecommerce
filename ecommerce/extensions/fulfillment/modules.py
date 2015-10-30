@@ -180,7 +180,13 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 'course_details': {
                     'course_id': course_key
                 },
-                'enrollment_attributes': []
+                'enrollment_attributes': [
+                    {
+                        'namespace': 'order',
+                        'name': 'order_number',
+                        'value': order.number
+                    }
+                ]
             }
             if provider:
                 data['enrollment_attributes'].append(
