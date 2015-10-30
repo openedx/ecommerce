@@ -1,6 +1,7 @@
 """Order Utility Classes. """
 from __future__ import unicode_literals
 from django.conf import settings
+from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 
 
 class OrderNumberGenerator(object):
@@ -42,3 +43,23 @@ class OrderNumberGenerator(object):
         basket_id = order_id - self.OFFSET
 
         return basket_id
+
+
+class OrderCreator(OscarOrderCreator):
+    def create_order_model(self, user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
+                           total, order_number, status, **extra_order_fields):
+        """
+        Create an order model.
+
+        This override ensures the order's site is set to that of the basket. If the basket has no site, the default
+        site is used. The site value can be overridden by setting the `site` kwarg.
+        """
+
+        # Pull the order's site from the basket, if the basket has a site and
+        # a site is not already being explicitly set.
+        if basket.site and 'site' not in extra_order_fields:
+            extra_order_fields['site'] = basket.site
+
+        return super(OrderCreator, self).create_order_model(
+            user, basket, shipping_address, shipping_method, shipping_charge, billing_address, total, order_number,
+            status, **extra_order_fields)
