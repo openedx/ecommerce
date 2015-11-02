@@ -37,26 +37,26 @@ js_info_dict = {
     'packages': ('courses',),
 }
 
+# Always login via edX OpenID Connect
+login = RedirectView.as_view(url=reverse_lazy('social:begin', args=['edx-oidc']), permanent=False, query_string=True)
+
+# Use the same auth views for all logins, including those originating from the browseable API.
+AUTH_URLS = [
+    url(r'^login/$', login, name='login'),
+    url(r'^logout/$', logout, name='logout'),
+]
+
 urlpatterns = [
-    url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
+    url(r'^accounts/', include(AUTH_URLS)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
-    url(r'^health/$', core_views.health, name='health'),
-    url(
-        r'^accounts/login/$',
-        RedirectView.as_view(
-            url=reverse_lazy('social:begin', args=['edx-oidc']),
-            permanent=False,
-            query_string=True
-        ),
-        name='login'
-    ),
-    url(r'^accounts/logout/$', logout, name='logout'),
-
-    url('', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
+    url(r'^health/$', core_views.health, name='health'),
+    url(r'^i18n/', include('django.conf.urls.i18n')),
+    url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
+    url('', include('social.apps.django_app.urls', namespace='social')),
 ]
 
 # Install Oscar extension URLs
