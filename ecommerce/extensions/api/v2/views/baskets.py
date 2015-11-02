@@ -303,5 +303,6 @@ class OrderByBasketRetrieveView(OrderRetrieveView):
 
     def dispatch(self, request, *args, **kwargs):
         # Change the basket ID to an order number.
-        kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(kwargs['basket_id'])
+        partner = request.site.siteconfiguration.partner
+        kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(partner, kwargs['basket_id'])
         return super(OrderByBasketRetrieveView, self).dispatch(request, *args, **kwargs)

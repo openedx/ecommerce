@@ -1,21 +1,35 @@
 """Order Utility Classes. """
 from __future__ import unicode_literals
-from django.conf import settings
+import logging
+
+from django.contrib.sites.models import Site
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
+
+logger = logging.getLogger(__name__)
 
 
 class OrderNumberGenerator(object):
-    """Simple object for generating order numbers.
-
-    We need this as the order number is often required for payment
-    which takes place before the order model has been created.
-    """
     OFFSET = 100000
 
     def order_number(self, basket):
-        return self.order_number_from_basket_id(basket.id)
+        """
+        Returns an order number, determined using the basket's ID and site.
 
-    def order_number_from_basket_id(self, basket_id):
+        Arguments:
+            basket (Basket)
+
+        Returns:
+            string: Order number
+        """
+        site = basket.site
+        if not site:
+            site = Site.objects.get_current()
+            logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
+
+        partner = site.siteconfiguration.partner
+        return self.order_number_from_basket_id(partner, basket.id)
+
+    def order_number_from_basket_id(self, partner, basket_id):
         """
         Return an order number for a given basket ID.
 
@@ -26,7 +40,7 @@ class OrderNumberGenerator(object):
             string: Order number.
         """
         order_id = int(basket_id) + self.OFFSET
-        return u'{prefix}-{order_id}'.format(prefix=settings.ORDER_NUMBER_PREFIX, order_id=order_id)
+        return u'{prefix}-{order_id}'.format(prefix=partner.short_code.upper(), order_id=order_id)
 
     def basket_id(self, order_number):
         """Inverse of order number generation.
@@ -39,10 +53,8 @@ class OrderNumberGenerator(object):
         Returns:
             int: The basket ID used to generate the provided order number.
         """
-        order_id = int(order_number.lstrip(u'{prefix}-'.format(prefix=settings.ORDER_NUMBER_PREFIX)))
-        basket_id = order_id - self.OFFSET
-
-        return basket_id
+        order_id = int(order_number.split('-')[1])
+        return order_id - self.OFFSET
 
 
 class OrderCreator(OscarOrderCreator):

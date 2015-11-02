@@ -7,7 +7,7 @@ import logging
 import ddt
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.test import TransactionTestCase, override_settings
+from django.test import override_settings
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -21,7 +21,7 @@ from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.tests.mixins import ThrottlingMixin, BasketCreationMixin
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
