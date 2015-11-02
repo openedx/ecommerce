@@ -5,7 +5,7 @@ from oscar.test.factories import create_basket as oscar_create_basket
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, PartnerFactory
 from ecommerce.tests.testcases import TestCase
 
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
@@ -14,32 +14,41 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
-class UtilsTest(TestCase):
-    """Unit tests for the order utility functions and classes. """
+class OrderNumberGeneratorTests(TestCase):
+    generator = OrderNumberGenerator()
 
-    ORDER_NUMBER_PREFIX = 'FOO'
+    def assert_order_number_matches_basket(self, basket, partner):
+        expected = '{}-{}'.format(partner.short_code.upper(), 100000 + basket.id)
+        self.assertEqual(self.generator.order_number(basket), expected)
 
-    @override_settings(ORDER_NUMBER_PREFIX=ORDER_NUMBER_PREFIX)
-    def test_order_number_generation(self):
-        """
-        Verify that order numbers are generated correctly, and that they can
-        be converted back into basket IDs when necessary.
-        """
-        first_basket = BasketFactory()
-        second_basket = BasketFactory()
+    def test_order_number(self):
+        """ Verify the method returns an order number determined using the basket's site/partner and ID. """
+        basket = BasketFactory(site=self.site)
+        self.assert_order_number_matches_basket(basket, self.partner)
 
-        first_order_number = OrderNumberGenerator().order_number(first_basket)
-        second_order_number = OrderNumberGenerator().order_number(second_basket)
+    def test_order_number_for_basket_without_site(self):
+        """ Verify the order number is linked to the default site, if the basket has no associated site. """
+        site_configuration = SiteConfigurationFactory(site__domain='acme.fake', partner__name='ACME')
+        site = site_configuration.site
+        partner = site_configuration.partner
+        basket = BasketFactory(site=None)
 
-        self.assertIn(self.ORDER_NUMBER_PREFIX, first_order_number)
-        self.assertIn(self.ORDER_NUMBER_PREFIX, second_order_number)
-        self.assertNotEqual(first_order_number, second_order_number)
+        with override_settings(SITE_ID=site.id):
+            self.assert_order_number_matches_basket(basket, partner)
 
-        first_basket_id = OrderNumberGenerator().basket_id(first_order_number)
-        second_basket_id = OrderNumberGenerator().basket_id(second_order_number)
+    def test_order_number_from_basket_id(self):
+        """ Verify the method returns an order number determined using the basket's ID, and the specified partner. """
+        basket = BasketFactory()
+        acme = PartnerFactory(name='ACME')
 
-        self.assertEqual(first_basket_id, first_basket.id)
-        self.assertEqual(second_basket_id, second_basket.id)
+        for partner in (self.partner, acme,):
+            self.assertEqual(self.generator.order_number_from_basket_id(partner, basket.id),
+                             '{}-{}'.format(partner.short_code.upper(), 100000 + basket.id))
+
+    def test_basket_id(self):
+        """ Verify the method returns the ID of the basket associated with a given order number. """
+        self.assertEqual(self.generator.basket_id('EDX-100001'), 1)
+        self.assertEqual(self.generator.basket_id('ACME-101001'), 1001)
 
 
 class OrderCreatorTests(TestCase):
