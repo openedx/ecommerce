@@ -6,7 +6,7 @@ from factory.django import mute_signals
 import httpretty
 import mock
 from oscar.apps.order.exceptions import UnableToPlaceOrder
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
@@ -63,7 +63,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         paid_type = PaymentEventType.objects.get(code='paid')
         self.assert_payment_event_exists(self.basket, paid_type, reference, self.processor_name)
 
-    def _assert_processing_failure(self, notification, status_code, error_message):
+    def _assert_processing_failure(self, notification, status_code, error_message, log_level='ERROR'):
         """Verify that payment processing operations fail gracefully."""
         logger_name = 'ecommerce.extensions.payment.views'
         with LogCapture(logger_name) as l:
@@ -88,7 +88,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
                         basket_id=self.basket.id
                     )
                 ),
-                (logger_name, 'ERROR', error_message)
+                (logger_name, log_level, error_message)
             )
 
     # Disable the normal signal receivers so that we can verify the state of the created order.
@@ -158,7 +158,18 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
                                                 basket=self.basket)
 
-    def test_payment_handling_error(self):
+    @ddt.data(
+        (PaymentError, 200, 'ERROR', 'CyberSource payment failed for basket [{basket_id}]. '
+                                     'The payment response was recorded in entry [{response_id}].'),
+        (UserCancelled, 200, 'INFO', 'CyberSource payment did not complete for basket [{basket_id}] because '
+                                     '[UserCancelled]. The payment response was recorded in entry [{response_id}].'),
+        (TransactionDeclined, 200, 'INFO', 'CyberSource payment did not complete for basket [{basket_id}] because '
+                                           '[TransactionDeclined]. The payment response was recorded in entry '
+                                           '[{response_id}].'),
+        (KeyError, 500, 'ERROR', 'Attempts to handle payment for basket [{basket_id}] failed.')
+    )
+    @ddt.unpack
+    def test_payment_handling_error(self, error_class, status_code, log_level, error_message):
         """
         Verify that CyberSource's merchant notification is saved to the database despite an error handling payment.
         """
@@ -167,21 +178,17 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
             self.basket,
             billing_address=self.billing_address,
         )
-
-        with mock.patch.object(CybersourceNotifyView, 'handle_payment',
-                               side_effect=PaymentError) as fake_handle_payment:
-            error_message = 'CyberSource payment failed for basket [{basket_id}]. ' \
-                            'The payment response was recorded in entry [{response_id}].'.\
-                format(basket_id=self.basket.id, response_id=1)
-            self._assert_processing_failure(notification, 200, error_message)
-            self.assertTrue(fake_handle_payment.called)
-
-        with mock.patch.object(CybersourceNotifyView, 'handle_payment',
-                               side_effect=KeyError) as fake_handle_payment:
-            error_message = 'Attempts to handle payment for basket [{basket_id}] failed.'.format(
-                basket_id=self.basket.id
+        with mock.patch.object(
+            CybersourceNotifyView,
+            'handle_payment',
+            side_effect=error_class
+        ) as fake_handle_payment:
+            self._assert_processing_failure(
+                notification,
+                status_code,
+                error_message.format(basket_id=self.basket.id, response_id=1),
+                log_level
             )
-            self._assert_processing_failure(notification, 500, error_message)
             self.assertTrue(fake_handle_payment.called)
 
     def test_unable_to_place_order(self):
