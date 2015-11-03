@@ -1,13 +1,15 @@
+from __future__ import unicode_literals
 import json
 import logging
-import requests
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_api_client.exceptions import SlumberHttpBaseException
+import requests
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.settings import get_lms_url
-
 
 logger = logging.getLogger(__name__)
 
@@ -37,31 +39,19 @@ class LMSPublisher(object):
 
     def _publish_creditcourse(self, course_id, access_token):
         """Creates or updates a CreditCourse object on the LMS."""
-        url = get_lms_url('api/credit/v1/courses/')
+
+        api = EdxRestApiClient(
+            get_lms_url('api/credit/v1/'),
+            oauth_access_token=access_token,
+            timeout=self.timeout
+        )
 
         data = {
             'course_key': course_id,
             'enabled': True
         }
 
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + access_token
-        }
-
-        kwargs = {
-            'url': url,
-            'data': json.dumps(data),
-            'headers': headers,
-            'timeout': self.timeout
-        }
-        response = requests.post(**kwargs)
-        if response.status_code == 400:
-            # The CreditCourse already exists. Try updating it.
-            kwargs['url'] += course_id.strip('/') + '/'
-            response = requests.put(**kwargs)
-
-        return response
+        api.courses(course_id).put(data)
 
     def publish(self, course, access_token=None):
         """ Publish course commerce data to LMS.
@@ -94,31 +84,22 @@ class LMSPublisher(object):
 
         has_credit = 'credit' in [mode['name'] for mode in modes]
         if has_credit:
-            if access_token is not None:
-                try:
-                    response = self._publish_creditcourse(course_id, access_token)
-                    if response.status_code in (200, 201):
-                        logger.info(u'Successfully published CreditCourse for [%s] to LMS.', course_id)
-                    else:
-                        # Note that %r is used to log the repr() of the response content, which may sometimes
-                        # contain non-ASCII Unicode. %s would call str() on the response content, sometimes
-                        # resulting in a UnicodeDecodeError.
-                        logger.error(
-                            u'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was %r.',
-                            course_id,
-                            response.status_code,
-                            response.content
-                        )
-
-                        return self._parse_error(response, error_message)
-                except Exception:  # pylint: disable=broad-except
-                    logger.exception(u'Failed to publish CreditCourse for [%s] to LMS.', course_id)
-                    return error_message
-            else:
-                logger.error(
-                    u'Unable to publish CreditCourse for [%s] to LMS. No access token available.',
-                    course_id
+            try:
+                self._publish_creditcourse(course_id, access_token)
+                logger.info(u'Successfully published CreditCourse for [%s] to LMS.', course_id)
+            except SlumberHttpBaseException as e:
+                # Note that %r is used to log the repr() of the response content, which may sometimes
+                # contain non-ASCII Unicode. We don't know (or want to guess) the encoding, so using %r will log the
+                # raw bytes of the message, freeing us from the possibility of encoding errors.
+                logger.exception(
+                    u'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was %r.',
+                    course_id,
+                    e.response.status_code,
+                    e.content
                 )
+                return error_message
+            except Exception:  # pylint: disable=broad-except
+                logger.exception(u'Failed to publish CreditCourse for [%s] to LMS.', course_id)
                 return error_message
 
         data = {

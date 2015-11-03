@@ -41,27 +41,17 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
                                content_type=JSON)
 
-    def _mock_credit_api(self, creation_status, update_status, body=None):
+    def mock_creditcourse_endpoint(self, course_id, status, body=None):
         self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock Credit API calls.')
 
-        url = get_lms_url('api/credit/v1/courses/')
+        url = get_lms_url('/api/credit/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(
-            httpretty.POST,
+            httpretty.PUT,
             url,
-            status=creation_status,
+            status=status,
             body=json.dumps(body),
             content_type=JSON
         )
-
-        if update_status is not None:
-            url += self.course.id.strip('/') + '/'
-            httpretty.register_uri(
-                httpretty.PUT,
-                url,
-                status=update_status,
-                body=json.dumps(body),
-                content_type=JSON
-            )
 
     @ddt.data('', None)
     def test_commerce_api_url_not_set(self, setting_value):
@@ -71,12 +61,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
                 response = self.publisher.publish(self.course)
                 l.check((LOGGER_NAME, 'ERROR', 'COMMERCE_API_URL is not set. Commerce data will not be published!'))
                 self.assertIsNotNone(response)
-                self.assertEqual(
-                    response,
-                    self.error_message.format(
-                        course_id=self.course.id
-                    )
-                )
+                self.assertEqual(response, self.error_message)
 
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
@@ -196,91 +181,56 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         }
         self.assertDictEqual(actual, expected)
 
+    def attempt_credit_publication(self, api_status):
+        """
+        Sets up a credit seat and attempts to publish it to LMS.
+
+        Returns
+            String - Publish error message.
+        """
+        # Setup the course and mock the API endpoints
+        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='acme', credit_hours=1)
+        self.mock_creditcourse_endpoint(self.course.id, api_status)
+        self._mock_commerce_api(201)
+
+        # Attempt to publish the course
+        return self.publisher.publish(self.course, access_token='access_token')
+
+    def assert_creditcourse_endpoint_called(self):
+        """ Verify the Credit API's CreditCourse endpoint was called. """
+        last_request = httpretty.httpretty.latest_requests[0]
+        self.assertEqual(last_request.path, '/api/credit/v1/courses/{}/'.format(self.course.id))
+
     @httpretty.activate
-    @ddt.data(
-        (201, None, 201),
-        (400, 200, 200)
-    )
-    @ddt.unpack
-    def test_credit_publication_success(self, creation_status, update_status, commerce_status):
-        """
-        Verify that course publication succeeds if the Credit API responds
-        with 2xx status codes when publishing CreditCourse data to the LMS.
-        """
-        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
-
-        self._mock_credit_api(creation_status, update_status)
-        self._mock_commerce_api(commerce_status)
-
-        access_token = 'access_token'
-        error_message = self.publisher.publish(self.course, access_token=access_token)
+    def test_credit_publication_success(self):
+        """ Verify the endpoint returns successfully when credit publication succeeds. """
+        error_message = self.attempt_credit_publication(201)
         self.assertIsNone(error_message)
-
-        # Retrieve the latest request to the Credit API.
-        if creation_status == 400:
-            latest_request = httpretty.httpretty.latest_requests[1]
-        else:
-            latest_request = httpretty.httpretty.latest_requests[0]
-
-        # Verify the headers passed to the Credit API were correct.
-        expected = {
-            'Content-Type': JSON,
-            'Authorization': 'Bearer ' + access_token
-        }
-        self.assertDictContainsSubset(expected, latest_request.headers)
-
-        # Verify the data passed to the Credit API was correct.
-        expected = {
-            'course_key': self.course.id,
-            'enabled': True
-        }
-        actual = json.loads(latest_request.body)
-        self.assertEqual(expected, actual)
+        self.assert_creditcourse_endpoint_called()
 
     @httpretty.activate
-    @ddt.unpack
-    @ddt.data(
-        ({'non_field_errors': ['deadline issue']}, 'deadline issue'),
-        ('page not found', 'page not found'),
-        ({'detail': 'Authentication'}, 'Authentication'),
-        ({}, ''),
-    )
-    def test_credit_publication_failure(self, error_message, expected_message):
-        """
-        Verify that course publication fails if the Credit API does not respond
-        with 2xx status codes when publishing CreditCourse data to the LMS.
-        """
-        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
+    def test_credit_publication_api_failure(self):
+        """ Verify the endpoint fails appropriately when Credit API calls return an error. """
+        course_id = self.course.id
+        with LogCapture(LOGGER_NAME) as l:
+            status = 400
+            actual = self.attempt_credit_publication(status)
 
-        self._mock_credit_api(400, 418, error_message)
+            # Ensure the HTTP status and response are logged
+            expected_log = 'Failed to publish CreditCourse for [{course_id}] to LMS. ' \
+                           'Status was [{status}]. Body was \'null\'.'.format(course_id=course_id, status=status)
+            l.check((LOGGER_NAME, 'ERROR', expected_log))
 
-        response = self.publisher.publish(self.course, access_token='access_token')
-        self.assert_response_message(response, expected_message)
+        expected = 'Failed to publish commerce data for {} to LMS.'.format(course_id)
+        self.assertEqual(actual, expected)
+        self.assert_creditcourse_endpoint_called()
 
-    def test_credit_publication_no_access_token(self):
-        """
-        Verify that course publication fails if no access token is provided
-        when publishing CreditCourse data to the LMS.
-        """
-        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
-
-        response = self.publisher.publish(self.course, access_token=None)
-        self.assertIsNotNone(response)
-        self.assertEqual(self.error_message, response)
-
-    def test_credit_publication_exception(self):
-        """
-        Verify that course publication fails if an exception is raised
-        while publishing CreditCourse data to the LMS.
-        """
-        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='Harvard', credit_hours=1)
-
-        with mock.patch.object(LMSPublisher, '_publish_creditcourse') as mock_publish_creditcourse:
-            mock_publish_creditcourse.side_effect = Exception(self.error_message)
-
-            response = self.publisher.publish(self.course, access_token='access_token')
-            self.assertIsNotNone(response)
-            self.assertEqual(self.error_message, response)
+    @mock.patch('requests.get', mock.Mock(side_effect=Exception))
+    def test_credit_publication_uncaught_exception(self):
+        """ Verify the endpoint fails appropriately when the Credit API fails unexpectedly. """
+        actual = self.attempt_credit_publication(500)
+        expected = 'Failed to publish commerce data for {} to LMS.'.format(self.course.id)
+        self.assertEqual(actual, expected)
 
     def assert_response_message(self, api_response, expected_error_msg):
         self.assertIsNotNone(api_response)
