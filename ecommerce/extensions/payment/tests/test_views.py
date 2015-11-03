@@ -318,7 +318,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
         self.assertRedirects(
             response,
-            u'{}?basket_id={}'.format(self.processor.receipt_url, self.basket.id),
+            u'{}?orderNum={}'.format(self.processor.receipt_url, self.basket.order_number),
             fetch_redirect_response=False
         )
 
