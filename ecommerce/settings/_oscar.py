@@ -115,6 +115,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'client_secret': None,
         'receipt_url': None,
         'cancel_url': None,
+        'error_url': None,
     },
 }
 # END PAYMENT PROCESSING

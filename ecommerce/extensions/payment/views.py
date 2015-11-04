@@ -3,7 +3,7 @@ from cStringIO import StringIO
 import logging
 import os
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
@@ -168,15 +168,30 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     payment_processor = Paypal()
 
     def _get_basket(self, payment_id):
-        """Retrieve a basket using a payment ID."""
-        basket = PaymentProcessorResponse.objects.get(
-            processor_name=self.payment_processor.NAME,
-            transaction_id=payment_id
-        ).basket
+        """
+        Retrieve a basket using a payment ID.
 
-        basket.strategy = strategy.Default()
+        Arguments:
+            payment_id: payment_id received from PayPal.
 
-        return basket
+        Returns:
+            It will return related basket or log exception and return None if
+            duplicate payment_id received or any other exception occurred.
+
+        """
+        try:
+            basket = PaymentProcessorResponse.objects.get(
+                processor_name=self.payment_processor.NAME,
+                transaction_id=payment_id
+            ).basket
+            basket.strategy = strategy.Default()
+            return basket
+        except MultipleObjectsReturned:
+            logger.exception(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
+            return None
+        except Exception:  # pylint: disable=broad-except
+            logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
+            return None
 
     @transaction.non_atomic_requests
     def get(self, request):
@@ -187,6 +202,10 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
         paypal_response = request.GET.dict()
         basket = self._get_basket(payment_id)
+
+        if not basket:
+            return redirect(self.payment_processor.error_url)
+
         receipt_url = u'{}?orderNum={}'.format(self.payment_processor.receipt_url, basket.order_number)
 
         try:

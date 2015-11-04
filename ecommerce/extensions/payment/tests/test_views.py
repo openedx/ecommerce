@@ -459,6 +459,81 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self._assert_order_placement_failure(error_message)
             self.assertTrue(fake_handle_order_placement.called)
 
+    @httpretty.activate
+    def test_payment_error_with_duplicate_payment_id(self):
+        """
+        Verify that we fail gracefully when PayPal sends us the wrong payment ID,
+        logging the exception and redirecting the user to an LMS checkout error page.
+        """
+        logger_name = 'ecommerce.extensions.payment.views'
+        with LogCapture(logger_name) as l:
+            self.mock_oauth2_response()
+
+            # Create payment records with different baskets which will have same payment ID
+            self.mock_payment_creation_response(self.basket)
+            self.processor.get_transaction_parameters(self.basket, request=self.request)
+
+            dummy_basket = factories.create_basket()
+            self.mock_payment_creation_response(dummy_basket)
+            self.processor.get_transaction_parameters(dummy_basket, request=self.request)
+
+            self._assert_error_page_redirect()
+            l.check(
+                (
+                    logger_name,
+                    'INFO',
+                    'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
+                        payment_id=self.PAYMENT_ID,
+                        payer_id=self.PAYER_ID
+                    )
+                ),
+                (
+                    logger_name,
+                    'ERROR',
+                    'Duplicate payment ID [{payment_id}] received from PayPal.'.format(payment_id=self.PAYMENT_ID),
+                ),
+            )
+
+    @httpretty.activate
+    def test_payment_error_with_no_basket(self):
+        """
+        Verify that we fail gracefully when any Exception occurred in _get_basket() method,
+        logging the exception and redirecting the user to an LMS checkout error page.
+        """
+        with mock.patch.object(PaymentProcessorResponse.objects, 'get', side_effect=Exception):
+            logger_name = 'ecommerce.extensions.payment.views'
+            with LogCapture(logger_name) as l:
+                self.mock_oauth2_response()
+                self.mock_payment_creation_response(self.basket)
+                self.processor.get_transaction_parameters(self.basket, request=self.request)
+                self._assert_error_page_redirect()
+
+                l.check(
+                    (
+                        logger_name,
+                        'INFO',
+                        'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
+                            payment_id=self.PAYMENT_ID,
+                            payer_id=self.PAYER_ID
+                        )
+                    ),
+                    (
+                        logger_name,
+                        'ERROR',
+                        'Unexpected error during basket retrieval while executing PayPal payment.'
+                    ),
+                )
+
+    def _assert_error_page_redirect(self):
+        """Verify redirection to the configured checkout error page after attempted failed payment execution."""
+        response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
+
+        self.assertRedirects(
+            response,
+            self.processor.error_url,
+            fetch_redirect_response=False
+        )
+
 
 @mock.patch('ecommerce.extensions.payment.views.call_command')
 class PaypalProfileAdminViewTests(TestCase):
