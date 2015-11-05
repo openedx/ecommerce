@@ -332,3 +332,19 @@ class CatalogSerializer(serializers.ModelSerializer):
             kwargs={'parent_lookup_stockrecords__catalogs': obj.id},
             request=self.context['request']
         )
+
+
+class EnrollmentCodeOrderSerializer(serializers.Serializer):
+    client = serializers.CharField(required=True, max_length=255)
+    stock_records = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    quantity = serializers.IntegerField()
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+    type = serializers.ChoiceField(
+        choices=(
+            ('Single use', _("Can be used once by one customer")),
+            ('Multi-use', _("Can be used multiple times by multiple customers")),
+            ('Once per customer', _("Can only be used once per customer"))
+        ),
+        allow_blank=False
+    )

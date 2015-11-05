@@ -8,7 +8,8 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments
                                                products as product_views, courses as course_views,
                                                publication as publication_views, partners as partner_views,
                                                catalog as catalog_views,
-                                               stockrecords as stockrecords_views)
+                                               stockrecords as stockrecords_views,
+                                               enrollment_codes as enrollment_codes_views)
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -20,6 +21,11 @@ BASKET_URLS = [
         basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
+]
+
+ENROLLMENT_CODE_URLS = [
+    url(r'^$', enrollment_codes_views.EnrollmentCodeOrderCreateView.as_view(), name='create'),
+
 ]
 
 ORDER_URLS = [
@@ -57,6 +63,7 @@ ATOMIC_PUBLICATION_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
+    url(r'^enrollment_codes/', include(ENROLLMENT_CODE_URLS, namespace='enrollment_codes')),
     url(r'^orders/', include(ORDER_URLS, namespace='orders')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
