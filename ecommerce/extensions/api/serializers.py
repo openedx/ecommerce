@@ -26,6 +26,7 @@ ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
@@ -49,6 +50,11 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
         return instance.attribute.name
 
     def get_value(self, obj):
+        if obj.attribute.name == 'Coupon vouchers':
+            request = self.context.get('request')
+            vouchers = obj.value.vouchers.all()
+            serializer = VoucherSerializer(vouchers, many=True, context={'request': request})
+            return serializer.data
         return obj.value
 
     class Meta(object):
@@ -77,11 +83,22 @@ class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
 
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
     """ Serializer for Products. """
-    attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
+    attribute_values = serializers.SerializerMethodField()
     product_class = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
     stockrecords = StockRecordSerializer(many=True, read_only=True)
+
+    def get_attribute_values(self, product):
+        request = self.context.get('request')
+        attributes = product.attr
+        serializer = ProductAttributeValueSerializer(
+            attributes,
+            many=True,
+            read_only=True,
+            context={'request': request}
+        )
+        return serializer.data
 
     def get_product_class(self, product):
         return product.get_product_class().name
@@ -331,4 +348,24 @@ class CatalogSerializer(serializers.ModelSerializer):
             'api:v2:catalog-product-list',
             kwargs={'parent_lookup_stockrecords__catalogs': obj.id},
             request=self.context['request']
+        )
+
+
+class VoucherSerializer(serializers.ModelSerializer):
+    is_available_to_user = serializers.SerializerMethodField()
+    benefit = serializers.SerializerMethodField()
+
+    def get_is_available_to_user(self, obj):
+        request = self.context.get('request')
+        return obj.is_available_to_user(user=request.user)
+
+    def get_benefit(self, obj):
+        return (obj.offers.first().benefit.type, obj.offers.first().benefit.value)
+
+    class Meta(object):
+        model = Voucher
+        fields = (
+            'id', 'name', 'code', 'usage', 'start_datetime', 'end_datetime',
+            'num_basket_additions', 'num_orders', 'total_discount',
+            'date_created', 'offers', 'is_available_to_user', 'benefit'
         )

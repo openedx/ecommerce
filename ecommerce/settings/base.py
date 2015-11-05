@@ -246,6 +246,7 @@ DJANGO_APPS = [
     'rest_framework',
     'simple_history',
     'waffle',
+    'django_filters'
 ]
 
 # Apps specific to this project go here.

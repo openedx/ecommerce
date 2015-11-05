@@ -78,6 +78,7 @@ OSCAR_ORDER_STATUS_CASCADE = {
 # lines in the order to determine which it can fulfill.
 FULFILLMENT_MODULES = [
     'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule',
+    'ecommerce.extensions.fulfillment.modules.CouponFulfillmentModule',
 ]
 
 HAYSTACK_CONNECTIONS = {
