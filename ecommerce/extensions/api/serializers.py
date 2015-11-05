@@ -26,6 +26,7 @@ ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
@@ -332,3 +333,27 @@ class CatalogSerializer(serializers.ModelSerializer):
             kwargs={'parent_lookup_stockrecords__catalogs': obj.id},
             request=self.context['request']
         )
+
+
+class VoucherSerializer(serializers.ModelSerializer):
+
+    class Meta(object):
+        model = Voucher
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    price = serializers.SerializerMethodField()
+    vouchers = serializers.SerializerMethodField()
+
+    def get_price(self, obj):
+        stock_record = StockRecord.objects.get(product=obj)
+        return stock_record.price_excl_tax
+
+    def get_vouchers(self, obj):
+        vouchers = obj.attr.coupon_vouchers.vouchers.all()
+        serializer = VoucherSerializer(vouchers, many=True)
+        return serializer.data
+
+    class Meta(object):
+        model = Product
+        fields = ('id', 'title', 'price', 'vouchers')

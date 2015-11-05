@@ -7,7 +7,9 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments
                                                products as product_views, courses as course_views,
                                                publication as publication_views, partners as partner_views,
                                                catalog as catalog_views,
-                                               stockrecords as stockrecords_views)
+                                               stockrecords as stockrecords_views,
+                                               coupons as coupons_views,
+                                               vouchers as vouchers_views)
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -19,6 +21,14 @@ BASKET_URLS = [
         basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
+]
+
+COUPON_URLS = [
+    url(r'^$', coupons_views.CouponOrderCreateView.as_view({'get': 'list'}), name='create'),
+]
+
+VOUCHER_URLS = [
+    url(r'^$', vouchers_views.VoucherViewSet.as_view({'get': 'list'}), name='list'),
 ]
 
 PAYMENT_URLS = [
@@ -42,9 +52,11 @@ ATOMIC_PUBLICATION_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
+    url(r'^coupons/', include(COUPON_URLS, namespace='coupons')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
+    url(r'^vouchers/', include(VOUCHER_URLS, namespace='vouchers')),
 ]
 
 router = ExtendedSimpleRouter()

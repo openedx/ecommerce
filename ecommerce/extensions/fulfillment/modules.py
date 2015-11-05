@@ -281,3 +281,52 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 
         return False
+
+
+class CouponFulfillmentModule(BaseFulfillmentModule):
+    """ Fulfillment Module for coupons. """
+
+    def supports_line(self, line):
+        """
+        Check whether the product in line is a Coupon
+
+        Args:
+            line (Line): Defines the length of randomly generated string
+
+        Returns:
+            True if the line contains product of product class Coupon.
+            False otherwise.
+        """
+        return line.product.get_product_class().name == 'Coupon'
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines containing products with Coupon product class
+        that can be fulfilled.
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+        Returns:
+            A supported list of unmodified lines associated with 'Coupon' products.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of an 'coupon' products.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be 'Coupon' products.
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+        logger.info("Attempting to fulfill 'Coupon' product types for order [%s]", order.number)
+
+        for line in lines:
+            line.set_status(LINE.COMPLETE)
+
+        logger.info("Finished fulfilling 'Coupon' product types for order [%s]", order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        raise NotImplementedError("Revoke method not implemented!")
