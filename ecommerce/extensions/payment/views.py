@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from oscar.apps.partner import strategy
-from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
+from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -20,9 +20,9 @@ from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 
-
 logger = logging.getLogger(__name__)
 
+Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
@@ -30,6 +30,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Selector = get_class('partner.strategy', 'Selector')
 
 
 class CybersourceNotifyView(EdxOrderPlacementMixin, View):
@@ -61,10 +62,14 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
         if not basket_id:
             return None
 
+        user = self.request.user
+        site = self.request.site
+
         try:
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
-            basket.strategy = strategy.Default()
+            basket.strategy = Selector().strategy(user=user, site=site)
+            Applicator().apply(basket, user, self.request)
             return basket
         except (ValueError, ObjectDoesNotExist):
             return None
@@ -184,7 +189,11 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 processor_name=self.payment_processor.NAME,
                 transaction_id=payment_id
             ).basket
-            basket.strategy = strategy.Default()
+
+            user = self.request.user
+            site = self.request.site
+            basket.strategy = Selector().strategy(user=user, site=site)
+            Applicator().apply(basket, user, self.request)
             return basket
         except MultipleObjectsReturned:
             logger.exception(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
@@ -247,7 +256,6 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
 
 class PaypalProfileAdminView(View):
-
     ACTIONS = ('list', 'create', 'show', 'update', 'delete', 'enable', 'disable')
 
     def dispatch(self, request, *args, **kwargs):

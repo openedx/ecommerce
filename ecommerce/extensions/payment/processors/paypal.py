@@ -93,8 +93,9 @@ class Paypal(BasePaymentProcessor):
                             'quantity': line.quantity,
                             # PayPal requires that item names be at most 127 characters long.
                             'name': middle_truncate(line.product.title, 127),
-                            'price': unicode(line.price_incl_tax),
+                            'price': unicode(line.line_price_excl_tax_incl_discounts / line.quantity),
                             'currency': line.stockrecord.price_currency,
+                            'sku': line.stockrecord.partner_sku
                         }
                         for line in basket.all_lines()
                     ],

@@ -33,7 +33,7 @@ class Basket(AbstractBasket):
                 basket.merge(stale_basket, add_quantities=False)
 
         # Assign the appropriate strategy class to the basket
-        basket.strategy = Selector().strategy(user=user)
+        basket.strategy = Selector().strategy(user=user, site=site)
 
         return basket
 
