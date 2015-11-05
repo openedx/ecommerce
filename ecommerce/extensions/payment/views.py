@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from oscar.apps.partner import strategy
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -112,6 +112,15 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                         ppr.id
                     )
                     return HttpResponse(status=400)
+                except (UserCancelled, TransactionDeclined) as exception:
+                    logger.info(
+                        'CyberSource payment did not complete for basket [%d] because [%s]. '
+                        'The payment response was recorded in entry [%d].',
+                        basket.id,
+                        exception.__class__.__name__,
+                        ppr.id
+                    )
+                    return HttpResponse()
                 except PaymentError:
                     logger.exception(
                         'CyberSource payment failed for basket [%d]. The payment response was recorded in entry [%d].',
