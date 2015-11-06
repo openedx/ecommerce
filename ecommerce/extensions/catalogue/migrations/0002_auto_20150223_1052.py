@@ -60,6 +60,15 @@ def create_catalog(apps, schema_editor):
     )
 
 
+def remove_catalog(apps, schema_editor):
+    """ Reverse function. """
+    Category = apps.get_model("catalogue", "Category")
+    ProductClass = apps.get_model("catalogue", "ProductClass")
+
+    Category.objects.filter(slug='seats').delete()
+    ProductClass.objects.filter(slug='seat').delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -67,5 +76,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_catalog),
+        migrations.RunPython(create_catalog, remove_catalog),
     ]
