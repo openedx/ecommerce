@@ -1,0 +1,29 @@
+<div class="alerts" tabindex="-1" aria-live="polite"></div>
+
+<div class="fields">
+    <div class="form-group">
+        <label for="name"><%= gettext('Code Type') %></label>
+        <select class="form-control" name="type"></select>
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="course_id"><%= gettext('Course ID') %></label>
+        <input type="text" class="form-control" name="course_id" placeholder="">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="course_name"><%= gettext('Course Name') %></label>
+        <input type="text" class="form-control" name="course_name" placeholder="">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="course_name"><%= gettext('Course Name') %></label>
+        <input type="text" class="form-control" name="course_name" placeholder="">
+        <p class="help-block"></p>
+    </div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= gettext('Create Code') %></button>
+    <a class="btn btn-default" href="/codes/"><%= gettext('Cancel') %></a>
+</div>
