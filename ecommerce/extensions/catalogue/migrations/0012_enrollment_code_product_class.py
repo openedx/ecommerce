@@ -58,15 +58,15 @@ def create_product_class(apps, schema_editor):
     )
     AttributeOption.objects.create(
         group=group,
-        option='single_use'
+        option='Single use'
     )
     AttributeOption.objects.create(
         group=group,
-        option='multi_use'
+        option='Multi use'
     )
     AttributeOption.objects.create(
         group=group,
-        option='once_per_customer'
+        option='Once per customer'
     )
 
     ProductAttribute.objects.create(

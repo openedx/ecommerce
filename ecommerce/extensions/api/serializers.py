@@ -342,9 +342,10 @@ class EnrollmentCodeOrderSerializer(serializers.Serializer):
     end_date = serializers.DateField()
     type = serializers.ChoiceField(
         choices=(
-            ('single_use', _("Can be used once by one customer")),
-            ('multi-use', _("Can be used multiple times by multiple customers")),
-            ('once_per_customer', _("Can only be used once per customer"))
+            ('Single use', _("Can be used once by one customer")),
+            ('Multi-use', _("Can be used multiple times by multiple customers")),
+            ('Once per customer', _("Can only be used once per customer"))
         ),
         allow_blank=False
     )
+    price = serializers.IntegerField()
