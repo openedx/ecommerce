@@ -10,7 +10,6 @@ import httpretty
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
-from oscar.test.factories import ProductFactory
 from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
@@ -26,6 +25,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
+AttributeOption = get_model('catalogue', 'AttributeOption')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Condition = get_model('offer', 'Condition')
@@ -389,6 +389,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         self.product.attr.catalog = self.catalog
         self.product.attr.start_date = datetime.date(2016, 11, 30)
         self.product.attr.end_date = datetime.date(2017, 11, 30)
+        self.product.attr.type = AttributeOption.objects.get(option='Single use')
         self.product.save()
 
         self.stock_record = factories.create_stockrecord(self.product, num_in_stock=2)
@@ -411,6 +412,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
             product.attr.catalog = catalog
             product.attr.start_date = datetime.date(2016, 11, 30)
             product.attr.end_date = datetime.date(2017, 11, 30)
+            product.attr.type = AttributeOption.objects.get(option='Single use')
             product.save()
             products.append(product)
 
@@ -446,6 +448,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         line = self.order.lines.all()[0]
         enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
         self.assertIn(vouchers[0], enrollment_code.vouchers.all())
+        self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
 
     def test_multiple_enrollment_codes_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill multiple enrollment codes."""
@@ -476,6 +479,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         line = self.order.lines.all()[0]
         enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
         self.assertIn(vouchers[0], enrollment_code.vouchers.all())
+        self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
 
     def test_different_enrollment_codes_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill different enrollment codes."""
@@ -509,6 +513,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
             self.assertEqual(voucher_catalog, catalogs[i])
 
             self.assertIn(vouchers[0], enrollment_code.vouchers.all())
+            self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
 
     def test_enrollment_code_revoke_line(self):
         """Happy path test to ensure we can properly revoke enrollment code order line"""
@@ -531,3 +536,4 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
 
         for voucher in vouchers:
             self.assertEqual(voucher.is_active(), False)
+            self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
