@@ -14,6 +14,7 @@ class APIDictionaryKeys(object):
     PAYMENT_FORM_DATA = u'payment_form_data'
     PAYMENT_PAGE_URL = u'payment_page_url'
     PAYMENT_PROCESSOR_NAME = u'payment_processor_name'
+    PRICE = u'price'
     PRODUCTS = u'products'
     QUANTITY = u'quantity'
     SHIPPING_CHARGE = u'shipping_charge'
@@ -21,6 +22,7 @@ class APIDictionaryKeys(object):
     START_DATE = u'start_date'
     STOCK_RECORDS = u'stock_records'
     SKU = u'sku'
+    TYPE = u'type'
 
 
 class APIConstants(object):
