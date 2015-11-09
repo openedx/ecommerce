@@ -382,7 +382,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         voucher = Voucher.objects.create(
             name=voucher_name,
             code=voucher_code,
-            usage=Voucher.SINGLE_USE,
+            usage=unicode(line.product.attr.type),
             start_datetime=line.product.attr.start_date,
             end_datetime=line.product.attr.end_date
         )
