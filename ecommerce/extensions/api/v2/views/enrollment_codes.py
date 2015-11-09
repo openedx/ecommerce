@@ -38,6 +38,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
 
+
             ### ENROLLMENT PRODUCT ###
             enrollment_code_client, created = Client.objects.get_or_create(
                 username=client,
@@ -97,10 +98,12 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             stock_record.price_excl_tax = price
             stock_record.save()
 
+
             ### BASKET ###
             basket = Basket.get_basket(request.user, request.site)
-            basket.add_product(enrollment_code_product)
+            basket.add_product(enrollment_code_product, quantity=quantity)
             logger.info(u"Added product with SKU [%s] to basket [%d]", sku, basket.id)
+
 
             ### ORDER ###
             basket.freeze()
@@ -113,12 +116,14 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
                 total_incl_tax=pricing.incl_tax,
                 total_excl_tax=pricing.excl_tax
             )
+            basket.submit()
 
             logger.info(
                 u"Created new order number [%s] from basket [%d]",
                 order_metadata[AC.KEYS.ORDER_NUMBER],
                 basket.id
             )
+
 
             ### RESPONSE ###
             response_data = {
