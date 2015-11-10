@@ -109,6 +109,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             )
             return Response({'developer_message': ex.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        enrollment_code_product.save()
 
         ### STOCK RECORD ###
         sku = generate_sku(enrollment_code_product, partner)
