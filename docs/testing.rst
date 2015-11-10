@@ -107,51 +107,36 @@ Environment Variables
 
 Our acceptance tests rely on configuration which can be specified using environment variables.
 
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| Variable                  | Purpose                                                                  | Required? | Default Value                        |
-+===========================+==========================================================================+===========+======================================+
-| ACCESS\_TOKEN             | OAuth2 access token used to authenticate requests                        | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ENABLE\_OAUTH2\_TESTS     | Whether to run tests verifying that the LMS can be used to sign into Otto| No        | True                                 |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| HONOR\_COURSE\_ID         | The ID of a Free (Honor) course                                          | No        | 'edX/DemoX/Demo_Course'              |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| VERIFIED\_COURSE\_ID      | The ID of a Verified course                                              | No        | 'edX/victor101/Victor_s_test_course' |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ECOMMERCE\_URL\_ROOT      | URL root for the E-Commerce Service                                      | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ECOMMERCE\_API\_URL       | URL for the E-Commerce API, used to initialize an API client             | No        | ECOMMERCE\_URL\_ROOT + '/api/v2'     |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ECOMMERCE\_API\_TOKEN     | Token used to authenticate against the E-Commerce API                    | No        | ACCESS\_TOKEN                        |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| MAX\_COMPLETION\_RETRIES  | Number of times to retry checking for an order's completion              | No        | 3                                    |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| PAYPAL\_EMAIL             | Email address used to sign into PayPal during payment                    | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| PAYPAL\_PASSWORD          | Password used to sign into PayPal during payment                         | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ENABLE\_CYBERSOURCE\_TESTS| Whether to run tests verifying the CyberSource payment flow              | No        | True                                 |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| LMS\_URL\_ROOT            | URL root for the LMS                                                     | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| LMS\_USERNAME             | Username belonging to an LMS user to use during testing                  | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| LMS\_EMAIL                | Email address used to sign into the LMS                                  | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| LMS\_PASSWORD             | Password used to sign into the LMS                                       | Yes       | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| LMS\_AUTO\_AUTH           | Whether auto-auth is enabled on the LMS                                  | No        | False                                |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| LMS\_HTTPS                | Whether HTTPS is enabled on the LMS                                      | No        | True                                 |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ENROLLMENT\_API\_URL      | URL for the LMS Enrollment API                                           | No        | LMS\_URL\_ROOT + '/api/enrollment/v1'|
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| ENROLLMENT\_API\_TOKEN    | Token used to authenticate against the Enrollment API                    | No        | ACCESS\_TOKEN                        |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| BASIC\_AUTH\_USERNAME     | Username used to bypass HTTP basic auth on the LMS                       | No        | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
-| BASIC\_AUTH\_PASSWORD     | Password used to bypass HTTP basic auth on the LMS                       | No        | N/A                                  |
-+---------------------------+--------------------------------------------------------------------------+-----------+--------------------------------------+
+======================== ========================================================================= ========= ============================================================
+Variable                 Description                                                               Required? Default Value
+======================== ========================================================================= ========= ============================================================
+ACCESS_TOKEN             OAuth2 access token used to authenticate requests                         Yes       N/A
+ENABLE_OAUTH2_TESTS      Whether to run tests verifying that the LMS can be used to sign into Otto No        True
+HONOR_COURSE_ID          The ID of a Free (Honor) course                                           No        'edX/DemoX/Demo_Course'
+VERIFIED_COURSE_ID       The ID of a Verified course                                               No        'course-v1:BerkeleyX+ColWri.3.6x+3T2015'
+PROFESSIONAL_COURSE_ID   The ID of a Professional Education course                                 No        'course-v1:UBCx+Marketing5501x+2T2015'
+ECOMMERCE_URL_ROOT       URL root for the E-Commerce Service                                       Yes       N/A
+ECOMMERCE_API_URL        URL for the E-Commerce API, used to initialize an API client              No        ECOMMERCE_URL_ROOT + '/api/v2'
+ECOMMERCE_API_TOKEN      Token used to authenticate against the E-Commerce API                     No        ACCESS_TOKEN
+MAX_COMPLETION_RETRIES   Number of times to retry checking for an order's completion               No        3
+PAYPAL_EMAIL             Email address used to sign into PayPal during payment                     Yes       N/A
+PAYPAL_PASSWORD          Password used to sign into PayPal during payment                          Yes       N/A
+ENABLE_CYBERSOURCE_TESTS Whether to run tests verifying the CyberSource payment flow               No        True
+ENABLE_MARKETING_SITE    Whether to visit the marketing site during testing                        No        False
+MARKETING_URL_ROOT       URL root for the marketing site                                           No        None
+VERIFIED_COURSE_SLUG     Drupal slug corresponding to the provided verified course ID              No        'dracula-stoker-berkeleyx-book-club-uc-berkeleyx-colwri3-6x'
+PROFESSIONAL_COURSE_SLUG Drupal slug corresponding to the provided professional course ID          No        'marketing-non-marketers-ubcx-marketing5501x'
+LMS_URL_ROOT             URL root for the LMS                                                      Yes       N/A
+LMS_USERNAME             Username belonging to an LMS user to use during testing                   Yes       N/A
+LMS_EMAIL                Email address used to sign into the LMS                                   Yes       N/A
+LMS_PASSWORD             Password used to sign into the LMS                                        Yes       N/A
+LMS_AUTO_AUTH            Whether auto-auth is enabled on the LMS                                   No        False
+LMS_HTTPS                Whether HTTPS is enabled on the LMS                                       No        True
+ENROLLMENT_API_URL       URL for the LMS Enrollment API                                            No        LMS_URL_ROOT + '/api/enrollment/v1'
+ENROLLMENT_API_TOKEN     Token used to authenticate against the Enrollment API                     No        ACCESS_TOKEN
+BASIC_AUTH_USERNAME      Username used to bypass HTTP basic auth on the LMS                        No        N/A
+BASIC_AUTH_PASSWORD      Password used to bypass HTTP basic auth on the LMS                        No        N/A
+======================== ========================================================================= ========= ============================================================
 
 Running Acceptance Tests
 ************************
@@ -167,5 +152,3 @@ As discussed above, the acceptance tests rely on configuration which can be spec
 When running against a production-like staging environment, you might run::
 
     $ ECOMMERCE_URL_ROOT="https://ecommerce.stage.edx.org" LMS_URL_ROOT="https://courses.stage.edx.org" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="True" LMS_AUTO_AUTH="False" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" BASIC_AUTH_USERNAME="<username>" BASIC_AUTH_PASSWORD="<password>" HONOR_COURSE_ID="<course ID>" VERIFIED_COURSE_ID="<course ID>" make accept
-
-
