@@ -10,7 +10,8 @@ def str2bool(s):
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 ENABLE_OAUTH2_TESTS = str2bool(os.environ.get('ENABLE_OAUTH2_TESTS', True))
 HONOR_COURSE_ID = os.environ.get('HONOR_COURSE_ID', 'edX/DemoX/Demo_Course')
-VERIFIED_COURSE_ID = os.environ.get('VERIFIED_COURSE_ID', 'edX/victor101/Victor_s_test_course')
+VERIFIED_COURSE_ID = os.environ.get('VERIFIED_COURSE_ID', 'course-v1:BerkeleyX+ColWri.3.6x+3T2015')
+PROFESSIONAL_COURSE_ID = os.environ.get('PROFESSIONAL_COURSE_ID', 'course-v1:UBCx+Marketing5501x+2T2015')
 
 if ACCESS_TOKEN is None:
     raise RuntimeError('A valid OAuth2 access token is required to run acceptance tests.')
@@ -32,6 +33,23 @@ PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
 # tests to be disabled.
 ENABLE_CYBERSOURCE_TESTS = str2bool(os.environ.get('ENABLE_CYBERSOURCE_TESTS', True))
 # END OTTO CONFIGURATION
+
+
+# MARKETING CONFIGURATION
+ENABLE_MARKETING_SITE = str2bool(os.environ.get('ENABLE_MARKETING_SITE', False))
+
+MARKETING_URL_ROOT = os.environ.get('MARKETING_URL_ROOT').strip('/')
+
+# These must correspond to the course IDs provided for each enrollment mode.
+VERIFIED_COURSE_SLUG = os.environ.get(
+    'VERIFIED_COURSE_SLUG',
+    'dracula-stoker-berkeleyx-book-club-uc-berkeleyx-colwri3-6x'
+)
+PROFESSIONAL_COURSE_SLUG = os.environ.get(
+    'PROFESSIONAL_COURSE_SLUG',
+    'marketing-non-marketers-ubcx-marketing5501x'
+)
+# END MARKETING CONFIGURATION
 
 
 # LMS CONFIGURATION

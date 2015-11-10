@@ -9,10 +9,11 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import (
-    VERIFIED_COURSE_ID, LMS_HTTPS, PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS
+    VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG, LMS_HTTPS, PAYPAL_PASSWORD, PAYPAL_EMAIL,
+    ENABLE_CYBERSOURCE_TESTS
 )
 from acceptance_tests.mixins import LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin, UnenrollmentMixin
-from acceptance_tests.pages import LMSCourseModePage
+from acceptance_tests.pages import LMSCourseModePage, MarketingCourseAboutPage
 
 
 @ddt.ddt
@@ -26,12 +27,26 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
     def _start_checkout(self):
         """ Begin the checkout process for a verified certificate. """
         self.login_with_lms(self.email, self.password)
-        course_modes_page = LMSCourseModePage(self.browser, self.course_id)
-        course_modes_page.visit()
+
+        # If a slug is provided, use the marketing site.
+        if ENABLE_MARKETING_SITE:
+            course_about_page = MarketingCourseAboutPage(self.browser, VERIFIED_COURSE_SLUG)
+            course_about_page.visit()
+
+            # Click the first enroll button on the page to take the browser to the track selection page.
+            course_about_page.q(css='.js-enroll-btn').first.click()
+
+            # Wait for the track selection page to load.
+            WebDriverWait(self.browser, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'form-register-choose'))
+            )
+        else:
+            course_modes_page = LMSCourseModePage(self.browser, self.course_id)
+            course_modes_page.visit()
 
         # Click the purchase button on the track selection page to take
         # the browser to the payment selection page.
-        course_modes_page.q(css='input[name=verified_mode]').click()
+        self.browser.find_element_by_css_selector('input[name=verified_mode]').click()
 
     def assert_receipt_page_loads(self):
         """ Verifies the receipt page loaded in the browser. """
