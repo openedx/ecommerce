@@ -489,6 +489,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 voucher = self.create_new_voucher(offer, line)
                 enrollment_code = self.get_or_create_enrollment_code(line)
                 enrollment_code.vouchers.add(voucher)
+            line.set_status(LINE.COMPLETE)
 
         logger.info("Finished fulfilling 'Enrollment Code' product types for order [%s]", order.number)
         return order, lines

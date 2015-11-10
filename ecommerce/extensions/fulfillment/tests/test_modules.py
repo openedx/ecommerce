@@ -522,7 +522,6 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
 
             self.assertEqual(voucher_catalog, catalogs[i])
 
-
             self.assertIn(voucher, enrollment_code.vouchers.all())
             self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
             self.assertEqual(line.status, LINE.COMPLETE)
@@ -546,6 +545,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         line = self.order.lines.all()[1]
         enrollment_code = EnrollmentCode.objects.filter(order_line=line).first()
         vouchers = enrollment_code.vouchers.all()
+        self.assertEqual(line.status, LINE.COMPLETE)
 
         for voucher in vouchers:
             self.assertEqual(voucher.is_active(), False)
