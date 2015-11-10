@@ -9,7 +9,8 @@ def generate_sku(product, partner):
     """
     # Note: This currently supports enrollment codes and seats.
     # A new product type can be added via a new else if block.
-    if product.product_class.slug == u'enrollment_code':
+    if product.product_class and \
+    product.product_class.slug == u'enrollment_code':
         _hash = u' '.join((
             unicode(getattr(product.attr, 'catalog', '')),
             unicode(getattr(product.attr, 'client', '')),
