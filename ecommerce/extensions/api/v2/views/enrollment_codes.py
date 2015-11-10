@@ -4,7 +4,7 @@ import logging
 from django.db import transaction
 from oscar.core.loading import get_model
 from rest_framework import status, generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import serializers, data as data_api
@@ -25,7 +25,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMixin):
     serializer_class = serializers.EnrollmentCodeOrderSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminUser)
 
     def create(self, request, *args, **kwargs):
         with transaction.atomic():
@@ -51,25 +51,9 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             )
 
             basket = Basket.get_basket(request.user, request.site)
-
-            ### ORDER ###
-            basket.freeze()
             order_metadata = data_api.get_order_metadata(basket)
-            pricing = order_metadata[AC.KEYS.ORDER_TOTAL]
-            Order.objects.create(
-                number=order_metadata[AC.KEYS.ORDER_NUMBER],
-                basket=basket,
-                currency=pricing.currency,
-                total_incl_tax=pricing.incl_tax,
-                total_excl_tax=pricing.excl_tax
-            )
-            basket.submit()
 
-            logger.info(
-                u"Created new order number [%s] from basket [%d]",
-                order_metadata[AC.KEYS.ORDER_NUMBER],
-                basket.id
-            )
+            new_order = self._create_order(basket, order_metadata)
 
             ### RESPONSE ###
             response_data = {
@@ -144,6 +128,30 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
         basket.add_product(product, quantity=quantity)
         logger.info(
             u"Added product with SKU [%s] to basket [%d]",
-            product.stockrecord.first().partner_sku, basket.id
+            product.stockrecords.first().partner_sku, basket.id
         )
         return basket
+
+    def _create_order(self, basket, order_metadata):
+        basket.freeze()
+
+        order = self.handle_order_placement(
+            order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
+            user=basket.owner,
+            basket=basket,
+            shipping_address=None,
+            shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
+            shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
+            billing_address=None,
+            order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+        )
+
+        basket.submit()
+
+        logger.info(
+            u"Created new order number [%s] from basket [%d]",
+            order_metadata[AC.KEYS.ORDER_NUMBER],
+            basket.id
+        )
+
+        return order
