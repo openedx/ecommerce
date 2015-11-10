@@ -122,6 +122,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'client_secret': 'fake-client-secret',
         'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+        'error_url': get_lms_url('/commerce/checkout/error/'),
     },
 }
 # END PAYMENT PROCESSING

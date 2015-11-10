@@ -47,6 +47,7 @@ class Paypal(BasePaymentProcessor):
         configuration = self.configuration
         self.receipt_url = configuration['receipt_url']
         self.cancel_url = configuration['cancel_url']
+        self.error_url = configuration['error_url']
 
         # Number of times payment execution is retried after failure.
         self.retry_attempts = configuration.get('retry_attempts', 1)
