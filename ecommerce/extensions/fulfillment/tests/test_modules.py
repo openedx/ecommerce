@@ -445,7 +445,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         self.assertEqual(vouchers.count(), 1)
         self.assertEqual(voucher_catalog, self.catalog)
 
-        line = self.order.lines.all()[0]
+        line = self.order.lines.first()
         enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
         self.assertIn(vouchers[0], enrollment_code.vouchers.all())
         self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
@@ -455,7 +455,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
 
         self.basket.add_product(self.product)
         self.order = factories.create_order(number=1, basket=self.basket, user=self.user)
-        lines = list(self.order.lines.all())
+        lines = self.order.lines.all()
 
         EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
 
