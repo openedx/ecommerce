@@ -9,7 +9,9 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments
                                                publication as publication_views, partners as partner_views,
                                                catalog as catalog_views,
                                                stockrecords as stockrecords_views,
-                                               enrollment_codes as enrollment_codes_views)
+                                               enrollment_codes as enrollment_codes_views,
+                                               invoices as invoice_views)
+
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -61,6 +63,12 @@ ATOMIC_PUBLICATION_URLS = [
     ),
 ]
 
+INVOICE_URLS = [
+    url(r'^$', invoice_views.InvoiceListView.as_view(),
+        name='list_invoices'),
+]
+
+
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^enrollment_codes/', include(ENROLLMENT_CODE_URLS, namespace='enrollment_codes')),
@@ -68,6 +76,7 @@ urlpatterns = [
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
+    url(r'^invoices/', include(INVOICE_URLS, namespace='invoices')),
 ]
 
 router = ExtendedSimpleRouter()

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+Invoice = get_model('invoice', 'Invoice')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -144,6 +145,13 @@ class RefundSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Refund
 
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    """ Serializer for Invoice objects. """
+
+    class Meta(object):
+        model = Invoice
+    
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)

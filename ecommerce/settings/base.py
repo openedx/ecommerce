@@ -251,6 +251,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     'ecommerce.core',
     'ecommerce.courses',
+    'ecommerce.invoice',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

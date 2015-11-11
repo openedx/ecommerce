@@ -117,6 +117,15 @@ PAYMENT_PROCESSOR_CONFIG = {
         'cancel_url': None,
         'error_url': None,
     },
+    'invoice': {
+        # 'mode' can be either 'sandbox' or 'live'
+        'mode': None,
+        'client_id': None,
+        'client_secret': None,
+        'receipt_url': None,
+        'cancel_url': None,
+        'error_url': None,
+    },
 }
 # END PAYMENT PROCESSING
 
