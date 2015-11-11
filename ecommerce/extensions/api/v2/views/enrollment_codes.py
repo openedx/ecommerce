@@ -3,11 +3,11 @@ import logging
 
 from django.db import transaction
 from oscar.core.loading import get_model
-from rest_framework import generics, status
+from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-from ecommerce.extensions.api import data as data_api, serializers
+from ecommerce.extensions.api import serializers, data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.catalogue.utils import generate_sku
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -24,8 +24,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMixin):
-    """Endpoint for creating orders for enrollment codes.
-    """
     serializer_class = serializers.EnrollmentCodeOrderSerializer
     permission_classes = (IsAuthenticated, IsAdminUser)
 
@@ -55,7 +53,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             basket = Basket.get_basket(request.user, request.site)
             order_metadata = data_api.get_order_metadata(basket)
 
-            self._create_order(basket, order_metadata)
+            new_order = self._create_order(basket, order_metadata)
 
             ### RESPONSE ###
             response_data = {
@@ -66,7 +64,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
 
             return Response(response_data, status=status.HTTP_200_OK)
 
-    def create_enrollment_code_product(self, client, stock_records, start_date,
+    def _create_enrollment_code_product(self, client, stock_records, start_date,
                                         end_date, ecode_type, price, partner):
         ### ENROLLMENT PRODUCT ###
         enrollment_code_client, created = Client.objects.get_or_create(username=client)
@@ -125,7 +123,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
 
         return enrollment_code_product
 
-    def add_product_to_basket(self, product, user, site, quantity):
+    def _add_product_to_basket(self, product, user, site, quantity):
 
         basket = Basket.get_basket(user, site)
         basket.add_product(product, quantity=quantity)
@@ -135,7 +133,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
         )
         return basket
 
-    def create_order(self, basket, order_metadata):
+    def _create_order(self, basket, order_metadata):
         basket.freeze()
 
         order = self.handle_order_placement(
@@ -149,6 +147,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
         )
 
+        basket.submit()
 
         logger.info(
             u"Created new order number [%s] from basket [%d]",
