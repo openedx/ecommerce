@@ -124,7 +124,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
         'error_url': get_lms_url('/commerce/checkout/error/'),
     },
-    'invlice': {
+    'invoice': {
         'mode': 'sandbox',
         'client_id': 'fake-client-id',
         'client_secret': 'fake-client-secret',
