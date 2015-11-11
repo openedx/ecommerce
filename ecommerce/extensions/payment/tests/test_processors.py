@@ -624,3 +624,7 @@ class InvoiceTests(TestCase):
         """Test for transaction parameters"""
         params = self.processor_class().get_transaction_parameters(self.basket)
         self.assertIsNone(None, params)
+
+    def test_issue_credit(self):
+        """Test issue credit"""
+        self.assertRaises(NotImplementedError, self.processor_class().issue_credit, None, 0, 'USD')
