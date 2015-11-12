@@ -28,9 +28,9 @@ class InvoicePayment(BasePaymentProcessor):
 
         """
         configuration = self.configuration
-        self.payment_page_url = configuration['payment_page_url']
-        self.receipt_page_url = configuration['receipt_page_url']
-        self.cancel_page_url = configuration['cancel_page_url']
+        self.receipt_url = configuration['receipt_url']
+        self.error_url = configuration['error_url']
+        self.cancel_url = configuration['cancel_url']
         self.language_code = settings.LANGUAGE_CODE
 
     def handle_processor_response(self, response, basket=None):
