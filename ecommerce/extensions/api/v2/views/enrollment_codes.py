@@ -156,12 +156,12 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
 
         if payment_process_name == 'invoice':
             fake_response = {
-                'currency': order_metadata['total'].currency,
-                'total': Decimal(order_metadata[AC.KEYS.ORDER_TOTAL].excl_tax),
+                'req_currency': order_metadata['total'].currency,
+                'req_amount': Decimal(order_metadata[AC.KEYS.ORDER_TOTAL].excl_tax),
                 'transaction_id': -1
             }
             payment_processor = InvoicePayment
-            payment_processor().handle_processor_response(reponse=response, basket=basket)
+            payment_processor().handle_processor_response(response=fake_response, basket=basket)
         else:
             payment_processor = get_processor_class_by_name(payment_process_name)
             parameters = payment_processor().get_transaction_parameters(basket, request=self.request)
