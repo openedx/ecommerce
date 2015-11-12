@@ -1,3 +1,4 @@
+from decimal import Decimal
 import dateutil.parser
 import logging
 
@@ -11,6 +12,8 @@ from ecommerce.extensions.api import serializers, data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.catalogue.utils import generate_sku
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.payment.helpers import get_processor_class_by_name
+from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 
 AttributeOption = get_model('catalogue', 'AttributeOption')
 Basket = get_model('basket', 'Basket')
@@ -52,8 +55,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
 
             basket = Basket.get_basket(request.user, request.site)
             order_metadata = data_api.get_order_metadata(basket)
-
-            new_order = self._create_order(basket, order_metadata)
+            self._create_order(basket, order_metadata)
 
             ### RESPONSE ###
             response_data = {
@@ -132,7 +134,7 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
         )
         return basket
 
-    def _create_order(self, basket, order_metadata):
+    def _create_order(self, basket, order_metadata, payment_process_name='invoice'):
         basket.freeze()
 
         order = self.handle_order_placement(
@@ -146,12 +148,22 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
             order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
         )
 
-        basket.submit()
-
         logger.info(
             u"Created new order number [%s] from basket [%d]",
             order_metadata[AC.KEYS.ORDER_NUMBER],
             basket.id
         )
+
+        if payment_process_name == 'invoice':
+            fake_response = {
+                'currency': order_metadata['total'].currency,
+                'total': Decimal(order_metadata[AC.KEYS.ORDER_TOTAL].excl_tax),
+                'transaction_id': -1
+            }
+            payment_processor = InvoicePayment
+            payment_processor().handle_processor_response(reponse=response, basket=basket)
+        else:
+            payment_processor = get_processor_class_by_name(payment_process_name)
+            parameters = payment_processor().get_transaction_parameters(basket, request=self.request)
 
         return order
