@@ -10,8 +10,8 @@ require.config({
         'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
         'bootstrap_accessibility': 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
         'collections': 'js/collections',
-        'dataTables': 'bower_components/datatables/media/js/jquery.dataTables',
-        'dataTablesBootstrap': 'vendor/dataTables/dataTables.bootstrap',
+        'datatables.net': 'bower_components/datatables/media/js/jquery.dataTables',
+        'dataTablesBootstrap': 'bower_components/datatables/media/js/dataTables.bootstrap',
         'jquery': 'bower_components/jquery/dist/jquery',
         'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
         'models': 'js/models',
@@ -34,11 +34,11 @@ require.config({
         bootstrap_accessibility: {
             deps: ['bootstrap']
         },
-        dataTables: {
+        'datatables.net': {
             deps: ['jquery']
         },
         dataTablesBootstrap: {
-            deps: ['jquery', 'dataTables']
+            deps: ['jquery', 'datatables.net']
         },
         'jquery-cookie': {
             deps: ['jquery']
