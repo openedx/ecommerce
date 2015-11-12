@@ -79,13 +79,12 @@ class EnrollmentCodeOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMix
                 StockRecord.objects.get(id=stock_record_id)
             )
 
-        enrollment_code_product = Product.objects.create(
-            product_class=product_class,
-            title='-'.join((
-                enrollment_code_client.username,
-                unicode(enrollment_code_catalog)
-            ))
-        )
+        enrollment_code_product = Product()
+        enrollment_code_product.product_class = product_class
+        enrollment_code_product.title = '-'.join((
+            enrollment_code_client.username,
+            unicode(enrollment_code_catalog)
+        ))
 
         enrollment_code_type = AttributeOption.objects.get(
             option=ecode_type
