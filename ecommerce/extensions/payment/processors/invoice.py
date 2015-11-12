@@ -65,7 +65,7 @@ class InvoicePayment(BasePaymentProcessor):
         """
         invoice = Invoice()
         invoice.invoice_number = transaction_id
-        invoice.client = basket.user
+        invoice.client = basket.lines.first().product.attr.client
         invoice.order_number = basket.order_number
         invoice.total = total
         invoice.save()
