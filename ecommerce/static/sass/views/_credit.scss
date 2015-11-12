@@ -25,6 +25,26 @@
   .advatanges-panel,
   .provider-details {
     padding: 20px 0;
+
+    .radio-button {
+      padding-top: 30px;
+      cursor: pointer;
+
+      span {
+        display: block;
+      }
+    }
+
+    .provider {
+      border: 1px solid $gray-light;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+
+    .selected {
+      background: $gray-lighter;
+    }
   }
 
   .provider-details {
@@ -36,7 +56,7 @@
     }
   }
 
-  .eligibility-details {
+  .deadline-date {
     margin-bottom: 20px;
   }
 
@@ -46,11 +66,12 @@
   }
 
   .checkout-controls {
-    margin-top: 20px;
+    margin-top: 10px;
 
     .payment-button {
       background-color: $brand-success;
       border-color: $brand-success;
+      margin-bottom: 15px;
     }
   }
 

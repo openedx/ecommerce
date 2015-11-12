@@ -1,91 +1,82 @@
-require([
+define([
         'jquery',
         'backbone',
         'models/user_model',
         'models/tracking_model',
         'models/course_model',
-        'collections/credit_provider_collection',
-        'collections/credit_eligibility_collection',
         'views/clickable_view',
         'views/analytics_view',
         'views/payment_button_view',
         'utils/utils',
-        'views/credit_provider_view',
-        'views/credit_eligibility_view'
+        'views/provider_selection_view',
+        'pages/page'
     ],
     function ($,
               Backbone,
               UserModel,
               TrackingModel,
               CourseModel,
-              CreditProviderCollection,
-              CreditEligibilityCollection,
               ClickableView,
               AnalyticsView,
               PaymentButtonView,
               Utils,
-              CreditProviderView,
-              CreditEligibilityView) {
+              ProviderSelectionView,
+              Page) {
         'use strict';
 
-        var $container = $('.credit-checkout'),
-            $courseDetails = $container.find('#course-name'),
-            $providerDetails = $container.find('.provider-details'),
-            lmsRootUrl = $container.data('lms-root-url');
+        return Page.extend({
 
-        new PaymentButtonView({
-            el: $('#payment-buttons')
-        });
+            initialize: function () {
+                var providerSelectionView = new ProviderSelectionView({el: '.provider-details'}),
+                    paymentButtonView = new PaymentButtonView({el: '#payment-buttons'});
 
-        new CreditProviderView({
-            el: $providerDetails,
-            collection: new CreditProviderCollection({
-                lmsRootUrl: lmsRootUrl,
-                providerIds: $providerDetails.data('provider-ids')
-            })
-        });
+                this.listenTo(providerSelectionView, 'productSelected', function (data) {
+                    paymentButtonView.setSku(data.sku);
 
-        new CreditEligibilityView({
-            collection: new CreditEligibilityCollection({
-                lmsRootUrl: lmsRootUrl,
-                username: $courseDetails.data('username'),
-                courseKey: $courseDetails.data('course_key')
-            })
-        });
+                    // Update the display of the checkout total.
+                    this.$el.find('.total-price span').text(data.price);
+                });
 
-        var courseModel = new CourseModel(),
-            trackingModel = new TrackingModel(),
-            userModel = new UserModel();
+                // Render the payment buttons first, since the rendering of the provider selection will
+                // select the first available product.
+                paymentButtonView.render();
+                providerSelectionView.render();
 
-        /* jshint ignore:start */
-        // initModelData is set by the Django template at render time.
-        trackingModel.set(initModelData.tracking);
-        userModel.set(initModelData.user);
-        courseModel.set(initModelData.course);
-        /* jshint ignore:end */
+                var courseModel = new CourseModel(),
+                    trackingModel = new TrackingModel(),
+                    userModel = new UserModel();
 
-        /*
-         Triggering the analytics events on clicking the payment buttons on checkoutpage.
-         Buttons has the data-track- attributes type , event and category.
-         */
+                /* jshint ignore:start */
+                // initModelData is set by the Django template at render time.
+                trackingModel.set(initModelData.tracking);
+                userModel.set(initModelData.user);
+                courseModel.set(initModelData.course);
+                /* jshint ignore:end */
 
-        new AnalyticsView({
-            model: trackingModel,
-            userModel: userModel,
-            courseModel: courseModel
-        });
+                /*
+                 Triggering the analytics events on clicking the payment buttons on checkoutpage.
+                 Buttons has the data-track- attributes type , event and category.
+                 */
 
-        // instrument the click events
-        _($('[data-track-type="click"]')).each(function (track) {
-            var properties = Utils.getNodeProperties(track.attributes,
-                'data-track-', ['data-track-event']);
+                new AnalyticsView({
+                    model: trackingModel,
+                    userModel: userModel,
+                    courseModel: courseModel
+                });
 
-            new ClickableView({
-                model: trackingModel,
-                trackEventType: $(track).attr('data-track-event'),
-                trackProperties: properties,
-                el: track
-            });
+                // instrument the click events
+                _($('[data-track-type="click"]')).each(function (track) {
+                    var properties = Utils.getNodeProperties(track.attributes,
+                        'data-track-', ['data-track-event']);
+
+                    new ClickableView({
+                        model: trackingModel,
+                        trackEventType: $(track).attr('data-track-event'),
+                        trackProperties: properties,
+                        el: track
+                    });
+                });
+            }
         });
     }
 );
