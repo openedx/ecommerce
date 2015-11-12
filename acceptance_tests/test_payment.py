@@ -179,7 +179,8 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         self.browser.find_element_by_css_selector('input#login_password').send_keys(PAYPAL_PASSWORD)
         self.browser.find_element_by_css_selector('input#submitLogin').click()
 
-        # Checkout
+        # Wait for the checkout form to load, then submit it.
+        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'continue')))
         self.browser.find_element_by_css_selector('input#continue').click()
 
     def test_paypal(self):
