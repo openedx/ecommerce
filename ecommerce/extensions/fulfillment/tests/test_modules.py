@@ -1,14 +1,14 @@
 """Tests of the Fulfillment API's fulfillment modules."""
-import json
 import datetime
-
 import ddt
+import httpretty
+import json
+import mock
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import override_settings
-import httpretty
-import mock
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
@@ -25,6 +25,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
+Applicator = get_class('offer.utils', 'Applicator')
 AttributeOption = get_model('catalogue', 'AttributeOption')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -372,6 +373,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 class EnrollmentCodeFulfillmentModuleTests(TestCase):
     """Test enrollment code fulfillment."""
 
+    course_id = 'edX/DemoX/Demo_Course'
+    certificate_type = 'test-certificate-type'
+    provider = None
+
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
 
@@ -387,7 +392,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
             title='Test product'
         )
         self.product.attr.catalog = self.catalog
-        self.product.attr.start_date = datetime.date(2016, 11, 30)
+        self.product.attr.start_date = datetime.date(2015, 10, 30)
         self.product.attr.end_date = datetime.date(2017, 11, 30)
         self.product.attr.type = AttributeOption.objects.get(option='Single use')
         self.product.save()
@@ -428,27 +433,29 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         """Happy path test to ensure we can properly fulfill enrollment codes."""
 
         self.order = factories.create_order(number=1, basket=self.basket, user=self.user)
-        EnrollmentCodeFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+        EnrollmentCodeFulfillmentModule().fulfill_product(self.order, self.order.lines.all())
 
         self.assertEqual(Voucher.objects.count(), 1)
         self.assertEqual(Catalog.objects.count(), 1)
 
-        product_range = Range.objects.filter(catalog=self.catalog)[0]
+        product_range = Range.objects.filter(catalog=self.catalog).first()
         self.assertEqual(product_range.contains_product(self.stock_record), True)
 
-        offer_benefit = Benefit.objects.filter(range=product_range)[0]
-        offer_condition = Condition.objects.filter(range=product_range)[0]
-        offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition)[0]
-        vouchers = Voucher.objects.filter(offers=offer)
-        voucher_catalog = vouchers[0].offers.all()[0].condition.range.catalog
+        offer_benefit = Benefit.objects.filter(range=product_range).first()
+        offer_condition = Condition.objects.filter(range=product_range).first()
+        offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition).first()
+        voucher = Voucher.objects.filter(offers=offer).first()
+        voucher_catalog = voucher.offers.all().first().condition.range.catalog
 
-        self.assertEqual(vouchers.count(), 1)
         self.assertEqual(voucher_catalog, self.catalog)
 
         line = self.order.lines.first()
-        enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
-        self.assertIn(vouchers[0], enrollment_code.vouchers.all())
-        self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
+
+        enrollment_code = EnrollmentCode.objects.filter(order_line=line).first()
+        self.assertIn(voucher, enrollment_code.vouchers.all())
+        self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
+        self.assertEqual(line.status, LINE.COMPLETE)
+
 
     def test_multiple_enrollment_codes_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill multiple enrollment codes."""
@@ -460,69 +467,75 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
 
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0].quantity, 2)
+        self.assertEqual(lines.first().quantity, 2)
 
         self.assertEqual(Voucher.objects.count(), 2)
 
-        product_range = Range.objects.filter(catalog=self.catalog)[0]
+        product_range = Range.objects.filter(catalog=self.catalog).first()
         self.assertEqual(product_range.contains_product(self.stock_record), True)
 
-        offer_benefit = Benefit.objects.filter(range=product_range)[0]
-        offer_condition = Condition.objects.filter(range=product_range)[0]
-        offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition)[0]
+        offer_benefit = Benefit.objects.filter(range=product_range).first()
+        offer_condition = Condition.objects.filter(range=product_range).first()
+        offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition).first()
         vouchers = Voucher.objects.filter(offers=offer)
-        voucher_catalog = vouchers[0].offers.all()[0].condition.range.catalog
+        voucher = vouchers.first()
+        voucher_catalog = voucher.offers.all().first().condition.range.catalog
 
         self.assertEqual(vouchers.count(), 2)
         self.assertEqual(voucher_catalog, self.catalog)
 
-        line = self.order.lines.all()[0]
-        enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
-        self.assertIn(vouchers[0], enrollment_code.vouchers.all())
-        self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
+
+        line = self.order.lines.first()
+        enrollment_code = EnrollmentCode.objects.filter(order_line=line).first()
+        self.assertIn(voucher, enrollment_code.vouchers.all())
+        self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
+        self.assertEqual(line.status, LINE.COMPLETE)
+
 
     def test_different_enrollment_codes_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill different enrollment codes."""
 
         products, catalogs = self.create_enrollment_code_products(10)
         self.order = factories.create_order(number=1, basket=self.basket, user=self.user)
-        lines = list(self.order.lines.all())
+        lines = self.order.lines.all()
 
         EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
 
         self.assertEqual(len(lines), 11)
-        self.assertEqual(lines[0].quantity, 1)
+        self.assertEqual(lines.first().quantity, 1)
 
         self.assertEqual(Voucher.objects.count(), 11)
 
         for i in range(10):
             line = self.order.lines.all()[i+1]
-            enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
+            enrollment_code = EnrollmentCode.objects.filter(order_line=line).first()
 
-            product_range = Range.objects.filter(catalog=catalogs[i])[0]
-            stock_record = StockRecord.objects.filter(product=products[i])[0]
+            product_range = Range.objects.filter(catalog=catalogs[i]).first()
+            stock_record = StockRecord.objects.filter(product=products[i]).first()
             self.assertEqual(product_range.contains_product(stock_record), True)
 
-            offer_benefit = Benefit.objects.filter(range=product_range)[0]
-            offer_condition = Condition.objects.filter(range=product_range)[0]
-            offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition)[0]
-            vouchers = Voucher.objects.filter(offers=offer)
-            voucher_catalog = vouchers[0].offers.all()[0].condition.range.catalog
+            offer_benefit = Benefit.objects.filter(range=product_range).first()
+            offer_condition = Condition.objects.filter(range=product_range).first()
+            offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition).first()
+            voucher = Voucher.objects.filter(offers=offer).first()
+            voucher_catalog = voucher.offers.all().first().condition.range.catalog
 
-            self.assertEqual(vouchers.count(), 1)
             self.assertEqual(voucher_catalog, catalogs[i])
 
-            self.assertIn(vouchers[0], enrollment_code.vouchers.all())
-            self.assertEqual(vouchers[0].usage, Voucher.SINGLE_USE)
+
+            self.assertIn(voucher, enrollment_code.vouchers.all())
+            self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
+            self.assertEqual(line.status, LINE.COMPLETE)
+
 
     def test_enrollment_code_revoke_line(self):
         """Happy path test to ensure we can properly revoke enrollment code order line"""
 
         products, catalogs = self.create_enrollment_code_products(10)
         self.order = factories.create_order(number=1, basket=self.basket, user=self.user)
-        lines = list(self.order.lines.all())
+        lines = self.order.lines.all()
         EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines[1:])
-        is_revoked = EnrollmentCodeFulfillmentModule().revoke_line(lines[0])
+        is_revoked = EnrollmentCodeFulfillmentModule().revoke_line(lines.first())
 
         self.assertEqual(is_revoked, False)
 
@@ -531,9 +544,41 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         self.assertEqual(is_revoked, True)
 
         line = self.order.lines.all()[1]
-        enrollment_code = EnrollmentCode.objects.filter(order_line=line)[0]
+        enrollment_code = EnrollmentCode.objects.filter(order_line=line).first()
         vouchers = enrollment_code.vouchers.all()
 
         for voucher in vouchers:
             self.assertEqual(voucher.is_active(), False)
             self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
+
+    def test_creating_and_applying_enrollment_code_vouchers(self):
+        """Happy path test to ensure we can properly create and apply enrollment code"""
+
+        # Create course seat
+        course = Course.objects.create(id=self.course_id, name='Demo Course')
+        seat = course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
+        stock_record = StockRecord.objects.filter(product=seat).first()
+        self.catalog.stock_records.add(stock_record)
+
+        # Create enrollment code voucher
+        enrollment_code_order = factories.create_order(number=1, basket=self.basket, user=self.user)
+        EnrollmentCodeFulfillmentModule().fulfill_product(enrollment_code_order, enrollment_code_order.lines.all())
+        product_range = Range.objects.filter(catalog=self.catalog).first()
+        stock_record = StockRecord.objects.filter(product=self.product).first()
+        offer_benefit = Benefit.objects.filter(range=product_range).first()
+        offer_condition = Condition.objects.filter(range=product_range).first()
+        offer = ConditionalOffer.objects.filter(benefit=offer_benefit, condition=offer_condition).first()
+        voucher = Voucher.objects.filter(offers=offer).first()
+
+        self.assertEqual(product_range.contains_product(seat), True)
+        self.assertEqual(seat.get_is_discountable(), True)
+        self.assertEqual(voucher.usage, "Single use")
+
+        # Apply voucher
+        seat_basket = BasketFactory()
+        seat_basket.add_product(seat)
+        seat_basket.vouchers.add(voucher)
+        self.assertEqual(seat_basket.offer_applications, [])
+        Applicator().apply_offers(seat_basket, voucher.offers.all())
+        self.assertEqual(offer.is_condition_satisfied(seat_basket), True)
+        self.assertEqual(seat_basket.total_excl_tax, 0.00)

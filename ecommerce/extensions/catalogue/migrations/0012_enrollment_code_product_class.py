@@ -62,7 +62,7 @@ def create_product_class(apps, schema_editor):
     )
     AttributeOption.objects.create(
         group=group,
-        option='Multi use'
+        option='Multi-use'
     )
     AttributeOption.objects.create(
         group=group,
