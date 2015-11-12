@@ -416,7 +416,8 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         """
         offer_condition, created = Condition.objects.get_or_create(
             range=product_range,
-            type=Condition.VALUE,
+            type=Condition.COUNT,
+            value=1,
         )
         return offer_condition
 
@@ -434,8 +435,8 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         """
         offer_benefit, created = Benefit.objects.get_or_create(
             range=product_range,
-            type=Condition.VALUE,
-            value=100,
+            type=Benefit.PERCENTAGE,
+            value=100.00,
         )
         return offer_benefit
 
