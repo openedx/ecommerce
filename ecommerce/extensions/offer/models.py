@@ -11,4 +11,10 @@ class Range(AbstractRange):
             return product.id in self.catalog.stock_records.values_list('product', flat=True)
         return super(Range, self).contains_product(product)
 
+    def all_products(self):
+        if self.catalog:
+            products = [record.product for record in self.catalog.stock_records.all()]
+            return products
+        return super(Range, self).all_products()
+
 from oscar.apps.offer.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import

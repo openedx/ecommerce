@@ -456,7 +456,6 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
         self.assertEqual(line.status, LINE.COMPLETE)
 
-
     def test_multiple_enrollment_codes_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill multiple enrollment codes."""
 
@@ -484,13 +483,11 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         self.assertEqual(vouchers.count(), 2)
         self.assertEqual(voucher_catalog, self.catalog)
 
-
         line = self.order.lines.first()
         enrollment_code = EnrollmentCode.objects.filter(order_line=line).first()
         self.assertIn(voucher, enrollment_code.vouchers.all())
         self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
         self.assertEqual(line.status, LINE.COMPLETE)
-
 
     def test_different_enrollment_codes_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill different enrollment codes."""
@@ -525,7 +522,6 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
             self.assertIn(voucher, enrollment_code.vouchers.all())
             self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
             self.assertEqual(line.status, LINE.COMPLETE)
-
 
     def test_enrollment_code_revoke_line(self):
         """Happy path test to ensure we can properly revoke enrollment code order line"""
@@ -572,6 +568,7 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         voucher = Voucher.objects.filter(offers=offer).first()
 
         self.assertEqual(product_range.contains_product(seat), True)
+        self.assertEqual(voucher.is_available_to_user(self.user)[0], True)
         self.assertEqual(seat.get_is_discountable(), True)
         self.assertEqual(voucher.usage, "Single use")
 
@@ -579,7 +576,5 @@ class EnrollmentCodeFulfillmentModuleTests(TestCase):
         seat_basket = BasketFactory()
         seat_basket.add_product(seat)
         seat_basket.vouchers.add(voucher)
-        self.assertEqual(seat_basket.offer_applications, [])
         Applicator().apply_offers(seat_basket, voucher.offers.all())
-        self.assertEqual(offer.is_condition_satisfied(seat_basket), True)
         self.assertEqual(seat_basket.total_excl_tax, 0.00)

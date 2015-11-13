@@ -326,7 +326,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         Returns:
             Randomly generated string that will be used as a voucher code
         """
-        return line.product.get_product_class().slug == 'enrollment_code'
+        return line.product.get_product_class().name == 'Enrollment code'
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled through enrollment code.
@@ -360,6 +360,8 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             name=range_name,
             catalog=catalog,
         )
+        for product in product_range.all_products():
+            product_range.add_product(product)
         return product_range
 
     def create_new_voucher(self, offer, line):
@@ -489,9 +491,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 voucher = self.create_new_voucher(offer, line)
                 enrollment_code = self.get_or_create_enrollment_code(line)
                 enrollment_code.vouchers.add(voucher)
-
             line.set_status(LINE.COMPLETE)
-
         logger.info("Finished fulfilling 'Enrollment Code' product types for order [%s]", order.number)
         return order, lines
 
