@@ -1,0 +1,101 @@
+<div class="alerts" tabindex="-1" aria-live="polite"></div>
+
+<div class="row">
+    <div class="fields col-md-6">
+        <div class="form-group">
+            <label for="title"><%= gettext('Descriptive Name') %></label>
+            <input type="text" class="form-control" name="title">
+            <p class="help-block"></p>
+        </div>
+        <div class="form-group">
+            <label for="code_type"><%= gettext('Code Type') %></label>
+            <select class="form-control" name="code_type"></select>
+            <p class="help-block"></p>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="start_date"><%= gettext('Valid from') %></label>
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+                    <input type="datetime-local" class="form-control" name="start_date" placeholder="mm/dd/yyyy">
+                </div>
+                <p class="help-block"></p>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="end_date"><%= gettext('Valid until') %></label>
+                <div class="input-group">
+                    <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+                    <input type="datetime-local" class="form-control" name="end_date" placeholder="mm/dd/yyyy">
+                </div>
+                <p class="help-block"></p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="voucher_type"><%= gettext('Voucher Type') %></label>
+            <select class="form-control" name="voucher_type"></select>
+            <p class="help-block"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="code"><%= gettext('Code') %></label>
+            <input type="text" class="form-control" name="code">
+            <p class="help-block"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity"><%= gettext('Number of Codes') %></label>
+            <input type="text" class="form-control" name="quantity" value="1">
+            <p class="help-block"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="benefit_value"><%= gettext('Discount Value') %></label>
+            <div class="input-group">
+                <div class="benefit-addon input-group-addon"></div>
+                <input type="text" class="form-control" name="benefit_value" placeholder="">
+            </div>
+            <div class="form-inline benefit-type">
+                <input id="benefit_percent" type="radio" name="benefit_type" value="Percentage">
+                <label for="benefit_percent"><%= gettext('Percent') %></label>
+                <input id="benefit_fixed" type="radio" name="benefit_type" value="Fixed">
+                <label for="benefit_fixed"><%= gettext('Fixed ($USD)') %></label>
+            </div>
+            <p class="help-block"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="client_username"><%= gettext('Client') %></label>
+            <input type="text" class="form-control" name="client_username" placeholder="">
+            <p class="help-block"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="price"><%= gettext('Total Paid') %></label>
+            <div class="input-group">
+                <div class="input-group-addon">$</div>
+                <input type="text" class="form-control" name="price" placeholder="">
+            </div>
+            <p class="help-block"></p>
+        </div>
+    </div>
+
+    <div class="fields col-md-6">
+        <div class="form-group">
+            <label for="course_id"><%= gettext('Course ID') %></label>
+            <input type="text" class="form-control" name="course_id" placeholder="">
+            <p class="help-block"></p>
+        </div>
+        <div class="form-group">
+            <label for="seat_type"><%= gettext('Seat Type') %></label>
+            <select class="form-control" name="seat_type"></select>
+            <p class="help-block"></p>
+        </div>
+    </div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= gettext('Save') %></button>
+    <a class="btn btn-default" href="/"><%= gettext('Cancel') %></a>
+</div>
