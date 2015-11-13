@@ -326,7 +326,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         Returns:
             Randomly generated string that will be used as a voucher code
         """
-        return line.product.get_product_class().name == 'Enrollment Code'
+        return line.product.get_product_class().slug == 'enrollment_code'
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled through enrollment code.
