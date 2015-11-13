@@ -53,6 +53,7 @@ urlpatterns = [
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
+    url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),

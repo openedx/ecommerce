@@ -9,9 +9,11 @@ from django.db import transaction, connection, DatabaseError
 from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import View
+from django.utils.decorators import method_decorator
 
 from ecommerce.core.constants import Status, UnavailabilityMessage
 
@@ -99,3 +101,13 @@ class AutoAuth(View):
         login(request, user)
 
         return redirect('/')
+
+
+class StaffOnlyMixin(object):
+    """ Makes sure only staff users can access the view. """
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise Http404
+
+        return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
