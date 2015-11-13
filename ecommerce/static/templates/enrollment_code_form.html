@@ -1,0 +1,77 @@
+<div class="alerts" tabindex="-1" aria-live="polite"></div>
+
+<div class="fields">
+    <div class="form-group">
+        <label for="code_type"><%= gettext('Code Type') %></label>
+        <select class="form-control" name="code_type"></select>
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="course_id"><%= gettext('Course ID') %></label>
+        <input type="text" class="form-control" name="course_id" placeholder="e.g. edX/DemoX/Demo_Course">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="course_name"><%= gettext('Course Name') %></label>
+        <input type="text" class="form-control" name="course_name">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="partner_name"><%= gettext('Partner Name') %></label>
+        <input type="text" class="form-control" name="partner_name">
+        <p class="help-block"></p>
+    </div>
+
+    <div class="form-group">
+        <label for="seat_type"><%= gettext('Seat Type') %></label>
+        <select class="form-control" name="seat_type"></select>
+        <p class="help-block"></p>
+    </div>
+
+    <div class="form-group">
+        <label for="full_seat_price"><%= gettext('Full Price Per Seat') %></label>
+        <input type="text" class="form-control" name="full_seat_price" placeholder="">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="code_seat_price"><%= gettext('Code Price Per Seat') %></label>
+        <input type="text" class="form-control" name="code_seat_price" placeholder="">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="total_code_count"><%= gettext('Total # Codes') %></label>
+        <input type="text" class="form-control" name="total_code_count" placeholder="">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="total_cost"><%= gettext('Total Cost') %></label>
+        <input type="text" class="form-control" name="total_cost" placeholder="">
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="start_date"><%= gettext('Start Date') %></label>
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            <input type="datetime-local" class="form-control" name="start_date" placeholder="mm/dd/yyyy">
+        </div>
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="end_date"><%= gettext('End Date') %></label>
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            <input type="datetime-local" class="form-control" name="end_date" placeholder="mm/dd/yyyy">
+        </div>
+        <p class="help-block"></p>
+    </div>
+    <div class="form-group">
+        <label for="client_name"><%= gettext('Client Name') %></label>
+        <input type="text" class="form-control" name="client_name" placeholder="">
+        <p class="help-block"></p>
+    </div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= gettext('Create Code') %></button>
+    <a class="btn btn-default" href="/codes/"><%= gettext('Cancel') %></a>
+</div>
