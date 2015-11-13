@@ -30,12 +30,18 @@
 
     <div class="form-group">
         <label for="full_seat_price"><%= gettext('Full Price Per Seat') %></label>
-        <input type="text" class="form-control" name="full_seat_price" placeholder="">
+        <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input type="text" class="form-control" name="full_seat_price" placeholder="">
+        </div>
         <p class="help-block"></p>
     </div>
     <div class="form-group">
         <label for="code_seat_price"><%= gettext('Code Price Per Seat') %></label>
-        <input type="text" class="form-control" name="code_seat_price" placeholder="">
+        <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input type="text" class="form-control" name="code_seat_price" placeholder="">
+        </div>
         <p class="help-block"></p>
     </div>
     <div class="form-group">
@@ -45,7 +51,10 @@
     </div>
     <div class="form-group">
         <label for="total_cost"><%= gettext('Total Cost') %></label>
-        <input type="text" class="form-control" name="total_cost" placeholder="">
+        <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input type="text" class="form-control" name="total_cost" placeholder="">
+        </div>
         <p class="help-block"></p>
     </div>
     <div class="form-group">
