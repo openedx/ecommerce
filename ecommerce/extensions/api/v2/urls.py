@@ -1,5 +1,4 @@
 from django.conf.urls import url, include
-from django.views.decorators.cache import cache_page
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN
@@ -37,7 +36,7 @@ ORDER_URLS = [
 ]
 
 PAYMENT_URLS = [
-    url(r'^processors/$', cache_page(60 * 30)(payment_views.PaymentProcessorListView.as_view()),
+    url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(),
         name='list_processors'),
 ]
 

@@ -118,6 +118,8 @@ PAYMENT_PROCESSOR_CONFIG = {
         'error_url': None,
     },
 }
+
+PAYMENT_PROCESSOR_SWITCH_PREFIX = 'payment_processor_active_'
 # END PAYMENT PROCESSING
 
 
