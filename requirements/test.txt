@@ -1,8 +1,8 @@
 # Packages required for testing
 -r base.txt
 
-bok-choy==0.4.3
-coverage==3.7.1
+bok-choy==0.4.7
+coverage==4.0.2
 ddt==1.0.0
 django-nose==1.4.2
 edx-ecommerce-api-client==1.1.0
@@ -12,5 +12,5 @@ mock-django==0.6.9
 nose-ignore-docstring==0.2
 pep8==1.6.2
 pylint==1.4.4
-selenium>=2.47.1
-testfixtures==4.2.0
+selenium>=2.48.0
+testfixtures==4.5.0
