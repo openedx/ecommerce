@@ -2,6 +2,8 @@ import abc
 
 from django.conf import settings
 from oscar.core.loading import get_model
+import waffle
+
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -87,3 +89,10 @@ class BasePaymentProcessor(object):  # pragma: no cover
             currency (string): currency of the amount to be credited
         """
         raise NotImplementedError
+
+    @classmethod
+    def is_enabled(cls):
+        """
+        Returns True if this payment processor is enabled, and False otherwise.
+        """
+        return waffle.switch_is_active(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + cls.NAME)

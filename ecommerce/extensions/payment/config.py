@@ -15,3 +15,7 @@ class PaymentConfig(config.PaymentConfig):
                 'client_id': paypal_configuration['client_id'],
                 'client_secret': paypal_configuration['client_secret']
             })
+
+        # Register signal handlers
+        # noinspection PyUnresolvedReferences
+        import ecommerce.extensions.payment.signals  # pylint: disable=unused-variable
