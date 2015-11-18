@@ -38,7 +38,7 @@ ENABLE_CYBERSOURCE_TESTS = str2bool(os.environ.get('ENABLE_CYBERSOURCE_TESTS', T
 # MARKETING CONFIGURATION
 ENABLE_MARKETING_SITE = str2bool(os.environ.get('ENABLE_MARKETING_SITE', False))
 
-MARKETING_URL_ROOT = os.environ.get('MARKETING_URL_ROOT').strip('/')
+MARKETING_URL_ROOT = os.environ.get('MARKETING_URL_ROOT').strip('/') if ENABLE_MARKETING_SITE else None
 
 # These must correspond to the course IDs provided for each enrollment mode.
 VERIFIED_COURSE_SLUG = os.environ.get(
