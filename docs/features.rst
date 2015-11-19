@@ -45,6 +45,22 @@ Switches can be managed via the Django admin. The following switches exist:
 | PAYPAL_RETRY_ATTEMPTS          | Enable retry mechanism for failed PayPal payment executions               |
 +--------------------------------+---------------------------------------------------------------------------+
 
+Toggling Payment Processors
+---------------------------
+
+Payment processors sometimes experience temporary outages. When these outages occur, you can use Waffle switches to disable the faulty payment processor(s), then re-enable them after the outage is over.
+
+The names of these switches are prefixed with the value of the setting ``PAYMENT_PROCESSOR_SWITCH_PREFIX``. By default, this value is ``payment_processor_active_``. The table below lists valid switches and the payment processors they control.
+
+================= ==================================== =============
+Payment Processor Switch Name                          Default Value
+================= ==================================== =============
+PayPal            payment_processor_active_paypal      True
+CyberSource       payment_processor_active_cybersource True
+================= ==================================== =============
+
+The LMS is equipped to deal with the unlikely event that all payment processors are disabled.
+
 Business Intelligence (Analytics)
 ---------------------------------
 
