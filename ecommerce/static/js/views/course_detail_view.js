@@ -7,7 +7,8 @@ define([
         'text!templates/course_detail.html',
         'text!templates/_course_seat.html',
         'text!templates/_course_credit_seats.html',
-        'utils/course_utils'
+        'utils/course_utils',
+        'ecommerce'
     ],
     function ($,
               Backbone,
@@ -17,7 +18,8 @@ define([
               CourseDetailTemplate,
               CourseSeatTemplate,
               CourseCreditSeatsTemplate,
-              CourseUtils) {
+              CourseUtils,
+              ecommerce) {
         'use strict';
 
         return Backbone.View.extend({
@@ -47,7 +49,8 @@ define([
             },
 
             renderSeats: function () {
-                var html = '',
+                var creditProvider,
+                    html = '',
                     seats = CourseUtils.orderSeatsForDisplay(this.model.seats()),
                     $seatHolder = $('.course-seats', this.$el);
 
@@ -58,6 +61,13 @@ define([
                 });
 
                 if (seats.filtered && seats.filtered.length > 0) {
+                    _.each(seats.filtered, function (seat) {
+                        creditProvider = ecommerce.credit.providers.get(seat.get('credit_provider'));
+
+                        if (creditProvider) {
+                            seat.set('credit_provider', creditProvider.get('display_name'));
+                        }
+                    });
                     html += _.template(CourseCreditSeatsTemplate)({creditSeats: seats.filtered, moment: moment});
                 }
 

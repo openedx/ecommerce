@@ -224,6 +224,7 @@ COMMERCE_API_URL = None
 
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
+CREDIT_PROVIDER_CACHE_TIMEOUT = 600
 
 # OAuth2 provider URL used for OAuth2 transactions (e.g. validating access tokens)
 OAUTH2_PROVIDER_URL = None

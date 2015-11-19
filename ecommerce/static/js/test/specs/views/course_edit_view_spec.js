@@ -6,6 +6,8 @@ define([
         'views/course_seat_form_fields/verified_course_seat_form_field_view',
         'models/course_model',
         'utils/utils',
+        'collections/credit_provider_collection',
+        'ecommerce'
     ],
     function (_s,
               moment,
@@ -13,7 +15,9 @@ define([
               HonorCourseSeatFormFieldView,
               VerifiedCourseSeatFormFieldView,
               Course,
-              Utils) {
+              Utils,
+              CreditProviderCollection,
+              ecommerce) {
 
         'use strict';
 
@@ -91,7 +95,7 @@ define([
                         },
                         {
                             name: 'credit_provider',
-                            value: 'Harvard'
+                            value: 'harvard'
                         },
                         {
                             name: 'credit_hours',
@@ -156,8 +160,9 @@ define([
                 };
 
             beforeEach(function () {
+                ecommerce.credit.providers = new CreditProviderCollection([{id: 'harvard', display_name: 'Harvard'}]);
                 model = Course.findOrCreate(data, {parse: true});
-                view = new CourseCreateEditView({ model: model, editing: true }).render();
+                view = new CourseCreateEditView({model: model, editing: true}).render();
             });
 
             it('should display course details in form fields', function () {
@@ -185,7 +190,7 @@ define([
 
                 expect($creditElement.length).toBe(1);
                 _.each($creditSeats, function (seat) {
-                    expect($(seat).find('[name=credit_provider]').val()).toBe('Harvard');
+                    expect($(seat).find('[name=credit_provider]').val()).toBe('harvard');
                     expect($(seat).find('[name=price]').val()).toBe('200.00');
                     expect($(seat).find('[name=credit_hours]').val()).toBe('1');
                     expect($(seat).find('[name=expires]').val()).toBe(Utils.stripTimezone('2020-01-01T00:00:00Z'));
@@ -196,7 +201,7 @@ define([
                 data.type = 'professional';
 
                 model = Course.findOrCreate(data, {parse: true, merge: true});
-                view = new CourseCreateEditView({ model: model, editing: true }).render();
+                view = new CourseCreateEditView({model: model, editing: true}).render();
 
                 $professionalElement = view.$el.find('.row.course-seat.professional');
                 expect($professionalElement.length).toBe(1);

@@ -1,15 +1,21 @@
 from io import StringIO
+import json
 import logging
 import os
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView
+from edx_rest_api_client.client import EdxRestApiClient
+from requests import Timeout
+from slumber.exceptions import SlumberBaseException
 
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-
+from ecommerce.settings import get_lms_url
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +31,43 @@ class StaffOnlyMixin(object):
 
 class CourseAppView(StaffOnlyMixin, TemplateView):
     template_name = 'courses/course_app.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(CourseAppView, self).get_context_data(**kwargs)
+
+        user = self.request.user
+        if user.access_token:
+            credit_providers = self.get_credit_providers()
+            context['credit_providers'] = json.dumps(credit_providers)
+        else:
+            logger.warning('User [%s] has no access token, and will not be able to edit courses.', user.username)
+
+        return context
+
+    def get_credit_providers(self):
+        """
+        Retrieve all credit providers from LMS.
+
+        Results will be sorted alphabetically by display name.
+        """
+        key = 'credit_providers'
+        credit_providers = cache.get(key, [])
+
+        if not credit_providers:
+            try:
+                credit_api = EdxRestApiClient(
+                    get_lms_url('/api/credit/v1/'),
+                    oauth_access_token=self.request.user.access_token
+                )
+                credit_providers = credit_api.providers.get()
+                credit_providers.sort(key=lambda provider: provider['display_name'])
+
+                # Update the cache
+                cache.set(key, credit_providers, settings.CREDIT_PROVIDER_CACHE_TIMEOUT)
+            except (SlumberBaseException, Timeout):
+                logger.exception('Failed to retrieve credit providers!')
+
+        return credit_providers
 
 
 class CourseMigrationView(View):

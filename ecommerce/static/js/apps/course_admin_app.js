@@ -1,9 +1,13 @@
 require([
         'backbone',
-        'routers/course_router'
+        'routers/course_router',
+        'collections/credit_provider_collection',
+        'ecommerce'
     ],
     function (Backbone,
-              CourseRouter) {
+              CourseRouter,
+              CreditProviderCollection,
+              ecommerce) {
         'use strict';
 
         var navigate,
@@ -53,6 +57,9 @@ require([
 
         $(function () {
             var $app = $('#app');
+
+            ecommerce.credit = ecommerce.credit || {};
+            ecommerce.credit.providers = new CreditProviderCollection($app.data('credit-providers'));
 
             courseApp = new CourseRouter({$el: $app});
             courseApp.start();
