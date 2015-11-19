@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-02 05:42+0000\n"
+"Last-Translator: Juan Camilo Montoya Franco <juan.montoya@edunext.co>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
@@ -20,15 +20,17 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "Debe seleccionar un tipo de curso."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr ""
+"La fecha límite de verificación debe ser DESPUÉS de la fecha límite para "
+"upgrades."
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "La validación del producto ha fallado."
 
 #: static/js/models/course_model.js
 msgid "Course ID"
@@ -48,7 +50,13 @@ msgstr "Fecha límite de verificación"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
+msgstr "Todas las sillas del curso deben tener un precio."
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
+"La fecha límite para upgrades debe ser ANTES de la fecha límite de "
+"verificación."
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -58,7 +66,7 @@ msgstr "Verificado"
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "Crédito"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -78,23 +86,24 @@ msgstr "Certificado verificado"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Certificado Profesional"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Certificado de honor"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "Sin certificado"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "Todas las sillas de crédito deben tener un proveedor de crédito."
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
+"Todas las sillas de crédito deben designar un número de horas de crédito."
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
@@ -102,20 +111,21 @@ msgstr "Ver curso"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "Editar el curso"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
-msgstr ""
+msgstr "Gratis (Honor)"
 
 #: static/js/views/course_form_view.js
 msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgstr "Ruta de honor gratuita, con Certificado de código de honor."
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr ""
+"Ruta de certificado pago, con verificación inicial y Certificado Verificado"
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -126,16 +136,20 @@ msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr ""
+"Ruta de certificado pago con verificación inicial y Certificado de Educación"
+" Profesional"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr ""
+"Ruta de certificado pago con verificación inicial, Certificado Verificado y "
+"opción de compra de créditos"
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "Error!"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -143,15 +157,15 @@ msgstr "Guardando..."
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "Por favor completar todos los campos requeridos."
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "Ocurrió un error guardando los datos."
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "Buscar..."
 
 #: static/js/views/course_list_view.js
 msgid "Next"
@@ -165,17 +179,17 @@ msgstr "Anterior"
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "Mostrando _START_ a _END_ de _TOTAL_ cursos"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(filtrado de _MAX_ cursos en total)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "Mostrar _MENU_ cursos"
 
 #: static/js/views/course_list_view.js
 msgid "Course"

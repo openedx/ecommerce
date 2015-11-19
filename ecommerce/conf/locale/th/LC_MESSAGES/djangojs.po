@@ -3,14 +3,16 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Jirayu Chamamahattana <mman2x@gmail.com>, 2015
+# Noppachai Eiamwasant <noporo@hotmail.com>, 2015
 # Pornchai Tummarattananont <yantaku@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-28 14:29+0000\n"
+"Last-Translator: Jirayu Chamamahattana <mman2x@gmail.com>\n"
 "Language-Team: Thai (http://www.transifex.com/open-edx/edx-platform/language/th/)\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
@@ -20,19 +22,19 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "คุณต้องเลือกประเภทหลักสูตร"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "กำหนดสิ้นสุดการตรวจสอบจะต้องเกิดขึ้นหลังจากกำหนดสิ้นสุดการอัพเกรด"
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "การตรวจสอบล้มเหลว"
 
 #: static/js/models/course_model.js
 msgid "Course ID"
-msgstr "ID หลักสูตร"
+msgstr "รหัสหลักสูตร"
 
 #: static/js/models/course_model.js
 msgid "Course Name"
@@ -40,15 +42,19 @@ msgstr "ชื่อหลักสูตร"
 
 #: static/js/models/course_model.js static/js/views/course_list_view.js
 msgid "Course Type"
-msgstr ""
+msgstr "ประเภทหลักสูตร"
 
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
-msgstr ""
+msgstr "วันสิ้นสุดการตรวจสอบ"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "ทุกที่นั่งหลักสูตรต้องมีค่าใช้จ่าย"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
+msgstr "กำหนดสิ้นสุดการอัพเกรดจะต้องเกิดขึ้นก่อนกำหนดสิ้นสุดการตรวจสอบ"
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -58,7 +64,7 @@ msgstr "ตรวจสอบแล้ว"
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "หน่วยกิต"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -74,27 +80,27 @@ msgstr "ตรวจสอบหลักสูตรนี้"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"
-msgstr ""
+msgstr "ประกาศนียบัตรได้รับการรับรองแล้ว"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "ประกาศนียบัตรวิชาชีพ"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
-msgstr ""
+msgstr "ประกาศนียบัตรเกียรติคุณ"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "ไม่มีประกาศนียบัตร"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "ทุกหน่วยกิตจะต้องมีผู้ให้บริการหน่วยกิต"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "ทุกหน่วยกิตจะต้องกำหนดจำนวนชั่วโมงหน่วยกิต"
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
@@ -102,40 +108,42 @@ msgstr "ดูหลักสูตร"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "แก้ไขหลักสูตร"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
-msgstr ""
+msgstr "ฟรี (เกียรติคุณ)"
 
 #: static/js/views/course_form_view.js
 msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgstr "ติดตามเกียรติคุณฟรีพร้อมประกาศนียบัตรเกียรติคุณ"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
-msgstr ""
+msgstr "ชุดวิชาประกาศนียบัตรที่ชำระเงินแล้วพร้อมการตรวจสอบและรับรอง"
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
-msgstr "การศึกษา"
+msgstr "การศึกษาวิชาชีพ"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr ""
+"ชุดวิชาประกาศนียบัตรที่ชำระเงินแล้วพร้อมการตรวจสอบและรับรองการศึกษาวิชาชีพ"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr ""
+"ชุดวิชาประกาศนียบัตรที่ชำระเงินแล้วพร้อมการตรวจสอบและรับรอง และการชำระเครดิต"
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "ผิดพลาด!"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -143,15 +151,15 @@ msgstr "กำลังบันทึก..."
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "โปรดกรอกข้อมูลสำคัญให้ครบ"
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "เกิดข้อผิดพลาดขณะบันทึกข้อมูล"
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "ค้นหา..."
 
 #: static/js/views/course_list_view.js
 msgid "Next"
@@ -165,17 +173,17 @@ msgstr "ก่อนหน้า"
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "กำลังแสดง _เริ่มต้น_ ถึง _สิ้นสุด_ ของ _ทั้งหมด_ หลักสูตร"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(คัดกรองจาก _มากที่สุด_ หลักสูตรทั้งหมด)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "แสดง _เมนู_ หลักสูตร"
 
 #: static/js/views/course_list_view.js
 msgid "Course"
@@ -183,4 +191,4 @@ msgstr "หลักสูตร"
 
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
-msgstr ""
+msgstr "แก้ไขล่าสุด"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:12-0400\n"
+"POT-Creation-Date: 2015-11-19 15:51-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,6 +30,38 @@ msgid "Important dates"
 msgstr "Ìmpörtänt dätés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr ""
+"LMS ßäsé ürl för çüstöm sïté/mïçrösïté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr ""
+"Rööt ÛRL öf thïs sïté's LMS (é.g. https://çöürsés.stägé.édx.örg) Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr "Päth tö çüstöm sïté thémé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr ""
+"Päth tö sçss fïlés öf thé çüstöm sïté thémé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: core/models.py
+msgid "Payment processors"
+msgstr "Päýmént pröçéssörs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
+msgstr ""
+"Çömmä-sépärätéd lïst öf pröçéssör nämés: 'çýßérsöürçé,päýpäl' Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: core/models.py
 msgid "Full Name"
 msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
@@ -39,6 +71,13 @@ msgid ""
 msgstr ""
 "Läst däté/tïmé ön whïçh vérïfïçätïön för thïs prödüçt çän ßé süßmïttéd. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
+msgstr ""
+"Fäïléd tö püßlïsh çömmérçé dätä för {course_id} tö LMS. Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
@@ -82,6 +121,33 @@ msgstr ""
 #: extensions/api/serializers.py
 msgid "Products must have a price."
 msgstr "Prödüçts müst hävé ä prïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
+msgstr ""
+"Çöürsé [{course_id}] wäs nöt püßlïshéd tö LMS ßéçäüsé thé swïtçh "
+"[püßlïsh_çöürsé_mödés_tö_lms] ïs dïsäßléd. Tö ävöïd ghöst SKÛs, dätä häs nöt"
+" ßéén sävéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ "
+"∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ "
+"мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ "
+"єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє "
+"νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт "
+"¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂#"
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr "Sïté Ⱡ'σяєм ι#"
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
+msgstr ""
+"{id} - {status} ßäskét (öwnér: {owner}, lïnés: {num_lines}) Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
@@ -144,6 +210,20 @@ msgstr ""
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
 msgstr "Päýmént Pröçéssör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
+msgstr ""
+"Çlïçk 'Sävé änd Çöntïnüé Édïtïng' tö ädd stöçk réçörds Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr "Pärtnér Ⱡ'σяєм ιρѕυм #"
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "Pärtnérs Ⱡ'σяєм ιρѕυм ∂#"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
@@ -257,10 +337,6 @@ msgstr "Ördérs Ⱡ'σяєм ιρѕυ#"
 msgid "Statistics"
 msgstr "Stätïstïçs Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: settings/_oscar.py
-msgid "Partners"
-msgstr "Pärtnérs Ⱡ'σяєм ιρѕυм ∂#"
-
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -277,6 +353,14 @@ msgstr "Çüstömérs Ⱡ'σяєм ιρѕυм ∂σł#"
 #: settings/_oscar.py
 msgid "Stock alert requests"
 msgstr "Stöçk älért réqüésts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: settings/_oscar.py
+msgid "Offers"
+msgstr "Öfférs Ⱡ'σяєм ιρѕυ#"
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "Vöüçhérs Ⱡ'σяєм ιρѕυм ∂#"
 
 #: settings/_oscar.py
 msgid "Reports"
@@ -339,8 +423,6 @@ msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr "Hï %(full_name)s, Ⱡ'σяєм ιρѕυм #"
@@ -390,7 +472,6 @@ msgid "%(platform_name)s team "
 msgstr "%(platform_name)s téäm  Ⱡ'σяєм ιρѕυм ∂σł#"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
@@ -401,19 +482,15 @@ msgstr ""
 "¢σηѕє¢тє#"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
 msgstr "Réçéïpt Çönfïrmätïön för:  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
 msgstr "%(platform_name)s téäm Ⱡ'σяєм ιρѕυм ∂#"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
 msgstr "Thé édX téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
@@ -422,77 +499,123 @@ msgid "Order Placed"
 msgstr "Ördér Pläçéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
-msgstr "Réçéïpt Çönfïrmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+msgid "Payment Confirmation"
+msgstr "Päýmént Çönfïrmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
-msgstr "Réçéïpt Çönfïrmätïön för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+msgid "Payment confirmation for:"
+msgstr "Päýmént çönfïrmätïön för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
-msgstr "Vïéw Réçéïpt Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+msgid "View Payment Information"
+msgstr "Vïéw Päýmént Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "Déär %(full_name)s, Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
+msgstr ""
+"\n"
+"                            Thänk ýöü för pürçhäsïng %(credit_hours)s çrédït höürs fröm %(credit_provider)s för %(course_title)s. À çhärgé wïll äppéär ön ýöür çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf \"%(platform_name)s\".\n"
+"                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢α#"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
+msgstr ""
+"Tö réçéïvé ýöür çöürsé çrédït, ýöü müst älsö réqüést çrédït ät thé "
+"%(credit_provider)s wéßsïté. För ä lïnk tö réqüést çrédït fröm "
+"%(credit_provider)s, ör tö séé thé stätüs öf ýöür çrédït réqüést, gö tö ýöür"
+" %(platform_name)s däshßöärd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
+" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
+"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
+"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
+"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρя#"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
+msgstr ""
+"Tö éxplöré öthér çrédït-élïgïßlé çöürsés, vïsït thé %(platform_name)s "
+"wéßsïté. Wé ädd néw çöürsés fréqüéntlý! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr ""
+"Thänk ýöü. Wé höpé ýöü énjöýéd ýöür çöürsé! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr "Thé %(platform_name)s téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+"\n"
+"                            Ýöü réçéïvéd thïs méssägé ßéçäüsé ýöü pürçhäséd çrédït höürs för %(course_title)s, än %(platform_name)s çöürsé.\n"
+"                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łαв#"
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr "Päýmént çönfïrmätïön för:  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
 "Thänk ýöü för pürçhäsïng %(credit_hours)s çrédït höürs fröm "
-"%(credit_provider)s för %(course_title)s. Thé çhärgé ßélöw wïll äppéär ön "
-"ýöür néxt çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf "
-"%(platform_name)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg "
-"єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт "
-"єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт "
-"αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη "
-"νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт "
-"σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυ#"
+"%(credit_provider)s för %(course_title)s. À çhärgé wïll äppéär ön ýöür "
+"çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf \"%(platform_name)s\"."
+" Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ "
+"тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм,"
+" qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ "
+"¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє "
+"¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
+"ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηι#"
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr ""
+"Tö vïéw ýöür päýmént ïnförmätïön, vïsït thé föllöwïng wéßsïté. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
 msgstr ""
-"Ýöü çän séé thé stätüs thé stätüs öf ýöür çrédït réqüést ör çömplété thé "
-"çrédït réqüést pröçéss ön ýöür %(platform_name)s däshßöärd Ⱡ'σяєм ιρѕυм ∂#"
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-"Tö ßröwsé öthér çrédït-élïgïßlé çöürsés vïsït thé %(platform_name)s wéßsïté."
-" Möré çöürsés äré äddéd äll thé tïmé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr ""
-"Thänk ýöü änd çöngrätülätïön ön ýöür äçhïévémént. Wé höpé ýöü énjöý thé "
-"çöürsé! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-"Tö ßröwsé öthér çrédït-élïgïßlé çöürsés vïsït thé édX wéßsïté. Möré çöürsés "
-"äré äddéd äll thé tïmé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
-msgstr ""
-"Tö vïéw réçéïpt pléäsé vïsït thé lïnk ßélöw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя #"
+"Ýöü réçéïvéd thïs méssägé ßéçäüsé ýöü pürçhäséd çrédït höürs för "
+"%(course_title)s, än %(platform_name)s çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢т#"
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
@@ -543,8 +666,8 @@ msgstr ""
 "                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: templates/edx/credit/checkout.html
-msgid "You deserved it."
-msgstr "Ýöü désérvéd ït. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+msgid "You deserve it."
+msgstr "Ýöü désérvé ït. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: templates/edx/credit/checkout.html
 msgid ""
@@ -586,12 +709,12 @@ msgstr "Qüéstïöns? Ⱡ'σяєм ιρѕυм ∂σłσ#"
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
+"                Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
 "            "
 msgstr ""
 "\n"
-"                Pléäsé réäd %(link)s\n"
-"             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+"                Pléäsé réäd %(link_start)söür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés.%(link_end)s\n"
+"             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт #"
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
@@ -1014,7 +1137,6 @@ msgid "Instructions"
 msgstr "Ìnstrüçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
 msgstr "Bïllïng äddréss Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
@@ -1139,10 +1261,6 @@ msgstr "Tötäl ïnç täx Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
 msgstr "Nümßér öf ïtéms Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
-
-#: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr "Shïppïng äddréss Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:12-0400\n"
+"POT-Creation-Date: 2015-11-19 15:51-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,6 +108,10 @@ msgstr ""
 "Àll çrédït séäts müst désïgnäté ä nümßér öf çrédït höürs. Ⱡ'σяєм ιρѕυм ∂σłσя"
 " ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "Çréäté Néw Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "Vïéw Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя #"
@@ -115,6 +119,10 @@ msgstr "Vïéw Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
 msgstr "Édït Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
@@ -211,3 +219,39 @@ msgstr "Çöürsé Ⱡ'σяєм ιρѕυ#"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "Läst Édïtéd Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr ""
+"Àn érrör häs öççürréd. Pléäsé trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr ""
+"Ördér %(order_number)s häs ßéén fülfïlléd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢#"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr ""
+"Fäïléd tö fülfïll ördér %(order_number)s: %(error)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тє#"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr ""
+"Réfünd #%(refund_id)s häs ßéén pröçésséd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢т#"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "Érrör Ⱡ'σяєм ιρѕ#"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"Fäïléd tö pröçéss réfünd #%(refund_id)s: %(error)s. Pléäsé trý ägäïn, ör "
+"çöntäçt thé É-Çömmérçé Dévélöpmént Téäm. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"

@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-04 09:46+0000\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-11-14 14:44+0000\n"
 "Last-Translator: ali selek <aliselek01@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "Language: tr_TR\n"
@@ -26,7 +26,7 @@ msgstr "Kurs tipinizi seçmelisiniz."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "Yükseltme tarihinden SONRA doğrulama için son tarih gerçekleşmelidir."
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
@@ -50,7 +50,12 @@ msgstr "Doğrulama için son tarih"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
+msgstr "Tüm ders yerlerinin bir fiyatı olmak zorunda."
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
+"Doğrulama son tarihinden ÖNCE yükseltme için son tarih gerçekleşmelidir."
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -80,7 +85,7 @@ msgstr "Doğrulanmış Sertifika"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Profesyonel Sertifika"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
@@ -108,7 +113,7 @@ msgstr "Dersi Düzenle"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
-msgstr ""
+msgstr "Ücretsiz (Onur)"
 
 #: static/js/views/course_form_view.js
 msgid "Free honor track with Honor Certificate"
@@ -149,7 +154,7 @@ msgstr ""
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "Veriyi kaydederken bir hata oluştu."
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
