@@ -34,7 +34,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         )
 
     def _mock_commerce_api(self, status, body=None):
-        self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock Commerce API calls.')
+        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Commerce API calls.')
 
         body = body or {}
         url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
@@ -42,7 +42,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
                                content_type=JSON)
 
     def mock_creditcourse_endpoint(self, course_id, status, body=None):
-        self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock Credit API calls.')
+        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Credit API calls.')
 
         url = get_lms_url('/api/credit/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(
@@ -225,6 +225,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(actual, expected)
         self.assert_creditcourse_endpoint_called()
 
+    @httpretty.activate
     @mock.patch('requests.get', mock.Mock(side_effect=Exception))
     def test_credit_publication_uncaught_exception(self):
         """ Verify the endpoint fails appropriately when the Credit API fails unexpectedly. """

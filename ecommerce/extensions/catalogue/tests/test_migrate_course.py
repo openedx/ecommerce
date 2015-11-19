@@ -55,7 +55,7 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
     }
 
     def _mock_lms_apis(self):
-        self.assertTrue(httpretty.is_enabled, 'httpretty must be enabled to mock LMS API calls.')
+        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock LMS API calls.')
 
         # Mock Commerce API
         body = {

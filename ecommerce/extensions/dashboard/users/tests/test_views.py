@@ -25,7 +25,7 @@ class UserDetailViewTests(DashboardViewTestMixin, TestCase):
         self.data = [{'course_id': 'a/b/c'}]
 
     def mock_enrollment_api(self, status=200):
-        self.assertTrue(httpretty.is_enabled)
+        self.assertTrue(httpretty.is_enabled())
         httpretty.register_uri(httpretty.GET, settings.ENROLLMENT_API_URL, status=status,
                                body=json.dumps(self.data),
                                content_type='application/json')
