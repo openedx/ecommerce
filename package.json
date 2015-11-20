@@ -5,14 +5,15 @@
     "url": "git://github.com/edx/ecommerce"
   },
   "dependencies": {
-    "bower": "^1.4.1",
+    "bower": "^1.6.5",
     "requirejs": "^2.1.18"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
-    "gulp-jscs": "^2.0.0",
-    "gulp-jshint": "^1.11.2",
+    "gulp-jscs": "^3.0.2",
+    "gulp-jshint": "^2.0.0",
     "jasmine-core": "^2.3.4",
+    "jshint": "^2.8.0",
     "karma": "^0.13.2",
     "karma-coverage": "^0.4.2",
     "karma-firefox-launcher": "^0.1.6",
