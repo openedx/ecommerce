@@ -3,13 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Mariangeles Fernandez <mariangelesfm@gmail.com>, 2015
+# URJConline <online.mooc@urjc.es>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-11-10 11:06+0000\n"
+"Last-Translator: Mariangeles Fernandez <mariangelesfm@gmail.com>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.com/open-edx/edx-platform/language/es_ES/)\n"
 "Language: es_ES\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +21,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "Debes seleccionar un curso"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -31,7 +33,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "Course ID"
-msgstr "ID del Curso"
+msgstr "ID del curso"
 
 #: static/js/models/course_model.js
 msgid "Course Name"
@@ -47,6 +49,10 @@ msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
@@ -73,7 +79,7 @@ msgstr "Oyente"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Certificado verificado"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"

@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Alina Kozoriz <alinakozoriz@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-05 10:19+0000\n"
+"Last-Translator: Alina Kozoriz <alinakozoriz@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/open-edx/edx-platform/language/uk/)\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +20,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "Ви повинні обрати вид курсу."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -39,7 +40,7 @@ msgstr "Назва курсу"
 
 #: static/js/models/course_model.js static/js/views/course_list_view.js
 msgid "Course Type"
-msgstr ""
+msgstr "Вид курсу"
 
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
@@ -47,6 +48,10 @@ msgstr "Дата окінчення перевірки"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
@@ -77,7 +82,7 @@ msgstr "Верифікований сертифікат"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Професійний сертифікат"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
@@ -101,7 +106,7 @@ msgstr "Переглянути курс"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "Редагувати курс"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
@@ -134,7 +139,7 @@ msgstr ""
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "Помилка!"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -150,7 +155,7 @@ msgstr ""
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "Пошук..."
 
 #: static/js/views/course_list_view.js
 msgid "Next"
@@ -158,7 +163,7 @@ msgstr "Наступний"
 
 #: static/js/views/course_list_view.js
 msgid "Previous"
-msgstr "Колишній"
+msgstr "Попередній"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.

@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-03 10:23+0000\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-23 06:44+0000\n"
 "Last-Translator: Abel <abelcama@gmail.com>\n"
 "Language-Team: Basque (Spain) (http://www.transifex.com/open-edx/edx-platform/language/eu_ES/)\n"
 "Language: eu_ES\n"
@@ -18,6 +18,247 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: core/admin.py
+msgid "Personal info"
+msgstr "Norberaren informazioa"
+
+#: core/admin.py
+msgid "Permissions"
+msgstr "Baimenak"
+
+#: core/admin.py
+msgid "Important dates"
+msgstr "Data garrantzitsuak"
+
+#: core/models.py
+msgid "Full Name"
+msgstr "Izen osoa"
+
+#: courses/models.py
+msgid ""
+"Last date/time on which verification for this product can be submitted."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid "You can't check out with an empty basket."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid ""
+"We couldn't locate the identification code necessary to find one of your "
+"products."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid "We couldn't find one of the products you're looking for."
+msgstr "Ezin dugu aurkitu zu bila ari zaren produktuetako bat."
+
+#: extensions/api/exceptions.py
+msgid "One of the products you're trying to order is unavailable."
+msgstr ""
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid "Invalid product class [{product_class}] requested."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must indicate whether ID verification is required."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must have a price."
+msgstr "Produktuek prezioa izan behar dute."
+
+#: extensions/catalogue/models.py
+msgid "Last date/time on which this product can be purchased."
+msgstr ""
+
+#: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Username"
+msgstr "Erabiltzaile-izena"
+
+#: extensions/dashboard/orders/views.py
+#, python-brace-format
+msgid ""
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
+msgstr ""
+
+#: extensions/dashboard/orders/views.py
+msgid ""
+"A refund cannot be created for these lines. They may have already been "
+"refunded."
+msgstr ""
+
+#: extensions/dashboard/refunds/config.py
+msgid "Refunds Dashboard"
+msgstr ""
+
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+msgid "Refund ID"
+msgstr ""
+
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Status"
+msgstr "Egoera"
+
+#: extensions/dashboard/users/views.py
+msgid "Failed to retrieve enrollment data."
+msgstr ""
+
+#: extensions/order/models.py extensions/payment/models.py
+msgid "Payment Processor"
+msgstr "Ordainketa-prozesadorea"
+
+#: extensions/payment/admin.py extensions/payment/models.py
+msgid "Basket"
+msgstr "Saskia"
+
+#: extensions/payment/exceptions.py
+msgid "We don't support the payment option you selected."
+msgstr "Ez dugu zuk hautatutako ordainketa-aukera onartzen."
+
+#: extensions/payment/models.py
+msgid "Transaction ID"
+msgstr ""
+
+#: extensions/payment/models.py
+msgid "Payment Processor Response"
+msgstr "Ordainketa-prozesadorearen erantzuna"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Responses"
+msgstr "Ordainketa-prozesadorearen erantzunak"
+
+#. Translators: This is a string placed in the middle of a truncated string
+#. to indicate that truncation has occurred. For example, if a title may only
+#. be at most 11 characters long, "A Very Long Title" (17 characters) would be
+#. truncated to "A Ve...itle".
+#: extensions/payment/utils.py
+msgid "..."
+msgstr "..."
+
+#: extensions/refund/models.py
+msgid "Order"
+msgstr "Agindua"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "User"
+msgstr "Erabiltzailea"
+
+#: extensions/refund/models.py
+msgid "Total Credit (excl. tax)"
+msgstr ""
+
+#: extensions/refund/models.py
+msgid "Currency"
+msgstr "Moneta"
+
+#: extensions/refund/models.py
+msgid "Refund"
+msgstr ""
+
+#: extensions/refund/models.py
+msgid "Order Line"
+msgstr ""
+
+#: extensions/refund/models.py
+msgid "Line Credit (excl. tax)"
+msgstr ""
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+msgid "Quantity"
+msgstr "Kantitatea"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Dashboard"
+msgstr "Aginte-panela"
+
+#: settings/_oscar.py
+msgid "Catalogue"
+msgstr "Katalogoa"
+
+#: settings/_oscar.py
+msgid "Products"
+msgstr "Produktuak"
+
+#: settings/_oscar.py
+msgid "Product Types"
+msgstr "Produktu-motak"
+
+#: settings/_oscar.py
+msgid "Categories"
+msgstr "Kategoriak"
+
+#: settings/_oscar.py
+msgid "Ranges"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Low stock alerts"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Fulfillment"
+msgstr ""
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Orders"
+msgstr "Aginduak"
+
+#: settings/_oscar.py
+msgid "Statistics"
+msgstr "Estatistikak"
+
+#: settings/_oscar.py
+msgid "Partners"
+msgstr "Partaideak"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Refunds"
+msgstr ""
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Customers"
+msgstr "Bezeroak"
+
+#: settings/_oscar.py
+msgid "Stock alert requests"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Reports"
+msgstr "Txostenak"
 
 #: templates/courses/course_app.html
 msgid "Courses"
@@ -59,7 +300,7 @@ msgstr "Ikastaroa kudeatzeko tresna"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "E-merkataritzaren aginte-panela"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -68,15 +309,18 @@ msgstr "Amaitu saioa"
 #: templates/customer/email_base.html
 #, python-format
 msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgstr "Copyright © 2015 %(platform_name)s, Eskubide guztiak erreserbatuak."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr "Kaixo %(full_name)s,"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
@@ -85,6 +329,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
@@ -92,6 +337,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
@@ -99,6 +345,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
 msgstr ""
 
@@ -114,20 +361,44 @@ msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"E-posta hau jaso duzu %(platform_name)s plataformako course %(course_title)s"
+" ikastaroan plaza erosi duzulako."
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Receipt Confirmation for: "
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "%(platform_name)s team"
+msgstr "%(platform_name)s taldea"
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "The edX team"
+msgstr "edX taldea"
+
+#: templates/customer/emails/commtype_course_purchased_subject.txt
+msgid "Order Placed"
+msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
-msgstr ""
+msgstr "Ordainagiriaren konfirmazioa"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation for:"
-msgstr ""
+msgstr "Ordainagiriaren konfirmazioa honentzat:"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Receipt"
-msgstr ""
+msgstr "Ikusi ordainagiria"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -137,6 +408,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You can see the status the status of your credit request or complete the "
@@ -151,14 +423,24 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid "%(platform_name)s team"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid ""
+"To browse other credit-eligible courses visit the edX website. More courses "
+"are added all the time."
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view receipt please visit the link below"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
+msgid "Order Receipt"
 msgstr ""
 
 #: templates/edx/credit/checkout.html
@@ -180,11 +462,11 @@ msgstr[1] ""
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
-msgstr ""
+msgstr "Zerbait gaizki joan da! Mesedez, saiatu berriz beranduago."
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
-msgstr ""
+msgstr "Denerakoa:"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -226,7 +508,7 @@ msgstr ""
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
-msgstr ""
+msgstr "Galderarik?"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -235,15 +517,9 @@ msgid ""
 "                Please read %(link)s\n"
 "            "
 msgstr ""
-
-#: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Dashboard"
-msgstr "Aginte-panela"
+"\n"
+"                Mesedez, irakurri %(link)s\n"
+"            "
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
@@ -251,7 +527,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "Denerako aginduak"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
@@ -263,23 +539,23 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "Denerako produktuak"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "Azken aginduak (azken 24 orduetan)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "Aginduak - Azken 24 orduetan"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "Denerako aginduak"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "Denerako lerroak"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
@@ -299,16 +575,11 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "Aginduak - Guztiak"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
 msgstr ""
-
-#: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Customers"
-msgstr "Bezeroak"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
@@ -328,7 +599,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "Denerako produktuak"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
@@ -360,12 +631,6 @@ msgid "Order %(number)s"
 msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Orders"
-msgstr "Aginduak"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
 msgstr ""
@@ -374,14 +639,6 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
 msgstr "Bezeroen informazioa"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Username"
-msgstr "Erabiltzaile-izena"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -414,16 +671,7 @@ msgstr "Erosketa-data"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Time of purchase"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Status"
-msgstr "Egoera"
+msgstr "Erosketa-ordua"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
@@ -431,19 +679,11 @@ msgstr "Aginduaren xehetasunak"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Refunds"
-msgstr ""
+msgstr "Aginduaren edukiak"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
-msgstr ""
+msgstr "Bidalketa"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment"
@@ -463,11 +703,6 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-msgid "Quantity"
 msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -519,7 +754,7 @@ msgstr "Ikusi"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discount"
-msgstr ""
+msgstr "Deskontua"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
@@ -551,7 +786,7 @@ msgstr "Aginduak denera"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
-msgstr ""
+msgstr "Aukeratutako lerroekin"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
@@ -568,7 +803,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
-msgstr ""
+msgstr "aukeratu ekitaldi-mota"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
@@ -636,6 +871,9 @@ msgid ""
 "                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
 msgstr ""
+"\n"
+"                                              %(title)s (kantitatea %(event_qty)s/%(total_qty)s)\n"
+"                                            "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
@@ -658,7 +896,7 @@ msgstr "Produktua:"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "quantity"
-msgstr ""
+msgstr "kantitatea"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -755,10 +993,6 @@ msgid "No discounts were applied to this order."
 msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "User"
-msgstr "Erabiltzailea"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
 msgstr "Kudeatzailea"
 
@@ -836,7 +1070,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
-msgstr "Ez da agindurik helbiderik aurkitu."
+msgstr "Ez da agindurik aurkitu."
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 #: templates/oscar/dashboard/users/detail.html
@@ -889,11 +1123,6 @@ msgstr ""
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
-msgid "Refund ID"
-msgstr ""
-
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
 msgstr ""
 
@@ -901,7 +1130,7 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "Denerako kreditua"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -949,7 +1178,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
-msgstr ""
+msgstr "Kantitatea:"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "General"
@@ -985,7 +1214,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date joined"
-msgstr ""
+msgstr "Bat egindako data "
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
@@ -1005,7 +1234,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
-msgstr ""
+msgstr "Berrikusketak idatzi dira"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
@@ -1058,12 +1287,12 @@ msgstr "Izenburua"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Body"
-msgstr ""
+msgstr "Gorputza"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date created"
-msgstr ""
+msgstr "Data sortu da"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."
-msgstr ""
+msgstr "Bezero honek ez du berrikusketarik idatzi oraindik."

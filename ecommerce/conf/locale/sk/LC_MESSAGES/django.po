@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-09-05 02:23+0000\n"
 "Last-Translator: cblackburn <cblackburn@edx.org>\n"
 "Language-Team: Slovak (http://www.transifex.com/open-edx/edx-platform/language/sk/)\n"
 "Language: sk\n"
@@ -17,6 +17,253 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: core/admin.py
+msgid "Personal info"
+msgstr "Osobné informácie"
+
+#: core/admin.py
+msgid "Permissions"
+msgstr "Povolenia"
+
+#: core/admin.py
+msgid "Important dates"
+msgstr "Dôležité dátumy"
+
+#: core/models.py
+msgid "Full Name"
+msgstr "Celé meno"
+
+#: courses/models.py
+msgid ""
+"Last date/time on which verification for this product can be submitted."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid "You can't check out with an empty basket."
+msgstr "Nemôžete ísť do pokladne s prázdnym košíkom."
+
+#: extensions/api/exceptions.py
+msgid ""
+"We couldn't locate the identification code necessary to find one of your "
+"products."
+msgstr ""
+"Nemohli sme nájsť identifikačný kód potrebný pre nájdenie jedného z vašich "
+"produktov."
+
+#: extensions/api/exceptions.py
+msgid "We couldn't find one of the products you're looking for."
+msgstr "Nemohli sme nájsť jeden z produktov, ktoré hľadáte."
+
+#: extensions/api/exceptions.py
+msgid "One of the products you're trying to order is unavailable."
+msgstr "Jeden z produktov, ktoré sa pokúšate objednať, nie je k dispozícii."
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid "Invalid product class [{product_class}] requested."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must indicate whether ID verification is required."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must have a price."
+msgstr ""
+
+#: extensions/catalogue/models.py
+msgid "Last date/time on which this product can be purchased."
+msgstr ""
+
+#: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Username"
+msgstr "Meno používateľa"
+
+#: extensions/dashboard/orders/views.py
+#, python-brace-format
+msgid ""
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
+msgstr ""
+"{link_start}Refundácia #{refund_id}{link_end} bola vytvorená! Kliknite "
+"{link_start}sem{link_end}, ak ju chcete zobraziť."
+
+#: extensions/dashboard/orders/views.py
+msgid ""
+"A refund cannot be created for these lines. They may have already been "
+"refunded."
+msgstr ""
+"Nie je možné vytvoriť refundáciu pre tieto línie. Je možné, že už boli "
+"refundované."
+
+#: extensions/dashboard/refunds/config.py
+msgid "Refunds Dashboard"
+msgstr "Palubná doska refundácií"
+
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+msgid "Refund ID"
+msgstr "ID refundácie"
+
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Status"
+msgstr "Stav"
+
+#: extensions/dashboard/users/views.py
+msgid "Failed to retrieve enrollment data."
+msgstr ""
+
+#: extensions/order/models.py extensions/payment/models.py
+msgid "Payment Processor"
+msgstr "Spracovateľ platby"
+
+#: extensions/payment/admin.py extensions/payment/models.py
+msgid "Basket"
+msgstr "Košík"
+
+#: extensions/payment/exceptions.py
+msgid "We don't support the payment option you selected."
+msgstr "Nepodporujeme vami zvolený spôsob platby."
+
+#: extensions/payment/models.py
+msgid "Transaction ID"
+msgstr "ID transakcie"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Response"
+msgstr "Odpoveď spracovateľa platby"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Responses"
+msgstr "Odpovede spracovateľa platby"
+
+#. Translators: This is a string placed in the middle of a truncated string
+#. to indicate that truncation has occurred. For example, if a title may only
+#. be at most 11 characters long, "A Very Long Title" (17 characters) would be
+#. truncated to "A Ve...itle".
+#: extensions/payment/utils.py
+msgid "..."
+msgstr "..."
+
+#: extensions/refund/models.py
+msgid "Order"
+msgstr "Objednávka"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "User"
+msgstr "Používateľ"
+
+#: extensions/refund/models.py
+msgid "Total Credit (excl. tax)"
+msgstr "Súčet pohľadávky (bez dane)"
+
+#: extensions/refund/models.py
+msgid "Currency"
+msgstr "Mena"
+
+#: extensions/refund/models.py
+msgid "Refund"
+msgstr "Vrátiť peniaze"
+
+#: extensions/refund/models.py
+msgid "Order Line"
+msgstr "Objednať líniu"
+
+#: extensions/refund/models.py
+msgid "Line Credit (excl. tax)"
+msgstr "Pohľadávka za líniu (bez dane)"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+msgid "Quantity"
+msgstr "Množstvo"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Dashboard"
+msgstr "Palubná doska"
+
+#: settings/_oscar.py
+msgid "Catalogue"
+msgstr "Katalóg"
+
+#: settings/_oscar.py
+msgid "Products"
+msgstr "Produkty"
+
+#: settings/_oscar.py
+msgid "Product Types"
+msgstr "Typy produktov"
+
+#: settings/_oscar.py
+msgid "Categories"
+msgstr "Kategórie"
+
+#: settings/_oscar.py
+msgid "Ranges"
+msgstr "Rozsahy"
+
+#: settings/_oscar.py
+msgid "Low stock alerts"
+msgstr "Upozornenia pri nízkom stave skladových zásob"
+
+#: settings/_oscar.py
+msgid "Fulfillment"
+msgstr "Plnenie"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Orders"
+msgstr "Objednávky"
+
+#: settings/_oscar.py
+msgid "Statistics"
+msgstr "Štatistiky"
+
+#: settings/_oscar.py
+msgid "Partners"
+msgstr "Partneri"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Refunds"
+msgstr "Refundácie"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Customers"
+msgstr "Zákazníci"
+
+#: settings/_oscar.py
+msgid "Stock alert requests"
+msgstr "Požiadavky počas nízkeho stavu zásob"
+
+#: settings/_oscar.py
+msgid "Reports"
+msgstr "Oznámenia"
 
 #: templates/courses/course_app.html
 msgid "Courses"
@@ -70,12 +317,15 @@ msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
@@ -84,6 +334,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
@@ -91,6 +342,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
@@ -98,6 +350,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
 msgstr ""
 
@@ -114,6 +367,27 @@ msgid ""
 "%(platform_name)s course %(course_title)s."
 msgstr ""
 
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Receipt Confirmation for: "
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "%(platform_name)s team"
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "The edX team"
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_subject.txt
+msgid "Order Placed"
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
 msgstr ""
@@ -127,6 +401,7 @@ msgid "View Receipt"
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -136,6 +411,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You can see the status the status of your credit request or complete the "
@@ -150,14 +426,24 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid "%(platform_name)s team"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid ""
+"To browse other credit-eligible courses visit the edX website. More courses "
+"are added all the time."
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view receipt please visit the link below"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
+msgid "Order Receipt"
 msgstr ""
 
 #: templates/edx/credit/checkout.html
@@ -237,15 +523,6 @@ msgid ""
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Dashboard"
-msgstr "Palubná doska"
-
-#: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
 msgstr ""
 
@@ -306,11 +583,6 @@ msgid "Total <em>open</em> baskets"
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Customers"
-msgstr "Zákazníci"
-
-#: templates/oscar/dashboard/index.html
 msgid "Total customers"
 msgstr ""
 
@@ -360,12 +632,6 @@ msgid "Order %(number)s"
 msgstr "Objednávka %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Orders"
-msgstr "Objednávky"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
 msgstr "Objednávka #%(number)s"
@@ -374,14 +640,6 @@ msgstr "Objednávka #%(number)s"
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
 msgstr "Informácie o zákazníkovi"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Username"
-msgstr "Meno používateľa"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -417,29 +675,12 @@ msgid "Time of purchase"
 msgstr "Čas nákupu"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Status"
-msgstr "Stav"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
 msgstr "Podrobnosti o objednávke"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
 msgstr "Obsah objednávky"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Refunds"
-msgstr "Refundácie"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
@@ -464,11 +705,6 @@ msgstr "Objednané položky"
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
 msgstr "ID línie"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-msgid "Quantity"
-msgstr "Množstvo"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -758,10 +994,6 @@ msgid "No discounts were applied to this order."
 msgstr "Na túto objednávku neboli aplikované žiadne zľavy."
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "User"
-msgstr "Používateľ"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
 msgstr "Administrátor"
 
@@ -889,11 +1121,6 @@ msgstr "Schváliť"
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
 msgstr "Zamietnuť"
-
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-msgid "Refund ID"
-msgstr "ID refundácie"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html

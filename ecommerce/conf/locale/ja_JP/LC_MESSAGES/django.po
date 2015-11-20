@@ -3,20 +3,264 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# ayokose <ayokose.gacco@gmail.com>, 2015
 # Toshiboumi Ohta <ohta@securesky-tech.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-09-15 08:44+0000\n"
+"Last-Translator: ayokose <ayokose.gacco@gmail.com>\n"
 "Language-Team: Japanese (Japan) (http://www.transifex.com/open-edx/edx-platform/language/ja_JP/)\n"
 "Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#: core/admin.py
+msgid "Personal info"
+msgstr "個人情報"
+
+#: core/admin.py
+msgid "Permissions"
+msgstr "権限"
+
+#: core/admin.py
+msgid "Important dates"
+msgstr "重要な日付"
+
+#: core/models.py
+msgid "Full Name"
+msgstr "氏名"
+
+#: courses/models.py
+msgid ""
+"Last date/time on which verification for this product can be submitted."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid "You can't check out with an empty basket."
+msgstr "空のバスケットでは清算ができません。"
+
+#: extensions/api/exceptions.py
+msgid ""
+"We couldn't locate the identification code necessary to find one of your "
+"products."
+msgstr "製品を見つけるために必要な識別コードを割り当てることができません。"
+
+#: extensions/api/exceptions.py
+msgid "We couldn't find one of the products you're looking for."
+msgstr "探している製品を見つけることができませんでした。"
+
+#: extensions/api/exceptions.py
+msgid "One of the products you're trying to order is unavailable."
+msgstr "注文しようとしている製品のひとつが無効です。"
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid "Invalid product class [{product_class}] requested."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must indicate whether ID verification is required."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must have a price."
+msgstr ""
+
+#: extensions/catalogue/models.py
+msgid "Last date/time on which this product can be purchased."
+msgstr ""
+
+#: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Username"
+msgstr "ユーザー名"
+
+#: extensions/dashboard/orders/views.py
+#, python-brace-format
+msgid ""
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
+msgstr ""
+"{link_start} 払い戻し #{refund_id}{link_end} が作られました！{link_start} ここ {link_end} "
+"をクリックしてご覧ください。"
+
+#: extensions/dashboard/orders/views.py
+msgid ""
+"A refund cannot be created for these lines. They may have already been "
+"refunded."
+msgstr "その工程では、払い戻しができません。既に払い戻しが行われているようです。"
+
+#: extensions/dashboard/refunds/config.py
+msgid "Refunds Dashboard"
+msgstr "払い戻しのダッシュボード"
+
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+msgid "Refund ID"
+msgstr "払い戻しID"
+
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Status"
+msgstr "状態"
+
+#: extensions/dashboard/users/views.py
+msgid "Failed to retrieve enrollment data."
+msgstr ""
+
+#: extensions/order/models.py extensions/payment/models.py
+msgid "Payment Processor"
+msgstr "支払処理"
+
+#: extensions/payment/admin.py extensions/payment/models.py
+msgid "Basket"
+msgstr "バスケット"
+
+#: extensions/payment/exceptions.py
+msgid "We don't support the payment option you selected."
+msgstr "選択した支払いオプションには対応していません。"
+
+#: extensions/payment/models.py
+msgid "Transaction ID"
+msgstr "手続きID"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Response"
+msgstr "支払処理の応答"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Responses"
+msgstr "支払処理の応答"
+
+#. Translators: This is a string placed in the middle of a truncated string
+#. to indicate that truncation has occurred. For example, if a title may only
+#. be at most 11 characters long, "A Very Long Title" (17 characters) would be
+#. truncated to "A Ve...itle".
+#: extensions/payment/utils.py
+msgid "..."
+msgstr "..."
+
+#: extensions/refund/models.py
+msgid "Order"
+msgstr "注文"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "User"
+msgstr "ユーザ"
+
+#: extensions/refund/models.py
+msgid "Total Credit (excl. tax)"
+msgstr "総額 (税別) "
+
+#: extensions/refund/models.py
+msgid "Currency"
+msgstr "通貨"
+
+#: extensions/refund/models.py
+msgid "Refund"
+msgstr "払い戻し"
+
+#: extensions/refund/models.py
+msgid "Order Line"
+msgstr "注文手続き"
+
+#: extensions/refund/models.py
+msgid "Line Credit (excl. tax)"
+msgstr "手続き額 (税別) "
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+msgid "Quantity"
+msgstr "量"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Dashboard"
+msgstr "マイページ"
+
+#: settings/_oscar.py
+msgid "Catalogue"
+msgstr "カタログ"
+
+#: settings/_oscar.py
+msgid "Products"
+msgstr "製品"
+
+#: settings/_oscar.py
+msgid "Product Types"
+msgstr "製品のタイプ"
+
+#: settings/_oscar.py
+msgid "Categories"
+msgstr "カテゴリ"
+
+#: settings/_oscar.py
+msgid "Ranges"
+msgstr "範囲"
+
+#: settings/_oscar.py
+msgid "Low stock alerts"
+msgstr "在庫不足の警報"
+
+#: settings/_oscar.py
+msgid "Fulfillment"
+msgstr "達成"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Orders"
+msgstr "注文"
+
+#: settings/_oscar.py
+msgid "Statistics"
+msgstr "統計"
+
+#: settings/_oscar.py
+msgid "Partners"
+msgstr "パートナー"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Refunds"
+msgstr "払い戻し"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Customers"
+msgstr "顧客"
+
+#: settings/_oscar.py
+msgid "Stock alert requests"
+msgstr "在庫警報が必要"
+
+#: settings/_oscar.py
+msgid "Reports"
+msgstr "レポート"
 
 #: templates/courses/course_app.html
 msgid "Courses"
@@ -70,12 +314,15 @@ msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
@@ -84,6 +331,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
@@ -91,6 +339,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
@@ -98,6 +347,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
 msgstr ""
 
@@ -114,6 +364,27 @@ msgid ""
 "%(platform_name)s course %(course_title)s."
 msgstr ""
 
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Receipt Confirmation for: "
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "%(platform_name)s team"
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "The edX team"
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_subject.txt
+msgid "Order Placed"
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
 msgstr ""
@@ -127,6 +398,7 @@ msgid "View Receipt"
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -136,6 +408,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You can see the status the status of your credit request or complete the "
@@ -150,14 +423,24 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid "%(platform_name)s team"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid ""
+"To browse other credit-eligible courses visit the edX website. More courses "
+"are added all the time."
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view receipt please visit the link below"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
+msgid "Order Receipt"
 msgstr ""
 
 #: templates/edx/credit/checkout.html
@@ -235,15 +518,6 @@ msgid ""
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Dashboard"
-msgstr "マイページ"
-
-#: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
 msgstr ""
 
@@ -304,11 +578,6 @@ msgid "Total <em>open</em> baskets"
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Customers"
-msgstr "顧客"
-
-#: templates/oscar/dashboard/index.html
 msgid "Total customers"
 msgstr ""
 
@@ -358,12 +627,6 @@ msgid "Order %(number)s"
 msgstr "注番 %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Orders"
-msgstr "注文"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
 msgstr "注文 #%(number)s"
@@ -372,14 +635,6 @@ msgstr "注文 #%(number)s"
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
 msgstr "顧客情報"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Username"
-msgstr "ユーザー名"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -415,29 +670,12 @@ msgid "Time of purchase"
 msgstr "購入回数"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Status"
-msgstr "状態"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
 msgstr "注文の詳細"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
 msgstr "注文コンテンツ"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Refunds"
-msgstr "払い戻し"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
@@ -462,11 +700,6 @@ msgstr "注文済アイテム"
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
 msgstr "Line ID"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-msgid "Quantity"
-msgstr "量"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -755,10 +988,6 @@ msgid "No discounts were applied to this order."
 msgstr "この注文には割引が適用されません。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "User"
-msgstr "ユーザ"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
 msgstr "管理者"
 
@@ -886,11 +1115,6 @@ msgstr "承認"
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
 msgstr "否認"
-
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-msgid "Refund ID"
-msgstr "払い戻しID"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html

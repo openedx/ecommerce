@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-25 12:07+0000\n"
+"Last-Translator: yuval zana\n"
 "Language-Team: Hebrew (http://www.transifex.com/open-edx/edx-platform/language/he/)\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "עליך לבחור סוג קורס"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -28,7 +28,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "וידוא מוצר נכשל"
 
 #: static/js/models/course_model.js
 msgid "Course ID"
@@ -40,7 +40,7 @@ msgstr "שם הקורס"
 
 #: static/js/models/course_model.js static/js/views/course_list_view.js
 msgid "Course Type"
-msgstr ""
+msgstr "סוג קורס"
 
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
@@ -48,6 +48,10 @@ msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
@@ -102,7 +106,7 @@ msgstr "צפה בקורס"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "ערוך קורס"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
@@ -135,7 +139,7 @@ msgstr ""
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "שגיאה!"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -143,7 +147,7 @@ msgstr "שומר..."
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "אנא מלא את כל השדות הנדרשים"
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
@@ -151,7 +155,7 @@ msgstr ""
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "חפש..."
 
 #: static/js/views/course_list_view.js
 msgid "Next"
@@ -183,4 +187,4 @@ msgstr "קורס"
 
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
-msgstr ""
+msgstr "נערך לאחרונה"

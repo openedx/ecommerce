@@ -4,20 +4,263 @@
 # 
 # Translators:
 # Foteini T. <ftouli@yahoo.gr>, 2015
+# LOUKAS SKOUROLIAKOS, 2015
 # Nick Gikopoulos <ngick1@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-17 20:41+0000\n"
+"Last-Translator: LOUKAS SKOUROLIAKOS\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: core/admin.py
+msgid "Personal info"
+msgstr "Προσωπικές πληροφορίες"
+
+#: core/admin.py
+msgid "Permissions"
+msgstr "Δικαιώματα"
+
+#: core/admin.py
+msgid "Important dates"
+msgstr "Σημαντικές ημερομηνίες"
+
+#: core/models.py
+msgid "Full Name"
+msgstr "Πλήρες όνομα"
+
+#: courses/models.py
+msgid ""
+"Last date/time on which verification for this product can be submitted."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid "You can't check out with an empty basket."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid ""
+"We couldn't locate the identification code necessary to find one of your "
+"products."
+msgstr ""
+
+#: extensions/api/exceptions.py
+msgid "We couldn't find one of the products you're looking for."
+msgstr "Δεν μπορούμε να βρούμε ένα από τα προϊόντα που ψάχνετε. "
+
+#: extensions/api/exceptions.py
+msgid "One of the products you're trying to order is unavailable."
+msgstr ""
+"Ένα από τα προϊόντα που προσπαθείτε να παραγγείλετε δεν είναι διαθέσιμο."
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid "Invalid product class [{product_class}] requested."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must indicate whether ID verification is required."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must have a price."
+msgstr "Τα προϊόντα πρέπει να έχουν μια τιμή."
+
+#: extensions/catalogue/models.py
+msgid "Last date/time on which this product can be purchased."
+msgstr ""
+
+#: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Username"
+msgstr "Όνομα χρήστη"
+
+#: extensions/dashboard/orders/views.py
+#, python-brace-format
+msgid ""
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
+msgstr ""
+
+#: extensions/dashboard/orders/views.py
+msgid ""
+"A refund cannot be created for these lines. They may have already been "
+"refunded."
+msgstr ""
+
+#: extensions/dashboard/refunds/config.py
+msgid "Refunds Dashboard"
+msgstr ""
+
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+msgid "Refund ID"
+msgstr ""
+
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Status"
+msgstr "Κατάσταση"
+
+#: extensions/dashboard/users/views.py
+msgid "Failed to retrieve enrollment data."
+msgstr ""
+
+#: extensions/order/models.py extensions/payment/models.py
+msgid "Payment Processor"
+msgstr ""
+
+#: extensions/payment/admin.py extensions/payment/models.py
+msgid "Basket"
+msgstr "Καλάθι"
+
+#: extensions/payment/exceptions.py
+msgid "We don't support the payment option you selected."
+msgstr "Δέν υποστηρίζουμε τον τρόπο πληρωμής που επιλέξατε."
+
+#: extensions/payment/models.py
+msgid "Transaction ID"
+msgstr "Ταυτότητα συναλλαγής"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Response"
+msgstr ""
+
+#: extensions/payment/models.py
+msgid "Payment Processor Responses"
+msgstr ""
+
+#. Translators: This is a string placed in the middle of a truncated string
+#. to indicate that truncation has occurred. For example, if a title may only
+#. be at most 11 characters long, "A Very Long Title" (17 characters) would be
+#. truncated to "A Ve...itle".
+#: extensions/payment/utils.py
+msgid "..."
+msgstr ""
+
+#: extensions/refund/models.py
+msgid "Order"
+msgstr "Παραγγελία"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "User"
+msgstr "Χρήστης"
+
+#: extensions/refund/models.py
+msgid "Total Credit (excl. tax)"
+msgstr ""
+
+#: extensions/refund/models.py
+msgid "Currency"
+msgstr "Νόμισμα"
+
+#: extensions/refund/models.py
+msgid "Refund"
+msgstr ""
+
+#: extensions/refund/models.py
+msgid "Order Line"
+msgstr "Γραμμή Παραγγελείας"
+
+#: extensions/refund/models.py
+msgid "Line Credit (excl. tax)"
+msgstr ""
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+msgid "Quantity"
+msgstr "Ποσότητα"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Dashboard"
+msgstr "Πίνακας"
+
+#: settings/_oscar.py
+msgid "Catalogue"
+msgstr "Κατάλογος"
+
+#: settings/_oscar.py
+msgid "Products"
+msgstr "Προϊόντα"
+
+#: settings/_oscar.py
+msgid "Product Types"
+msgstr "Τύποι Προϊόντων."
+
+#: settings/_oscar.py
+msgid "Categories"
+msgstr "Κατηγορίες"
+
+#: settings/_oscar.py
+msgid "Ranges"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Low stock alerts"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Fulfillment"
+msgstr ""
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Orders"
+msgstr "Παραγγελίες"
+
+#: settings/_oscar.py
+msgid "Statistics"
+msgstr "Στατιστικές."
+
+#: settings/_oscar.py
+msgid "Partners"
+msgstr ""
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Refunds"
+msgstr ""
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Customers"
+msgstr "Πελάτες"
+
+#: settings/_oscar.py
+msgid "Stock alert requests"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Reports"
+msgstr "Αναφορές"
 
 #: templates/courses/course_app.html
 msgid "Courses"
@@ -71,12 +314,15 @@ msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
@@ -85,6 +331,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
@@ -92,6 +339,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
@@ -99,6 +347,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
 msgstr ""
 
@@ -115,6 +364,27 @@ msgid ""
 "%(platform_name)s course %(course_title)s."
 msgstr ""
 
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Receipt Confirmation for: "
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "%(platform_name)s team"
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "The edX team"
+msgstr "Η ομάδα edX"
+
+#: templates/customer/emails/commtype_course_purchased_subject.txt
+msgid "Order Placed"
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
 msgstr ""
@@ -128,6 +398,7 @@ msgid "View Receipt"
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -137,6 +408,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You can see the status the status of your credit request or complete the "
@@ -151,14 +423,24 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid "%(platform_name)s team"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid ""
+"To browse other credit-eligible courses visit the edX website. More courses "
+"are added all the time."
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view receipt please visit the link below"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
+msgid "Order Receipt"
 msgstr ""
 
 #: templates/edx/credit/checkout.html
@@ -237,15 +519,6 @@ msgid ""
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Dashboard"
-msgstr "Πίνακας"
-
-#: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
 msgstr ""
 
@@ -306,11 +579,6 @@ msgid "Total <em>open</em> baskets"
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Customers"
-msgstr "Πελάτες"
-
-#: templates/oscar/dashboard/index.html
 msgid "Total customers"
 msgstr ""
 
@@ -360,12 +628,6 @@ msgid "Order %(number)s"
 msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Orders"
-msgstr "Παραγγελίες"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
 msgstr ""
@@ -374,14 +636,6 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
 msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Username"
-msgstr "Όνομα χρήστη"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -417,29 +671,12 @@ msgid "Time of purchase"
 msgstr "Ώρα αγοράς"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Status"
-msgstr "Κατάσταση"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
 msgstr "Πληροφορίες παραγγελίας"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
 msgstr "Περιεχόμενα παραγγελίας"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Refunds"
-msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
@@ -464,11 +701,6 @@ msgstr "Τεμάχια που παραγγέλθηκαν"
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
 msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-msgid "Quantity"
-msgstr "Ποσότητα"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -755,10 +987,6 @@ msgid "No discounts were applied to this order."
 msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "User"
-msgstr "Χρήστης"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
 msgstr "Διαχειρηστής"
 
@@ -886,11 +1114,6 @@ msgstr "Έγκριση"
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
 msgstr "Άρνηση "
-
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-msgid "Refund ID"
-msgstr ""
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html

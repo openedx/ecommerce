@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-20 10:50+0000\n"
+"Last-Translator: Alexander Lundervold <alexander.lundervold@gmail.com>\n"
 "Language-Team: Norwegian Bokmål (http://www.transifex.com/open-edx/edx-platform/language/nb/)\n"
 "Language: nb\n"
 "MIME-Version: 1.0\n"
@@ -51,6 +51,10 @@ msgid "All course seats must have a price."
 msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
+msgstr ""
+
+#: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Verified"
 msgstr "Verifisert"
@@ -70,7 +74,7 @@ msgstr "Ære"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Audit"
-msgstr ""
+msgstr "Følg"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"

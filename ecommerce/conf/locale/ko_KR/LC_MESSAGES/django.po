@@ -5,19 +5,263 @@
 # Translators:
 # Hongseob Lee <shevious@gmail.com>, 2015
 # Jong-Dae Park <jdpark7@gmail.com>, 2015
+# Lee, Sang Eun <sl4557a@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-02 06:35+0000\n"
+"Last-Translator: Lee, Sang Eun <sl4557a@gmail.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/open-edx/edx-platform/language/ko_KR/)\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#: core/admin.py
+msgid "Personal info"
+msgstr "개인 정보"
+
+#: core/admin.py
+msgid "Permissions"
+msgstr "허용"
+
+#: core/admin.py
+msgid "Important dates"
+msgstr "중요한 날짜"
+
+#: core/models.py
+msgid "Full Name"
+msgstr "실명"
+
+#: courses/models.py
+msgid ""
+"Last date/time on which verification for this product can be submitted."
+msgstr "이 제품에 대한 확인이 제출될 수 있는 마지막 날짜/시간"
+
+#: extensions/api/exceptions.py
+msgid "You can't check out with an empty basket."
+msgstr "빈 장바구니로 결제할 수 없습니다."
+
+#: extensions/api/exceptions.py
+msgid ""
+"We couldn't locate the identification code necessary to find one of your "
+"products."
+msgstr "귀하의 품목을 찾는데 필요한 고유 식별 코드를 찾을 수 없습니다."
+
+#: extensions/api/exceptions.py
+msgid "We couldn't find one of the products you're looking for."
+msgstr "찾고 있는 제품을 찾을 수 없습니다."
+
+#: extensions/api/exceptions.py
+msgid "One of the products you're trying to order is unavailable."
+msgstr "주문하려고 하는 제품중 하나를 이용할 수 없습니다."
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid "Invalid product class [{product_class}] requested."
+msgstr ""
+
+#: extensions/api/serializers.py
+msgid "Products must indicate whether ID verification is required."
+msgstr "제품은 아이디 확인이 필요한지를 나타내야 합니다."
+
+#: extensions/api/serializers.py
+msgid "Products must have a price."
+msgstr "제품은 가격이 책정되어야 합니다."
+
+#: extensions/catalogue/models.py
+msgid "Last date/time on which this product can be purchased."
+msgstr "이 제품을 구매할 수 있는 마지막 날짜/시간"
+
+#: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Username"
+msgstr "아이디"
+
+#: extensions/dashboard/orders/views.py
+#, python-brace-format
+msgid ""
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
+msgstr ""
+"{link_start}환불 #{refund_id}{link_end} 생성되었습니다! 보기위해서 "
+"{link_start}여기를{link_end} 클릭하세요."
+
+#: extensions/dashboard/orders/views.py
+msgid ""
+"A refund cannot be created for these lines. They may have already been "
+"refunded."
+msgstr "환불은 이 라인에 만들어질 수 없습니다. 이미 환불되어졌을 것입니다. "
+
+#: extensions/dashboard/refunds/config.py
+msgid "Refunds Dashboard"
+msgstr "환불 정보"
+
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+msgid "Refund ID"
+msgstr "환불 ID"
+
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Status"
+msgstr "상태"
+
+#: extensions/dashboard/users/views.py
+msgid "Failed to retrieve enrollment data."
+msgstr "등록 정보를 검색하는 데 실패했습니다."
+
+#: extensions/order/models.py extensions/payment/models.py
+msgid "Payment Processor"
+msgstr "결제 처리기"
+
+#: extensions/payment/admin.py extensions/payment/models.py
+msgid "Basket"
+msgstr "장바구니"
+
+#: extensions/payment/exceptions.py
+msgid "We don't support the payment option you selected."
+msgstr "당신이 선택한 결제 옵션은 지원하지 않습니다."
+
+#: extensions/payment/models.py
+msgid "Transaction ID"
+msgstr "거래 아이디"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Response"
+msgstr "지불 처리 반응"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Responses"
+msgstr "지불처리 반응"
+
+#. Translators: This is a string placed in the middle of a truncated string
+#. to indicate that truncation has occurred. For example, if a title may only
+#. be at most 11 characters long, "A Very Long Title" (17 characters) would be
+#. truncated to "A Ve...itle".
+#: extensions/payment/utils.py
+msgid "..."
+msgstr "..."
+
+#: extensions/refund/models.py
+msgid "Order"
+msgstr "주문"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "User"
+msgstr "사용자"
+
+#: extensions/refund/models.py
+msgid "Total Credit (excl. tax)"
+msgstr "총 크레딧 (excl. tax)"
+
+#: extensions/refund/models.py
+msgid "Currency"
+msgstr "환율"
+
+#: extensions/refund/models.py
+msgid "Refund"
+msgstr "환불"
+
+#: extensions/refund/models.py
+msgid "Order Line"
+msgstr "주문 라인"
+
+#: extensions/refund/models.py
+msgid "Line Credit (excl. tax)"
+msgstr "라인 신용(세금 제외)"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+msgid "Quantity"
+msgstr "수량"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Dashboard"
+msgstr "대시보드"
+
+#: settings/_oscar.py
+msgid "Catalogue"
+msgstr "카탈로그"
+
+#: settings/_oscar.py
+msgid "Products"
+msgstr "제품"
+
+#: settings/_oscar.py
+msgid "Product Types"
+msgstr "제품유형"
+
+#: settings/_oscar.py
+msgid "Categories"
+msgstr "카테고리"
+
+#: settings/_oscar.py
+msgid "Ranges"
+msgstr "범위"
+
+#: settings/_oscar.py
+msgid "Low stock alerts"
+msgstr "낮은 스탁 알림"
+
+#: settings/_oscar.py
+msgid "Fulfillment"
+msgstr "결제 이행"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Orders"
+msgstr "주문"
+
+#: settings/_oscar.py
+msgid "Statistics"
+msgstr "통계"
+
+#: settings/_oscar.py
+msgid "Partners"
+msgstr "파트너"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Refunds"
+msgstr "환불"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Customers"
+msgstr "고객"
+
+#: settings/_oscar.py
+msgid "Stock alert requests"
+msgstr "스탁 알림 요청"
+
+#: settings/_oscar.py
+msgid "Reports"
+msgstr "보고서"
 
 #: templates/courses/course_app.html
 msgid "Courses"
@@ -51,15 +295,15 @@ msgstr ""
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "학습자 대시보드"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "강좌 관리 도구"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "전자 상거래 대시보드"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -71,12 +315,15 @@ msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
@@ -85,6 +332,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
@@ -92,6 +340,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
@@ -99,8 +348,9 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "감사합니다. 본 강좌가 즐겁기를 바랍니다."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
@@ -115,9 +365,30 @@ msgid ""
 "%(platform_name)s course %(course_title)s."
 msgstr ""
 
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Receipt Confirmation for: "
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "%(platform_name)s team"
+msgstr ""
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "The edX team"
+msgstr "edX 팀"
+
+#: templates/customer/emails/commtype_course_purchased_subject.txt
+msgid "Order Placed"
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
-msgstr ""
+msgstr "영수증 확인"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation for:"
@@ -125,9 +396,10 @@ msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Receipt"
-msgstr ""
+msgstr "영수증 보기"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -137,6 +409,7 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You can see the status the status of your credit request or complete the "
@@ -151,15 +424,25 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid "%(platform_name)s team"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid ""
+"To browse other credit-eligible courses visit the edX website. More courses "
+"are added all the time."
 msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view receipt please visit the link below"
+msgstr "영수증을 조회하려면 아래 링크를 확인하세요."
+
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
+msgid "Order Receipt"
+msgstr "주문 영수증"
 
 #: templates/edx/credit/checkout.html
 msgid "Credit Checkout"
@@ -179,11 +462,11 @@ msgstr[0] ""
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
-msgstr ""
+msgstr "무엇인가 잘못되었습니다. 다시 시도하세요."
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
-msgstr ""
+msgstr "합계:"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -211,7 +494,7 @@ msgstr ""
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
-msgstr ""
+msgstr "edX에서 제공하는 학점은 대부분의 타 기관에서 제공하는 것에 비해 일반적으로 더 낮은 비용이 듭니다."
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
@@ -221,7 +504,7 @@ msgstr ""
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr ""
+msgstr "오늘날 수요가 많은 직업들의 대부분은 학위를 요구합니다. 성공으로 이끄는 길을 시작하세요! "
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
@@ -236,21 +519,12 @@ msgid ""
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Dashboard"
-msgstr "대시보드"
-
-#: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "총 주문"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
@@ -305,11 +579,6 @@ msgid "Total <em>open</em> baskets"
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Customers"
-msgstr "고객"
-
-#: templates/oscar/dashboard/index.html
 msgid "Total customers"
 msgstr ""
 
@@ -351,18 +620,12 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "프로모션"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
 msgstr "주문 %(number)s"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Orders"
-msgstr "주문"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -373,14 +636,6 @@ msgstr "주문 #%(number)s"
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
 msgstr "고객정보"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Username"
-msgstr "아이디"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -416,29 +671,12 @@ msgid "Time of purchase"
 msgstr "구매 시간"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Status"
-msgstr "상태"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
 msgstr "구매 세부사항"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
 msgstr "구매 내용"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Refunds"
-msgstr "환불"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
@@ -463,11 +701,6 @@ msgstr "주문 항목"
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
 msgstr "라인 ID"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-msgid "Quantity"
-msgstr "수량"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -733,7 +966,7 @@ msgstr "송금"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Type"
-msgstr "유형"
+msgstr "종류"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"
@@ -754,10 +987,6 @@ msgstr "메시지"
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
 msgstr "이 주문에서 할인은 적용되지 않습니다."
-
-#: templates/oscar/dashboard/orders/order_detail.html
-msgid "User"
-msgstr "사용자"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
@@ -800,7 +1029,7 @@ msgstr "닫기"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "검색 중..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
@@ -858,7 +1087,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "등록 현황을 찾을 수 없습니다."
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
@@ -887,11 +1116,6 @@ msgstr "승인"
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
 msgstr "거부"
-
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-msgid "Refund ID"
-msgstr "환불 ID"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html

@@ -3,13 +3,16 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Jirayu Chamamahattana <mman2x@gmail.com>, 2015
+# Noppachai Eiamwasant <noporo@hotmail.com>, 2015
+# Sitdhibong Laokok <sitdhibong@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-28 15:24+0000\n"
+"Last-Translator: Jirayu Chamamahattana <mman2x@gmail.com>\n"
 "Language-Team: Thai (http://www.transifex.com/open-edx/edx-platform/language/th/)\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
@@ -17,17 +20,260 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: core/admin.py
+msgid "Personal info"
+msgstr "ข้อมูลส่วนบุคคล"
+
+#: core/admin.py
+msgid "Permissions"
+msgstr "สิทธิ์การใช้งาน"
+
+#: core/admin.py
+msgid "Important dates"
+msgstr "วันที่ที่สำคัญ"
+
+#: core/models.py
+msgid "Full Name"
+msgstr "ชื่อและนามสกุล"
+
+#: courses/models.py
+msgid ""
+"Last date/time on which verification for this product can be submitted."
+msgstr "วันที่/เวลาล่าสุดที่เข้าสู่ระบบสามารถใช้งานได้กับผลิตภัณฑ์นี้"
+
+#: extensions/api/exceptions.py
+msgid "You can't check out with an empty basket."
+msgstr "คุณไม่สามารถแจ้งออกจากระบบด้วยตะกร้าเปล่า"
+
+#: extensions/api/exceptions.py
+msgid ""
+"We couldn't locate the identification code necessary to find one of your "
+"products."
+msgstr "เราไม่สามารถหาที่ตั้งโค้ดประจำตัวที่จำเป็นในการหาผลิตภัณฑ์ของคุณ"
+
+#: extensions/api/exceptions.py
+msgid "We couldn't find one of the products you're looking for."
+msgstr "เราไม่สามารถค้นหาผลิตภัณฑ์ที่คุณกำลังมองหา"
+
+#: extensions/api/exceptions.py
+msgid "One of the products you're trying to order is unavailable."
+msgstr "หนึ่งในผลิตภัณฑ์ที่คุณกำลังพยายามที่จะสั่งไม่สามารถใช้การได้"
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid "Invalid product class [{product_class}] requested."
+msgstr "ระดับสินค้าที่ไม่ถูกต้อง [{product_class}]  ได้รับการร้องขอ"
+
+#: extensions/api/serializers.py
+msgid "Products must indicate whether ID verification is required."
+msgstr "ผลิตภัณฑ์จำเป็นต้องระบุรหัสการยืนยัน"
+
+#: extensions/api/serializers.py
+msgid "Products must have a price."
+msgstr "ผลิตภัณฑ์ต้องมีราคา"
+
+#: extensions/catalogue/models.py
+msgid "Last date/time on which this product can be purchased."
+msgstr "วันที่/เวลาล่าสุดที่ผลิตภัณฑ์นี้สามารถชำระเงินได้"
+
+#: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Username"
+msgstr "ชื่อผู้ใช้"
+
+#: extensions/dashboard/orders/views.py
+#, python-brace-format
+msgid ""
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
+msgstr ""
+"{link_start}การคืนเงิน #{refund_id}{link_end} ถูกสร้าง! คลิก "
+"{link_start}ที่นี่{link_end} เพื่อรับชม"
+
+#: extensions/dashboard/orders/views.py
+msgid ""
+"A refund cannot be created for these lines. They may have already been "
+"refunded."
+msgstr "การคืนเงินไม่อาจสร้างขึ้นได้ในสายนี้ อาจถูกทำเรื่องการคืนเงินแล้ว"
+
+#: extensions/dashboard/refunds/config.py
+msgid "Refunds Dashboard"
+msgstr "แดชบอร์ดการคืนเงิน"
+
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+msgid "Refund ID"
+msgstr "รหัสการคืนเงิน"
+
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Status"
+msgstr "สถานะ"
+
+#: extensions/dashboard/users/views.py
+msgid "Failed to retrieve enrollment data."
+msgstr "ล้มเหลวในการดึงข้อมูลการลงทะเบียน"
+
+#: extensions/order/models.py extensions/payment/models.py
+msgid "Payment Processor"
+msgstr "หน่วยประมวลผลการชำระเงิน"
+
+#: extensions/payment/admin.py extensions/payment/models.py
+msgid "Basket"
+msgstr "ตะกร้า"
+
+#: extensions/payment/exceptions.py
+msgid "We don't support the payment option you selected."
+msgstr "เราไม่สนับสนุนตัวเลือกการชำระเงินที่คุณเลือก"
+
+#: extensions/payment/models.py
+msgid "Transaction ID"
+msgstr "รหัสการดำเนินการ"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Response"
+msgstr "การตอบกลับจากหน่วยประมวลผลการชำระเงิน"
+
+#: extensions/payment/models.py
+msgid "Payment Processor Responses"
+msgstr "การตอบกลับจากหน่วยประมวลผลการชำระเงิน"
+
+#. Translators: This is a string placed in the middle of a truncated string
+#. to indicate that truncation has occurred. For example, if a title may only
+#. be at most 11 characters long, "A Very Long Title" (17 characters) would be
+#. truncated to "A Ve...itle".
+#: extensions/payment/utils.py
+msgid "..."
+msgstr "..."
+
+#: extensions/refund/models.py
+msgid "Order"
+msgstr "รายการที่สั่ง"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "User"
+msgstr "ผู้ใช้"
+
+#: extensions/refund/models.py
+msgid "Total Credit (excl. tax)"
+msgstr "เครดิตทั้งหมด (ไม่รวมภาษี)"
+
+#: extensions/refund/models.py
+msgid "Currency"
+msgstr "สกุลเงิน"
+
+#: extensions/refund/models.py
+msgid "Refund"
+msgstr "การคืนเงิน"
+
+#: extensions/refund/models.py
+msgid "Order Line"
+msgstr "สายการสั่ง"
+
+#: extensions/refund/models.py
+msgid "Line Credit (excl. tax)"
+msgstr "วงเงิน (ไม่รวมภาษี)"
+
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+msgid "Quantity"
+msgstr "ปริมาณ"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Dashboard"
+msgstr "แดชบอร์ด"
+
+#: settings/_oscar.py
+msgid "Catalogue"
+msgstr "แคตตาล็อก"
+
+#: settings/_oscar.py
+msgid "Products"
+msgstr "ผลิตภัณฑ์"
+
+#: settings/_oscar.py
+msgid "Product Types"
+msgstr "ประเภทผลิตภัณฑ์"
+
+#: settings/_oscar.py
+msgid "Categories"
+msgstr "หมวดหมู่"
+
+#: settings/_oscar.py
+msgid "Ranges"
+msgstr "ช่วง"
+
+#: settings/_oscar.py
+msgid "Low stock alerts"
+msgstr "การแจ้งเตือนหุ้นต่ำ"
+
+#: settings/_oscar.py
+msgid "Fulfillment"
+msgstr "การชำระเงิน"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Orders"
+msgstr "รายการที่สั่ง"
+
+#: settings/_oscar.py
+msgid "Statistics"
+msgstr "สถิติ"
+
+#: settings/_oscar.py
+msgid "Partners"
+msgstr "พันธมิตร"
+
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Refunds"
+msgstr "การคืนเงิน"
+
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
+msgid "Customers"
+msgstr "ลูกค้า"
+
+#: settings/_oscar.py
+msgid "Stock alert requests"
+msgstr "ขอการแจ้งเตือนหุ้น"
+
+#: settings/_oscar.py
+msgid "Reports"
+msgstr "รายงาน"
+
 #: templates/courses/course_app.html
 msgid "Courses"
-msgstr ""
+msgstr "หลักสูตร"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Toggle navigation"
-msgstr "เปิดปิด เนวิเกชั่น"
+msgstr "สลับการนำทาง"
 
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
+msgstr "การดูแลหลักสูตร"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Dashboard for:"
@@ -35,7 +281,7 @@ msgstr "แดชบอร์ดสำหรับ:"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Toggle Dropdown"
-msgstr ""
+msgstr "สลับเลื่อนลง"
 
 #: templates/courses/course_app.html templates/edx/base.html
 #: templates/edx/base.html.py
@@ -45,19 +291,19 @@ msgstr "เข้าสู่ระบบ"
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "เครื่องมือดูแลหลักสูตร %(platform_name)s "
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "แดชบอร์ดนักเรียน"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "เครื่องมือดูแลหลักสูตร"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "แดชบอร์ดการพาณิชย์อิเล็กทรอนิกส์"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -66,44 +312,57 @@ msgstr "ออกจากระบบ"
 #: templates/customer/email_base.html
 #, python-format
 msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgstr "ลิขสิทธิ์© 2015 %(platform_name)s, สงวนลิขสิทธิ์"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "สวัสดี %(full_name)s,"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"ขอบคุณสำหรับการซื้อ %(course_title)s "
+"ค่าใช้จ่ายด้านล่างจะปรากฏบนใบแจ้งยอดบัตรเครดิตหรือเดบิตถัดไปของคุณที่มีชื่อบริษัท"
+" %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
 msgstr ""
+"คุณสามารถเข้าถึงหลักสูตรของคุณและดำเนินการตรวจสอบของคุณ (ถ้าจำเป็น) "
+"บนแดชบอร์ด %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
 msgstr ""
+"ในการสำรวจหลักสูตรที่ยอดเยี่ยมอื่น ๆ แวะไปที่เว็บไซต์ %(platform_name)s "
+"มีการเพิ่มหลักสูตรทุกวัน!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "ขอบคุณ เราหวังว่าคุณจะสนุกกับหลักสูตร"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "ทีมงาน %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.html
@@ -112,20 +371,44 @@ msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"คุณได้รับอีเมล์ฉบับนี้เพราะคุณซื้อที่นั่งใน %(platform_name)s หลักสูตร "
+"%(course_title)s."
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Receipt Confirmation for: "
+msgstr "ยืนยันใบเสร็จสำหรับ:"
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "%(platform_name)s team"
+msgstr "ทีมงาน %(platform_name)s"
+
+#: templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "The edX team"
+msgstr "ทีมงาน edX"
+
+#: templates/customer/emails/commtype_course_purchased_subject.txt
+msgid "Order Placed"
+msgstr "รายการสั่งถูกวาง"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
-msgstr ""
+msgstr "ยืนยันใบเสร็จ"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation for:"
-msgstr ""
+msgstr "ยืนยันใบเสร็จสำหรับ:"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Receipt"
-msgstr ""
+msgstr "ดูใบเสร็จ"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -133,13 +416,20 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"ขอขอบคุณสำหรับการซื้อชั่วโมงหน่วยกิต%(credit_hours)s จาก %(credit_provider)s"
+" สำหรับ %(course_title)s "
+"ค่าใช้จ่ายด้านล่างจะปรากฏบนใบแจ้งยอดบัตรเครดิตหรือเดบิตถัดไปของคุณที่มีชื่อ "
+"บริษัท %(platform_name)s"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You can see the status the status of your credit request or complete the "
 "credit request process on your %(platform_name)s dashboard"
 msgstr ""
+"คุณสามารถดูสถานะของคำขอหน่วยกิตของคุณหรือเสร็จสิ้นขั้นตอนการร้องขอหน่วยกิตในแดชบอร์ด\n"
+"%(platform_name)s"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
@@ -147,21 +437,37 @@ msgid ""
 "To browse other credit-eligible courses visit the %(platform_name)s website."
 " More courses are added all the time."
 msgstr ""
+"ในการเรียกดูหลักสูตรที่มีสิทธิ์ให้เครคิตอื่น ๆ เยี่ยมชมเว็บไซต์ "
+"%(platform_name)s  มีการเพิ่มหลักสูตรตลอดเวลา"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
+"ขอบคุณและขอแสดงความยินดีในความสำเร็จของคุณ "
+"เราหวังว่าคุณจะเพลิดเพลินไปกับหลักสูตร"
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid "%(platform_name)s team"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid ""
+"To browse other credit-eligible courses visit the edX website. More courses "
+"are added all the time."
 msgstr ""
+"ในการเรียกดูหลักสูตรที่มีสิทธิ์ให้เครคิตอื่น ๆ เยี่ยมชมเว็บไซต์edX  "
+"มีการเพิ่มหลักสูตรตลอดเวลา"
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view receipt please visit the link below"
+msgstr "กดลิงค์ด้านล่างเพื่อเรียกดูใบเสร็จ"
+
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
+msgid "Order Receipt"
+msgstr "ใบรายการสั่ง"
 
 #: templates/edx/credit/checkout.html
 msgid "Credit Checkout"
-msgstr ""
+msgstr "การชำระเงินเครดิต"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -174,14 +480,16 @@ msgid_plural ""
 "                        Purchase %(hours)s credits from %(provider)s for:\n"
 "                    "
 msgstr[0] ""
+"\n"
+"ซื้อ %(hours)s เครดิตจาก %(provider)s สำหรับ:"
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
-msgstr ""
+msgstr " มีบางสิ่งผิดพลาด กรุณาลองใหม่อีกครั้ง"
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
-msgstr ""
+msgstr "ทั้งหมด:"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -190,40 +498,48 @@ msgid ""
 "                                Credit eligibility expires on %(date)s\n"
 "                            "
 msgstr ""
+"\n"
+"สิทธิ์การให้หน่วยกิตหมดอายุใน %(date)s\n"
+"                            "
 
 #: templates/edx/credit/checkout.html
 msgid "You deserved it."
-msgstr ""
+msgstr "คุณสมควรได้รับมัน"
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"งานหนักได้ผ่านแล้ว คุณผ่านหลักสูตร! "
+"รับหน่วยกิตของคุณเพื่อเริ่มต้นหรือเติมเต็มวุฒิ"
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "ราคาไม่แพง"
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr ""
+"หน่วยกิตที่เสนอผ่านedX โดยปกติมีราคาต่ำกว่าหน่วยกิตเดียวกันในสถาบันส่วนมาก"
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "เปิดประตู"
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
 msgstr ""
+"งานที่ได้รับความต้องการมากที่สุดในปัจจุบันจำเป็นต้องมีระดับวิทยาลัย "
+"เริ่มต้นเส้นทางของคุณเพื่อประสบความสำเร็จ!"
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
-msgstr ""
+msgstr "คำถาม?"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -232,279 +548,232 @@ msgid ""
 "                Please read %(link)s\n"
 "            "
 msgstr ""
-
-#: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Dashboard"
-msgstr ""
+"\n"
+"                โปรดอ่าน %(link)s\n"
+"            "
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "ที่เก็บสถิติของคุณ"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "รายการที่สั่งทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "ลูกค้าใหม่"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "ลูกค้าทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "ผลิตภัณฑ์ทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "การสั่งล่าสุด (24 ชั่วโมงที่ผ่านมา)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "การสั่ง 24 ชั่วโมงที่ผ่านมา"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "รายการที่สั่งทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "สายทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "รายได้รวม"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "ค่าใช้จ่ายในการสั่งซื้อโดยเฉลี่ย"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "ราคาสั่ง(ชำระเงินแล้ว)โดยเฉลี่ย"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "จัดการ"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "การสั่ง ตลอดเวลา"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
-
-#: templates/oscar/dashboard/index.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Customers"
-msgstr ""
+msgstr "ทั้งหมด <em>เปิด</em> ตะกร้า"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "ลูกค้าทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "ลูกค้าใหม่"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "ดูการแจ้งเตือนหุ้น"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "แคตตาล็อกและหุ้น"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "ผลิตภัณฑ์ทั้งหมด"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>เปิด</em> การแจ้งเตือนหุ้น"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>ปิด</em> การแจ้งเตือนหุ้น"
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "ข้อเสนอ บัตรกำนัล และการส่งเสริมการขาย"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "ข้อเสนอ <em>ไซต์</em> ที่ใช้งาน"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "<em>บัตรกำนัล</em> ที่ใช้งาน"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "การส่งเสริมการขาย"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Orders"
-msgstr ""
+msgstr "รายการสั่ง %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
-msgstr ""
+msgstr "รายการสั่ง #%(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Username"
-msgstr ""
+msgstr "ข้อมูลลูกค้า"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Full name"
-msgstr ""
+msgstr "ชื่อและนามสกุล"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Email address"
-msgstr ""
+msgstr "อีเมล์"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer has deleted their account."
-msgstr ""
+msgstr "ลูกค้าได้ลบชื่อบัญชีของพวกเขา"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order information"
-msgstr ""
+msgstr "ข้อมูลการสั่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Total"
-msgstr ""
+msgstr "รายการสั้งทั้งหมด"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Date of purchase"
-msgstr ""
+msgstr "วันที่จ่ายเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Time of purchase"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Status"
-msgstr ""
+msgstr "เวลาที่จ่ายเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
-msgstr ""
+msgstr "รายละเอียดการสั่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-#: templates/oscar/dashboard/users/detail.html
-msgid "Refunds"
-msgstr ""
+msgstr "เนื้อหาการสั่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
-msgstr ""
+msgstr "การขนส่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment"
-msgstr ""
+msgstr "การชำระเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discounts"
-msgstr ""
+msgstr "ส่วนลด"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes"
-msgstr ""
+msgstr "บันทึก"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Items ordered"
-msgstr ""
+msgstr "รายการที่สั่งซื้อ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/refunds/refund_detail.html
-msgid "Quantity"
-msgstr ""
+msgstr "รหัสสาย"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product"
-msgstr ""
+msgstr "ผลิตภัณฑ์"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "UPC"
-msgstr ""
+msgstr "UPC"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier"
-msgstr ""
+msgstr "ผู้จัดจำหน่าย"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier SKU"
-msgstr ""
+msgstr "ผู้จัดจำหน่าย SKU"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Est. dispatch date"
-msgstr ""
+msgstr "สร้างวันที่จัดส่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price excl tax (before discounts)"
-msgstr ""
+msgstr "ราคาไม่รวมภาษี (ก่อนหักส่วนลด)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price inc tax (before discounts)"
-msgstr ""
+msgstr "ราคารวมภาษี (ก่อนหักส่วนลด)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Actions"
-msgstr ""
+msgstr "การกระทำ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -512,119 +781,119 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "View"
-msgstr ""
+msgstr "ดู"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discount"
-msgstr ""
+msgstr "ส่วนลด"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
-msgstr ""
+msgstr "ตะกร้าทั้งหมด (ไม่รวมส่วนลด)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (inc. discounts)"
-msgstr ""
+msgstr "ตะกร้าทั้งหมด (รวมส่วนลด)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total"
-msgstr ""
+msgstr "ตะกร้าทั้งหมด"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (excl. discounts)"
-msgstr ""
+msgstr "การจัดส่งทั้งหมด (ไม่รวมส่วนลด)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (inc. discounts)"
-msgstr ""
+msgstr "การจัดส่งทั้งหมด (รวมส่วนลด)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total"
-msgstr ""
+msgstr "การจัดส่งทั้งหมด"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order total"
-msgstr ""
+msgstr "รายการสั้งทั้งหมด"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
-msgstr ""
+msgstr "กับสายที่เลือก"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
-msgstr ""
+msgstr "เปลี่ยนสถานะสายเป็น"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "choose new status"
-msgstr ""
+msgstr "เลือกสถานะใหม่"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
-msgstr ""
+msgstr "เปลี่ยนเหตุการณ์การจัดส่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
-msgstr ""
+msgstr "เลือกประเภทเหตุการณ์"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
-msgstr ""
+msgstr "กับการอ้างอิง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
-msgstr ""
+msgstr "สร้างการชำระเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
-msgstr ""
+msgstr "ด้วยจำนวน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
-msgstr ""
+msgstr "สร้างการคืนเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
-msgstr ""
+msgstr "ไป!"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change order status"
-msgstr ""
+msgstr "เปลี่ยนสถานะการสั่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change status"
-msgstr ""
+msgstr "เปลี่ยนสถานะ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "This order can't have its status changed."
-msgstr ""
+msgstr "การสั่งนี้ไม่สามารถเปลี่ยนสถานะได้"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
-msgstr ""
+msgstr "เหตุการณ์การจัดส่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Date"
-msgstr ""
+msgstr "วันที่"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Event"
-msgstr ""
+msgstr "เหตุการณ์"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Lines"
-msgstr ""
+msgstr "สาย"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Reference"
-msgstr ""
+msgstr "อ้างอิง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -633,207 +902,206 @@ msgid ""
 "                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
 msgstr ""
+"\n"
+"                                              %(title)s (ปริมาณ %(event_qty)s/%(total_qty)s)\n"
+"                                            "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
-msgstr ""
+msgstr "ไม่มีเหตุการณ์การจัดส่ง"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Payment Events"
-msgstr ""
+msgstr "เหตุการณ์การชำระเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Amount"
-msgstr ""
+msgstr "จำนวน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product:"
-msgstr ""
+msgstr "ผลิตภัณฑ์:"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "quantity"
-msgstr ""
+msgstr "ปริมาณ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "No payment events."
-msgstr ""
+msgstr "ไม่มีเหตุการณ์การชำระเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method name"
-msgstr ""
+msgstr "ชื่อวิธีการ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method code"
-msgstr ""
+msgstr "รหัสวิธี"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (incl tax)"
-msgstr ""
+msgstr "การคิดเงิน (รวมภาษี)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (excl tax)"
-msgstr ""
+msgstr "การคิดเงิน (ไม่รวมภาษี)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Address"
-msgstr ""
+msgstr "ที่อยู่"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Update"
-msgstr ""
+msgstr "อัพเดต"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "โทรศัพท์"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Instructions"
-msgstr ""
+msgstr "คำแนะนำ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
-msgstr ""
+msgstr "ที่อยู่เรียกเก็บเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
-msgstr ""
+msgstr "แหล่งการชำระเงิน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
-msgstr ""
+msgstr "แหล่งที่มา"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
-msgstr ""
+msgstr "การจัดสรร"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
-msgstr ""
+msgstr "จำนวนเงินที่หัก"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
-msgstr ""
+msgstr "จำนวนเงินที่ได้รับคืน"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
-msgstr ""
+msgstr "ไม่มีแหล่งที่มาของการชำระเงินสำหรับการสั่งซื้อที่พบนี้"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
-msgstr ""
+msgstr "รายการธุรกรรม"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Type"
-msgstr ""
+msgstr "ประเภท"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"
-msgstr ""
+msgstr "บัตรกำนัล"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
-msgstr ""
+msgstr "เสนอชื่อ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
-msgstr ""
+msgstr "ความถี่"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Message"
-msgstr ""
+msgstr "ข้อความ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-msgid "User"
-msgstr ""
+msgstr "ไม่มีส่วนลดสำหรับการสั่งครั้งนี้"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
-msgstr ""
+msgstr "ผู้ดูแลระบบ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Edit"
-msgstr ""
+msgstr "แก้ไข"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Delete"
-msgstr ""
+msgstr "ลบ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No notes available."
-msgstr ""
+msgstr "ไม่มีบันทึกที่ใช้งานได้"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Save note"
-msgstr ""
+msgstr "บันทึก"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes are only editable for 5 minutes after being saved."
-msgstr ""
+msgstr "บันทึกสามารถแก้ไขได้หลังจากการบันทึก 5 นาทีเท่านั้น"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Search"
-msgstr ""
+msgstr "ค้นหา"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Advanced Search"
-msgstr ""
+msgstr "การค้นหาขั้นสูง"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Close"
-msgstr ""
+msgstr "ปิด"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "ค้นหา..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
-msgstr ""
+msgstr "ดาวน์โหลดการสั่งที่ถูกเลือกในรูปแบบ CSV่"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
-msgstr ""
+msgstr "ดาวน์โหลด"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Order number"
-msgstr ""
+msgstr "เลขที่การสั่ง"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
-msgstr ""
+msgstr "การรวมภาษีโดยรวม"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
-msgstr ""
+msgstr "จำนวนรายการ"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Shipping address"
-msgstr ""
+msgstr "ที่อยู่สำหรับการจัดส่ง"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Deleted"
-msgstr ""
+msgstr "ลบแล้ว"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
-msgstr ""
+msgstr "ลองชำระเงินใหม่"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
-msgstr ""
+msgstr "ไม่พบการสั่ง"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 #: templates/oscar/dashboard/users/detail.html
@@ -842,7 +1110,7 @@ msgstr "ลงทะเบียนเรียน"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Course ID"
-msgstr "ID หลักสูตร"
+msgstr "รหัสหลักสูตร"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Mode"
@@ -850,111 +1118,106 @@ msgstr "โหมด"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "กำลังใช้งาน?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "ไม่พบการลงทะเบียน"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
-msgstr ""
+msgstr "ยืนยันกระบวนการคืนเงิน"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to issue a full refund?"
-msgstr ""
+msgstr "คุณแน่ใจที่จะคืนเงินเต็มจำนวน?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to deny this refund request?"
-msgstr ""
+msgstr "คุณแน่ใจที่จะยกเลิกคำร้องการคืนเงินนี้?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Cancel"
-msgstr ""
+msgstr "ยกเลิก"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm"
-msgstr ""
+msgstr "ยืนยัน"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve"
-msgstr ""
+msgstr "อนุมัติ"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
-msgstr ""
-
-#: templates/oscar/dashboard/partials/refund_table.html
-#: templates/oscar/dashboard/refunds/refund_list.html
-msgid "Refund ID"
-msgstr ""
+msgstr "ปฏิเสธ"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
-msgstr ""
+msgstr "จำนวนรายการ"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "เครดิตทั้งหมด"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Created"
-msgstr ""
+msgstr "สร้างแล้ว"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "No refunds found."
-msgstr ""
+msgstr "ไม่พบการคืนเงิน"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
 msgid "Refund #%(id)s"
-msgstr ""
+msgstr "การคืนเงิน #%(id)s"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
-msgstr ""
+msgstr "ภาพรวมการคืนเงิน"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
-msgstr ""
+msgstr "การสั่งที่เกี่ยวข้อง"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
-msgstr ""
+msgstr "รายการคืนเงิน"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
-msgstr ""
+msgstr "รหัสสายการคืนเงิน"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
-msgstr ""
+msgstr "สายการสั่งที่เกี่ยวข้อง"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
-msgstr ""
+msgstr "เครดิต (ไม่รวมภาษี)"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
-msgstr ""
+msgstr "หน่วยประมวลผล"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
-msgstr ""
+msgstr "ปริมาณ:"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "General"
-msgstr ""
+msgstr "ทั่วไป"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Email"
-msgstr ""
+msgstr "อีเมล์"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Active"
@@ -962,105 +1225,105 @@ msgstr "กำลังใช้งาน"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Yes,No"
-msgstr ""
+msgstr "ใช่,ไม่"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Superuser"
-msgstr ""
+msgstr "Superuser"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
-msgstr ""
+msgstr "จริง,เท็จ"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Staff"
-msgstr ""
+msgstr "เจ้าหน้าที่"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Last login"
-msgstr ""
+msgstr "เข้าสู่ระบบล่าสุด"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date joined"
-msgstr ""
+msgstr "วันที่เข้าร่วม"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
-msgstr ""
+msgstr "ดูผลิตภัณฑ์"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of orders"
-msgstr ""
+msgstr "จำนวนรายการสั่ง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of ordered items"
-msgstr ""
+msgstr "จำนวนของรายการที่สั่ง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total spent"
-msgstr ""
+msgstr "การจ่ายทั้งหมด"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
-msgstr ""
+msgstr "ความเห็นถูกเขียน"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
-msgstr ""
+msgstr "ส่งอีเมล์ตั้งค่ารหัสผ่านใหม่"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
-msgstr ""
+msgstr "ที่อยู่"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews"
-msgstr ""
+msgstr "วิจารณ์"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
-msgstr ""
+msgstr "เลขที่การสั่ง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
-msgstr ""
+msgstr "จำนวนรายการ"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
-msgstr ""
+msgstr "มูลค่าทั้งหมด"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date placed"
-msgstr ""
+msgstr "วันที่วาง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not placed any orders yet."
-msgstr ""
+msgstr "ลูกค้ายังไม่ได้วางรายการสั่ง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
-msgstr ""
+msgstr "ลูกค้าไม่ได้บันทึกที่อยู่"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
-msgstr ""
+msgstr "รหัสผลิตภัณฑ์"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Score"
-msgstr ""
+msgstr "คะแนน"
 
 #: templates/oscar/dashboard/users/detail.html
 msgctxt "Product review title"
 msgid "Title"
-msgstr ""
+msgstr "ชื่อเรื่อง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Body"
-msgstr ""
+msgstr "เนื้อเรื่อง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date created"
-msgstr ""
+msgstr "วันที่สร้าง"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."
-msgstr ""
+msgstr "ลูกค้ายังไม่ได้เขียนแสดงความเห็น"

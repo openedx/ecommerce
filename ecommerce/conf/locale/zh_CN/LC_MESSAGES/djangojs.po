@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Wenyong Hu <huwenyong.nl@gmail.com>, 2015
 # zhaojina <zhaojianwei187@126.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-09-21 06:27+0000\n"
+"Last-Translator: Wenyong Hu <huwenyong.nl@gmail.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -20,15 +21,15 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "您必须选择其中一种课程。"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "认证的截止日期必须晚于更新的截止日期。"
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "产品认证失败。"
 
 #: static/js/models/course_model.js
 msgid "Course ID"
@@ -48,7 +49,11 @@ msgstr "认证截止日期"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "所有的课程项都必须包含标价。"
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
+msgstr "更新的截止日期必须早于认证的截止日期。"
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -58,7 +63,7 @@ msgstr "已认证"
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "学分"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -78,23 +83,23 @@ msgstr "认证证书"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "专业证书"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
-msgstr ""
+msgstr "荣誉证书"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "未获得证书"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "所有的学分项必须由某个学分授予者授予。"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "所有学分项必须指定一定的时长。"
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
@@ -102,20 +107,20 @@ msgstr "查看课程"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "编辑课程"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
-msgstr ""
+msgstr "免费(荣誉)"
 
 #: static/js/views/course_form_view.js
 msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgstr "免费提供荣誉证书"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
-msgstr ""
+msgstr "初始认证和认证证书需要付费获取"
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -125,17 +130,17 @@ msgstr "专业教育"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "初始认证和专业教育证书需要付费获取"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "初始认证和认证证书需要付费获取，同时你可以选择购买学分。"
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "错误！"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -143,15 +148,15 @@ msgstr "正在保存…"
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "请完成所有必填项。"
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "保存数据时发生错误。"
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "搜索"
 
 #: static/js/views/course_list_view.js
 msgid "Next"
@@ -165,17 +170,17 @@ msgstr "上一个"
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "显示“已经开始”到“已经结束”的所有课程"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(结果筛选于所有课程中“最大的”)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "显示“菜单”课程"
 
 #: static/js/views/course_list_view.js
 msgid "Course"

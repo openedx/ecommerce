@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Fanny Dos Reis, 2015
 # rafcha <raphael.chay@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-01 14:31-0400\n"
-"PO-Revision-Date: 2015-09-01 18:43+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2015-09-04 22:20-0400\n"
+"PO-Revision-Date: 2015-10-21 07:08+0000\n"
+"Last-Translator: Fanny Dos Reis\n"
 "Language-Team: French (http://www.transifex.com/open-edx/edx-platform/language/fr/)\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +21,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "Vous devez sélectionner un type de cours."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -28,7 +29,7 @@ msgstr ""
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "La validation du produit a échoué."
 
 #: static/js/models/course_model.js
 msgid "Course ID"
@@ -48,6 +49,10 @@ msgstr "Date limite de vérification"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
+msgstr "Toutes les places de cours doivent avoir un prix."
+
+#: static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
@@ -58,7 +63,7 @@ msgstr "Vérifié "
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "Crédit"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -78,7 +83,7 @@ msgstr "Certificat vérifié"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Certificat Professionnel"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
@@ -86,7 +91,7 @@ msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "Non Certifié"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
@@ -135,7 +140,7 @@ msgstr ""
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "Erreur!"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -143,15 +148,15 @@ msgstr "Enregistrement..."
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "Completez tout les champs demandes, SVP"
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "Une erreur s'est produite lors de l'enregistrement des donnees."
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "Recherche..."
 
 #: static/js/views/course_list_view.js
 msgid "Next"
