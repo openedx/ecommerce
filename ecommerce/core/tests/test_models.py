@@ -1,5 +1,3 @@
-from social.apps.django_app.default.models import UserSocialAuth
-
 from ecommerce.core.models import User
 from ecommerce.tests.testcases import TestCase
 
@@ -11,13 +9,8 @@ class UserTests(TestCase):
         user = self.create_user()
         self.assertIsNone(user.access_token)
 
-        social_auth = UserSocialAuth.objects.create(user=user)
-        self.assertIsNone(user.access_token)
-
-        access_token = u'My voice is my passport. Verify me.'
-        social_auth.extra_data[u'access_token'] = access_token
-        social_auth.save()
-        self.assertEqual(user.access_token, access_token)
+        self.create_access_token(user)
+        self.assertEqual(user.access_token, self.access_token)
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read

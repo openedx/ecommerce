@@ -12,6 +12,7 @@ import jwt
 from mock import patch
 from oscar.core.loading import get_model, get_class
 from oscar.test import factories
+from social.apps.django_app.default.models import UserSocialAuth
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -28,11 +29,21 @@ User = get_user_model()
 
 class UserMixin(object):
     """Provides utility methods for creating and authenticating users in test cases."""
+    access_token = 'test-access-token'
     password = 'test'
 
     def create_user(self, **kwargs):
         """Create a user, with overrideable defaults."""
         return factories.UserFactory(password=self.password, **kwargs)
+
+    def create_access_token(self, user, access_token=None):
+        """
+        Create an OAuth access token for the specified user.
+
+        If no access_token value is supplied, the default (self.access_token) will be used.
+        """
+        access_token = access_token or self.access_token
+        UserSocialAuth.objects.create(user=user, extra_data={'access_token': access_token})
 
     def generate_jwt_token_header(self, user, secret=None):
         """Generate a valid JWT token header for authenticated requests."""

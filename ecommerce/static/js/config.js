@@ -12,6 +12,7 @@ require.config({
         'collections': 'js/collections',
         'datatables.net': 'bower_components/datatables/media/js/jquery.dataTables',
         'dataTablesBootstrap': 'bower_components/datatables/media/js/dataTables.bootstrap',
+        'ecommerce': 'js/shims/ecommerce',
         'jquery': 'bower_components/jquery/dist/jquery',
         'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
         'models': 'js/models',

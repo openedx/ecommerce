@@ -1,7 +1,7 @@
 define([
         'backbone',
         'underscore.string',
-        'models/credit_provider_model'
+        'models/credit_provider'
     ],
     function (Backbone,
               _s,
@@ -17,8 +17,10 @@ define([
                  * @param {Object} options This Object MUST contain lmsRootUrl and providerIds keys.
                  */
                 initialize: function (options) {
-                    this.lmsRootUrl = options.lmsRootUrl;
-                    this.providerIds = options.providerIds;
+                    if (options) {
+                        this.lmsRootUrl = options.lmsRootUrl;
+                        this.providerIds = options.providerIds;
+                    }
                 },
 
                 /**

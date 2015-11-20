@@ -1,11 +1,13 @@
 define([
         'backbone',
         'backbone.stickit',
-        'text!templates/credit_course_seat_form_field_row.html'
+        'text!templates/credit_course_seat_form_field_row.html',
+        'ecommerce'
     ],
     function (Backbone,
               BackboneStickit,
-              CreditSeatTableRowTemplate) {
+              CreditSeatTableRowTemplate,
+              ecommerce) {
         'use strict';
 
         return Backbone.View.extend({
@@ -18,8 +20,20 @@ define([
             },
 
             bindings: {
-                'input[name=credit_provider]': {
+                // TODO Determine why this is not set for a single-item list.
+                'select[name=credit_provider]': {
                     observe: 'credit_provider',
+                    selectOptions: {
+                        collection: function () {
+                            return ecommerce.credit.providers;
+                        },
+                        labelPath: 'display_name',
+                        valuePath: 'id',
+                        defaultOption: {
+                            label: '----',
+                            value: null
+                        }
+                    },
                     setOptions: {
                         validate: true
                     }

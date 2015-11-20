@@ -3,6 +3,8 @@
  * add files to the karma configuration.
  */
 
+'use strict';
+
 var specs = [],
     config = {};
 
@@ -11,10 +13,13 @@ var specs = [],
 // the text so tests can be run if modules reference gettext
 if (!window.gettext) {
     window.gettext = function (text) {
-        'use strict';
         return text;
     };
 }
+
+// Establish the global namespace
+window.ecommerce = window.ecommerce || {};
+window.ecommerce.credit = window.ecommerce.credit || {};
 
 // you can automatically get the test files using karma's configs
 for (var file in window.__karma__.files) {

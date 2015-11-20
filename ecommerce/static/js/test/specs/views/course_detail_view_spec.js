@@ -2,12 +2,16 @@ define([
         'jquery',
         'underscore.string',
         'views/course_detail_view',
-        'models/course_model'
+        'models/course_model',
+        'collections/credit_provider_collection',
+        'ecommerce'
     ],
     function ($,
               _s,
               CourseDetailView,
-              Course) {
+              Course,
+              CreditProviderCollection,
+              ecommerce) {
         'use strict';
 
         describe('course detail view', function () {
@@ -154,6 +158,7 @@ define([
                 };
 
             beforeEach(function () {
+                ecommerce.credit.providers = new CreditProviderCollection();
                 model = Course.findOrCreate(data, {parse: true});
                 view = new CourseDetailView({model: model}).render();
             });
