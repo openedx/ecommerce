@@ -10,21 +10,20 @@ define([
         'use strict';
 
         return Backbone.View.extend({
-
             events: {
                 'click .payment-button': 'checkout'
             },
 
             initialize: function () {
                 _.bindAll(this, 'checkout');
+                this.sku = null;
             },
 
             checkout: function (event) {
-                var sku = $(event.currentTarget).data('sku'),
-                    processor_name = $(event.currentTarget).data('processor-name'),
+                var processor_name = $(event.currentTarget).data('processor-name'),
                     url = '/api/v2/baskets/',
                     postData = JSON.stringify({
-                        'products': [{'sku': sku}],
+                        'products': [{'sku': this.sku}],
                         'checkout': true,
                         'payment_processor_name': processor_name
                     });
@@ -93,6 +92,10 @@ define([
 
                 // Re-enable the button so the user can re-try
                 this.setPaymentEnabled(true);
+            },
+
+            setSku: function (sku) {
+                this.sku = sku;
             }
         });
     });

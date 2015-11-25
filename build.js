@@ -25,7 +25,7 @@
             exclude: ['js/common']
         },
         {
-            name: 'js/pages/credit_checkout',
+            name: 'js/apps/credit_checkout_app',
             exclude: ['js/common']
         }
     ]
