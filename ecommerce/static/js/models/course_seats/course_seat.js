@@ -50,9 +50,8 @@ define([
             getSeatType: function () {
                 switch (this.get('certificate_type')) {
                     case 'verified':
-                    {
+                    case 'verifiedAudit':
                         return 'verified';
-                    }
                     case 'credit':
                         return 'credit';
                     case 'professional':

@@ -86,6 +86,8 @@ class Course(models.Model):
         elif 'professional' in seat_types or 'no-id-professional' in seat_types:
             return 'professional'
         elif 'verified' in seat_types:
+            if 'honor' not in seat_types:
+                return 'verifiedAudit'
             return 'verified'
         else:
             return 'honor'
