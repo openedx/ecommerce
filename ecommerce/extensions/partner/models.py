@@ -20,4 +20,4 @@ class Partner(AbstractPartner):
 
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.partner.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.apps.partner.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,ungrouped-imports

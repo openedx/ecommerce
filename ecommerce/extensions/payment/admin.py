@@ -26,4 +26,4 @@ class PaymentProcessorResponseAdmin(admin.ModelAdmin):
 admin.site.register(PaymentProcessorResponse, PaymentProcessorResponseAdmin)
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.payment.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.apps.payment.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position

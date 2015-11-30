@@ -46,4 +46,4 @@ class Basket(AbstractBasket):
 
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position

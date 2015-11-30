@@ -24,7 +24,7 @@ class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
     def post(self, request, *args, **kwargs):
         return self._save_and_publish(request.data)
 
-    def put(self, request, *args, **kwargs):
+    def put(self, request, *_args, **kwargs):
         return self._save_and_publish(request.data, course_id=kwargs['course_id'])
 
     def _save_and_publish(self, data, course_id=None):
