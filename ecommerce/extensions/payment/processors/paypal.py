@@ -116,7 +116,7 @@ class Paypal(BasePaymentProcessor):
         # responsible for handling the exception.
         if not payment.success():
             error = self._get_error(payment)
-            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
+            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)  # pylint: disable=unsubscriptable-object
 
             logger.error(
                 u"Failed to create PayPal payment for basket [%d]. PayPal's response was recorded in entry [%d].",
@@ -186,7 +186,7 @@ class Paypal(BasePaymentProcessor):
             # Raise an exception for payments that were not successfully executed. Consuming code is
             # responsible for handling the exception
             error = self._get_error(payment)
-            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
+            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)  # pylint: disable=unsubscriptable-object
 
             logger.warning(
                 u"Failed to execute PayPal payment on attempt [%d]. "

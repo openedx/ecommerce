@@ -32,4 +32,4 @@ class PaypalWebProfile(models.Model):
 
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.payment.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.apps.payment.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order

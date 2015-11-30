@@ -16,7 +16,7 @@ def generate_sku(product, partner):
         getattr(product.attr, 'credit_provider', ''),
         str(partner.id)
     ))
-    _hash = md5(_hash.lower())
-    _hash = _hash.hexdigest()[-7:]
+    md5_hash = md5(_hash.lower())
+    digest = md5_hash.hexdigest()[-7:]
 
-    return _hash.upper()
+    return digest.upper()

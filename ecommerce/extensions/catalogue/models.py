@@ -30,4 +30,4 @@ class Catalog(models.Model):
 
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.catalogue.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.apps.catalogue.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,ungrouped-imports
