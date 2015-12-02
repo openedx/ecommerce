@@ -1,9 +1,9 @@
 import itertools
 
-from django.contrib.sites.models import Site
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from ecommerce.tests.factories import SiteConfigurationFactory, create_basket
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -13,23 +13,14 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 class BasketTests(TestCase):
     def setUp(self):
         super(BasketTests, self).setUp()
-        self.site1 = Site.objects.create(domain='site1.fake')
-        self.site2 = Site.objects.create(domain='site2.fake')
+        self.site1 = SiteConfigurationFactory(site__domain='site1.fake').site
+        self.site2 = SiteConfigurationFactory(site__domain='site2.fake').site
 
     def assert_basket_state(self, basket, status, user, site):
         """ Verify the given basket's properties. """
         self.assertEqual(basket.status, status)
         self.assertEqual(basket.owner, user)
         self.assertEqual(basket.site, site)
-
-    def _create_basket(self, user, site, status=Basket.OPEN):
-        """ Create a new Basket for the user. """
-        basket = factories.create_basket()
-        basket.owner = user
-        basket.site = site
-        basket.status = status
-        basket.save()
-        return basket
 
     def test_order_number(self):
         """ The method should return the order number for the Order corresponding to the Basket. """
@@ -75,12 +66,12 @@ class BasketTests(TestCase):
         # Create baskets in a state that qualifies them for merging
         editable_baskets = []
         for status in Basket.editable_statuses:
-            editable_baskets.append(self._create_basket(user, self.site1, status))
+            editable_baskets.append(create_basket(user, self.site1, status))
 
         # Create baskets that should NOT be merged
         non_editable_baskets = []
         for status in (Basket.MERGED, Basket.FROZEN, Basket.SUBMITTED):
-            non_editable_baskets.append(self._create_basket(user, self.site1, status))
+            non_editable_baskets.append(create_basket(user, self.site1, status))
 
         # Create a basket for the other site/tenant
         Basket.get_basket(user, self.site2)

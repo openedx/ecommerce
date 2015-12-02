@@ -17,6 +17,7 @@ from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_default_processor_class, get_processor_class_by_name)
 
 
+Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 logger = logging.getLogger(__name__)
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
@@ -127,7 +128,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         # (baskets, then orders) to ensure that we don't leave the system in a dirty state
         # in the event of an error.
         with transaction.atomic():
-            basket = Basket.get_basket(request.user, request.site)
+            user = request.user
+            basket = Basket.get_basket(user, request.site)
 
             requested_products = request.data.get(AC.KEYS.PRODUCTS)
             if requested_products:
@@ -183,6 +185,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 payment_processor = get_default_processor_class()
 
             try:
+                Applicator().apply(basket, user, request)
                 response_data = self._checkout(basket, payment_processor())
             except Exception as ex:  # pylint: disable=broad-except
                 basket.thaw()

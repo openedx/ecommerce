@@ -106,6 +106,7 @@ class BasketCreationMixin(JwtMixin):
             structure='child',
             parent=self.base_product,
             title=u'𝑪𝒂𝒓𝒅𝒃𝒐𝒂𝒓𝒅 𝑪𝒖𝒕𝒐𝒖𝒕',
+            stockrecords__partner=self.partner,
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
         )
@@ -155,7 +156,7 @@ class BasketCreationMixin(JwtMixin):
 
             basket = Basket.objects.get()
             user = User.objects.get(username=self.USER_DATA['username'])
-            basket.strategy = Selector().strategy(user=user)
+            basket.strategy = Selector().strategy(site=self.site, user=user)
             self.assertEqual(response.data['id'], basket.id)
 
             if checkout:

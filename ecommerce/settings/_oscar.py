@@ -33,6 +33,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.order',
     'ecommerce.extensions.partner',
     'ecommerce.extensions.payment',
+    'ecommerce.extensions.search',
 ])
 # END APP CONFIGURATION
 

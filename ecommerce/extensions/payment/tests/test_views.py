@@ -8,7 +8,6 @@ import mock
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
 from oscar.core.loading import get_class, get_model
-from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
@@ -17,6 +16,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
+from ecommerce.tests.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -36,12 +36,10 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
     def setUp(self):
         super(CybersourceNotifyViewTests, self).setUp()
 
-        self.user = factories.UserFactory()
+        self.user = self.create_user()
         self.billing_address = self.make_billing_address()
 
-        self.basket = factories.create_basket()
-        self.basket.owner = self.user
-        self.basket.freeze()
+        self.basket = create_basket(self.user, self.site, Basket.FROZEN)
 
         self.processor = Cybersource()
         self.processor_name = self.processor.NAME
@@ -179,9 +177,9 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
             billing_address=self.billing_address,
         )
         with mock.patch.object(
-            CybersourceNotifyView,
-            'handle_payment',
-            side_effect=error_class
+                CybersourceNotifyView,
+                'handle_payment',
+                side_effect=error_class
         ) as fake_handle_payment:
             self._assert_processing_failure(
                 notification,
@@ -299,9 +297,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     def setUp(self):
         super(PaypalPaymentExecutionViewTests, self).setUp()
 
-        self.basket = factories.create_basket()
-        self.basket.owner = factories.UserFactory()
-        self.basket.freeze()
+        self.basket = create_basket(self.create_user(), self.site, Basket.FROZEN)
 
         self.processor = Paypal()
         self.processor_name = self.processor.NAME
@@ -473,7 +469,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self.mock_payment_creation_response(self.basket)
             self.processor.get_transaction_parameters(self.basket, request=self.request)
 
-            dummy_basket = factories.create_basket()
+            dummy_basket = create_basket(None, self.site)
             self.mock_payment_creation_response(dummy_basket)
             self.processor.get_transaction_parameters(dummy_basket, request=self.request)
 
