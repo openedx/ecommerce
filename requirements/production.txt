@@ -5,5 +5,5 @@ django-ses==0.7.0
 MySQL-python==1.2.5
 PyYAML==3.11
 gunicorn==19.2.1
-gevent==1.0.1
+gevent==1.0.2
 nodeenv==0.13.6
