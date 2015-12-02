@@ -35,8 +35,6 @@ define([
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/coupons/',
 
-            dateFormat: 'MM/DD/YYYY',
-
             defaults: {
             },
 
@@ -67,13 +65,12 @@ define([
                     if (_.isEmpty(val)) {
                         return gettext('Start date is required');
                     }
-                    var isValid = moment(val, this.dateFormat).isValid();
-                    if (!isValid) {
+                    var startDate = moment(new Date(val));
+                    if (!startDate.isValid()) {
                         return gettext('Start date is invalid');
                     }
-                    var endDate = moment(this.get('end_date'), this.dateFormat);
-                    var isBefore = moment(val, this.dateFormat).isBefore(endDate);
-                    if (endDate && !isBefore) {
+                    var endDate = moment(this.get('end_date'));
+                    if (endDate && startDate.isAfter(endDate)) {
                         return gettext('Must occur before end date');
                     }
                 },
@@ -81,13 +78,12 @@ define([
                     if (_.isEmpty(val)) {
                         return gettext('End date is required');
                     }
-                    var isValid = moment(val, this.dateFormat).isValid();
-                    if (!isValid) {
+                    var endDate = moment(new Date(val));
+                    if (!endDate.isValid()) {
                         return gettext('End date is invalid');
                     }
-                    var startDate = moment(this.get('start_date'), this.dateFormat);
-                    var isAfter = moment(val, this.dateFormat).isAfter(startDate);
-                    if (startDate && !isAfter) {
+                    var startDate = moment(new Date(this.get('start_date')));
+                    if (startDate && endDate.isBefore(startDate)) {
                         return gettext('Must occur after start date');
                     }
                 }
@@ -163,8 +159,8 @@ define([
                 var data = {
                     title: this.get('title'),
                     client_username: this.get('client_username'),
-                    start_date: this.get('start_date'),
-                    end_date: this.get('end_date'),
+                    start_date: moment.utc(this.get('start_date')),
+                    end_date: moment.utc(this.get('end_date')),
                     stock_record_ids: stockRecordIds,
                     code: this.get('code') || '',
                     voucher_type: this.get('voucher_type'),

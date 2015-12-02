@@ -39,8 +39,8 @@ define([
                 title: 'Test Discount',
                 code_type: 'discount',
                 client_username: 'test_client',
-                start_date: '05/25/2016',
-                end_date: '05/26/2017',
+                start_date: '2015-01-01T00:00:00Z',
+                end_date: '2016-01-01T00:00:00Z',
                 stock_record_ids: [1],
                 code: 'TESTCODE',
                 voucher_type: 'Single use',
@@ -55,8 +55,8 @@ define([
                 title: 'Test Enrollment',
                 code_type: 'enrollment',
                 client_username: 'test_client',
-                start_date: '05/25/2016',
-                end_date: '05/26/2017',
+                start_date: '2015-01-01T00:00:00Z',
+                end_date: '2016-01-01T00:00:00Z',
                 stock_record_ids: [1],
                 voucher_type: 'Single use',
                 quantity: 0,
@@ -79,8 +79,8 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
 
-                    model.set('start_date', '11/11/2015');
-                    model.set('end_date', '10/10/2015');
+                    model.set('start_date', '2015-11-11T00:00:00Z');
+                    model.set('end_date', '2015-10-10T00:00:00Z');
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
                 });
