@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Unit tests of payment processor implementations."""
+from __future__ import unicode_literals
+
 import datetime
 import json
 import logging
@@ -19,6 +21,7 @@ import paypalrestsdk
 from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
 from testfixtures import LogCapture
+from waffle.models import Sample
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.tests import toggle_switch
@@ -96,51 +99,89 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
 class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase):
     """ Tests for CyberSource payment processor. """
     PI_DAY = datetime.datetime(2015, 3, 14, 9, 26, 53)
-    UUID = u'UUID'
+    UUID = 'UUID'
 
     processor_class = Cybersource
     processor_name = 'cybersource'
 
-    def test_get_transaction_parameters(self):
-        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
-
-        # Patch the datetime object so that we can validate the signed_date_time field
-        with mock.patch.object(Cybersource, u'utcnow', return_value=self.PI_DAY):
-            actual = self.processor.get_transaction_parameters(self.basket)
-
+    def get_expected_transaction_parameters(self, transaction_uuid, include_level_2_3_details=False):
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[self.processor_name]
-        access_key = configuration[u'access_key']
-        profile_id = configuration[u'profile_id']
+        access_key = configuration['access_key']
+        profile_id = configuration['profile_id']
 
         expected = {
-            u'access_key': access_key,
-            u'profile_id': profile_id,
-            u'signed_field_names': u'',
-            u'unsigned_field_names': u'',
-            u'signed_date_time': self.PI_DAY.strftime(ISO_8601_FORMAT),
-            u'locale': settings.LANGUAGE_CODE,
-            u'transaction_type': u'sale',
-            u'reference_number': self.basket.order_number,
-            u'amount': unicode(self.basket.total_incl_tax),
-            u'currency': self.basket.currency,
-            u'consumer_id': self.basket.owner.username,
-            u'override_custom_receipt_page': u'{}?orderNum={}'.format(self.processor.receipt_page_url,
-                                                                      self.basket.order_number),
-            u'override_custom_cancel_page': self.processor.cancel_page_url,
-            u'merchant_defined_data1': self.course.id,
-            u'merchant_defined_data2': self.CERTIFICATE_TYPE,
+            'access_key': access_key,
+            'profile_id': profile_id,
+            'signed_field_names': '',
+            'unsigned_field_names': '',
+            'signed_date_time': self.PI_DAY.strftime(ISO_8601_FORMAT),
+            'locale': settings.LANGUAGE_CODE,
+            'transaction_type': 'sale',
+            'reference_number': self.basket.order_number,
+            'amount': unicode(self.basket.total_incl_tax),
+            'currency': self.basket.currency,
+            'consumer_id': self.basket.owner.username,
+            'override_custom_receipt_page': '{}?orderNum={}'.format(self.processor.receipt_page_url,
+                                                                    self.basket.order_number),
+            'override_custom_cancel_page': self.processor.cancel_page_url,
+            'merchant_defined_data1': self.course.id,
+            'merchant_defined_data2': self.CERTIFICATE_TYPE,
         }
 
-        signed_field_names = expected.keys() + [u'transaction_uuid']
-        expected[u'signed_field_names'] = u','.join(sorted(signed_field_names))
+        if include_level_2_3_details:
+            expected.update({
+                'line_item_count': self.basket.lines.count(),
+                'amex_data_taa1': settings.PLATFORM_NAME,
+                'purchasing_level': '3',
+                'user_po': 'BLANK',
+            })
+
+            for index, line in enumerate(self.basket.lines.all()):
+                expected['item_{}_code'.format(index)] = line.product.get_product_class().slug
+                expected['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+                expected['item_{}_gross_net_indicator'.format(index)] = 'Y'
+                expected['item_{}_name'.format(index)] = line.product.title
+                expected['item_{}_quantity'.format(index)] = line.quantity
+                expected['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+                expected['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+                expected['item_{}_tax_rate'.format(index)] = '0'
+                expected['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+                expected['item_{}_unit_of_measure'.format(index)] = 'ITM'
+                expected['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+
+        signed_field_names = expected.keys() + ['transaction_uuid']
+        expected['signed_field_names'] = ','.join(sorted(signed_field_names))
 
         # Copy the UUID value so that we can properly generate the signature. We will validate the UUID below.
-        expected[u'transaction_uuid'] = actual[u'transaction_uuid']
-        expected[u'signature'] = self.generate_signature(self.processor.secret_key, expected)
+        expected['transaction_uuid'] = transaction_uuid
+        expected['signature'] = self.generate_signature(self.processor.secret_key, expected)
+
+        return expected
+
+    def assert_correct_transaction_parameters(self, include_level_2_3_details=False):
+        """ Verifies the processor returns the correct parameters required to complete a transaction.
+
+         Arguments
+            include_level_23_details (bool): Determines if Level 2/3 details should be included in the parameters.
+        """
+        # Patch the datetime object so that we can validate the signed_date_time field
+        with mock.patch.object(Cybersource, 'utcnow', return_value=self.PI_DAY):
+            actual = self.processor.get_transaction_parameters(self.basket)
+
+        expected = self.get_expected_transaction_parameters(actual['transaction_uuid'], include_level_2_3_details)
         self.assertDictContainsSubset(expected, actual)
 
         # If this raises an exception, the value is not a valid UUID4.
-        UUID(actual[u'transaction_uuid'], version=4)
+        UUID(actual['transaction_uuid'], version=4)
+
+    def test_get_transaction_parameters(self):
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
+        self.assert_correct_transaction_parameters()
+
+    def test_get_transaction_parameters_with_level2_3_details(self):
+        """ Verify the processor returns parameters including Level 2/3 details. """
+        Sample.objects.update_or_create(name='send_level_2_3_details_to_cybersource', defaults={'percent': 100})
+        self.assert_correct_transaction_parameters(True)
 
     def test_is_signature_valid(self):
         """ Verify that the is_signature_valid method properly validates the response's signature. """
@@ -150,28 +191,28 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # The method should return False for responses with invalid signatures.
         response = {
-            u'signed_field_names': u'field_1,field_2,signed_field_names',
-            u'field_2': u'abc',
-            u'field_1': u'123',
-            u'signature': u'abc123=='
+            'signed_field_names': 'field_1,field_2,signed_field_names',
+            'field_2': 'abc',
+            'field_1': '123',
+            'signature': 'abc123=='
         }
         self.assertFalse(self.processor.is_signature_valid(response))
 
         # The method should return True if the signature is valid.
-        del response[u'signature']
-        response[u'signature'] = self.generate_signature(self.processor.secret_key, response)
+        del response['signature']
+        response['signature'] = self.generate_signature(self.processor.secret_key, response)
         self.assertTrue(self.processor.is_signature_valid(response))
 
     def test_handle_processor_response(self):
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
 
         response = self.generate_notification(self.processor.secret_key, self.basket)
-        reference = response[u'transaction_id']
+        reference = response['transaction_id']
         source, payment_event = self.processor.handle_processor_response(response, basket=self.basket)
 
         # Validate the Source
         source_type = SourceType.objects.get(code=self.processor.NAME)
-        label = response[u'req_card_number']
+        label = response['req_card_number']
         self.assert_basket_matches_source(
             self.basket,
             source,
@@ -182,7 +223,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         )
 
         # Validate PaymentEvent
-        paid_type = PaymentEventType.objects.get(code=u'paid')
+        paid_type = PaymentEventType.objects.get(code='paid')
         amount = self.basket.total_incl_tax
         self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
 
@@ -192,14 +233,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         signature is not valid.
         """
         response = self.generate_notification(self.processor.secret_key, self.basket)
-        response[u'signature'] = u'Tampered.'
+        response['signature'] = 'Tampered.'
         self.assertRaises(InvalidSignatureError, self.processor.handle_processor_response, response, basket=self.basket)
 
     @ddt.data(
-        (u'CANCEL', UserCancelled),
-        (u'DECLINE', TransactionDeclined),
-        (u'ERROR', GatewayError),
-        (u'huh?', InvalidCybersourceDecision))
+        ('CANCEL', UserCancelled),
+        ('DECLINE', TransactionDeclined),
+        ('ERROR', GatewayError),
+        ('huh?', InvalidCybersourceDecision))
     @ddt.unpack
     def test_handle_processor_response_not_accepted(self, decision, exception):
         """ The handle_processor_response method should raise an exception if payment was not accepted. """
@@ -212,7 +253,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         The handle_processor_response method should raise PartialAuthorizationError if the authorized amount
         differs from the requested amount.
         """
-        response = self.generate_notification(self.processor.secret_key, self.basket, auth_amount=u'0.00')
+        response = self.generate_notification(self.processor.secret_key, self.basket, auth_amount='0.00')
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
                           basket=self.basket)
 
@@ -286,7 +327,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertEqual(source.amount_refunded, amount)
 
         # Verify PaymentEvent created
-        paid_type = PaymentEventType.objects.get(code=u'refunded')
+        paid_type = PaymentEventType.objects.get(code='refunded')
         payment_event = order.payment_events.first()
         self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, transaction_id)
 
@@ -321,10 +362,10 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 @ddt.ddt
 class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
     """Tests for the PayPal payment processor."""
-    ERROR = {u'debug_id': u'foo'}
+    ERROR = {'debug_id': 'foo'}
 
     processor_class = Paypal
-    processor_name = u'paypal'
+    processor_name = 'paypal'
 
     def setUp(self):
         super(PaypalTests, self).setUp()
@@ -340,7 +381,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
     def _assert_transaction_parameters(self):
         """DRY helper for verifying transaction parameters."""
         expected = {
-            u'payment_page_url': self.APPROVAL_URL,
+            'payment_page_url': self.APPROVAL_URL,
         }
         actual = self.processor.get_transaction_parameters(self.basket, request=self.request)
         self.assertEqual(actual, expected)
@@ -356,7 +397,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assert_basket_matches_source(self.basket, source, source_type, reference, label)
 
         # Validate PaymentEvent
-        paid_type = PaymentEventType.objects.get(code=u'paid')
+        paid_type = PaymentEventType.objects.get(code='paid')
         amount = self.basket.total_incl_tax
         self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
 
@@ -540,7 +581,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(source.amount_refunded, amount)
 
         # Verify PaymentEvent created
-        paid_type = PaymentEventType.objects.get(code=u'refunded')
+        paid_type = PaymentEventType.objects.get(code='refunded')
         order = basket.order_set.first()
         payment_event = order.payment_events.first()
         self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, transaction_id)
