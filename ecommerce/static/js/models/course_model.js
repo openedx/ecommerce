@@ -111,6 +111,8 @@ define([
              */
             courseTypeSeatMapping: {
                 // Free honor courses
+                audit: ['audit'],
+                // Free honor courses
                 honor: ['audit', 'honor'],
                 // Verified track with honor option and audit default
                 verified: ['audit', 'honor', 'verified'],

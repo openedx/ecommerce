@@ -69,6 +69,11 @@ define([
             courseTypeRadioTemplate: _.template(CourseTypeRadioTemplate),
 
             courseTypes: {
+                audit: {
+                    type: 'audit',
+                    displayName: gettext('Free (Audit)'),
+                    helpText: gettext('Free audit track with No Certificate')
+                },
                 honor: {
                     type: 'honor',
                     displayName: gettext('Free (Honor)'),
@@ -199,7 +204,7 @@ define([
                         activeCourseTypes = ['credit'];
                         break;
                     default:
-                        activeCourseTypes = ['honor', 'verified', 'professional', 'credit', 'verifiedAudit'];
+                        activeCourseTypes = ['audit', 'honor', 'verified', 'professional', 'credit', 'verifiedAudit'];
                         break;
                 }
 
