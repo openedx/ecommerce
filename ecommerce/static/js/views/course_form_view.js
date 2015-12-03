@@ -13,7 +13,6 @@ define([
         'text!templates/course_form.html',
         'text!templates/_course_type_radio_field.html',
         'views/course_seat_form_fields/audit_course_seat_form_field_view',
-        'views/course_seat_form_fields/honor_course_seat_form_field_view',
         'views/course_seat_form_fields/verified_course_seat_form_field_view',
         'views/course_seat_form_fields/professional_course_seat_form_field_view',
         'views/course_seat_form_fields/credit_course_seat_form_field_view',
@@ -32,7 +31,6 @@ define([
               CourseFormTemplate,
               CourseTypeRadioTemplate,
               AuditCourseSeatFormFieldView,
-              HonorCourseSeatFormFieldView,
               VerifiedCourseSeatFormFieldView,
               ProfessionalCourseSeatFormFieldView,
               CreditCourseSeatFormFieldView,
@@ -69,10 +67,10 @@ define([
             courseTypeRadioTemplate: _.template(CourseTypeRadioTemplate),
 
             courseTypes: {
-                honor: {
-                    type: 'honor',
-                    displayName: gettext('Free (Honor)'),
-                    helpText: gettext('Free honor track with Honor Certificate')
+                audit: {
+                    type: 'audit',
+                    displayName: gettext('Free (Audit)'),
+                    helpText: gettext('Free audit track. No certificate.')
                 },
                 verified: {
                     type: 'verified',
@@ -96,7 +94,6 @@ define([
             // Map course seats to view classes
             courseSeatViewMappings: {
                 audit: AuditCourseSeatFormFieldView,
-                honor: HonorCourseSeatFormFieldView,
                 verified: VerifiedCourseSeatFormFieldView,
                 professional: ProfessionalCourseSeatFormFieldView,
                 credit: CreditCourseSeatFormFieldView
@@ -130,6 +127,13 @@ define([
                     setOptions: {
                         validate: true
                     }
+                },
+                'input[name=honor_mode]': {
+                    observe: 'honor_mode',
+                    setOptions: {
+                        validate: true
+                    },
+                    onSet: 'cleanHonorMode'
                 }
             },
 
@@ -141,6 +145,8 @@ define([
                 this.listenTo(this.model, 'change:type', this.renderCourseSeats);
                 this.listenTo(this.model, 'change:type change:id_verification_required',
                     this.renderVerificationDeadline);
+                this.listenTo(this.model, 'change:type change:honor_mode',
+                    this.renderHonorMode);
 
                 // Listen for the sync event so that we can keep track of the original course type.
                 // This helps us determine which course types the course can be upgraded to.
@@ -176,8 +182,8 @@ define([
                     courseType = this.editing ? this.lockedCourseType : this.model.get('type');
 
                 switch (courseType) {
-                    case 'honor':
-                        activeCourseTypes = ['honor', 'verified', 'credit'];
+                    case 'audit':
+                        activeCourseTypes = ['audit', 'verified', 'credit'];
                         break;
                     case 'verified':
                         activeCourseTypes = ['verified', 'credit'];
@@ -189,7 +195,7 @@ define([
                         activeCourseTypes = ['credit'];
                         break;
                     default:
-                        activeCourseTypes = ['honor', 'verified', 'professional', 'credit'];
+                        activeCourseTypes = ['audit', 'verified', 'professional', 'credit'];
                         break;
                 }
 
@@ -200,6 +206,10 @@ define([
                 this.lockedCourseType = this.model.get('type');
             },
 
+            cleanHonorMode: function (val) {
+                return _s.toBoolean(val);
+            },
+
             render: function () {
                 // Render the parent form/template
                 this.$el.html(this.template(this.model.attributes));
@@ -208,6 +218,8 @@ define([
                 this.renderCourseTypes();
                 this.renderCourseSeats();
                 this.renderVerificationDeadline();
+                this.renderHonorMode();
+                this.disableHonorMode();
 
                 this.stickit();
 
@@ -253,12 +265,34 @@ define([
             },
 
             /**
+             * Displays, or hides, the honor mode based on the course type.
+             */
+            renderHonorMode: function () {
+                var $honorModeContainer = this.$el.find('.honor-mode');
+
+                $honorModeContainer.toggleClass('hidden', !this.model.includeHonorMode());
+
+                return this;
+            },
+
+            /**
+             * Makes honor mode read only if editing an existing course.
+             */
+            disableHonorMode: function() {
+                var $honorModeRadioButtons = this.$el.find('input[name=honor_mode]');
+
+                if( this.model.seats().length > 0 ){
+                    $honorModeRadioButtons.attr('disabled', true);
+                }
+            },
+
+            /**
              * Renders the course seats based upon the course model's type field.
              */
             renderCourseSeats: function () {
                 var $courseSeats,
                     $courseSeatsContainer = this.$el.find('.course-seats'),
-                    activeSeats = this.model.validSeatTypes();
+                    activeSeats = this.model.activeSeatTypes();
 
                 // Display a helpful message if the user has not yet selected a course type.
                 if (activeSeats.length < 1) {

@@ -88,7 +88,7 @@ class Course(models.Model):
         elif 'verified' in seat_types:
             return 'verified'
         else:
-            return 'honor'
+            return 'audit'
 
     @property
     def parent_seat_product(self):

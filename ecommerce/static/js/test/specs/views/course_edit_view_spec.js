@@ -2,8 +2,6 @@ define([
         'underscore.string',
         'moment',
         'views/course_create_edit_view',
-        'views/course_seat_form_fields/honor_course_seat_form_field_view',
-        'views/course_seat_form_fields/verified_course_seat_form_field_view',
         'models/course_model',
         'utils/utils',
         'collections/credit_provider_collection',
@@ -12,8 +10,6 @@ define([
     function (_s,
               moment,
               CourseCreateEditView,
-              HonorCourseSeatFormFieldView,
-              VerifiedCourseSeatFormFieldView,
               Course,
               Utils,
               CreditProviderCollection,
@@ -24,19 +20,15 @@ define([
         describe('course edit view', function () {
             var view,
                 model,
-                honorSeat = {
-                    id: 8,
-                    url: 'http://ecommerce.local:8002/api/v2/products/8/',
+                auditSeat = {
+                    id: 6,
+                    url: 'http://ecommerce.local:8002/api/v2/products/6/',
                     structure: 'child',
                     product_class: 'Seat',
-                    title: 'Seat in edX Demonstration Course with honor certificate',
+                    title: 'Seat in edX Demonstration Course with no certificate',
                     price: '0.00',
                     expires: null,
                     attribute_values: [
-                        {
-                            name: 'certificate_type',
-                            value: 'honor'
-                        },
                         {
                             name: 'course_key',
                             value: 'edX/DemoX/Demo_Course'
@@ -105,7 +97,7 @@ define([
                     is_available_to_buy: true
                 },
                 professionalSeat = {
-                    id: 8,
+                    id: 11,
                     url: 'http://ecommerce.local:8002/api/v2/products/8/',
                     structure: 'child',
                     product_class: 'Seat',
@@ -133,11 +125,12 @@ define([
                     url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/',
                     name: 'edX Demonstration Course',
                     verification_deadline: null,
+                    honor_mode: false,
                     type: 'credit',
                     products_url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/products/',
                     last_edited: '2015-07-27T00:27:23Z',
                     products: [
-                        honorSeat,
+                        auditSeat,
                         verifiedSeat,
                         creditSeat,
                         {
@@ -175,28 +168,28 @@ define([
             });
 
             it('should display correct course seats given course type', function () {
-                var $honorElement = view.$el.find('.row.course-seat.honor'),
+                var $auditElement = view.$el.find('.row.course-seat.audit'),
                     $verifiedElement = view.$el.find('.row.course-seat.verified'),
                     $creditElement = view.$el.find('.row.credit'),
                     $creditSeats = $creditElement.find('.course-seat'),
-                    $professionalElement;
+                    $professionalElement,
+                    seat;
 
-                expect($honorElement.length).toBe(1);
-                expect($honorElement.find('.seat-price').text()).toBe('$0.00');
+                expect($auditElement.length).toBe(1);
+                expect($auditElement.find('.seat-price').text()).toBe('$0.00');
 
                 expect($verifiedElement.length).toBe(1);
                 expect($verifiedElement.find('[name=price]').val()).toBe('15.00');
                 expect($verifiedElement.find('[name=expires]').val()).toBe(Utils.stripTimezone('2020-01-01T00:00:00Z'));
 
                 expect($creditElement.length).toBe(1);
-                _.each($creditSeats, function (seat) {
-                    expect($(seat).find('[name=credit_provider]').val()).toBe('harvard');
-                    expect($(seat).find('[name=price]').val()).toBe('200.00');
-                    expect($(seat).find('[name=credit_hours]').val()).toBe('1');
-                    expect($(seat).find('[name=expires]').val()).toBe(Utils.stripTimezone('2020-01-01T00:00:00Z'));
-                });
+                seat = _.last($creditSeats);
+                expect($(seat).find('[name=credit_provider]').val()).toBe('harvard');
+                expect($(seat).find('[name=price]').val()).toBe('200.00');
+                expect($(seat).find('[name=credit_hours]').val()).toBe('1');
+                expect($(seat).find('[name=expires]').val()).toBe(Utils.stripTimezone('2020-01-01T00:00:00Z'));
 
-                // Remove honor, verified, and credit seats, and add a professional seat
+                // Remove audit, verified, and credit seats, and add a professional seat
                 data.products.splice(0, 3, professionalSeat);
                 data.type = 'professional';
 
