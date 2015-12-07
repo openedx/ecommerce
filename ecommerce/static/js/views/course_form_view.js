@@ -69,6 +69,11 @@ define([
             courseTypeRadioTemplate: _.template(CourseTypeRadioTemplate),
 
             courseTypes: {
+                audit: {
+                    type: 'audit',
+                    displayName: gettext('Free (Audit)'),
+                    helpText: gettext('Free audit track with No Certificate')
+                },
                 honor: {
                     type: 'honor',
                     displayName: gettext('Free (Honor)'),
@@ -78,6 +83,13 @@ define([
                     type: 'verified',
                     displayName: gettext('Verified'),
                     helpText: gettext('Paid certificate track with initial verification and Verified Certificate')
+                },
+                verifiedAudit: {
+                    type: 'verifiedAudit',
+                    displayName: gettext('Verified with Audit Mode'),
+                    helpText: gettext(
+                        'Paid certificate track with verification and free audit track (with no certificate)'
+                    )
                 },
                 professional: {
                     type: 'professional',
@@ -177,10 +189,13 @@ define([
 
                 switch (courseType) {
                     case 'honor':
-                        activeCourseTypes = ['honor', 'verified', 'credit'];
+                        activeCourseTypes = ['honor', 'verified', 'verifiedAudit', 'credit'];
                         break;
                     case 'verified':
                         activeCourseTypes = ['verified', 'credit'];
+                        break;
+                    case 'verifiedAudit':
+                        activeCourseTypes = ['verifiedAudit', 'credit'];
                         break;
                     case 'professional':
                         activeCourseTypes = ['professional'];
@@ -189,7 +204,7 @@ define([
                         activeCourseTypes = ['credit'];
                         break;
                     default:
-                        activeCourseTypes = ['honor', 'verified', 'professional', 'credit'];
+                        activeCourseTypes = ['audit', 'honor', 'verified', 'professional', 'credit', 'verifiedAudit'];
                         break;
                 }
 

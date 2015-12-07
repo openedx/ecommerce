@@ -16,6 +16,26 @@ define([
         'use strict';
 
         var model,
+            auditSeat = {
+                id: 6,
+                url: 'http://ecommerce.local:8002/api/v2/products/6/',
+                structure: 'child',
+                product_class: 'Seat',
+                title: 'Seat in edX Demonstration Course with no certificate',
+                price: '0.00',
+                expires: null,
+                attribute_values: [
+                    {
+                        name: 'course_key',
+                        value: 'edX/DemoX/Demo_Course'
+                    },
+                    {
+                        name: 'id_verification_required',
+                        value: false
+                    }
+                ],
+                is_available_to_buy: true
+            },
             honorSeat = {
                 id: 8,
                 url: 'http://ecommerce.local:8002/api/v2/products/8/',
@@ -137,6 +157,7 @@ define([
                 products_url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/products/',
                 last_edited: '2015-07-27T00:27:23Z',
                 products: [
+                    auditSeat,
                     honorSeat,
                     verifiedSeat,
                     creditSeat,
@@ -177,14 +198,14 @@ define([
 
                     // Sanity check to ensure the products were properly parsed
                     products = model.get('products');
-                    expect(products.length).toEqual(5);
+                    expect(products.length).toEqual(6);
 
                     // Remove the parent products
                     model.removeParentProducts();
 
                     // Only the children survived...
-                    expect(products.length).toEqual(4);
-                    expect(products.where({structure: 'child'}).length).toEqual(4);
+                    expect(products.length).toEqual(5);
+                    expect(products.where({structure: 'child'}).length).toEqual(5);
                 });
             });
 
@@ -259,6 +280,7 @@ define([
             describe('getOrCreateSeats', function () {
                 it('should return existing seats', function () {
                     var mapping = {
+                            'audit': [auditSeat],
                             'honor': [honorSeat],
                             'verified': [verifiedSeat],
                             'credit': [creditSeat, alternateCreditSeat]
@@ -267,26 +289,21 @@ define([
 
                     _.each(mapping, function (expected, seatType) {
                         seats = model.getOrCreateSeats(seatType);
-
                         _.each(seats, function (seat) {
                             expect(expected).toContain(seat.toJSON());
                         });
                     });
                 });
 
-                it('should return an empty array if an audit seat does not already exist', function () {
-                    expect(model.getOrCreateSeats('audit')).toEqual([]);
-                });
-
                 it('should create a new CourseSeat if one does not exist', function () {
                     var seat;
 
                     // Sanity check to confirm a new seat is created later
-                    expect(model.seats().length).toEqual(4);
+                    expect(model.seats().length).toEqual(5);
 
                     // A new seat should be created
                     seat = model.getOrCreateSeats('professional')[0];
-                    expect(model.seats().length).toEqual(5);
+                    expect(model.seats().length).toEqual(6);
 
                     // The new seat's class/type should correspond to the passed in seat type
                     expect(seat).toEqual(jasmine.any(ProfessionalSeat));

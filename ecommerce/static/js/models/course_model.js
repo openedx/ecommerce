@@ -110,18 +110,24 @@ define([
              * Mapping of course type to an array of course seat types.
              */
             courseTypeSeatMapping: {
+                // Free honor courses
+                audit: ['audit'],
+                // Free honor courses
                 honor: ['audit', 'honor'],
+                // Verified track with honor option and audit default
                 verified: ['audit', 'honor', 'verified'],
+                // Verified track with no honor option
+                verifiedAudit: ['audit', 'verified'],
+                // Professional education
                 professional: ['professional'],
+                // Credit courses
                 credit: ['audit', 'honor', 'verified', 'credit']
             },
 
             /**
              * Seat types that can be created by the user.
-             *
-             * Note that audit seats cannot be created, only edited.
              */
-            creatableSeatTypes: ['honor', 'verified', 'professional', 'credit'],
+            creatableSeatTypes: ['audit', 'honor', 'verified', 'professional', 'credit'],
 
             initialize: function () {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
@@ -193,7 +199,6 @@ define([
                         return product.getSeatType() === seatType;
                     }),
                     seat;
-
                 if (_.isEmpty(seats) && _.contains(this.creatableSeatTypes, seatType)) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
                     /*jshint newcap: false */
