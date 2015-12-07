@@ -84,3 +84,18 @@ OIDC client via LMS admin.
     $ python manage.py runserver 8002
 
 .. _Django's runserver command: https://docs.djangoproject.com/en/1.8/ref/django-admin/#runserver-port-or-address-port
+
+
+Development outside devstack
+----------------------------
+If you are using `devstack`_ for platform development, you may still wish to install and run this service on your host
+operating system.  One simple way to achieve this is setting up a reverse port-forward, such as the following:
+
+.. code-block:: bash
+
+    $ vagrant ssh -- -R 8002:127.0.0.1:8002  # run on the vm host, not the guest.
+    
+This will allow your LMS process inside devstack to make calls to your ecommerce server running on the host, via
+'127.0.0.1:8002', simplifying URL configuration in the LMS.
+
+.. _devstack: https://github.com/edx/configuration/wiki/edX-Developer-Stack
