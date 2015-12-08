@@ -1,8 +1,8 @@
 import json
 
+import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
-import httpretty
 from requests import Timeout
 from testfixtures import LogCapture
 
@@ -12,9 +12,7 @@ from ecommerce.tests.testcases import TestCase
 LOGGER_NAME = 'ecommerce.courses.views'
 
 
-class CourseMigrationViewTests(TestCase):
-    path = reverse('courses:migrate')
-
+class ManagementCommandViewMixin(object):
     def test_superuser_required(self):
         """ Verify the view is only accessible to superusers. """
         response = self.client.get(self.path)
@@ -42,6 +40,14 @@ class CourseMigrationViewTests(TestCase):
 
         response = self.client.get(self.path + '?course_ids=foo')
         self.assertEqual(response.status_code, 200)
+
+
+class CourseMigrationViewTests(ManagementCommandViewMixin, TestCase):
+    path = reverse('courses:migrate')
+
+
+class CourseConvertHonorToAuditView(ManagementCommandViewMixin, TestCase):
+    path = reverse('courses:convert_honor_to_audit')
 
 
 class CourseAppViewTests(TestCase):

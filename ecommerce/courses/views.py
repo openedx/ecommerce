@@ -125,3 +125,60 @@ class CourseMigrationView(View):
             log.close()
             out.close()
             err.close()
+
+
+class CourseConvertHonorToAuditView(View):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            raise Http404
+
+        return super(CourseConvertHonorToAuditView, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, *_args, **_kwargs):
+        # TODO If this is not immediately deleted after we convert courses, make sure this is updated to support
+        # multi-tenancy.
+        course_ids = request.GET.get('course_ids')
+        commit = request.GET.get('commit', False)
+        commit = commit in ('1', 'true')
+
+        # Capture all output and logging
+        out = StringIO()
+        err = StringIO()
+        log = StringIO()
+
+        root_logger = logging.getLogger()
+        log_handler = logging.StreamHandler(log)
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        log_handler.setFormatter(formatter)
+        root_logger.addHandler(log_handler)
+
+        try:
+            # Log who ran this request
+            msg = u'User [%s] requested conversion of honor seats to audit seats for [%s]. '
+            if commit:  # pragma: no cover
+                msg += u'The changes will be committed to the database.'
+            else:
+                msg += u'The changes will NOT be committed to the database.'
+
+            user = request.user
+            logger.info(msg, user.username, course_ids)
+
+            if not course_ids:
+                return HttpResponse('No course_ids specified.', status=400)
+
+            course_ids = course_ids.split(',')
+
+            call_command('convert_honor_to_audit', *course_ids, access_token=user.access_token, commit=commit,
+                         settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
+
+            # Format the output for display
+            output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
+                                                                            log=log.getvalue())
+
+            return HttpResponse(output, content_type='text/plain')
+        finally:
+            # Remove the log capture handler and close all streams
+            root_logger.removeHandler(log_handler)
+            log.close()
+            out.close()
+            err.close()
