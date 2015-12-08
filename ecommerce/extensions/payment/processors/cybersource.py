@@ -18,7 +18,7 @@ from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, Inva
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
-
+from ecommerce.extensions.payment.transport import RequestsTransport
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +244,7 @@ class Cybersource(BasePaymentProcessor):
             token = UsernameToken(self.merchant_id, self.transaction_key)
             security.tokens.append(token)
 
-            client = Client(self.soap_api_url)
+            client = Client(self.soap_api_url, transport=RequestsTransport())
             client.set_options(wsse=security)
 
             credit_service = client.factory.create('ns0:CCCreditService')
