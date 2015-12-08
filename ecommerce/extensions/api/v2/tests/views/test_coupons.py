@@ -37,30 +37,54 @@ class CouponOrderCreateViewTest(TestCase):
         course = Course.objects.create(id=course_id)
         course.create_or_update_seat('verified', True, 50, self.partner)
 
-        self.coupon_client = Client.objects.create(username='TestX')
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.product_class, __ = ProductClass.objects.get_or_create(name='Coupon')
 
-        data = {
-            'partner': self.partner,
-            'benefit_type': Benefit.PERCENTAGE,
-            'benefit_value': 100,
-            'catalog': self.catalog,
-            'end_date': datetime.date(2020, 1, 1),
-            'code': '',
-            'quantity': 5,
-            'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE
-        }
+        # data = {
+        #     'partner': self.partner,
+        #     'benefit_type': Benefit.PERCENTAGE,
+        #     'benefit_value': 100,
+        #     'catalog': self.catalog,
+        #     'end_date': datetime.date(2020, 1, 1),
+        #     'code': '',
+        #     'quantity': 5,
+        #     'start_date': datetime.date(2015, 1, 1),
+        #     'voucher_type': Voucher.SINGLE_USE
+        # }
 
-        self.coupon = CouponOrderCreateView().create_coupon_product(
-            title='Test coupon',
-            price=100,
+        # self.coupon = CouponOrderCreateView().create_coupon_product(
+        #     title='Test coupon',
+        #     price=100,
+        #     data=data
+        # )
+
+    def create_coupon(self, title, price, data=None):
+        """Helper method for creating a coupon."""
+        if data is None:
+            # Use default values
+            data = {
+                'partner': self.partner,
+                'benefit_type': Benefit.PERCENTAGE,
+                'benefit_value': 100,
+                'catalog': self.catalog,
+                'end_date': datetime.date(2020, 1, 1),
+                'code': '',
+                'quantity': 5,
+                'start_date': datetime.date(2015, 1, 1),
+                'voucher_type': Voucher.SINGLE_USE
+            }
+
+        coupon = CouponOrderCreateView().create_coupon_product(
+            title=title,
+            price=price,
             data=data
         )
+        return coupon
 
     def test_list_coupons(self):
         """Test coupon API endpoint list."""
+        self.create_coupon(title='Test coupon', price=100)
+
         response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)['results']
@@ -78,19 +102,21 @@ class CouponOrderCreateViewTest(TestCase):
 
     def test_create_coupon_product(self):
         """Test the created coupon data."""
+        coupon = self.create_coupon(title='Test coupon', price=100)
         self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
-        self.assertIsInstance(self.coupon, Product)
-        self.assertEqual(self.coupon.title, 'Test coupon')
+        self.assertIsInstance(coupon, Product)
+        self.assertEqual(coupon.title, 'Test coupon')
 
-        self.assertEqual(StockRecord.objects.filter(product=self.coupon).count(), 1)
-        stock_record = StockRecord.objects.get(product=self.coupon)
+        self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 1)
+        stock_record = StockRecord.objects.get(product=coupon)
         self.assertEqual(stock_record.price_currency, 'USD')
         self.assertEqual(stock_record.price_excl_tax, 100)
 
-        self.assertEqual(self.coupon.attr.coupon_vouchers.vouchers.count(), 5)
+        self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), 5)
 
     def test_append_to_existing_coupon(self):
         """Test adding additional vouchers to an existing coupon."""
+        self.create_coupon(title='Test coupon', price=100)
         data = {
             'partner': self.partner,
             'benefit_type': Benefit.PERCENTAGE,
@@ -131,7 +157,6 @@ class CouponOrderCreateViewTest(TestCase):
             price=100,
             data=data
         )
-        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 2)
         self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.count(), 1)
         self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.first().code, 'CUSTOMCODE')
 
@@ -163,11 +188,14 @@ class CouponOrderCreateViewTest(TestCase):
 
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
+        coupon = self.create_coupon(title='Test coupon', price=100)
+        coupon_client = Client.objects.create(username='TestX')
         basket = CouponOrderCreateView().add_product_to_basket(
-            product=self.coupon,
-            client=self.coupon_client,
+            product=coupon,
+            client=coupon_client,
             site=self.site
         )
+
         self.assertIsInstance(basket, Basket)
         self.assertEqual(Basket.objects.count(), 1)
         self.assertEqual(basket.lines.count(), 1)
@@ -175,9 +203,11 @@ class CouponOrderCreateViewTest(TestCase):
 
     def test_create_order(self):
         """Test the order creation."""
+        coupon = self.create_coupon(title='Test coupon', price=100)
+        coupon_client = Client.objects.create(username='TestX')
         basket = CouponOrderCreateView().add_product_to_basket(
-            product=self.coupon,
-            client=self.coupon_client,
+            product=coupon,
+            client=coupon_client,
             site=self.site
         )
         response_data = CouponOrderCreateView().create_order_for_invoice(basket)
