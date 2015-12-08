@@ -32,7 +32,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CouponOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMixin, NonDestroyableModelViewSet):
+class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
     """Endpoint for creating coupon orders.
 
     Creates a new coupon product, adds it to a basket and creates a

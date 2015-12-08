@@ -4,13 +4,14 @@ import datetime
 import json
 
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
@@ -221,7 +222,7 @@ class CouponOrderCreateViewTest(TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponOrderCreateViewFunctionalTest(TestCase):
+class CouponOrderCreateViewFunctionalTest(TransactionTestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
@@ -250,10 +251,11 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
             'quantity': 2,
             'price': 100
         }
-        self.response = self.client.post(COUPONS_LINK, data, format='json')
+        with transaction.atomic():
+            self.response = self.client.post(COUPONS_LINK, data, format='json')
 
     def test_response(self):
-        """Test the response data give after the order was created."""
+        """Test the response data given after the order was created."""
         self.assertEqual(self.response.status_code, 200)
         response_data = json.loads(self.response.content)
         self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
