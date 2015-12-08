@@ -23,7 +23,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
-COUPONS_LINK = reverse('api:v2:coupons:create')
+COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
 class CouponOrderCreateViewTest(TestCase):
@@ -40,24 +40,6 @@ class CouponOrderCreateViewTest(TestCase):
 
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.product_class, __ = ProductClass.objects.get_or_create(name='Coupon')
-
-        # data = {
-        #     'partner': self.partner,
-        #     'benefit_type': Benefit.PERCENTAGE,
-        #     'benefit_value': 100,
-        #     'catalog': self.catalog,
-        #     'end_date': datetime.date(2020, 1, 1),
-        #     'code': '',
-        #     'quantity': 5,
-        #     'start_date': datetime.date(2015, 1, 1),
-        #     'voucher_type': Voucher.SINGLE_USE
-        # }
-
-        # self.coupon = CouponOrderCreateView().create_coupon_product(
-        #     title='Test coupon',
-        #     price=100,
-        #     data=data
-        # )
 
     def create_coupon(self, title, price, data=None):
         """Helper method for creating a coupon."""

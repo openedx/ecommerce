@@ -56,7 +56,6 @@ urlpatterns = [
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
-    url(r'^vouchers/', include(VOUCHER_URLS, namespace='vouchers')),
 ]
 
 router = ExtendedSimpleRouter()
@@ -78,4 +77,6 @@ router.register(r'catalogs', catalog_views.CatalogViewSet) \
 
 router.register(r'orders', order_views.OrderViewSet)
 
+router.register(r'coupons', coupons_views.CouponOrderCreateView, base_name="coupons")
+router.register(r'vouchers', vouchers_views.VoucherViewSet, base_name="vouchers")
 urlpatterns += router.urls
