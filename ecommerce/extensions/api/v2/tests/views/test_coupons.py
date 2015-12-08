@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import datetime
 import json
 
+from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
@@ -20,6 +21,8 @@ Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+
+COUPONS_LINK = reverse('api:v2:coupons:create')
 
 
 class CouponOrderCreateViewTest(TestCase):
@@ -58,7 +61,7 @@ class CouponOrderCreateViewTest(TestCase):
 
     def test_list_coupons(self):
         """Test coupon API endpoint list."""
-        response = self.client.get('/api/v2/coupons/')
+        response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)['results']
         self.assertEqual(len(result), 1)
@@ -67,7 +70,7 @@ class CouponOrderCreateViewTest(TestCase):
 
         # If there are no products it returns an empty response.
         Product.objects.all().delete()
-        response = self.client.get('/api/v2/coupons/')
+        response = self.client.get(COUPONS_LINK)
         self.assertDictEqual(
             json.loads(response.content),
             {'count': 0, 'next': None, 'previous': None, 'results': []}
@@ -204,7 +207,6 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
         course = Course.objects.create(id=course_id)
         course.create_or_update_seat('verified', True, 100, self.partner)
 
-        url = '/api/v2/coupons/'
         data = {
             'title': 'Test coupon',
             'client_username': 'TestX',
@@ -218,7 +220,7 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
             'quantity': 2,
             'price': 100
         }
-        self.response = self.client.post(url, data, format='json')
+        self.response = self.client.post(COUPONS_LINK, data, format='json')
 
     def test_response(self):
         """Test the response data give after the order was created."""
