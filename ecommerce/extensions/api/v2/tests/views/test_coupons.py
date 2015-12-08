@@ -41,7 +41,7 @@ class CouponOrderCreateViewTest(TestCase):
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.product_class, __ = ProductClass.objects.get_or_create(name='Coupon')
 
-        self.data = {
+        data = {
             'partner': self.partner,
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100,
@@ -56,7 +56,7 @@ class CouponOrderCreateViewTest(TestCase):
         self.coupon = CouponOrderCreateView().create_coupon_product(
             title='Test coupon',
             price=100,
-            data=self.data
+            data=data
         )
 
     def test_list_coupons(self):
