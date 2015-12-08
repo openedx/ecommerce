@@ -211,7 +211,7 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
             'stock_record_ids': [1, 2],
             'start_date': '2015-01-01',
             'end_date': '2020-01-01',
-            'code': None,
+            'code': '',
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100,
             'voucher_type': Voucher.SINGLE_USE,

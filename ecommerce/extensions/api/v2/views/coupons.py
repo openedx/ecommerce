@@ -194,10 +194,10 @@ class CouponOrderCreateView(generics.CreateAPIView, EdxOrderPlacementMixin, NonD
                 benefit_value=Decimal(data['benefit_value']),
                 catalog=data['catalog'],
                 coupon=coupon_product,
-                end_date=data['end_date'],
-                code=data['code'],
+                end_datetime=data['end_date'],
+                code=data['code'] or None,
                 quantity=int(data['quantity']),
-                start_date=data['start_date'],
+                start_datetime=data['start_date'],
                 voucher_type=data['voucher_type']
             )
         except IntegrityError as ex:
