@@ -50,6 +50,10 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
         return instance.attribute.name
 
     def get_value(self, obj):
+        if obj.attribute.name == 'Coupon vouchers':
+            vouchers = obj.value.vouchers.all()
+            serializer = VoucherSerializer(vouchers, many=True)
+            return serializer.data
         return obj.value
 
     class Meta(object):
