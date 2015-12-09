@@ -179,10 +179,10 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
         course = Course.objects.create(id='a/b/c', name='Test Course')
-        self.assertEqual(course.type, 'honor')
+        self.assertEqual(course.type, 'audit')
 
-        course.create_or_update_seat('honor', False, 0, self.partner)
-        self.assertEqual(course.type, 'honor')
+        course.create_or_update_seat('audit', False, 0, self.partner)
+        self.assertEqual(course.type, 'audit')
 
         course.create_or_update_seat('verified', True, 10, self.partner)
         self.assertEqual(course.type, 'verified')

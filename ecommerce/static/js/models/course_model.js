@@ -45,7 +45,8 @@ define([
                 id: null,
                 name: null,
                 type: null,
-                verification_deadline: null
+                verification_deadline: null,
+                honor_mode: null
             },
 
             validation: {
@@ -59,6 +60,10 @@ define([
                 type: {
                     required: true,
                     msg: gettext('You must select a course type.')
+                },
+                honor_mode: {
+                    required: true,
+                    msg: gettext('You must choose if an honor seat should be created.')
                 },
                 verification_deadline: function (value) {
                     var invalid;
@@ -91,7 +96,8 @@ define([
                 id: gettext('Course ID'),
                 name: gettext('Course Name'),
                 type: gettext('Course Type'),
-                verification_deadline: gettext('Verification Deadline')
+                verification_deadline: gettext('Verification Deadline'),
+                honor_mode: gettext('Include Honor Seat')
             },
 
             relations: [{
@@ -107,25 +113,34 @@ define([
             }],
 
             /**
-             * Mapping of course type to an array of course seat types.
+             * Mapping of course type to an array of valid course seat types.
              */
-            courseTypeSeatMapping: {
-                honor: ['audit', 'honor'],
-                verified: ['audit', 'honor', 'verified'],
+            validCourseTypeSeatMapping: {
+                audit: ['audit', 'honor'],
+                verified: ['audit', 'verified', 'honor'],
                 professional: ['professional'],
-                credit: ['audit', 'honor', 'verified', 'credit']
+                credit: ['audit', 'verified', 'credit', 'honor']
+            },
+
+            /**
+             * Mapping of course type to an array of active course seat types.
+             */
+            activeCourseTypeSeatMapping: {
+                audit: ['audit'],
+                verified: ['audit', 'verified'],
+                professional: ['professional'],
+                credit: ['audit', 'verified', 'credit']
             },
 
             /**
              * Seat types that can be created by the user.
-             *
-             * Note that audit seats cannot be created, only edited.
              */
-            creatableSeatTypes: ['honor', 'verified', 'professional', 'credit'],
+            creatableSeatTypes: ['audit', 'honor', 'verified', 'professional', 'credit'],
 
             initialize: function () {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
                 this.on('sync', this.removeParentProducts, this);
+                this.on('sync', this.honorModeInit, this);
             },
 
             parse: function (response) {
@@ -153,6 +168,24 @@ define([
              */
             triggerIdVerified: function () {
                 this.trigger('change:id_verification_required', this.isIdVerified());
+            },
+
+            /**
+             * Return boolean if this Course has seats and one of them is Honor.
+             */
+            honorModeInit: function () {
+                var honor_seat;
+
+                if( this.seats().length > 0 ) {
+                    honor_seat = _.find(
+                        this.seats(),
+                        function (seat) {
+                            return seat.attributes.certificate_type === 'honor';
+                        }
+                    );
+
+                    this.set('honor_mode', !!honor_seat);
+                }
             },
 
             /**
@@ -220,12 +253,30 @@ define([
             },
 
             /**
-             * Returns an array of seat types relevant to this Course, based on its type.
+             * Returns boolean indicating if this Course should include an honor seat.
+             *
+             * @returns {boolean}
+             */
+            includeHonorMode: function () {
+                return this.get('type') && this.get('type') !== 'professional';
+            },
+
+            /**
+             * Returns an array of valid seat types relevant to this Course, based on its type.
              *
              * @returns {String[]} - Array of course seat types, or an empty array if the course type is unrecognized.
              */
             validSeatTypes: function () {
-                return _.result(this.courseTypeSeatMapping, this.get('type'), []);
+                return _.result(this.validCourseTypeSeatMapping, this.get('type'), []);
+            },
+
+            /**
+             * Returns an array of active seat types relevant to this Course, based on its type.
+             *
+             * @returns {String[]} - Array of course seat types, or an empty array if the course type is unrecognized.
+             */
+            activeSeatTypes: function () {
+                return _.result(this.activeCourseTypeSeatMapping, this.get('type'), []);
             },
 
             /**
@@ -251,11 +302,26 @@ define([
              */
             save: function (options) {
                 var verificationDeadline,
+                    honorMode,
+                    honorSeatClass,
+                    honorSeat,
                     data = {
                         id: this.get('id'),
                         name: this.get('name'),
                         verification_deadline: null
                     };
+
+                if (this.includeHonorMode()) {
+                    honorMode = this.get('honor_mode');
+
+                    if (honorMode) {
+                        honorSeatClass = CourseUtils.getCourseSeatModel('honor');
+                        /*jshint newcap: false */
+                        honorSeat = new honorSeatClass({course: this});
+                        /*jshint newcap: true */
+                        this.get('products').add(honorSeat);
+                    }
+                }
 
                 // Submit only the relevant products
                 data.products = _.map(this.getCleanProducts(), function (product) {
