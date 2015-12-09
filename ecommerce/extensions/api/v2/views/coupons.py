@@ -9,7 +9,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils.decorators import method_decorator
 from oscar.core.loading import get_model
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
@@ -17,7 +17,7 @@ from ecommerce.core.models import Client
 from ecommerce.extensions.api import serializers, data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
-from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_upc
+from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -87,7 +87,7 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
             client, __ = Client.objects.get_or_create(username=client_username)
 
-            coupon_catalog = get_or_create_catalog(
+            coupon_catalog, __ = get_or_create_catalog(
                 name='Coupon',  # Catalog classifier.
                 partner=partner,
                 stock_record_ids=stock_record_ids
@@ -111,7 +111,8 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             basket = self.add_product_to_basket(
                 product=coupon_product,
                 client=client,
-                site=request.site
+                site=request.site,
+                partner=partner
             )
 
             response_data = self.create_order_for_invoice(basket)
@@ -122,70 +123,40 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         """Creates a coupon product and a stock record for it.
 
         Arguments:
-            title (string): The name of the coupon.
-            price (integer): The price of the coupon(s).
+            title (str): The name of the coupon.
+            price (int): The price of the coupon(s).
             data (dict): Contains data needed to create vouchers,SKU and UPC:
                 - partner (User)
-                - benefit_type (string)
-                - benefit_value (integer)
+                - benefit_type (str)
+                - benefit_value (int)
                 - catalog (Catalog)
                 - end_date (Datetime)
-                - code (string)
-                - quantity (integer)
+                - code (str)
+                - quantity (int)
                 - start_date (Datetime)
-                - voucher_type (string)
+                - voucher_type (str)
 
         Returns:
             A coupon product object.
-        """
 
-        upc = generate_upc(
+        Raises:
+            IntegrityError: An error occured when create_vouchers method returns
+                            an IntegrityError exception
+            ValidationError: An error occured clean() validation method returns
+                             a ValidationError exception
+        """
+        coupon_slug = generate_coupon_slug(
             title=title,
             catalog=data['catalog'],
             partner=data['partner']
         )
+
         product_class = ProductClass.objects.get(slug='coupon')
-        coupon_product, created = Product.objects.get_or_create(
+        coupon_product, __ = Product.objects.get_or_create(
+            title=title,
             product_class=product_class,
-            upc=upc
+            slug=coupon_slug
         )
-
-        sku = generate_sku(
-            product=coupon_product,
-            partner=data['partner'],
-            catalog=data['catalog'],
-        )
-
-        if created:
-            coupon_product.title = title
-
-            stock_record = StockRecord.objects.create(
-                product=coupon_product,
-                partner=data['partner'],
-                partner_sku=sku
-            )
-            stock_record.price_currency = 'USD'
-            stock_record.price_excl_tax = price
-            stock_record.save()
-        else:
-            stock_record = StockRecord.objects.get(
-                partner=data['partner'],
-                partner_sku=sku
-            )
-            stock_record.price_excl_tax = price
-            stock_record.save()
-
-        # Product validation.
-        try:
-            coupon_product.clean()
-        except ValidationError as ex:
-            logger.exception(
-                'Failed to validate [%s] coupon.',
-                coupon_product.title
-            )
-            raise ValidationError(ex)
-
-        coupon_product.save()
 
         try:
             create_vouchers(
@@ -212,15 +183,41 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         coupon_product.attr.coupon_vouchers = coupon_vouchers
         coupon_product.save()
 
+        # Product validation.
+        try:
+            coupon_product.clean()
+        except ValidationError as ex:
+            logger.exception(
+                'Failed to validate [%s] coupon.',
+                coupon_product.title
+            )
+            raise ValidationError(ex)
+
+        sku = generate_sku(
+            product=coupon_product,
+            partner=data['partner'],
+            catalog=data['catalog'],
+        )
+
+        stock_record, __ = StockRecord.objects.get_or_create(
+            product=coupon_product,
+            partner=data['partner'],
+            partner_sku=sku
+        )
+        stock_record.price_currency = 'USD'
+        stock_record.price_excl_tax = price
+        stock_record.save()
+
         return coupon_product
 
-    def add_product_to_basket(self, product, client, site):
+    def add_product_to_basket(self, product, client, site, partner):
         """Adds the coupon product to the user's basket."""
         basket = Basket.get_basket(client, site)
         basket.add_product(product)
         logger.info(
             'Added product with SKU [%s] to basket [%d]',
-            product.stockrecords.first().partner_sku, basket.id
+            product.stockrecords.filter(partner=partner).first().partner_sku,
+            basket.id
         )
         return basket
 
@@ -233,8 +230,15 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             AC.KEYS.ORDER: None,
             AC.KEYS.PAYMENT_DATA: None,
         }
-
         basket.freeze()
+
+        # Invoice payment processor invocation.
+        payment_processor = InvoicePayment
+        payment_processor().handle_processor_response(response={}, basket=basket)
+        response_data[AC.KEYS.PAYMENT_DATA] = {
+            AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
+        }
+
         order = self.handle_order_placement(
             order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
             user=basket.owner,
@@ -252,12 +256,5 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             order_metadata[AC.KEYS.ORDER_NUMBER],
             basket.id
         )
-
-        # Invoice payment processor invocation.
-        payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(response={}, basket=basket)
-        response_data[AC.KEYS.PAYMENT_DATA] = {
-            AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
-        }
 
         return response_data

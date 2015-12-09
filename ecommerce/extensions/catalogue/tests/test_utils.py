@@ -1,4 +1,4 @@
-from  __future__ import unicode_literals
+from __future__ import unicode_literals
 
 import datetime
 from hashlib import md5
@@ -7,7 +7,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.catalogue.utils import generate_sku, generate_upc, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -48,7 +48,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
             'benefit_value': 100,
             'catalog': self.catalog,
             'end_date': datetime.date(2020, 1, 1),
-            'code': None,
+            'code': '',
             'quantity': 5,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE
@@ -75,12 +75,12 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
         self.assertEqual(self.catalog.id, 1)
 
-        existing_catalog = get_or_create_catalog(
+        existing_catalog, created = get_or_create_catalog(
             name='Test',
-            partner_id=self.partner.id,
+            partner=self.partner,
             stock_record_ids=[1]
         )
-
+        self.assertFalse(created)
         self.assertEqual(self.catalog, existing_catalog)
         self.assertEqual(Catalog.objects.count(), 1)
 
@@ -88,16 +88,17 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         course = Course.objects.create(id=course_id, name='Test Course 2')
         course.create_or_update_seat('verified', False, 0, self.partner)
 
-        new_catalog = get_or_create_catalog(
+        new_catalog, created = get_or_create_catalog(
             name='Test',
-            partner_id=self.partner.id,
+            partner=self.partner,
             stock_record_ids=[1, 2]
         )
-
+        self.assertTrue(created)
         self.assertNotEqual(self.catalog, new_catalog)
         self.assertEqual(Catalog.objects.count(), 2)
 
-    def test_generate_upc(self):
+    def test_generate_coupon_slug(self):
+        """Verify the method generates proper slug."""
         title = 'Test coupon'
         _hash = ' '.join((
             unicode(title),
@@ -106,5 +107,5 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         ))
         _hash = md5(_hash.lower()).hexdigest()[-10:]
         expected = _hash.upper()
-        actual = generate_upc(self.partner, title=title, catalog=self.catalog)
+        actual = generate_coupon_slug(self.partner, title=title, catalog=self.catalog)
         self.assertEqual(actual, expected)

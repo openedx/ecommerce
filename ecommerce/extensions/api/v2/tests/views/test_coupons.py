@@ -11,7 +11,7 @@ from oscar.core.loading import get_model
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
-from ecommerce.tests.testcases import TestCase, TransactionTestCase
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
@@ -176,7 +176,8 @@ class CouponOrderCreateViewTest(TestCase):
         basket = CouponOrderCreateView().add_product_to_basket(
             product=coupon,
             client=coupon_client,
-            site=self.site
+            site=self.site,
+            partner=self.partner
         )
 
         self.assertIsInstance(basket, Basket)
@@ -191,7 +192,8 @@ class CouponOrderCreateViewTest(TestCase):
         basket = CouponOrderCreateView().add_product_to_basket(
             product=coupon,
             client=coupon_client,
-            site=self.site
+            site=self.site,
+            partner=self.partner
         )
         response_data = CouponOrderCreateView().create_order_for_invoice(basket)
         self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
@@ -204,7 +206,7 @@ class CouponOrderCreateViewTest(TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponOrderCreateViewFunctionalTest(TransactionTestCase):
+class CouponOrderCreateViewFunctionalTest(TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):

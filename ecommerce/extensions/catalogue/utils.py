@@ -17,9 +17,10 @@ def generate_sku(product, partner, **kwargs):
     # Note: This currently supports coupons and seats.
     # A new product type can be added via a new else if block.
     if product.product_class and product.product_class.name == 'Coupon':
+        catalog = kwargs.get('catalog', '')
         _hash = ' '.join((
             unicode(product.id),
-            unicode(kwargs.get('catalog', '')),
+            unicode(catalog.name),
             str(partner.id)
         ))
     else:
@@ -49,18 +50,18 @@ def get_or_create_catalog(name, partner, stock_record_ids):
     for catalog in catalogs:
         if catalog.name == name and catalog.partner == partner:
             if set(catalog.stock_records.all()) == set(stock_records):
-                return catalog
+                return catalog, False
 
     catalog = Catalog.objects.create(name=name, partner=partner)
     for stock_record in stock_records:
         catalog.stock_records.add(stock_record)
-    return catalog
+    return catalog, True
 
 
-def generate_upc(partner, title, catalog):
+def generate_coupon_slug(partner, title, catalog):
     """
-    Generates a unique UPC value for a coupon from the
-    catalog and partner. Used to differentiate products.
+    Generates a unique slug value for a coupon from the
+    partner, title and catalog. Used to differentiate products.
     """
     _hash = ' '.join((
         unicode(title),
