@@ -19,9 +19,14 @@ define([
         return Backbone.View.extend({
             className: 'coupon-list-view',
 
+            events: {
+                'click .voucher-report-button': 'downloadVoucherReport'
+            },
+
             template: _.template(CouponListViewTemplate),
 
             initialize: function () {
+                _.bindAll(this, 'downloadVoucherReport');
                 this.listenTo(this.collection, 'update', this.refreshTableData);
             },
 
@@ -30,10 +35,6 @@ define([
                     id: coupon.get('id'),
                     title: coupon.get('title'),
                     client: coupon.get('client')
-                    // catalog: coupon.get('catalog'),
-                    // start_date: moment(coupon.get('start_date')).format('MMMM DD, YYYY, h:mm A'),
-                    // end_date: moment(coupon.get('end_date')).format('MMMM DD, YYYY, h:mm A'),
-                    // discount: coupon.get('discount')
                 };
             },
 
@@ -71,20 +72,17 @@ define([
                             {
                                 title: gettext('Client'),
                                 data: 'client'
-                            }
-                            // {
-                            //     title: gettext('Valid From'),
-                            //     data: 'start_date'
-                            // },
-                            // {
-                            //     title: gettext('Valid Until'),
-                            //     data: 'end_date'
-                            // }
-                            // {
-                            //     data: 'id',
-                            //     visible: false,
-                            //     searchable: true
-                            // }
+                            },
+                            {
+                                title: gettext('Voucher Report'),
+                                data: 'id',
+                                fnCreatedCell: function (nTd, sData, oData) {
+                                    $(nTd).html(_s.sprintf('<a href="" ' +
+                                        'class="btn btn-secondary btn-small voucher-report-button" ' +
+                                        'data-coupon-id="%s"> Download Voucher Report</a>', oData.id));
+                                },
+                                orderable: false
+                             }
                         ]
                     });
 
@@ -114,6 +112,19 @@ define([
                     $table = this.$el.find('#couponTable').DataTable();
 
                 $table.clear().rows.add(data).draw();
+                return this;
+            },
+
+            /**
+             * Download voucher report for a Coupon product
+             */
+            downloadVoucherReport: function (event) {
+                var coupon_id = $(event.currentTarget).data('coupon-id'),
+                    url = '/api/v2/vouchers/download_voucher_report/' + coupon_id;
+
+                event.preventDefault();
+                window.open(url, '_blank');
+                this.refreshTableData();
                 return this;
             }
         });
