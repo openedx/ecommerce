@@ -1,13 +1,13 @@
 """Tests of the Fulfillment API's fulfillment modules."""
+import datetime
 import json
-
 import ddt
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.test import override_settings
 import httpretty
 import mock
-from oscar.core.loading import get_model
+
+from django.conf import settings
+from django.test import override_settings
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
@@ -19,13 +19,19 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
+from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
+Applicator = get_class('offer.utils', 'Applicator')
+Benefit = get_model('offer', 'Benefit')
+Catalog = get_model('catalogue', 'Catalog')
 ProductAttribute = get_model("catalogue", "ProductAttribute")
-User = get_user_model()
+ProductClass = get_model('catalogue', 'ProductClass')
+StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 
 @ddt.ddt
@@ -353,3 +359,35 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             # 'x-edx-ga-client-id' and 'x-forwarded-for'.
             self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), '123.123')
             self.assertEqual(exp.request.headers.get('x-forwarded-for'), '11.22.33.44')
+
+    def test_voucher_usage(self):
+        """
+        Test that using a voucher applies offer discount to reduce order price
+        """
+        catalog = Catalog.objects.create(partner=self.partner)
+
+        coupon_product_class, _ = ProductClass.objects.get_or_create(name='coupon')
+        coupon = factories.create_product(
+            product_class=coupon_product_class,
+            title='Test product'
+        )
+
+        stock_record = StockRecord.objects.filter(product=self.seat).first()
+        catalog.stock_records.add(stock_record)
+
+        vouchers = create_vouchers(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.00,
+            catalog=catalog,
+            coupon=coupon,
+            end_datetime=datetime.datetime.now(),
+            name="Test Voucher",
+            quantity=10,
+            start_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
+            voucher_type=Voucher.SINGLE_USE
+        )
+        voucher = vouchers[0]
+
+        seat_basket = self.order.basket
+        Applicator().apply_offers(seat_basket, voucher.offers.all())
+        self.assertEqual(seat_basket.total_excl_tax, 0.00)
