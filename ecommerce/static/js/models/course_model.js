@@ -12,7 +12,8 @@ define([
         'collections/product_collection',
         'models/course_seats/course_seat',
         'utils/course_utils',
-        'utils/utils'
+        'utils/utils',
+        'utils/validation_patterns'
     ],
     function (Backbone,
               BackboneRelational,
@@ -29,14 +30,6 @@ define([
         'use strict';
 
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
-
-        _.extend(Backbone.Validation.patterns, {
-            courseId: /[^/+]+(\/|\+)[^/+]+(\/|\+)[^/]+/
-        });
-
-        _.extend(Backbone.Validation.messages, {
-            courseId: gettext('The course ID is invalid.')
-        });
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/courses/',

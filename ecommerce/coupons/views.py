@@ -1,16 +1,5 @@
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from django.http import Http404
-
-
-class StaffOnlyMixin(object):
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise Http404
-
-        return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
+from ecommerce.core.views import StaffOnlyMixin
 
 
 class CouponAppView(StaffOnlyMixin, TemplateView):

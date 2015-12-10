@@ -33,8 +33,7 @@ define([
             getRowData: function (coupon) {
                 return {
                     id: coupon.get('id'),
-                    title: coupon.get('title'),
-                    client: coupon.get('client')
+                    title: coupon.get('title')
                 };
             },
 
@@ -68,10 +67,6 @@ define([
                             {
                                 title: gettext('Name'),
                                 data: 'title'
-                            },
-                            {
-                                title: gettext('Client'),
-                                data: 'client'
                             },
                             {
                                 title: gettext('Voucher Report'),

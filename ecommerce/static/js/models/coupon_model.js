@@ -1,5 +1,3 @@
-// jscs:disable requireCapitalizedConstructors
-
 define([
         'backbone',
         'backbone.relational',
@@ -9,7 +7,9 @@ define([
         'jquery-cookie',
         'underscore',
         'moment',
-        'models/course_model'
+        'models/course_model',
+        'utils/validation_patterns',
+
     ],
     function (Backbone,
               BackboneRelational,
@@ -19,24 +19,14 @@ define([
               $cookie,
               _,
               moment,
-              Course) {
+              Course
+            ) {
         'use strict';
 
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
-        _.extend(Backbone.Validation.patterns, {
-            courseId: /[^/+]+(\/|\+)[^/+]+(\/|\+)[^/]+/
-        });
-
-        _.extend(Backbone.Validation.messages, {
-            courseId: gettext('The course ID is invalid.')
-        });
-
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/coupons/',
-
-            defaults: {
-            },
 
             validation: {
                 course_id: {
@@ -97,9 +87,6 @@ define([
                 return this.get('code_type') === 'discount' ;
             },
 
-            labels: {
-            },
-
             relations: [
                 {
                     type: Backbone.HasOne,
@@ -115,6 +102,9 @@ define([
                 this.set('quantity', 1);
             },
 
+            /**
+             * Fetch course data for valid course ID.
+             */
             loadCourse: function (model, value) {
                 if (this.isValid('course_id')) {
                     this.set('course', Course.findOrCreate({id: value}));
@@ -123,6 +113,9 @@ define([
                 }
             },
 
+            /**
+             * Fill seat type options from course data.
+             */
             fillFromCourse: function (course) {
                 var seatTypes = _.map(course.seats(), function(val) {
                     return {
@@ -136,12 +129,18 @@ define([
                 this.set('seat_type', seatTypes[0].value);
             },
 
+            /**
+             * When user selects the 'Sinle use' limitation option set quanity to '1'.
+             */
             changeVoucherType: function (model, value) {
                 if (value === 'Single use') {
                     this.set('quantity', 1);
                 }
             },
 
+            /**
+             * Save the Coupon.
+             */
             save: function (options) {
                 _.defaults(options || (options = {}), {
                     type: 'POST',
@@ -150,6 +149,7 @@ define([
                     contentType: 'application/json'
                 });
 
+                // find the seat by selected seat type, so we can get the stockrecord IDs
                 var seat = this.get('course').get('products').findWhere({
                     certificate_type: this.get('seat_type')
                 });
@@ -171,6 +171,7 @@ define([
                     data.quantity = 1;
                 }
 
+                // Enrolment code always gives 100% discount
                 switch (this.get('code_type')) {
                 case 'enrollment':
                     data.price = parseFloat(this.get('price'));

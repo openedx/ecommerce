@@ -4,11 +4,9 @@ import logging
 import os
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
-from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView
 from edx_rest_api_client.client import EdxRestApiClient
 from requests import Timeout
@@ -16,17 +14,9 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.settings import get_lms_url
+from ecommerce.core.views import StaffOnlyMixin
 
 logger = logging.getLogger(__name__)
-
-
-class StaffOnlyMixin(object):
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise Http404
-
-        return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 class CourseAppView(StaffOnlyMixin, TemplateView):

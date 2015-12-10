@@ -20,7 +20,6 @@ class CouponAppViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(settings.LOGIN_URL, response.url)
 
-    @httpretty.activate
     def test_staff_user_required(self):
         """ Verify the view is only accessible to staff users. """
         user = self.create_user(is_staff=False)
@@ -29,7 +28,6 @@ class CouponAppViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
         user = self.create_user(is_staff=True)
-        self.create_access_token(user)
         self.client.login(username=user.username, password=self.password)
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)

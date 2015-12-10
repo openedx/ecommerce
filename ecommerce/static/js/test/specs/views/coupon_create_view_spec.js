@@ -27,6 +27,11 @@ define([
             });
 
             it('should toggle fields', function () {
+              
+                function visible(selector) {
+                    return !view.$el.find(selector).closest('.form-group').hasClass('hidden');
+                }
+
                 // discount
                 view.$el.find('[name=code_type]').val('discount').trigger('change');
                 expect(visible('[name=price]')).toBe(false);
@@ -52,10 +57,6 @@ define([
                 expect(visible('[name=quantity]')).toBe(false);
                 view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
                 expect(visible('[name=quantity]')).toBe(false);
-
-                function visible(selector) {
-                    return !view.$el.find(selector).closest('.form-group').hasClass('hidden');
-                }
             });
 
         });
