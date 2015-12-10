@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-import dateutil.parser
 import logging
 from decimal import Decimal
+import dateutil.parser
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -38,9 +38,7 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
     Creates a new coupon product, adds it to a basket and creates a
     new order from that basket.
     """
-    queryset = Product.objects.filter(
-        product_class=ProductClass.objects.get(name='Coupon')
-    )
+    queryset = Product.objects.filter(product_class__name='Coupon')
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = serializers.CouponSerializer
 
@@ -145,11 +143,7 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             ValidationError: An error occured clean() validation method returns
                              a ValidationError exception
         """
-        coupon_slug = generate_coupon_slug(
-            title=title,
-            catalog=data['catalog'],
-            partner=data['partner']
-        )
+        coupon_slug = generate_coupon_slug(title=title, catalog=data['catalog'], partner=data['partner'])
 
         product_class = ProductClass.objects.get(slug='coupon')
         coupon_product, __ = Product.objects.get_or_create(
@@ -172,10 +166,7 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 voucher_type=data['voucher_type']
             )
         except IntegrityError as ex:
-            logger.exception(
-                'Failed to create vouchers for [%s] coupon.',
-                coupon_product.title
-            )
+            logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
             raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
@@ -187,10 +178,7 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         try:
             coupon_product.clean()
         except ValidationError as ex:
-            logger.exception(
-                'Failed to validate [%s] coupon.',
-                coupon_product.title
-            )
+            logger.exception('Failed to validate [%s] coupon.', coupon_product.title)
             raise ValidationError(ex)
 
         sku = generate_sku(

@@ -24,7 +24,7 @@ def create_product_class(apps, schema_editor):
         name='Coupon vouchers',
         code='coupon_vouchers',
         type='entity',
-        required=False
+        required=True
     )
     # Create a category for course seats
     Category.objects.create(

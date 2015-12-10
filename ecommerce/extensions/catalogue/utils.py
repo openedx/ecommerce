@@ -33,10 +33,10 @@ def generate_sku(product, partner, **kwargs):
             str(partner.id)
         ))
 
-    _hash = md5(_hash.lower())
-    _hash = _hash.hexdigest()[-7:]
+    md5_hash = md5(_hash.lower())
+    digest = md5_hash.hexdigest()[-7:]
 
-    return _hash.upper()
+    return digest.upper()
 
 
 def get_or_create_catalog(name, partner, stock_record_ids):
@@ -68,7 +68,7 @@ def generate_coupon_slug(partner, title, catalog):
         unicode(catalog.name),
         str(partner.id)
     ))
-    _hash = md5(_hash.lower())
-    _hash = _hash.hexdigest()[-10:]
+    md5_hash = md5(_hash.lower())
+    digest = md5_hash.hexdigest()[-10:]
 
-    return _hash.upper()
+    return digest.upper()

@@ -4,13 +4,14 @@ import datetime
 import json
 
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.db.utils import IntegrityError
+from django.test import RequestFactory
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
+from ecommerce.tests.factories import SiteFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -72,7 +73,7 @@ class CouponOrderCreateViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)['results']
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['price'], 100)
+        self.assertEqual(result[0]['price'], '100.00')
         self.assertEqual(len(result[0]['vouchers']), 5)
 
         # If there are no products it returns an empty response.
@@ -81,6 +82,36 @@ class CouponOrderCreateViewTest(TestCase):
         self.assertDictEqual(
             json.loads(response.content),
             {'count': 0, 'next': None, 'previous': None, 'results': []}
+        )
+
+    def test_create(self):
+        """Test the create method."""
+        site_configuration = SiteConfigurationFactory(partner__name='TestX')
+        site = SiteFactory()
+        site.siteconfiguration = site_configuration
+        data = {
+            'title': 'Test coupon',
+            'client_username': 'Client',
+            'stock_record_ids': [1],
+            'start_date': '2015-1-1',
+            'end_date': '2020-1-1',
+            'code': '',
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 1,
+            'price': 100
+        }
+        request = RequestFactory()
+        request.data = data
+        request.site = site
+
+        response = CouponOrderCreateView().create(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(
+            response.data,
+            {u'payment_data': {u'payment_processor_name': u'Invoice'}, u'id': 1, u'order': 1}
         )
 
     def test_create_coupon_product(self):
@@ -235,8 +266,7 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
             'quantity': 2,
             'price': 100
         }
-        with transaction.atomic():
-            self.response = self.client.post(COUPONS_LINK, data, format='json')
+        self.response = self.client.post(COUPONS_LINK, data, format='json')
 
     def test_response(self):
         """Test the response data given after the order was created."""
