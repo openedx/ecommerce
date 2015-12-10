@@ -21,20 +21,6 @@ BASKET_URLS = [
     ),
 ]
 
-ORDER_URLS = [
-    url(r'^$', order_views.OrderListView.as_view(), name='list'),
-    url(
-        r'^{number}/$'.format(number=ORDER_NUMBER_PATTERN),
-        order_views.OrderRetrieveView.as_view(),
-        name='retrieve'
-    ),
-    url(
-        r'^{number}/fulfill/$'.format(number=ORDER_NUMBER_PATTERN),
-        order_views.OrderFulfillView.as_view(),
-        name='fulfill'
-    ),
-]
-
 PAYMENT_URLS = [
     url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(),
         name='list_processors'),
@@ -56,7 +42,6 @@ ATOMIC_PUBLICATION_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
-    url(r'^orders/', include(ORDER_URLS, namespace='orders')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
@@ -78,5 +63,7 @@ router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_nam
 router.register(r'catalogs', catalog_views.CatalogViewSet) \
     .register(r'products', product_views.ProductViewSet, base_name='catalog-product',
               parents_query_lookups=['stockrecords__catalogs'])
+
+router.register(r'orders', order_views.OrderViewSet)
 
 urlpatterns += router.urls
