@@ -4,7 +4,6 @@ import logging
 from decimal import Decimal
 import dateutil.parser
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils.decorators import method_decorator
@@ -173,13 +172,6 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         coupon_product.attr.coupon_vouchers = coupon_vouchers
         coupon_product.save()
-
-        # Product validation.
-        try:
-            coupon_product.clean()
-        except ValidationError as ex:
-            logger.exception('Failed to validate [%s] coupon.', coupon_product.title)
-            raise ValidationError(ex)
 
         sku = generate_sku(
             product=coupon_product,
