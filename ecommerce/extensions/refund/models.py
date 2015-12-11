@@ -58,6 +58,10 @@ class StatusMixin(object):
 
 class Refund(StatusMixin, TimeStampedModel):
     """Main refund model, used to represent the state of a refund."""
+
+    class Meta(TimeStampedModel.Meta):
+        index_together = ["modified", "created"]
+
     order = models.ForeignKey('order.Order', related_name='refunds', verbose_name=_('Order'))
     user = models.ForeignKey('core.User', related_name='refunds', verbose_name=_('User'))
     total_credit_excl_tax = models.DecimalField(_('Total Credit (excl. tax)'), decimal_places=2, max_digits=12)
@@ -211,6 +215,10 @@ class Refund(StatusMixin, TimeStampedModel):
 
 class RefundLine(StatusMixin, TimeStampedModel):
     """A refund line, used to represent the state of a single item as part of a larger Refund."""
+
+    class Meta(TimeStampedModel.Meta):
+        index_together = ["modified", "created"]
+
     refund = models.ForeignKey('refund.Refund', related_name='lines', verbose_name=_('Refund'))
     order_line = models.ForeignKey('order.Line', related_name='refund_lines', verbose_name=_('Order Line'))
     line_credit_excl_tax = models.DecimalField(_('Line Credit (excl. tax)'), decimal_places=2, max_digits=12)
