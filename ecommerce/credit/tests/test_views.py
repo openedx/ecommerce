@@ -4,9 +4,11 @@ Tests for the checkout page.
 from __future__ import unicode_literals
 import json
 
+import ddt
 from django.conf import settings
 from django.core.urlresolvers import reverse
 import httpretty
+from waffle.models import Switch
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
@@ -19,6 +21,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 
 
+@ddt.ddt
 class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
     """Test for Checkout page"""
 
@@ -235,3 +238,45 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
 
         response = self.client.get(self.path)
         self.assertEqual(response.context['error'], 'No credit seat is available for this course.')
+
+    @ddt.data(
+        (settings.PAYMENT_PROCESSORS, {
+            'payment_processors': {},
+            'error': u'All payment options are currently unavailable. Try the transaction again in a few minutes.'
+        }),
+        (('ecommerce.extensions.payment.processors.paypal.Paypal',), {
+            'payment_processors': {
+                'cybersource': 'Checkout'
+            }
+        }),
+        ((), {
+            'payment_processors': {
+                'cybersource': 'Checkout',
+                'paypal': 'Checkout with PayPal'
+            }
+        })
+    )
+    @ddt.unpack
+    @httpretty.activate
+    def test_disabled_providers(self, disabled_processors, expected_context):
+        """ Verify that payment processors can be disabled with their Waffle
+        switches, and that an error is shown if none are available.
+        """
+        for path in disabled_processors:
+            processor_class = get_processor_class(path)
+            switch, __ = Switch.objects.get_or_create(
+                name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor_class.NAME
+            )
+            switch.active = False
+            switch.save()
+
+        self.course.create_or_update_seat(
+            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+        )
+
+        self._mock_eligibility_api(body=self.eligibilities)
+        self._mock_providers_api(body=self.provider_data)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(expected_context, response.context)

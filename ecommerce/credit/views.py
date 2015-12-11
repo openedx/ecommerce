@@ -66,13 +66,22 @@ class Checkout(TemplateView):
         # Make button text for each processor which will be shown to user.
         processors_dict = OrderedDict()
         for path in settings.PAYMENT_PROCESSORS:
-            processor = get_processor_class(path).NAME.lower()
+            processor_class = get_processor_class(path)
+            if not processor_class.is_enabled():
+                continue
+            processor = processor_class.NAME.lower()
             if processor == 'cybersource':
                 processors_dict[processor] = 'Checkout'
             elif processor == 'paypal':
                 processors_dict[processor] = 'Checkout with PayPal'
             else:
                 processors_dict[processor] = 'Checkout with {}'.format(processor)
+        if len(processors_dict) == 0:
+            context.update({
+                'error': _(
+                    u'All payment options are currently unavailable. Try the transaction again in a few minutes.'
+                )
+            })
 
         context.update({
             'course': course,
