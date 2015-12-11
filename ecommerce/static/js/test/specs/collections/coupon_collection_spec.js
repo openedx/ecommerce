@@ -10,27 +10,48 @@ define([
                 previous: null,
                 results: [
                     {
-                        id: 1,
-                        title: 'Test Coupon',
-                        client: 'TestClient',
-                        price: 0.0,
-                        vouchers: [
+                        id: 4,
+                        url: 'http://localhost:8002/api/v2/products/4/',
+                        structure: 'standalone',
+                        product_class: 'Coupon',
+                        title: 'Coupon',
+                        price: '100.00',
+                        expires: null,
+                        attribute_values: [
                             {
-                                id: 8,
-                                name: 'Voucher for 2: edx-Coupon',
-                                code: 'CODE123',
-                                usage: 'Single use',
-                                start_datetime: '2015-11-22T05:00:00Z',
-                                end_datetime: '2015-11-25T05:00:00Z',
-                                num_basket_additions: 0,
-                                num_orders: 0,
-                                total_discount: '0.00',
-                                date_created: '2015-11-24',
-                                offers: [
-                                    3
+                                name: 'Coupon vouchers',
+                                value: [
+                                    {
+                                        id: 1,
+                                        name: 'Coupon',
+                                        code: 'P5KM74JY',
+                                        usage: 'Single use',
+                                        start_datetime: '2015-01-01T00:00:00Z',
+                                        end_datetime: '2020-01-01T00:00:00Z',
+                                        num_basket_additions: 1,
+                                        num_orders: 0,
+                                        total_discount: '0.00',
+                                        date_created: '2015-12-09',
+                                        offers: [
+                                            1
+                                        ]
+                                    }
                                 ]
                             }
-                        ]
+                        ],
+                        is_available_to_buy: true,
+                        stockrecords: []
+                    },
+                    {
+                        id: 3,
+                        url: 'http://localhost:8002/api/v2/products/3/',
+                        structure: 'child',
+                        product_class: 'Seat',
+                        title: 'Seat in demo course with verified certificate (and ID verification)',
+                        price: '100.00',
+                        expires: null,
+                        is_available_to_buy: true,
+                        stockrecords: [ ]
                     },
                 ]
             };
@@ -41,13 +62,18 @@ define([
 
         describe('Coupon collection', function () {
             describe('parse', function () {
-                it('should return the results list in the response', function () {
-                    expect(collection.parse(response)).toEqual(response.results);
+                it('should filter results by product_class = Coupon', function () {
+                    spyOn(collection, 'fetch').and.returnValue(null);
+                    collection.set(collection.parse(response));
+
+                    expect(collection.length).toEqual(1);
+                    expect(collection.get(3)).toBeUndefined();
+                    expect(collection.get(4)).toBeDefined();
                 });
 
                 it('should fetch the next page of results', function () {
                     spyOn(collection, 'fetch').and.returnValue(null);
-                    response.next = '/api/v2/coupons/?page=2';
+                    response.next = '/api/v2/products/?page=2';
 
                     collection.parse(response);
                     expect(collection.url).toEqual(response.next);
