@@ -10,6 +10,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 import waffle
 
+from ecommerce.extensions.api.mixins import ProductInfoMixin
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.courses.models import Course
 
@@ -30,11 +31,6 @@ Voucher = get_model('voucher', 'Voucher')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
-
-
-def get_info(request, product):
-    """Return the appropriate ``PurchaseInfo`` instance."""
-    return Selector().strategy(request=request).fetch_for_product(product)
 
 
 class BillingAddressSerializer(serializers.ModelSerializer):
@@ -85,27 +81,19 @@ class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
         fields = ('price_currency', 'price_excl_tax',)
 
 
-class ProductSerializer(serializers.HyperlinkedModelSerializer):
+class ProductSerializer(ProductInfoMixin, serializers.HyperlinkedModelSerializer):
     """ Serializer for Products. """
     attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
     product_class = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
     stockrecords = StockRecordSerializer(many=True, read_only=True)
 
     def get_product_class(self, product):
         return product.get_product_class().name
 
-    def get_price(self, product):
-        request = self.context.get('request')
-        info = get_info(request, product)
-        if info.availability.is_available_to_buy:
-            return serializers.DecimalField(max_digits=10, decimal_places=2).to_representation(info.price.excl_tax)
-        return None
-
     def get_is_available_to_buy(self, product):
         request = self.context.get('request')
-        info = get_info(request, product)
+        info = self.get_info(request, product)
         return info.availability.is_available_to_buy
 
     class Meta(object):
@@ -347,20 +335,8 @@ class VoucherSerializer(serializers.ModelSerializer):
         model = Voucher
 
 
-class CouponSerializer(serializers.ModelSerializer):
-    price = serializers.SerializerMethodField()
+class CouponSerializer(ProductInfoMixin, serializers.ModelSerializer):
     vouchers = serializers.SerializerMethodField()
-
-    def get_price(self, product):
-        request = self.context.get('request')
-        info = get_info(request, product)
-
-        if info.availability.is_available_to_buy:
-            return serializers.DecimalField(
-                max_digits=10,
-                decimal_places=2
-            ).to_representation(info.price.excl_tax)
-        return None
 
     def get_vouchers(self, obj):
         vouchers = obj.attr.coupon_vouchers.vouchers.all()
