@@ -43,9 +43,13 @@ class Checkout(TemplateView):
             }
 
         partner = get_partner_for_site(self.request)
-        credit_seats = [seat for seat in course.seat_products if
-                        seat.attr.certificate_type == self.CREDIT_MODE and seat.stockrecords.filter(
-                            partner=partner).exists()]
+        # Audit seats do not have a `certificate_type` attribute, so
+        # we use getattr to avoid an exception.
+        credit_seats = [
+            seat for seat in course.seat_products
+            if getattr(seat.attr, 'certificate_type', None) == self.CREDIT_MODE and
+            seat.stockrecords.filter(partner=partner).exists()
+        ]
 
         if not credit_seats:
             return {
