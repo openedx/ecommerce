@@ -4,7 +4,7 @@ from rest_framework import serializers
 Selector = get_class('partner.strategy', 'Selector')
 
 
-class ProductInfoMixin(serializers.Serializer):
+class ProductInfoMixin(serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
 
     def get_info(self, request, product):
