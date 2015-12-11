@@ -27,7 +27,6 @@ define([
             });
 
             it('should toggle fields', function () {
-              
                 function visible(selector) {
                     return !view.$el.find(selector).closest('.form-group').hasClass('hidden');
                 }
@@ -36,6 +35,10 @@ define([
                 view.$el.find('[name=code_type]').val('discount').trigger('change');
                 expect(visible('[name=price]')).toBe(false);
                 expect(visible('[name=benefit_value]')).toBe(true);
+                expect(view.$el.find('.benefit-addon').html()).toBe('%');
+
+                view.$el.find('[name=benefit_type]').val('Fixed').trigger('change');
+                expect(view.$el.find('.benefit-addon').html()).toBe('$');
 
                 view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
                 expect(visible('[name=code]')).toBe(false);

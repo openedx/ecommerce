@@ -9,8 +9,7 @@ define([
         'underscore',
         'underscore.string',
         'text!templates/coupon_form.html',
-        'views/alert_view',
-        'utils/utils'
+        'views/form_view'
     ],
     function ($,
               Backbone,
@@ -20,20 +19,15 @@ define([
               _,
               _s,
               CouponFormTemplate,
-              AlertView,
-              Utils) {
+              FormView) {
         'use strict';
 
-        return Backbone.View.extend({
+        return FormView.extend({
             tagName: 'form',
 
             className: 'coupon-form-view',
 
             template: _.template(CouponFormTemplate),
-
-            events: {
-                'submit': 'submit'
-            },
 
             codeTypes: [
                 {
@@ -137,8 +131,7 @@ define([
                 this.listenTo(this.model, 'change:code_type', this.toggleFields);
                 this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
 
-                // Enable validation
-                Utils.bindValidation(this);
+                this._super();
             },
 
             toggleFields: function() {
@@ -179,12 +172,11 @@ define([
                 }
             },
 
-            remove: function () {
-                Backbone.Validation.unbind(this);
-
-                this.clearAlerts();
-
-                return this._super();
+            /**
+             * Navigate to coupon list on save (overrides default behaviour).
+             */
+            saveSuccess: function () {
+                this.goTo('/');
             },
 
             render: function () {
@@ -199,121 +191,10 @@ define([
                 this.model.set('voucher_type', this.voucherTypes[0].value);
                 this.model.set('benefit_type', 'Percentage');
 
-                return this;
-            },
-
-            /**
-             * Renders alerts that will appear at the top of the page.
-             *
-             * @param {String} level - Severity of the alert. This should be one of success, info, warning, or danger.
-             * @param {Sring} message - Message to display to the user.
-             */
-            renderAlert: function (level, message) {
-                var view = new AlertView({level: level, title: gettext('Error!'), message: message});
-
-                view.render();
-                this.$alerts.append(view.el);
-                this.alertViews.push(view);
-
-                $('body').animate({
-                    scrollTop: this.$alerts.offset().top
-                }, 500);
-
-                this.$alerts.focus();
-
-                return this;
-            },
-
-            /**
-             * Remove all alerts currently on display.
-             */
-            clearAlerts: function () {
-                _.each(this.alertViews, function (view) {
-                    view.remove();
-                });
-
-                this.alertViews = [];
-
-                return this;
-            },
-
-            /**
-             * Returns the value of an input field.
-             *
-             * @param {String} name - Name of the field whose value should be returned
-             * @returns {*} - Value of the field.
-             */
-            getFieldValue: function (name) {
-                return this.$(_s.sprintf('input[name=%s]', name)).val();
-            },
-
-            /**
-             * Submits the form data to the server.
-             *
-             * If client-side validation fails, data will NOT be submitted. Server-side errors will result in an
-             * alert being rendered. If submission succeeds, the user will be redirected to the course detail page.
-             *
-             * @param e
-             */
-            submit: function (e) {
-                var $buttons,
-                    $submitButton,
-                    btnDefaultText,
-                    self = this,
-                    btnSavingContent = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' +
-                        gettext('Saving...');
-
-                e.preventDefault();
-
-                // Validate the input and display a message, if necessary.
-                if (!this.model.isValid(true)) {
-                    this.clearAlerts();
-                    this.renderAlert('danger', gettext('Please complete all required fields.'));
-                    return;
-                }
-
-                $buttons = this.$el.find('.form-actions .btn');
-                $submitButton = $buttons.filter('button[type=submit]');
-
-                // Store the default button text, and replace it with the saving state content.
-                btnDefaultText = $submitButton.text();
-                $submitButton.html(btnSavingContent);
-
-                // Disable all buttons by setting the attribute (for <button>) and class (for <a>)
-                $buttons.attr('disabled', 'disabled').addClass('disabled');
-
-                this.model.save({
-                    complete: function () {
-                        // Restore the button text
-                        $submitButton.text(btnDefaultText);
-
-                        // Re-enable the buttons
-                        $buttons.removeAttr('disabled').removeClass('disabled');
-                    },
-                    success: function () {
-                        self.goTo('/');
-                    },
-                    error: function (model, response) {
-                        var message = gettext('An error occurred while saving the data.');
-
-                        if (response.responseJSON && response.responseJSON.error) {
-                            message = response.responseJSON.error;
-
-                            // Log the error to the console for debugging purposes
-                            console.error(message);
-                        } else {
-                            // Log the error to the console for debugging purposes
-                            console.error(response.responseText);
-                        }
-
-                        self.clearAlerts();
-                        self.renderAlert('danger', message);
-                        self.$el.animate({scrollTop: 0}, 'slow');
-                    }
-                });
-
+                this._super();
                 return this;
             }
+
         });
     }
 );
