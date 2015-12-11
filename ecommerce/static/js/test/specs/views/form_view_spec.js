@@ -50,14 +50,14 @@ define([
                     options.complete();
                 });
 
-                errorObj = { responseText: 'Fake error!' }
+                errorObj = { responseText: 'Fake error!' };
                 view.submit($.Event('click'));
                 expect(model.save).toHaveBeenCalled();
                 expect(view.$el.find('.alert').length).toBe(1);
                 expect(view.$el.find('.alert').html()).toBe(errorHTML);
 
                 // return responseJSON
-                errorObj = { responseJSON: { error: 'Fake error!' }};
+                errorObj = { responseJSON: { error: 'An error occurred while saving the data.' }};
                 view.submit($.Event('click'));
                 expect(model.save).toHaveBeenCalled();
                 expect(view.$el.find('.alert').length).toBe(1);
