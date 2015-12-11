@@ -209,6 +209,24 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self._assert_success_checkout_page()
 
     @httpretty.activate
+    def test_get_checkout_page_with_audit_seats(self):
+        """ Verify the page loads with the proper context, if all Credit API
+        calls return successfully.
+        """
+        # Create the credit seat
+        self.course.create_or_update_seat(
+            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+        )
+
+        # Create the audit seat
+        self.course.create_or_update_seat('', False, 0, self.partner)
+
+        self._mock_eligibility_api(body=self.eligibilities)
+        self._mock_providers_api(body=self.provider_data)
+
+        self._assert_success_checkout_page()
+
+    @httpretty.activate
     def test_get_without_credit_seat(self):
         """ Verify an error is shown if the Credit API returns an empty list
         of providers.
