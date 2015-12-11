@@ -24,7 +24,8 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
-COUPONS_LINK = reverse('api:v2:coupons-list')
+COUPONS_CREATE = reverse('api:v2:coupons:create')
+PRODUCTS_LIST = reverse('api:v2:product-list')
 
 
 class CouponOrderCreateViewTest(TestCase):
@@ -69,20 +70,13 @@ class CouponOrderCreateViewTest(TestCase):
         """Test coupon API endpoint list."""
         self.create_coupon(title='Test coupon', price=100)
 
-        response = self.client.get(COUPONS_LINK)
+        response = self.client.get(PRODUCTS_LIST)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)['results']
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 3)
         self.assertEqual(result[0]['price'], '100.00')
-        self.assertEqual(len(result[0]['vouchers']), 5)
-
-        # If there are no products it returns an empty response.
-        Product.objects.all().delete()
-        response = self.client.get(COUPONS_LINK)
-        self.assertDictEqual(
-            json.loads(response.content),
-            {'count': 0, 'next': None, 'previous': None, 'results': []}
-        )
+        self.assertEqual(result[0]['attribute_values'][0]['name'], 'Coupon vouchers')
+        self.assertEqual(len(result[0]['attribute_values'][0]['value']), 5)
 
     def test_create(self):
         """Test the create method."""
@@ -266,7 +260,7 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
             'quantity': 2,
             'price': 100
         }
-        self.response = self.client.post(COUPONS_LINK, data, format='json')
+        self.response = self.client.post(COUPONS_CREATE, data, format='json')
 
     def test_response(self):
         """Test the response data given after the order was created."""
