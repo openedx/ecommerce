@@ -9,8 +9,8 @@ require([
         'use strict';
 
         $(function () {
-            var $app = $('#app');
-            var couponApp = new CouponRouter({$el: $app});
+            var $app = $('#app'),
+                couponApp = new CouponRouter({$el: $app});
 
             couponApp.start();
 

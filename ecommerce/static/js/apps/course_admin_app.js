@@ -13,8 +13,8 @@ require([
         'use strict';
 
         $(function () {
-            var $app = $('#app');
-            var courseApp = new CourseRouter({$el: $app});
+            var $app = $('#app'),
+                courseApp = new CourseRouter({$el: $app});
 
             ecommerce.credit = ecommerce.credit || {};
             ecommerce.credit.providers = new CreditProviderCollection($app.data('credit-providers'));

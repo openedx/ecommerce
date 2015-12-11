@@ -9,7 +9,8 @@ define([
         'underscore',
         'underscore.string',
         'text!templates/coupon_form.html',
-        'views/alert_view'
+        'views/alert_view',
+        'utils/utils'
     ],
     function ($,
               Backbone,
@@ -19,27 +20,9 @@ define([
               _,
               _s,
               CouponFormTemplate,
-              AlertView) {
+              AlertView,
+              Utils) {
         'use strict';
-
-        // Extend the callbacks to work with Bootstrap.
-        // See: http://thedersen.com/projects/backbone-validation/#callbacks
-        _.extend(Backbone.Validation.callbacks, {
-            valid: function (view, attr) {
-                var $el = view.$('[name=' + attr + ']'),
-                    $group = $el.closest('.form-group');
-
-                $group.removeClass('has-error');
-                $group.find('.help-block:first').html('').addClass('hidden');
-            },
-            invalid: function (view, attr, error) {
-                var $el = view.$('[name=' + attr + ']'),
-                    $group = $el.closest('.form-group');
-
-                $group.addClass('has-error');
-                $group.find('.help-block:first').html(error).removeClass('hidden');
-            }
-        });
 
         return Backbone.View.extend({
             tagName: 'form',
@@ -155,7 +138,7 @@ define([
                 this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
 
                 // Enable validation
-                Backbone.Validation.bind(this);
+                Utils.bindValidation(this);
             },
 
             toggleFields: function() {

@@ -52,27 +52,31 @@ define([
                     }
                 },
                 start_date: function (val) {
+                    var startDate,
+                        endDate;
                     if (_.isEmpty(val)) {
                         return gettext('Start date is required');
                     }
-                    var startDate = moment(new Date(val));
+                    startDate = moment(new Date(val));
                     if (!startDate.isValid()) {
                         return gettext('Start date is invalid');
                     }
-                    var endDate = moment(this.get('end_date'));
+                    endDate = moment(this.get('end_date'));
                     if (endDate && startDate.isAfter(endDate)) {
                         return gettext('Must occur before end date');
                     }
                 },
                 end_date: function (val) {
+                    var startDate,
+                        endDate;
                     if (_.isEmpty(val)) {
                         return gettext('End date is required');
                     }
-                    var endDate = moment(new Date(val));
+                    endDate = moment(new Date(val));
                     if (!endDate.isValid()) {
                         return gettext('End date is invalid');
                     }
-                    var startDate = moment(new Date(this.get('start_date')));
+                    startDate = moment(new Date(this.get('start_date')));
                     if (startDate && endDate.isBefore(startDate)) {
                         return gettext('Must occur after start date');
                     }
@@ -142,6 +146,10 @@ define([
              * Save the Coupon.
              */
             save: function (options) {
+                var seat,
+                    stockRecordIds,
+                    data;
+
                 _.defaults(options || (options = {}), {
                     type: 'POST',
                     // The API requires a CSRF token for all POST requests using session authentication.
@@ -150,13 +158,13 @@ define([
                 });
 
                 // find the seat by selected seat type, so we can get the stockrecord IDs
-                var seat = this.get('course').get('products').findWhere({
+                seat = this.get('course').get('products').findWhere({
                     certificate_type: this.get('seat_type')
                 });
 
-                var stockRecordIds = _.map(seat.get('stockrecords'), _.compose(parseInt, _.property('id')));
+                stockRecordIds = _.map(seat.get('stockrecords'), _.compose(parseInt, _.property('id')));
 
-                var data = {
+                data = {
                     title: this.get('title'),
                     client_username: this.get('client_username'),
                     start_date: moment.utc(this.get('start_date')),
