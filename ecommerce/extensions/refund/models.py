@@ -62,7 +62,18 @@ class Refund(StatusMixin, TimeStampedModel):
     user = models.ForeignKey('core.User', related_name='refunds', verbose_name=_('User'))
     total_credit_excl_tax = models.DecimalField(_('Total Credit (excl. tax)'), decimal_places=2, max_digits=12)
     currency = models.CharField(_("Currency"), max_length=12, default=get_default_currency)
-    status = models.CharField(_('Status'), max_length=255)
+    status = models.CharField(
+        _('Status'),
+        max_length=255,
+        choices=[
+            (REFUND.OPEN, REFUND.OPEN),
+            (REFUND.DENIED, REFUND.DENIED),
+            (REFUND.PAYMENT_REFUND_ERROR, REFUND.PAYMENT_REFUND_ERROR),
+            (REFUND.PAYMENT_REFUNDED, REFUND.PAYMENT_REFUNDED),
+            (REFUND.REVOCATION_ERROR, REFUND.REVOCATION_ERROR),
+            (REFUND.COMPLETE, REFUND.COMPLETE),
+        ]
+    )
 
     history = HistoricalRecords()
     pipeline_setting = 'OSCAR_REFUND_STATUS_PIPELINE'
@@ -215,7 +226,16 @@ class RefundLine(StatusMixin, TimeStampedModel):
     order_line = models.ForeignKey('order.Line', related_name='refund_lines', verbose_name=_('Order Line'))
     line_credit_excl_tax = models.DecimalField(_('Line Credit (excl. tax)'), decimal_places=2, max_digits=12)
     quantity = models.PositiveIntegerField(_('Quantity'), default=1)
-    status = models.CharField(_('Status'), max_length=255)
+    status = models.CharField(
+        _('Status'),
+        max_length=255,
+        choices=[
+            (REFUND_LINE.OPEN, REFUND_LINE.OPEN),
+            (REFUND_LINE.REVOCATION_ERROR, REFUND_LINE.REVOCATION_ERROR),
+            (REFUND_LINE.DENIED, REFUND_LINE.DENIED),
+            (REFUND_LINE.COMPLETE, REFUND_LINE.COMPLETE),
+        ]
+    )
 
     history = HistoricalRecords()
     pipeline_setting = 'OSCAR_REFUND_LINE_STATUS_PIPELINE'
