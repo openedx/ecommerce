@@ -14,7 +14,43 @@ Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 Range = get_model('offer', 'Range')
+StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+
+
+def generate_coupon_report(coupon_vouchers):
+    """
+    Generate coupon report data
+
+    Args:
+        coupon_vouchers (List[CouponVouchers]): List of coupon_vouchers the report should be generated for
+
+    Returns:
+        List[str]
+        List[dict]
+    """
+
+    field_names = [_('Name'), _('Code'), _('Discount'), _('URL')]
+    rows = []
+
+    for coupon_voucher in coupon_vouchers:
+        for voucher in coupon_voucher.vouchers.all():
+            offer = voucher.offers.all().first()
+            currency = StockRecord.objects.get(product=coupon_voucher.coupon).price_currency
+            benefit_value = offer.benefit.value
+            if offer.benefit.type == Benefit.PERCENTAGE:
+                discount = _("{percentage} %").format(percentage=benefit_value)
+            else:
+                discount = _("{amount} {currency}").format(amount=benefit_value, currency=currency)
+            URL = '{}/coupons/redeem/?code={}'.format(settings.ECOMMERCE_URL_ROOT, voucher.code)
+            rows.append({
+                'Name': voucher.name,
+                'Code': voucher.code,
+                'Discount': discount,
+                'URL': URL
+            })
+
+    return field_names, rows
 
 
 def _get_or_create_offer(product_range, benefit_type, benefit_value):
