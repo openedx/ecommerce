@@ -1,5 +1,6 @@
 """HTTP endpoints for interacting with baskets."""
 import logging
+import warnings
 
 from django.db import transaction
 from django.utils.decorators import method_decorator
@@ -11,14 +12,14 @@ from rest_framework.response import Response
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.v2.views.orders import OrderRetrieveView
+from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_default_processor_class, get_processor_class_by_name)
 
-
 Basket = get_model('basket', 'Basket')
 logger = logging.getLogger(__name__)
+Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
@@ -294,15 +295,27 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         )
 
 
-class OrderByBasketRetrieveView(OrderRetrieveView):
-    """Allow the viewing of Orders by Basket.
-
-    Works exactly the same as OrderRetrieveView, except that orders are looked
-    up via the id of the related basket.
-    """
+class OrderByBasketRetrieveView(generics.RetrieveAPIView):
+    """Allow the viewing of Orders by Basket. """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = OrderSerializer
+    lookup_field = AC.KEYS.ORDER_NUMBER
+    queryset = Order.objects.all()
 
     def dispatch(self, request, *args, **kwargs):
+        warnings.warn('The basket-order API view is deprecated. Use the order API (e.g. /api/v2/orders/<order-number>/',
+                      DeprecationWarning)
         # Change the basket ID to an order number.
         partner = request.site.siteconfiguration.partner
         kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(partner, kwargs['basket_id'])
         return super(OrderByBasketRetrieveView, self).dispatch(request, *args, **kwargs)
+
+    def filter_queryset(self, queryset):
+        queryset = super(OrderByBasketRetrieveView, self).filter_queryset(queryset)
+        user = self.request.user
+
+        # Non-staff users should only see their own orders
+        if not user.is_staff:
+            queryset = queryset.filter(user=user)
+
+        return queryset

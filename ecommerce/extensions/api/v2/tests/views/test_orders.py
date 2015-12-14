@@ -1,11 +1,11 @@
 import json
 
 import ddt
+import httpretty
+import mock
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
 from django.test import override_settings
-import httpretty
-import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 
@@ -20,10 +20,11 @@ Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
 
 
+@ddt.ddt
 class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def setUp(self):
         super(OrderListViewTests, self).setUp()
-        self.path = reverse('api:v2:orders:list')
+        self.path = reverse('api:v2:order-list')
         self.user = self.create_user()
         self.token = self.generate_jwt_token_header(self.user)
 
@@ -83,12 +84,23 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assert_empty_result_response(response)
 
-    def test_super_user(self):
-        """ The view should return all orders for when authenticating as a superuser. """
-        superuser = self.create_user(is_superuser=True)
+        order = factories.create_order(user=self.user)
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        content = json.loads(response.content)
+        self.assertEqual(content['count'], 1)
+        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+
+    @ddt.unpack
+    @ddt.data(
+        (True, True),
+        (True, False),
+    )
+    def test_staff_superuser(self, is_staff, is_superuser):
+        """ The view should return all orders for when authenticating as a staff member or superuser. """
+        admin_user = self.create_user(is_staff=is_staff, is_superuser=is_superuser)
         order = factories.create_order(user=self.user)
 
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(superuser))
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
         content = json.loads(response.content)
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], unicode(order.number))
@@ -103,11 +115,11 @@ class OrderFulfillViewTests(TestCase):
 
         # Use the ecommerce worker service user in order to cover
         # request throttling code in extensions/api/throttles.py
-        self.user = self.create_user(is_superuser=True, username='test-service-user')
+        self.user = self.create_user(is_superuser=True, is_staff=True, username='test-service-user')
         self.client.login(username=self.user.username, password=self.password)
 
         self.order = factories.create_order(user=self.user)
-        self.url = reverse('api:v2:orders:fulfill', kwargs={'number': self.order.number})
+        self.url = reverse('api:v2:order-fulfill', kwargs={'number': self.order.number})
 
     def _put_to_view(self):
         """
@@ -186,4 +198,4 @@ class OrderFulfillViewTests(TestCase):
 class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
     @property
     def url(self):
-        return reverse('api:v2:orders:retrieve', kwargs={'number': self.order.number})
+        return reverse('api:v2:order-detail', kwargs={'number': self.order.number})
