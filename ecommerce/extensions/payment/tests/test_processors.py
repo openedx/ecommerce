@@ -594,20 +594,14 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         return ids
 
 
-class InvoiceTests(TestCase):
+class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
     """ Tests for Invoice payment processor. """
 
-    def setUp(self):
-        super(InvoiceTests, self).setUp()
-        self.processor_class = InvoicePayment
-        self.processor_name = 'invoice'
-        self.course = Course.objects.create(id='a/b/c', name='Demo Course')
-        self.product = self.course.create_or_update_seat('verified', True, 50, self.partner)
-        self.processor = self.processor_class()  # pylint: disable=not-callable
-        self.basket = factories.create_basket(empty=True)
-        self.basket.add_product(self.product)
-        self.basket.owner = factories.UserFactory()
-        self.basket.save()
+    processor_class = InvoicePayment
+    processor_name = 'invoice'
+
+    def test_configuration(self):
+        self.skipTest('Invoice processor does not currently require configuration.')
 
     def test_handle_processor_response(self):
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
@@ -620,11 +614,13 @@ class InvoiceTests(TestCase):
         # Validate PaymentSource
         self.assertEqual(source.source_type.name, self.processor.NAME)
 
-    def test_transaction_parameters(self):
-        """Test for transaction parameters"""
+    def test_get_transaction_parameters(self):
         params = self.processor_class().get_transaction_parameters(self.basket)
         self.assertIsNone(None, params)
 
     def test_issue_credit(self):
         """Test issue credit"""
         self.assertRaises(NotImplementedError, self.processor_class().issue_credit, None, 0, 'USD')
+
+    def test_issue_credit_error(self):
+        self.skipTest('Invoice processor does not yet support issuing credit.')
