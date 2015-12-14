@@ -9,6 +9,7 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments
                                                catalog as catalog_views,
                                                stockrecords as stockrecords_views,
                                                coupons as coupons_views)
+from ecommerce.extensions.voucher.views import VoucherReportView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -30,6 +31,10 @@ PAYMENT_URLS = [
 REFUND_URLS = [
     url(r'^$', refund_views.RefundCreateView.as_view(), name='create'),
     url(r'^(?P<pk>[\d]+)/process/$', refund_views.RefundProcessView.as_view(), name='process'),
+]
+
+VOUCHER_URLS = [
+    url(r'^download_voucher_report/(?P<coupon_id>[\d]+)/$', VoucherReportView.as_view(), name='download_voucher_report'),
 ]
 
 ATOMIC_PUBLICATION_URLS = [

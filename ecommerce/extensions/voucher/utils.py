@@ -17,6 +17,32 @@ Range = get_model('offer', 'Range')
 Voucher = get_model('voucher', 'Voucher')
 
 
+def generate_voucher_report(vouchers):
+    """
+    Generate CSV voucher report
+
+    Args:
+        vouchers (List[Voucher]): List of vouchers the report should be generated for
+
+    Returns:
+        List[str]
+        List[dict]
+    """
+
+    field_names = [_('Name'), _('Code'), _('Discount'), _('URL')]
+    rows = []
+
+    for voucher in vouchers:
+        rows.append({
+            'Name': voucher.name,
+            'Code': voucher.code,
+            'Discount': voucher.discount,
+            'URL': voucher.URL
+        })
+
+    return field_names, rows
+
+
 def _get_or_create_offer(product_range, benefit_type, benefit_value):
     """
     Return an offer for a catalog with condition and benefit.

@@ -1,11 +1,12 @@
 import datetime
 
+from django.conf import settings
 from django.db import IntegrityError
 from django.test import override_settings
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.extensions.voucher.utils import create_vouchers, generate_voucher_report
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -153,4 +154,46 @@ class UtilTests(TestCase):
                 start_datetime=datetime.date(2015, 10, 1),
                 voucher_type=Voucher.SINGLE_USE,
                 code="XMASC0DE"
+            )
+
+    def test_generate_voucher_report(self):
+        """
+        Test generate voucher report
+        """
+        vouchers = []
+
+        for i in range(10):
+            vouchers.extend(
+                create_vouchers(
+                    benefit_type=Benefit.PERCENTAGE,
+                    benefit_value=100.00,
+                    catalog=self.catalog,
+                    coupon=self.coupon,
+                    end_datetime=datetime.date(2015, 10, 30),
+                    name="Test voucher",
+                    quantity=1,
+                    start_datetime=datetime.date(2015, 10, 1),
+                    voucher_type=Voucher.SINGLE_USE,
+                    code=chr(65+i)*8
+                )
+            )
+
+        for voucher in vouchers:
+            voucher.discount = "100.00 %"
+            voucher.url = settings.ECOMMERCE_URL_ROOT + "/coupons/redeem/?code={}".format(voucher.code)
+
+        field_names, rows = generate_voucher_report(vouchers)
+
+        self.assertListEqual(field_names, ['Name', 'Code', 'Discount', 'URL'])
+
+        for i in range(10):
+            voucher_code = chr(65+i)*8
+            self.assertDictEqual(
+                rows[i],
+                {
+                    'Name': 'Test voucher',
+                    'Code': voucher_code,
+                    'Discount': '100.00 %',
+                    'URL': settings.ECOMMERCE_URL_ROOT + "/coupons/redeem/?code={}".format(voucher_code)
+                }
             )
