@@ -176,7 +176,7 @@ define([
              * Navigate to coupon list on save (overrides default behaviour).
              */
             saveSuccess: function (model) {
-                this.goTo(model.id.toString());
+                this.goTo(model.attributes.id.toString());
             },
 
             render: function () {
