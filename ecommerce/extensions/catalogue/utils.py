@@ -20,7 +20,7 @@ def generate_sku(product, partner, **kwargs):
         catalog = kwargs.get('catalog', '')
         _hash = ' '.join((
             unicode(product.id),
-            unicode(catalog.name),
+            unicode(catalog.id),
             str(partner.id)
         ))
     else:
