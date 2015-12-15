@@ -44,7 +44,7 @@ def _get_or_create_offer(product_range, benefit_type, benefit_value):
         max_affected_items=1,
     )
 
-    offer_name = "{}-{}".format(offer_benefit.type, offer_benefit.value)
+    offer_name = "{}-{}-{}".format(product_range.catalog.name, offer_benefit.type, offer_benefit.value)
 
     offer, __ = ConditionalOffer.objects.get_or_create(
         name=offer_name,
