@@ -23,7 +23,7 @@ BASKET_URLS = [
 ]
 
 COUPON_URLS = [
-    url(r'^$', coupons_views.CouponOrderCreateView.as_view(), name='create'),
+    url(r'^$', coupons_views.CouponOrderCreateView.as_view({'get': 'list'}), name='create'),
 ]
 
 PAYMENT_URLS = [

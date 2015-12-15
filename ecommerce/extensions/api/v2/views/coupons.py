@@ -13,8 +13,9 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from ecommerce.core.models import Client
-from ecommerce.extensions.api import data as data_api
+from ecommerce.extensions.api import data as data_api, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
@@ -30,12 +31,14 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CouponOrderCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
+class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
     """Endpoint for creating coupon orders.
 
     Creates a new coupon product, adds it to a basket and creates a
     new order from that basket.
     """
+    queryset = Product.objects.filter(product_class__name='Coupon')
+    serializer_class = serializers.CouponSerializer
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
