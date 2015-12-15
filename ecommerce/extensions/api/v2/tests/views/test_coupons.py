@@ -65,19 +65,6 @@ class CouponOrderCreateViewTest(TestCase):
         )
         return coupon
 
-    def test_list_coupons(self):
-        """Test coupon API endpoint list."""
-        self.create_coupon(title='Test coupon', price=100)
-        self.assertEqual(Product.objects.count(), 987)
-
-        response = self.client.get(COUPONS_LINK)
-        self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)['results']
-        self.assertEqual(response.content, 3)
-        self.assertEqual(result[0]['price'], '100.00')
-        self.assertEqual(result[0]['attribute_values'][0]['name'], 'Coupon vouchers')
-        self.assertEqual(len(result[0]['attribute_values'][0]['value']), 5)
-
     def test_create(self):
         """Test the create method."""
         site_configuration = SiteConfigurationFactory(partner__name='TestX')
@@ -276,3 +263,14 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
         self.assertEqual(Order.objects.first().status, 'Complete')
         self.assertEqual(Order.objects.first().lines.count(), 1)
         self.assertEqual(Order.objects.first().lines.first().product.title, 'Test coupon')
+
+    def test_list_coupon_orders(self):
+        """Test coupon API endpoint list."""
+        response = self.client.get(COUPONS_LINK)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.content)['results']
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['coupon_type'], 'Enrollment code')
+        self.assertEqual(result[0]['products'][0]['title'], 'Test coupon')
+        self.assertEqual(result[0]['products'][0]['price'], '100.00')
+        self.assertEqual(len(result[0]['products'][0]['attribute_values'][0]['value']), 2)

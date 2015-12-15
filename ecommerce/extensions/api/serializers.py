@@ -402,3 +402,29 @@ class CouponOrderSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Order
         fields = ('id', 'coupon_type', 'products', 'catalog', 'client', 'last_edited')
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    price = serializers.SerializerMethodField()
+    vouchers = serializers.SerializerMethodField()
+    catalog = serializers.SerializerMethodField()
+
+    def get_price(self, obj):
+        stock_record = StockRecord.objects.get(product=obj)
+        return stock_record.price_excl_tax
+
+    def get_vouchers(self, obj):
+        vouchers = obj.attr.coupon_vouchers.vouchers.all()
+        serializer = VoucherSerializer(vouchers, many=True)
+        return serializer.data
+
+    def get_catalog(self, obj):
+        request = self.context.get('request')
+        offer = obj.attr.coupon_vouchers.vouchers.first().offers.first()
+        catalog = offer.condition.range.catalog
+        serializer = CatalogSerializer(catalog, context={'request': request})
+        return serializer.data
+
+    class Meta(object):
+        model = Product
+        fields = ('id', 'title', 'price', 'catalog', 'vouchers')

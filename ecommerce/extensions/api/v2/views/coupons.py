@@ -38,8 +38,10 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
     new order from that basket.
     """
 
-    queryset = Order.objects.filter(lines__product__product_class__name='Coupon')
-    serializer_class = serializers.CouponOrderSerializer
+    # queryset = Order.objects.filter(lines__product__product_class__name='Coupon')
+    # serializer_class = serializers.CouponOrderSerializer
+    queryset = Product.objects.filter(product_class__name='Coupon')
+    serializer_class = serializers.CouponSerializer
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
