@@ -87,8 +87,10 @@ class CouponOrderCreateView(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
             client, __ = Client.objects.get_or_create(username=client_username)
 
+            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+
             coupon_catalog, __ = get_or_create_catalog(
-                name='Coupon',  # Catalog classifier.
+                name='Catalog for stock records: {}'.format(stock_records_string),
                 partner=partner,
                 stock_record_ids=stock_record_ids
             )
