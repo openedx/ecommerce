@@ -24,8 +24,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
-COUPONS_CREATE = reverse('api:v2:coupons:create')
-PRODUCTS_LIST = reverse('api:v2:product-list')
+COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
 class CouponOrderCreateViewTest(TestCase):
@@ -69,11 +68,12 @@ class CouponOrderCreateViewTest(TestCase):
     def test_list_coupons(self):
         """Test coupon API endpoint list."""
         self.create_coupon(title='Test coupon', price=100)
+        self.assertEqual(Product.objects.count(), 987)
 
-        response = self.client.get(PRODUCTS_LIST)
+        response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)['results']
-        self.assertEqual(len(result), 3)
+        self.assertEqual(response.content, 3)
         self.assertEqual(result[0]['price'], '100.00')
         self.assertEqual(result[0]['attribute_values'][0]['name'], 'Coupon vouchers')
         self.assertEqual(len(result[0]['attribute_values'][0]['value']), 5)
@@ -260,7 +260,7 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
             'quantity': 2,
             'price': 100
         }
-        self.response = self.client.post(COUPONS_CREATE, data, format='json')
+        self.response = self.client.post(COUPONS_LINK, data, format='json')
 
     def test_response(self):
         """Test the response data given after the order was created."""
