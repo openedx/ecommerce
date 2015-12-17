@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('refund', '0002_auto_20151211_1417'),
+        ('refund', '0001_squashed_0002_auto_20150515_2220'),
     ]
 
     operations = [

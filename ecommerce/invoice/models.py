@@ -15,9 +15,6 @@ class Invoice(TimeStampedModel):
 
     history = HistoricalRecords()
 
-    class Meta(TimeStampedModel.Meta):
-        index_together = ["modified", "created"]
-
     def __str__(self):
         return 'Invoice {id} for order number {order}'.format(id=self.id, order=self.basket.order.number)
 
