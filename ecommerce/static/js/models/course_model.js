@@ -62,7 +62,9 @@ define([
                     msg: gettext('You must select a course type.')
                 },
                 honor_mode: {
-                    required: true,
+                    required: function () {
+                        return this.includeHonorMode();
+                    },
                     msg: gettext('You must choose if an honor seat should be created.')
                 },
                 verification_deadline: function (value) {

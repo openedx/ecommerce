@@ -403,6 +403,32 @@ define([
                     });
                 });
             });
+
+            describe('honor mode validation', function () {
+                describe('without an honor mode', function () {
+                    beforeEach(function () {
+                        model = Course.findOrCreate({
+                            id: 'test/testX/testcourse',
+                            name: 'Test Course',
+                            verification_deadline: '2015-10-01T00:00:00Z',
+                            honor_mode: null,
+                            type: null
+                        });
+                    });
+
+                    it('is valid for professional education courses', function () {
+                        model.set('type', 'professional');
+                        expect(model.isValid(true)).toBeTruthy();
+                    });
+
+                    it('is not valid for non-prof-ed courses', function () {
+                        _.each(['audit', 'verified', 'credit'], function (type) {
+                            model.set('type', type);
+                            expect(model.isValid(true)).toBeFalsy();
+                        });
+                    });
+                });
+            });
         });
     }
 );
