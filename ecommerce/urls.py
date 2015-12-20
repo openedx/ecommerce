@@ -62,6 +62,11 @@ urlpatterns = [
 # Install Oscar extension URLs
 urlpatterns += extensions_patterns
 
+robots = TemplateView.as_view(template_name='robots.txt', content_type='text/plain')
+urlpatterns += [
+    url(r'^robots\.txt$', robots, name='robots')
+]
+
 if settings.DEBUG and settings.MEDIA_ROOT:  # pragma: no cover
     urlpatterns += static(
         settings.MEDIA_URL,
