@@ -46,6 +46,11 @@ A new OAuth 2.0 client can be created at ``http://127.0.0.1:8000/admin/oauth2/cl
     7. Select :guilabel:`Confidential (Web applications)` as the client type.
     8. Click :guilabel:`Save`.
 
+Your newly-created client must also be designated as trusted. Trusted clients bypass the user consent form typically displayed after validating the user's credentials. Create a new trusted client at ``http://127.0.0.1:8000/admin/oauth2_provider/trustedclient/add/``.
+
+    1. Select your newly-created client's redirect URL from the dropdown.
+    2. Click ``Save``.
+
 Now that you have the client credentials, you can update your settings (ideally in
 :file:`ecommerce/settings/local.py`). The table below describes the relevant settings.
 
