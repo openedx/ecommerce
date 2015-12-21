@@ -26,6 +26,8 @@ from ecommerce.extensions.voucher.utils import create_vouchers
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -75,6 +77,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
+            category = request.data[AC.KEYS.CATEGORY]
+            note = request.data.get(AC.KEYS.NOTE, None)
 
             client, __ = Client.objects.get_or_create(username=client_username)
 
@@ -96,9 +100,10 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 'code': code,
                 'quantity': quantity,
                 'start_date': start_date,
-                'voucher_type': voucher_type
+                'voucher_type': voucher_type,
+                'category': category,
+                'note': note,
             }
-
             coupon_product = self.create_coupon_product(title, price, data)
 
             basket = self.add_product_to_basket(
@@ -129,6 +134,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 - quantity (int)
                 - start_date (Datetime)
                 - voucher_type (str)
+                - category (str)
+                - note (str)
 
         Returns:
             A coupon product object.
@@ -168,9 +175,24 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
-
         coupon_product.attr.coupon_vouchers = coupon_vouchers
+        coupon_product.attr.note = data['note']
         coupon_product.save()
+
+        category = Category.objects.get(id=data['category'])
+
+        # The reason why we are not using:
+        #   ProductCategory.objects.get_or_create(product=product, category=category)
+        # here is that in case an existing coupon's category has been changed this will
+        # create a new product category which we don't want. We want one coupon to have
+        # one product category. Therefor if a coupon's category is edited the category of the
+        # existing product category will be edited.
+        try:
+            product_category = ProductCategory.objects.get(product=coupon_product)
+            product_category.category = category
+            product_category.save()
+        except ProductCategory.DoesNotExist:
+            product_category = ProductCategory.objects.create(category=category, product=coupon_product)
 
         sku = generate_sku(
             product=coupon_product,
