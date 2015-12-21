@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
+import datetime
 from decimal import Decimal
 import json
 
@@ -11,22 +12,27 @@ from django.core.urlresolvers import reverse
 import httpretty
 import jwt
 from mock import patch
+from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model, get_class
 from oscar.test import factories
 from social.apps.django_app.default.models import UserSocialAuth
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.settings import get_lms_url
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 
 Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
+Catalog = get_model('catalogue', 'Catalog')
 Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 User = get_user_model()
+Voucher = get_model('voucher', 'Voucher')
 
 
 class UserMixin(object):
@@ -291,3 +297,49 @@ class LmsApiMockMixin(object):
         }
         content_json = json.dumps(footer_content)
         httpretty.register_uri(httpretty.GET, footer_url, body=content_json, content_type='application/json')
+
+
+class CouponMixin(object):
+    """Mixin for preparing data for coupons and creating coupons."""
+    def setUp(self):
+        super(CouponMixin, self).setUp()
+        self.category = create_from_breadcrumbs('Coupons > Test category')
+
+    def create_coupon(
+            self,
+            title='Test coupon',
+            price=100,
+            partner=None,
+            catalog=None,
+            code='',
+            benefit_value=100,
+            sub_category=''):
+        """Helper method for creating a coupon."""
+
+        if partner is None:
+            partner = PartnerFactory(name='Tester')
+        if catalog is None:
+            catalog = Catalog.objects.create(partner=partner)
+        quantity = 5
+        if code is not '':
+            quantity = 1
+        data = {
+            'partner': partner,
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': benefit_value,
+            'catalog': catalog,
+            'end_date': datetime.date(2020, 1, 1),
+            'code': code,
+            'quantity': quantity,
+            'start_date': datetime.date(2015, 1, 1),
+            'voucher_type': Voucher.SINGLE_USE,
+            'category': self.category.id,
+            'sub_category': sub_category
+        }
+
+        coupon = CouponViewSet().create_coupon_product(
+            title=title,
+            price=price,
+            data=data
+        )
+        return coupon
