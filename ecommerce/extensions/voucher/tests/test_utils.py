@@ -8,7 +8,7 @@ from oscar.templatetags.currency_filters import currency
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.test.factories import create_coupon
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report
 from ecommerce.tests.testcases import TestCase
 
@@ -25,7 +25,7 @@ VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
 
-class UtilTests(CourseCatalogTestMixin, TestCase):
+class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
@@ -45,7 +45,7 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
         self.catalog.stock_records.add(self.stock_record)
 
-        self.coupon = create_coupon(title='Test product', catalog=self.catalog)
+        self.coupon = self.create_coupon(title='Test product', catalog=self.catalog)
 
     def test_create_vouchers(self):
         """
