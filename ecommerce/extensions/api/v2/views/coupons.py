@@ -6,6 +6,7 @@ import dateutil.parser
 
 from django.db import transaction
 from django.db.utils import IntegrityError
+from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -24,6 +25,8 @@ from ecommerce.extensions.voucher.utils import create_vouchers
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -73,6 +76,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
+            category = request.data[AC.KEYS.CATEGORY] or 'Other'
 
             client, __ = Client.objects.get_or_create(username=client_username)
 
@@ -94,7 +98,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 'code': code,
                 'quantity': quantity,
                 'start_date': start_date,
-                'voucher_type': voucher_type
+                'voucher_type': voucher_type,
+                'category': category
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -127,6 +132,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 - quantity (int)
                 - start_date (Datetime)
                 - voucher_type (str)
+                - category (str)
 
         Returns:
             A coupon product object.
@@ -168,6 +174,9 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 
         coupon_product.attr.coupon_vouchers = coupon_vouchers
+        category = create_from_breadcrumbs(data['category'])
+        ProductCategory.objects.get_or_create(category=category, product=coupon_product)
+
         coupon_product.save()
 
         sku = generate_sku(

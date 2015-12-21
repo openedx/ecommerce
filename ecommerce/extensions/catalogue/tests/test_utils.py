@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
 
-import datetime
 from hashlib import md5
 
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
+from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -16,13 +15,15 @@ Course = get_model('courses', 'Course')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
+COURSE_ID = 'sku/test_course/course'
+
 
 class UtilsTests(CourseCatalogTestMixin, TestCase):
+    course_id = 'sku/test_course/course'
 
     def setUp(self):
         super(UtilsTests, self).setUp()
-        course_id = 'sku/test_course/course'
-        self.course = Course.objects.create(id=course_id, name='Test Course')
+        self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
         self.course.create_or_update_seat('verified', False, 0, self.partner)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
@@ -40,38 +41,9 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         actual = generate_sku(product, self.partner)
         self.assertEqual(actual, expected)
 
-    def test_generate_sku_for_coupon(self):
-        """Verify the method generates a SKU for a coupon."""
-        data = {
-            'partner': self.partner,
-            'benefit_type': Benefit.PERCENTAGE,
-            'benefit_value': 100,
-            'catalog': self.catalog,
-            'end_date': datetime.date(2020, 1, 1),
-            'code': '',
-            'quantity': 5,
-            'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE
-        }
-        coupon = CouponViewSet().create_coupon_product(
-            title='Test coupon',
-            price=100,
-            data=data
-        )
-
-        _hash = ' '.join((
-            unicode(coupon.id),
-            unicode(self.catalog.id),
-            str(self.partner.id)
-        ))
-        _hash = md5(_hash.lower()).hexdigest()[-7:]
-        expected = _hash.upper()
-        actual = generate_sku(coupon, self.partner, catalog=self.catalog)
-        self.assertEqual(actual, expected)
-
     def test_get_or_create_catalog(self):
         """Verify that the proper catalog is fetched."""
-        self.catalog.stock_records.add(StockRecord.objects.first())
+        self.catalog.stock_records.add(StockRecord.objects.get(id=1))
 
         self.assertEqual(self.catalog.id, 1)
 
@@ -108,4 +80,25 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         _hash = md5(_hash.lower()).hexdigest()[-10:]
         expected = _hash.upper()
         actual = generate_coupon_slug(self.partner, title=title, catalog=self.catalog)
+        self.assertEqual(actual, expected)
+
+
+class CouponUtilsTests(TestCase):
+
+    def setUp(self):
+        super(CouponUtilsTests, self).setUp()
+        self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
+        self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
+
+    def test_generate_sku_for_coupon(self):
+        """Verify the method generates a SKU for a coupon."""
+        coupon = create_coupon(partner=self.partner, catalog=self.catalog)
+        _hash = ' '.join((
+            unicode(coupon.id),
+            unicode(self.catalog.id),
+            str(self.partner.id)
+        ))
+        digest = md5(_hash.lower()).hexdigest()[-7:]
+        expected = digest.upper()
+        actual = generate_sku(coupon, self.partner, catalog=self.catalog)
         self.assertEqual(actual, expected)
