@@ -21,6 +21,7 @@ Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -59,7 +60,8 @@ class CouponViewSetTest(TestCase):
             'benefit_value': 100,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 1,
-            'price': 100
+            'price': 100,
+            'category': 'Test category'
         }
         request = RequestFactory()
         request.data = data
@@ -86,6 +88,8 @@ class CouponViewSetTest(TestCase):
         self.assertEqual(stock_record.price_excl_tax, 100)
 
         self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), 5)
+        category = ProductCategory.objects.get(product=coupon).category
+        self.assertEqual(category.name, 'Test category')
 
     def test_append_to_existing_coupon(self):
         """Test adding additional vouchers to an existing coupon."""
@@ -99,7 +103,8 @@ class CouponViewSetTest(TestCase):
             'code': '',
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.MULTI_USE
+            'voucher_type': Voucher.MULTI_USE,
+            'category': 'Test category'
         }
         coupon_append = CouponViewSet().create_coupon_product(
             title='Test coupon',
@@ -123,7 +128,8 @@ class CouponViewSetTest(TestCase):
             'code': 'CUSTOMCODE',
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.ONCE_PER_CUSTOMER
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'category': 'Test category'
         }
         custom_coupon = CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -144,7 +150,8 @@ class CouponViewSetTest(TestCase):
             'code': 'CUSTOMCODE',
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE
+            'voucher_type': Voucher.SINGLE_USE,
+            'category': 'Test category'
         }
         CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -223,7 +230,8 @@ class CouponViewSetFunctionalTest(TestCase):
             'benefit_value': 100,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
-            'price': 100
+            'price': 100,
+            'category': 'Test category'
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 

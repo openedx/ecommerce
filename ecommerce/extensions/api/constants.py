@@ -9,6 +9,7 @@ class APIDictionaryKeys(object):
     CHECKOUT = u'checkout'
     CLIENT_USERNAME = u'client_username'
     CODE = u'code'
+    CATEGORY = u'category'
     COUPON_ID = u'coupon_id'
     END_DATE = u'end_date'
     ORDER = u'order'

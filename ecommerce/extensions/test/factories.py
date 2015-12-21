@@ -64,7 +64,8 @@ def create_coupon(title='Test coupon', price=100, partner=None, catalog=None, co
         'code': code,
         'quantity': quantity,
         'start_date': datetime.date(2015, 1, 1),
-        'voucher_type': Voucher.SINGLE_USE
+        'voucher_type': Voucher.SINGLE_USE,
+        'category': 'Test category'
     }
 
     coupon = CouponViewSet().create_coupon_product(
