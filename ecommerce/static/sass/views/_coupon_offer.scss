@@ -1,0 +1,79 @@
+#offer {
+
+    .message-error {
+        border-top: 4px solid #B20610;
+        h3 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    }
+
+    .container {
+        padding-top: spacing-vertical(small);
+        padding-bottom: spacing-vertical(small);
+    }
+
+    .course-price {
+        strong {
+            color: #25B85A;
+        }
+        .course-price {
+            color: #9EB1B9;
+            font-weight: bold;
+        }
+        s {
+            // replace the default line-through
+            text-decoration: none;
+            position: relative;
+            &:after {
+                content:"";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                border-top: 2px solid #B20610;
+                height: 50%;
+                width: 100%;
+            }
+        }
+    }
+
+    .total-price {
+        color: #065683;
+    }
+
+    .depth {
+        padding: 1.25rem 1.25rem;
+    }
+
+    .depth-2 {
+        background: #fcfcfc;
+        box-shadow: 0 1px 2px 1px rgba(167, 164, 164, 0.25);
+    }
+
+    .depth--3 {
+        background: #34383a;
+        .copy {
+            color: #e7e6e6;
+            @include container-fixed;
+
+            @media (min-width: $screen-sm-min) {
+              width: $container-sm;
+            }
+            @media (min-width: $screen-md-min) {
+              width: $container-md;
+            }
+            @media (min-width: $screen-lg-min) {
+              width: $container-lg;
+            }
+        }
+    }
+
+    .note {
+        border: 1px solid  #D2D0D0;
+        border-radius: 0;
+        margin-top: 1.25rem;
+        background: none;
+        color: #6B6969;
+    }
+
+}
