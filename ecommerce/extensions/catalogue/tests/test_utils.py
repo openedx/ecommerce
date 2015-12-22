@@ -5,7 +5,7 @@ from hashlib import md5
 
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
+from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
 from ecommerce.tests.testcases import TestCase
@@ -53,7 +53,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE
         }
-        coupon = CouponOrderCreateView().create_coupon_product(
+        coupon = CouponViewSet().create_coupon_product(
             title='Test coupon',
             price=100,
             data=data

@@ -1,5 +1,5 @@
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
-from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
+from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.tests.factories import PartnerFactory
 
 Benefit = get_model('offer', 'Benefit')
@@ -64,7 +64,7 @@ def create_coupon(title='Test coupon', price=100, partner=None, catalog=None):
         'voucher_type': Voucher.SINGLE_USE
     }
 
-    coupon = CouponOrderCreateView().create_coupon_product(
+    coupon = CouponViewSet().create_coupon_product(
         title=title,
         price=price,
         data=data

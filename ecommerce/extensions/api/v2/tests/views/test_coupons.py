@@ -10,7 +10,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.v2.views.coupons import CouponOrderCreateView
+from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.tests.factories import SiteFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
@@ -25,14 +25,14 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
-COUPONS_LINK = reverse('api:v2:coupons:create')
+COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
-class CouponOrderCreateViewTest(TestCase):
+class CouponViewSetTest(TestCase):
     """Unit tests for creating coupon order."""
 
     def setUp(self):
-        super(CouponOrderCreateViewTest, self).setUp()
+        super(CouponViewSetTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -65,7 +65,7 @@ class CouponOrderCreateViewTest(TestCase):
         request.data = data
         request.site = site
 
-        response = CouponOrderCreateView().create(request)
+        response = CouponViewSet().create(request)
 
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(
@@ -101,7 +101,7 @@ class CouponOrderCreateViewTest(TestCase):
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.MULTI_USE
         }
-        coupon_append = CouponOrderCreateView().create_coupon_product(
+        coupon_append = CouponViewSet().create_coupon_product(
             title='Test coupon',
             price=100,
             data=data
@@ -125,7 +125,7 @@ class CouponOrderCreateViewTest(TestCase):
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.ONCE_PER_CUSTOMER
         }
-        custom_coupon = CouponOrderCreateView().create_coupon_product(
+        custom_coupon = CouponViewSet().create_coupon_product(
             title='Custom coupon',
             price=100,
             data=data
@@ -146,14 +146,14 @@ class CouponOrderCreateViewTest(TestCase):
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE
         }
-        CouponOrderCreateView().create_coupon_product(
+        CouponViewSet().create_coupon_product(
             title='Custom coupon',
             price=100,
             data=data
         )
 
         with self.assertRaises(IntegrityError):
-            CouponOrderCreateView().create_coupon_product(
+            CouponViewSet().create_coupon_product(
                 title='Coupon with integrity issue',
                 price=100,
                 data=data
@@ -163,7 +163,7 @@ class CouponOrderCreateViewTest(TestCase):
         """Test adding a coupon product to a basket."""
         coupon = create_coupon(partner=self.partner)
         coupon_client = Client.objects.create(username='TestX')
-        basket = CouponOrderCreateView().add_product_to_basket(
+        basket = CouponViewSet().add_product_to_basket(
             product=coupon,
             client=coupon_client,
             site=self.site,
@@ -179,13 +179,13 @@ class CouponOrderCreateViewTest(TestCase):
         """Test the order creation."""
         coupon = create_coupon(partner=self.partner)
         coupon_client = Client.objects.create(username='TestX')
-        basket = CouponOrderCreateView().add_product_to_basket(
+        basket = CouponViewSet().add_product_to_basket(
             product=coupon,
             client=coupon_client,
             site=self.site,
             partner=self.partner
         )
-        response_data = CouponOrderCreateView().create_order_for_invoice(basket, coupon_id=coupon.id)
+        response_data = CouponViewSet().create_order_for_invoice(basket, coupon_id=coupon.id)
         self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
         self.assertEqual(response_data[AC.KEYS.ORDER], 1)
         self.assertEqual(response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
@@ -196,11 +196,11 @@ class CouponOrderCreateViewTest(TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponOrderCreateViewFunctionalTest(TestCase):
+class CouponViewSetFunctionalTest(TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
-        super(CouponOrderCreateViewFunctionalTest, self).setUp()
+        super(CouponViewSetFunctionalTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -259,3 +259,31 @@ class CouponOrderCreateViewFunctionalTest(TestCase):
 
         response = self.client.post(COUPONS_LINK, data=self.data)
         self.assertEqual(response.status_code, 403)
+
+    def test_list_coupons(self):
+        """Test that the endpoint returns information needed for the details page."""
+        response = self.client.get(COUPONS_LINK)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        coupon_data = response_data['results'][0]
+        self.assertEqual(coupon_data['title'], 'Test coupon')
+        self.assertEqual(coupon_data['coupon_type'], 'Enrollment code')
+        self.assertIsNotNone(coupon_data['last_edited'][0])
+        self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
+        self.assertEqual(coupon_data['seats'][0]['attribute_values'][1]['value'], 'edx/Demo_Course2/DemoX')
+        self.assertEqual(coupon_data['vouchers'][0]['benefit'][1], 100.0)
+        self.assertIsNotNone(coupon_data['vouchers'][0]['redeem_url'])
+        self.assertEqual(coupon_data['vouchers'][0]['start_datetime'], '2015-01-01T05:00:00Z')
+        self.assertEqual(coupon_data['vouchers'][0]['end_datetime'], '2020-01-01T05:00:00Z')
+        self.assertIsNotNone(coupon_data['vouchers'][0]['code'])
+        self.assertTrue(coupon_data['vouchers'][0]['is_available_to_user'][0])
+        self.assertEqual(coupon_data['client'], 'TestX')
+        self.assertEqual(coupon_data['price'], '100.00')
+
+        self.data['title'] = 'Test discount code'
+        self.data['benefit_value'] = 20
+        self.client.post(COUPONS_LINK, data=self.data, format='json')
+        response = self.client.get(COUPONS_LINK)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['results'][0]['coupon_type'], 'Discount code')
+        self.assertEqual(response_data['results'][0]['vouchers'][0]['benefit'][1], 20.0)
