@@ -293,7 +293,12 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                     )
 
-                resp_message = course.publish_to_lms(access_token=self.access_token)
+                # Publish the course. If the course is new (i.e.,
+                # `created == True`), ensure that the course has not
+                # started enrollment yet in order to avoid allowing
+                # inconsistencies in course modes between Otto and the
+                # LMS.
+                resp_message = course.publish_to_lms(access_token=self.access_token, check_enrollment_start=created)
                 published = (resp_message is None)
 
                 if published:
