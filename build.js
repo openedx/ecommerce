@@ -25,6 +25,10 @@
             exclude: ['js/common']
         },
         {
+            name: 'js/apps/coupon_admin_app',
+            exclude: ['js/common']
+        },
+        {
             name: 'js/apps/credit_checkout_app',
             exclude: ['js/common']
         }
