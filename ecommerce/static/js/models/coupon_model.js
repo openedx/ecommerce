@@ -26,7 +26,8 @@ define([
             defaults: {
                 quantity: 1,
                 stock_record_ids: [],
-                code: ''
+                code: '',
+                category: ''
             },
 
             validation: {
