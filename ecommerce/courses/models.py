@@ -4,11 +4,13 @@ import logging
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
+from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
 
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.utils import generate_sku
+from ecommerce.settings import get_lms_url
 
 logger = logging.getLogger(__name__)
 Category = get_model('catalogue', 'Category')
@@ -56,9 +58,19 @@ class Course(models.Model):
         super(Course, self).save(force_insert, force_update, using, update_fields)
         self._create_parent_seat()
 
-    def publish_to_lms(self, access_token=None):
+    def get_details(self, access_token):
+        """
+        Query the LMS Enrollment API for details about this course.
+        """
+        api = EdxRestApiClient(
+            get_lms_url('/api/enrollment/v1'),
+            oauth_access_token=access_token
+        )
+        return api.course(self.id).get()
+
+    def publish_to_lms(self, access_token=None, check_enrollment_start=False):
         """ Publish Course and Products to LMS. """
-        return LMSPublisher().publish(self, access_token=access_token)
+        return LMSPublisher().publish(self, access_token=access_token, check_enrollment_start=check_enrollment_start)
 
     @classmethod
     def is_mode_verified(cls, mode):

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test import override_settings
 import httpretty
 import mock
+import pytz
 from requests import Timeout
 from testfixtures import LogCapture
 
@@ -41,6 +42,19 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
                                content_type=JSON)
 
+    def _mock_course_details(self, status=200, body=None):
+        self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Enrollment API calls.')
+
+        if body is None:
+            date = datetime.datetime.now(pytz.UTC) + datetime.timedelta(days=7)
+            body = {
+                'enrollment_start': date.isoformat()
+            }
+        url = get_lms_url('/api/enrollment/v1/course/{}/'.format(self.course.id))
+        httpretty.register_uri(
+            httpretty.GET, url, status=status, body=json.dumps(body), content_type=JSON
+        )
+
     def mock_creditcourse_endpoint(self, course_id, status, body=None):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Credit API calls.')
 
@@ -63,12 +77,17 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
                 self.assertIsNotNone(response)
                 self.assertEqual(response, self.error_message)
 
+    @httpretty.activate
     def test_api_exception(self):
-        """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
+        """
+        If an exception is raised when communicating with the Commerce
+        API, an ERROR message should be logged.
+        """
+        self._mock_course_details()
         error = 'time out error'
         with mock.patch('requests.put', side_effect=Timeout(error)):
             with LogCapture(LOGGER_NAME) as l:
-                response = self.publisher.publish(self.course)
+                response = self.publisher.publish(self.course, access_token='access_token')
                 l.check(
                     (
                         LOGGER_NAME, 'ERROR',
@@ -198,8 +217,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
     def assert_creditcourse_endpoint_called(self):
         """ Verify the Credit API's CreditCourse endpoint was called. """
-        last_request = httpretty.httpretty.latest_requests[0]
-        self.assertEqual(last_request.path, '/api/credit/v1/courses/{}/'.format(self.course.id))
+        latest_request_paths = [request.path for request in httpretty.httpretty.latest_requests]
+        self.assertIn('/api/credit/v1/courses/{}/'.format(self.course.id), latest_request_paths)
 
     @httpretty.activate
     def test_credit_publication_success(self):
@@ -239,3 +258,41 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             self.assertEqual(api_response, " ".join([self.error_message, expected_error_msg]))
         else:
             self.assertEqual(api_response, self.error_message, expected_error_msg)
+
+    @httpretty.activate
+    def test_enrollment_start_passed(self):
+        date = datetime.datetime.now(pytz.UTC) - datetime.timedelta(days=1)
+        self._mock_course_details(status=200, body={'enrollment_start': date.isoformat()})
+
+        with LogCapture(LOGGER_NAME) as l:
+            response = self.publisher.publish(self.course, access_token='access_token', check_enrollment_start=True)
+            expected_log = u'Enrollment for course [{}] has already begun ([{}]). ' \
+                           'Course data will not be published.'.format(self.course.id, date)
+            l.check((LOGGER_NAME, 'ERROR', expected_log))
+
+        expected = u'Course {} has already started enrollment.'.format(self.course.id)
+        self.assertEqual(response, expected)
+
+    @httpretty.activate
+    @ddt.data(None, (datetime.datetime.now(pytz.UTC) + datetime.timedelta(days=1)).isoformat())
+    def test_enrollment_start_date_not_passed(self, enrollment_start):
+        self._mock_commerce_api(200)
+        self._mock_course_details(status=200, body={'enrollment_start': enrollment_start})
+        response = self.publisher.publish(self.course, access_token='access_token', check_enrollment_start=True)
+        self.assertIsNone(response)
+
+    @httpretty.activate
+    def test_enrollment_api_failure(self):
+        self._mock_course_details(status=404, body={})
+
+        with LogCapture(LOGGER_NAME) as l:
+            response = self.publisher.publish(self.course, access_token='access_token', check_enrollment_start=True)
+            expected_log = u'Failed to get course details for [{}] from LMS. Status was [{}]. Body was {}.'.format(
+                self.course.id,
+                404,
+                "'{}'"
+            )
+            l.check((LOGGER_NAME, 'ERROR', expected_log))
+
+        expected = u"Couldn't get enrollment data for {}.".format(self.course.id)
+        self.assertEqual(response, expected)

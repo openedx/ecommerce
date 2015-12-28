@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
+from datetime import datetime
 import json
 import logging
 
+import dateutil
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
+import pytz
 import requests
 
 from ecommerce.courses.utils import mode_for_seat
@@ -53,7 +56,7 @@ class LMSPublisher(object):
 
         api.courses(course_id).put(data)
 
-    def publish(self, course, access_token=None):
+    def publish(self, course, access_token=None, check_enrollment_start=False):
         """ Publish course commerce data to LMS.
 
         Uses the Commerce API to publish course modes, prices, and SKUs to LMS. Uses
@@ -64,6 +67,9 @@ class LMSPublisher(object):
 
         Keyword Arguments:
             access_token (str): Access token used when publishing CreditCourse data to the LMS.
+            check_enrollment_start (bool): If True, only publish this course if its enrollment
+                start date is in the future (and return an error if not). If False, do not check
+                enrollment dates.
 
         Returns:
             None, if publish operation succeeded; otherwise, error message.
@@ -77,6 +83,28 @@ class LMSPublisher(object):
         if not settings.COMMERCE_API_URL:
             logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
             return error_message
+
+        if check_enrollment_start:
+            try:
+                course_details = course.get_details(access_token)
+                enrollment_start = course_details['enrollment_start']
+                if enrollment_start is not None:
+                    enrollment_start_date = dateutil.parser.parse(enrollment_start)
+                    if enrollment_start_date <= datetime.now(pytz.UTC):
+                        logger.error(
+                            u'Enrollment for course [%s] has already begun ([%s]). Course data will not be published.',
+                            course_id,
+                            enrollment_start_date
+                        )
+                        return _(u'Course {course_id} has already started enrollment.').format(course_id=course_id)
+            except SlumberHttpBaseException as e:
+                logger.exception(
+                    u'Failed to get course details for [%s] from LMS. Status was [%d]. Body was %r.',
+                    course_id,
+                    e.response.status_code,
+                    e.content
+                )
+                return _(u"Couldn't get enrollment data for {course_id}.").format(course_id=course_id)
 
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
