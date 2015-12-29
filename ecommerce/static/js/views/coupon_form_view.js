@@ -135,7 +135,10 @@ define([
             },
 
             events: {
-                'input [name=course_id]': 'fillFromCourse'
+                'input [name=course_id]': 'fillFromCourse',
+
+                // catch value after autocomplete
+                'blur [name=course_id]': 'fillFromCourse'
             },
 
             initialize: function (options) {
@@ -189,6 +192,9 @@ define([
                 var courseId = this.$el.find('[name=course_id]').val(),
                     course = Course.findOrCreate({id: courseId}),
                     parseId = _.compose(parseInt, _.property('id'));
+
+                // stickit will not pick it up if this is a blur event
+                this.model.set('course_id', courseId);
 
                 course.listenTo(course, 'sync', _.bind(function () {
                     this.seatTypes = _.map(course.seats(), function(seat) {
