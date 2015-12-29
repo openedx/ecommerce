@@ -18,16 +18,11 @@ define([
             ) {
         'use strict';
 
-        var requiredMsg = gettext('This field is required'),
-            requiredValidator = {
-                required: true,
-                msg: requiredMsg
-            },
-            numberValidator = {
-                pattern: 'number',
-                msg: gettext('This value must be a number')
-            };
-
+        _.extend(Backbone.Validation.messages, {
+            required: gettext('This field is required'),
+            number: gettext('This value must be a number'),
+            digits: gettext('This value must be a number')
+        });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
         return Backbone.Model.extend({
@@ -37,7 +32,8 @@ define([
                 quantity: 1,
                 stock_record_ids: [],
                 code: '',
-                category: ''
+                category: '',
+                price: ''
             },
 
             validation: {
@@ -45,32 +41,22 @@ define([
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required')
                 },
-                title: [requiredValidator],
-                client_username: [requiredValidator],
+                title: { required: true },
+                client_username: { required: true },
                 // seat_type is for validation only, stock_record_ids holds the values
-                seat_type: [requiredValidator],
-                price: [
-                    {
-                        required: function () { return this.isEnrollmentCode(); },
-                        msg: requiredMsg
+                seat_type: { required: true },
+                quantity: { pattern: 'digits' },
+                benefit_value: {
+                    pattern: 'number',
+                    required: function () {
+                        return this.get('code_type') === 'discount';
                     },
-                    numberValidator
-                ],
-                quantity: {
-                    pattern: 'digits'
                 },
-                benefit_value: [
-                    {
-                        required: function () { return this.isDiscountCode(); },
-                        msg: requiredMsg
-                    },
-                    numberValidator
-                ],
                 start_date: function (val) {
                     var startDate,
                         endDate;
                     if (_.isEmpty(val)) {
-                        return requiredMsg;
+                        return Backbone.Validation.messages.required;
                     }
                     startDate = moment(new Date(val));
                     if (!startDate.isValid()) {
@@ -85,7 +71,7 @@ define([
                     var startDate,
                         endDate;
                     if (_.isEmpty(val)) {
-                        return requiredMsg;
+                        return Backbone.Validation.messages.required;
                     }
                     endDate = moment(new Date(val));
                     if (!endDate.isValid()) {
@@ -96,14 +82,6 @@ define([
                         return gettext('Must occur after start date');
                     }
                 }
-            },
-
-            isEnrollmentCode: function () {
-                return this.get('code_type') === 'enrollment' ;
-            },
-
-            isDiscountCode: function () {
-                return this.get('code_type') === 'discount' ;
             },
 
             initialize: function () {
