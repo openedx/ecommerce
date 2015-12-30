@@ -43,6 +43,10 @@ This panel is located at http://localhost:8002/admin/core/siteconfiguration/.
 
 The following image shows the ``SiteConfiguration`` model in the Django administration panel for a configured site.
 
+If you're running devstack, you can use the default ``example.com`` in the Site field,
+and your LMS base should be ``localhost:8000``. The path to custom site theme field
+cannot be left blank, but if you don't have one, you can provide dummy text.
+
 .. image:: _static/images/site_configuration.png
     :width: 600px
     :alt: Populated site configuration model
