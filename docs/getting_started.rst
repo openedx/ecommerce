@@ -88,7 +88,31 @@ OIDC client via LMS admin.
 
     $ python manage.py runserver 8002
 
+If you're running on devstack, you'll need to pass the appropriate settings:
+
+.. code-block:: bash
+
+    $ python manage.py runserver 0.0.0.0:8002 --settings=ecommerce.settings.devstack
+
 .. _Django's runserver command: https://docs.djangoproject.com/en/1.8/ref/django-admin/#runserver-port-or-address-port
+
+
+Create a course mode with the course admin tool
+-----------------------------------------------
+If you're using `devstack`_, the ecommerce and edx-platform servers
+already have the correct configuration defaults to communicate with
+one another. To configure course modes for a course, do the following:
+
+1. On `devstack`_, bring up the ecommerce server on port 8002, and the LMS on port 8000.
+2. On the ecommerce server, set up a `SiteConfiguration`_ in the django admin.
+3. Head over to the courses page on the ecommerce server: http://localhost:8000/courses.
+4. Click "Add New Course".
+
+From there, you should be able to enter in the course id and desired course mode
+for the course you'd like to configure.
+
+.. _SiteConfiguration: http://open-edx-ecommerce-guide.readthedocs.org/en/latest/partner_config.html#site-configuration-model-django-admin
+
 
 
 Development outside devstack
@@ -99,7 +123,7 @@ operating system.  One simple way to achieve this is setting up a reverse port-f
 .. code-block:: bash
 
     $ vagrant ssh -- -R 8002:127.0.0.1:8002  # run on the vm host, not the guest.
-    
+
 This will allow your LMS process inside devstack to make calls to your ecommerce server running on the host, via
 '127.0.0.1:8002', simplifying URL configuration in the LMS.
 
