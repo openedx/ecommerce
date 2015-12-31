@@ -12,14 +12,7 @@ define([
 
         return PaginatedCollection.extend({
             model: CouponModel,
-            url: '/api/v2/products/',
-            fetch: function (options) {
-                options = options || {};
-                _.defaults(options.data || (options.data = {}), {
-                    product_class__name: 'Coupon'
-                });
-                return PaginatedCollection.prototype.fetch.call(this, options);
-            }
+            url: '/api/v2/coupons/'
         });
     }
 );

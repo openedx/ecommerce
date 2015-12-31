@@ -11,7 +11,7 @@ define([
                 results: [
                     {
                         id: 4,
-                        url: 'http://localhost:8002/api/v2/products/4/',
+                        url: 'http://localhost:8002/api/v2/coupons/4/',
                         structure: 'standalone',
                         product_class: 'Coupon',
                         title: 'Coupon',
@@ -53,27 +53,13 @@ define([
             describe('parse', function () {
                 it('should fetch the next page of results', function () {
                     spyOn(collection, 'fetch').and.returnValue(null);
-                    response.next = '/api/v2/products/?page=2';
+                    response.next = '/api/v2/coupons/?page=2';
 
                     collection.parse(response);
                     expect(collection.url).toEqual(response.next);
                     expect(collection.fetch).toHaveBeenCalledWith({remove: false});
                 });
 
-            });
-
-            describe('fetch', function () {
-                it('should call correct url', function () {
-                    var args;
-                    spyOn($, 'ajax');
-                    collection.fetch({
-                      dummyOption: 'dummy', data: {arg: 'arg'}
-                    });
-                    args = $.ajax.calls.argsFor(0);
-                    expect(args[0].data).toEqual({
-                        arg: 'arg', product_class__name: 'Coupon'
-                    });
-                });
             });
         });
     }
