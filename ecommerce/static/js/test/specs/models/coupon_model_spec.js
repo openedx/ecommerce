@@ -82,14 +82,6 @@ define([
                     expect(model.isValid()).toBeFalsy();
                 });
 
-                it('should validate enrollment code has price', function () {
-                    spyOn($, 'ajax');
-                    var model = new Coupon(enrollment);
-                    model.set('price', '');
-                    model.validate();
-                    expect(model.isValid()).toBeFalsy();
-                });
-
                 it('should validate discount code has discount type and value', function () {
                     spyOn($, 'ajax');
                     var model = new Coupon(discount);
