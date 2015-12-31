@@ -61,20 +61,6 @@ define([
                 });
 
             });
-
-            describe('fetch', function () {
-                it('should call correct url', function () {
-                    var args;
-                    spyOn($, 'ajax');
-                    collection.fetch({
-                      dummyOption: 'dummy', data: {arg: 'arg'}
-                    });
-                    args = $.ajax.calls.argsFor(0);
-                    expect(args[0].data).toEqual({
-                        arg: 'arg', product_class__name: 'Coupon'
-                    });
-                });
-            });
         });
     }
 );

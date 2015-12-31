@@ -69,7 +69,7 @@ define([
                                 data: 'title'
                             },
                             {
-                                title: gettext('Voucher Report'),
+                                title: gettext('Coupon Report'),
                                 data: 'id',
                                 fnCreatedCell: function (nTd, sData, oData) {
                                     $(nTd).html(_s.sprintf('<a href="" ' +
