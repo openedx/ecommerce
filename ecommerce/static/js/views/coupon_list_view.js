@@ -24,6 +24,10 @@ define([
             },
 
             template: _.template(CouponListViewTemplate),
+            linkTpl: _.template('<a href="/coupons/<%= id %>/" class="coupon-title"><%= title %></a>'),
+            downloadTpl: _.template(
+                '<a href="" class="btn btn-secondary btn-small voucher-report-button"' +
+                ' data-coupon-id="<%= id %>"><%=gettext(\'Download Coupon Report\')%></a>'),
 
             initialize: function () {
                 _.bindAll(this, 'downloadVoucherReport');
@@ -66,16 +70,17 @@ define([
                         columns: [
                             {
                                 title: gettext('Name'),
-                                data: 'title'
+                                data: 'title',
+                                fnCreatedCell: _.bind(function (nTd, sData, oData) {
+                                    $(nTd).html(this.linkTpl(oData));
+                                }, this)
                             },
                             {
-                                title: gettext('Voucher Report'),
+                                title: gettext('Coupon Report'),
                                 data: 'id',
-                                fnCreatedCell: function (nTd, sData, oData) {
-                                    $(nTd).html(_s.sprintf('<a href="" ' +
-                                        'class="btn btn-secondary btn-small voucher-report-button" ' +
-                                        'data-coupon-id="%s"> Download Voucher Report</a>', oData.id));
-                                },
+                                fnCreatedCell: _.bind(function (nTd, sData, oData) {
+                                    $(nTd).html(this.downloadTpl(oData));
+                                }, this),
                                 orderable: false
                              }
                         ]

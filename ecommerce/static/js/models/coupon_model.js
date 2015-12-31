@@ -18,6 +18,11 @@ define([
             ) {
         'use strict';
 
+        _.extend(Backbone.Validation.messages, {
+            required: gettext('This field is required'),
+            number: gettext('This value must be a number'),
+            date: gettext('This value must be a date')
+        });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
         return Backbone.Model.extend({
@@ -31,27 +36,20 @@ define([
 
             validation: {
                 course_id: {
-                    pattern: 'courseId'
+                    pattern: 'courseId',
+                    msg: gettext('A valid course ID is required')
                 },
-                title: {
-                    required: true
-                },
-                client_username: {
-                    required: true
-                },
+                title: { required: true },
+                client_username: { required: true },
                 // seat_type is for validation only, stock_record_ids holds the values
-                seat_type: {
-                    required: true
-                },
                 price: {
                     pattern: 'number',
                     required: function () {
                         return this.isEnrollmentCode();
                     }
                 },
-                quantity: {
-                    pattern: 'digits'
-                },
+                seat_type: { required: true },
+                quantity: { pattern: 'number' },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
@@ -62,11 +60,11 @@ define([
                     var startDate,
                         endDate;
                     if (_.isEmpty(val)) {
-                        return gettext('Start date is required');
+                        return Backbone.Validation.messages.required;
                     }
                     startDate = moment(new Date(val));
                     if (!startDate.isValid()) {
-                        return gettext('Start date is invalid');
+                        return Backbone.Validation.messages.date;
                     }
                     endDate = moment(this.get('end_date'));
                     if (endDate && startDate.isAfter(endDate)) {
@@ -77,27 +75,17 @@ define([
                     var startDate,
                         endDate;
                     if (_.isEmpty(val)) {
-                        return gettext('End date is required');
+                        return Backbone.Validation.messages.required;
                     }
                     endDate = moment(new Date(val));
                     if (!endDate.isValid()) {
-                        return gettext('End date is invalid');
+                        return Backbone.Validation.messages.date;
                     }
                     startDate = moment(new Date(this.get('start_date')));
                     if (startDate && endDate.isBefore(startDate)) {
                         return gettext('Must occur after start date');
                     }
                 }
-            },
-
-            labels: {
-                course_id: gettext('Course ID'),
-                title: gettext('Name'),
-                client_username: gettext('Client'),
-                seat_type: gettext('Seat Type'),
-                price: gettext('Total Paid'),
-                quantity: gettext('Number of Codes'),
-                benefit_value: gettext('Discount Value')
             },
 
             isEnrollmentCode: function () {

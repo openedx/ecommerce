@@ -117,7 +117,7 @@ define([
                 // Validate the input and display a message, if necessary.
                 if (!this.model.isValid(true)) {
                     this.clearAlerts();
-                    this.renderAlert('danger', gettext('Please complete all required fields.'));
+                    this.renderAlert('danger', gettext('You must complete all required fields.'));
                     return;
                 }
 
