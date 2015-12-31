@@ -35,12 +35,12 @@ define([
 
             codeTypes: [
                 {
-                    value: 'discount',
-                    label: gettext('Discount Code')
-                },
-                {
                     value: 'enrollment',
                     label: gettext('Enrollment Code'),
+                },
+                {
+                    value: 'discount',
+                    label: gettext('Discount Code')
                 },
             ],
 
