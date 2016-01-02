@@ -105,7 +105,7 @@ one another. To configure course modes for a course, do the following:
 
 1. On `devstack`_, bring up the ecommerce server on port 8002, and the LMS on port 8000.
 2. On the ecommerce server, set up a `SiteConfiguration`_ in the django admin.
-3. Head over to the courses page on the ecommerce server: http://localhost:8000/courses.
+3. Head over to the courses page on the ecommerce server: http://localhost:8002/courses.
 4. Click "Add New Course".
 
 From there, you should be able to enter in the course id and desired course mode
