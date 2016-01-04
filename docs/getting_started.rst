@@ -88,11 +88,13 @@ OIDC client via LMS admin.
 
     $ python manage.py runserver 8002
 
-If you're running on devstack, you'll need to pass the appropriate settings:
+If you're running on devstack, you'll need to pass the appropriate settings
+after switching to the ecommerce user:
 
 .. code-block:: bash
 
-    $ python manage.py runserver 0.0.0.0:8002 --settings=ecommerce.settings.devstack
+    $ sudo su ecommerce
+    $ make devserve
 
 .. _Django's runserver command: https://docs.djangoproject.com/en/1.8/ref/django-admin/#runserver-port-or-address-port
 
@@ -103,10 +105,18 @@ If you're using `devstack`_, the ecommerce and edx-platform servers
 already have the correct configuration defaults to communicate with
 one another. To configure course modes for a course, do the following:
 
-1. On `devstack`_, bring up the ecommerce server on port 8002, and the LMS on port 8000.
-2. On the ecommerce server, set up a `SiteConfiguration`_ in the django admin.
-3. Head over to the courses page on the ecommerce server: http://localhost:8002/courses.
-4. Click "Add New Course".
+1. In the ecommerce and LMS configuration files (``/edx/etx/ecommerce.yml`` and
+``/edx/app/edxapp/lms.auth.json``, respectively), verify the following:
+
+    * LMS's ``EDX_API_KEY`` should match ecommerce's ``EDX_API_KEY``
+    * LMS's ``ECOMMERCE_API_SIGNING_KEY`` should match ecommerce's ``JWT_SECRET_KEY``
+
+If they don't match, you should update them so that they do.
+
+2. On `devstack`_, bring up the ecommerce server on port 8002, and the LMS on port 8000.
+3. On the ecommerce server, set up a `SiteConfiguration`_ in the django admin.
+4. Head over to the courses page on the ecommerce server: http://localhost:8002/courses.
+5. Click "Add New Course".
 
 From there, you should be able to enter in the course id and desired course mode
 for the course you'd like to configure.
