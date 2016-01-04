@@ -290,6 +290,7 @@ define([
                                     view = new viewClass({model: seats[0]});
                                 }
 
+                                this.$el.find('.course-seat.empty').addClass('hidden');
                                 /*jshint newcap: true */
                                 view.render();
 
