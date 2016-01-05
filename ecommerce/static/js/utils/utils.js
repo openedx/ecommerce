@@ -116,6 +116,8 @@ define([
 
                         if (_.isEqual($msg.length, 0)) {
                             $helpBlock.append('<div class="' + className + '">' + error + '</div>');
+                        } else {
+                            $msg.html(error);
                         }
 
                         $group.addClass('has-error');

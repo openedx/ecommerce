@@ -22,7 +22,7 @@ define([
             });
 
             it('should throw an error if submitted with blank fields', function () {
-                var errorHTML = '<strong>Error!</strong> Please complete all required fields.';
+                var errorHTML = '<strong>Error!</strong> You must complete all required fields.';
                 spyOn(model, 'isValid').and.returnValue(false);
                 view.submit($.Event('click'));
                 expect(view.$el.find('.alert').length).toBe(1);
