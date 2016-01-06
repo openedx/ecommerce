@@ -90,7 +90,11 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'insecure-secret-key',
-    'JWT_ISSUERS': (OAUTH2_PROVIDER_URL,),
+    'JWT_ISSUERS': (
+        OAUTH2_PROVIDER_URL,
+        # Must match the value of JWT_ISSUER configured for the ecommerce worker.
+        'ecommerce_worker',
+    ),
 })
 # END AUTHENTICATION
 
