@@ -1,12 +1,10 @@
 define([
         'backbone',
-        'backbone.super',
         'underscore',
         'collections/paginated_collection',
         'models/coupon_model'
     ],
     function (Backbone,
-              BackboneSuper,
               _,
               PaginatedCollection,
               CouponModel) {
@@ -20,7 +18,7 @@ define([
                 _.defaults(options.data || (options.data = {}), {
                     product_class__name: 'Coupon'
                 });
-                return this._super(options);
+                return PaginatedCollection.prototype.fetch.call(this, options);
             }
         });
     }
