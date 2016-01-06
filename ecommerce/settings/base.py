@@ -434,6 +434,10 @@ CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
 )
 
+# Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
+# See http://celery.readthedocs.org/en/latest/configuration.html#celeryd-hijack-root-logger.
+CELERYD_HIJACK_ROOT_LOGGER = False
+
 # Execute tasks locally (synchronously) instead of sending them to the queue.
 # See http://celery.readthedocs.org/en/latest/configuration.html#celery-always-eager.
 CELERY_ALWAYS_EAGER = False
