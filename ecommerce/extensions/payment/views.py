@@ -36,6 +36,11 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
     payment_processor = Cybersource()
 
+    # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
+    # until the request had concluded; Django will refuse to commit when an atomic() block
+    # is active, since that would break atomicity. Without an order present in the database
+    # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
+    @method_decorator(transaction.non_atomic_requests)
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(CybersourceNotifyView, self).dispatch(request, *args, **kwargs)
@@ -69,7 +74,6 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
         except (ValueError, ObjectDoesNotExist):
             return None
 
-    @transaction.non_atomic_requests
     def post(self, request):
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
 
@@ -167,6 +171,14 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     """Execute an approved PayPal payment and place an order for paid products as appropriate."""
     payment_processor = Paypal()
 
+    # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
+    # until the request had concluded; Django will refuse to commit when an atomic() block
+    # is active, since that would break atomicity. Without an order present in the database
+    # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
+    @method_decorator(transaction.non_atomic_requests)
+    def dispatch(self, request, *args, **kwargs):
+        return super(PaypalPaymentExecutionView, self).dispatch(request, *args, **kwargs)
+
     def _get_basket(self, payment_id):
         """
         Retrieve a basket using a payment ID.
@@ -193,7 +205,6 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
             return None
 
-    @transaction.non_atomic_requests
     def get(self, request):
         """Handle an incoming user returned to us by PayPal after approving payment."""
         payment_id = request.GET.get('paymentId')
