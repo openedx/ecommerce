@@ -300,6 +300,8 @@ define([
                     honorMode,
                     honorSeatClass,
                     honorSeat,
+                    products,
+                    auditSeat,
                     data = {
                         id: this.get('id'),
                         name: this.get('name'),
@@ -314,7 +316,12 @@ define([
                         /*jshint newcap: false */
                         honorSeat = new honorSeatClass({course: this});
                         /*jshint newcap: true */
-                        this.get('products').add(honorSeat);
+
+                        products = this.get('products');
+                        auditSeat = products.where({certificate_type: null});
+
+                        products.remove(auditSeat);
+                        products.add(honorSeat);
                     }
                 }
 
