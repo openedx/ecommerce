@@ -62,8 +62,7 @@ define([
 
             });
 
-            // Disable since this is failing in travis as of 1/6/16.
-            xit('fetch', function () {
+            describe('fetch', function () {
                 it('should call correct url', function () {
                     var args;
                     spyOn($, 'ajax');
