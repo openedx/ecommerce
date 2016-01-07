@@ -3,6 +3,7 @@ from decimal import Decimal
 import logging
 
 from dateutil.parser import parse
+from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model, get_class
@@ -16,6 +17,8 @@ from ecommerce.courses.models import Course
 
 logger = logging.getLogger(__name__)
 
+Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
 Line = get_model('order', 'Line')
@@ -30,6 +33,22 @@ Voucher = get_model('voucher', 'Voucher')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
+
+
+class ProductPaymentInfoMixin(serializers.ModelSerializer):
+    """ Mixin class used for retrieving price information from products. """
+    price = serializers.SerializerMethodField()
+
+    def get_price(self, product):
+        info = self._get_info(product)
+        if info.availability.is_available_to_buy:
+            return serializers.DecimalField(max_digits=10, decimal_places=2).to_representation(info.price.excl_tax)
+        return None
+
+    def _get_info(self, product):
+        return Selector().strategy(
+            request=self.context.get('request')
+        ).fetch_for_product(product)
 
 
 class BillingAddressSerializer(serializers.ModelSerializer):
@@ -81,11 +100,10 @@ class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
         fields = ('price_currency', 'price_excl_tax',)
 
 
-class ProductSerializer(serializers.HyperlinkedModelSerializer):
+class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSerializer):
     """ Serializer for Products. """
     attribute_values = serializers.SerializerMethodField()
     product_class = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
     stockrecords = StockRecordSerializer(many=True, read_only=True)
 
@@ -102,17 +120,6 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_product_class(self, product):
         return product.get_product_class().name
-
-    def get_price(self, product):
-        info = self._get_info(product)
-        if info.availability.is_available_to_buy:
-            return serializers.DecimalField(max_digits=10, decimal_places=2).to_representation(info.price.excl_tax)
-        return None
-
-    def _get_info(self, product):
-        return Selector().strategy(
-            request=self.context.get('request')
-        ).fetch_for_product(product)
 
     def get_is_available_to_buy(self, product):
         info = self._get_info(product)
@@ -354,6 +361,7 @@ class CatalogSerializer(serializers.ModelSerializer):
 class VoucherSerializer(serializers.ModelSerializer):
     is_available_to_user = serializers.SerializerMethodField()
     benefit = serializers.SerializerMethodField()
+    redeem_url = serializers.SerializerMethodField()
 
     def get_is_available_to_user(self, obj):
         request = self.context.get('request')
@@ -362,10 +370,57 @@ class VoucherSerializer(serializers.ModelSerializer):
     def get_benefit(self, obj):
         return (obj.offers.first().benefit.type, obj.offers.first().benefit.value)
 
+    def get_redeem_url(self, obj):
+        domain = settings.ECOMMERCE_URL_ROOT
+        return "{}/coupons/offer/?code={}".format(domain, obj.code)
+
     class Meta(object):
         model = Voucher
         fields = (
-            'id', 'name', 'code', 'usage', 'start_datetime', 'end_datetime',
+            'id', 'name', 'code', 'redeem_url', 'usage', 'start_datetime', 'end_datetime',
             'num_basket_additions', 'num_orders', 'total_discount',
             'date_created', 'offers', 'is_available_to_user', 'benefit'
         )
+
+
+class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
+    """ Serializer for Coupons. """
+    coupon_type = serializers.SerializerMethodField()
+    last_edited = serializers.SerializerMethodField()
+    seats = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
+    vouchers = serializers.SerializerMethodField()
+    # coupon_category = serializers.SerializerMethodField()
+
+    def get_coupon_type(self, obj):
+        voucher = obj.attr.coupon_vouchers.vouchers.first()
+        benefit = voucher.offers.first().benefit
+        if benefit.type == Benefit.PERCENTAGE and benefit.value == 100:
+            return "Enrollment code"
+        return "Discount code"
+
+    def get_last_edited(self, obj):
+        history = obj.history.latest()
+        return (history.history_user.username, history.history_date)
+
+    def get_seats(self, obj):
+        voucher = obj.attr.coupon_vouchers.vouchers.first()
+        stockrecords = voucher.offers.first().condition.range.catalog.stock_records.all()
+        seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
+        serializer = ProductSerializer(seats, many=True, context={'request': self.context['request']})
+        return serializer.data
+
+    def get_client(self, obj):
+        return Basket.objects.filter(lines__product_id=obj.id).first().owner.username
+
+    def get_vouchers(self, obj):
+        vouchers = obj.attr.coupon_vouchers.vouchers.all()
+        serializer = VoucherSerializer(vouchers, many=True, context={'request': self.context['request']})
+        return serializer.data
+
+    # def get_coupon_category(self, obj):
+    #     return obj.attr.coupon_category
+
+    class Meta(object):
+        model = Product
+        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers',)

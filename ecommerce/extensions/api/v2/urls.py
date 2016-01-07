@@ -8,7 +8,7 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments
                                                publication as publication_views, partners as partner_views,
                                                catalog as catalog_views,
                                                stockrecords as stockrecords_views,
-                                               coupons as coupons_views)
+                                               coupons as coupon_views)
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
@@ -20,10 +20,6 @@ BASKET_URLS = [
         basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
-]
-
-COUPON_URLS = [
-    url(r'^$', coupons_views.CouponOrderCreateView.as_view(), name='create'),
 ]
 
 PAYMENT_URLS = [
@@ -47,7 +43,6 @@ ATOMIC_PUBLICATION_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
-    url(r'^coupons/', include(COUPON_URLS, namespace='coupons')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
@@ -70,7 +65,7 @@ router.register(r'catalogs', catalog_views.CatalogViewSet) \
     .register(r'products', product_views.ProductViewSet, base_name='catalog-product',
               parents_query_lookups=['stockrecords__catalogs'])
 
-
+router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
 router.register(r'orders', order_views.OrderViewSet)
 
 urlpatterns += router.urls
