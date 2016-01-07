@@ -1,6 +1,5 @@
-================
 Coupon Codes
-================
+============
 
 A feature that adds the ability to create "Coupon Codes".  Coupon Codes are a product that is treated just like
 any other product in Otto.
