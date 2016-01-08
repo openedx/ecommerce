@@ -390,7 +390,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
     vouchers = serializers.SerializerMethodField()
-    # coupon_category = serializers.SerializerMethodField()
 
     def get_coupon_type(self, obj):
         voucher = obj.attr.coupon_vouchers.vouchers.first()
@@ -417,9 +416,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         vouchers = obj.attr.coupon_vouchers.vouchers.all()
         serializer = VoucherSerializer(vouchers, many=True, context={'request': self.context['request']})
         return serializer.data
-
-    # def get_coupon_category(self, obj):
-    #     return obj.attr.coupon_category
 
     class Meta(object):
         model = Product
