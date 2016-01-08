@@ -115,7 +115,11 @@ class OrderFulfillViewTests(TestCase):
 
         # Use the ecommerce worker service user in order to cover
         # request throttling code in extensions/api/throttles.py
-        self.user = self.create_user(is_superuser=True, is_staff=True, username='test-service-user')
+        self.user = self.create_user(is_staff=True, username='test-service-user')
+
+        self.change_order_permission = Permission.objects.get(codename='change_order')
+        self.user.user_permissions.add(self.change_order_permission)
+
         self.client.login(username=self.user.username, password=self.password)
 
         self.order = factories.create_order(user=self.user)
@@ -130,11 +134,33 @@ class OrderFulfillViewTests(TestCase):
         """
         return self.client.put(self.url)
 
+    def _assert_fulfillment_success(self):
+        """Verify that order fulfillment was successful. The view should return HTTP 200."""
+        with mock.patch('ecommerce.extensions.order.processing.EventHandler.handle_shipping_event') as mocked:
+            def handle_shipping_event(order, _event_type, _lines, _line_quantities, **_kwargs):
+                order.status = ORDER.COMPLETE
+                order.save()
+                return order
+
+            mocked.side_effect = handle_shipping_event
+            response = self._put_to_view()
+
+        self.assertTrue(mocked.called)
+        self.assertEqual(200, response.status_code)
+
+        return response
+
     @ddt.data('delete', 'get', 'post')
-    def test_put_or_patch_required(self, method):
-        """ Verify that the view only responds to PUT and PATCH operations. """
+    def test_delete_get_post_prohibited(self, method):
+        """Verify that the view does not allow DELETE, GET, or POST."""
         response = getattr(self.client, method)(self.url)
-        self.assertEqual(405, response.status_code)
+
+        # TODO: Since the view is routed to PUT and PATCH, DELETE, GET, and
+        # POST *should* all be met with 405. However, permissions checks appear
+        # to occur first. As a result, when a user with change permissions
+        # attempts a POST or DELETE, the response has status code 403, since
+        # the user doesn't have permission to create or delete orders.
+        self.assertIn(response.status_code, [405, 403])
 
     def test_login_required(self):
         """ The view should return HTTP 401 status if the user is not logged in. """
@@ -143,16 +169,19 @@ class OrderFulfillViewTests(TestCase):
 
     def test_change_permissions_required(self):
         """
-        The view requires the user to have change permissions for Order objects. If the user does not have permission,
-        the view should return HTTP 403 status.
+        Verify that staff users with permission to change Order objects are
+        able to modify orders on behalf of other users.
         """
-        self.user.is_superuser = False
-        self.user.save()
-        self.assertEqual(403, self._put_to_view().status_code)
+        customer = self.create_user(username='customer')
+        customer_order = factories.create_order(user=customer)
+        self.url = reverse('api:v2:order-fulfill', kwargs={'number': customer_order.number})
 
-        permission = Permission.objects.get(codename='change_order')
-        self.user.user_permissions.add(permission)
-        self.assertNotEqual(403, self._put_to_view().status_code)
+        self._assert_fulfillment_success()
+
+        # If the requesting user does not have the correct permissions, the view should
+        # return HTTP 403 status.
+        self.user.user_permissions.remove(self.change_order_permission)
+        self.assertEqual(403, self._put_to_view().status_code)
 
     def test_order_complete_state_disallowed(self):
         """ If the order is Complete, the view must return an HTTP 406. """
@@ -169,17 +198,7 @@ class OrderFulfillViewTests(TestCase):
         self.order.status = order_status
         self.order.save()
 
-        with mock.patch('ecommerce.extensions.order.processing.EventHandler.handle_shipping_event') as mocked:
-            def handle_shipping_event(order, _event_type, _lines, _line_quantities, **_kwargs):
-                order.status = ORDER.COMPLETE
-                order.save()
-                return order
-
-            mocked.side_effect = handle_shipping_event
-            response = self._put_to_view()
-            self.assertTrue(mocked.called)
-
-        self.assertEqual(200, response.status_code)
+        response = self._assert_fulfillment_success()
 
         # Reload the order from the DB and check its status
         self.order = Order.objects.get(number=self.order.number)
