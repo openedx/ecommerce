@@ -24,11 +24,11 @@ The Coupon Administration Tool allows the creation of two flavors of codes:
 
 Both types of Coupons can have the following behavior:
 
-  - Once by customer
+  - One time by one user
 
-  - Multiple times by multiple customers
+  - Multiple times by multiple users
 
-  - Once per customer
+  - One time by multiple users
 
 The creation of a Coupon behind the scenes generates an order.  Payment for these orders is handled by the new
 Invoice Payment Processor module and assumes out of band payment for the codes.
