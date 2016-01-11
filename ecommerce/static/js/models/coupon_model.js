@@ -31,7 +31,8 @@ define([
             defaults: {
                 quantity: 1,
                 stock_record_ids: [],
-                code: ''
+                code: '',
+                price: '0'
             },
 
             validation: {
@@ -42,18 +43,13 @@ define([
                 title: { required: true },
                 client_username: { required: true },
                 // seat_type is for validation only, stock_record_ids holds the values
-                price: {
-                    pattern: 'number',
-                    required: function () {
-                        return this.isEnrollmentCode();
-                    }
-                },
                 seat_type: { required: true },
                 quantity: { pattern: 'number' },
+                price: { pattern: 'number' },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
-                        return this.isDiscountCode();
+                        return this.get('code_type') === 'discount';
                     }
                 },
                 start_date: function (val) {
@@ -86,14 +82,6 @@ define([
                         return gettext('Must occur after start date');
                     }
                 }
-            },
-
-            isEnrollmentCode: function () {
-                return this.get('code_type') === 'enrollment' ;
-            },
-
-            isDiscountCode: function () {
-                return this.get('code_type') === 'discount' ;
             },
 
             initialize: function () {

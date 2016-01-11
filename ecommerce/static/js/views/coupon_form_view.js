@@ -63,18 +63,6 @@ define([
                 'input[name=title]': {
                     observe: 'title'
                 },
-                'select[name=seat_type]': {
-                    observe: ['seat_type', 'stock_record_ids'],
-                    selectOptions: {
-                        collection: function () {
-                            return this.seatTypes;
-                        }
-                    },
-                    onSet: function(value) {
-                        // seat_type, stock_record_ids
-                        return [value, value];
-                    }
-                },
                 'select[name=code_type]': {
                     observe: 'code_type',
                     selectOptions: {
@@ -135,7 +123,11 @@ define([
             },
 
             events: {
-                'input [name=course_id]': 'fillFromCourse'
+                'input [name=course_id]': 'fillFromCourse',
+
+                // catch value after autocomplete
+                'blur [name=course_id]': 'fillFromCourse',
+                'change [name=seat_type]': 'changeSeatType'
             },
 
             initialize: function (options) {
@@ -190,20 +182,47 @@ define([
                     course = Course.findOrCreate({id: courseId}),
                     parseId = _.compose(parseInt, _.property('id'));
 
+                // stickit will not pick it up if this is a blur event
+                this.model.set('course_id', courseId);
+
                 course.listenTo(course, 'sync', _.bind(function () {
                     this.seatTypes = _.map(course.seats(), function(seat) {
-                        return {
-                            label: seat.getSeatTypeDisplayName(),
-                            value: _.map(seat.get('stockrecords'), parseId)
-                        };
+                        var name = seat.getSeatTypeDisplayName();
+                        return $('<option></option>')
+                            .text(name)
+                            .val(name)
+                            .data({
+                                price: seat.get('price'),
+                                stockrecords: _.map(seat.get('stockrecords'), parseId)
+                            });
                     });
-                    // update selectOptions and update field
-                    this.stickit();
-                    this.$el.find('[name=seat_type]').trigger('change');
+                    // update field
+                    this.$el.find('[name=seat_type]')
+                        .html(this.seatTypes)
+                        .trigger('change');
                 }, this));
 
                 course.fetch({data: {include_products: true}});
             }, 100),
+
+            /*
+             * Update price field and model.stockrecords
+             */
+            changeSeatType: function () {
+                var data, quantity, price,
+                    seatType = this.$el.find('[name=seat_type]').val();
+
+                this.model.set('seat_type', seatType);
+
+                if (seatType) {
+                    data = this.$el.find('[value='+seatType+']').data();
+                    quantity = this.model.get('quantity');
+                    price = data.price * quantity;
+                    this.model.set('stock_record_ids', data.stockrecords);
+                    this.model.set('price', price);
+                    this.$el.find('[name=price]').val(price);
+                }
+            },
 
             render: function () {
                 // Render the parent form/template
