@@ -17,6 +17,7 @@ These are the developer docs for the edX E-Commerce Service.
    features
    partner_config
    fulfillment
+   coupons
    notifications
    internationalization
    maintenance
