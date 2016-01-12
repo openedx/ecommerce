@@ -5,6 +5,8 @@ define([
         'collections/product_collection',
         'models/course_model',
         'models/course_seats/professional_seat',
+        'models/course_seats/audit_seat',
+        'models/course_seats/honor_seat',
         'jquery-cookie'
     ],
     function ($,
@@ -12,7 +14,9 @@ define([
               _,
               ProductCollection,
               Course,
-              ProfessionalSeat) {
+              ProfessionalSeat,
+              AuditSeat,
+              HonorSeat) {
         'use strict';
 
         var model,
@@ -278,20 +282,32 @@ define([
                 });
 
                 describe('when honor_mode true', function() {
-                    it('adds an honor seat', function() {
-                        model.set('products', [auditSeat]);
+                    it('adds an honor seat and removes the audit seat', function() {
+                        var seats;
+
+                        model.set('products', []);
+                        model.get('products').push(new AuditSeat({}));
                         model.set('honor_mode', true);
                         model.save();
-                        expect(model.get('products').length).toEqual(2);
+
+                        seats = model.seats();
+                        expect(seats.length).toEqual(1);
+                        expect(seats[0].attributes.certificate_type).toEqual('honor');
                     });
                 });
 
                 describe('when honor_mode false', function() {
-                    it('does not add an honor seat', function() {
-                        model.set('products', [auditSeat]);
+                    it('does not add an honor seat and leaves the audit seat', function() {
+                        var seats;
+
+                        model.set('products', []);
+                        model.get('products').push(new AuditSeat({}));
                         model.set('honor_mode', false);
                         model.save();
-                        expect(model.get('products').length).toEqual(1);
+
+                        seats = model.seats();
+                        expect(seats.length).toEqual(1);
+                        expect(seats[0].attributes.certificate_type).toBeNull();
                     });
                 });
             });
@@ -381,14 +397,17 @@ define([
                 describe('with seats', function () {
                     it('sets honor_mode to true', function () {
                         model.set('honor_mode', null);
-                        model.set('products', [auditSeat, honorSeat]);
+                        model.set('products', []);
+                        model.get('products').push(new AuditSeat({}));
+                        model.get('products').push(new HonorSeat({}));
                         model.honorModeInit();
                         expect(model.get('honor_mode')).toBeTruthy();
                     });
 
                     it('sets honor_mode to false', function () {
                         model.set('honor_mode', null);
-                        model.set('products', [auditSeat]);
+                        model.set('products', []);
+                        model.get('products').push(new AuditSeat({}));
                         model.honorModeInit();
                         expect(model.get('honor_mode')).toBeFalsy();
                     });
