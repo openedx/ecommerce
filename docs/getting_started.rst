@@ -105,7 +105,7 @@ If you're using `devstack`_, the ecommerce and edx-platform servers
 already have the correct configuration defaults to communicate with
 one another. To configure course modes for a course, do the following:
 
-1. In the ecommerce and LMS configuration files (``/edx/etx/ecommerce.yml`` and
+1. In the ecommerce and LMS configuration files (``/edx/etc/ecommerce.yml`` and
 ``/edx/app/edxapp/lms.auth.json``, respectively), verify the following:
 
     * LMS's ``EDX_API_KEY`` should match ecommerce's ``EDX_API_KEY``
