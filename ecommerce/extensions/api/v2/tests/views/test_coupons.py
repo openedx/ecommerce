@@ -287,3 +287,34 @@ class CouponViewSetFunctionalTest(TestCase):
         response_data = json.loads(response.content)
         self.assertEqual(response_data['results'][0]['coupon_type'], 'Discount code')
         self.assertEqual(response_data['results'][0]['vouchers'][0]['benefit'][1], 20.0)
+
+    def test_update(self):
+        """Test updating a coupon."""
+        coupon = Product.objects.get(title='Test coupon')
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
+        response = self.client.put(path, json.dumps({'title': 'New title'}), 'application/json')
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['id'], coupon.id)
+        self.assertEqual(response_data['title'], 'New title')
+
+    def test_update_datetimes(self):
+        """Test that updating a coupons date updates all of it's voucher dates."""
+        coupon = Product.objects.get(title='Test coupon')
+        voucher_code = coupon.attr.coupon_vouchers.vouchers.first().code
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
+        data = {
+            'id': coupon.id,
+            'start_datetime': '2030-01-01',
+            'end_datetime': '2035-01-01'
+        }
+        response = self.client.put(path, json.dumps(data), 'application/json')
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['id'], coupon.id)
+        self.assertEqual(response_data['title'], 'Test coupon')
+
+        new_coupon = Product.objects.get(id=coupon.id)
+        self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.first().code, voucher_code)
+        self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.first().start_datetime.year, 2030)
+        self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().start_datetime.year, 2030)
+        self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.first().end_datetime.year, 2035)
+        self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().end_datetime.year, 2035)
