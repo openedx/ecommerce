@@ -46,20 +46,23 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
     return order
 
 
-def create_coupon(title='Test coupon', price=100, partner=None, catalog=None):
+def create_coupon(title='Test coupon', price=100, partner=None, catalog=None, code='', benefit_value=100):
     """Helper method for creating a coupon."""
     if partner is None:
         partner = PartnerFactory(name='Tester')
     if catalog is None:
         catalog = Catalog.objects.create(partner=partner)
+    quantity = 5
+    if code is not '':
+        quantity = 1
     data = {
         'partner': partner,
         'benefit_type': Benefit.PERCENTAGE,
-        'benefit_value': 100,
+        'benefit_value': benefit_value,
         'catalog': catalog,
         'end_date': datetime.date(2020, 1, 1),
-        'code': '',
-        'quantity': 5,
+        'code': code,
+        'quantity': quantity,
         'start_date': datetime.date(2015, 1, 1),
         'voucher_type': Voucher.SINGLE_USE
     }

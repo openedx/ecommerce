@@ -1,0 +1,15 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}{% trans "Redeem" %}{% endblock %}
+
+{% block content %}
+    <div id="offer">
+        {% if error %}
+            {% include "coupons/_offer_error.html" %}
+        {% else%}
+            {% include "coupons/_offer_success.html" %}
+        {% endif %}
+    </div>
+{% endblock %}

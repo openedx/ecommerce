@@ -1,0 +1,47 @@
+{% load i18n %}
+
+<div class="depth depth--3">
+    <div class="copy copy-meta">
+        {% trans "Enrollment code applied to course price. To redeem the enrollment code, enroll in the course." %}
+    </div>
+</div>
+<div class="container">
+    <h5>{% trans "Enroll and pursue a verified certificate in the following course." %}</h5>
+    <div class="row">
+        <div class="col-md-2">
+            <img class="img-responsive" src="{{course.image_url}}" alt="" />
+        </div>
+        <div class="col-md-8">
+            <h3>{{ course.name }} - {{ course.org }}</h3>
+            <p>
+                {{ course.short_description }}
+            </p>
+        </div>
+        <div class="col-md-2 text-right course-price">
+            <s class="course-price">${{ price }}</s>
+            <strong>{% trans "FREE" %}</strong>
+        </div>
+    </div>
+    <hr>
+    <div class="text-right">
+        <p>
+            <b class="total-price">{% trans "Total: $0" %}</b>
+        </p>
+        <a href="{% url 'coupons:redeem' %}?code={{ code }}" class="btn btn-primary">{% trans "Enroll and Redeem Code" %}</a>
+    </div>
+
+    {% if verified %}
+    <div class="alert alert-info note">
+        <span class="fa fa-exclamation-circle" aria-hidden="true"></span>
+        <b>{% trans "Note:" %}</b>
+        {% trans "You must verify your identity using a webcam and a government-issued photo ID before the course ends." %}
+    </div>
+    {% endif %}
+
+    <div>
+        <b>{% trans "Questions?" %}</b>
+        <p>
+            {% trans "Read our FAQs for answers to common questions about our certificates." %}
+        </p>
+    </div>
+</div>
