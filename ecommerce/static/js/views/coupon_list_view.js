@@ -20,7 +20,7 @@ define([
             className: 'coupon-list-view',
 
             events: {
-                'click .voucher-report-button': 'downloadVoucherReport'
+                'click .voucher-report-button': 'downloadCouponReport'
             },
 
             template: _.template(CouponListViewTemplate),
@@ -30,7 +30,6 @@ define([
                 ' data-coupon-id="<%= id %>"><%=gettext(\'Download Coupon Report\')%></a>'),
 
             initialize: function () {
-                _.bindAll(this, 'downloadVoucherReport');
                 this.listenTo(this.collection, 'update', this.refreshTableData);
             },
 
@@ -118,9 +117,9 @@ define([
             /**
              * Download voucher report for a Coupon product
              */
-            downloadVoucherReport: function (event) {
+            downloadCouponReport: function (event) {
                 var coupon_id = $(event.currentTarget).data('coupon-id'),
-                    url = '/api/v2/vouchers/download_voucher_report/' + coupon_id;
+                    url = '/api/v2/coupons/coupon_reports/' + coupon_id;
 
                 event.preventDefault();
                 window.open(url, '_blank');

@@ -1,11 +1,12 @@
 import datetime
 
+from django.conf import settings
 from django.db import IntegrityError
 from django.test import override_settings
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -16,6 +17,8 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
+REDEMPTION_URL = "/coupons/redeem/?code={}"
+VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
 
@@ -135,7 +138,7 @@ class UtilTests(TestCase):
             quantity=1,
             start_datetime=datetime.date(2015, 10, 1),
             voucher_type=Voucher.SINGLE_USE,
-            code="XMASC0DE"
+            code=VOUCHER_CODE
         )
 
         self.assertEqual(len(discount_vouchers), 1)
@@ -152,5 +155,57 @@ class UtilTests(TestCase):
                 quantity=1,
                 start_datetime=datetime.date(2015, 10, 1),
                 voucher_type=Voucher.SINGLE_USE,
-                code="XMASC0DE"
+                code=VOUCHER_CODE
             )
+
+    def test_generate_coupon_report(self):
+        """
+        Test generate coupon report
+        """
+        create_vouchers(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.00,
+            catalog=self.catalog,
+            coupon=self.coupon,
+            end_datetime=datetime.date(2015, 10, 30),
+            name="Discount code",
+            quantity=1,
+            start_datetime=datetime.date(2015, 10, 1),
+            voucher_type=Voucher.SINGLE_USE,
+            code=VOUCHER_CODE
+        )
+
+        create_vouchers(
+            benefit_type=Benefit.FIXED,
+            benefit_value=100.00,
+            catalog=self.catalog,
+            coupon=self.coupon,
+            end_datetime=datetime.date(2015, 10, 30),
+            name="Enrollment code",
+            quantity=1,
+            start_datetime=datetime.date(2015, 10, 1),
+            voucher_type=Voucher.SINGLE_USE
+        )
+
+        coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
+
+        field_names, rows = generate_coupon_report(coupon_vouchers)
+
+        self.assertEqual(field_names, ['Name', 'Code', 'Discount', 'URL'])
+        self.assertEqual(
+            rows[0],
+            {
+                'Name': 'Discount code',
+                'Code': VOUCHER_CODE,
+                'Discount': '100.00 %',
+                'URL': settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(VOUCHER_CODE)
+            }
+        )
+        enrollment_code_row = rows[1]
+        self.assertEqual(enrollment_code_row['Name'], 'Enrollment code')
+        self.assertEqual(len(enrollment_code_row['Code']), settings.VOUCHER_CODE_LENGTH)
+        self.assertEqual(enrollment_code_row['Discount'], '100.00 USD')
+        self.assertEqual(
+            enrollment_code_row['URL'],
+            settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(enrollment_code_row['Code'])
+        )

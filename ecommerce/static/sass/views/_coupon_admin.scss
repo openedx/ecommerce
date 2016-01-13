@@ -6,3 +6,80 @@
         width: 40px;
     }
 }
+
+.coupon-detail-view {
+    .coupon-information {
+        .heading {
+            padding-bottom: 50px;
+            color: gray;
+        }
+
+        .info-item {
+            .heading {
+                border-bottom: 1px solid #eeeeee;
+
+                padding-bottom: 5px;
+            }
+
+            .value {
+                padding-top: 10px;
+            }
+        }
+
+        .value {
+            color: black;
+            font-weight: bold;
+
+            span {
+                color: gray;
+
+                font-weight: normal;
+            }
+        }
+
+        .code-status {
+            &.active {
+                color: green;
+            }
+
+            @include padding-left(10px);
+        }
+
+        .discount-value,
+        .course-info,
+        .date-info,
+        .usage-limitations,
+        .client-info,
+        .total-paid {
+            @include float(left);
+
+            @include margin-right(2%);
+            margin-bottom: 50px;
+            width: 48%;
+            height: 75px;
+        }
+
+        .date-info,
+        .usage-limitations,
+        .total-paid {
+            @include margin-right(50%);
+        }
+
+        .start-date-info,
+        .end-date-info {
+            @include float(left);
+            width: 50%;
+        }
+
+        #vouchersTable_wrapper {
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        .codes {
+            .heading {
+                margin-bottom: 10px;
+            }
+        }
+    }
+}

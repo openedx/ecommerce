@@ -1,0 +1,62 @@
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/coupons/"><%= gettext('Coupons') %></a></li>
+        <li class="active"><%= coupon['title'] %></li>
+    </ol>
+    <div class="page-header">
+        <h1 class="hd-1 emphasized">
+            <span class="coupon-title"><%= coupon['title'] %></span>
+        </h1>
+        <h3 class="hd-3">
+            <span class="coupon-type"><%= couponType %></span>
+        </h3>
+    </div>
+    <div class="coupon-information">
+        <div class="heading"><%= gettext('Code Status:') %>
+            <span class="code-status value <% if(codeStatus == 'ACTIVE') { %>active <% } %>"><%= codeStatus %></span>
+            <div class="pull-right">
+                <%= gettext('Last edit:') %>
+                <span><%= lastEdited %></span>
+            </div>
+        </div>
+        <div class="info-item discount-value">
+            <div class="heading"><%= gettext('Discount value:') %></div>
+            <div class="value"><%= discountValue %></div>
+        </div>
+        <div class="info-item course-info">
+            <div class="heading"><%= gettext('Valid for course:') %></div>
+            <div class="value"><%= course_id %>
+                <span class="pull-right"><%= course_type %></span>
+            </div>
+        </div>
+        <div class="info-item date-info">
+            <div class="start-date-info">
+                <div class="heading"><%= gettext('Valid from:') %></div>
+                <div class="value"><%= startDateTime %></div>
+            </div>
+            <div class="end-date-info">
+                <div class="heading"><%= gettext('Valid until:') %></div>
+                <div class="value"><%= endDateTime %></div>
+            </div>
+        </div>
+        <div class="info-item usage-limitations">
+            <div class="heading"><%= gettext('Usage Limitations:') %></div>
+            <div class="value"><%= usage %></div>
+        </div>
+        <div class="info-item codes">
+            <div class="heading"><%= gettext('Code(s):') %></div>
+            <a href="/<%= coupon['id'] %>/" class="btn btn-primary btn-small pull-right voucher-report-button"><%= gettext('Download') %></a>
+            <table id="vouchersTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
+                <caption class="sr-only"><%= gettext('Current Voucher Codes') %></caption>
+            </table>
+        </div>
+        <div class="info-item client-info">
+            <div class="heading"><%= gettext('Client:') %></div>
+            <div class="value"><%= coupon['client'] %></div>
+        </div>
+        <div class="info-item total-paid">
+            <div class="heading"><%= gettext('Total Paid:') %></div>
+            <div class="value"><%= price %></div>
+        </div>
+    </div>
+</div>
