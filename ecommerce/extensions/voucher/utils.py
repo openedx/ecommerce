@@ -1,7 +1,8 @@
 """Order Utility Classes. """
+import base64
+import hashlib
 import logging
-import random
-import string  # pylint: disable=deprecated-module
+import uuid
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -107,13 +108,12 @@ def _generate_code_string(length):
     if length < 1:
         raise ValueError("Voucher code length must be a positive number.")
 
-    chars = [
-        char for char in string.ascii_uppercase + string.digits
-        if char not in 'AEIOU1'
-    ]
-    voucher_code = string.join((random.choice(chars) for i in range(length)), '')
+    h = hashlib.sha256()
+    h.update(uuid.uuid4().get_bytes())
+    voucher_code = base64.b32encode(h.digest())[0:length]
     if Voucher.objects.filter(code__iexact=voucher_code).exists():
         return _generate_code_string(length)
+
     return voucher_code
 
 
