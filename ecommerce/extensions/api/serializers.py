@@ -21,6 +21,7 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -422,3 +423,9 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers',)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta(object):
+        model = Category
