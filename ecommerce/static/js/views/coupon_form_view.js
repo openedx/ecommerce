@@ -8,9 +8,10 @@ define([
         'backbone.stickit',
         'underscore',
         'underscore.string',
+        'utils/utils',
         'text!templates/coupon_form.html',
         'models/course_model',
-        'views/form_view'
+        'views/form_view',
     ],
     function ($,
               Backbone,
@@ -19,6 +20,7 @@ define([
               BackboneStickit,
               _,
               _s,
+              Utils,
               CouponFormTemplate,
               Course,
               FormView) {
@@ -97,7 +99,7 @@ define([
                     observe: 'benefit_value'
                 },
                 'input[name=client_username]': {
-                    observe: 'client_username'
+                    observe: 'client'
                 },
                 'input[name=course_id]': {
                     observe: 'course_id'
@@ -109,16 +111,19 @@ define([
                     observe: 'price'
                 },
                 'input[name=start_date]': {
-                    observe: 'start_date'
+                    observe: 'start_date',
+                    onGet: function (val) {
+                        return Utils.stripTimezone(val);
+                    }
                 },
                 'input[name=end_date]': {
-                    observe: 'end_date'
+                    observe: 'end_date',
+                    onGet: function (val) {
+                        return Utils.stripTimezone(val);
+                    }
                 },
                 'input[name=code]': {
                     observe: 'code'
-                },
-                'input[name=category]': {
-                    observe: 'category'
                 }
             },
 
@@ -214,7 +219,7 @@ define([
 
                 this.model.set('seat_type', seatType);
 
-                if (seatType) {
+                if (seatType && !this.editing) {
                     data = this.$el.find('[value='+seatType+']').data();
                     quantity = this.model.get('quantity');
                     price = data.price * quantity;
@@ -222,6 +227,14 @@ define([
                     this.model.set('price', price);
                     this.$el.find('[name=price]').val(price);
                 }
+            },
+
+            disableNonEditableFields: function () {
+                this.$el.find('input[name=title]').attr('disabled', true);
+                this.$el.find('input[name=client_username]').attr('disabled', true);
+                this.$el.find('input[name=price]').attr('disabled', true);
+                this.$el.find('input[name=course_id]').attr('disabled', true);
+                this.$el.find('select[name=seat_type]').attr('disabled', true);
             },
 
             render: function () {
@@ -236,6 +249,14 @@ define([
                 this.model.set('voucher_type', this.voucherTypes[0].value);
                 this.model.set('benefit_type', 'Percentage');
 
+                if(this.editing) {
+                    this.disableNonEditableFields();
+                    this.$el.find('button[type=submit]').html(gettext('Save Changes'));
+                    this.fillFromCourse();
+                } else {
+                    this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
+                }
+
                 this._super();
                 return this;
             },
@@ -244,7 +265,7 @@ define([
              * Override default saveSuccess.
              */
             saveSuccess: function (model, response) {
-                this.goTo(response.coupon_id.toString());
+                this.goTo(response.coupon_id ? response.coupon_id.toString() : response.id.toString());
             },
 
         });

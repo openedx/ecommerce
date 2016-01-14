@@ -41,7 +41,7 @@ define([
                     msg: gettext('A valid course ID is required')
                 },
                 title: { required: true },
-                client_username: { required: true },
+                client: { required: true },
                 // seat_type is for validation only, stock_record_ids holds the values
                 seat_type: { required: true },
                 quantity: { pattern: 'number' },
@@ -86,6 +86,8 @@ define([
 
             initialize: function () {
                 this.on('change:voucher_type', this.changeVoucherType, this);
+                this.on('change:seats', this.updateSeatData);
+                this.on('change:vouchers', this.updateVoucherData);
             },
 
             /**
@@ -97,21 +99,33 @@ define([
                 }
             },
 
+            updateSeatData: function () {
+                var seat_data = this.get('seats')[0];
+                this.set('seat_type', seat_data.attribute_values[0].value);
+                this.set('course_id', seat_data.attribute_values[1].value);
+            },
+
+            updateVoucherData: function () {
+                var voucher_data = this.get('vouchers')[0];
+                this.set('start_date', voucher_data.start_datetime);
+                this.set('end_date', voucher_data.end_datetime);
+            },
+
             save: function (options) {
                 var data;
 
                 _.defaults(options || (options = {}), {
-                    type: 'POST',
                     // The API requires a CSRF token for all POST requests using session authentication.
                     headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')},
                     contentType: 'application/json'
                 });
 
                 data = this.toJSON();
+                data.client_username = this.get('client');
                 data.start_date = moment.utc(this.get('start_date'));
                 data.end_date = moment.utc(this.get('end_date'));
 
-                // Enrolment code always gives 100% discount
+                // Enrollment code always gives 100% discount
                 switch (this.get('code_type')) {
                 case 'enrollment':
                     // this is the price paid for the code(s)

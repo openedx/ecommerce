@@ -76,7 +76,7 @@ define([
 
             beforeEach(function () {
                 model = new Coupon();
-                view = new CouponFormView({ model: model }).render();
+                view = new CouponFormView({ editing: false, model: model }).render();
             });
 
             describe('seat type dropdown', function () {

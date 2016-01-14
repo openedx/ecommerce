@@ -38,7 +38,7 @@ define([
             discount = {
                 title: 'Test Discount',
                 code_type: 'discount',
-                client_username: 'test_client',
+                client: 'test_client',
                 start_date: '2015-01-01T00:00:00Z',
                 end_date: '2016-01-01T00:00:00Z',
                 stock_record_ids: [1],
@@ -47,12 +47,13 @@ define([
                 benefit_type: 'Percentage',
                 benefit_value: 25,
                 course_id: 'a/b/c',
-                seat_type: 'verified'
+                seat_type: 'verified',
+                course: course
             },
             enrollment = {
                 title: 'Test Enrollment',
                 code_type: 'enrollment',
-                client_username: 'test_client',
+                client: 'test_client',
                 start_date: '2015-01-01T00:00:00Z',
                 end_date: '2016-01-01T00:00:00Z',
                 stock_record_ids: [1],

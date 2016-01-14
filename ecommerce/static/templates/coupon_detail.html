@@ -6,6 +6,12 @@
     <div class="page-header">
         <h1 class="hd-1 emphasized">
             <span class="coupon-title"><%= coupon['title'] %></span>
+
+            <div class="pull-right">
+                <a class="btn btn-primary btn-small" href="/coupons/<%= coupon['id'] %>/edit/">
+                    <%= gettext('Edit Coupon') %>
+                </a>
+            </div>
         </h1>
         <h3 class="hd-3">
             <span class="coupon-type"><%= couponType %></span>

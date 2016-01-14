@@ -71,6 +71,7 @@ define([
                 // event is debounced, override _.now to trigger immediately
                 spyOn(_, 'now').and.returnValue(Date.now() + 110);
                 jasmine.clock().tick(110);
+                expect(view.$el.find('[name=seat_type]').val()).toEqual('Verified');
                 view.formView.submit($.Event('click'));
                 expect(model.isValid()).toBe(true);
                 expect(model.save).toHaveBeenCalled();
