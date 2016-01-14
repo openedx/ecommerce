@@ -8,7 +8,7 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views,
                                                products as product_views, courses as course_views,
                                                publication as publication_views, partners as partner_views,
                                                catalog as catalog_views, stockrecords as stockrecords_views,
-                                               coupons as coupon_views)
+                                               coupons as coupon_views, categories as category_views)
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
@@ -78,5 +78,5 @@ router.register(r'catalogs', catalog_views.CatalogViewSet) \
 
 router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
 router.register(r'orders', order_views.OrderViewSet)
-
+router.register(r'categories', category_views.CategoryViewSet)
 urlpatterns += router.urls

@@ -21,6 +21,7 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -431,3 +432,9 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 
     def get_payment_form_data(self, obj):
         return obj['payment_form_data']
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta(object):
+        model = Category
