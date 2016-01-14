@@ -98,7 +98,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             user_id=order.user.id
         )
 
-        if waffle.switch_is_active('async_order_fulfillment'):
+        if waffle.sample_is_active('async_order_fulfillment'):
             # Always commit transactions before sending tasks depending on state from the current transaction!
             # There's potential for a race condition here if the task starts executing before the active
             # transaction has been committed; the necessary order doesn't exist in the database yet.

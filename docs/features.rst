@@ -1,12 +1,12 @@
 Feature Toggling
 ================
 
-All new features/functionality should be released behind a feature gate. This allows us to easily disable features
-in the event that an issue is discovered in production. This project uses the
-`Waffle <http://waffle.readthedocs.org/en/latest/>`_ library for feature gating.
+All new features/functionality should be released behind a feature gate. This allows us to release
+new features in a controlled manner and easily disable features in the event that an issue is discovered
+in production. This project uses the `Waffle <http://waffle.readthedocs.org/en/latest/>`_ library
+for feature gating.
 
-Waffle supports three types of feature gates (listed below). We typically use flags and switches since samples are
-random and not ideal for our needs.
+Waffle supports three types of feature gates, listed below.
 
     Flag
         Enable a feature for specific users, groups, users meeting certain criteria (e.g. authenticated or staff),
@@ -22,28 +22,21 @@ random and not ideal for our needs.
 For information on creating or updating features, refer to the
 `Waffle documentation <http://waffle.readthedocs.org/en/latest/>`_.
 
-Available Switches
-------------------
+Available Feature Gates
+-----------------------
 
-Switches can be managed via the Django admin. The following switches exist:
+Waffle-based feature gates can be managed via the Django admin. The following feature gates exist:
 
-+--------------------------------+---------------------------------------------------------------------------+
-| Name                           | Functionality                                                             |
-+================================+=======================+===================================================+
-| user_enrollments_on_dashboard  | Display a user's current enrollments on the dashboard user detail page    |
-+--------------------------------+---------------------------------------------------------------------------+
-| publish_course_modes_to_lms    | Publish prices and SKUs to the LMS after every course modification        |
-+--------------------------------+---------------------------------------------------------------------------+
-| async_order_fulfillment        | Fulfill orders asynchronously                                             |
-+--------------------------------+---------------------------------------------------------------------------+
-| ENABLE_CREDIT_APP              | Enable the credit checkout page, from which students can purchase credit  |
-|                                | courses                                                                   |
-+--------------------------------+---------------------------------------------------------------------------+
-| ENABLE_NOTIFICATIONS           | Enable email notifications for a variety of user actions (e.g., order     |
-|                                | placed)                                                                   |
-+--------------------------------+---------------------------------------------------------------------------+
-| PAYPAL_RETRY_ATTEMPTS          | Enable retry mechanism for failed PayPal payment executions               |
-+--------------------------------+---------------------------------------------------------------------------+
+============================= ====== ===============================================================================
+Name                          Type   Purpose
+============================= ====== ===============================================================================
+user_enrollments_on_dashboard Switch Display a user's current enrollments on the dashboard user detail page
+publish_course_modes_to_lms   Switch Publish prices and SKUs to the LMS after every course modification
+async_order_fulfillment       Sample Determines what percentage of orders are fulfilled asynchronously.
+ENABLE_CREDIT_APP             Switch Enable the credit checkout page, from which students can purchase credit course
+ENABLE_NOTIFICATIONS          Switch Enable email notifications for a variety of user actions (e.g., order placed)
+PAYPAL_RETRY_ATTEMPTS         Switch Enable retry mechanism for failed PayPal payment executions
+============================= ====== ===============================================================================
 
 Toggling Payment Processors
 ---------------------------

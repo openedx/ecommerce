@@ -7,6 +7,7 @@ from django.test import override_settings
 from mock import Mock, patch
 from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
+from waffle.models import Sample
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -159,3 +160,24 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         self.assertTrue(mock_track.called)
         # ensure we logged a warning.
         self.assertTrue(mock_log_exc.called_with("Failed to emit tracking event upon order placement."))
+
+    @override_settings(SEGMENT_KEY=None)
+    def test_handle_successful_async_order(self, __):
+        """
+        Verify that a Waffle Sample can be used to control async order fulfillment.
+        """
+        sample, created = Sample.objects.get_or_create(
+            name='async_order_fulfillment',
+            defaults={
+                'percent': 100.0,
+                'note': 'Determines what percentage of orders are fulfilled asynchronously.',
+            }
+        )
+
+        if not created:
+            sample.percent = 100.0
+            sample.save()
+
+        with patch('ecommerce.extensions.checkout.mixins.fulfill_order.delay') as mock_delay:
+            EdxOrderPlacementMixin().handle_successful_order(self.order)
+            self.assertTrue(mock_delay.called)
