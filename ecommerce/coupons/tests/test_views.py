@@ -16,7 +16,7 @@ import pytz
 
 from ecommerce.coupons.views import get_voucher, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.test.factories import create_coupon
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.settings import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
@@ -29,7 +29,7 @@ Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 
-class CouponAppViewTests(TestCase):
+class CouponAppViewTests(CouponMixin, TestCase):
     path = reverse('coupons:app', args=[''])
 
     def setUp(self):
@@ -203,7 +203,7 @@ class CouponOfferViewTests(TestCase):
         self.assertEqual(response.context['code'], _('COUPONTEST'))
 
 
-class CouponRedeemViewTests(TestCase):
+class CouponRedeemViewTests(CouponMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
@@ -237,14 +237,14 @@ class CouponRedeemViewTests(TestCase):
     def test_basket_not_free(self):
         """ Verify a response message is returned when the basket is not free. """
         self.assertEqual(StockRecord.objects.get(product=self.seat).price_excl_tax, Decimal('50.00'))
-        create_coupon(catalog=self.catalog, code='COUPONTEST', benefit_value=0)
+        self.create_coupon(catalog=self.catalog, code='COUPONTEST', benefit_value=0)
         url = self.redeem_url + '?code={}'.format('COUPONTEST')
         response = self.client.get(url)
         self.assertEqual(str(response.context['error']), _('Basket total not $0, current value = $50.00'))
 
     def test_order_not_completed(self):
         """ Verify a response message is returned when an order is not completed. """
-        create_coupon(catalog=self.catalog, code='COUPONTEST')
+        self.create_coupon(catalog=self.catalog, code='COUPONTEST')
         self.assertEqual(Voucher.objects.filter(code='COUPONTEST').count(), 1)
 
         url = self.redeem_url + '?code={}'.format('COUPONTEST')
@@ -254,7 +254,7 @@ class CouponRedeemViewTests(TestCase):
     @httpretty.activate
     def test_redirect(self):
         """ Verify a redirect happens when valid info is provided. """
-        create_coupon(catalog=self.catalog, code='COUPONTEST')
+        self.create_coupon(catalog=self.catalog, code='COUPONTEST')
         self.assertEqual(Voucher.objects.filter(code='COUPONTEST').count(), 1)
 
         httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200)
@@ -265,7 +265,7 @@ class CouponRedeemViewTests(TestCase):
     @httpretty.activate
     def test_multiple_vouchers(self):
         """ Verify a redirect happens when a basket with already existing vouchers is used. """
-        create_coupon(catalog=self.catalog, code='COUPONTEST')
+        self.create_coupon(catalog=self.catalog, code='COUPONTEST')
         self.assertEqual(Voucher.objects.filter(code='COUPONTEST').count(), 1)
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code='COUPONTEST'))
