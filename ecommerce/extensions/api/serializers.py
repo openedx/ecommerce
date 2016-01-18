@@ -391,9 +391,9 @@ class CategorySerializer(serializers.ModelSerializer):
     child = serializers.SerializerMethodField()
 
     def get_child(self, obj):
-        desc = obj.get_children()
-        if desc:
-            serializer = CategorySerializer(desc, many=True)
+        child = obj.get_children()
+        if child:
+            serializer = CategorySerializer(child, many=True)
             return serializer.data
         return None
 
