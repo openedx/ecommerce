@@ -6,7 +6,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
-from ecommerce.extensions.test.factories import create_coupon
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -83,7 +83,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(actual, expected)
 
 
-class CouponUtilsTests(TestCase):
+class CouponUtilsTests(CouponMixin, TestCase):
 
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
@@ -92,7 +92,7 @@ class CouponUtilsTests(TestCase):
 
     def test_generate_sku_for_coupon(self):
         """Verify the method generates a SKU for a coupon."""
-        coupon = create_coupon(partner=self.partner, catalog=self.catalog)
+        coupon = self.create_coupon(partner=self.partner, catalog=self.catalog)
         _hash = ' '.join((
             unicode(coupon.id),
             unicode(self.catalog.id),

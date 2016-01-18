@@ -6,14 +6,13 @@ import json
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
-from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.tests.factories import SiteFactory, SiteConfigurationFactory
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -31,7 +30,7 @@ Voucher = get_model('voucher', 'Voucher')
 COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
-class CouponViewSetTest(TestCase):
+class CouponViewSetTest(CouponMixin, TestCase):
     """Unit tests for creating coupon order."""
 
     def setUp(self):
@@ -63,7 +62,8 @@ class CouponViewSetTest(TestCase):
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 1,
             'price': 100,
-            'category': 'Test category'
+            'category': 'Test category',
+            'sub_category': ''
         }
         request = RequestFactory()
         request.data = data
@@ -79,7 +79,7 @@ class CouponViewSetTest(TestCase):
 
     def test_create_coupon_product(self):
         """Test the created coupon data."""
-        coupon = create_coupon()
+        coupon = self.create_coupon()
         self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
         self.assertIsInstance(coupon, Product)
         self.assertEqual(coupon.title, 'Test coupon')
@@ -95,7 +95,7 @@ class CouponViewSetTest(TestCase):
 
     def test_append_to_existing_coupon(self):
         """Test adding additional vouchers to an existing coupon."""
-        create_coupon(partner=self.partner, catalog=self.catalog)
+        self.create_coupon(partner=self.partner, catalog=self.catalog)
         data = {
             'partner': self.partner,
             'benefit_type': Benefit.PERCENTAGE,
@@ -106,7 +106,8 @@ class CouponViewSetTest(TestCase):
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.MULTI_USE,
-            'category': 'Test category'
+            'category': 'Test category',
+            'sub_category': ''
         }
         coupon_append = CouponViewSet().create_coupon_product(
             title='Test coupon',
@@ -131,7 +132,8 @@ class CouponViewSetTest(TestCase):
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
-            'category': 'Test category'
+            'category': 'Test category',
+            'sub_category': ''
         }
         custom_coupon = CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -153,7 +155,8 @@ class CouponViewSetTest(TestCase):
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
-            'category': 'Test category'
+            'category': 'Test category',
+            'sub_category': ''
         }
         CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -170,7 +173,7 @@ class CouponViewSetTest(TestCase):
 
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
-        coupon = create_coupon(partner=self.partner)
+        coupon = self.create_coupon(partner=self.partner)
         coupon_client = Client.objects.create(username='TestX')
         basket = CouponViewSet().add_product_to_basket(
             product=coupon,
@@ -186,7 +189,7 @@ class CouponViewSetTest(TestCase):
 
     def test_create_order(self):
         """Test the order creation."""
-        coupon = create_coupon(partner=self.partner)
+        coupon = self.create_coupon(partner=self.partner)
         coupon_client = Client.objects.create(username='TestX')
         basket = CouponViewSet().add_product_to_basket(
             product=coupon,
@@ -205,7 +208,7 @@ class CouponViewSetTest(TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponViewSetFunctionalTest(TestCase):
+class CouponViewSetFunctionalTest(CouponMixin, TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
@@ -220,8 +223,6 @@ class CouponViewSetFunctionalTest(TestCase):
         course_id = 'edx/Demo_Course2/DemoX'
         course = Course.objects.create(id=course_id)
         course.create_or_update_seat('verified', True, 100, self.partner)
-        breadcrumb = 'Coupons > Test category'
-        create_from_breadcrumbs(breadcrumb)
         self.data = {
             'title': 'Test coupon',
             'client_username': 'TestX',
