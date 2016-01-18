@@ -388,9 +388,18 @@ class VoucherSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    child = serializers.SerializerMethodField()
+
+    def get_child(self, obj):
+        desc = obj.get_children()
+        if desc:
+            serializer = CategorySerializer(desc, many=True)
+            return serializer.data
+        return None
 
     class Meta(object):
         model = Category
+        fields = ('id', 'name', 'slug', 'description', 'path', 'depth', 'numchild', 'image', 'child')
 
 
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):

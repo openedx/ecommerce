@@ -24,9 +24,10 @@ class APIDictionaryKeys(object):
     QUANTITY = u'quantity'
     SHIPPING_CHARGE = u'shipping_charge'
     SHIPPING_METHOD = u'shipping_method'
+    SKU = u'sku'
     START_DATE = u'start_date'
     STOCK_RECORD_IDS = u'stock_record_ids'
-    SKU = u'sku'
+    SUB_CATEGORY = u'sub_category'
     TITLE = u'title'
     VOUCHER_TYPE = u'voucher_type'
 
