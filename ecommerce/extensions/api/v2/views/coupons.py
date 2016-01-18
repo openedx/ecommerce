@@ -76,7 +76,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
-            category = request.data[AC.KEYS.CATEGORY] or 'Other'
+            category = request.data[AC.KEYS.CATEGORY]
+            sub_category = request.data['sub_category']
 
             client, __ = Client.objects.get_or_create(username=client_username)
 
@@ -99,7 +100,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 'quantity': quantity,
                 'start_date': start_date,
                 'voucher_type': voucher_type,
-                'category': category
+                'category': category,
+                'sub_category': sub_category
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -133,6 +135,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 - start_date (Datetime)
                 - voucher_type (str)
                 - category (str)
+                - sub_category (str)
 
         Returns:
             A coupon product object.
@@ -173,8 +176,29 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 
+        category_name = data['category']
         coupon_product.attr.coupon_vouchers = coupon_vouchers
-        category = create_from_breadcrumbs(data['category'])
+
+        coupons_category = Category.objects.get(name='Coupons')
+        # Retrieve existing coupon categories
+        existing_categories = Category.objects.filter(
+            path__startswith=coupons_category.path
+        ).filter(
+            depth__lt=3
+        ).values_list('name', flat=True)
+
+        if category_name not in existing_categories:
+            raise Exception('Invalid category')
+
+        if data['sub_category']:
+            breadcrumb = 'Coupons > {category} > {sub_category}'.format(
+                category=category_name,
+                sub_category=data['sub_category']
+            )
+            category = create_from_breadcrumbs(breadcrumb)
+        else:
+            breadcrumb = 'Coupons > {category}'.format(category=category_name)
+            category = create_from_breadcrumbs(breadcrumb)
         ProductCategory.objects.get_or_create(category=category, product=coupon_product)
 
         coupon_product.save()

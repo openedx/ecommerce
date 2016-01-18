@@ -6,6 +6,7 @@ import json
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
+from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
@@ -18,6 +19,7 @@ from ecommerce.tests.testcases import TestCase
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Course = get_model('courses', 'Course')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -218,7 +220,8 @@ class CouponViewSetFunctionalTest(TestCase):
         course_id = 'edx/Demo_Course2/DemoX'
         course = Course.objects.create(id=course_id)
         course.create_or_update_seat('verified', True, 100, self.partner)
-
+        breadcrumb = 'Coupons > Test category'
+        create_from_breadcrumbs(breadcrumb)
         self.data = {
             'title': 'Test coupon',
             'client_username': 'TestX',
@@ -231,7 +234,8 @@ class CouponViewSetFunctionalTest(TestCase):
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
             'price': 100,
-            'category': 'Test category'
+            'category': 'Test category',
+            'sub_category': ''
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 

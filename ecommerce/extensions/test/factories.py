@@ -1,4 +1,5 @@
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.tests.factories import PartnerFactory
 
@@ -46,7 +47,15 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
     return order
 
 
-def create_coupon(title='Test coupon', price=100, partner=None, catalog=None, code='', benefit_value=100):
+def create_coupon(
+        title='Test coupon',
+        price=100,
+        partner=None,
+        catalog=None,
+        code='',
+        benefit_value=100,
+        sub_category=''
+    ):
     """Helper method for creating a coupon."""
     if partner is None:
         partner = PartnerFactory(name='Tester')
@@ -65,7 +74,8 @@ def create_coupon(title='Test coupon', price=100, partner=None, catalog=None, co
         'quantity': quantity,
         'start_date': datetime.date(2015, 1, 1),
         'voucher_type': Voucher.SINGLE_USE,
-        'category': 'Test category'
+        'category': 'Test category',
+        'sub_category': sub_category
     }
 
     coupon = CouponViewSet().create_coupon_product(
