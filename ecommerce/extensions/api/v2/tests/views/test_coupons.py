@@ -93,6 +93,52 @@ class CouponViewSetTest(CouponMixin, TestCase):
         category = ProductCategory.objects.get(product=coupon).category
         self.assertEqual(category.name, 'Test category')
 
+    def test_non_existing_category(self):
+        """Test creating a coupon with a non-existing category."""
+        data = {
+            'partner': self.partner,
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100,
+            'catalog': self.catalog,
+            'end_date': datetime.date(2020, 1, 1),
+            'code': '',
+            'quantity': 2,
+            'start_date': datetime.date(2015, 1, 1),
+            'voucher_type': Voucher.MULTI_USE,
+            'category': 'New category',
+            'sub_category': ''
+        }
+        with self.assertRaises(Exception):
+            CouponViewSet().create_coupon_product(
+                title='Test coupon',
+                price=100,
+                data=data
+            )
+
+    def test_coupon_sub_category(self):
+        """Test adding a sub-category to a coupon."""
+        data = {
+            'partner': self.partner,
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100,
+            'catalog': self.catalog,
+            'end_date': datetime.date(2020, 1, 1),
+            'code': '',
+            'quantity': 2,
+            'start_date': datetime.date(2015, 1, 1),
+            'voucher_type': Voucher.MULTI_USE,
+            'category': 'Test category',
+            'sub_category': 'Test sub-category'
+        }
+        coupon = CouponViewSet().create_coupon_product(
+            title='Test coupon',
+            price=100,
+            data=data
+        )
+        category = ProductCategory.objects.get(product=coupon).category
+        self.assertEqual(category.name, 'Test sub-category')
+        self.assertEqual(category.depth, 3)
+
     def test_append_to_existing_coupon(self):
         """Test adding additional vouchers to an existing coupon."""
         self.create_coupon(partner=self.partner, catalog=self.catalog)
@@ -236,7 +282,7 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
             'quantity': 2,
             'price': 100,
             'category': 'Test category',
-            'sub_category': ''
+            'sub_category': 'Test sub-category'
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 
@@ -280,6 +326,7 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
         response_data = json.loads(response.content)
         coupon_data = response_data['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
+        self.assertEqual(coupon_data['category']['name'], 'Test sub-category')
         self.assertEqual(coupon_data['coupon_type'], 'Enrollment code')
         self.assertIsNotNone(coupon_data['last_edited'][0])
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
