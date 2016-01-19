@@ -268,7 +268,7 @@ class TestServerUrlMixin(object):
 
 
 class CouponMixin(object):
-    """Mixing for preparing data for coupons and creating coupons."""
+    """Mixin for preparing data for coupons and creating coupons."""
     def setUp(self):
         super(CouponMixin, self).setUp()
         breadcrumb = 'Coupons > Test category'
