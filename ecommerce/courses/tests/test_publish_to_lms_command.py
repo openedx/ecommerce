@@ -13,13 +13,13 @@ from django.core.management import CommandError
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TransactionTestCase
 
 logger = logging.getLogger(__name__)
 
 
 @ddt.ddt
-class PublishCoursesToLMSTests(CourseCatalogTestMixin, TestCase):
+class PublishCoursesToLMSTests(CourseCatalogTestMixin, TransactionTestCase):
     """Tests the course publish command."""
 
     tmp_file_path = os.path.join(tempfile.gettempdir(), "tmp-testfile.txt")
