@@ -434,6 +434,8 @@ CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
 )
 
+CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'}}
+
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
 # See http://celery.readthedocs.org/en/latest/configuration.html#celeryd-hijack-root-logger.
 CELERYD_HIJACK_ROOT_LOGGER = False
