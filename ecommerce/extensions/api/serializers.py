@@ -392,10 +392,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def get_child(self, obj):
         child = obj.get_children()
-        if child:
-            serializer = CategorySerializer(child, many=True)
-            return serializer.data
-        return None
+        serializer = CategorySerializer(child, many=True)
+        return serializer.data
 
     class Meta(object):
         model = Category
