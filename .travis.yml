@@ -34,8 +34,5 @@ script:
     - make static
     - make validate_python
     - make validate_js
-branches:
-    only:
-        - master
 after_success:
     - codecov
