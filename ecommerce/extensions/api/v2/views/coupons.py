@@ -236,3 +236,19 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         )
 
         return response_data
+
+    def update(self, request, *args, **kwargs):
+        """Update start and end dates of all vouchers associated with the coupon."""
+        super(CouponViewSet, self).update(request, *args, **kwargs)
+        coupon = self.get_object()
+
+        start_datetime = request.data.get('start_datetime', '')
+        if start_datetime:
+            coupon.attr.coupon_vouchers.vouchers.all().update(start_datetime=start_datetime)
+
+        end_datetime = request.data.get('end_datetime', '')
+        if end_datetime:
+            coupon.attr.coupon_vouchers.vouchers.all().update(end_datetime=end_datetime)
+
+        serializer = self.get_serializer(coupon)
+        return Response(serializer.data)
