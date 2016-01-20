@@ -296,7 +296,8 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
                 self.course_id,
                 access_token=ACCESS_TOKEN,
                 commit=True,
-                partner=self.partner.short_code
+                # `partner_short_code` is the option destination variable
+                partner_short_code=self.partner.short_code
             )
 
             # Verify that the migrated course was published back to the LMS
