@@ -15,6 +15,7 @@ from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.settings import get_lms_url
@@ -96,7 +97,7 @@ class CouponOfferView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CouponOfferView, self).get_context_data(**kwargs)
-
+        footer = get_lms_footer()
         code = self.request.GET.get('code', None)
         if code is not None:
             voucher, product = get_voucher(code=code)
@@ -110,23 +111,38 @@ class CouponOfferView(TemplateView):
                 except SlumberHttpBaseException as e:
                     logger.exception('Could not get course information. [%s]', e)
                     return {
-                        'error': _('Could not get course information. [{error}]'.format(error=e))
+                        'error': _('Could not get course information. [{error}]'.format(error=e)),
+                        'footer': footer
                     }
-
                 course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
                 stock_records = voucher.offers.first().benefit.range.catalog.stock_records.first()
+                benefit_type = voucher.offers.first().benefit.type
+                benefit_value = voucher.offers.first().benefit.value
+                price = stock_records.price_excl_tax
+                if benefit_type == 'Percentage':
+                    new_price = price - (price * (benefit_value / 100))
+                else:
+                    new_price = price - benefit_value
+                    if new_price < 0:
+                        new_price = 0.00
                 context.update({
+                    'benefit_type': benefit_type,
+                    'benefit_value': benefit_value,
                     'course': course,
                     'code': code,
-                    'price': stock_records.price_excl_tax,
-                    'verified': (product.attr.certificate_type is 'verified')
+                    'price': price,
+                    'new_price': "%.2f" % new_price,
+                    'verified': (product.attr.certificate_type == 'verified'),
+                    'footer': footer
                 })
                 return context
             return {
-                'error': msg
+                'error': msg,
+                'footer': footer
             }
         return {
-            'error': _('This coupon code is invalid.')
+            'error': _('This coupon code is invalid.'),
+            'footer': footer
         }
 
     def get(self, request, *args, **kwargs):

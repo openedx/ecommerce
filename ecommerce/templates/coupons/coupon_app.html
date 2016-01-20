@@ -60,15 +60,13 @@
 {% endblock %}
 
 {% block footer %}
+    {% if footer %}
     <footer class="footer">
         <div class="container">
-            <div class="row">
-                <div class="col-xs-12 text-right">
-                    <em>{% blocktrans %}Coupon Administration Tool{% endblocktrans %}</em>
-                </div>
-            </div>
+            {{ footer }}
         </div>
     </footer>
+    {% endif %}
 {% endblock footer %}
 
 {% block javascript %}

@@ -14,8 +14,13 @@
     }
 
     .course-price {
+        .discount {
+            font-weight: bold;
+            @include padding-right(10px);
+        }
         strong {
             color: #25B85A;
+            @include padding-left(10px);
         }
         .course-price {
             color: #9EB1B9;
@@ -67,7 +72,11 @@
             }
         }
     }
-
+    p.voucher {
+        margin: 0 20px;
+        color: gray;
+        @include float(left);
+    }
     .note {
         border: 1px solid  #D2D0D0;
         border-radius: 0;
