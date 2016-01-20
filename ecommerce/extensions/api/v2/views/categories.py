@@ -21,7 +21,7 @@ class CategoryFilter(django_filters.FilterSet):
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.filter(depth=1)
     serializer_class = serializers.CategorySerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = CategoryFilter
