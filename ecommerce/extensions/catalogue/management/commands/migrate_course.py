@@ -180,7 +180,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         course_ids = args
         access_token = options.get('access_token')
-        partner_short_code = options.get('partner')
+        partner_short_code = options.get('partner_short_code')
         if not access_token:
             logger.error('Courses cannot be migrated if no access token is supplied.')
             return
