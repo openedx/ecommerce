@@ -55,7 +55,8 @@ define([
                 expect(view.$el.find('.alert').html()).toBe(errorHTML);
             });
 
-            it('should submit form with valid fields', function () {
+            //Disable flaky test SOL-1604
+            xit('should submit form with valid fields', function () {
                 jasmine.clock().install();
                 view.$el.find('[name=title]').val('Test Enrollment').trigger('change');
                 view.$el.find('[name=code_type]').val('enrollment').trigger('change');
