@@ -2,12 +2,14 @@ define([
         'routers/page_router',
         'pages/coupon_list_page',
         'pages/coupon_create_page',
-        'pages/coupon_detail_page'
+        'pages/coupon_detail_page',
+        'pages/coupon_edit_page'
     ],
     function (PageRouter,
               CouponListPage,
               CouponCreatePage,
-              CouponDetailPage) {
+              CouponDetailPage,
+              CouponEditPage) {
         'use strict';
 
         return PageRouter.extend({
@@ -19,6 +21,7 @@ define([
                 '(/)': 'index',
                 'new(/)': 'new',
                 ':id(/)': 'show',
+                ':id/edit(/)': 'edit',
                 '*path': 'notFound'
             },
 
@@ -49,6 +52,15 @@ define([
                 this.currentView = page;
                 this.$el.html(page.el);
             },
+
+            /**
+             * Display a form for editing an existing coupon.
+             */
+            edit: function (id) {
+                var page = new CouponEditPage({id: id});
+                this.currentView = page;
+                $('#app').html(page.el);
+            }
         });
     }
 );
