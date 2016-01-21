@@ -151,7 +151,8 @@ class MigratedCourse(object):
             expires = mode.get('expiration_datetime')
             expires = parse(expires) if expires else None
             self.course.create_or_update_seat(
-                certificate_type, id_verification_required, price, self.partner, expires=expires
+                certificate_type, id_verification_required, price, self.partner,
+                expires=expires, remove_stale_modes=False
             )
 
 
