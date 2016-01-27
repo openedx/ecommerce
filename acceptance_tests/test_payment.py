@@ -101,6 +101,7 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         select_fields = (
             ('#bill_to_address_country', address['country']),
             ('#bill_to_address_state_us_ca', address['state']),
+            ('#card_expiry_month', '01'),
             ('#card_expiry_year', '2020')
         )
         for selector, value in select_fields:
