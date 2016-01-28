@@ -31,6 +31,27 @@ How To Contribute
 
 Contributions are welcome. Please read `How To Contribute <https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst>`_ for details. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
 
+E-Commerce Team SLA
+-------------------
+
+Pull Requests made by teams internal to edX will be reviewed within certain timeframes based on the size/complexity of the PR.
+
++-------------+---------------+----------------+--------------------------+
+|             | Lines of Code | Files Modified | SLA                      |
++=============+===============+================+==========================+
+| SMALL       | < 10          | 1 - 2          | 2 Days                   |
++-------------+---------------+----------------+--------------------------+
+| MEDIUM      | < 300         | 2 - 10         | 7 Days                   |
++-------------+---------------+----------------+--------------------------+
+| LARGE       | > 300         | > 10           | 14 Days                  |
++-------------+---------------+----------------+--------------------------+
+| EXTRA LARGE | >1000         | > 100          | Team recommends breaking |
+|             |               |                | PRs of this size into    |
+|             |               |                | smaller chunks of work.  |
++-------------+---------------+----------------+--------------------------+
+
+If the PR is time sensitive, the contributor is encouraged to notify the team well in advance of the need for code review so that the team can plan for the work involved.
+
 Reporting Security Issues
 -------------------------
 
