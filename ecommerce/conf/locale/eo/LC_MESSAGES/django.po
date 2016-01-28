@@ -2,19 +2,19 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-19 15:51-0500\n"
+"POT-Creation-Date: 2016-01-28 18:28-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: core/admin.py
@@ -65,6 +65,67 @@ msgstr ""
 msgid "Full Name"
 msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr "Çöüpön döés nöt éxïst Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr "Çöüpön éxpïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr ""
+"Thïs çöüpön häs älréädý ßéén üséd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "Thïs çöüpön çödé ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr "édX Démönsträtïön Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr "ÇÖÛPÖNTÉST Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr "Çödé nöt prövïdéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr ""
+"Bäskét tötäl nöt $0, çürrént välüé = $50.00 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr ""
+"Érrör whén trýïng tö rédéém çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr ""
+"Prödüçt [{product}] nöt äväïläßlé för pürçhäsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
+" ¢σηѕє¢тєтυя #"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr ""
+"Çöüld nöt gét çöürsé ïnförmätïön. [{error}] Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr ""
+"Bäskét tötäl nöt $0, çürrént välüé = ${basket_price} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя #"
+
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
@@ -78,6 +139,36 @@ msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr ""
 "Fäïléd tö püßlïsh çömmérçé dätä för {course_id} tö LMS. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
+msgstr ""
+"Àn érrör häs öççürréd. Wé çöüld nöt çönfïrm thät ýöü äré élïgïßlé för çöürsé"
+" çrédït. Trý thé tränsäçtïön ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr ""
+"Nö çrédït séät ïs äväïläßlé för thïs çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr ""
+"Àn érrör häs öççürréd. Wé çöüld nöt çönfïrm thät thé ïnstïtütïön ýöü "
+"séléçtéd öfférs thïs çöürsé çrédït. Trý thé tränsäçtïön ägäïn. Ⱡ#"
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr ""
+"Àll päýmént öptïöns äré çürréntlý ünäväïläßlé. Trý thé tränsäçtïön ägäïn ïn "
+"ä féw mïnütés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
@@ -290,6 +381,51 @@ msgstr "Lïné Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕι
 msgid "Quantity"
 msgstr "Qüäntïtý Ⱡ'σяєм ιρѕυм ∂#"
 
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "Nämé Ⱡ'σяєм ι#"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "Çödé Ⱡ'σяєм ι#"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "Dïsçöünt Ⱡ'σяєм ιρѕυм ∂#"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "ÛRL Ⱡ'σяєм#"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
+msgstr "{percentage} % Ⱡ'σяєм ιρѕ#"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr "{amount} {currency} Ⱡ'σяєм ιρѕυм #"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr "Rängé för {catalog_name} Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr "Çöüpön Répört för {coupon_name} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr "Nöt Päïd Ⱡ'σяєм ιρѕυм ∂#"
+
+#: invoice/models.py
+msgid "Paid"
+msgstr "Päïd Ⱡ'σяєм ι#"
+
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -366,30 +502,103 @@ msgstr "Vöüçhérs Ⱡ'σяєм ιρѕυм ∂#"
 msgid "Reports"
 msgstr "Répörts Ⱡ'σяєм ιρѕυм #"
 
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr ""
+"Ìf ýöü nééd ässïstänçé, çöntäçt édX süppört. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
+msgstr ""
+"Énröllmént çödé äpplïéd tö çöürsé prïçé. Tö rédéém thé énröllmént çödé, "
+"énröll ïn thé çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr ""
+"Énröll änd pürsüé ä vérïfïéd çértïfïçäté ïn thé föllöwïng çöürsé. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "FRÉÉ Ⱡ'σяєм ι#"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr "Tötäl: $0 Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr "Énröll änd Rédéém Çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr "Nöté: Ⱡ'σяєм ιρѕ#"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr ""
+"Ýöü müst vérïfý ýöür ïdéntïtý üsïng ä wéßçäm änd ä gövérnmént-ïssüéd phötö "
+"ÌD ßéföré thé çöürsé énds. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "Qüéstïöns? Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr ""
+"Réäd öür FÀQs för änswérs tö çömmön qüéstïöns äßöüt öür çértïfïçätés. Ⱡ'σяєм"
+" ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "Çöüpön Çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle navigation"
+msgstr "Tögglé nävïgätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr "Çöüpön Çödé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Dashboard for:"
+msgstr "Däshßöärd för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle Dropdown"
+msgstr "Tögglé Dröpdöwn Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
+msgid "Login"
+msgstr "Lögïn Ⱡ'σяєм ιρѕ#"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr "Çöüpön Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr "Rédéém Ⱡ'σяєм ιρѕυ#"
+
 #: templates/courses/course_app.html
 msgid "Courses"
 msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle navigation"
-msgstr "Tögglé nävïgätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
-
 #: templates/courses/course_app.html
 msgid "Course Administration"
 msgstr "Çöürsé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Dashboard for:"
-msgstr "Däshßöärd för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle Dropdown"
-msgstr "Tögglé Dröpdöwn Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
-
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
-msgid "Login"
-msgstr "Lögïn Ⱡ'σяєм ιρѕ#"
 
 #: templates/courses/course_app.html
 #, python-format
@@ -621,49 +830,142 @@ msgstr ""
 msgid "Order Receipt"
 msgstr "Ördér Réçéïpt Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "Séléçt Ⱡ'σяєм ιρѕυ#"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr "Çrédïts:  Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "Prïçé:  Ⱡ'σяєм ιρѕυм #"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Learn more about %(display_name)s credit?\n"
+"                "
+msgstr ""
+"\n"
+"                    Léärn möré äßöüt %(display_name)s çrédït?\n"
+"                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Ýöü çän pürçhäsé çrédït thröügh %(display_name)s för thïs çöürsé för üp tö öné ýéär\n"
+"                        äftér thé çöürsé énd däté. Ýöü çän üsé thé çrédït ät %(display_name)s ör tränsfér thé\n"
+"                        çrédït tö änöthér ïnstïtütïön thät äççépts thé çrédït.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσ#"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr "Tö pürçhäsé çöürsé çrédït: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr ""
+"Ön thïs pägé, séléçt ä çhéçköüt öptïön. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr ""
+"Ön thé päýmént pägé, éntér ýöür päýmént ïnförmätïön. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+"\n"
+"                            Whén ýöür päýmént ïs çömplété, föllöw thé lïnk tö thé %(display_name)s wéßsïté.\n"
+"                         Ⱡ'σяєм ιρѕυ#"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+"\n"
+"                            Ön thé %(display_name)s wéßsïté, éntér äll réqüïréd ïnförmätïön tö réqüést ýöür çöürsé\n"
+"                            çrédït.\n"
+"                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂є#"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Àftér %(display_name)s äpprövés ýöür çrédït, ýöü çän réqüést än öffïçïäl tränsçrïpt fröm\n"
+"                        %(display_name)s.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αη#"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
+msgstr ""
+"\n"
+"                    Çrédït äväïläßlé üntïl %(date)s\n"
+"                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
 #: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
-msgstr "Çrédït Çhéçköüt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
+msgstr "Pürçhäsé Çrédït för %(course_name)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
+"                                Purchase Credit for %(course_name)s\n"
+"                            "
+msgstr ""
 "\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
-"                    "
-msgstr[0] ""
-"\n"
-"                        Pürçhäsé 1 çrédït fröm %(provider)s för:\n"
-"                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
-msgstr[1] ""
-"\n"
-"                        Pürçhäsé %(hours)s çrédïts fröm %(provider)s för:\n"
-"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+"                                Pürçhäsé Çrédït för %(course_name)s\n"
+"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
 msgstr ""
-"Söméthïng wént wröng! Pléäsé trý ägäïn lätér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя #"
+"\n"
+"                        Çöngrätülätïöns! Ýöü äré élïgïßlé tö pürçhäsé äçädémïç çöürsé çrédït för thïs çöürsé.\n"
+"                        Ýöü müst pürçhäsé ýöür çrédït ßéföré %(date)s.\n"
+"                        Séléçt öné öf thé föllöwïng ïnstïtütïöns tö pürçhäsé ýöür çrédït.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт#"
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
 msgstr "Tötäl: Ⱡ'σяєм ιρѕυ#"
-
-#: templates/edx/credit/checkout.html
-#, python-format
-msgid ""
-"\n"
-"                                Credit eligibility expires on %(date)s\n"
-"                            "
-msgstr ""
-"\n"
-"                                Çrédït élïgïßïlïtý éxpïrés ön %(date)s\n"
-"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: templates/edx/credit/checkout.html
 msgid "You deserve it."
@@ -702,19 +1004,15 @@ msgstr ""
 "päth tö süççéss! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr "Qüéstïöns? Ⱡ'σяєм ιρѕυм ∂σłσ#"
-
-#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
 "\n"
-"                Pléäsé réäd %(link_start)söür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés.%(link_end)s\n"
-"             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт #"
+"                    Pléäsé réäd %(link_start)söür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés.%(link_end)s\n"
+"                 Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
@@ -949,10 +1247,6 @@ msgstr "Àçtïöns Ⱡ'σяєм ιρѕυм #"
 #: templates/oscar/dashboard/users/detail.html
 msgid "View"
 msgstr "Vïéw Ⱡ'σяєм ι#"
-
-#: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr "Dïsçöünt Ⱡ'σяєм ιρѕυм ∂#"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"

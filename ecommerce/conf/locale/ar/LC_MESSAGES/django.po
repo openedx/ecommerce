@@ -1,22 +1,24 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Ahmed Jazzar <ajazzar@qrf.org>, 2015
+# may <may@qordoba.com>, 2015
 # Nabeel El-Dughailib <nabeel@qordoba.com>, 2015
+# Soha Assali <soha+transifex@qordoba.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-10-13 20:22+0000\n"
-"Last-Translator: Ahmed Jazzar <ajazzar@qrf.org>\n"
+"PO-Revision-Date: 2015-12-17 03:37+0000\n"
+"Last-Translator: Soha Assali <soha+transifex@qordoba.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
-"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ar\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: core/admin.py
@@ -38,11 +40,11 @@ msgstr "الاسم الكامل"
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
-msgstr ""
+msgstr "آخر تاريخ/توقيت يمكن تقديم توثيق لهذا المنتج فيه."
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
-msgstr "لا يمكنك التحقّق بسلّة فارغة."
+msgstr "لا يمكنك إتمام عملية البيع بسلّة فارغة."
 
 #: extensions/api/exceptions.py
 msgid ""
@@ -61,19 +63,19 @@ msgstr "أحد المنتجات التي تحاول طلبها غير متوفّ
 #: extensions/api/serializers.py
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
-msgstr ""
+msgstr "جرى طلب فئة منتجات [{product_class}] غير صالحة"
 
 #: extensions/api/serializers.py
 msgid "Products must indicate whether ID verification is required."
-msgstr ""
+msgstr "يجب أن تحدّد المنتجات فيما إذا كان توثيق الرقم التعريفي مطلوبًا "
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
-msgstr ""
+msgstr "يجب أن يكون للمنتجات سعر"
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
-msgstr ""
+msgstr "آخر تاريخ/توقيت يمكن شراء هذا المنتج فيه "
 
 #: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -91,7 +93,7 @@ msgid ""
 "{link_start}here{link_end} to view it."
 msgstr ""
 "أُنشِئَت عملية {link_start}استرداد المبلغ #{refund_id}{link_end}! يُرجى "
-"النقر {link_start}هنا{link_end} لرؤيته."
+"النقر {link_start}هنا{link_end} لاستعراض بيانات العملية."
 
 #: extensions/dashboard/orders/views.py
 msgid ""
@@ -99,7 +101,7 @@ msgid ""
 "refunded."
 msgstr ""
 "لا يمكن إنشاء عملية استرداد المبلغ لهذه الخطوط، ربما تكون المبالغ قد "
-"استُردَّت بالفعل."
+"استُردَّت في وقتٍ سابق."
 
 #: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
@@ -123,7 +125,7 @@ msgstr "الحالة"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "عذرًا، لقد فشلنا في استرجاع بيانات التسجيل."
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
@@ -274,7 +276,7 @@ msgstr "تبديل طريقة التصفّح"
 
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
+msgstr "إدارة المساق"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Dashboard for:"
@@ -282,7 +284,7 @@ msgstr "لوحة المعلومات لـ:"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Toggle Dropdown"
-msgstr ""
+msgstr "آلية تفعيل القائمة المنسدلة"
 
 #: templates/courses/course_app.html templates/edx/base.html
 #: templates/edx/base.html.py
@@ -292,19 +294,19 @@ msgstr "تسجيل الدخول"
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "أداة إدارة المساق الخاص بـ %(platform_name)s"
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "لوحة معلومات الطالب"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "أداة مشرف المساق"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "لوحة معلومات التجارة الإلكترونية"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -313,7 +315,7 @@ msgstr "تسجيل الخروج"
 #: templates/customer/email_base.html
 #, python-format
 msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgstr "جميع حقوق النشر والطبع محفوظة للمنصّة %(platform_name)s  © 2015."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -321,7 +323,7 @@ msgstr ""
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "مرحبًا %(full_name)s،"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -331,6 +333,9 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"نشكرك لاشتراك وسداد قيمة المساقات %(course_title)s. ستظهر التعرفة المبيّنة "
+"أدناه مرفقةً باسم المنصّة  %(platform_name)s ضمن البيان التفصيلي القادم "
+"لبطائة الدائن/المدين خاصتّك."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -339,6 +344,8 @@ msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
 msgstr ""
+"يمكنك الوصول إلى مساقك وإتمام عملية التوثيق (إذا كان مطلوبًا) باستخدام لوحة "
+"معلومات منصّة  %(platform_name)s الخاصّة بك."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -347,16 +354,18 @@ msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
 msgstr ""
+"يُمكنك زيارة موقع %(platform_name)s لاستكشاف العديد من المساقات الرائعة "
+"الأخرى حيث تُضاف مساقات جديدة كل يوم."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "نشكر مشاركتك ونأمل أن تستمتع بالمساق!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "فريق %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.html
@@ -365,18 +374,20 @@ msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"وصلتك رسالة البريد الالكتروني هذه نتيجة شرائك لمقعد في مساق %(course_title)s"
+" الذي تقدّمه %(platform_name)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
-msgstr ""
+msgstr "إقرار استلام من أجل:"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
-msgstr ""
+msgstr "فريق %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -385,19 +396,19 @@ msgstr "فريق edX"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
-msgstr ""
+msgstr "جرى وضع الطلب قيد التنفيذ."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
-msgstr ""
+msgstr "إقرار استلام."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation for:"
-msgstr ""
+msgstr "إقرار استلام من أجل:"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Receipt"
-msgstr ""
+msgstr "عرض الإيصال"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -408,6 +419,10 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"نشكرك لاشتراكك وسداد قيمة الساعات %(credit_hours)s المعتمدة لمادة المساق "
+"%(course_title)s المزّودة من قبل %(credit_provider)s. ستظهر التعرفة المبيّنة"
+" أدناه مرفقةً باسم المنصّة %(platform_name)s، ضمن البيان التفصيلي القادم "
+"لبطاقة الدائن/ المدين خاصّتك."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -416,6 +431,8 @@ msgid ""
 "You can see the status the status of your credit request or complete the "
 "credit request process on your %(platform_name)s dashboard"
 msgstr ""
+"يمكنك أن تتابع وضع طلب المادة أو إتمام عملية طلب المادة باستخدام لوحة "
+"معلومات المنصّة %(platform_name)s."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
@@ -423,27 +440,31 @@ msgid ""
 "To browse other credit-eligible courses visit the %(platform_name)s website."
 " More courses are added all the time."
 msgstr ""
+"يُمكنك زيارة موقع %(platform_name)s لاستكشاف مساقات أخرى تستوجب حضور "
+"المادّة. تُضاف مساقات جديدة كل يوم."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
-msgstr ""
+msgstr "نشكر مشاركتك ونهنّئك بإنجازك. نأمل أن تكون قد استمتعت بحضور المساق!"
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "To browse other credit-eligible courses visit the edX website. More courses "
 "are added all the time."
 msgstr ""
+"يُمكنك زيارة موقع edX لاستكشاف مساقات أخرى تستوجب حضور المادّة. تُضاف مساقات"
+" جديدة كل يوم."
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "To view receipt please visit the link below"
-msgstr ""
+msgstr "يُرجى زيارة الرابط المبيّن أدناه لعرض الإيصال."
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
-msgstr ""
+msgstr "إيصال الطلب"
 
 #: templates/edx/credit/checkout.html
 msgid "Credit Checkout"
@@ -460,15 +481,33 @@ msgid_plural ""
 "                        Purchase %(hours)s credits from %(provider)s for:\n"
 "                    "
 msgstr[0] ""
+"\n"
+"شراء %(hours)s ساعة للمادّة من %(provider)s من أجل:\n"
+"                    "
 msgstr[1] ""
+"\n"
+"شراء 1 ساعة للمادّة من %(provider)s من أجل:\n"
+"                    "
 msgstr[2] ""
+"\n"
+"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
+"                    "
 msgstr[3] ""
+"\n"
+"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
+"                    "
 msgstr[4] ""
+"\n"
+"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
+"                    "
 msgstr[5] ""
+"\n"
+"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
+"                    "
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
-msgstr ""
+msgstr "حدث خطأ! الرجاء المحاولة مرّة أخرى لاحقًا."
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
@@ -481,40 +520,49 @@ msgid ""
 "                                Credit eligibility expires on %(date)s\n"
 "                            "
 msgstr ""
+"\n"
+"                                ينتهي استحقاق المادّة بتاريخ %(date)s\n"
+"                            "
 
 #: templates/edx/credit/checkout.html
 msgid "You deserved it."
-msgstr ""
+msgstr "لقد استحققتها."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"انتهى الجزء المتعب - لقد أنهيت المساق بنجاح! والآن يمكنك الحصول على اعتماد "
+"المقرّر الذي تستحق للبدء أو إتمام الدرجة التي تعمل لنيلها."
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr " إنه في متناول اليد."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr ""
+"بشكل عام، تقل تكلفة المادّة المتاحة من خلال منصّة edX عن تكلفة المادّة ذاتها"
+" في معظم المؤسّسات التعليمية."
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "ستفتح لك أبوابًا."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
 msgstr ""
+"يتطلّب العديد من أكثر الوظائف طلبًا حيازة مؤهلٍ جامعي. ابدأ مشوارك نحو "
+"النجاح!"
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
-msgstr ""
+msgstr "ألديك أسئلة؟"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -523,110 +571,113 @@ msgid ""
 "                Please read %(link)s\n"
 "            "
 msgstr ""
+"\n"
+"                يُرجى مطالعة %(link)s\n"
+"            "
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "إحصائيات متجرك"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "إجمالي الطلبيات"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "العملاء الجدد"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "إجمالي العملاء"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "إجمالي المنتجات"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "الطلبيات الأخيرة (خلال 24 ساعة الأخيرة)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "الطلبيات - خلال الـ 24 ساعة الأخيرة"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "إجمالي الطلبيات"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "إجمالي الخطوط"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "إجمالي الإيرادات"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "متوسط تكاليف الطلبية"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "متوسط تكاليف الطلبية (المدفوعة)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "إدارة"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "الطلبيات - في جميع الأوقات"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "إجمالي سلل الشراء <em>المفتوحة</em> "
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "إجمالي العملاء"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "العملاء الجدد"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "عرض تنبيهات المخزون"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "الكتالوج والمخزون"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "إجمالي المنتجات"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "تنبيهات المخزون <em>المفتوحة</em> "
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "تنبيهات المخزون <em>المغلقة</em> "
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "العروض والقسائم والعروض الترويجية"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "عروض <em>الموقع</em> النشطة"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "<em>قسائم الشراء</em> الفعّالة"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "عروض ترويجية"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -1035,7 +1086,7 @@ msgstr "إغلاق"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "جاري البحث..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
@@ -1089,11 +1140,11 @@ msgstr "الوضعية"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "فعّال؟"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "عذرًا، لم نجد عمليات تسجيل!"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"

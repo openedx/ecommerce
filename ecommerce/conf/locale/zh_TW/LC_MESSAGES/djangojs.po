@@ -1,34 +1,35 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
+# JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
 # Mushiyo <Mushiyo@ya.ru>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-05 02:21+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"PO-Revision-Date: 2015-12-14 07:57+0000\n"
+"Last-Translator: JEN-HAO HSIEH <orienthauz@gmail.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
-"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr ""
+msgstr "您必須選擇一個課程類別。"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "驗證期限必須在更新期限之後。"
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "產品認證失敗。"
 
 #: static/js/models/course_model.js
 msgid "Course ID"
@@ -40,19 +41,19 @@ msgstr "課程名稱"
 
 #: static/js/models/course_model.js static/js/views/course_list_view.js
 msgid "Course Type"
-msgstr ""
+msgstr "課程類別"
 
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
-msgstr ""
+msgstr "驗證期限"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "所有課程必須有價位。"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "驗證期限必須在更新期限之前。"
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -62,7 +63,7 @@ msgstr "已驗證"
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "學分"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -82,23 +83,23 @@ msgstr "簽名認證"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "專業認證"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
-msgstr ""
+msgstr "榮譽證書"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "為認證"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "所有學分必須有學分提供方。"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "所有學分必須指定學分小時數。"
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
@@ -106,20 +107,20 @@ msgstr "檢視課程"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "編輯課程"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
-msgstr ""
+msgstr "免費(榮譽)"
 
 #: static/js/views/course_form_view.js
 msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgstr "免費的榮譽課程語認證"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
-msgstr ""
+msgstr "初步認證與簽名認證的付費證書課程"
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -129,17 +130,17 @@ msgstr "專業教育"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "初步認證與專業教育認證的付費證書課程"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "初步認證與簽名認證的付費證書課程，可選擇購買學分課程。"
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
-msgstr ""
+msgstr "錯誤!"
 
 #: static/js/views/course_form_view.js
 msgid "Saving..."
@@ -147,15 +148,15 @@ msgstr "儲存中"
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "請完成所有的欄位。"
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "儲存時發生錯誤。"
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
-msgstr ""
+msgstr "搜索..."
 
 #: static/js/views/course_list_view.js
 msgid "Next"
@@ -169,17 +170,17 @@ msgstr "上一個"
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "顯示_開始_到_結束_在_所有_課程"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(filtered from _MAX_ total courses)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "顯示 _選單_ 課程"
 
 #: static/js/views/course_list_view.js
 msgid "Course"
@@ -187,4 +188,4 @@ msgstr "課程"
 
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
-msgstr ""
+msgstr "上一次編輯"

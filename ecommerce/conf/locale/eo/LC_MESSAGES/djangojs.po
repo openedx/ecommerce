@@ -2,24 +2,54 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-19 15:51-0500\n"
+"POT-Creation-Date: 2016-01-28 18:28-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "Thïs fïéld ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "Thïs välüé müst ßé ä nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "Thïs välüé müst ßé ä däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "À välïd çöürsé ÌD ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "Müst öççür ßéföré énd däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "Müst öççür äftér stärt däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
 #: static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "Ýöü müst séléçt ä çöürsé týpé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr ""
+"Ýöü müst çhöösé ïf än hönör séät shöüld ßé çréätéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -46,6 +76,10 @@ msgstr "Çöürsé Týpé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "Vérïfïçätïön Déädlïné Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "Ìnçlüdé Hönör Séät Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -108,6 +142,22 @@ msgstr ""
 "Àll çrédït séäts müst désïgnäté ä nümßér öf çrédït höürs. Ⱡ'σяєм ιρѕυм ∂σłσя"
 " ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "Çréäté Néw Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "Vïéw Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "Édït Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "Çöüpön Çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
 #: static/js/pages/course_create_page.js
 msgid "Create New Course"
 msgstr "Çréäté Néw Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
@@ -124,15 +174,103 @@ msgstr "Édït Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 msgid "Courses"
 msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "Fréé (Hönör) Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "ÀÇTÌVÉ Ⱡ'σяєм ιρѕυ#"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "Énröllmént Çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr ""
+"Çän ßé üséd önçé ßý öné çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr ""
+"Çän ßé üséd mültïplé tïmés ßý mültïplé çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr ""
+"Çän önlý ßé üséd önçé pér çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "Çödé Ⱡ'σяєм ι#"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "Rédémptïön ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "Dïsçöünt Çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr ""
+"Çän ßé üséd önçé ßý mültïplé çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "Çréäté Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "Séärçh... Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "Néxt Ⱡ'σяєм ι#"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "Prévïöüs Ⱡ'σяєм ιρѕυм ∂#"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr ""
+"Dïspläýïng _STÀRT_ tö _ÉND_ öf _TÖTÀL_ çöüpöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α#"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr ""
+"(fïltéréd fröm _MÀX_ tötäl çöüpöns) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "Dïspläý _MÉNÛ_ çöüpöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "Nämé Ⱡ'σяєм ι#"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "Çöüpön Répört Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
+msgid "Free (Audit)"
+msgstr "Fréé (Àüdït) Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
 msgstr ""
-"Fréé hönör träçk wïth Hönör Çértïfïçäté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя#"
+"Fréé äüdït träçk. Nö çértïfïçäté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: static/js/views/course_form_view.js
 msgid ""
@@ -161,38 +299,6 @@ msgstr ""
 "Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Vérïfïéd Çértïfïçäté, "
 "änd öptïön tö pürçhäsé çrédït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "Érrör! Ⱡ'σяєм ιρѕυ#"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "Sävïng... Ⱡ'σяєм ιρѕυм ∂σł#"
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr ""
-"Pléäsé çömplété äll réqüïréd fïélds. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυ#"
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr ""
-"Àn érrör öççürréd whïlé sävïng thé dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя#"
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "Séärçh... Ⱡ'σяєм ιρѕυм ∂σł#"
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "Néxt Ⱡ'σяєм ι#"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "Prévïöüs Ⱡ'σяєм ιρѕυм ∂#"
-
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
@@ -220,11 +326,39 @@ msgstr "Çöürsé Ⱡ'σяєм ιρѕυ#"
 msgid "Last Edited"
 msgstr "Läst Édïtéd Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "Érrör! Ⱡ'σяєм ιρѕυ#"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "Sävïng... Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr ""
+"Ýöü müst çömplété äll réqüïréd fïélds. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr ""
+"Àn érrör öççürréd whïlé sävïng thé dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
 #: static/js/views/payment_button_view.js
 msgid "An error has occurred. Please try again."
 msgstr ""
 "Àn érrör häs öççürréd. Pléäsé trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "Séléçt Ⱡ'σяєм ιρѕυ#"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "Séléçtéd Ⱡ'σяєм ιρѕυм ∂#"
 
 #: static/vendor-extensions/oscar/js/order_list.js
 msgid "Order %(order_number)s has been fulfilled."
