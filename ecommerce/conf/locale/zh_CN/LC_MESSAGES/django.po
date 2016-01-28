@@ -1,10 +1,13 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Dandi Xu <dandi.xu.china@gmail.com>, 2015
 # Dustin Yu <dustintt123@hotmail.com>, 2015
+# jg Ma <jg20040308@126.com>, 2016
+# jsgang <jsgang9@gmail.com>, 2015-2016
+# Li SY <leelucy1@hotmail.com>, 2015
 # meelo <bbvy@qq.com>, 2015
 # ruiruillp <gaier1993@163.com>, 2015
 # vivian <467095288@qq.com>, 2015
@@ -16,13 +19,13 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-11-05 11:17+0000\n"
-"Last-Translator: Dandi Xu <dandi.xu.china@gmail.com>\n"
+"PO-Revision-Date: 2016-01-11 16:06+0000\n"
+"Last-Translator: jg Ma <jg20040308@126.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
-"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: core/admin.py
@@ -325,7 +328,7 @@ msgstr ""
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "%(full_name)s 你好,"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -355,12 +358,12 @@ msgstr ""
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "谢谢。我们愿您学习愉快！"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "%(platform_name)s团队"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.html
@@ -380,7 +383,7 @@ msgstr ""
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
-msgstr ""
+msgstr "%(platform_name)s 团队"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -389,7 +392,7 @@ msgstr "edX团队"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
-msgstr ""
+msgstr "订单已提交"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
@@ -433,7 +436,7 @@ msgstr ""
 msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
-msgstr ""
+msgstr "谢谢您的努力，并恭喜您完成课程。我们希望您学习愉快！"
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
@@ -447,7 +450,7 @@ msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
-msgstr ""
+msgstr "订单收据"
 
 #: templates/edx/credit/checkout.html
 msgid "Credit Checkout"
@@ -467,7 +470,7 @@ msgstr[0] ""
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
-msgstr ""
+msgstr "出错了！请再试一次。"
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
@@ -509,7 +512,7 @@ msgstr ""
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr ""
+msgstr "如今炙手可热的工作都需要一个学院的文凭。在这里，开启您的成功之路吧！"
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
@@ -522,46 +525,48 @@ msgid ""
 "                Please read %(link)s\n"
 "            "
 msgstr ""
+"\n"
+"请阅读  %(link)s"
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "您的商店数据"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "所有订单"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "新客户"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "客户总数"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "商品总数"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "最近订单(24小时内)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "订单－24小时内"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "总订单"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "总行数"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "总收入"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
@@ -577,7 +582,7 @@ msgstr "管理"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "订单 - 所有时间"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
@@ -585,7 +590,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "客户总数"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
@@ -601,31 +606,31 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "商品总数"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>打开</em>库存提示"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>关闭</em>库存提示 "
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "折扣商品，优惠卷和促销商品"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "激活<em>页面</em>折扣商品"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "激活<em>优惠卷</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "促销产品"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -1089,11 +1094,11 @@ msgstr "模式"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "激活？"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "没有发现注册信息"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"

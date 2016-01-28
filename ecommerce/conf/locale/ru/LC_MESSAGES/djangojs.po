@@ -1,8 +1,9 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
+# Maksimenkova Olga <omaksimenkova@hse.ru>, 2015
 # Michael Savin <m.savin.ru@gmail.com>, 2015
 # Weyedide <weyedide@gmail.com>, 2015
 msgid ""
@@ -10,13 +11,13 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-11-15 17:33+0000\n"
+"PO-Revision-Date: 2015-12-10 06:18+0000\n"
 "Last-Translator: Michael Savin <m.savin.ru@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
-"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: static/js/models/course_model.js
@@ -25,7 +26,7 @@ msgstr "Вы должны выбрать тип курса"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "Время верификации должно быть ПОЗЖЕ срока обновления. "
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
@@ -53,7 +54,7 @@ msgstr "Все места курса должны иметь цену."
 
 #: static/js/models/course_seats/course_seat.js
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "Время обновления должно быть РАНЬШЕ времени верификации. "
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -95,11 +96,11 @@ msgstr "Нет сертификата"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "У курса должен быть указан провайдер зачётных единиц."
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "Должно быть определено количество зачётных единиц."
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
@@ -111,16 +112,18 @@ msgstr "Редактировать курс"
 
 #: static/js/views/course_form_view.js
 msgid "Free (Honor)"
-msgstr ""
+msgstr "Бесплатно (Кодекс чести)"
 
 #: static/js/views/course_form_view.js
 msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgstr "Бесплатный трек с сертификатом Кодекса чести"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr ""
+"Платный трек с предварительным подтверждением и Подтверждённым Сертификатом."
+" "
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -131,12 +134,16 @@ msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr ""
+"Платный трек с предварительным подтверждением и Сертификатом "
+"профессионального образования"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr ""
+"Платный трек с предварительным подтверждением, Подтверждённым сертификатом и"
+" возможностью получения кредита."
 
 #: static/js/views/course_form_view.js
 msgid "Error!"
@@ -148,11 +155,11 @@ msgstr "Сохранение..."
 
 #: static/js/views/course_form_view.js
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "Пожалуйста, заполните все обязательные поля."
 
 #: static/js/views/course_form_view.js
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "При сохранении данных возникла ошибка."
 
 #: static/js/views/course_list_view.js
 msgid "Search..."
@@ -170,17 +177,17 @@ msgstr "Предыдущее"
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "Отображено _START_ - _END_ из _TOTAL_ курсов"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(отобрано из _MAX_ курсов)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "Отобразить _MENU_ курсы"
 
 #: static/js/views/course_list_view.js
 msgid "Course"
@@ -188,4 +195,4 @@ msgstr "Курс"
 
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
-msgstr ""
+msgstr "Последняя модификация"

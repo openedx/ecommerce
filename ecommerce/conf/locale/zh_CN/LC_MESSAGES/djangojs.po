@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Wenyong Hu <huwenyong.nl@gmail.com>, 2015
 # zhaojina <zhaojianwei187@126.com>, 2015
@@ -13,10 +13,10 @@ msgstr ""
 "PO-Revision-Date: 2015-09-21 06:27+0000\n"
 "Last-Translator: Wenyong Hu <huwenyong.nl@gmail.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
-"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: static/js/models/course_model.js

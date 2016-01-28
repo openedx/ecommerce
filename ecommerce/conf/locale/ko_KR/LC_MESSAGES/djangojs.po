@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Hongseob Lee <shevious@gmail.com>, 2015
 # Hongseob Lee <shevious@yahoo.com>, 2015
@@ -13,10 +13,10 @@ msgstr ""
 "PO-Revision-Date: 2015-09-25 11:07+0000\n"
 "Last-Translator: Hongseob Lee <shevious@yahoo.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/open-edx/edx-platform/language/ko_KR/)\n"
-"Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ko_KR\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: static/js/models/course_model.js

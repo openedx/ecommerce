@@ -1,22 +1,26 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # JauhorngChen <jauhorng.chen@gmail.com>, 2015
+# JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
 # Mushiyo <Mushiyo@ya.ru>, 2015
+# vincent <orzkng2007@yahoo.com.tw>, 2015
+# Yenling Chen <bugchen.chen@gmail.com>, 2015
+# 薛念林 <nlhsueh@mail.fcu.edu.tw>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-05 02:23+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"PO-Revision-Date: 2015-12-29 13:25+0000\n"
+"Last-Translator: Yenling Chen <bugchen.chen@gmail.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
-"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: core/admin.py
@@ -38,11 +42,11 @@ msgstr "全名"
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
-msgstr ""
+msgstr "驗證產品的期限已經可以設置。"
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
-msgstr ""
+msgstr "不能留置空欄位。"
 
 #: extensions/api/exceptions.py
 msgid ""
@@ -69,7 +73,7 @@ msgstr ""
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
-msgstr ""
+msgstr "產品必須標示價格。"
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
@@ -99,7 +103,7 @@ msgstr ""
 
 #: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
-msgstr ""
+msgstr "退款儀表板"
 
 #: extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/partials/refund_table.html
@@ -123,15 +127,15 @@ msgstr ""
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
-msgstr ""
+msgstr "付款處理器"
 
 #: extensions/payment/admin.py extensions/payment/models.py
 msgid "Basket"
-msgstr ""
+msgstr "籃"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
-msgstr ""
+msgstr "我們不支持您選擇的付款方式。"
 
 #: extensions/payment/models.py
 msgid "Transaction ID"
@@ -139,11 +143,11 @@ msgstr "交易編號"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Response"
-msgstr ""
+msgstr "付款處理器響應"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Responses"
-msgstr ""
+msgstr "付款處理器響應"
 
 #. Translators: This is a string placed in the middle of a truncated string
 #. to indicate that truncation has occurred. For example, if a title may only
@@ -164,7 +168,7 @@ msgstr "用戶"
 
 #: extensions/refund/models.py
 msgid "Total Credit (excl. tax)"
-msgstr ""
+msgstr "總金額 (不含稅)"
 
 #: extensions/refund/models.py
 msgid "Currency"
@@ -172,11 +176,11 @@ msgstr "貨幣"
 
 #: extensions/refund/models.py
 msgid "Refund"
-msgstr ""
+msgstr "退款"
 
 #: extensions/refund/models.py
 msgid "Order Line"
-msgstr ""
+msgstr "訂單行"
 
 #: extensions/refund/models.py
 msgid "Line Credit (excl. tax)"
@@ -219,25 +223,25 @@ msgstr "範圍"
 
 #: settings/_oscar.py
 msgid "Low stock alerts"
-msgstr ""
+msgstr "低庫存警報"
 
 #: settings/_oscar.py
 msgid "Fulfillment"
-msgstr ""
+msgstr "履行"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Orders"
-msgstr ""
+msgstr "訂單"
 
 #: settings/_oscar.py
 msgid "Statistics"
-msgstr ""
+msgstr "統計"
 
 #: settings/_oscar.py
 msgid "Partners"
-msgstr ""
+msgstr "合作夥伴"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
@@ -245,16 +249,16 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Refunds"
-msgstr ""
+msgstr "退款"
 
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Customers"
-msgstr ""
+msgstr "客戶"
 
 #: settings/_oscar.py
 msgid "Stock alert requests"
-msgstr ""
+msgstr "庫存警報請求"
 
 #: settings/_oscar.py
 msgid "Reports"
@@ -270,7 +274,7 @@ msgstr "切換導航"
 
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
+msgstr "課程管理"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Dashboard for:"
@@ -278,7 +282,7 @@ msgstr "我的課程："
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Toggle Dropdown"
-msgstr ""
+msgstr "切換下拉"
 
 #: templates/courses/course_app.html templates/edx/base.html
 #: templates/edx/base.html.py
@@ -292,15 +296,15 @@ msgstr ""
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "學生儀表板"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "課程管理工具"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "電子商務儀表板"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -347,7 +351,7 @@ msgstr ""
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "謝謝。我們希望你喜歡的課程！"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
@@ -365,7 +369,7 @@ msgstr ""
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
-msgstr ""
+msgstr "收貨確認書："
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
@@ -377,23 +381,23 @@ msgstr ""
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
-msgstr ""
+msgstr "EDX團隊"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
-msgstr ""
+msgstr "已下訂單"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
-msgstr ""
+msgstr "收到確認"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation for:"
-msgstr ""
+msgstr "收貨確認書："
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Receipt"
-msgstr ""
+msgstr "查看收據"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -669,7 +673,7 @@ msgstr "購買時間"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
-msgstr ""
+msgstr "訂單詳情"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
@@ -702,7 +706,7 @@ msgstr ""
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product"
-msgstr ""
+msgstr "產品"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -712,16 +716,16 @@ msgstr ""
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier"
-msgstr ""
+msgstr "供應商"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier SKU"
-msgstr ""
+msgstr "供應商SKU"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Est. dispatch date"
-msgstr ""
+msgstr "美東時間。發貨日期"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price excl tax (before discounts)"
@@ -780,16 +784,16 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
-msgstr ""
+msgstr "在選擇線路"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
-msgstr ""
+msgstr "更改線路狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "choose new status"
-msgstr ""
+msgstr "選擇新的狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
@@ -797,42 +801,42 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
-msgstr ""
+msgstr "選擇事件類型"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
-msgstr ""
+msgstr "供參考"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
-msgstr ""
+msgstr "創建付款事件"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
-msgstr ""
+msgstr "with amount"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
-msgstr ""
+msgstr "創建退款"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
-msgstr ""
+msgstr "開始！"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change order status"
-msgstr ""
+msgstr "更改訂單狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change status"
-msgstr ""
+msgstr "更改狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "This order can't have its status changed."
-msgstr ""
+msgstr "這個順序不能有其狀態更改。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
@@ -846,7 +850,7 @@ msgstr "日期"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Event"
-msgstr ""
+msgstr "事件"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -856,7 +860,7 @@ msgstr ""
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Reference"
-msgstr ""
+msgstr "參考"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -868,12 +872,12 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
-msgstr ""
+msgstr "沒有付款的事件。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Payment Events"
-msgstr ""
+msgstr "付款明細"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -883,16 +887,16 @@ msgstr "總額"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product:"
-msgstr ""
+msgstr "產品"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "quantity"
-msgstr ""
+msgstr "數量"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "No payment events."
-msgstr ""
+msgstr "沒有付款的事件。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method name"
@@ -904,23 +908,23 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (incl tax)"
-msgstr ""
+msgstr "費用 (含稅)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (excl tax)"
-msgstr ""
+msgstr "費 (不含稅)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Address"
-msgstr ""
+msgstr "地址"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Update"
-msgstr ""
+msgstr "更新"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "手機"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Instructions"
@@ -929,11 +933,11 @@ msgstr "說明"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
-msgstr ""
+msgstr "帳單地址"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
-msgstr ""
+msgstr "付款來源"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
@@ -941,19 +945,19 @@ msgstr "來源"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
-msgstr ""
+msgstr "分配"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
-msgstr ""
+msgstr "扣除額"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
-msgstr ""
+msgstr "退款金額"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
-msgstr ""
+msgstr "發現該訂單號的支付來源。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
@@ -965,7 +969,7 @@ msgstr "類型"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"
-msgstr ""
+msgstr "憑證"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
@@ -981,7 +985,7 @@ msgstr "訊息"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
-msgstr ""
+msgstr "沒有折扣分別適用於這個順序。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
@@ -997,15 +1001,15 @@ msgstr "刪除"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No notes available."
-msgstr ""
+msgstr "無可用筆記。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Save note"
-msgstr ""
+msgstr "保存注意事項"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes are only editable for 5 minutes after being saved."
-msgstr ""
+msgstr "注意編輯在5分鐘後保存。"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
@@ -1024,11 +1028,11 @@ msgstr "關閉"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "搜尋中..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
-msgstr ""
+msgstr "作為一個CSV下載所選訂單"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
@@ -1040,15 +1044,15 @@ msgstr "訂單编號"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
-msgstr ""
+msgstr "總INC稅"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
-msgstr ""
+msgstr "項目數"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Shipping address"
-msgstr ""
+msgstr "收貨地址"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
@@ -1061,7 +1065,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
-msgstr ""
+msgstr "沒有訂單。"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 #: templates/oscar/dashboard/users/detail.html
@@ -1078,7 +1082,7 @@ msgstr "模式"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "繳活?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
@@ -1086,15 +1090,15 @@ msgstr ""
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
-msgstr ""
+msgstr "確認退款處理"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to issue a full refund?"
-msgstr ""
+msgstr "你確定要全額退款？"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to deny this refund request?"
-msgstr ""
+msgstr "你確定要拒絕此要求退款？"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Cancel"
@@ -1106,16 +1110,16 @@ msgstr "確認"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve"
-msgstr ""
+msgstr "批准"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
-msgstr ""
+msgstr "拒絕"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
-msgstr ""
+msgstr "項目數"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -1127,12 +1131,12 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Created"
-msgstr ""
+msgstr "創建"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "No refunds found."
-msgstr ""
+msgstr "沒有發現退款。"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
@@ -1141,15 +1145,15 @@ msgstr ""
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
-msgstr ""
+msgstr "退款概述"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
-msgstr ""
+msgstr "關聯訂單"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
-msgstr ""
+msgstr "退款項目"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
@@ -1157,7 +1161,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
-msgstr ""
+msgstr "相關訂單行"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
@@ -1169,7 +1173,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
-msgstr ""
+msgstr "數量："
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "General"
@@ -1189,7 +1193,7 @@ msgstr "是，否"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Superuser"
-msgstr ""
+msgstr "超級用戶"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
@@ -1205,31 +1209,31 @@ msgstr "最後登入時間"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date joined"
-msgstr ""
+msgstr "加盟日期"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
-msgstr ""
+msgstr "產品瀏覽"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of orders"
-msgstr ""
+msgstr "訂單數量"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of ordered items"
-msgstr ""
+msgstr "責令項目數"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total spent"
-msgstr ""
+msgstr "總花費"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
-msgstr ""
+msgstr "撰寫的評論"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
-msgstr ""
+msgstr "發送密碼重置郵件"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
@@ -1237,7 +1241,7 @@ msgstr "地址"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews"
-msgstr ""
+msgstr "點評"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
@@ -1249,23 +1253,23 @@ msgstr ""
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
-msgstr ""
+msgstr "總共多少錢"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date placed"
-msgstr ""
+msgstr "放置日期"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not placed any orders yet."
-msgstr ""
+msgstr "該客戶沒有下任何訂單呢。"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
-msgstr ""
+msgstr "該客戶已沒有保存任何地址。"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
-msgstr ""
+msgstr "產品編號"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Score"
@@ -1282,7 +1286,7 @@ msgstr "Body標籤"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date created"
-msgstr ""
+msgstr "創建日期"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."

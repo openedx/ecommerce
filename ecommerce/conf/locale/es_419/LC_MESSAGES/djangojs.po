@@ -1,21 +1,22 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015
+# Laura Silva <lingison@edx.org>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-10-02 05:42+0000\n"
-"Last-Translator: Juan Camilo Montoya Franco <juan.montoya@edunext.co>\n"
+"PO-Revision-Date: 2016-01-21 18:06+0000\n"
+"Last-Translator: Laura Silva <lingison@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
-"Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: es_419\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: static/js/models/course_model.js
@@ -78,7 +79,7 @@ msgstr "Honor"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Audit"
-msgstr "Espectador"
+msgstr "Tomar como oyente"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"

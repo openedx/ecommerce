@@ -1,25 +1,28 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # Ilya <i.batozskiy@gmail.com>, 2015
 # Liubov Fomicheva <liubov.nelapa@gmail.com>, 2015
 # Michael Savin <m.savin.ru@gmail.com>, 2015
 # Nikolay K Medvedev <elsin16@gmail.com>, 2015
+# Oleg Tekeli <ann.sova1919@gmail.com>, 2015
+# Romanov Aleksei, 2015
 # Weyedide <weyedide@gmail.com>, 2015
+# Олег <oad@rambler.ru>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-11-18 10:46+0000\n"
+"PO-Revision-Date: 2015-12-10 07:10+0000\n"
 "Last-Translator: Michael Savin <m.savin.ru@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
-"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: core/admin.py
@@ -103,7 +106,7 @@ msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
 msgstr ""
-"Невозможно выполнить возврат денежных средств по этим пунктам.  Возможно, "
+"Невозможно выполнить возврат денежных средств по этим позициям.  Возможно, "
 "средства уже были возвращены."
 
 #: extensions/dashboard/refunds/config.py
@@ -128,7 +131,7 @@ msgstr "Состояние"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "Не удалось получить данные о регистрации."
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
@@ -173,7 +176,7 @@ msgstr "Пользователь"
 
 #: extensions/refund/models.py
 msgid "Total Credit (excl. tax)"
-msgstr ""
+msgstr "Итого (без налогов)"
 
 #: extensions/refund/models.py
 msgid "Currency"
@@ -189,7 +192,7 @@ msgstr "Строка заказа"
 
 #: extensions/refund/models.py
 msgid "Line Credit (excl. tax)"
-msgstr ""
+msgstr "Итого (без налогов)"
 
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -224,11 +227,11 @@ msgstr "Категории"
 
 #: settings/_oscar.py
 msgid "Ranges"
-msgstr ""
+msgstr "Диапазон"
 
 #: settings/_oscar.py
 msgid "Low stock alerts"
-msgstr ""
+msgstr "Оповещение о низких остатках"
 
 #: settings/_oscar.py
 msgid "Fulfillment"
@@ -263,7 +266,7 @@ msgstr "Заказчики"
 
 #: settings/_oscar.py
 msgid "Stock alert requests"
-msgstr ""
+msgstr "Запрос оповещения"
 
 #: settings/_oscar.py
 msgid "Reports"
@@ -279,7 +282,7 @@ msgstr "Включить навигацию"
 
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
+msgstr "Администрация курса"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Dashboard for:"
@@ -287,7 +290,7 @@ msgstr "Панель управления для:"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Toggle Dropdown"
-msgstr ""
+msgstr "Переключить выпадающий список"
 
 #: templates/courses/course_app.html templates/edx/base.html
 #: templates/edx/base.html.py
@@ -297,7 +300,7 @@ msgstr "Войти"
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "%(platform_name)s инструменты администрации курса"
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
@@ -309,7 +312,7 @@ msgstr "Инструменты администрирования курса"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "Панель электронной коммерции"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -336,6 +339,8 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"Благодарим вас за покупку %(course_title)s. Оплата появится в выписке вашей "
+"кредитной или дебетовой карты с названием компании %(platform_name)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -344,6 +349,8 @@ msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
 msgstr ""
+"Вы можете получить доступ к вашему курсу и завершить процесс верификации "
+"личности (если требуется) в панели управления %(platform_name)s. "
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -352,6 +359,8 @@ msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
 msgstr ""
+"Чтобы посмотреть список всех доступных курсов, посетите %(platform_name)s. "
+"Новые курсы добавляются еженедельно!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -370,6 +379,8 @@ msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"Вы получили это письмо, поскольку вы приобрели доступ %(platform_name)s к "
+"курсу %(course_title)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -413,6 +424,9 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"Благодарим вас за приобретение %(credit_hours)s зачётных единиц "
+"%(credit_provider)s по %(course_title)s. Оплата появится в выписке вашей "
+"кредитной или дебетовой карты с названием компании %(platform_name)s."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -421,6 +435,8 @@ msgid ""
 "You can see the status the status of your credit request or complete the "
 "credit request process on your %(platform_name)s dashboard"
 msgstr ""
+"Вы можете увидеть статус вашего запроса на зачётные единицы в  панели "
+"управления %(platform_name)s"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
@@ -428,6 +444,8 @@ msgid ""
 "To browse other credit-eligible courses visit the %(platform_name)s website."
 " More courses are added all the time."
 msgstr ""
+"Чтобы посмотреть список всех курсов предлагающих зачётные единицы, посетите "
+"веб-сайт %(platform_name)s. Новые курсы добавляются регулярно."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -435,12 +453,16 @@ msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
+"Спасибо и поздравляем вас с достижением. Мы надеемся, что вам понравится "
+"курс!"
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
 "To browse other credit-eligible courses visit the edX website. More courses "
 "are added all the time."
 msgstr ""
+"Чтобы посмотреть список всех курсов предлагающих зачётные единицы, посетите "
+"веб-сайт edX. Новые курсы добавляются регулярно."
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "To view receipt please visit the link below"
@@ -448,11 +470,11 @@ msgstr "Квитанция доступна по ссылке, данной ни
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
-msgstr ""
+msgstr "Заказать счёт"
 
 #: templates/edx/credit/checkout.html
 msgid "Credit Checkout"
-msgstr ""
+msgstr "Заказ зачётных единиц"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -465,9 +487,21 @@ msgid_plural ""
 "                        Purchase %(hours)s credits from %(provider)s for:\n"
 "                    "
 msgstr[0] ""
+"\n"
+"                        Приобретена 1 зачётная единица %(provider)s для:\n"
+"                        "
 msgstr[1] ""
+"\n"
+"                        Приобретено %(hours)s зачётных единиц %(provider)s для:\n"
+"                    "
 msgstr[2] ""
+"\n"
+"                        Приобретено %(hours)s зачётных единиц %(provider)s для:\n"
+"                    "
 msgstr[3] ""
+"\n"
+"                        Приобретено %(hours)s зачётных единиц %(provider)s для:\n"
+"                    "
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
@@ -484,6 +518,9 @@ msgid ""
 "                                Credit eligibility expires on %(date)s\n"
 "                            "
 msgstr ""
+"\n"
+"                                Зачётные единицы доступны до %(date)s\n"
+"                            "
 
 #: templates/edx/credit/checkout.html
 msgid "You deserved it."
@@ -494,16 +531,20 @@ msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"Напряженная работа закончена - вы успешно прошли курс! Теперь получите "
+"зачётные единицы, которые вы заслужили, чтобы учесть их в дипломе."
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "Допустимо."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr ""
+"Зачётные единицы предлагаемые через edX, как правило, стоят дешевле, чем в "
+"большинстве образовательных учреждений."
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
@@ -514,6 +555,8 @@ msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
 msgstr ""
+"Многие из сегодняшних самых востребованных рабочих мест требуют высшее "
+"образование. Начните свой путь к успеху!"
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
@@ -568,15 +611,15 @@ msgstr "Всего строк"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "Итого выручка"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "Средний чек"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "Средняя стоимость (платных) заказов"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
@@ -588,7 +631,7 @@ msgstr "Все заказы"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "Итого <em>открыто</em> корзин"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
@@ -600,11 +643,11 @@ msgstr "Новые клиенты"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "Посмотреть предупреждение"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "Каталог"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
@@ -612,27 +655,27 @@ msgstr "Все продукты"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>Открыто</em> предупреждений об остатках"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>Закрыто</em> предупреждений об остатках"
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "Предложения, купоны, скидки"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "Активные <em>акции</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "Активные <em>купоны</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "Предложения"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -722,7 +765,7 @@ msgstr "Товар"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "UPC"
-msgstr ""
+msgstr "UPC"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -732,7 +775,7 @@ msgstr "Поставщик"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier SKU"
-msgstr ""
+msgstr "SKU"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Est. dispatch date"
@@ -795,11 +838,11 @@ msgstr "Сумма заказа"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
-msgstr ""
+msgstr "с выбранными строками"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
-msgstr ""
+msgstr "Изменить статус "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -816,7 +859,7 @@ msgstr "выбрать тип операции"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
-msgstr ""
+msgstr "со ссылками"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
@@ -824,11 +867,11 @@ msgstr "Создать платёжную операцию"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
-msgstr ""
+msgstr "с количеством"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
-msgstr ""
+msgstr "Вернуть"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
@@ -861,7 +904,7 @@ msgstr "Дата"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Event"
-msgstr ""
+msgstr "Событие"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -951,7 +994,7 @@ msgstr "Адрес плательщика"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
-msgstr ""
+msgstr "Источники оплат"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
@@ -959,19 +1002,19 @@ msgstr "Источник"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
-msgstr ""
+msgstr "Распределение"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
-msgstr ""
+msgstr "Количество списаний"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
-msgstr ""
+msgstr "Количество возвратов"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
-msgstr ""
+msgstr "Источник оплаты не найден для этого заказа."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
@@ -987,7 +1030,7 @@ msgstr "Платёжный документ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
-msgstr ""
+msgstr "Название спецпредложения"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
@@ -1075,7 +1118,7 @@ msgstr "Удалено"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
-msgstr ""
+msgstr "Повторить выполнение"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
@@ -1096,15 +1139,15 @@ msgstr "Режим"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "Действующий?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "Ни одного зачисления не найдено."
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
-msgstr ""
+msgstr "Возвраты ожидают подтверждения"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to issue a full refund?"
@@ -1139,7 +1182,7 @@ msgstr "Количество единиц"
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "Итого"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -1150,7 +1193,7 @@ msgstr "Создано"
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "No refunds found."
-msgstr ""
+msgstr "Возвраты не найдены."
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
@@ -1159,31 +1202,31 @@ msgstr "Возврат платежа №%(id)s"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
-msgstr ""
+msgstr "Просмотр возвратов"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
-msgstr ""
+msgstr "Связанный Заказ"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
-msgstr ""
+msgstr "Возврат позиций"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
-msgstr ""
+msgstr "Идентификатор возврата"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
-msgstr ""
+msgstr "Связанная Строка Заказа"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
-msgstr ""
+msgstr "К оплате (без налога)"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
-msgstr ""
+msgstr "Процессинговый центр"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
@@ -1191,7 +1234,7 @@ msgstr "Количество:"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "General"
-msgstr ""
+msgstr "Общий"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Email"
@@ -1199,7 +1242,7 @@ msgstr "Электронная почта"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Active"
-msgstr ""
+msgstr "Активный"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Yes,No"
@@ -1211,7 +1254,7 @@ msgstr "Superuser"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
-msgstr ""
+msgstr "Верно,Неверно"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Staff"
@@ -1227,27 +1270,27 @@ msgstr "Дата входа"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
-msgstr ""
+msgstr "Просмотрено товаров"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of orders"
-msgstr ""
+msgstr "Количество заказов"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of ordered items"
-msgstr ""
+msgstr "Количество заказанных единиц"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total spent"
-msgstr ""
+msgstr "Всего потрачено"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
-msgstr ""
+msgstr "Отзывов написано"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
-msgstr ""
+msgstr "Отправить письмо с инструкцией по сбросу пароля"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
@@ -1255,15 +1298,15 @@ msgstr "Адрес"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews"
-msgstr ""
+msgstr "Отзывы"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
-msgstr ""
+msgstr "Номер заказа"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
-msgstr ""
+msgstr "Количество единиц"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
@@ -1279,15 +1322,15 @@ msgstr "Этот покупатель пока не разместил ни од
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
-msgstr ""
+msgstr "Покупатель пока не сохранил ни одного адреса."
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
-msgstr ""
+msgstr "Идентификатор товара"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Score"
-msgstr "Superuser"
+msgstr "Балл"
 
 #: templates/oscar/dashboard/users/detail.html
 msgctxt "Product review title"
@@ -1304,4 +1347,4 @@ msgstr "Дата создания"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."
-msgstr ""
+msgstr "Покупатель пока не оставил отзывов."

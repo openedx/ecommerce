@@ -1,20 +1,20 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-05 02:23+0000\n"
+"PO-Revision-Date: 2015-12-29 14:41+0000\n"
 "Last-Translator: cblackburn <cblackburn@edx.org>\n"
 "Language-Team: Chinese (Hong Kong) (http://www.transifex.com/open-edx/edx-platform/language/zh_HK/)\n"
-"Language: zh_HK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_HK\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: core/admin.py
@@ -23,7 +23,7 @@ msgstr ""
 
 #: core/admin.py
 msgid "Permissions"
-msgstr ""
+msgstr "權限"
 
 #: core/admin.py
 msgid "Important dates"
@@ -149,11 +149,11 @@ msgstr ""
 #. truncated to "A Ve...itle".
 #: extensions/payment/utils.py
 msgid "..."
-msgstr ""
+msgstr "..."
 
 #: extensions/refund/models.py
 msgid "Order"
-msgstr ""
+msgstr "次序"
 
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -193,7 +193,7 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Dashboard"
-msgstr ""
+msgstr "控制面版"
 
 #: settings/_oscar.py
 msgid "Catalogue"
@@ -302,7 +302,7 @@ msgstr ""
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
-msgstr ""
+msgstr "登出"
 
 #: templates/customer/email_base.html
 #, python-format

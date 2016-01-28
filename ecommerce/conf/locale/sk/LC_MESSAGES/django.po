@@ -1,21 +1,22 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
+# Marcel Miklosik <marcel.miklosik@gmail.com>, 2015
 # Vladimír Záhradník <vladimir.zahradnik@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-05 02:23+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"PO-Revision-Date: 2015-12-17 17:42+0000\n"
+"Last-Translator: Marcel Miklosik <marcel.miklosik@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/open-edx/edx-platform/language/sk/)\n"
-"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: sk\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: core/admin.py
@@ -62,19 +63,19 @@ msgstr "Jeden z produktov, ktoré sa pokúšate objednať, nie je k dispozícii.
 #: extensions/api/serializers.py
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
-msgstr ""
+msgstr "Vyžadovaná nesprávna trieda produktu [{product_class}]."
 
 #: extensions/api/serializers.py
 msgid "Products must indicate whether ID verification is required."
-msgstr ""
+msgstr "Produkty musia mať uvedené, či je požadované overenie s ID."
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
-msgstr ""
+msgstr "Produkty musia mať cenu."
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
-msgstr ""
+msgstr "Posledný dátum/čas kedy je môžné tento produkt zakúpiť."
 
 #: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -124,7 +125,7 @@ msgstr "Stav"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "Nepodarilo sa načítať dáta zápisu."
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
@@ -275,11 +276,11 @@ msgstr "Prepnúť navigáciu"
 
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
+msgstr "Administrácia kurzu"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Dashboard for:"
-msgstr ""
+msgstr "Panel pre :"
 
 #: templates/courses/course_app.html templates/edx/base.html
 msgid "Toggle Dropdown"
@@ -293,28 +294,28 @@ msgstr "Prihlásiť sa"
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "%(platform_name)s Nástroj administrácie kurzu"
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "Panel Študenta"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "Nástroj administrácie kurzu"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "Panel E-Commerce"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
-msgstr ""
+msgstr "Odhlásiť sa"
 
 #: templates/customer/email_base.html
 #, python-format
 msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgstr "Copyright © 2015 %(platform_name)s, všetky práva vyhradené."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -322,7 +323,7 @@ msgstr ""
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "Ahoj %(full_name)s,"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -332,6 +333,9 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"Ďakujeme Vám za zakúpenie %(course_title)s. Nižšie uvedený poplatok sa "
+"objaví na výpise Vašej kreditnej alebo debetnej karty s názvom firmy "
+"%(platform_name)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -352,12 +356,12 @@ msgstr ""
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "Ďakujem. Dúfame, že ste si užili kurz!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "%(platform_name)s tím"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.html
@@ -366,39 +370,41 @@ msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"Dostali ste tento e-mail, pretože ste si zakúpili miesto v %(platform_name)s"
+"  v kurze %(course_title)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
-msgstr ""
+msgstr "Potvrdenie o prijatí pre:"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
-msgstr ""
+msgstr "%(platform_name)s tím"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
-msgstr ""
+msgstr "Tím edX"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
-msgstr ""
+msgstr "Objednávka prijatá"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation"
-msgstr ""
+msgstr "Potvrdenie o prijatí"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Receipt Confirmation for:"
-msgstr ""
+msgstr "Potvrdenie o prijatí pre:"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Receipt"
-msgstr ""
+msgstr "Pozrieť potvrdenku"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
 #: templates/customer/emails/commtype_credit_receipt_body.txt
@@ -431,6 +437,7 @@ msgid ""
 "Thank you and congratulation on your achievement. We hope you enjoy the "
 "course!"
 msgstr ""
+"Ďakujeme a gratululujeme k Vašemu úspechu. Dúfame, že ste si užili kurz!"
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid ""
@@ -440,11 +447,11 @@ msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "To view receipt please visit the link below"
-msgstr ""
+msgstr "Ak chcete zobraziť potvrdenie, prosím navštívte odkaz nižšie"
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
-msgstr ""
+msgstr "Potvrdenie objednávky"
 
 #: templates/edx/credit/checkout.html
 msgid "Credit Checkout"
@@ -466,11 +473,11 @@ msgstr[2] ""
 
 #: templates/edx/credit/checkout.html
 msgid "Something went wrong! Please try again later."
-msgstr ""
+msgstr "Niečo sa pokazilo! Skúste neskôr prosím."
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
-msgstr ""
+msgstr "Celkom"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -482,17 +489,19 @@ msgstr ""
 
 #: templates/edx/credit/checkout.html
 msgid "You deserved it."
-msgstr ""
+msgstr "Zaslúžil si si to."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"Tvrdá práca je na konci - absolvovali ste kurz! Teraz ste získali kredit "
+"ktorý ste si zaslúžili na začatie alebo dokončenie vzdelania."
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "Je to cenovo dostupné."
 
 #: templates/edx/credit/checkout.html
 msgid ""
@@ -502,17 +511,19 @@ msgstr ""
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "To otvára dvere."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
 msgstr ""
+"Mnohé z dnešných najžiadanejších pracovných miest si vyžaduje vysokoškolské "
+"vzdelanie. Začnite svoju cestu k úspechu!"
 
 #: templates/edx/credit/checkout.html
 msgid "Questions?"
-msgstr ""
+msgstr "Otázky?"
 
 #: templates/edx/credit/checkout.html
 #, python-format
@@ -521,110 +532,112 @@ msgid ""
 "                Please read %(link)s\n"
 "            "
 msgstr ""
+"\n"
+"Prosím čítajte %(link)s"
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "Štatistika Vášeho obchodu"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "Celkom objednávky"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "Noví zákazníci"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "Celkovo zákazníkov"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "Celkom produktov"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "Posledné objednávky (posledných 24 hodín)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "Objednávky - Posledných 24 hodín"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "Celkom objednávky"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "Celkom linky"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "Celkové príjmy"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "Priemerná cena objednávky"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "Priemerná (zaplatená) cena objednávky"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "Riadiť"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "Objednávky - Celkom"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "Celkom <em>otvorených</em> košíkov"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "Celkovo zákazníkov"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "Noví zákazníci"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "Pozrieť skladové zásoby"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "Katalóg a skladové zasoby"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "Celkom produktov"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>Otvorené</em> upozornenia skladových zásob."
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>Zatvorené</em> upozornenia skladových zásob."
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "Ponuky, poukážky a propagačné akcie"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "Aktívne <em>Miesto</em> Ponuky"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "Aktívne <em>Poukážky</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "Propagačné akcie"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -1034,7 +1047,7 @@ msgstr "Zavrieť"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "Vyhľadávanie ..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
@@ -1080,19 +1093,19 @@ msgstr "Zápisy"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Course ID"
-msgstr ""
+msgstr "ID kurzu"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Mode"
-msgstr ""
+msgstr "Mód"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "Aktívny?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "Neboli nájdené žiadne zápisy."
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
