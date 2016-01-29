@@ -99,9 +99,12 @@ fake_translations: extract_translations dummy_translations compile_translations
 pull_translations:
 	cd ecommerce && tx pull -a
 
+push_translations:
+	cd ecommerce && tx push -s
+
 update_translations: pull_translations fake_translations
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage accept \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
-	update_translations fast_validate_python clean_static
+	push_translations update_translations fast_validate_python clean_static
