@@ -174,7 +174,8 @@
                                 <tr>
                                     <td align="left" valign="top" style="font-size: 10px; color: #767676; font-style: italic;">
                                         <br>
-                                        {% blocktrans %}Copyright © 2015 {{platform_name}}, All Rights. Reserved.{% endblocktrans %}
+                                        {% now 'Y' as year %}
+                                        {% blocktrans %}Copyright © {{ year }} {{ platform_name }}. All rights reserved.{% endblocktrans %}
                                     </td>
                                 </tr>
                                 <tr>
