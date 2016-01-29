@@ -1,9 +1,12 @@
 """ CyberSource payment processing. """
+from __future__ import unicode_literals
+
 import datetime
-from decimal import Decimal
 import logging
 import uuid
+from decimal import Decimal
 
+import waffle
 from django.conf import settings
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
@@ -38,7 +41,7 @@ class Cybersource(BasePaymentProcessor):
     http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
     """
 
-    NAME = u'cybersource'
+    NAME = 'cybersource'
 
     def __init__(self):
         """
@@ -75,21 +78,20 @@ class Cybersource(BasePaymentProcessor):
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
         parameters = {
-            u'access_key': self.access_key,
-            u'profile_id': self.profile_id,
-            u'transaction_uuid': uuid.uuid4().hex,
-            u'signed_field_names': u'',
-            u'unsigned_field_names': u'',
-            u'signed_date_time': self.utcnow().strftime(ISO_8601_FORMAT),
-            u'locale': self.language_code,
-            u'transaction_type': u'sale',
-            u'reference_number': basket.order_number,
-            u'amount': unicode(basket.total_incl_tax),
-            u'currency': basket.currency,
-            u'consumer_id': basket.owner.username,
-            # TODO: Update once LMS receipt page is able to look up orders by order number.
-            u'override_custom_receipt_page': u'{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
-            u'override_custom_cancel_page': self.cancel_page_url,
+            'access_key': self.access_key,
+            'profile_id': self.profile_id,
+            'transaction_uuid': uuid.uuid4().hex,
+            'signed_field_names': '',
+            'unsigned_field_names': '',
+            'signed_date_time': self.utcnow().strftime(ISO_8601_FORMAT),
+            'locale': self.language_code,
+            'transaction_type': 'sale',
+            'reference_number': basket.order_number,
+            'amount': str(basket.total_incl_tax),
+            'currency': basket.currency,
+            'consumer_id': basket.owner.username,
+            'override_custom_receipt_page': '{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
+            'override_custom_cancel_page': self.cancel_page_url,
         }
 
         # XCOM-274: when internal reporting across all processors is
@@ -97,15 +99,39 @@ class Cybersource(BasePaymentProcessor):
         # be removed.
         single_seat = self.get_single_seat(basket)
         if single_seat:
-            parameters[u'merchant_defined_data1'] = single_seat.attr.course_key
-            parameters[u'merchant_defined_data2'] = getattr(single_seat.attr, 'certificate_type', '')
+            parameters['merchant_defined_data1'] = single_seat.attr.course_key
+            parameters['merchant_defined_data2'] = getattr(single_seat.attr, 'certificate_type', '')
+
+        # Level 2/3 details
+        if waffle.sample_is_active('send_level_2_3_details_to_cybersource'):
+            parameters['amex_data_taa1'] = '{}'.format(settings.PLATFORM_NAME)
+            parameters['purchasing_level'] = '3'
+            parameters['line_item_count'] = basket.lines.count()
+            # Note (CCB): This field (purchase order) is required for Visa;
+            # but, is not actually used by us/exposed on the order form.
+            parameters['user_po'] = 'BLANK'
+
+            for index, line in enumerate(basket.lines.all()):
+                parameters['item_{}_code'.format(index)] = line.product.get_product_class().slug
+                parameters['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+                # Note (CCB): This indicates that the total_amount field below includes tax.
+                parameters['item_{}_gross_net_indicator'.format(index)] = 'Y'
+                parameters['item_{}_name'.format(index)] = line.product.title
+                parameters['item_{}_quantity'.format(index)] = line.quantity
+                parameters['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+                parameters['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+                parameters['item_{}_tax_rate'.format(index)] = '0'
+                parameters['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+                # Note (CCB): Course seat is not a unit of measure. Use item (ITM).
+                parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
+                parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
 
         # Sign all fields
         signed_field_names = parameters.keys()
-        parameters[u'signed_field_names'] = u','.join(sorted(signed_field_names))
-        parameters[u'signature'] = self._generate_signature(parameters)
+        parameters['signed_field_names'] = ','.join(sorted(signed_field_names))
+        parameters['signature'] = self._generate_signature(parameters)
 
-        parameters[u'payment_page_url'] = self.payment_page_url
+        parameters['payment_page_url'] = self.payment_page_url
 
         return parameters
 
@@ -166,12 +192,12 @@ class Cybersource(BasePaymentProcessor):
 
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
-        decision = response[u'decision'].lower()
-        if decision != u'accept':
+        decision = response['decision'].lower()
+        if decision != 'accept':
             exception = {
-                u'cancel': UserCancelled,
-                u'decline': TransactionDeclined,
-                u'error': GatewayError
+                'cancel': UserCancelled,
+                'decline': TransactionDeclined,
+                'error': GatewayError
             }.get(decision, InvalidCybersourceDecision)
 
             raise exception
@@ -180,16 +206,16 @@ class Cybersource(BasePaymentProcessor):
         # Note (CCB): We should never reach this point in production since partial authorization is disabled
         # for our account, and should remain that way until we have a proper solution to allowing users to
         # complete authorization for the entire order.
-        if response[u'auth_amount'] != response[u'req_amount']:
+        if response['auth_amount'] != response['req_amount']:
             raise PartialAuthorizationError
 
         # Create Source to track all transactions related to this processor and order
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
-        currency = response[u'req_currency']
-        total = Decimal(response[u'req_amount'])
-        transaction_id = response[u'transaction_id']
-        req_card_number = response[u'req_card_number']
-        card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response[u'req_card_type'])
+        currency = response['req_currency']
+        total = Decimal(response['req_amount'])
+        transaction_id = response['transaction_id']
+        req_card_number = response['req_card_number']
+        card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
 
         source = Source(source_type=source_type,
                         currency=currency,
@@ -223,16 +249,16 @@ class Cybersource(BasePaymentProcessor):
         Returns:
             unicode: the signature for the given parameters
         """
-        keys = parameters[u'signed_field_names'].split(u',')
+        keys = parameters['signed_field_names'].split(',')
         # Generate a comma-separated list of keys and values to be signed. CyberSource refers to this
         # as a 'Version 1' signature in their documentation.
-        message = u','.join([u'{key}={value}'.format(key=key, value=parameters.get(key)) for key in keys])
+        message = ','.join(['{key}={value}'.format(key=key, value=parameters.get(key)) for key in keys])
 
         return sign(message, self.secret_key)
 
     def is_signature_valid(self, response):
         """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
-        return response and (self._generate_signature(response) == response.get(u'signature'))
+        return response and (self._generate_signature(response) == response.get('signature'))
 
     def issue_credit(self, source, amount, currency):
         order = source.order
