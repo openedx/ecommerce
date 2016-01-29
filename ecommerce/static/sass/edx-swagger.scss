@@ -1,0 +1,19 @@
+body {
+  background-color: white;
+}
+
+#django-rest-swagger {
+  background-color: white;
+  color: #999999;
+
+  a {
+    color: inherit;
+  }
+}
+
+.swagger-ui-wrap {
+  .container {
+    // Undo Bootstrap's container width
+    width: initial;
+  }
+}

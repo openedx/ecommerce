@@ -9,7 +9,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 class StockRecordViewSet(viewsets.ModelViewSet):
-    """ Endpoint for listing stock records. """
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     serializer_class = serializers.StockRecordSerializer
     queryset = StockRecord.objects.all()
@@ -23,6 +22,7 @@ class StockRecordViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def update(self, request, *args, **kwargs):
+        """ Update a stock record. """
         allowed_fields = ['price_currency', 'price_excl_tax']
         if any([key not in allowed_fields for key in request.data.keys()]):
             return Response({

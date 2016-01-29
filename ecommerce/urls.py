@@ -51,6 +51,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
+    url(r'^api-docs/', include('rest_framework_swagger.urls')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
     url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),

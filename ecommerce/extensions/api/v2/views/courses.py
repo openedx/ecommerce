@@ -17,6 +17,34 @@ class CourseViewSet(NonDestroyableModelViewSet):
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
 
+    def list(self, request, *args, **kwargs):
+        """
+        List all courses.
+        ---
+        parameters:
+            - name: include_products
+              description: Indicates if the related products should be included in the response.
+              required: false
+              type: boolean
+              paramType: query
+              multiple: false
+        """
+        return super(CourseViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve details for a course.
+        ---
+        parameters:
+            - name: include_products
+              description: Indicates if the related products should be included in the response.
+              required: false
+              type: boolean
+              paramType: query
+              multiple: false
+        """
+        return super(CourseViewSet, self).retrieve(request, *args, **kwargs)
+
     def get_serializer_context(self):
         context = super(CourseViewSet, self).get_serializer_context()
         context['include_products'] = bool(self.request.GET.get('include_products', False))

@@ -246,7 +246,8 @@ DJANGO_APPS = [
     'rest_framework',
     'simple_history',
     'waffle',
-    'django_filters'
+    'django_filters',
+    'rest_framework_swagger',
 ]
 
 # Apps specific to this project go here.
@@ -404,6 +405,19 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'user': '40/minute',
     },
+}
+
+SWAGGER_SETTINGS = {
+    'info': {
+        'title': 'edX E-Commerce API',
+        'description': 'API for interacting with E-Commerce (Otto) orders, products, and associated resources.',
+    },
+    'doc_expansion': 'list',
+    'api_version': 'v2',
+
+    # Exclude the publication endpoint because its serializer requires context that rest-swagger does not
+    # supply. See https://github.com/marcgibbons/django-rest-swagger/issues/397
+    'exclude_namespaces': ['publication'],
 }
 # END DJANGO REST FRAMEWORK
 

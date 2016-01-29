@@ -13,7 +13,7 @@ PAYMENT_PROCESSOR_CACHE_TIMEOUT = 60 * 30
 
 
 class PaymentProcessorListView(generics.ListAPIView):
-    """View that lists the available payment processors."""
+    """List the available payment processors"""
     pagination_class = None
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.PaymentProcessorSerializer
