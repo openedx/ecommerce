@@ -178,7 +178,9 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     def __init__(self, *args, **kwargs):
         super(CourseSerializer, self).__init__(*args, **kwargs)
 
-        include_products = kwargs['context'].pop('include_products', False)
+        # NOTE: All normal initializations of the serializer will include a context kwarg.
+        # We use dict.get() here because Swagger does not include context when generating docs.
+        include_products = kwargs.get('context', {}).pop('include_products', False)
         if not include_products:
             self.fields.pop('products', None)
 
