@@ -17,14 +17,18 @@ def create_sample(apps, schema_editor):
 
 def delete_sample(apps, schema_editor):
     Sample = apps.get_model('waffle', 'Sample')
-    Sample.objects.get(name=SAMPLE_NAME).delete()
+
+    try:
+        Sample.objects.get(name=SAMPLE_NAME).delete()
+    except Sample.DoesNotExist:
+        pass
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('payment', '0006_enable_payment_processors'),
+        ('payment', '0007_add_cybersource_level23_sample'),
     ]
 
     operations = [
-        migrations.RunPython(create_sample, delete_sample)
+        migrations.RunPython(delete_sample, create_sample)
     ]
