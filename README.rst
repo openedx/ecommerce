@@ -36,7 +36,7 @@ Reporting Security Issues
 
 Please do not report security issues in public. Please email security@edx.org.
 
-Mailing List and IRC Channel
-----------------------------
+Mailing List and Slack
+----------------------
 
-You can discuss this code on the `edx-code Google Group <https://groups.google.com/forum/#!forum/edx-code>`_ or in the ``#edx-code`` IRC channel on Freenode.
+You can discuss this code on the `edx-code Google Group <https://groups.google.com/forum/#!forum/edx-code>`_ or on  `Open edX <https://openedx.slack.com/messages/general/>`_  on Slack.
