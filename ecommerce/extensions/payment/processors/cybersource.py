@@ -6,7 +6,6 @@ import logging
 import uuid
 from decimal import Decimal
 
-import waffle
 from django.conf import settings
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
@@ -92,6 +91,12 @@ class Cybersource(BasePaymentProcessor):
             'consumer_id': basket.owner.username,
             'override_custom_receipt_page': '{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
             'override_custom_cancel_page': self.cancel_page_url,
+            'amex_data_taa1': settings.PLATFORM_NAME,
+            'purchasing_level': '3',
+            'line_item_count': basket.lines.count(),
+            # Note (CCB): This field (purchase order) is required for Visa;
+            # but, is not actually used by us/exposed on the order form.
+            'user_po': 'BLANK',
         }
 
         # XCOM-274: when internal reporting across all processors is
@@ -102,29 +107,20 @@ class Cybersource(BasePaymentProcessor):
             parameters['merchant_defined_data1'] = single_seat.attr.course_key
             parameters['merchant_defined_data2'] = getattr(single_seat.attr, 'certificate_type', '')
 
-        # Level 2/3 details
-        if waffle.sample_is_active('send_level_2_3_details_to_cybersource'):
-            parameters['amex_data_taa1'] = '{}'.format(settings.PLATFORM_NAME)
-            parameters['purchasing_level'] = '3'
-            parameters['line_item_count'] = basket.lines.count()
-            # Note (CCB): This field (purchase order) is required for Visa;
-            # but, is not actually used by us/exposed on the order form.
-            parameters['user_po'] = 'BLANK'
-
-            for index, line in enumerate(basket.lines.all()):
-                parameters['item_{}_code'.format(index)] = line.product.get_product_class().slug
-                parameters['item_{}_discount_amount '.format(index)] = str(line.discount_value)
-                # Note (CCB): This indicates that the total_amount field below includes tax.
-                parameters['item_{}_gross_net_indicator'.format(index)] = 'Y'
-                parameters['item_{}_name'.format(index)] = line.product.title
-                parameters['item_{}_quantity'.format(index)] = line.quantity
-                parameters['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
-                parameters['item_{}_tax_amount'.format(index)] = str(line.line_tax)
-                parameters['item_{}_tax_rate'.format(index)] = '0'
-                parameters['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
-                # Note (CCB): Course seat is not a unit of measure. Use item (ITM).
-                parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
-                parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+        for index, line in enumerate(basket.lines.all()):
+            parameters['item_{}_code'.format(index)] = line.product.get_product_class().slug
+            parameters['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+            # Note (CCB): This indicates that the total_amount field below includes tax.
+            parameters['item_{}_gross_net_indicator'.format(index)] = 'Y'
+            parameters['item_{}_name'.format(index)] = line.product.title
+            parameters['item_{}_quantity'.format(index)] = line.quantity
+            parameters['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+            parameters['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+            parameters['item_{}_tax_rate'.format(index)] = '0'
+            parameters['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+            # Note (CCB): Course seat is not a unit of measure. Use item (ITM).
+            parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
+            parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
 
         # Sign all fields
         signed_field_names = parameters.keys()
