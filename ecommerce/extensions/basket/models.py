@@ -16,21 +16,34 @@ class Basket(AbstractBasket):
         return OrderNumberGenerator().order_number(self)
 
     @classmethod
-    def get_basket(cls, user, site):
+    def get_basket(cls, user, site, new_basket=False):
         """Retrieve the basket belonging to the indicated user.
 
         If no such basket exists, create a new one. If multiple such baskets exist,
         merge them into one.
+
+        If a new basket is requested find all open baskets associated with that user and delete them.
+        This is need for the single-item basket flow.  We want to ensure an empty basket so no
+        other products / vouchers are already included.  This flow is for redemption of a single product
+        as well as used for redeeming a product with a dicount code.
         """
-        editable_baskets = cls.objects.filter(site=site, owner=user, status__in=Basket.editable_statuses)
-        if len(editable_baskets) == 0:
+
+        if new_basket:
+            # If new_baket is requested -- delete all open ones for a user and create new one.
+            all_user_baskets = cls.objects.filter(owner=user, status__in=Basket.editable_statuses)
+            for user_basket in all_user_baskets:
+                user_basket.delete()
             basket = cls.objects.create(site=site, owner=user)
         else:
-            stale_baskets = list(editable_baskets)
-            basket = stale_baskets.pop(0)
-            for stale_basket in stale_baskets:
-                # Don't add line quantities when merging baskets
-                basket.merge(stale_basket, add_quantities=False)
+            editable_baskets = cls.objects.filter(site=site, owner=user, status__in=Basket.editable_statuses)
+            if len(editable_baskets) == 0:
+                basket = cls.objects.create(site=site, owner=user)
+            else:
+                stale_baskets = list(editable_baskets)
+                basket = stale_baskets.pop(0)
+                for stale_basket in stale_baskets:
+                    # Don't add line quantities when merging baskets
+                    basket.merge(stale_basket, add_quantities=False)
 
         # Assign the appropriate strategy class to the basket
         basket.strategy = Selector().strategy(user=user)
