@@ -66,11 +66,19 @@ define([
                     observe: 'title'
                 },
                 'select[name=code_type]': {
-                    observe: 'code_type',
+                    observe: 'coupon_type',
                     selectOptions: {
                         collection: function() {
                             return this.codeTypes;
                         }
+                    },
+                    onGet: function (val) {
+                        if (val === 'Enrollment code') {
+                            return 'enrollment';
+                        } else if (val === 'Discount code') {
+                            return 'discount';
+                        }
+                        return '';
                     }
                 },
                 'select[name=voucher_type]': {
@@ -139,32 +147,30 @@ define([
                 this.alertViews = [];
                 this.editing = options.editing || false;
 
-                this.listenTo(this.model, 'change:code_type', this.toggleFields);
+                this.listenTo(this.model, 'change:coupon_type', this.toggleFields);
                 this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
 
                 this._super();
             },
 
             toggleFields: function() {
-                var codeType = this.model.get('code_type'),
+                var couponType = this.model.get('coupon_type'),
                     voucherType = this.model.get('voucher_type'),
                     formGroup = function (sel) {
                         return this.$el.find(sel).closest('.form-group');
                     }.bind(this);
 
-                if (codeType === 'discount') {
-                    formGroup('[name=price]').addClass('hidden');
+                if (couponType === 'discount') {
                     formGroup('[name=benefit_value]').removeClass('hidden');
                 } else {
                     // enrollment
-                    formGroup('[name=price]').removeClass('hidden');
                     formGroup('[name=benefit_value]').addClass('hidden');
                 }
 
                 // When creating a discount show the CODE field for both (they are both multi-use)
                 //     - Multiple times by multiple customers
                 //     - Once per customer
-                if (codeType === 'discount' && voucherType !== 'Single use') {
+                if (couponType === 'discount' && voucherType !== 'Single use') {
                     formGroup('[name=code]').removeClass('hidden');
                 } else {
                     formGroup('[name=code]').addClass('hidden');
@@ -205,6 +211,11 @@ define([
                     this.$el.find('[name=seat_type]')
                         .html(this.seatTypes)
                         .trigger('change');
+
+                    if (this.editing) {
+                        this.$el.find('[name=seat_type]')
+                            .val(_s.capitalize(this.model.get('seat_type')));
+                    }
                 }, this));
 
                 course.fetch({data: {include_products: true}});
@@ -217,23 +228,31 @@ define([
                 var data, quantity, price,
                     seatType = this.$el.find('[name=seat_type]').val();
 
-                this.model.set('seat_type', seatType);
+                if (!this.editing) {
+                    this.model.set('seat_type', seatType);
 
-                if (seatType && !this.editing) {
-                    data = this.$el.find('[value='+seatType+']').data();
-                    quantity = this.model.get('quantity');
-                    price = data.price * quantity;
-                    this.model.set('stock_record_ids', data.stockrecords);
-                    this.model.set('price', price);
-                    this.$el.find('[name=price]').val(price);
+                    if (seatType && !this.editing) {
+                        data = this.$el.find('[value='+seatType+']').data();
+                        quantity = this.model.get('quantity');
+                        price = data.price * quantity;
+                        this.model.set('stock_record_ids', data.stockrecords);
+                        this.model.set('price', price);
+                        this.$el.find('[name=price]').val(price);
+                    }
                 }
             },
 
             disableNonEditableFields: function () {
                 this.$el.find('input[name=title]').attr('disabled', true);
+                this.$el.find('select[name=code_type]').attr('disabled', true);
+                this.$el.find('select[name=voucher_type]').attr('disabled', true);
+                this.$el.find('input[name=quantity]').attr('disabled', true);
                 this.$el.find('input[name=client_username]').attr('disabled', true);
                 this.$el.find('input[name=price]').attr('disabled', true);
                 this.$el.find('input[name=course_id]').attr('disabled', true);
+                this.$el.find('input[name=code]').attr('disabled', true);
+                this.$el.find('input[name=benefit_value]').attr('disabled', true);
+                this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
             },
 
@@ -245,15 +264,14 @@ define([
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.
                 this.$alerts = this.$el.find('.alerts');
 
-                this.model.set('code_type', this.codeTypes[0].value);
-                this.model.set('voucher_type', this.voucherTypes[0].value);
-                this.model.set('benefit_type', 'Percentage');
-
                 if(this.editing) {
                     this.disableNonEditableFields();
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
                     this.fillFromCourse();
                 } else {
+                    this.model.set('coupon_type', this.codeTypes[0].value);
+                    this.model.set('voucher_type', this.voucherTypes[0].value);
+                    this.model.set('benefit_type', 'Percentage');
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
                 }
 

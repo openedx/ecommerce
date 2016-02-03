@@ -40,6 +40,16 @@ define([
                 );
             },
 
+            courseID: function(course_data) {
+                var course_id = _.findWhere(course_data, {'name': 'course_key'});
+                return course_id ? course_id.value : '';
+            },
+
+            courseType: function(course_data) {
+                var course_type = _.findWhere(course_data, {'name': 'certificate_type'});
+                return course_type ? gettext(this.capitalize(course_type.value)) : '';
+            },
+
             discountValue: function(voucher) {
                 var benefitType = voucher.benefit[0],
                     benefitValue = voucher.benefit[1];
@@ -67,13 +77,13 @@ define([
             },
 
             render: function () {
-                var course_data = this.model.get('seats')[0],
+                var course_data = this.model.get('seats')[0].attribute_values,
                     html,
                     voucher = this.model.get('vouchers')[0];
 
                 html = this.template({
-                    course_id: course_data.attribute_values[1].value,
-                    course_type: gettext(this.capitalize(course_data.attribute_values[0].value)),
+                    course_id: this.courseID(course_data),
+                    course_type: this.courseType(course_data),
                     coupon: this.model.attributes,
                     couponType: this.couponType(voucher),
                     codeStatus: this.codeStatus(voucher),

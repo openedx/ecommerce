@@ -148,10 +148,6 @@ define([
                     expect(visible('[name=benefit_value]')).toBe(true);
                 });
 
-                it('should hide the price field', function () {
-                    expect(visible('[name=price]')).toBe(false);
-                });
-
                 it('should indicate the benefit type', function () {
                     view.$el.find('[name=code_type]').val('enrollment').trigger('change');
                     expect(view.$el.find('.benefit-addon').html()).toBe('%');

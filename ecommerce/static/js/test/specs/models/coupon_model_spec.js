@@ -37,7 +37,7 @@ define([
             },
             discount = {
                 title: 'Test Discount',
-                code_type: 'discount',
+                coupon_type: 'discount',
                 client: 'test_client',
                 start_date: '2015-01-01T00:00:00Z',
                 end_date: '2016-01-01T00:00:00Z',
@@ -48,11 +48,12 @@ define([
                 benefit_value: 25,
                 course_id: 'a/b/c',
                 seat_type: 'verified',
-                course: course
+                course: course,
+                price: 100
             },
             enrollment = {
                 title: 'Test Enrollment',
-                code_type: 'enrollment',
+                coupon_type: 'enrollment',
                 client: 'test_client',
                 start_date: '2015-01-01T00:00:00Z',
                 end_date: '2016-01-01T00:00:00Z',
@@ -115,7 +116,6 @@ define([
                     expect($.ajax).toHaveBeenCalled();
                     args = $.ajax.calls.argsFor(0);
                     ajaxData = JSON.parse(args[0].data);
-                    expect(ajaxData.price).toEqual(0);
                     expect(ajaxData.quantity).toEqual(1);
                 });
             });

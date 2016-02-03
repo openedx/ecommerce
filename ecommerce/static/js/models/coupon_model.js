@@ -32,7 +32,7 @@ define([
                 quantity: 1,
                 stock_record_ids: [],
                 code: '',
-                price: '0'
+                price: 0
             },
 
             validation: {
@@ -49,7 +49,7 @@ define([
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
-                        return this.get('code_type') === 'discount';
+                        return this.get('coupon_type') === 'discount';
                     }
                 },
                 start_date: function (val) {
@@ -100,15 +100,28 @@ define([
             },
 
             updateSeatData: function () {
-                var seat_data = this.get('seats')[0];
-                this.set('seat_type', seat_data.attribute_values[0].value);
-                this.set('course_id', seat_data.attribute_values[1].value);
+                var seat_data = this.get('seats')[0].attribute_values,
+                    seat_type = _.findWhere(seat_data, {'name': 'certificate_type'}),
+                    course_id = _.findWhere(seat_data, {'name': 'course_key'});
+                this.set('seat_type', seat_type ? seat_type.value : '');
+                this.set('course_id', course_id ? course_id.value : '');
             },
 
             updateVoucherData: function () {
-                var voucher_data = this.get('vouchers')[0];
-                this.set('start_date', voucher_data.start_datetime);
-                this.set('end_date', voucher_data.end_datetime);
+                var vouchers = this.get('vouchers'),
+                    voucher = vouchers[0],
+                    code_count = _.findWhere(voucher, {'code': voucher.code});
+                this.set('start_date', voucher.start_datetime);
+                this.set('end_date', voucher.end_datetime);
+                this.set('voucher_type', voucher.usage);
+                if (this.get('coupon_type') === 'Discount code') {
+                    this.set('benefit_type', voucher.benefit[0]);
+                    this.set('benefit_value', voucher.benefit[1]);
+                }
+
+                if (code_count > 1 || _.size(vouchers) === 1) {
+                    this.set('code', voucher.code);
+                }
             },
 
             save: function (options) {
@@ -124,17 +137,16 @@ define([
                 data.client_username = this.get('client');
                 data.start_date = moment.utc(this.get('start_date'));
                 data.end_date = moment.utc(this.get('end_date'));
+                data.price = this.get('price');
 
                 // Enrollment code always gives 100% discount
-                switch (this.get('code_type')) {
+                switch (this.get('coupon_type')) {
                 case 'enrollment':
                     // this is the price paid for the code(s)
-                    data.price = this.get('price');
                     data.benefit_type = 'Percentage';
                     data.benefit_value = 100;
                 break;
                 case 'discount':
-                    data.price = 0;
                     data.benefit_type = this.get('benefit_type');
                     data.benefit_value = this.get('benefit_value');
                 break;
