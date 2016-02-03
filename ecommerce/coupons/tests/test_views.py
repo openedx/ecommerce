@@ -2,6 +2,7 @@ import datetime
 from decimal import Decimal
 import json
 
+import ddt
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -22,6 +23,7 @@ from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
 StockRecord = get_model('partner', 'StockRecord')
@@ -55,13 +57,15 @@ class CouponAppViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+@ddt.ddt
 class CouponOfferViewTests(TestCase):
-    offer_url = reverse('coupons:offer')
+    path = reverse('coupons:offer')
+    path_with_code = '{path}?code={code}'.format(path=path, code='COUPONTEST')
 
     def setUp(self):
         super(CouponOfferViewTests, self).setUp()
 
-    def prepare_voucher(self, range_=None, start_datetime=None, benefit_value=100):
+    def prepare_voucher(self, range_=None, start_datetime=None, benefit_value=100, benefit_type='Percentage'):
         """ Create a voucher and add an offer to it that contains a created product. """
         if range_ is None:
             product = ProductFactory(title='Test product')
@@ -73,10 +77,31 @@ class CouponOfferViewTests(TestCase):
             start_datetime = now() - datetime.timedelta(days=1)
 
         voucher = VoucherFactory(code='COUPONTEST', start_datetime=start_datetime, usage=Voucher.SINGLE_USE)
-        benefit = BenefitFactory(range=range_, value=benefit_value)
+        benefit = BenefitFactory(type=benefit_type, range=range_, value=benefit_value)
         offer = ConditionalOfferFactory(benefit=benefit)
         voucher.offers.add(offer)
         return voucher, product
+
+    def prepare_course_information(self):
+        """ Helper function to prepare an API endpoint that provides course information. """
+        course = CourseFactory()
+        seat = course.create_or_update_seat('verified', True, 50, self.partner)
+        sr = StockRecord.objects.get(product=seat)
+        catalog = Catalog.objects.create(name='Test catalog', partner=self.partner)
+        catalog.stock_records.add(sr)
+        range_ = RangeFactory(catalog=catalog)
+        course_info = {
+            "media": {
+                "course_image": {
+                    "uri": "/asset-v1:edX+DemoX+Demo_Course+type@asset+block@images_course_image.jpg"
+                }
+            },
+            "name": "edX Demonstration Course",
+        }
+        course_info_json = json.dumps(course_info)
+        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course.id))
+        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+        return range_
 
     def test_get_voucher(self):
         """ Verify that get_voucher() returns product and voucher. """
@@ -146,12 +171,12 @@ class CouponOfferViewTests(TestCase):
 
     def test_no_code(self):
         """ Verify a proper response is returned when no code is supplied. """
-        response = self.client.get(self.offer_url)
+        response = self.client.get(self.path)
         self.assertEqual(response.context['error'], _('This coupon code is invalid.'))
 
     def test_invalid_voucher(self):
         """ Verify a proper response is returned when voucher with provided code does not exist. """
-        url = self.offer_url + '?code={}'.format('DOESNTEXIST')
+        url = self.path + '?code={}'.format('DOESNTEXIST')
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('Coupon does not exist'))
 
@@ -166,8 +191,7 @@ class CouponOfferViewTests(TestCase):
         course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course.id))
         httpretty.register_uri(httpretty.GET, course_url, status=404, content_type='application/json')
 
-        url = self.offer_url + '?code={}'.format('COUPONTEST')
-        response = self.client.get(url)
+        response = self.client.get(self.path_with_code)
         response_text = (
             'Could not get course information. '
             '[Client Error 404: http://127.0.0.1:8000/api/courses/v1/courses/{}/]'
@@ -177,30 +201,24 @@ class CouponOfferViewTests(TestCase):
     @httpretty.activate
     def test_proper_code(self):
         """ Verify that proper information is returned when a valid code is provided. """
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 50, self.partner)
-        sr = StockRecord.objects.get(product=seat)
-        catalog = Catalog.objects.create(name='Test catalog', partner=self.partner)
-        catalog.stock_records.add(sr)
-        range_ = RangeFactory(catalog=catalog)
+        range_ = self.prepare_course_information()
         self.prepare_voucher(range_=range_)
-
-        course_info = {
-            "media": {
-                "course_image": {
-                    "uri": "/asset-v1:edX+DemoX+Demo_Course+type@asset+block@images_course_image.jpg"
-                }
-            },
-            "name": "edX Demonstration Course",
-        }
-        course_info_json = json.dumps(course_info)
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course.id))
-        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
-
-        url = self.offer_url + '?code={}'.format('COUPONTEST')
-        response = self.client.get(url)
+        response = self.client.get(self.path_with_code)
         self.assertEqual(response.context['course']['name'], _('edX Demonstration Course'))
         self.assertEqual(response.context['code'], _('COUPONTEST'))
+
+    @httpretty.activate
+    @ddt.data(
+        (5, '45.00'),
+        (100000, '0.00'),
+    )
+    @ddt.unpack
+    def test_fixed_amount(self, benefit_value, new_price):
+        """ Verify a new price is calculated properly with fixed price type benefit. """
+        range_ = self.prepare_course_information()
+        self.prepare_voucher(range_=range_, benefit_value=benefit_value, benefit_type=Benefit.FIXED_PRICE)
+        response = self.client.get(self.path_with_code)
+        self.assertEqual(response.context['new_price'], new_price)
 
 
 class CouponRedeemViewTests(TestCase):

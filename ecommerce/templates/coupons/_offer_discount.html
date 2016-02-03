@@ -1,0 +1,56 @@
+{% load i18n %}
+
+<div class="depth depth--3">
+    <div class="copy copy-meta">
+        {% trans "Discount code applied to course price." %}
+    </div>
+</div>
+<div class="container">
+    <h5>{% trans "Enroll and pursue a verified certificate in the following course." %}</h5>
+    <div class="row">
+        <div class="col-md-2">
+            <img class="img-responsive" src="{{course.image_url}}" alt="" />
+        </div>
+        <div class="col-md-7">
+            <h3>{{ course.name }} - {{ course.org }}</h3>
+            <p>
+                {{ course.short_description }}
+            </p>
+        </div>
+        <div class="col-md-3 text-right course-price">
+            {% if benefit_type == 'Percentage' %}
+                <span class="discount">{{ benefit_value }}% off </span>
+                <s class="course-price">${{ price }}</s>
+                <strong>${{ new_price }}</strong>
+            {% else %}
+                <span class="discount">${{ benefit_value }} off </span>
+                <s class="course-price">${{ price }}</s>
+                <strong>${{ new_price }}</strong>
+            {% endif %}
+        </div>
+    </div>
+    <hr>
+    <div class="code">
+        <p class="voucher">Promotion code {{ code }} applied</p>
+    </div>
+    <div class="text-right">
+        <p>
+            <b class="total-price">{% trans "Total: $" %}{{ new_price }}</b>
+        </p>
+        <a href="#" class="btn btn-primary">{% trans "Add to basket" %}</a>
+    </div>
+    {% if verified %}
+    <div class="alert alert-info note">
+        <span class="fa fa-exclamation-circle" aria-hidden="true"></span>
+        <b>{% trans "Note:" %}</b>
+        {% trans "You must verify your identity using a webcam and a government-issued photo ID before the course ends." %}
+    </div>
+    {% endif %}
+
+    <div>
+        <b>{% trans "Questions?" %}</b>
+        <p>
+            {% trans "Read our FAQs for answers to common questions about our certificates." %}
+        </p>
+    </div>
+</div>

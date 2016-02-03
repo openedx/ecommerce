@@ -8,8 +8,20 @@
     <div id="offer">
         {% if error %}
             {% include "coupons/_offer_error.html" %}
-        {% else%}
-            {% include "coupons/_offer_success.html" %}
+        {% else %}
+            {% if benefit_type == 'Percentage' and benefit_value == 100.00 %}
+                {% include "coupons/_offer_enrollment.html" %}
+            {% else %}
+                {% include "coupons/_offer_discount.html" %}
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}
+
+{% block footer %}
+    {% if footer %}
+        {% autoescape off %}
+            {{ footer }}
+        {% endautoescape %}
+    {% endif %}
+{% endblock footer %}
