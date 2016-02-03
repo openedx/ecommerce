@@ -23,7 +23,7 @@ class Basket(AbstractBasket):
         merge them into one.
 
         If a new basket is requested find all open baskets associated with that user and delete them.
-        This is need for the single-item basket flow.  We want to ensure an empty basket so no
+        This is needed for the single-item basket flow.  We want to ensure an empty basket so no
         other products / vouchers are already included.  This flow is for redemption of a single product
         as well as used for redeeming a product with a dicount code.
         """
