@@ -4,10 +4,11 @@ from ecommerce.core.context_processors import core
 from ecommerce.tests.testcases import TestCase
 
 PLATFORM_NAME = 'Test Platform'
+SUPPORT_URL = 'example.com'
 
 
 class CoreContextProcessorTests(TestCase):
-    @override_settings(PLATFORM_NAME=PLATFORM_NAME)
+    @override_settings(PLATFORM_NAME=PLATFORM_NAME, SUPPORT_URL=SUPPORT_URL)
     def test_core(self):
         request = RequestFactory().get('/')
-        self.assertDictEqual(core(request), {'platform_name': PLATFORM_NAME})
+        self.assertDictEqual(core(request), {'platform_name': PLATFORM_NAME, 'support_url': SUPPORT_URL})

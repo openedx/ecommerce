@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
@@ -16,6 +17,7 @@ from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.data import get_lms_footer
+from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.settings import get_lms_url
@@ -29,9 +31,9 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 
-def get_voucher(code):
+def get_voucher_from_code(code):
     """
-    Returns a voucher and prodcut for a given code.
+    Returns a voucher and product for a given code.
 
     Arguments:
         code (str): The code of a coupon voucher.
@@ -100,7 +102,7 @@ class CouponOfferView(TemplateView):
         footer = get_lms_footer()
         code = self.request.GET.get('code', None)
         if code is not None:
-            voucher, product = get_voucher(code=code)
+            voucher, product = get_voucher_from_code(code=code)
             valid_voucher, msg = voucher_is_valid(voucher, product, self.request)
             if valid_voucher:
                 api = EdxRestApiClient(
@@ -165,12 +167,12 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not code:
             return render(request, template_name, {'error': _('Code not provided')})
 
-        voucher, product = get_voucher(code=code)
+        voucher, product = get_voucher_from_code(code=code)
         valid_voucher, msg = voucher_is_valid(voucher, product, request)
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
-        basket = self._prepare_basket(request.site, request.user, product, voucher)
+        basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == AC.FREE:
             basket.freeze()
             order_metadata = data_api.get_order_metadata(basket)
@@ -194,54 +196,17 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
             )
         else:
-            return render(
-                request,
-                template_name,
-                {'error': _('Basket total not $0, current value = ${basket_price}'.format(
-                    basket_price=basket.total_excl_tax
-                ))}
+            partner = request.site.siteconfiguration.partner
+            sku = StockRecord.objects.get(product=product, partner=partner).partner_sku
+            url = '{url}?sku={sku}&code={code}'.format(
+                url=reverse('basket:single-item'),
+                sku=sku,
+                code=code
             )
+            return HttpResponseRedirect(url)
 
         if order.status is ORDER.COMPLETE:
             return HttpResponseRedirect(get_lms_url(''))
         else:
             logger.error('Order was not completed [%s]', order.id)
             return render(request, template_name, {'error': _('Error when trying to redeem code')})
-
-    def _prepare_basket(self, site, user, product, voucher):
-        """
-        Prepare the basket, add the product, and apply a voucher.
-
-        Existing baskets are merged and flushed. The specified product will
-        be added to the remaining open basket, and the basket will be frozen.
-        The Voucher is applied to the basket and checked for discounts.
-
-        Arguments:
-            site (Site): The site from which the request came.
-            user (User): User who made the request.
-            product (Product): Product to be added to the basket.
-            voucher (Voucher): Voucher to apply to the basket.
-
-        Returns:
-            basket (Basket): Contains the product to be redeemed and the Voucher applied.
-        """
-        basket = Basket.get_basket(user, site)
-        basket.thaw()
-        # remove all existing vouchers from the basket
-        for v in basket.vouchers.all():
-            basket.vouchers.remove(v)
-        basket.reset_offer_applications()
-        basket.flush()
-        basket.add_product(product, 1)
-        basket.vouchers.add(voucher)
-        Applicator().apply(basket, user, self.request)
-        discounts = basket.offer_applications
-        # Look for discounts from this new voucher
-        for discount in discounts:
-            if discount['voucher'] and discount['voucher'] == voucher:
-                logger.info('Applied Voucher [%s] to basket.', voucher.code)
-                break
-            else:
-                logger.info('Voucher [%s] does not offer a discount.', voucher.code)
-                basket.vouchers.remove(voucher)
-        return basket

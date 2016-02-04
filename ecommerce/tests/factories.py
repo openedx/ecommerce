@@ -1,6 +1,7 @@
 from django.contrib.sites.models import Site
 import factory
 from oscar.core.loading import get_model
+from oscar.test.factories import ProductFactory, StockRecordFactory as OscarStockRecordFactory
 
 from ecommerce.core.models import SiteConfiguration
 
@@ -24,3 +25,8 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
 
     site = factory.SubFactory(SiteFactory)
     partner = factory.SubFactory(PartnerFactory)
+
+
+class StockRecordFactory(OscarStockRecordFactory):
+    product = factory.SubFactory(ProductFactory)
+    price_currency = 'USD'
