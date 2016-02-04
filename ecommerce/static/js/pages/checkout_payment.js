@@ -50,7 +50,7 @@ require([
                         'X-CSRFToken': $.cookie('ecommerce_csrftoken')
                     },
                     data: JSON.stringify(data)
-                }).done(function (data, textStatus, jqXHR) {
+                }).done(function (data) {
                     redirectToPaymentProvider(data);
                 });
             });
