@@ -176,7 +176,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 
-        category_name = data['category']
+        category = data['category']
+        category_name = Category.objects.get(id=category).name
         coupon_product.attr.coupon_vouchers = coupon_vouchers
 
         coupons_category = Category.objects.get(name='Coupons')
@@ -186,7 +187,6 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         ).filter(
             depth__lt=3
         ).values_list('name', flat=True)
-
         if category_name not in existing_categories:
             raise Exception('Invalid category')
 
