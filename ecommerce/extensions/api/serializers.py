@@ -452,4 +452,8 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
 
     class Meta(object):
         model = Product
-        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers', 'category', 'sub_category')
+        fields = (
+            'id', 'title', 'coupon_type', 'last_edited',
+            'seats', 'client', 'price', 'vouchers',
+            'category', 'sub_category'
+        )
