@@ -15,7 +15,7 @@ def prepare_basket(request, product, voucher=None):
     be added to the remaining open basket. The Voucher is applied to the basket.
 
     Arguments:
-        site (Site): The site from which the request came.
+        request (Request): The request object made to the view.
         product (Product): Product to be added to the basket.
         voucher (Voucher): Voucher to apply to the basket.
 
