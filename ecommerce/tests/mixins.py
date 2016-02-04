@@ -271,8 +271,7 @@ class CouponMixin(object):
     """Mixin for preparing data for coupons and creating coupons."""
     def setUp(self):
         super(CouponMixin, self).setUp()
-        breadcrumb = 'Coupons > Test category'
-        create_from_breadcrumbs(breadcrumb)
+        self.category = create_from_breadcrumbs('Coupons > Test category')
 
     def create_coupon(
             self,
@@ -302,7 +301,7 @@ class CouponMixin(object):
             'quantity': quantity,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': sub_category
         }
 

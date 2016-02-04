@@ -62,7 +62,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 1,
             'price': 100,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': ''
         }
         request = RequestFactory()
@@ -105,7 +105,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.MULTI_USE,
-            'category': 'New category',
+            'category': 9999,
             'sub_category': ''
         }
         with self.assertRaises(Exception):
@@ -127,7 +127,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.MULTI_USE,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': 'Test sub-category'
         }
         coupon = CouponViewSet().create_coupon_product(
@@ -152,7 +152,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.MULTI_USE,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': ''
         }
         coupon_append = CouponViewSet().create_coupon_product(
@@ -178,7 +178,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': ''
         }
         custom_coupon = CouponViewSet().create_coupon_product(
@@ -201,7 +201,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': ''
         }
         CouponViewSet().create_coupon_product(
@@ -281,7 +281,7 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
             'price': 100,
-            'category': 'Test category',
+            'category': self.category.id,
             'sub_category': 'Test sub-category'
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
@@ -326,7 +326,8 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
         response_data = json.loads(response.content)
         coupon_data = response_data['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
-        self.assertEqual(coupon_data['category']['name'], 'Test sub-category')
+        self.assertEqual(coupon_data['category']['name'], 'Test category')
+        self.assertEqual(coupon_data['sub_category']['name'], 'Test sub-category')
         self.assertEqual(coupon_data['coupon_type'], 'Enrollment code')
         self.assertIsNotNone(coupon_data['last_edited'][0])
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
