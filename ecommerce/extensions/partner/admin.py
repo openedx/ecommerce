@@ -10,6 +10,7 @@ Catalog = get_class('ecommerce.extensions.catalogue.models', 'Catalog')
 class StockRecordAdminExtended(SimpleHistoryAdmin):
     list_display = ('product', 'partner', 'partner_sku', 'price_excl_tax', 'cost_price', 'num_in_stock')
     list_filter = ('partner',)
+    raw_id_fields = ('product',)
 
 
 class CatalogAdmin(admin.ModelAdmin):
