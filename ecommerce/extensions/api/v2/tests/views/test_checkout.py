@@ -73,3 +73,11 @@ class CheckoutViewTests(TestCase):
         self.assertEqual(response_data['payment_form_data']['transaction_param'], 'test_trans_param')
         self.assertEqual(response_data['payment_page_url'], 'test_processor.edx')
         self.assertEqual(response_data['payment_processor'], 'dummy_with_url')
+
+    @override_settings(
+        PAYMENT_PROCESSORS=['ecommerce.extensions.api.v2.tests.views.test_checkout.DummyProcessor']
+    )
+    def test_invalid_payment_processor(self):
+        """ Verify the endpoint returns HTTP 400 if payment processor not found """
+        response = self.client.post(self.path, data=self.data)
+        self.assertEqual(response.status_code, 400)
