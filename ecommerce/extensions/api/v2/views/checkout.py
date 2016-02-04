@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseBadRequest
 from oscar.core.loading import get_class
@@ -6,15 +8,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ecommerce.extensions.api.serializers import CheckoutSerializer
+from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 
 Applicator = get_class('offer.utils', 'Applicator')
+logger = logging.getLogger(__name__)
 
 
 class CheckoutView(APIView):
     """
-    Prepares a basket for checkout and returns information necessary for the browser to redirect the client
-    to the payment process.
+    Freezes a basket, and returns the information necessary to start the payment process.
     """
     permission_classes = (IsAuthenticated,)
 
@@ -31,12 +34,15 @@ class CheckoutView(APIView):
         # Freeze the basket so that it cannot be modified
         basket.strategy = request.strategy
         Applicator().apply(basket, request.user, request)
-        basket.save()
-
         basket.freeze()
 
         # Return the payment info
-        payment_processor = get_processor_class_by_name(payment_processor)()
+        try:
+            payment_processor = get_processor_class_by_name(payment_processor)()
+        except ProcessorNotFoundError:
+            logger.exception('Failed to get payment processor [%s].', payment_processor)
+            return HttpResponseBadRequest('Payment Processor [{}] not found'.format(payment_processor))
+
         parameters = payment_processor.get_transaction_parameters(basket, request=request)
         payment_page_url = parameters.pop('payment_page_url')
 

@@ -26,12 +26,16 @@ class DummyProcessorWithUrl(DummyProcessor):
         return dummy_values
 
 
+@override_settings(
+    PAYMENT_PROCESSORS=['ecommerce.extensions.api.v2.tests.views.test_checkout.DummyProcessorWithUrl']
+)
 class CheckoutViewTests(TestCase):
     """ Tests for CheckoutView API view. """
     path = reverse('api:v2:checkout')
 
     def setUp(self):
         super(CheckoutViewTests, self).setUp()
+        self.activate_payment_processor()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         Basket.objects.create(owner=self.user)
@@ -40,7 +44,7 @@ class CheckoutViewTests(TestCase):
             'payment_processor': DummyProcessorWithUrl.NAME
         }
 
-    def toggle_payment_processor(self):
+    def activate_payment_processor(self):
         """ Helper function to activate the dummy payment processor. """
         switch, __ = Switch.objects.get_or_create(
             name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessorWithUrl.NAME
@@ -48,31 +52,20 @@ class CheckoutViewTests(TestCase):
         switch.active = True
         switch.save()
 
-    @override_settings(
-        PAYMENT_PROCESSORS=['ecommerce.extensions.api.v2.tests.views.test_checkout.DummyProcessorWithUrl']
-    )
     def test_authentication_required(self):
-        """ Verify that a guest cannot access the view. """
-        self.toggle_payment_processor()
-        response = self.client.post(self.path, data=self.data)
-        self.assertEqual(response.status_code, 200)
-
+        """ Verify the endpoint requires authentication. """
         self.client.logout()
         response = self.client.post(self.path, data=self.data)
         self.assertEqual(response.status_code, 401)
 
     def test_no_basket(self):
-        """ Verify an error happens when a user has no baskets associated. """
+        """ Verify the endpoint returns HTTP 400 if the user has no associated baskets. """
         self.user.baskets.all().delete()
         response = self.client.post(self.path, data=self.data)
         self.assertEqual(response.status_code, 400)
 
-    @override_settings(
-        PAYMENT_PROCESSORS=['ecommerce.extensions.api.v2.tests.views.test_checkout.DummyProcessorWithUrl']
-    )
     def test_view_response(self):
-        """ Verify proper response happens. """
-        self.toggle_payment_processor()
+        """ Verify the endpoint returns a successful response when the user is able to checkout. """
         response = self.client.post(self.path, data=self.data)
         self.assertEqual(response.status_code, 200)
 
