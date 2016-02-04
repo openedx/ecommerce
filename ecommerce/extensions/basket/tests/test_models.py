@@ -106,19 +106,3 @@ class BasketTests(TestCase):
 
         # Verify the basket for the second site/tenant is not modified
         self.assert_basket_state(user.baskets.get(site=self.site2), Basket.OPEN, user, self.site2)
-
-    def test_get_basket_return_new_basket(self):
-        """ Verify when new_basket param is passed old basket is deleted and new created. """
-        user = factories.UserFactory()
-
-        # Create three baskets and verify that they exist
-        for __ in range(3):
-            self._create_basket(user, self.site1)
-        self.assertEqual(Basket.objects.filter(owner=user).count(), 3)
-        domain = Basket.objects.filter(owner=user).first().site.domain
-        self.assertEqual(domain, 'site1.fake')
-
-        # Pass new_basket param to get_basket() and verify it's the only basket
-        Basket.get_basket(user, self.site2, new_basket=True)
-        self.assertEqual(Basket.objects.filter(owner=user).count(), 1)
-        self.assertEqual(Basket.objects.get(owner=user).site.domain, 'site2.fake')

@@ -27,7 +27,12 @@ def prepare_basket(request, user, product, voucher=None):
     Returns:
     basket (Basket): Contains the product to be redeemed and the Voucher applied.
     """
-    basket = Basket.get_basket(user, request.site, True)
+    basket = Basket.get_basket(user, request.site)
+    # remove all existing vouchers from the basket
+    for v in basket.vouchers.all():
+        basket.vouchers.remove(v)
+    basket.reset_offer_applications()
+    basket.flush()
     basket.add_product(product, 1)
     if voucher:
         basket.vouchers.add(voucher)
