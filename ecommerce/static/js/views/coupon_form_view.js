@@ -288,7 +288,7 @@ define([
                         if(data){
                             for(var i = 0; i < data.child.length; i++){
                                 categories.push({
-                                    value: gettext(data.child[i].name), // currently main identificator is name
+                                    value: data.child[i].id,
                                     label: gettext(data.child[i].name)
                                 });      
                             }
