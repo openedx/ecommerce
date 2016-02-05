@@ -29,7 +29,7 @@ class CheckoutView(APIView):
         try:
             basket = request.user.baskets.get(id=basket_id)
         except ObjectDoesNotExist:
-            return HttpResponseBadRequest('Basket [{}] not found'.format(basket_id))
+            return HttpResponseBadRequest('Basket [{}] not found.'.format(basket_id))
 
         # Freeze the basket so that it cannot be modified
         basket.strategy = request.strategy
@@ -41,7 +41,9 @@ class CheckoutView(APIView):
             payment_processor = get_processor_class_by_name(payment_processor)()
         except ProcessorNotFoundError:
             logger.exception('Failed to get payment processor [%s].', payment_processor)
-            return HttpResponseBadRequest('Payment Processor [{}] not found'.format(payment_processor))
+            return HttpResponseBadRequest(
+                'Payment processor [{processor}] not found.'.format(processor=payment_processor)
+            )
 
         parameters = payment_processor.get_transaction_parameters(basket, request=request)
         payment_page_url = parameters.pop('payment_page_url')
