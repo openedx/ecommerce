@@ -58,9 +58,10 @@ require([
                     data: JSON.stringify(data)
                 }).done(function (data) {
                     redirectToPaymentProvider(data);
-                }).fail(function(jqXHR, errorThrown) {
+                }).fail(function () {
+                    var message = gettext('Problem occurred during checkout. Please contact support');
                     $('#messages').empty().append(
-                        '<div class="error">' + jqXHR.status + errorThrown + ' occurred during checkout.</div>'
+                        '<div class="error">' + message + '</div>'
                     );
                 });
             });
