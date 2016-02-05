@@ -52,6 +52,10 @@ require([
                     data: JSON.stringify(data)
                 }).done(function (data) {
                     redirectToPaymentProvider(data);
+                }).fail(function(jqXHR, errorThrown) {
+                    $('#messages').empty().append(
+                        '<div class="error">' + jqXHR.status + errorThrown + ' occurred during checkout.</div>'
+                    );
                 });
             });
         });
