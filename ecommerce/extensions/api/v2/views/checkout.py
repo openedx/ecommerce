@@ -42,7 +42,7 @@ class CheckoutView(APIView):
         except ProcessorNotFoundError:
             logger.exception('Failed to get payment processor [%s].', payment_processor)
             return HttpResponseBadRequest(
-                'Payment processor [{processor}] not found.'.format(processor=payment_processor)
+                'Payment processor [{}] not found.'.format(payment_processor)
             )
 
         parameters = payment_processor.get_transaction_parameters(basket, request=request)

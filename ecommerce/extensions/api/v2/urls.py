@@ -37,6 +37,10 @@ COUPON_URLS = [
     url(r'^coupon_reports/(?P<coupon_id>[\d]+)/$', CouponReportCSVView.as_view(), name='coupon_reports'),
 ]
 
+CHECKOUT_URLS = [
+    url(r'^$', checkout_views.CheckoutView.as_view(), name='process')
+]
+
 ATOMIC_PUBLICATION_URLS = [
     url(r'^$', publication_views.AtomicPublicationView.as_view(), name='create'),
     url(
@@ -48,7 +52,7 @@ ATOMIC_PUBLICATION_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
-    url(r'^checkout/$', checkout_views.CheckoutView.as_view(), name='checkout'),
+    url(r'^checkout/$', include(CHECKOUT_URLS, namespace='checkout')),
     url(r'^coupons/', include(COUPON_URLS, namespace='vouchers')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),

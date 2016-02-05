@@ -28,7 +28,7 @@ class DummyProcessorWithUrl(DummyProcessor):
 
 class CheckoutViewTests(TestCase):
     """ Tests for CheckoutView API view. """
-    path = reverse('api:v2:checkout')
+    path = reverse('api:v2:checkout:process')
 
     def setUp(self):
         super(CheckoutViewTests, self).setUp()
