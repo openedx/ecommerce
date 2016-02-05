@@ -2,12 +2,12 @@ from django.conf.urls import url, include
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN
-from ecommerce.extensions.api.v2.views import (baskets as basket_views,
-                                               checkout as checkout_views, payments as payment_views,
+from ecommerce.extensions.api.v2.views import (baskets as basket_views, payments as payment_views,
                                                orders as order_views, refunds as refund_views,
                                                products as product_views, courses as course_views,
                                                publication as publication_views, partners as partner_views,
-                                               catalog as catalog_views, stockrecords as stockrecords_views,
+                                               catalog as catalog_views,
+                                               stockrecords as stockrecords_views,
                                                coupons as coupon_views)
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
@@ -37,10 +37,6 @@ COUPON_URLS = [
     url(r'^coupon_reports/(?P<coupon_id>[\d]+)/$', CouponReportCSVView.as_view(), name='coupon_reports'),
 ]
 
-CHECKOUT_URLS = [
-    url(r'^$', checkout_views.CheckoutView.as_view(), name='process')
-]
-
 ATOMIC_PUBLICATION_URLS = [
     url(r'^$', publication_views.AtomicPublicationView.as_view(), name='create'),
     url(
@@ -52,7 +48,6 @@ ATOMIC_PUBLICATION_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
-    url(r'^checkout/$', include(CHECKOUT_URLS, namespace='checkout')),
     url(r'^coupons/', include(COUPON_URLS, namespace='vouchers')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),

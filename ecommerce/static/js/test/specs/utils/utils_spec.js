@@ -1,13 +1,11 @@
 define([
         'backbone',
         'test/spec-utils',
-        'utils/utils',
-        'views/coupon_form_view'
+        'utils/utils'
     ],
     function (Backbone,
               SpecUtils,
-              Utils,
-              CouponFormView) {
+              Utils) {
         'use strict';
 
         describe('Utils', function () {
@@ -54,36 +52,6 @@ define([
                     // A mixture of validation statuses should always return false.
                     models.push(new (SpecUtils.getModelForValidation(true))());
                     expect(Utils.areModelsValid(models)).toEqual(false);
-                });
-            });
-
-            describe('disableElementWhileRunning', function () {
-
-                beforeEach(function () {
-                    jasmine.addMatchers({
-                        toHaveClass: function () {
-                            return {
-                                compare: function (actual, className) {
-                                    return { pass: $(actual).hasClass(className) };
-                                }
-                            };
-                        }
-                    });
-                });
-
-                it('adds "is-disabled" class to element while action is running and removes it after', function() {
-                    var ModelClass = SpecUtils.getModelForValidation(false),
-                        model = new ModelClass(),
-                        view = new CouponFormView({ editing: false, model: model }).render(),
-                        button,
-                        deferred = new $.Deferred(),
-                        promise = deferred.promise();
-                    button = view.$el.find('button').first();
-                    expect(button).not.toHaveClass('is-disabled');
-                    Utils.disableElementWhileRunning(button, function() { return promise; });
-                    expect(button).toHaveClass('is-disabled');
-                    deferred.resolve();
-                    expect(button).not.toHaveClass('is-disabled');
                 });
             });
         });

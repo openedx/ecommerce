@@ -124,20 +124,6 @@ define([
                         $helpBlock.removeClass('hidden');
                     }
                 });
-            },
-
-            /**
-             * Disables a given element when a given operation is running.
-             * @param {jQuery} element the element to be disabled.
-             * @param operation the operation during whose duration the
-             * element should be disabled. The operation should return
-             * a JQuery promise.
-             */
-            disableElementWhileRunning: function(element, operation) {
-                element.addClass('is-disabled').attr('aria-disabled', true);
-                return operation().always(function() {
-                    element.removeClass('is-disabled').attr('aria-disabled', false);
-                });
             }
         };
     }
