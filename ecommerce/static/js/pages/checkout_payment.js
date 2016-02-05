@@ -5,10 +5,12 @@
 require([
         'jquery',
         'underscore',
+        'utils/utils',
         'jquery-cookie'
     ],
     function ($,
-              _) {
+              _,
+              Utils) {
         'use strict';
 
         var redirectToPaymentProvider = function (data) {
@@ -35,11 +37,15 @@ require([
 
             $paymentButtons.find('.payment-button').click(function (e) {
                 var $btn = $(e.target),
+                    deferred = new $.Deferred(),
+                    promise = deferred.promise(),
                     paymentProcessor = $btn.val(),
                     data = {
                         basket_id: basketId,
                         payment_processor: paymentProcessor
                     };
+
+                Utils.disableElementWhileRunning($btn, function() { return promise; });
 
                 $.ajax({
                     url: '/api/v2/checkout/',
