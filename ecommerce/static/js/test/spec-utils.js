@@ -24,6 +24,17 @@ define([
                         return {error: 'Test model: validate always fails.'};
                     }
                 });
+            },
+
+            /**
+             * Returns a Boolean value that indicates whether a DOM element has a specific class.
+             */
+            toHaveClass: function () {
+                return {
+                    compare: function (actual, className) {
+                        return { pass: $(actual).hasClass(className) };
+                    }
+                };
             }
         };
     }

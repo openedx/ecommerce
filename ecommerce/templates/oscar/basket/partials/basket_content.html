@@ -1,0 +1,132 @@
+{% load i18n %}
+{% load currency_filters %}
+{% load purchase_info_tags %}
+{% load widget_tweaks %}
+
+{% include 'partials/alert_messages.html' %}
+
+{% if not basket.is_empty %}
+    <div id="content-inner">
+        {% block basket_form_main %}
+            <form action="." method="post" class="basket_summary" id="basket_formset">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                <div class="basket-items">
+                    {% for line in lines %}
+                        {% purchase_info_for_line request line as session %}
+                        {% if line.certificate_type %}
+                        <p class="certificate_type">
+                            {% blocktrans with certificate_type=line.certificate_type %}
+                                Enroll and Pursue a {{certificate_type}} Certificate in
+                            {% endblocktrans %}
+                        </p>
+                        {% endif %}
+                        <div class="row">
+                            <div class="col-sm-2 course_image">
+                                {{ form.id }}
+                                    <img class="thumbnail" src="{{ line.course.image_url }}" alt="{{ line.course.name }}"/>
+                            </div>
+                            <div class="col-sm-5">
+                                <p class="course_name">{{ line.course.name }} - {{ line.course.org }} ({{ line.course.number }})</p>
+                                <p class="course_description">{{ line.course.short_description }}</p>
+                            </div>
+                            {% if line.is_discounted %}
+                                <div class="col-sm-3 discount">
+                                    <div class="benefit">
+                                        {% blocktrans with percentage=line.discount_percentage|stringformat:'d' %}
+                                            {{percentage}}% off
+                                        {% endblocktrans %}
+                                    </div>
+                                    <div class="old-price">
+                                        {{ line.line_price_incl_tax|currency:line.price_currency }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="price {% if line.is_discounted %}discounted{% endif %}">
+                                {{ line.line_price_incl_tax_incl_discounts|currency:line.price_currency }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </form>
+        {% endblock %}
+
+        <div class="total">
+            <div class="row">
+                {% block vouchers %}
+                    {% if basket.contains_a_voucher %}
+                        <div class="vouchers col-sm-6">
+                            {% for voucher in basket.vouchers.all %}
+                                <p class="voucher">
+                                {% blocktrans with voucher_code=voucher.code %}
+                                    Promotion code {{voucher_code}} applied
+                                {% endblocktrans %}
+                                <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button class="remove-voucher" type="submit"><i class="fa fa-times"></i></button>
+                                </form>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
+                        {% if voucher_form %}
+                            <div class="use-voucher col-sm-6">
+                                <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a promotion code" %}</a></p>
+
+                                <div id="voucher_form_container">
+                                    <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="code">
+                                            <input id="id_code" name="code" type="text" placeholder="{% trans 'enter promo code' %}">
+                                            <button type="submit" class="btn btn-default" data-loading-text="{% trans 'Applying...' %}">{% trans "Apply" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endblock vouchers %}
+
+                {% block baskettotals %}
+                    {% include 'basket/partials/basket_totals.html' with editable=1 %}
+                {% endblock baskettotals %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="payment-buttons col-sm-3" data-basket-id="{{ basket.id }}">
+                {% for processor in payment_processors %}
+                    <button class="btn btn-primary payment-button" value="{{ processor.NAME|lower }}">
+                        {% if processor.NAME == 'cybersource' %}
+                            {% trans "Checkout" %}
+                        {% elif processor.NAME == 'paypal' %}
+                            {# Translators: Do NOT translate the name PayPal. #}
+                            {% trans "Checkout with PayPal" %}
+                        {% endif %}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row verification-note">
+            <span><i class="fa fa-exclamation-circle"></i></span>
+            {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
+            {% trans "<b>Note:</b> You will need a <b>webcam</b> and a <b>photo ID</b> to verify your identity before the course starts. " %}
+        </div>
+        <div class="row help">
+            <p><b>{% trans "Have questions?" %}</b></p>
+            {% blocktrans with link_start='<a href="{{ support_url }}" target="_blank">' link_end='</a>' %}
+                Please read {{ link_start }}our FAQs to view common questions about our certificates.{{ link_end }}
+            {% endblocktrans %}
+        </div>
+    </div>
+{% else %}
+    {% block emptybasket %}
+        <p>
+            {% trans "Your basket is empty." %}
+            <a href="{{ homepage_url }}">{% trans "Discover new courses." %}</a>
+        </p>
+    {% endblock %}
+{% endif %}

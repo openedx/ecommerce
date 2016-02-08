@@ -11,7 +11,7 @@ define([
 
         'use strict';
 
-        describe('course edit view', function () {
+        describe('coupons edit view', function () {
             var view,
                 model,
                 verifiedSeat = {
@@ -41,7 +41,7 @@ define([
                 enrollment_code_data = {
                     'id': 10,
                     'title': 'Test Enrollment Code',
-                    'coupon_type': 'Enrollment code',
+                    'code_type': 'enrollment',
                     'last_edited': [
                         'user',
                         '2016-01-15T07:26:22.926Z'
