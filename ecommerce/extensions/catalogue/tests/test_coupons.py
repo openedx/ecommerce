@@ -21,11 +21,11 @@ class CouponProductTest(TestCase):
         voucher = VoucherFactory(code='MYVOUCHER')
         voucherList = CouponVouchers.objects.create(coupon=coupon_product)
         voucherList.vouchers.add(voucher)
-        coupon_product.attr.coupon_voucher = voucherList
+        coupon_product.attr.coupon_vouchers = voucherList
 
         # clean() is an Oscar validation method for products
         self.assertIsNone(coupon_product.clean())
         self.assertIsInstance(coupon_product, Product)
         self.assertEqual(coupon_product.title, 'Test product')
-        self.assertEqual(coupon_product.attr.coupon_voucher.vouchers.count(), 1)
-        self.assertEqual(coupon_product.attr.coupon_voucher.vouchers.first().code, 'MYVOUCHER')
+        self.assertEqual(coupon_product.attr.coupon_vouchers.vouchers.count(), 1)
+        self.assertEqual(coupon_product.attr.coupon_vouchers.vouchers.first().code, 'MYVOUCHER')

@@ -9,7 +9,7 @@ import pytz
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.test.factories import create_coupon
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -125,15 +125,23 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCa
         }
         self.assertDictEqual(json.loads(response.content), expected)
 
+
+class ProductViewSetCouponTests(CouponMixin, TestCase):
+
+    def setUp(self):
+        super(ProductViewSetCouponTests, self).setUp()
+        self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+
     def test_coupon_product_details(self):
         """Verify the endpoint returns all coupon information."""
-        coupon = create_coupon()
+        coupon = self.create_coupon()
         url = reverse('api:v2:product-detail', kwargs={'pk': coupon.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         response_data = json.loads(response.content)
-        self.assertEqual(response_data['id'], 3)
+        self.assertEqual(response_data['id'], 1)
         self.assertEqual(response_data['title'], 'Test coupon')
         self.assertEqual(response_data['price'], '100.00')
         self.assertEqual(response_data['attribute_values'][0]['name'], 'Coupon vouchers')
@@ -141,7 +149,7 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCa
 
     def test_coupon_voucher_serializer(self):
         """Verify that the vouchers of a coupon are properly serialized."""
-        coupon = create_coupon()
+        coupon = self.create_coupon()
         url = reverse('api:v2:product-detail', kwargs={'pk': coupon.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -155,12 +163,12 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCa
 
     def test_product_filtering(self):
         """Verify products are filtered."""
-        create_coupon()
+        self.create_coupon()
         url = reverse('api:v2:product-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
-        self.assertEqual(response_data['count'], 3)
+        self.assertEqual(response_data['count'], 1)
 
         filtered_url = '{}?product_class=CoUpOn'.format(url)
         response = self.client.get(filtered_url)

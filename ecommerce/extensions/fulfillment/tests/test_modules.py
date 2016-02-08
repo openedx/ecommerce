@@ -19,8 +19,8 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule, EnrollmentFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
-from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -394,12 +394,12 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         self.assertEqual(seat_basket.total_excl_tax, 0.00)
 
 
-class CouponFulfillmentModuleTest(FulfillmentTestMixin, TestCase):
+class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
     """ Test coupon fulfillment. """
 
     def setUp(self):
         super(CouponFulfillmentModuleTest, self).setUp()
-        coupon = create_coupon()
+        coupon = self.create_coupon()
         user = UserFactory()
         basket = BasketFactory()
         basket.add_product(coupon, 1)

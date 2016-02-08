@@ -21,11 +21,13 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 Partner = get_model('partner', 'Partner')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
@@ -385,6 +387,19 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    child = serializers.SerializerMethodField()
+
+    def get_child(self, obj):
+        child = obj.get_children()
+        serializer = CategorySerializer(child, many=True)
+        return serializer.data
+
+    class Meta(object):
+        model = Category
+        fields = ('id', 'name', 'slug', 'description', 'path', 'depth', 'numchild', 'image', 'child')
+
+
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
     coupon_type = serializers.SerializerMethodField()
@@ -392,6 +407,8 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
     vouchers = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    sub_category = serializers.SerializerMethodField()
 
     def get_coupon_type(self, obj):
         voucher = obj.attr.coupon_vouchers.vouchers.first()
@@ -419,6 +436,24 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         serializer = VoucherSerializer(vouchers, many=True, context={'request': self.context['request']})
         return serializer.data
 
+    def get_category(self, obj):
+        category = ProductCategory.objects.get(product=obj).category
+        if category.depth == 3:
+            category = category.get_ancestors().last()
+        serializer = CategorySerializer(category)
+        return serializer.data
+
+    def get_sub_category(self, obj):
+        category = ProductCategory.objects.get(product=obj).category
+        if category.depth != 3:
+            return None
+        serializer = CategorySerializer(category)
+        return serializer.data
+
     class Meta(object):
         model = Product
-        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers',)
+        fields = (
+            'id', 'title', 'coupon_type', 'last_edited',
+            'seats', 'client', 'price', 'vouchers',
+            'category', 'sub_category'
+        )
