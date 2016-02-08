@@ -4,8 +4,11 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.test import override_settings
 from oscar.core.loading import get_model
-from oscar.test import factories
+from oscar.templatetags.currency_filters import currency
 
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report
 from ecommerce.tests.testcases import TestCase
 
@@ -22,7 +25,7 @@ VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
 
-class UtilTests(TestCase):
+class UtilTests(CourseCatalogTestMixin, TestCase):
 
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
@@ -31,16 +34,18 @@ class UtilTests(TestCase):
     def setUp(self):
         super(UtilTests, self).setUp()
 
+        self.user = self.create_user(full_name="Test User", is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.course = CourseFactory()
+        self.verified_seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
+
         self.catalog = Catalog.objects.create(partner=self.partner)
 
-        self.coupon_product_class, _ = ProductClass.objects.get_or_create(name='coupon')
-        self.coupon = factories.create_product(
-            product_class=self.coupon_product_class,
-            title='Test product'
-        )
-
-        self.stock_record = factories.create_stockrecord(self.coupon, num_in_stock=2)
+        self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
         self.catalog.stock_records.add(self.stock_record)
+
+        self.coupon = create_coupon(title='Test product', catalog=self.catalog)
 
     def test_create_vouchers(self):
         """
@@ -67,7 +72,7 @@ class UtilTests(TestCase):
         self.assertEqual(voucher_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(voucher_offer.benefit.value, 100.00)
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
-        self.assertEqual(len(coupon_voucher.vouchers.all()), 10)
+        self.assertEqual(len(coupon_voucher.vouchers.all()), 15)
         self.assertEqual(voucher.end_datetime, datetime.date(2015, 10, 30))
         self.assertEqual(voucher.start_datetime, datetime.date(2015, 10, 1))
         self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
@@ -187,24 +192,41 @@ class UtilTests(TestCase):
             voucher_type=Voucher.SINGLE_USE
         )
 
+        self.coupon.history.all().update(history_user=self.user)
         coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
         field_names, rows = generate_coupon_report(coupon_vouchers)
 
-        self.assertEqual(field_names, ['Name', 'Code', 'Discount', 'URL'])
-        self.assertEqual(
-            rows[0],
-            {
-                'Name': 'Discount code',
-                'Code': VOUCHER_CODE,
-                'Discount': '100.00 %',
-                'URL': settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(VOUCHER_CODE)
-            }
-        )
-        enrollment_code_row = rows[1]
+        self.assertEqual(field_names, [
+            'Name',
+            'Code',
+            'URL',
+            'CourseID',
+            'Price',
+            'Invoiced Amount',
+            'Discount',
+            'Status',
+            'Created By',
+            'Create Date',
+            'Expiry Date',
+        ])
+        enrollment_code_row = rows[-2]
+        self.assertEqual(enrollment_code_row['Name'], 'Discount code')
+        self.assertEqual(enrollment_code_row['Code'], VOUCHER_CODE)
+        self.assertEqual(enrollment_code_row['URL'], settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(VOUCHER_CODE))
+        self.assertEqual(enrollment_code_row['CourseID'], self.course.id)
+        self.assertEqual(enrollment_code_row['Price'], currency(0.00))
+        self.assertEqual(enrollment_code_row['Invoiced Amount'], currency(100.00))
+        self.assertEqual(enrollment_code_row['Discount'], '100.00 %')
+        self.assertEqual(enrollment_code_row['Status'], 'Inactive')
+        self.assertEqual(enrollment_code_row['Created By'], self.user.full_name)
+        self.assertEqual(enrollment_code_row['Create Date'], 'Oct 01,15')
+        self.assertEqual(enrollment_code_row['Expiry Date'], 'Oct 30,15')
+
+        enrollment_code_row = rows[-1]
         self.assertEqual(enrollment_code_row['Name'], 'Enrollment code')
         self.assertEqual(len(enrollment_code_row['Code']), settings.VOUCHER_CODE_LENGTH)
-        self.assertEqual(enrollment_code_row['Discount'], '100.00 USD')
+        self.assertEqual(enrollment_code_row['Discount'], '$100.00')
         self.assertEqual(
             enrollment_code_row['URL'],
             settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(enrollment_code_row['Code'])
