@@ -88,14 +88,6 @@ OIDC client via LMS admin.
 
     $ python manage.py runserver 8002
 
-If you're running on devstack, you'll need to pass the appropriate settings
-after switching to the ecommerce user:
-
-.. code-block:: bash
-
-    $ sudo su ecommerce
-    $ make devserve
-
 .. _Django's runserver command: https://docs.djangoproject.com/en/1.8/ref/django-admin/#runserver-port-or-address-port
 
 
