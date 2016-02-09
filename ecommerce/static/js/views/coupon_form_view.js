@@ -141,10 +141,16 @@ define([
                         collection: function() {
                             return this.categories;
                         }
+                    },
+                    onGet: function(val){
+                        return val ? val.id : null;
                     }
                 },
                 'input[name=sub_category]': {
-                    observe: 'sub_category'
+                    observe: 'sub_category',
+                    onGet: function(val){
+                        return val ? val.name : null;
+                    }
                 },
                 'input[name=own_code]': {
                     observe: 'own_code'
