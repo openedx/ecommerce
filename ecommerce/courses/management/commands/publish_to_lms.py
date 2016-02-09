@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 from optparse import make_option
 import os
+import time
 
 from django.core.management import BaseCommand, CommandError
 
@@ -38,25 +39,27 @@ class Command(BaseCommand):
 
         with open(course_ids_file, 'r') as file_handler:
             course_ids = file_handler.readlines()
-            total_courses = len(course_ids)
-            logger.info("Publishing %d courses.", total_courses)
-            for index, course_id in enumerate(course_ids, start=1):
-                try:
-                    course_id = course_id.strip()
-                    course = Course.objects.get(id=course_id)
-                    publishing_error = course.publish_to_lms()
-                    if publishing_error:
-                        failed += 1
-                        logger.error(
-                            u"(%d/%d) Failed to publish %s: %s", index, total_courses, course_id, publishing_error
-                        )
-                    else:
-                        logger.info(u"(%d/%d) Successfully published %s.", index, total_courses, course_id)
-                except Course.DoesNotExist:
+        total_courses = len(course_ids)
+        logger.info("Publishing %d courses.", total_courses)
+        for index, course_id in enumerate(course_ids, start=1):
+            try:
+                course_id = course_id.strip()
+                course = Course.objects.get(id=course_id)
+                publishing_error = course.publish_to_lms()
+                # sleep, so that we don't bombard the LMS
+                time.sleep(0.1)
+                if publishing_error:
                     failed += 1
                     logger.error(
-                        u"(%d/%d) Failed to publish %s: Course does not exist.", index, total_courses, course_id
+                        u"(%d/%d) Failed to publish %s: %s", index, total_courses, course_id, publishing_error
                     )
+                else:
+                    logger.info(u"(%d/%d) Successfully published %s.", index, total_courses, course_id)
+            except Course.DoesNotExist:
+                failed += 1
+                logger.error(
+                    u"(%d/%d) Failed to publish %s: Course does not exist.", index, total_courses, course_id
+                )
         if failed:
             logger.error("Completed publishing courses. %d of %d failed.", failed, total_courses)
         else:
