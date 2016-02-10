@@ -2,7 +2,6 @@ import json
 
 import ddt
 from django.core.urlresolvers import reverse
-from django.test import override_settings
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -10,7 +9,7 @@ from oscar.test import factories
 from rest_framework import status
 
 from ecommerce.extensions.api.serializers import RefundSerializer
-from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
+from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
@@ -96,7 +95,6 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         self.assert_ok_response(response)
 
     @httpretty.activate
-    @override_settings(OAUTH2_PROVIDER_URL=OAUTH2_PROVIDER_URL)
     def test_oauth_authentication(self):
         """ Client can authenticate with OAuth. """
         self.client.logout()

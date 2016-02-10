@@ -21,6 +21,7 @@ from paypalrestsdk import Payment, Sale
 from paypalrestsdk.resource import Resource
 from testfixtures import LogCapture
 
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.patched_httpretty import httpretty
@@ -393,7 +394,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
         last_request_body = json.loads(httpretty.last_request().body)
-        expected = urljoin(settings.ECOMMERCE_URL_ROOT, reverse('paypal_execute'))
+        expected = urljoin(get_ecommerce_url(), reverse('paypal_execute'))
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
 
     @httpretty.activate

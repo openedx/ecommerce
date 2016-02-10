@@ -8,11 +8,12 @@ django-libsass==0.5
 django-oscar==1.1.1
 django-rest-swagger==0.3.5
 django_simple_history==1.6.3
+django-threadlocals==0.8
 django-waffle==0.10.1
 djangorestframework==3.2.3
 djangorestframework-jwt==1.7.2
 drf-extensions==0.2.8
-edx-auth-backends==0.1.3
+edx-auth-backends==0.2.0
 edx-ecommerce-worker==0.3.3
 edx-rest-api-client==1.5.0
 jsonfield==1.0.3

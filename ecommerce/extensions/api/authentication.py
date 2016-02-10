@@ -1,13 +1,14 @@
 """JWT authentication scheme for use with DRF."""
 import logging
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 import requests
 from rest_framework import exceptions
 from rest_framework.authentication import get_authorization_header, BaseAuthentication
 from rest_framework.status import HTTP_200_OK
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+from ecommerce.core.url_utils import get_oauth2_provider_url
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -89,7 +90,7 @@ class BearerAuthentication(BaseAuthentication):
     """
 
     def authenticate(self, request):
-        provider_url = getattr(settings, 'OAUTH2_PROVIDER_URL', None)
+        provider_url = get_oauth2_provider_url()
         if not provider_url:
             return None
 

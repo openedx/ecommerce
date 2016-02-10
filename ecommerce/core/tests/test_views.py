@@ -24,6 +24,7 @@ class HealthTests(TestCase):
     """Tests of the health endpoint."""
 
     def setUp(self):
+        super(HealthTests, self).setUp()
         self.fake_lms_response = Response()
 
     def test_all_services_available(self, mock_lms_request):
@@ -33,6 +34,8 @@ class HealthTests(TestCase):
 
         self._assert_health(status.HTTP_200_OK, Status.OK, Status.OK, Status.OK)
 
+    @mock.patch('ecommerce.core.views.get_lms_heartbeat_url', mock.Mock(return_value=''))
+    @mock.patch('django.contrib.sites.middleware.get_current_site', mock.Mock(return_value=None))
     @mock.patch('django.db.backends.base.base.BaseDatabaseWrapper.cursor', mock.Mock(side_effect=DatabaseError))
     def test_database_outage(self, mock_lms_request):
         """Test that the endpoint reports when the database is unavailable."""

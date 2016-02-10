@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from django.views.generic import RedirectView, TemplateView
 
 from ecommerce.core import views as core_views
+from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
 
@@ -28,7 +29,7 @@ def handler403(_):
     Oscar's front-end are redirected to the LMS student dashboard, as one would
     usually be after signing into the LMS.
     """
-    return redirect(settings.LMS_DASHBOARD_URL)
+    return redirect(get_lms_dashboard_url())
 
 
 admin.autodiscover()

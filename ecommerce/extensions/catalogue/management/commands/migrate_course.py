@@ -4,9 +4,9 @@ from optparse import make_option
 
 from dateutil.parser import parse
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.db import transaction
-from oscar.core.loading import get_model
 import requests
 import waffle
 
@@ -14,13 +14,12 @@ from ecommerce.courses.models import Course
 
 
 logger = logging.getLogger(__name__)
-Partner = get_model('partner', 'Partner')
 
 
 class MigratedCourse(object):
-    def __init__(self, course_id, partner_short_code):
+    def __init__(self, course_id, site_domain):
         self.course, _created = Course.objects.get_or_create(id=course_id)
-        self.partner = Partner.objects.get(short_code=partner_short_code)
+        self.site_configuration = Site.objects.get(domain=site_domain).siteconfiguration
 
     def load_from_lms(self, access_token):
         """
@@ -39,17 +38,12 @@ class MigratedCourse(object):
     def _build_lms_url(self, path):
         # We avoid using urljoin here because it URL-encodes the path, and some LMS APIs
         # are not capable of decoding these values.
-        host = settings.LMS_URL_ROOT.strip('/')
+        host = self.site_configuration.lms_url_root.strip('/')
         return '{host}/{path}'.format(host=host, path=path)
 
     def _query_commerce_api(self, headers):
         """Get course name and verification deadline from the Commerce API."""
-        if not settings.COMMERCE_API_URL:
-            message = 'Aborting migration. COMMERCE_API_URL is not set.'
-            logger.error(message)
-            raise Exception(message)
-
-        url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
+        url = '{}/courses/{}/'.format(self._build_lms_url('api/commerce/v1'), self.course.id)
         timeout = settings.COMMERCE_API_TIMEOUT
 
         response = requests.get(url, headers=headers, timeout=timeout)
@@ -151,7 +145,7 @@ class MigratedCourse(object):
             expires = mode.get('expiration_datetime')
             expires = parse(expires) if expires else None
             self.course.create_or_update_seat(
-                certificate_type, id_verification_required, price, self.partner,
+                certificate_type, id_verification_required, price, self.site_configuration.partner,
                 expires=expires, remove_stale_modes=False
             )
 
@@ -171,30 +165,30 @@ class Command(BaseCommand):
                     default=False,
                     help='Save the migrated data to the database. If this is not set, '
                          'migrated data will NOT be saved to the database.'),
-        make_option('--partner',
+        make_option('--site',
                     action='store',
-                    dest='partner_short_code',
+                    dest='site_domain',
                     default=None,
-                    help='Short code for the partner providing the course.'),
+                    help='Domain for the ecommerce site providing the course.'),
     )
 
     def handle(self, *args, **options):
         course_ids = args
         access_token = options.get('access_token')
-        partner_short_code = options.get('partner_short_code')
+        site_domain = options.get('site_domain')
         if not access_token:
             logger.error('Courses cannot be migrated if no access token is supplied.')
             return
 
-        if not partner_short_code:
-            logger.error('Courses cannot be migrated without providing a partner short code.')
+        if not site_domain:
+            logger.error('Courses cannot be migrated without providing a site domain.')
             return
 
         for course_id in course_ids:
             course_id = unicode(course_id)
             try:
                 with transaction.atomic():
-                    migrated_course = MigratedCourse(course_id, partner_short_code)
+                    migrated_course = MigratedCourse(course_id, site_domain)
                     migrated_course.load_from_lms(access_token)
 
                     course = migrated_course.course

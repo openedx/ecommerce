@@ -5,7 +5,7 @@
 
 {% block additional_options %}
     <li class="{{ additional_class }}">
-        <a class="nav-link" href="{% settings_value 'LMS_DASHBOARD_URL' %}">{% trans "Student Dashboard" %}</a>
+        <a class="nav-link" href="{{ lms_dashboard_url }}">{% trans "Student Dashboard" %}</a>
     </li>
     <li class="{{ additional_class }}">
         <a class="nav-link" href="{% url 'courses:app' '' %}">{% trans "Course Admin Tool" %}</a>
