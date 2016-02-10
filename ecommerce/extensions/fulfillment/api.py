@@ -53,8 +53,9 @@ def fulfill_order(order, lines):
         for module_class in get_fulfillment_modules():
             module = module_class()
             supported_lines = module.get_supported_lines(line_items)
-            line_items = list(set(line_items) - set(supported_lines))
-            module.fulfill_product(order, supported_lines)
+            if supported_lines:
+                line_items = list(set(line_items) - set(supported_lines))
+                module.fulfill_product(order, supported_lines)
 
         # Check to see if any line items in the order have not been accounted for by a FulfillmentModule
         # Any product does not line up with a module, we have to mark a fulfillment error.
