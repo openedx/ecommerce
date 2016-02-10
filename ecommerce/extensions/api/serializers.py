@@ -436,21 +436,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         serializer = VoucherSerializer(vouchers, many=True, context={'request': self.context['request']})
         return serializer.data
 
-    class Meta(object):
-        model = Product
-        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers', 'category')
-
-
-class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-method
-    payment_form_data = serializers.SerializerMethodField()
-    payment_page_url = serializers.URLField()
-    payment_processor = serializers.CharField()
-
-    def get_payment_form_data(self, obj):
-        return obj['payment_form_data']
-
-
-class CategorySerializer(serializers.ModelSerializer):
     def get_category(self, obj):
         category = ProductCategory.objects.get(product=obj).category
         if category.depth == 3:
@@ -467,4 +452,17 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Product
-        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers', 'category', 'sub_category')
+        fields = (
+            'id', 'title', 'coupon_type', 'last_edited',
+            'seats', 'client', 'price', 'vouchers',
+            'category', 'sub_category'
+        )
+
+
+class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    payment_form_data = serializers.SerializerMethodField()
+    payment_page_url = serializers.URLField()
+    payment_processor = serializers.CharField()
+
+    def get_payment_form_data(self, obj):
+        return obj['payment_form_data']
