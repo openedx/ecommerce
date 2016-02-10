@@ -46,6 +46,9 @@ define([
                 seat_type: { required: true },
                 quantity: { pattern: 'number' },
                 price: { pattern: 'number' },
+                category: { required: true },
+                subcategory: { required: false },
+                own_code: { required: false },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {

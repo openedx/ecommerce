@@ -35,6 +35,8 @@ define([
 
             seatTypes: [],
 
+            categories: [],
+
             codeTypes: [
                 {
                     value: 'enrollment',
@@ -132,6 +134,26 @@ define([
                 },
                 'input[name=code]': {
                     observe: 'code'
+                },
+                'select[name=category]': {
+                    observe: 'category',
+                    selectOptions: {
+                        collection: function() {
+                            return this.categories;
+                        }
+                    },
+                    onGet: function(val){
+                        return val ? val.id : null;
+                    }
+                },
+                'input[name=sub_category]': {
+                    observe: 'sub_category',
+                    onGet: function(val){
+                        return val ? val.name : null;
+                    }
+                },
+                'input[name=own_code]': {
+                    observe: 'own_code'
                 }
             },
 
@@ -140,10 +162,13 @@ define([
 
                 // catch value after autocomplete
                 'blur [name=course_id]': 'fillFromCourse',
-                'change [name=seat_type]': 'changeSeatType'
+                'change [name=seat_type]': 'changeSeatType',
+
+                'change [name=own_code]': 'updateCode'
             },
 
             initialize: function (options) {
+                this.categories = this.fetchCategories();
                 this.alertViews = [];
                 this.editing = options.editing || false;
 
@@ -254,6 +279,33 @@ define([
                 this.$el.find('input[name=benefit_value]').attr('disabled', true);
                 this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
+                this.$el.find('select[name=category]').attr('disabled', true);
+                this.$el.find('input[name=sub_category]').attr('disabled', true);
+                this.$el.find('input[name=own_code]').attr('disabled', true);
+            },
+
+            fetchCategories: function(){
+                var categories = [];
+                $.ajax({
+                    async: false,
+                    url: '/api/v2/categories/3/', // Category 3 contains Coupon categories
+                    type: 'GET',
+                    success: function(data){
+                        if(data){
+                            for(var i = 0; i < data.child.length; i++){
+                                categories.push({
+                                    value: data.child[i].id,
+                                    label: gettext(data.child[i].name)
+                                });      
+                            }
+                        }
+                    }
+                });
+                return categories;
+            },
+
+            updateCode: function(){
+                this.model.set('code', this.model.get('own_code'));
             },
 
             render: function () {
@@ -270,6 +322,7 @@ define([
                     this.fillFromCourse();
                 } else {
                     this.model.set('coupon_type', this.codeTypes[0].value);
+                    this.model.set('category', this.categories[0].value);
                     this.model.set('voucher_type', this.voucherTypes[0].value);
                     this.model.set('benefit_type', 'Percentage');
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
