@@ -1,12 +1,15 @@
 """Order Utility Classes. """
 import base64
+import datetime
 import hashlib
 import logging
 import uuid
+import pytz
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
+from oscar.templatetags.currency_filters import currency
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +17,7 @@ Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 CouponVouchers = get_model('voucher', 'CouponVouchers')
+Product = get_model('catalogue', 'Product')
 Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -31,24 +35,63 @@ def generate_coupon_report(coupon_vouchers):
         List[dict]
     """
 
-    field_names = [_('Name'), _('Code'), _('Discount'), _('URL')]
+    field_names = [
+        _('Name'),
+        _('Code'),
+        _('URL'),
+        _('CourseID'),
+        _('Price'),
+        _('Invoiced Amount'),
+        _('Discount'),
+        _('Status'),
+        _('Created By'),
+        _('Create Date'),
+        _('Expiry Date'),
+    ]
     rows = []
 
     for coupon_voucher in coupon_vouchers:
         for voucher in coupon_voucher.vouchers.all():
             offer = voucher.offers.all().first()
-            currency = StockRecord.objects.get(product=coupon_voucher.coupon).price_currency
+
+            stockrecords = offer.condition.range.catalog.stock_records.all()
+            course_seat = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords]).first()
+            seat_stockrecord = course_seat.stockrecords.first()
+            history = coupon_voucher.coupon.history.latest()
+
+            coupon_stockrecord = StockRecord.objects.get(product=coupon_voucher.coupon)
+            course_id = course_seat.course.id
+            price = currency(seat_stockrecord.price_excl_tax)
+            invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
             benefit_value = offer.benefit.value
+            datetime_now = pytz.utc.localize(datetime.datetime.now())
+            in_datetime_interval = (
+                voucher.start_datetime < datetime_now and
+                voucher.end_datetime > datetime_now
+            )
+            if in_datetime_interval:
+                status = _('Redeemed') if voucher.num_orders > 0 else _('Active')
+            else:
+                status = _('Inactive')
             if offer.benefit.type == Benefit.PERCENTAGE:
                 discount = _("{percentage} %").format(percentage=benefit_value)
             else:
-                discount = _("{amount} {currency}").format(amount=benefit_value, currency=currency)
+                discount = currency(benefit_value)
             URL = '{}/coupons/redeem/?code={}'.format(settings.ECOMMERCE_URL_ROOT, voucher.code)
+            author = history.history_user.full_name
+
             rows.append({
                 'Name': voucher.name,
                 'Code': voucher.code,
+                'URL': URL,
+                'CourseID': course_id,
+                'Price': price,
+                'Invoiced Amount': invoiced_amount,
                 'Discount': discount,
-                'URL': URL
+                'Status': status,
+                'Created By': author,
+                'Create Date': voucher.start_datetime.strftime("%b %d,%y"),
+                'Expiry Date': voucher.end_datetime.strftime("%b %d,%y"),
             })
 
     return field_names, rows

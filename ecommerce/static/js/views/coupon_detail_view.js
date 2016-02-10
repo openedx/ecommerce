@@ -28,8 +28,10 @@ define([
             },
 
             codeStatus: function(voucher) {
-                var endDate = moment(new Date(voucher.end_datetime));
-                return gettext((endDate.isAfter(Date.now())) ? 'ACTIVE':'INACTIVE');
+                var startDate = moment(new Date(voucher.start_datetime)),
+                    endDate = moment(new Date(voucher.end_datetime)),
+                    in_time_interval = (startDate.isBefore(Date.now()) && endDate.isAfter(Date.now()));
+                return gettext(in_time_interval ? 'ACTIVE':'INACTIVE');
             },
 
             couponType: function(voucher) {
