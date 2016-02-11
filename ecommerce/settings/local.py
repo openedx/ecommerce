@@ -67,7 +67,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 # URL CONFIGURATION
 ECOMMERCE_URL_ROOT = 'http://localhost:8002'
 
-LMS_URL_ROOT = 'http://127.0.0.1:8000'
+LMS_URL_ROOT = 'http://localhost:8000'
 
 # The location of the LMS heartbeat page
 LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
@@ -83,13 +83,13 @@ COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
 
 # AUTHENTICATION
 # Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
-SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
-SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
+SOCIAL_AUTH_EDX_OIDC_KEY = 'f1a800994a803e570730'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'aa0921bc886b02ff31304c3aa5d93bf04f872c5f'
 SOCIAL_AUTH_EDX_OIDC_URL_ROOT = OAUTH2_PROVIDER_URL
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
 JWT_AUTH.update({
-    'JWT_SECRET_KEY': 'insecure-secret-key',
+    'JWT_SECRET_KEY': 'test',   # lms.ECOMMERCE_API_SIGNING_KEY
     'JWT_ISSUERS': (
         OAUTH2_PROVIDER_URL,
         # Must match the value of JWT_ISSUER configured for the ecommerce worker.
@@ -103,31 +103,20 @@ JWT_AUTH.update({
 ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
 ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 
-EDX_API_KEY = 'replace-me'
+EDX_API_KEY = 'test'   # lms.EDX_API_KEY
 # END ORDER PROCESSING
 
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
-    'cybersource': {
-        'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
-        'merchant_id': 'fake-merchant-id',
-        'transaction_key': 'fake-transaction-key',
-        'profile_id': 'fake-profile-id',
-        'access_key': 'fake-access-key',
-        'secret_key': 'fake-secret-key',
-        'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
-        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
-        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
+
+    "CyberSource2": {
+        "SECRET_KEY": "abcd123",
+        "ACCESS_KEY": "abcd123",
+        "PROFILE_ID": "edx",
+        "PURCHASE_ENDPOINT": "/shoppingcart/payment_fake"
     },
-    'paypal': {
-        'mode': 'sandbox',
-        'client_id': 'fake-client-id',
-        'client_secret': 'fake-client-secret',
-        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
-        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
-        'error_url': get_lms_url('/commerce/checkout/error/'),
-    },
+
 }
 # END PAYMENT PROCESSING
 
