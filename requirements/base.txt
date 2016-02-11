@@ -27,6 +27,7 @@ ndg-httpsclient==0.4.0
 path.py==7.2
 paypalrestsdk==1.11.5
 premailer==2.9.2
+py2neo==3.1.2
 pycountry==1.18
 python-dateutil==2.4.2
 pytz==2015.7

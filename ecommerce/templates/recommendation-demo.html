@@ -1,0 +1,99 @@
+{% extends "edx/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Course Recommendation Demo{% endblock title %}
+
+{% block navbar %}{% endblock navbar %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'bower_components/select2/dist/css/select2.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="container recommendation-demo">
+    <h1>Course Recommendation Demo</h1>
+    <p>This is a demonstration of a <em>very basic</em> recommendation engine. The engine offers two types of
+      recommendations:</p>
+    <dl>
+      <dt>Course-specific</dt>
+      <dd>Given a course, what other courses might interest a learner?</dd>
+      <dt>Learner-specific</dt>
+      <dd>Given a learner's current enrollments, what other courses might interest the learner?</dd>
+    </dl>
+    <p>In both cases recommendations are based upon the enrollments of other students. For example, say Students A and B
+      are both enrolled in a run of CS50x. Student A is also enrolled in LFS101x (the Linux course). If Student C
+      expresses an interest (e.g. views the about page or enrolls) in CS50x, we might also recommend LFS101x.</p>
+
+    <h2>Notes</h2>
+    <ul>
+      <li>Enrollment data is accurate as of November 8, 2016 2:45 AM EST.</li>
+      <li>Course names may not be accurate if certain runs of the course have inaccurate names, such as "DELETE (wrong
+        url)".
+      </li>
+      <li>Recommendations are calculated on-the-fly. <strong>Responses may take up to 15 seconds to be
+        returned.</strong> This is especially true for courses with a large number of learners, and learners enrolled in
+        a
+        large number of courses. In a real-world scenario we would either pre-calculate recommendations or use better
+        hardware to speed-up real-time calculations.
+      </li>
+      <li>Weights represent the number of students co-enrolled in a course, or with the given learner.</li>
+    </ul>
+
+    <div>
+
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#course" aria-controls="course" role="tab" data-toggle="tab">Course-Specific</a>
+        </li>
+        <li role="presentation"><a href="#learner" aria-controls="learner" role="tab"
+                                   data-toggle="tab">Learner-Specific</a></li>
+      </ul>
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="course">
+          <div class="course-specific recommendation-group">
+            <form class="form-inline">
+              <div class="form-group">
+                <select class="form-control" name="course">
+                  <option value="00690242.1x" selected="selected">Relics in Chinese History - Part 1: Agriculture
+                    and
+                    Manufacturing
+                  </option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="submit">Get Recommendations</button>
+            </form>
+            <table class="recommendations table table-striped table-bordered hidden">
+              <caption>Recommended Courses</caption>
+            </table>
+          </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="learner">
+          <div class="user-specific recommendation-group">
+            <form class="form-inline">
+              <div class="form-group">
+                <input class="form-control" name="username" type="text" placeholder="Enter a username"
+                       value="clintonblackburn">
+                <button class="btn btn-primary" type="submit">Get Recommendations</button>
+              </div>
+            </form>
+
+            <table class="enrollments table table-striped table-bordered hidden">
+              <caption>Current Enrollments</caption>
+            </table>
+
+            <table class="recommendations table table-striped table-bordered hidden">
+              <caption>Recommended Courses</caption>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block javascript %}
+  <script src="{% static 'js/apps/recommendation_demo.js' %}"></script>
+{% endblock javascript %}

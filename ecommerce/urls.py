@@ -55,6 +55,7 @@ urlpatterns = AUTH_URLS + [
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
+    url(r'^recommendation-demo/$', TemplateView.as_view(template_name='recommendation-demo.html')),
 ]
 
 # Install Oscar extension URLs
