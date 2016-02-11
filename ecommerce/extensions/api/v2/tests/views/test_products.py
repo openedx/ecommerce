@@ -19,11 +19,10 @@ ProductClass = get_model('catalogue', 'ProductClass')
 Voucher = get_model('voucher', 'Voucher')
 
 
-class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
-    maxDiff = None
+class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
-        super(ProductViewSetTests, self).setUp()
+        super(ProductViewSetBase, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
@@ -31,6 +30,9 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCa
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)
         self.seat = self.course.create_or_update_seat('honor', False, 0, self.partner, expires=expires)
+
+
+class ProductViewSetTests(ProductViewSetBase):
 
     def test_list(self):
         """ Verify a list of products is returned. """
@@ -124,6 +126,9 @@ class ProductViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCa
             'results': []
         }
         self.assertDictEqual(json.loads(response.content), expected)
+
+
+class ProductViewSetCouponTests(ProductViewSetBase):
 
     def test_coupon_product_details(self):
         """Verify the endpoint returns all coupon information."""
