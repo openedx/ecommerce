@@ -30,7 +30,6 @@
   {#  NOTE: Loading RequireJS, config.js, and common.js conflicts with Swagger's JS dependencies. Load our updated version of jQuery first, so that bootstrap.js loads properly. #}
   {% compress js %}
     <script src="{% static 'bower_components/jquery/dist/jquery.js' %}"></script>
-    <script src="{% static 'bower_components/bootstrap-sass/assets/javascripts/bootstrap.js' %}"></script>
   {% endcompress %}
 
   {{ block.super }}

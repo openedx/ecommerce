@@ -5,7 +5,6 @@ define([
         'underscore',
         'views/coupon_form_view',
         'text!templates/coupon_create_edit.html',
-        'bootstrap'
     ],
     function ($,
               Backbone,

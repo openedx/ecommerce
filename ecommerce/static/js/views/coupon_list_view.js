@@ -5,7 +5,6 @@ define([
         'underscore.string',
         'moment',
         'text!templates/coupon_list.html',
-        'dataTablesBootstrap'
     ],
     function ($,
               Backbone,

@@ -14,10 +14,6 @@
 .navbar {
   margin-bottom: 0;
 
-  // Remove default Bootstrap navbar border styling
-  border: none;
-  border-radius: 0;
-
   // Add our own border
   border-bottom: $navbar-border-bottom-width solid palette(primary, accent);
 

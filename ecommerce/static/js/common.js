@@ -2,8 +2,6 @@ require([
         'jquery',
         'backbone',
         'backbone.validation',
-        'bootstrap',
-        'bootstrap_accessibility',
         'underscore'
     ],
     function () {

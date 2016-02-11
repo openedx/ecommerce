@@ -80,7 +80,6 @@ if settings.DEBUG:  # pragma: no cover
         url(r'^403/$', handler403, name='403'),
         url(r'^404/$', 'django.views.defaults.page_not_found', name='404'),
         url(r'^500/$', 'django.views.defaults.server_error', name='500'),
-        url(r'^bootstrap/$', TemplateView.as_view(template_name='bootstrap-demo.html')),
     ]
     # Allow error pages to be tested
 
