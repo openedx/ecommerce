@@ -47,12 +47,10 @@ class CheckoutView(APIView):
 
         parameters = payment_processor.get_transaction_parameters(basket, request=request)
         payment_page_url = parameters.pop('payment_page_url')
-
         data = {
             'payment_form_data': parameters,
             'payment_page_url': payment_page_url,
             'payment_processor': payment_processor.NAME,
         }
-
         serializer = CheckoutSerializer(data)
         return Response(serializer.data)

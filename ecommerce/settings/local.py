@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Development settings and globals."""
 from __future__ import absolute_import
 
@@ -65,9 +66,11 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 
 # URL CONFIGURATION
-ECOMMERCE_URL_ROOT = 'http://localhost:8002'
+ECOMMERCE_URL_ROOT = 'http://localhost:8080'
 
-LMS_URL_ROOT = 'http://127.0.0.1:8000'
+OSCAR_DEFAULT_CURRENCY = 'EUR'
+
+LMS_URL_ROOT = 'https://chaloupe.fun-mooc.fr'
 
 # The location of the LMS heartbeat page
 LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
@@ -83,13 +86,13 @@ COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
 
 # AUTHENTICATION
 # Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
-SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
-SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
+SOCIAL_AUTH_EDX_OIDC_KEY = 'f1a800994a803e570730'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'aa0921bc886b02ff31304c3aa5d93bf04f872c5f'
 SOCIAL_AUTH_EDX_OIDC_URL_ROOT = OAUTH2_PROVIDER_URL
 SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 
 JWT_AUTH.update({
-    'JWT_SECRET_KEY': 'insecure-secret-key',
+    'JWT_SECRET_KEY': 'test',   # lms.ECOMMERCE_API_SIGNING_KEY
     'JWT_ISSUERS': (
         OAUTH2_PROVIDER_URL,
         # Must match the value of JWT_ISSUER configured for the ecommerce worker.
@@ -99,34 +102,32 @@ JWT_AUTH.update({
 # END AUTHENTICATION
 
 
+
+
+
+
 # ORDER PROCESSING
 ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
 ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 
-EDX_API_KEY = 'replace-me'
+EDX_API_KEY = 'test'   # lms.EDX_API_KEY
 # END ORDER PROCESSING
 
-
+PAYMENT_PROCESSORS = (
+    'ecommerce.extensions.payment.processors.paybox_system.PayboxSystem',
+)
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
-    'cybersource': {
-        'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
-        'merchant_id': 'fake-merchant-id',
-        'transaction_key': 'fake-transaction-key',
-        'profile_id': 'fake-profile-id',
-        'access_key': 'fake-access-key',
-        'secret_key': 'fake-secret-key',
-        'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
-        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
-        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
-    },
-    'paypal': {
-        'mode': 'sandbox',
-        'client_id': 'fake-client-id',
-        'client_secret': 'fake-client-secret',
-        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
-        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
-        'error_url': get_lms_url('/commerce/checkout/error/'),
+    'paybox_system': {
+        'PBX_SITE': '1999888',
+        'PBX_RANG': '43',
+        'PBX_IDENTIFIANT': '107975626',
+        'PBX_REPONDRE_A': 'http://chaloupe.fun-mooc.fr:8080/payment/paybox/notify/',
+        #'PBX_REPONDRE_A': LMS_URL_ROOT + '/payment/notification/',  #  TCP 80, 443 (HTTPS), 8080, 8081, 8082, 8083, 8084 ou 8085
+        'private_key': '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF',
+        'payment_page_url': 'https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi',
+        'receipt_page_url': LMS_URL_ROOT + '/payment/success/',
+        'cancel_page_url': LMS_URL_ROOT + '/payment/cancel/',
     },
 }
 # END PAYMENT PROCESSING
@@ -141,7 +142,7 @@ BROKER_URL = 'amqp://'
 
 
 ENABLE_AUTO_AUTH = True
-LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
+LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG', edx_filename='ecommerce.log')
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.

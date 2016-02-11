@@ -98,28 +98,16 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
-    'ecommerce.extensions.payment.processors.cybersource.Cybersource',
-    'ecommerce.extensions.payment.processors.paypal.Paypal',
+    #'ecommerce.extensions.payment.processors.cybersource.Cybersource',
+    #'ecommerce.extensions.payment.processors.paypal.Paypal',
 )
 
+from urlparse import urljoin
+def get_lms_url(path):
+    return urljoin('http://localhost:8000', path)
+
+
 PAYMENT_PROCESSOR_CONFIG = {
-    'cybersource': {
-        'profile_id': None,
-        'access_key': None,
-        'secret_key': None,
-        'payment_page_url': None,
-        'receipt_page_url': None,
-        'cancel_page_url': None,
-    },
-    'paypal': {
-        # 'mode' can be either 'sandbox' or 'live'
-        'mode': None,
-        'client_id': None,
-        'client_secret': None,
-        'receipt_url': None,
-        'cancel_url': None,
-        'error_url': None,
-    },
 }
 
 PAYMENT_PROCESSOR_SWITCH_PREFIX = 'payment_processor_active_'
