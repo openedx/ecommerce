@@ -1,14 +1,17 @@
+{% extends 'edx/base_menu.html' %}
 {% load core_extras %}
 {% load i18n %}
 
-<li class="{{ additional_class }}">
-    <a class="nav-link" href="{% settings_value 'LMS_DASHBOARD_URL' %}">{% trans "Student Dashboard" %}</a>
-</li>
-<li class="{{ additional_class }}">
-    <a class="nav-link" href="{% url 'courses:app' '' %}">{% trans "Course Admin Tool" %}</a>
-</li>
-<li class="{{ additional_class }}"
-    ><a class="nav-link" href="{% url 'dashboard:index' %}">{% trans "E-Commerce Dashboard" %}</a>
-</li>
-<li class="divider {{ additional_class }}"></li>
-<li class="{{ additional_class }}"><a class="nav-link" href="{% url 'logout' %}">{% trans "Sign Out" %}</a></li>
+
+{% block additional_options %}
+    <li class="{{ additional_class }}">
+        <a class="nav-link" href="{% settings_value 'LMS_DASHBOARD_URL' %}">{% trans "Student Dashboard" %}</a>
+    </li>
+    <li class="{{ additional_class }}">
+        <a class="nav-link" href="{% url 'courses:app' '' %}">{% trans "Course Admin Tool" %}</a>
+    </li>
+    <li class="{{ additional_class }}"
+        ><a class="nav-link" href="{% url 'dashboard:index' %}">{% trans "E-Commerce Dashboard" %}</a>
+    </li>
+    <li class="divider {{ additional_class }}"></li>
+{% endblock additional_options %}

@@ -18,7 +18,7 @@
             </p>
         </div>
         <div class="col-md-3 text-right course-price">
-            {% if benefit_type == 'Percentage' %}
+            {% if is_discount_value_percentage %}
                 <span class="discount">{{ benefit_value }}% off </span>
                 <s class="course-price">${{ price }}</s>
                 <strong>${{ new_price }}</strong>

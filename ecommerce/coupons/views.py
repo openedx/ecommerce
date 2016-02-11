@@ -25,6 +25,7 @@ from ecommerce.settings import get_lms_url
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
@@ -132,6 +133,8 @@ class CouponOfferView(TemplateView):
                     'benefit_value': benefit_value,
                     'course': course,
                     'code': code,
+                    'is_discount_value_percentage': benefit_type == 'Percentage',
+                    'is_enrollment_code': benefit_type == Benefit.PERCENTAGE and benefit_value == 100.00,
                     'price': price,
                     'new_price': "%.2f" % new_price,
                     'verified': (product.attr.certificate_type == 'verified'),

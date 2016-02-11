@@ -34,9 +34,9 @@
               <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
             </button>
             <ul class="dropdown-menu" aria-expanded="false">
-              {% include "courses/menu_options.html" %}
+              {% block dropdown_menu %}{% endblock dropdown_menu %}
             </ul>
-            {% include "courses/menu_options.html" with additional_class="visible-xs" %}
+              {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
           </li>
         {% else %}
           <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" %}</a>

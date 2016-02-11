@@ -1,0 +1,9 @@
+{% extends 'edx/partials/_base_navbar.html' %}
+
+{% block dropdown_menu %}
+  {% include "edx/base_menu.html" %}
+{% endblock dropdown_menu %}
+
+{% block small_dropdown_menu %}
+  {% include "edx/base_menu.html" with additional_class="visible-xs" %}
+{% endblock small_dropdown_menu %}
