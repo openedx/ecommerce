@@ -37,7 +37,7 @@ class BasketUtilsTests(TestCase):
 
         basket = prepare_basket(self.request, product, voucher)
         self.assertIsNotNone(basket)
-        self.assertEqual(basket.status, Basket.FROZEN)
+        self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
         self.assertEqual(basket.lines.first().product, product)
         self.assertEqual(basket.vouchers.count(), 1)
@@ -50,7 +50,7 @@ class BasketUtilsTests(TestCase):
         product = ProductFactory()
         basket = prepare_basket(self.request, product)
         self.assertIsNotNone(basket)
-        self.assertEqual(basket.status, Basket.FROZEN)
+        self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
         self.assertEqual(basket.lines.first().product, product)
         self.assertFalse(basket.vouchers.all())

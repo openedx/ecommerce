@@ -29,7 +29,6 @@ def prepare_basket(request, product, voucher=None):
         basket.vouchers.add(voucher)
         Applicator().apply(basket, request.user, request)
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
-    basket.freeze()
 
     return basket
 
