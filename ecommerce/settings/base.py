@@ -222,6 +222,9 @@ ENROLLMENT_API_URL = None
 COMMERCE_API_TIMEOUT = 7
 COMMERCE_API_URL = None
 
+# Cache course info from course API.
+COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
+
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
@@ -474,3 +477,6 @@ CELERY_ALWAYS_EAGER = False
 
 PLATFORM_NAME = 'Your Platform Name Here'
 THEME_SCSS = 'sass/themes/default.scss'
+
+# Link to the support site
+SUPPORT_URL = 'SET-ME-PLEASE'

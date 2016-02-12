@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
+import httpretty
 import jwt
 from mock import patch
 from oscar.core.loading import get_model, get_class
@@ -17,6 +18,7 @@ from social.apps.django_app.default.models import UserSocialAuth
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
+from ecommerce.settings import get_lms_url
 from ecommerce.tests.factories import SiteConfigurationFactory
 
 Basket = get_model('basket', 'Basket')
@@ -258,3 +260,34 @@ class TestServerUrlMixin(object):
         """ Returns a complete URL with the given path. """
         site = site or self.site
         return 'http://{domain}{path}'.format(domain=site.domain, path=path)
+
+
+class LmsApiMockMixin(object):
+    """ Mocks for the LMS API reponses. """
+
+    def setUp(self):
+        super(LmsApiMockMixin, self).setUp()
+
+    def mock_course_api_response(self, course=None):
+        """ Helper function to register an API endpoint for the course information. """
+        course_info = {
+            "media": {
+                "course_image": {
+                    "uri": "/asset-v1:test+test+test+type@asset+block@images_course_image.jpg"
+                }
+            },
+            'name': course.name if course else 'Test course'
+        }
+        course_info_json = json.dumps(course_info)
+        course_id = course.id if course else 'course-v1:test+test+test'
+        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
+        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+
+    def mock_footer_api_response(self):
+        """ Helper function to register an API endpoint for the footer information. """
+        footer_url = get_lms_url('api/branding/v1/footer')
+        footer_content = {
+            'footer': 'edX Footer'
+        }
+        content_json = json.dumps(footer_content)
+        httpretty.register_uri(httpretty.GET, footer_url, body=content_json, content_type='application/json')

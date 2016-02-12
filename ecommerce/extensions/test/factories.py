@@ -1,4 +1,8 @@
+from datetime import datetime
+
+from django.utils.timezone import now
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.tests.factories import PartnerFactory
 
@@ -12,7 +16,7 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 def create_order(number=None, basket=None, user=None, shipping_address=None,  # pylint:disable=function-redefined
                  shipping_method=None, billing_address=None, total=None, **kwargs):
     """
-    Helper method for creating an order for testing
+    Helper function for creating an order for testing
     """
     if not basket:
         basket = Basket.objects.create()
@@ -47,7 +51,7 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
 
 
 def create_coupon(title='Test coupon', price=100, partner=None, catalog=None, code='', benefit_value=100):
-    """Helper method for creating a coupon."""
+    """Helper function for creating a coupon."""
     if partner is None:
         partner = PartnerFactory(name='Tester')
     if catalog is None:
@@ -73,3 +77,23 @@ def create_coupon(title='Test coupon', price=100, partner=None, catalog=None, co
         data=data
     )
     return coupon
+
+
+def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, benefit_value=100,
+                    benefit_type=Benefit.PERCENTAGE):
+    """ Helper function to create a voucher and add an offer to it that contains a product. """
+    if _range is None:
+        product = ProductFactory(title='Test product')
+        _range = RangeFactory(products=[product, ])
+    else:
+        product = _range.all_products()[0]
+
+    if start_datetime is None:
+        start_datetime = now() - datetime.timedelta(days=1)
+
+    voucher = VoucherFactory(code=code, start_datetime=start_datetime, usage=Voucher.SINGLE_USE)
+    benefit = BenefitFactory(type=benefit_type, range=_range, value=benefit_value)
+    condition = ConditionFactory(value=1, range=_range)
+    offer = ConditionalOfferFactory(benefit=benefit, condition=condition)
+    voucher.offers.add(offer)
+    return voucher, product
