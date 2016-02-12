@@ -224,7 +224,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 try:
                     self.handle_payment(paypal_response, basket)
                 except PaymentError:
-                    return redirect(receipt_url)
+                    return redirect(self.payment_processor.error_url)
         except:  # pylint: disable=bare-except
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
