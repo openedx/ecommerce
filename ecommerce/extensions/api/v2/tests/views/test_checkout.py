@@ -6,8 +6,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import override_settings
 from oscar.core.loading import get_model
-from waffle.models import Switch
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.tests.testcases import TestCase
 
@@ -66,14 +66,12 @@ class CheckoutViewTests(TestCase):
     )
     def test_view_response(self):
         """ Verify the endpoint returns a successful response when the user is able to checkout. """
-        switch, __ = Switch.objects.get_or_create(
-            name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessorWithUrl.NAME
-        )
-        switch.active = True
-        switch.save()
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessorWithUrl.NAME, True)
         response = self.client.post(self.path, data=self.data)
         self.assertEqual(response.status_code, 200)
 
+        basket = Basket.objects.get(id=1)
+        self.assertEqual(basket.status, Basket.FROZEN)
         response_data = json.loads(response.content)
         self.assertEqual(response_data['payment_form_data']['transaction_param'], 'test_trans_param')
         self.assertEqual(response_data['payment_page_url'], 'test_processor.edx')

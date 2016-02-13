@@ -43,7 +43,9 @@ class BasketSingleItemViewTests(LmsApiMockMixin, TestCase):
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
-        product = factories.ProductFactory()
+        course = CourseFactory()
+        course.create_or_update_seat('verified', True, 50, self.partner)
+        product = course.create_or_update_seat('verified', False, 0, self.partner)
         self.stock_record = StockRecordFactory(product=product, partner=self.partner)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
@@ -100,7 +102,7 @@ class BasketSingleItemViewTests(LmsApiMockMixin, TestCase):
         self.assertRedirects(response, expected_url, status_code=303)
 
         basket = Basket.objects.get(owner=self.user, site=self.site)
-        self.assertEqual(basket.status, Basket.FROZEN)
+        self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
         self.assertTrue(basket.contains_a_voucher)
         self.assertEqual(basket.lines.first().product, self.stock_record.product)
