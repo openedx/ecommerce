@@ -9,6 +9,7 @@ import logging
 
 from django.conf import settings
 from django.utils import importlib
+from django.utils.timezone import now
 
 from ecommerce.extensions.fulfillment import exceptions
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
@@ -76,7 +77,15 @@ def fulfill_order(order, lines):
                 break
 
         order.set_status(order_status)
-        logger.info("Finished fulfilling order [%s] with status [%s]", order.number, order.status)
+
+        elapsed = now() - order.date_placed
+        logger.info(
+            "Finished fulfilling order [%s] with status [%s]. [%s] seconds elapsed since placement.",
+            order.number,
+            order.status,
+            elapsed.total_seconds()
+        )
+
         return order  # pylint: disable=lost-exception
 
 
