@@ -60,7 +60,50 @@ define([
                             ]
                         }
                     ]
+                },
+                categoriesDropdownOptions = [
+                    {
+                        value: 4,
+                        label: 'NewCoursePromo',
+                        selected: true
+                    }
+                ],
+                mockedFetchedCategories = {
+                    id: 3,
+                    name: 'Coupons',
+                    slug: 'coupons',
+                    description: 'All Coupons',
+                    path: '0002',
+                    depth: 1,
+                    numchild: 9,
+                    image: null,
+                    child: [
+                        {
+                            id: 4,
+                            name: 'NewCoursePromo',
+                            slug: 'newcoursepromo',
+                            description: '',
+                            path: '00020001',
+                            depth: 2,
+                            numchild: 1,
+                            image: null,
+                            child: [
+                                {
+                                    id: 17,
+                                    name: 'None',
+                                    slug: 'none',
+                                    description: '',
+                                    path: '000200010001',
+                                    depth: 3,
+                                    numchild: 0,
+                                    image: null,
+                                    child: []
+                                }
+                                ]
+                        }
+                    ]
                 };
+
 
             /**
               * Helper function to check if a form field is shown.
@@ -75,8 +118,23 @@ define([
             }
 
             beforeEach(function () {
+                spyOn(CouponFormView.prototype.couponCategoryCollection, 'fetch')
+                    .and.returnValue(mockedFetchedCategories);
+                spyOn(CouponFormView.prototype, 'updateDropdown').and.callFake(function(){
+                    this.categories = categoriesDropdownOptions;
+                });
                 model = new Coupon();
                 view = new CouponFormView({ editing: false, model: model }).render();
+            });
+
+            describe('API call', function(){
+                it('should populate categories', function(){
+                    expect(view.couponCategoryCollection.fetch).toHaveBeenCalled();
+                    expect(view.couponCategoryCollection.fetch()).toEqual(mockedFetchedCategories);
+                    expect(view.couponCategoryCollection.parse(mockedFetchedCategories))
+                        .toEqual(categoriesDropdownOptions);
+                    expect(view.categories).toEqual(categoriesDropdownOptions);
+                });
             });
 
             describe('seat type dropdown', function () {
@@ -113,7 +171,6 @@ define([
                     expect(model.get('stock_record_ids')).toEqual([2]);
                 });
             });
-
 
             describe('enrollment code', function () {
                 beforeEach(function () {
