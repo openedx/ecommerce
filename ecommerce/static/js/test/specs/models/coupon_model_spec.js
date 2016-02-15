@@ -49,7 +49,9 @@ define([
                 course_id: 'a/b/c',
                 seat_type: 'verified',
                 course: course,
-                price: 100
+                price: 100,
+                category: 4,
+                sub_category: 'TESTSUB'
             },
             enrollment = {
                 title: 'Test Enrollment',
@@ -62,7 +64,9 @@ define([
                 price: 100,
                 course_id: 'a/b/c',
                 seat_type: 'verified',
-                course: course
+                course: course,
+                category: 4,
+                sub_category: 'TESTSUB'
             };
 
         describe('Coupon model', function () {
