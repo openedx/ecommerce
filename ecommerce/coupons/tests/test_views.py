@@ -251,10 +251,8 @@ class CouponRedeemViewTests(TestCase):
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
         create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-        sku = StockRecord.objects.get(product=self.seat).partner_sku
-        test_server_url = self.get_full_url(path=reverse('basket:single-item'))
-        expected_url = '{url}?sku={sku}&code={code}'.format(url=test_server_url, sku=sku, code=COUPON_CODE)
-        self.assert_redemption_page_redirects(expected_url, 303)
+        expected_url = self.get_full_url(path=reverse('basket:summary'))
+        self.assert_redemption_page_redirects(expected_url)
 
     @httpretty.activate
     def test_basket_redirect_enrollment_code(self):
