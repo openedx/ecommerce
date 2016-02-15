@@ -12,6 +12,7 @@ define([
         'text!templates/coupon_form.html',
         'models/course_model',
         'views/form_view',
+        'collections/coupon_category_collection'
     ],
     function ($,
               Backbone,
@@ -23,7 +24,8 @@ define([
               Utils,
               CouponFormTemplate,
               Course,
-              FormView) {
+              FormView,
+              CouponCategoryCollection) {
         'use strict';
 
         return FormView.extend({
@@ -35,17 +37,19 @@ define([
 
             seatTypes: [],
 
-            categories: [],
+            couponCategoryCollection: new CouponCategoryCollection(),
+
+            categories: null,
 
             codeTypes: [
                 {
                     value: 'enrollment',
-                    label: gettext('Enrollment Code'),
+                    label: gettext('Enrollment Code')
                 },
                 {
                     value: 'discount',
                     label: gettext('Discount Code')
-                },
+                }
             ],
 
             voucherTypes: [
@@ -59,7 +63,7 @@ define([
                 },
                 {
                     value: 'Multi-use',
-                    label: gettext('Can be used multiple times by multiple customers'),
+                    label: gettext('Can be used multiple times by multiple customers')
                 }
             ],
 
@@ -164,18 +168,20 @@ define([
                 'blur [name=course_id]': 'fillFromCourse',
                 'change [name=seat_type]': 'changeSeatType',
                 'change [name=benefit_type]': 'changeUpperLimitForBenefitValue'
-                'change [name=own_code]': 'updateCode'
             },
 
             initialize: function (options) {
-                this.categories = this.fetchCategories();
                 this.alertViews = [];
                 this.editing = options.editing || false;
 
+                this.couponCategoryCollection.fetch(); // fetch collection of coupon categories
+                this.updateDropdown(this.couponCategoryCollection); // assign them to the stickit observable 
+
                 this.listenTo(this.model, 'change:coupon_type', this.toggleFields);
                 this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
-
+                
                 this._super();
+
             },
 
             changeUpperLimitForBenefitValue: function() {
@@ -291,51 +297,33 @@ define([
                 this.$el.find('input[name=own_code]').attr('disabled', true);
             },
 
-            fetchCategories: function(){
-                var categories = [];
-                $.ajax({
-                    async: false,
-                    url: '/api/v2/categories/3/', // Category 3 contains Coupon categories
-                    type: 'GET',
-                    success: function(data){
-                        if(data){
-                            for(var i = 0; i < data.child.length; i++){
-                                categories.push({
-                                    value: data.child[i].id,
-                                    label: gettext(data.child[i].name)
-                                });      
-                            }
-                        }
-                    }
-                });
-                return categories;
-            },
-
             updateCode: function(){
                 this.model.set('code', this.model.get('own_code'));
             },
 
+            updateDropdown: function(options){
+                this.categories = options;
+            },
+
             render: function () {
                 // Render the parent form/template
+                this.model.attributes.editing = this.editing;
                 this.$el.html(this.template(this.model.attributes));
                 this.stickit();
-
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.
                 this.$alerts = this.$el.find('.alerts');
-
+ 
                 if(this.editing) {
                     this.disableNonEditableFields();
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
                     this.fillFromCourse();
                 } else {
                     this.model.set('coupon_type', this.codeTypes[0].value);
-                    this.model.set('category', this.categories[0].value);
                     this.model.set('voucher_type', this.voucherTypes[0].value);
                     this.model.set('benefit_type', 'Percentage');
                     this.$el.find('[name=benefit_value]').attr('max', 100);
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
                 }
-
                 this._super();
                 return this;
             },
