@@ -12,7 +12,7 @@ from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
-from ecommerce.tests.mixins import CouponMixin
+from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -95,6 +95,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
 
     def test_non_existing_category(self):
         """Test creating a coupon with a non-existing category."""
+        category = Category.objects.create(name="Not the one you look for", depth=1)
         data = {
             'partner': self.partner,
             'benefit_type': Benefit.PERCENTAGE,
@@ -105,7 +106,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.MULTI_USE,
-            'category': 9999,
+            'category': category.id,
             'sub_category': ''
         }
         with self.assertRaises(Exception):
@@ -254,7 +255,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponViewSetFunctionalTest(CouponMixin, TestCase):
+class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
@@ -348,6 +349,34 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
         response_data = json.loads(response.content)
         self.assertEqual(response_data['results'][0]['coupon_type'], 'Discount code')
         self.assertEqual(response_data['results'][0]['vouchers'][0]['benefit'][1], 20.0)
+
+    def test_no_subcategory(self):
+        """ Test that the serializers displays None for when a coupon does not have a sub category. """
+        self.data['sub_category'] = ''
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        response_data = json.loads(response.content)
+
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': response_data['coupon_id']})
+        detail_response = self.client.get(path)
+        response_data = json.loads(detail_response.content)
+        self.assertEqual(response_data['title'], 'Test coupon')
+        self.assertIsNone(response_data['sub_category'])
+
+    def test_existing_coupon_category_change(self):
+        """ Test that the existing product category has been edited on change of (sub)category. """
+        response_data = json.loads(self.response.content)
+        coupon = Product.objects.get(id=response_data['coupon_id'])
+        self.assertEqual(ProductCategory.objects.filter(product=coupon).count(), 1)
+        product_category = ProductCategory.objects.get(product=coupon)
+        self.assertEqual(product_category.category.name, 'Test sub-category')
+
+        self.data['sub_category'] = 'A new sub-category'
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ProductCategory.objects.filter(product=coupon).count(), 1)
+        new_product_category = ProductCategory.objects.get(product=coupon)
+        self.assertEqual(new_product_category, product_category)
+        self.assertEqual(new_product_category.category.name, 'A new sub-category')
 
     def test_update(self):
         """Test updating a coupon."""

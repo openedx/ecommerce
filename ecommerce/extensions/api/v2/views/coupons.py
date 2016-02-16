@@ -201,9 +201,21 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         else:
             breadcrumb = 'Coupons > {category}'.format(category=category_name)
             category = create_from_breadcrumbs(breadcrumb)
-        ProductCategory.objects.get_or_create(category=category, product=coupon_product)
 
         coupon_product.save()
+
+        # The reason why we are not using:
+        #   ProductCategory.objects.get_or_create(product=product, category=category)
+        # here is that in case an existing coupon's category has been changed this will
+        # create a new product category which we don't want. We want one coupon to have
+        # one product category. Therefor if a coupon's category is edited the category of the
+        # existing product category will be edited.
+        try:
+            product_category = ProductCategory.objects.get(product=coupon_product)
+            product_category.category = category
+            product_category.save()
+        except ProductCategory.DoesNotExist:
+            product_category = ProductCategory.objects.create(category=category, product=coupon_product)
 
         sku = generate_sku(
             product=coupon_product,
