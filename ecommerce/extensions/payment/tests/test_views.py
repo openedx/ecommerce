@@ -311,7 +311,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.request = RequestFactory().post('/')
 
     @httpretty.activate
-    def _assert_execution_redirect(self, payer_info=None):
+    def _assert_execution_redirect(self, payer_info=None, url_redirect=None):
         """Verify redirection to the configured receipt page after attempted payment execution."""
         self.mock_oauth2_response()
 
@@ -325,7 +325,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
         self.assertRedirects(
             response,
-            u'{}?orderNum={}'.format(self.processor.receipt_url, self.basket.order_number),
+            url_redirect or u'{}?orderNum={}'.format(self.processor.receipt_url, self.basket.order_number),
             fetch_redirect_response=False
         )
 
@@ -378,7 +378,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                                side_effect=PaymentError) as fake_handle_payment:
             logger_name = 'ecommerce.extensions.payment.views'
             with LogCapture(logger_name) as l:
-                creation_response, __ = self._assert_execution_redirect()
+                creation_response, __ = self._assert_execution_redirect(url_redirect=self.processor.error_url)
                 self.assertTrue(fake_handle_payment.called)
 
                 # Verify that the payment creation response was recorded despite the error
