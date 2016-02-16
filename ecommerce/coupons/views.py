@@ -196,14 +196,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
             )
         else:
-            partner = request.site.siteconfiguration.partner
-            sku = StockRecord.objects.get(product=product, partner=partner).partner_sku
-            url = '{url}?sku={sku}&code={code}'.format(
-                url=reverse('basket:single-item'),
-                sku=sku,
-                code=code
-            )
-            return HttpResponseRedirect(url)
+            return HttpResponseRedirect(reverse('basket:summary'))
 
         if order.status is ORDER.COMPLETE:
             return HttpResponseRedirect(get_lms_url(''))
