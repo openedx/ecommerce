@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import logging
+from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -20,6 +21,7 @@ from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.voucher.utils import get_voucher_discount_info
 from ecommerce.settings import get_lms_url
 
 
@@ -118,26 +120,27 @@ class CouponOfferView(TemplateView):
                         'footer': footer
                     }
                 course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
-                stock_records = voucher.offers.first().benefit.range.catalog.stock_records.first()
-                benefit_type = voucher.offers.first().benefit.type
-                benefit_value = voucher.offers.first().benefit.value
-                price = stock_records.price_excl_tax
-                if benefit_type == 'Percentage':
-                    new_price = price - (price * (benefit_value / 100))
+                benefit = voucher.offers.first().benefit
+                stock_record = benefit.range.catalog.stock_records.first()
+                price = stock_record.price_excl_tax
+                context.update(get_voucher_discount_info(benefit, price))
+                if benefit.type == 'Percentage':
+                    new_price = price - (price * (benefit.value / 100))
                 else:
-                    new_price = price - benefit_value
+                    new_price = price - benefit.value
                     if new_price < 0:
-                        new_price = 0.00
+                        new_price = Decimal(0)
                 context.update({
-                    'benefit_type': benefit_type,
-                    'benefit_value': benefit_value,
+                    'benefit': benefit,
                     'course': course,
                     'code': code,
-                    'is_discount_value_percentage': benefit_type == 'Percentage',
-                    'is_enrollment_code': benefit_type == Benefit.PERCENTAGE and benefit_value == 100.00,
+                    'is_discount_value_percentage': benefit.type == 'Percentage',
+                    'is_enrollment_code': benefit.type == Benefit.PERCENTAGE and benefit.value == 100.00,
+                    'discount_value': "%.2f" % (price - new_price),
                     'price': price,
                     'new_price': "%.2f" % new_price,
                     'verified': (product.attr.certificate_type == 'verified'),
+                    'verification_deadline': product.course.verification_deadline,
                     'footer': footer
                 })
                 return context

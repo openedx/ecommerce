@@ -5,11 +5,12 @@ from django.db import IntegrityError
 from django.test import override_settings
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
+from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import create_coupon
-from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report
+from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report, get_voucher_discount_info
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -38,14 +39,32 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
 
         self.course = CourseFactory()
-        self.verified_seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.verified_seat = self.course.create_or_update_seat('verified', False, 100, self.partner)
 
         self.catalog = Catalog.objects.create(partner=self.partner)
 
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
+        self.seat_price = self.stock_record.price_excl_tax
         self.catalog.stock_records.add(self.stock_record)
 
         self.coupon = create_coupon(title='Test product', catalog=self.catalog)
+
+    def create_benefits(self):
+        """
+        Create all Benefit permutations
+            - Benefit type: Percentage, Benefit value: 100%
+            - Benefit type: Percentage, Benefit value: 50%
+            - Benefit type: Value, Benefit value: seat price
+            - Benefit type: Value, Benefit value: half the seat price
+        """
+        _range = RangeFactory(products=[self.verified_seat, ])
+
+        benefit_percentage_all = BenefitFactory(type=Benefit.PERCENTAGE, range=_range, value=100.00)
+        benefit_percentage_half = BenefitFactory(type=Benefit.PERCENTAGE, range=_range, value=50.00)
+        benefit_value_all = BenefitFactory(type=Benefit.FIXED, range=_range, value=self.seat_price)
+        benefit_value_half = BenefitFactory(type=Benefit.FIXED, range=_range, value=self.seat_price / 2)
+
+        return [benefit_percentage_all, benefit_percentage_half, benefit_value_all, benefit_value_half]
 
     def test_create_vouchers(self):
         """
@@ -215,7 +234,7 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(enrollment_code_row['Code'], VOUCHER_CODE)
         self.assertEqual(enrollment_code_row['URL'], settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(VOUCHER_CODE))
         self.assertEqual(enrollment_code_row['CourseID'], self.course.id)
-        self.assertEqual(enrollment_code_row['Price'], currency(0.00))
+        self.assertEqual(enrollment_code_row['Price'], currency(100.00))
         self.assertEqual(enrollment_code_row['Invoiced Amount'], currency(100.00))
         self.assertEqual(enrollment_code_row['Discount'], '100.00 %')
         self.assertEqual(enrollment_code_row['Status'], 'Inactive')
@@ -231,3 +250,33 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
             enrollment_code_row['URL'],
             settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(enrollment_code_row['Code'])
         )
+
+    def test_get_voucher_discount_info(self):
+        """
+        Test get voucher discount info
+        """
+        benefits = self.create_benefits()
+
+        for benefit in benefits:
+            discount_info = get_voucher_discount_info(benefit, self.seat_price)
+            if (
+                    benefit.type == "Percentage" and benefit.value == 100.00 or
+                    benefit.type == "Absolute" and benefit.value == self.seat_price
+            ):
+                self.assertEqual(discount_info['discount_percentage'], 100.00)
+                self.assertFalse(discount_info['is_discounted'])
+            else:
+                self.assertEqual(discount_info['discount_percentage'], 50.00)
+                self.assertTrue(discount_info['is_discounted'])
+
+            discount_info = get_voucher_discount_info(benefit, 0.0)
+            self.assertEqual(discount_info['discount_percentage'], 0.00)
+            self.assertFalse(discount_info['is_discounted'])
+
+            discount_info = get_voucher_discount_info(None, 0.0)
+            self.assertEqual(discount_info['discount_percentage'], 0.00)
+            self.assertFalse(discount_info['is_discounted'])
+
+            discount_info = get_voucher_discount_info(None, self.seat_price)
+            self.assertEqual(discount_info['discount_percentage'], 0.00)
+            self.assertFalse(discount_info['is_discounted'])
