@@ -13,16 +13,21 @@ ProductCategory = get_model("catalogue", "ProductCategory")
 def create_default_categories(apps, schema_editor):
     """Create default coupon categories."""
     categories = (
-        'Coupons > NewCoursePromo',
+        'Coupons > AffiliatePromo',
         'Coupons > BulkEnrollment',
-        'Coupons > CustomerService',
-        'Coupons > Marketing-Other',
-        'Coupons > PaidCohort',
         'Coupons > ConnectEd',
-        'Coupons > Services-Other',
+        'Coupons > CoursePromo',
+        'Coupons > CustomerService',
         'Coupons > FinancialAssistance',
+        'Coupons > GeographyPromo',
+        'Coupons > Marketing-Other',
+        'Coupons > MktgPartnerPromo',
+        'Coupons > PaidCohort',
+        'Coupons > RetentionPromo',
+        'Coupons > Services-Other',
         'Coupons > Support-Other',
-        'Coupons > Other',
+        'Coupons > UpSellPromo',
+        'Coupons > Other'
     )
     for breadcrumbs in categories:
         create_from_breadcrumbs(breadcrumbs)
@@ -31,8 +36,9 @@ def create_default_categories(apps, schema_editor):
 def remove_default_categories(apps, schema_editor):
     """Remove default coupon categories."""
     default_categories = [
-        'NewCoursePromo', 'BulkEnrollment', 'CustomerService', 'Marketing-Other', 'Other',
-        'PaidCohort', 'ConnectEd', 'Services-Other', 'FinancialAssistance', 'Support-Other'
+        'CoursePromo', 'BulkEnrollment', 'CustomerService', 'Marketing-Other', 'Other',
+        'PaidCohort', 'ConnectEd', 'Services-Other', 'FinancialAssistance', 'Support-Other',
+        'MktgPartnerPromo', 'RetentionPromo', 'AffiliatePromo', 'UpSellPromo', 'GeographyPromo'
     ]
     for category in default_categories:
         Category.objects.get(name=category).delete()
