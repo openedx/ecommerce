@@ -1,0 +1,29 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+{% trans "Basket" %}
+{% endblock title %}
+
+
+{% block javascript %}
+    <script src="{% static 'js/apps/basket_app.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="basket">
+        <div class="container">
+            {# Use a partial template so that AJAX can be used to re-render basket #}
+            {% include 'basket/partials/basket_content.html' %}
+        </div>
+    </div>
+{% endblock content %}
+
+{% block footer %}
+    {% if footer %}
+        {% autoescape off %}
+            {{ footer }}
+        {% endautoescape %}
+    {% endif %}
+{% endblock footer %}
