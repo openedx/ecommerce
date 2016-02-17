@@ -140,7 +140,8 @@ define([
 
                 // catch value after autocomplete
                 'blur [name=course_id]': 'fillFromCourse',
-                'change [name=seat_type]': 'changeSeatType'
+                'change [name=seat_type]': 'changeSeatType',
+                'change [name=benefit_type]': 'changeUpperLimitForBenefitValue'
             },
 
             initialize: function (options) {
@@ -151,6 +152,13 @@ define([
                 this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
 
                 this._super();
+            },
+
+            changeUpperLimitForBenefitValue: function() {
+                var is_benefit_percentage = this.$el.find('[name=code_type]').val() === 'Percentage',
+                    max_value = is_benefit_percentage ? '100' : '';
+
+                this.$el.find('[name=benefit_value]').attr('max', max_value);
             },
 
             toggleFields: function() {
@@ -272,6 +280,7 @@ define([
                     this.model.set('coupon_type', this.codeTypes[0].value);
                     this.model.set('voucher_type', this.voucherTypes[0].value);
                     this.model.set('benefit_type', 'Percentage');
+                    this.$el.find('[name=benefit_value]').attr('max', 100);
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
                 }
 

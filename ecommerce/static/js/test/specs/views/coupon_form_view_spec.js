@@ -155,6 +155,13 @@ define([
                     expect(view.$el.find('.benefit-addon').html()).toBe('$');
                 });
 
+                it('should toggle upper limit on the benefit value input', function () {
+                    view.$el.find('[name=code_type]').val('enrollment').trigger('change');
+                    expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('100');
+                    view.$el.find('[name=benefit_type]').val('Fixed').trigger('change');
+                    expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('');
+                });
+
                 it('should show the code field only for multi-use vouchers', function () {
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
                     expect(visible('[name=code]')).toBe(false);
