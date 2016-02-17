@@ -12,7 +12,7 @@ from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.test.factories import create_coupon
-from ecommerce.tests.factories import SiteFactory, SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -304,8 +304,8 @@ class CouponViewSetFunctionalTest(TestCase):
         path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
         data = {
             'id': coupon.id,
-            'start_datetime': '2030-01-01',
-            'end_datetime': '2035-01-01'
+            AC.KEYS.START_DATE: '2030-01-01',
+            AC.KEYS.END_DATE: '2035-01-01'
         }
         response = self.client.put(path, json.dumps(data), 'application/json')
         response_data = json.loads(response.content)
