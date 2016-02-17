@@ -155,9 +155,6 @@ define([
                     onGet: function(val){
                         return val ? val.name : null;
                     }
-                },
-                'input[name=own_code]': {
-                    observe: 'own_code'
                 }
             },
 
@@ -294,11 +291,6 @@ define([
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
                 this.$el.find('select[name=category]').attr('disabled', true);
                 this.$el.find('input[name=sub_category]').attr('disabled', true);
-                this.$el.find('input[name=own_code]').attr('disabled', true);
-            },
-
-            updateCode: function(){
-                this.model.set('code', this.model.get('own_code'));
             },
 
             updateDropdown: function(options){
@@ -307,7 +299,6 @@ define([
 
             render: function () {
                 // Render the parent form/template
-                this.model.attributes.editing = this.editing;
                 this.$el.html(this.template(this.model.attributes));
                 this.stickit();
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.

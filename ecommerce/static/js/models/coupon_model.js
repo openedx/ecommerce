@@ -50,7 +50,6 @@ define([
                 price: { pattern: 'number' },
                 category: { required: true },
                 sub_category: { required: true },
-                own_code: { required: false },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
