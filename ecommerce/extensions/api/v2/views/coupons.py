@@ -2,13 +2,13 @@ from __future__ import unicode_literals
 
 import logging
 from decimal import Decimal
-import dateutil.parser
 
+import dateutil.parser
 from django.db import transaction
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import Client
@@ -16,7 +16,9 @@ from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.serializers import CouponSerializer
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
-from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
+from ecommerce.extensions.catalogue.utils import (generate_coupon_slug,
+                                                  generate_sku,
+                                                  get_or_create_catalog)
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -242,11 +244,11 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         super(CouponViewSet, self).update(request, *args, **kwargs)
         coupon = self.get_object()
 
-        start_datetime = request.data.get('start_datetime', '')
+        start_datetime = request.data.get(AC.KEYS.START_DATE, '')
         if start_datetime:
             coupon.attr.coupon_vouchers.vouchers.all().update(start_datetime=start_datetime)
 
-        end_datetime = request.data.get('end_datetime', '')
+        end_datetime = request.data.get(AC.KEYS.END_DATE, '')
         if end_datetime:
             coupon.attr.coupon_vouchers.vouchers.all().update(end_datetime=end_datetime)
 
