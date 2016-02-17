@@ -34,7 +34,7 @@ define([
                 code: '',
                 price: 0,
                 category: 4,
-                sub_category: 'default'
+                sub_category: ''
             },
 
             validation: {
@@ -49,7 +49,7 @@ define([
                 quantity: { pattern: 'number' },
                 price: { pattern: 'number' },
                 category: { required: true },
-                sub_category: { required: true },
+                sub_category: { required: false },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
