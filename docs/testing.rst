@@ -1,6 +1,12 @@
 Testing
 =======
 
+The tests use the `ecommerce.settings.test` settings module, which has compression enabled. Before running the tests, run the command below to compile and compress static files.
+
+.. code-block:: bash
+
+    $ DJANGO_SETTINGS_MODULE=ecommerce.settings.test make static
+
 To run the unit test suite followed by quality checks, run:
 
 .. code-block:: bash
@@ -19,6 +25,7 @@ Code quality validation can be performed independently with:
 .. code-block:: bash
 
     $ make quality
+
 
 Writing Tests
 -------------
