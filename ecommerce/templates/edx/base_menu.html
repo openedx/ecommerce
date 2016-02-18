@@ -1,0 +1,7 @@
+{% load core_extras %}
+{% load i18n %}
+
+{% block additional_options %}
+{% endblock additional_options %}
+
+<li class="{{ additional_class }}"><a class="nav-link" href="{% url 'logout' %}">{% trans "Sign Out" %}</a></li>

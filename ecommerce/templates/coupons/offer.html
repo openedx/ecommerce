@@ -4,12 +4,16 @@
 
 {% block title %}{% trans "Redeem" %}{% endblock %}
 
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
 {% block content %}
     <div id="offer">
         {% if error %}
             {% include "coupons/_offer_error.html" %}
         {% else %}
-            {% if benefit_type == 'Percentage' and benefit_value == 100.00 %}
+            {% if is_enrollment_code %}
                 {% include "coupons/_offer_enrollment.html" %}
             {% else %}
                 {% include "coupons/_offer_discount.html" %}

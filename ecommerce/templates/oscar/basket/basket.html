@@ -6,6 +6,10 @@
 {% trans "Basket" %}
 {% endblock title %}
 
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
 
 {% block javascript %}
     <script src="{% static 'js/apps/basket_app.js' %}"></script>
