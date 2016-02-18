@@ -131,7 +131,7 @@ define([
 
                     // Ensure the data was POSTed to the correct endpoint
                     args = $.ajax.calls.argsFor(0)[0];
-                    expect(args.type).toEqual('POST');
+                    expect(args.method).toEqual('POST');
                     expect(args.url).toEqual('/api/v2/checkout/');
                     expect(args.contentType).toEqual('application/json; charset=utf-8');
                     expect(args.headers).toEqual({'X-CSRFToken': cookie});
