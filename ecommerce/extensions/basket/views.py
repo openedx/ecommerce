@@ -64,9 +64,10 @@ class BasketSummaryView(BasketView):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         lines = self.request.basket.lines.all()
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
+        page_title = 'Upgrade your enrollment in '
         for line in lines:
             course_id = line.product.course_id
-
+            page_title += course_id
             # Get each course type so we can display to the user at checkout.
             try:
                 line.certificate_type = get_certificate_type_display_value(line.product.attr.certificate_type)
@@ -104,6 +105,7 @@ class BasketSummaryView(BasketView):
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
             'lines': lines,
+            'page_title': page_title,
         })
         return context
 
