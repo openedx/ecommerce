@@ -6,7 +6,8 @@ define([
         'jquery',
         'underscore',
         'underscore.string',
-        'utils/utils'
+        'utils/utils',
+        'jquery-cookie'
     ],
     function ($,
               _,
