@@ -13,20 +13,20 @@ ProductCategory = get_model("catalogue", "ProductCategory")
 def create_default_categories(apps, schema_editor):
     """Create default coupon categories."""
     categories = (
-        'Coupons > AffiliatePromo',
-        'Coupons > BulkEnrollment',
+        'Coupons > Affiliate Promotion',
+        'Coupons > Bulk Enrollment',
         'Coupons > ConnectEd',
-        'Coupons > CoursePromo',
-        'Coupons > CustomerService',
-        'Coupons > FinancialAssistance',
-        'Coupons > GeographyPromo',
+        'Coupons > Course Promotion',
+        'Coupons > Customer Service',
+        'Coupons > Financial Assistance',
+        'Coupons > Geography Promotion',
+        'Coupons > Marketing Partner Promotion',
         'Coupons > Marketing-Other',
-        'Coupons > MktgPartnerPromo',
-        'Coupons > PaidCohort',
-        'Coupons > RetentionPromo',
+        'Coupons > Paid Cohort',
+        'Coupons > Retention Promotion',
         'Coupons > Services-Other',
         'Coupons > Support-Other',
-        'Coupons > UpSellPromo',
+        'Coupons > Upsell Promotion',
         'Coupons > Other'
     )
     for breadcrumbs in categories:
@@ -36,9 +36,10 @@ def create_default_categories(apps, schema_editor):
 def remove_default_categories(apps, schema_editor):
     """Remove default coupon categories."""
     default_categories = [
-        'CoursePromo', 'BulkEnrollment', 'CustomerService', 'Marketing-Other', 'Other',
-        'PaidCohort', 'ConnectEd', 'Services-Other', 'FinancialAssistance', 'Support-Other',
-        'MktgPartnerPromo', 'RetentionPromo', 'AffiliatePromo', 'UpSellPromo', 'GeographyPromo'
+        'Affiliate Promotion', 'Bulk Enrollment', 'ConnectEd', 'Course Promotion',
+        'Customer Service', 'Financial Assistance', 'Geography Promotion',
+        'Marketing Partner Promotion', 'Marketing-Other', 'Paid Cohort', 'Other',
+        'Retention Promotion', 'Services-Other', 'Support-Other', 'Upsell Promotion',
     ]
     for category in default_categories:
         Category.objects.get(name=category).delete()
