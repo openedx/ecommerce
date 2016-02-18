@@ -25,7 +25,7 @@ define([
         checkoutPayment = function(data) {
             $.ajax({
                 url: '/api/v2/checkout/',
-                type: 'POST',
+                method: 'POST',
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 headers: {
