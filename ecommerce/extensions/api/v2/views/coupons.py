@@ -6,6 +6,7 @@ from decimal import Decimal
 import dateutil.parser
 from django.db import transaction
 from django.db.utils import IntegrityError
+from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -26,6 +27,8 @@ from ecommerce.extensions.voucher.utils import create_vouchers
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -75,6 +78,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
+            category = request.data[AC.KEYS.CATEGORY]
+            sub_category = request.data['sub_category']
 
             client, __ = Client.objects.get_or_create(username=client_username)
 
@@ -96,7 +101,9 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 'code': code,
                 'quantity': quantity,
                 'start_date': start_date,
-                'voucher_type': voucher_type
+                'voucher_type': voucher_type,
+                'category': category,
+                'sub_category': sub_category
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -129,6 +136,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 - quantity (int)
                 - start_date (Datetime)
                 - voucher_type (str)
+                - category (str)
+                - sub_category (str)
 
         Returns:
             A coupon product object.
@@ -169,8 +178,44 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 
+        category = data['category']
+        category_name = Category.objects.get(id=category).name
         coupon_product.attr.coupon_vouchers = coupon_vouchers
+
+        coupons_category = Category.objects.get(name='Coupons')
+        # Retrieve existing coupon categories
+        existing_categories = Category.objects.filter(
+            path__startswith=coupons_category.path
+        ).filter(
+            depth__lt=3
+        ).values_list('name', flat=True)
+        if category_name not in existing_categories:
+            raise Exception('Invalid category')
+
+        if data['sub_category']:
+            breadcrumb = 'Coupons > {category} > {sub_category}'.format(
+                category=category_name,
+                sub_category=data['sub_category']
+            )
+            category = create_from_breadcrumbs(breadcrumb)
+        else:
+            breadcrumb = 'Coupons > {category}'.format(category=category_name)
+            category = create_from_breadcrumbs(breadcrumb)
+
         coupon_product.save()
+
+        # The reason why we are not using:
+        #   ProductCategory.objects.get_or_create(product=product, category=category)
+        # here is that in case an existing coupon's category has been changed this will
+        # create a new product category which we don't want. We want one coupon to have
+        # one product category. Therefor if a coupon's category is edited the category of the
+        # existing product category will be edited.
+        try:
+            product_category = ProductCategory.objects.get(product=coupon_product)
+            product_category.category = category
+            product_category.save()
+        except ProductCategory.DoesNotExist:
+            product_category = ProductCategory.objects.create(category=category, product=coupon_product)
 
         sku = generate_sku(
             product=coupon_product,

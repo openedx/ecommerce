@@ -11,16 +11,18 @@ from oscar.core.loading import get_model
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
-from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
+from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Course = get_model('courses', 'Course')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -28,7 +30,7 @@ Voucher = get_model('voucher', 'Voucher')
 COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
-class CouponViewSetTest(TestCase):
+class CouponViewSetTest(CouponMixin, TestCase):
     """Unit tests for creating coupon order."""
 
     def setUp(self):
@@ -59,7 +61,9 @@ class CouponViewSetTest(TestCase):
             'benefit_value': 100,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 1,
-            'price': 100
+            'price': 100,
+            'category': self.category.id,
+            'sub_category': ''
         }
         request = RequestFactory()
         request.data = data
@@ -75,7 +79,7 @@ class CouponViewSetTest(TestCase):
 
     def test_create_coupon_product(self):
         """Test the created coupon data."""
-        coupon = create_coupon()
+        coupon = self.create_coupon()
         self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
         self.assertIsInstance(coupon, Product)
         self.assertEqual(coupon.title, 'Test coupon')
@@ -86,10 +90,12 @@ class CouponViewSetTest(TestCase):
         self.assertEqual(stock_record.price_excl_tax, 100)
 
         self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), 5)
+        category = ProductCategory.objects.get(product=coupon).category
+        self.assertEqual(category.name, 'Test category')
 
-    def test_append_to_existing_coupon(self):
-        """Test adding additional vouchers to an existing coupon."""
-        create_coupon(partner=self.partner, catalog=self.catalog)
+    def test_non_existing_category(self):
+        """Test creating a coupon with a non-existing category."""
+        category = Category.objects.create(name="Not the one you look for", depth=1)
         data = {
             'partner': self.partner,
             'benefit_type': Benefit.PERCENTAGE,
@@ -99,7 +105,56 @@ class CouponViewSetTest(TestCase):
             'code': '',
             'quantity': 2,
             'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.MULTI_USE
+            'voucher_type': Voucher.MULTI_USE,
+            'category': category.id,
+            'sub_category': ''
+        }
+        with self.assertRaises(Exception):
+            CouponViewSet().create_coupon_product(
+                title='Test coupon',
+                price=100,
+                data=data
+            )
+
+    def test_coupon_sub_category(self):
+        """Test adding a sub-category to a coupon."""
+        data = {
+            'partner': self.partner,
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100,
+            'catalog': self.catalog,
+            'end_date': datetime.date(2020, 1, 1),
+            'code': '',
+            'quantity': 2,
+            'start_date': datetime.date(2015, 1, 1),
+            'voucher_type': Voucher.MULTI_USE,
+            'category': self.category.id,
+            'sub_category': 'Test sub-category'
+        }
+        coupon = CouponViewSet().create_coupon_product(
+            title='Test coupon',
+            price=100,
+            data=data
+        )
+        category = ProductCategory.objects.get(product=coupon).category
+        self.assertEqual(category.name, 'Test sub-category')
+        self.assertEqual(category.depth, 3)
+
+    def test_append_to_existing_coupon(self):
+        """Test adding additional vouchers to an existing coupon."""
+        self.create_coupon(partner=self.partner, catalog=self.catalog)
+        data = {
+            'partner': self.partner,
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100,
+            'catalog': self.catalog,
+            'end_date': datetime.date(2020, 1, 1),
+            'code': '',
+            'quantity': 2,
+            'start_date': datetime.date(2015, 1, 1),
+            'voucher_type': Voucher.MULTI_USE,
+            'category': self.category.id,
+            'sub_category': ''
         }
         coupon_append = CouponViewSet().create_coupon_product(
             title='Test coupon',
@@ -123,7 +178,9 @@ class CouponViewSetTest(TestCase):
             'code': 'CUSTOMCODE',
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.ONCE_PER_CUSTOMER
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'category': self.category.id,
+            'sub_category': ''
         }
         custom_coupon = CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -144,7 +201,9 @@ class CouponViewSetTest(TestCase):
             'code': 'CUSTOMCODE',
             'quantity': 1,
             'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE
+            'voucher_type': Voucher.SINGLE_USE,
+            'category': self.category.id,
+            'sub_category': ''
         }
         CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -161,7 +220,7 @@ class CouponViewSetTest(TestCase):
 
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
-        coupon = create_coupon(partner=self.partner)
+        coupon = self.create_coupon(partner=self.partner)
         coupon_client = Client.objects.create(username='TestX')
         basket = CouponViewSet().add_product_to_basket(
             product=coupon,
@@ -177,7 +236,7 @@ class CouponViewSetTest(TestCase):
 
     def test_create_order(self):
         """Test the order creation."""
-        coupon = create_coupon(partner=self.partner)
+        coupon = self.create_coupon(partner=self.partner)
         coupon_client = Client.objects.create(username='TestX')
         basket = CouponViewSet().add_product_to_basket(
             product=coupon,
@@ -196,7 +255,7 @@ class CouponViewSetTest(TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponViewSetFunctionalTest(TestCase):
+class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
@@ -211,7 +270,6 @@ class CouponViewSetFunctionalTest(TestCase):
         course_id = 'edx/Demo_Course2/DemoX'
         course = Course.objects.create(id=course_id)
         course.create_or_update_seat('verified', True, 100, self.partner)
-
         self.data = {
             'title': 'Test coupon',
             'client_username': 'TestX',
@@ -223,7 +281,9 @@ class CouponViewSetFunctionalTest(TestCase):
             'benefit_value': 100,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
-            'price': 100
+            'price': 100,
+            'category': self.category.id,
+            'sub_category': 'Test sub-category'
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 
@@ -267,6 +327,8 @@ class CouponViewSetFunctionalTest(TestCase):
         response_data = json.loads(response.content)
         coupon_data = response_data['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
+        self.assertEqual(coupon_data['category']['name'], 'Test category')
+        self.assertEqual(coupon_data['sub_category']['name'], 'Test sub-category')
         self.assertEqual(coupon_data['coupon_type'], 'Enrollment code')
         self.assertIsNotNone(coupon_data['last_edited'][0])
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
@@ -287,6 +349,34 @@ class CouponViewSetFunctionalTest(TestCase):
         response_data = json.loads(response.content)
         self.assertEqual(response_data['results'][0]['coupon_type'], 'Discount code')
         self.assertEqual(response_data['results'][0]['vouchers'][0]['benefit'][1], 20.0)
+
+    def test_no_subcategory(self):
+        """ Test that the serializers displays None for when a coupon does not have a sub category. """
+        self.data['sub_category'] = ''
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        response_data = json.loads(response.content)
+
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': response_data['coupon_id']})
+        detail_response = self.client.get(path)
+        response_data = json.loads(detail_response.content)
+        self.assertEqual(response_data['title'], 'Test coupon')
+        self.assertIsNone(response_data['sub_category'])
+
+    def test_existing_coupon_category_change(self):
+        """ Test that the existing product category has been edited on change of (sub)category. """
+        response_data = json.loads(self.response.content)
+        coupon = Product.objects.get(id=response_data['coupon_id'])
+        self.assertEqual(ProductCategory.objects.filter(product=coupon).count(), 1)
+        product_category = ProductCategory.objects.get(product=coupon)
+        self.assertEqual(product_category.category.name, 'Test sub-category')
+
+        self.data['sub_category'] = 'A new sub-category'
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ProductCategory.objects.filter(product=coupon).count(), 1)
+        new_product_category = ProductCategory.objects.get(product=coupon)
+        self.assertEqual(new_product_category, product_category)
+        self.assertEqual(new_product_category.category.name, 'A new sub-category')
 
     def test_update(self):
         """Test updating a coupon."""

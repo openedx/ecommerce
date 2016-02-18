@@ -13,7 +13,7 @@ define([
 
             initialize: function () {
                 this.model = new Coupon({});
-                this.view = new CouponCreateEditView({model: this.model});
+                this.view = new CouponCreateEditView({ model: this.model });
                 this.render();
             }
         });

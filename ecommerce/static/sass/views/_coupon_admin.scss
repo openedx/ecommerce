@@ -53,6 +53,7 @@
         .date-info,
         .usage-limitations,
         .client-info,
+        .category-info,
         .total-paid {
             @include float(left);
 
@@ -64,12 +65,15 @@
 
         .date-info,
         .usage-limitations,
-        .total-paid {
+        .total-paid,
+        .category-info {
             @include margin-right(50%);
         }
 
         .start-date-info,
-        .end-date-info {
+        .end-date-info,
+        .start-category-info,
+        .end-category-info {
             @include float(left);
             width: 50%;
         }

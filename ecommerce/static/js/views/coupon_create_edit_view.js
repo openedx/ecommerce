@@ -38,7 +38,7 @@ define([
                     data = this.model.attributes;
 
                 // The form should be instantiated only once.
-                this.formView = this.formView || new CouponFormView({editing: this.editing, model: this.model});
+                this.formView = this.formView || new CouponFormView({editing: this.editing, model: this.model });
 
                 // Render the basic page layout
                 data.editing = this.editing;
@@ -46,7 +46,7 @@ define([
 
                 // Render the form
                 this.formView.render();
-                $html.find('.coupon-form-outer').html(this.formView.el);
+                $html.find('.coupon-form-outer').html(this.formView.$el);
 
                 // Render the complete view
                 this.$el.html($html);
@@ -57,5 +57,4 @@ define([
                 return this;
             }
         });
-    }
-);
+});
