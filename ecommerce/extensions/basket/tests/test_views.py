@@ -153,7 +153,7 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
     @ddt.data(
         (Benefit.PERCENTAGE, 100, 100, False),
         (Benefit.PERCENTAGE, 50, 50, True),
-        (Benefit.FIXED_PRICE, 50, 10, True)
+        (Benefit.FIXED, 50, 10, True)
     )
     @ddt.unpack
     def test_response_success(self, benefit_type, benefit_value, expected_value, is_discounted):

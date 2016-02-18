@@ -194,7 +194,7 @@ class CouponOfferViewTests(LmsApiMockMixin, TestCase):
     def test_fixed_amount(self, benefit_value, new_price):
         """ Verify a new price is calculated properly with fixed price type benefit. """
         _range = self.prepare_course_information()
-        prepare_voucher(code=COUPON_CODE, _range=_range, benefit_value=benefit_value, benefit_type=Benefit.FIXED_PRICE)
+        prepare_voucher(code=COUPON_CODE, _range=_range, benefit_value=benefit_value, benefit_type=Benefit.FIXED)
         response = self.client.get(self.path_with_code)
         self.assertEqual(response.context['new_price'], new_price)
 
