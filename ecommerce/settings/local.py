@@ -106,17 +106,20 @@ ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 EDX_API_KEY = 'test'   # lms.EDX_API_KEY
 # END ORDER PROCESSING
 
-
+PAYMENT_PROCESSORS = (
+    'ecommerce.extensions.payment.processors.paybox_system.PayBoxSystem',
+)
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
-
-    "CyberSource2": {
-        "SECRET_KEY": "abcd123",
-        "ACCESS_KEY": "abcd123",
-        "PROFILE_ID": "edx",
-        "PURCHASE_ENDPOINT": "/shoppingcart/payment_fake"
+    'paybox_system': {
+        'PBX_SITE': '1999888',
+        'PBX_RANG': '43',
+        'PBX_IDENTIFIANT': '107975626',
+        'private_key': '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF',
+        'payment_page_url': 'https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi',
+        'receipt_page_url': get_lms_url('/payment/postpay-success/'),
+        'cancel_page_url': get_lms_url('/payment/postpay-cancel/'),
     },
-
 }
 # END PAYMENT PROCESSING
 
