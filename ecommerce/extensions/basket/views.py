@@ -64,8 +64,15 @@ class BasketSummaryView(BasketView):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         lines = self.request.basket.lines.all()
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
-        page_title = 'Upgrade your enrollment'
-        for line in lines:
+        if 'HTTP_REFERER' in self.request.META:
+            referer = self.request.META['HTTP_REFERER']
+        else:
+            referer = ''
+        if referer.find('dashboard') == -1:
+            page_title = 'Enroll in '
+        else:
+            page_title = 'Upgrade your enrollment for '
+        for index, line in enumerate(lines):
             course_id = line.product.course_id
             # Get each course type so we can display to the user at checkout.
             try:
@@ -82,6 +89,8 @@ class BasketSummaryView(BasketView):
                     course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
                     cache.set(cache_hash, course, settings.COURSES_API_CACHE_TIMEOUT)
                 line.course = course
+                if index == 0:
+                    page_title += course['name']
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_id)
 
