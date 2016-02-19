@@ -56,16 +56,17 @@ class BasketUtilsTests(TestCase):
         self.assertFalse(basket.vouchers.all())
         self.assertFalse(basket.applied_offers())
 
-    def test_prepare_basket_with_multiple_quantity(self):
-        """ Verify a basket is returned and only contains a single quantity of product. """
-        product = ProductFactory()
-        basket = prepare_basket(self.request, product)
-        basket = prepare_basket(self.request, product)
+    def test_prepare_basket_with_multiple_products(self):
+        """ Verify a basket is returned and only contains a single product. """
+        product1 = ProductFactory(stockrecords__partner__short_code='test1')
+        product2 = ProductFactory(stockrecords__partner__short_code='test2')
+        basket = prepare_basket(self.request, product1)
+        basket = prepare_basket(self.request, product2)
         self.assertIsNotNone(basket)
         self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
-        self.assertEqual(basket.lines.first().product, product)
-        self.assertEqual(basket.product_quantity(product), 1)
+        self.assertEqual(basket.lines.first().product, product2)
+        self.assertEqual(basket.product_quantity(product2), 1)
 
     @ddt.data(
         ('honor', 'Honor'),
