@@ -119,7 +119,7 @@ Variable                 Description                                            
 ======================== ========================================================================= ========= ============================================================
 ACCESS_TOKEN             OAuth2 access token used to authenticate requests                         Yes       N/A
 ENABLE_OAUTH2_TESTS      Whether to run tests verifying that the LMS can be used to sign into Otto No        True
-HONOR_COURSE_ID          The ID of a Free (Honor) course                                           No        'edX/DemoX/Demo_Course'
+HONOR_COURSE_ID          The ID of a Free (Honor) course                                           No        'course-v1:edX+DemoX+Demo_Course'
 VERIFIED_COURSE_ID       The ID of a Verified course                                               No        'course-v1:BerkeleyX+ColWri.3.6x+3T2015'
 PROFESSIONAL_COURSE_ID   The ID of a Professional Education course                                 No        'course-v1:UBCx+Marketing5501x+2T2015'
 ECOMMERCE_URL_ROOT       URL root for the E-Commerce Service                                       Yes       N/A

@@ -29,7 +29,7 @@ define([
                         },
                         {
                             name: 'course_key',
-                            value: 'edX/DemoX/Demo_Course'
+                            value: 'course-v1:edX+DemoX+Demo_Course'
                         },
                         {
                             name: 'id_verification_required',

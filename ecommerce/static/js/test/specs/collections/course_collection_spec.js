@@ -1,21 +1,24 @@
 define([
+        'underscore.string',
         'collections/course_collection'
     ],
-    function (CourseCollection) {
+    function (_s,
+              CourseCollection) {
         'use strict';
         var collection,
+            demo_course_api_url = 'http://ecommerce.local:8002/api/v2/courses/course-v1:edX+DemoX+Demo_Course/',
             response = {
                 count: 1,
                 next: null,
                 previous: null,
                 results: [
                     {
-                        id: 'edX/DemoX/Demo_Course',
-                        url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/',
+                        id: 'course-v1:edX+DemoX+Demo_Course',
+                        url: demo_course_api_url,
                         name: 'edX Demonstration Course',
                         verification_deadline: null,
                         type: 'credit',
-                        products_url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/products/',
+                        products_url: _s.sprintf('%sproducts', demo_course_api_url),
                         last_edited: '2015-07-28T18:08:15Z'
                     }
                 ]

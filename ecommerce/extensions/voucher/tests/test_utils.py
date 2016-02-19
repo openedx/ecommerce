@@ -27,7 +27,7 @@ VOUCHER_CODE_LENGTH = 1
 
 class UtilTests(CourseCatalogTestMixin, TestCase):
 
-    course_id = 'edX/DemoX/Demo_Course'
+    course_id = 'course-v1:edX+DemoX+Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
 

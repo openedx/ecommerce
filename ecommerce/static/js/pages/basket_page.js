@@ -15,14 +15,7 @@ define([
               Utils) {
         'use strict';
 
-        var appendToForm = function (value, key, form) {
-            $('<input>').attr({
-                type: 'text',
-                name: key,
-                value: value
-            }).appendTo(form);
-        },
-        checkoutPayment = function(data) {
+        var checkoutPayment = function(data) {
             $.ajax({
                 url: '/api/v2/checkout/',
                 method: 'POST',
@@ -48,14 +41,21 @@ define([
         },
         onSuccess = function (data) {
             var $form = $('<form>', {
+                class: 'hidden',
                 action: data.payment_page_url,
                 method: 'POST',
                 'accept-method': 'UTF-8'
             });
 
-            _.each(data.payment_form_data, appendToForm($form));
+            _.each(data.payment_form_data, function (value, key) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: key,
+                    value: value
+                }).appendTo($form);
+            });
 
-            $form.submit();
+            $form.appendTo('body').submit();
         },
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
@@ -71,8 +71,8 @@ define([
                 hideVoucherForm();
             });
 
-            $paymentButtons.find('.payment-button').click(function (e) {
-                var $btn = $(e.target),
+            $paymentButtons.find('.payment-button').on('click', function(event) {
+                var $btn = $(event.target),
                     deferred = new $.Deferred(),
                     promise = deferred.promise(),
                     paymentProcessor = $btn.val(),
@@ -92,13 +92,12 @@ define([
         };
 
         return {
-            appendToForm: appendToForm,
             checkoutPayment: checkoutPayment,
             hideVoucherForm: hideVoucherForm,
             onSuccess: onSuccess,
             onFail: onFail,
             onReady: onReady,
-            showVoucherForm: showVoucherForm,
+            showVoucherForm: showVoucherForm
         };
     }
 );

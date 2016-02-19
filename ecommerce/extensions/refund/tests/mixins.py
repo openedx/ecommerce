@@ -24,7 +24,7 @@ SourceType = get_model('payment', 'SourceType')
 class RefundTestMixin(CourseCatalogTestMixin):
     def setUp(self):
         super(RefundTestMixin, self).setUp()
-        self.course, __ = Course.objects.get_or_create(id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course')
+        self.course, __ = Course.objects.get_or_create(id=u'course-v1:edX+DemoX+Demo_Course', name=u'edX Demó Course')
         self.honor_product = self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.verified_product = self.course.create_or_update_seat('verified', True, 10, self.partner)
 

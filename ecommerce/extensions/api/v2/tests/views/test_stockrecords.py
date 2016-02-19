@@ -23,7 +23,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, Th
         super(StockRecordViewSetTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
+        self.course = Course.objects.create(id='course-v1:edX+DemoX+Demo_Course', name='Demo Course')
         self.product = self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.stockrecord = self.product.stockrecords.first()
         self.change_permission = Permission.objects.get(codename='change_stockrecord')

@@ -17,7 +17,7 @@ class CatalogMixin(CourseCatalogTestMixin):
         self.user = self.create_user(is_staff=True)
 
         # Create course seat for edx partner
-        self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
+        self.course = Course.objects.create(id='course-v1:edX+DemoX+Demo_Course', name='Demo Course')
         self.seat = self.course.create_or_update_seat('honor', False, 0, self.partner)
 
         # Create Catalog and stockRecord objects.

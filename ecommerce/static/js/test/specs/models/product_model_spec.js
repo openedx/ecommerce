@@ -22,7 +22,7 @@ define([
                     },
                     {
                         name: 'course_key',
-                        value: 'edX/DemoX/Demo_Course'
+                        value: 'course-v1:edX+DemoX+Demo_Course'
                     },
                     {
                         name: 'id_verification_required',
@@ -66,7 +66,7 @@ define([
 
                     // Sanity check
                     expect(model.get('certificate_type')).toEqual('verified');
-                    expect(model.get('course_key')).toEqual('edX/DemoX/Demo_Course');
+                    expect(model.get('course_key')).toEqual('course-v1:edX+DemoX+Demo_Course');
                     expect(model.get('id_verification_required')).toEqual(true);
 
                     // Very the attributes have been re-nested

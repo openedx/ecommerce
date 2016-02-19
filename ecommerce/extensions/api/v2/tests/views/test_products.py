@@ -25,7 +25,7 @@ class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         super(ProductViewSetBase, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
+        self.course = Course.objects.create(id='course-v1:edX+DemoX+Demo_Course', name='Test Course')
 
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)

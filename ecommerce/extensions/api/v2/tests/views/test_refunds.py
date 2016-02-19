@@ -25,7 +25,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
     def setUp(self):
         super(RefundCreateViewTests, self).setUp()
-        self.course_id = 'edX/DemoX/Demo_Course'
+        self.course_id = 'course-v1:edX+DemoX+Demo_Course'
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 

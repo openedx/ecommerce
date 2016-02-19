@@ -12,7 +12,7 @@ define([
 
         describe('Basket Page', function () {
             var data,
-                form;
+                $form;
 
             beforeEach(function () {
                 $('<div id="voucher_form_container"><input id="id_code">' +
@@ -33,7 +33,8 @@ define([
                     }
                 };
 
-                form = $('<form>', {
+                $form = $('<form>', {
+                    class: 'hidden',
                     action: data.payment_page_url,
                     method: 'POST',
                     'accept-method': 'UTF-8'
@@ -77,23 +78,6 @@ define([
                 });
             });
 
-            describe('appendToForm', function () {
-                it('should append input data to form', function () {
-                    _.each(data.payment_form_data, function(value, key) {
-                        BasketPage.appendToForm(value, key, form);
-                    });
-                    expect(form.children().length).toEqual(3);
-                });
-            });
-
-            describe('onSuccess', function () {
-                it('should fill form inputs for each data key/value pair', function () {
-                    spyOn(_, 'each');
-                    BasketPage.onSuccess(data);
-                    expect(_.each.calls.count()).toEqual(1);
-                });
-            });
-
             describe('onFail', function () {
                 it('should report error to message div element', function () {
                     $('<div id="messages"></div>').appendTo('body');
@@ -122,6 +106,8 @@ define([
                         cookie = 'checkout-payment-test';
 
                     spyOn($, 'ajax');
+                    spyOn(BasketPage, 'onSuccess');
+
                     $.cookie('ecommerce_csrftoken', cookie);
 
                     BasketPage.checkoutPayment(data);
@@ -136,6 +122,8 @@ define([
                     expect(args.contentType).toEqual('application/json; charset=utf-8');
                     expect(args.headers).toEqual({'X-CSRFToken': cookie});
                     expect(JSON.parse(args.data)).toEqual(data);
+                    BasketPage.onSuccess(args);
+                    expect(BasketPage.onSuccess).toHaveBeenCalled();
                 });
             });
         });
