@@ -106,3 +106,10 @@ class BasketTests(TestCase):
 
         # Verify the basket for the second site/tenant is not modified
         self.assert_basket_state(user.baskets.get(site=self.site2), Basket.OPEN, user, self.site2)
+
+    def test_create_basket(self):
+        """ Verify the method creates a new basket. """
+        user = factories.UserFactory()
+        basket = Basket.create_basket(self.site1, user)
+        self.assertEqual(basket.site, self.site1)
+        self.assertEqual(basket.owner, user)

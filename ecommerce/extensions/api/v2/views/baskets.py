@@ -130,7 +130,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         # (baskets, then orders) to ensure that we don't leave the system in a dirty state
         # in the event of an error.
         with transaction.atomic():
-            basket = Basket.get_basket(request.user, request.site)
+            basket = Basket.create_basket(request.site, request.user)
+            basket_id = basket.id
 
             requested_products = request.data.get(AC.KEYS.PRODUCTS)
             if requested_products:
@@ -163,7 +164,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                         )
 
                     basket.add_product(product)
-                    logger.info(u"Added product with SKU [%s] to basket [%d]", sku, basket.id)
+                    logger.info('Added product with SKU [%s] to basket [%d]', sku, basket_id)
             else:
                 # If no products were included in the request, we cannot checkout.
                 return self._report_bad_request(
@@ -188,8 +189,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             try:
                 response_data = self._checkout(basket, payment_processor())
             except Exception as ex:  # pylint: disable=broad-except
-                basket.thaw()
-                logger.exception('Failed to initiate checkout for Basket [%d]. Basket has been thawed.', basket.id)
+                basket.delete()
+                logger.exception('Failed to initiate checkout for Basket [%d]. The basket has been deleted.', basket_id)
                 return Response({'developer_message': ex.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             # Return a serialized basket, if checkout was not requested.
@@ -305,8 +306,8 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
     queryset = Order.objects.all()
 
     def dispatch(self, request, *args, **kwargs):
-        warnings.warn('The basket-order API view is deprecated. Use the order API (e.g. /api/v2/orders/<order-number>/',
-                      DeprecationWarning)
+        msg = 'The basket-order API view is deprecated. Use the order API (e.g. /api/v2/orders/<order-number>/).'
+        warnings.warn(msg, DeprecationWarning)
         # Change the basket ID to an order number.
         partner = request.site.siteconfiguration.partner
         kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(partner, kwargs['basket_id'])
