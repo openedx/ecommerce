@@ -18,7 +18,7 @@
                         {% if line.certificate_type %}
                         <p class="certificate_type">
                             {% blocktrans with certificate_type=line.certificate_type %}
-                                Enroll and Pursue a {{certificate_type}} Certificate in
+                                Pursue a {{certificate_type}} Certificate in
                             {% endblocktrans %}
                         </p>
                         {% endif %}
@@ -98,7 +98,7 @@
         <div class="row">
             <div class="payment-buttons col-sm-3" data-basket-id="{{ basket.id }}">
                 {% for processor in payment_processors %}
-                    <button class="btn btn-primary payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
+                    <button class="btn btn-success payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
                         {% if processor.NAME == 'cybersource' %}
                             {% trans "Checkout" %}
                         {% elif processor.NAME == 'paypal' %}
@@ -113,13 +113,17 @@
         <div class="row verification-note">
             <span><i class="fa fa-exclamation-circle"></i></span>
             {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
-            {% trans "<b>Note:</b> You will need a <b>webcam</b> and a <b>photo ID</b> to verify your identity before the course starts. " %}
+            {% for line in lines %}
+                {% if line.certificate_type == 'Professional' or line.certificate_type == 'Verified' %}
+                    {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b> before the course starts. " %}
+                {% else %}
+                    {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
+                {% endif %}
+            {% endfor %}
         </div>
         <div class="row help">
             <p><b>{% trans "Have questions?" %}</b></p>
-            {% blocktrans with link_start='<a href="{{ support_url }}" target="_blank">' link_end='</a>' %}
-                Please read {{ link_start }}our FAQs to view common questions about our certificates.{{ link_end }}
-            {% endblocktrans %}
+            <a href="{{ faq_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
         </div>
     </div>
 {% else %}
