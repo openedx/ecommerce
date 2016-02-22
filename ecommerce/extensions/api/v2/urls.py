@@ -12,10 +12,15 @@ from ecommerce.extensions.api.v2.views import (baskets as basket_views,
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
-BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
+BASKET_ID_PATTERN = r'(?P<basket_id>[\d]+)'
 
 BASKET_URLS = [
     url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
+    url(
+        r'^{basket_id}/$'.format(basket_id=BASKET_ID_PATTERN),
+        basket_views.BasketDestroyView.as_view(),
+        name='destroy'
+    ),
     url(
         r'^{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
         basket_views.OrderByBasketRetrieveView.as_view(),

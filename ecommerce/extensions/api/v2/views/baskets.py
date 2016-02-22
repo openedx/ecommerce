@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.permissions import IsSuperUser
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
@@ -319,3 +320,9 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
             queryset = queryset.filter(user=user)
 
         return queryset
+
+
+class BasketDestroyView(generics.DestroyAPIView):
+    lookup_url_kwarg = 'basket_id'
+    permission_classes = (IsAuthenticated, IsSuperUser,)
+    queryset = Basket.objects.all()
