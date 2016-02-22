@@ -11,6 +11,7 @@ from django.test import override_settings
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
+from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
 from testfixtures import LogCapture
 
@@ -261,3 +262,27 @@ class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):
         response = self.client.get(url, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.serialize_order(self.order))
+
+
+class BasketDestroyViewTests(TestCase):
+    def setUp(self):
+        super(BasketDestroyViewTests, self).setUp()
+        self.basket = BasketFactory()
+        self.url = reverse('api:v2:baskets:destroy', kwargs={'basket_id': self.basket.id})
+
+    def test_authorization(self):
+        """ Verify regular users cannot delete baskets. """
+        user = self.create_user()
+        self.client.login(username=user.username, password=self.password)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Basket.objects.filter(id=self.basket.id).exists())
+
+    def test_deletion(self):
+        """ Verify superusers can delete baskets. """
+        superuser = self.create_user(is_superuser=True)
+        self.client.login(username=superuser.username, password=self.password)
+        response = self.client.delete(self.url)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Basket.objects.filter(id=self.basket.id).exists())
