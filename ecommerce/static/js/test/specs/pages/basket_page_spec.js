@@ -106,9 +106,14 @@ define([
             });
 
             describe('onSuccess', function () {
-                it('should create and submit form', function () {
+                beforeEach(function(){
                     spyOn(BasketPage, 'createForm').and.callFake(function(){
-                        return;
+                        return $('<form>', {
+                            class: 'hidden',
+                            action: data.payment_page_url,
+                            method: 'POST',
+                            'accept-method': 'UTF-8'
+                        });
                     });
                     spyOn(BasketPage, 'submitForm').and.callFake(function(){
                         return;
@@ -116,7 +121,11 @@ define([
                     spyOn(BasketPage, 'onSuccess').and.callFake(function(data){
                         var form = BasketPage.createForm(data);
                         BasketPage.submitForm(form, data);
+                        return;
                     });
+                });
+
+                it('should create and submit form', function () {
                     BasketPage.onSuccess(data);
                     expect(BasketPage.onSuccess).toHaveBeenCalled();
                     expect(BasketPage.createForm).toHaveBeenCalled();
