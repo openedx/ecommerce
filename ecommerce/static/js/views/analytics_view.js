@@ -75,10 +75,21 @@ define([
              */
             logUser: function () {
                 var userModel = this.options.userModel;
-                analytics.identify(userModel.get('username'), {
-                    name: userModel.get('name'),
-                    email: userModel.get('email')
-                });
+                analytics.identify(
+                    userModel.get('username'),
+                    {
+                        name: userModel.get('name'),
+                        email: userModel.get('email')
+                    },
+                    {
+                        integrations: {
+                            // Disable MailChimp because we don't want to update the user's email
+                            // and username in MailChimp based on this request. We only need to capture
+                            // this data in MailChimp on registration/activation.
+                            MailChimp: false
+                        }
+                    }
+                );
             },
 
             buildCourseProperties: function() {
