@@ -150,11 +150,8 @@ define([
                         return val ? val.id : null;
                     }
                 },
-                'input[name=sub_category]': {
-                    observe: 'sub_category',
-                    onGet: function(val){
-                        return val ? val.name : null;
-                    }
+                'input[name=note]': {
+                    observe: 'note'
                 }
             },
 
@@ -172,8 +169,11 @@ define([
                 this.editing = options.editing || false;
 
                 this.couponCategoryCollection.fetch(); // fetch collection of coupon categories
-                this.updateDropdown(this.couponCategoryCollection); // assign them to the stickit observable 
-
+                this.updateDropdown(this.couponCategoryCollection); // assign them to the stickit observable
+                if(options.editing){ // assign note if exists
+                    var note = this.model.get('attribute_values').filter(function(obj){ return obj.name === 'Note'; });
+                    this.model.set('note', note.length > 0 ? note[0].value : null);
+                }
                 this.listenTo(this.model, 'change:coupon_type', this.toggleFields);
                 this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
                 
@@ -290,7 +290,7 @@ define([
                 this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
                 this.$el.find('select[name=category]').attr('disabled', true);
-                this.$el.find('input[name=sub_category]').attr('disabled', true);
+                this.$el.find('input[name=note]').attr('disabled', true);
             },
 
             updateDropdown: function(options){

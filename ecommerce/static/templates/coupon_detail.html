@@ -51,8 +51,10 @@
                 <div class="value"><%= coupon['category']['name'] %></div>
             </div>
             <div class="end-category-info">
-                <div class="heading"><%= gettext('Subcategory:') %></div>
-                <div class="value"><%= coupon['sub_category']['name'] %></div>
+                <% if(note != null){ %>
+                <div class="heading"><%= gettext('Note:') %></div>
+                <div class="value"><%= note %></div>
+                <% } %>
             </div>
         </div>
         <div class="info-item usage-limitations">

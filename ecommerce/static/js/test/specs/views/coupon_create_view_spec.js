@@ -18,70 +18,23 @@ define([
                 categoriesDropdownOptions = [
                     {
                         value: 4,
-                        label: 'NewCoursePromo',
+                        label: 'Affiliate Promotion',
                         selected: true
-                    },
-                    {
-                        value: 5,
-                        label: 'OldCoursePromo',
-                        selected: false
                     }
                 ],
                 mockedFetchedCategories = {
                     id: 3,
-                    name: 'Coupons',
-                    slug: 'coupons',
-                    description: 'All Coupons',
-                    path: '0002',
-                    depth: 1,
-                    numchild: 9,
-                    image: null,
-                    child: [
+                    children: [
                         {
                             id: 4,
-                            name: 'NewCoursePromo',
-                            slug: 'newcoursepromo',
-                            description: '',
+                            children: [],
                             path: '00020001',
                             depth: 2,
-                            numchild: 1,
-                            image: null,
-                            child: [
-                                {
-                                    id: 17,
-                                    name: 'None',
-                                    slug: 'none',
-                                    description: '',
-                                    path: '000200010001',
-                                    depth: 3,
-                                    numchild: 0,
-                                    image: null,
-                                    child: []
-                                }
-                                ]
-                        },
-                        {
-                            id: 5,
-                            name: 'OldCoursePromo',
-                            slug: 'newcoursepromo',
+                            numchild: 0,
+                            name: 'Affiliate Promotion',
                             description: '',
-                            path: '00020001',
-                            depth: 2,
-                            numchild: 1,
                             image: null,
-                            child: [
-                                {
-                                    id: 17,
-                                    name: 'None',
-                                    slug: 'none',
-                                    description: '',
-                                    path: '000200010001',
-                                    depth: 3,
-                                    numchild: 0,
-                                    image: null,
-                                    child: []
-                                }
-                                ]
+                            slug: 'affiliate-promotion'
                         }
                     ]
                 };
@@ -138,7 +91,7 @@ define([
                 view.formView.delegateEvents();
                 view.$el.find('[name=course_id]').val('course-v1:edX+DemoX+Demo_Course').trigger('input');
                 view.$el.find('[name=category]').val(categoriesDropdownOptions[0].value).trigger('change');
-                view.$el.find('[name=sub_category]').val('TESTSUBCAT').trigger('change');
+                view.$el.find('[name=note]').val('TESTNOTE').trigger('change');
                 view.formView.submit($.Event('click'));
                 expect(model.isValid()).toBe(true);
                 expect(model.save).toHaveBeenCalled();

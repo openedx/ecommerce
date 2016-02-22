@@ -34,7 +34,7 @@ define([
                 code: '',
                 price: 0,
                 category: 4,
-                sub_category: 'default'
+                note: ''
             },
 
             validation: {
@@ -49,7 +49,7 @@ define([
                 quantity: { pattern: 'number' },
                 price: { pattern: 'number' },
                 category: { required: true },
-                sub_category: { required: true },
+                note: { required: false },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
@@ -112,8 +112,9 @@ define([
             },
 
             updateVoucherData: function () {
-                var vouchers = this.get('vouchers'),
-                    voucher = vouchers[0],
+                //var vouchers = this.get('vouchers'),
+                var vouchers = this.get('attribute_values'),
+                    voucher = vouchers.filter(function(obj){ return obj.name === 'Coupon vouchers'; })[0].value[0],
                     code_count = _.findWhere(voucher, {'code': voucher.code});
                 this.set('start_date', voucher.start_datetime);
                 this.set('end_date', voucher.end_datetime);
@@ -143,7 +144,7 @@ define([
                 data.end_date = moment.utc(this.get('end_date'));
                 data.price = this.get('price');
                 data.category = this.get('category');
-                data.sub_category = this.get('sub_category');
+                data.note = this.get('note');
 
                 // Enrollment code always gives 100% discount
                 switch (this.get('coupon_type')) {
