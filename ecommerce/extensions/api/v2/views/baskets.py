@@ -1,4 +1,6 @@
 """HTTP endpoints for interacting with baskets."""
+from __future__ import unicode_literals
+
 import logging
 import warnings
 
@@ -93,9 +95,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
             >>> response.json()
             {
-                u'id': 7,
-                u'order': None,
-                u'payment_data': None
+                'id': 7,
+                'order': None,
+                'payment_data': None
             }
 
             If the product with SKU 'FREE-SEAT' is free and checkout is desired:
@@ -104,9 +106,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
             >>> response.json()
             {
-                u'id': 7,
-                u'order': {u'number': u'OSCR-100007'},
-                u'payment_data': None
+                'id': 7,
+                'order': {'number': 'OSCR-100007'},
+                'payment_data': None
             }
 
             If the product with SKU 'PAID-SEAT' is not free and checkout is desired:
@@ -115,12 +117,12 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
             >>> response.json()
             {
-                u'id': 7,
-                u'order': None,
-                u'payment_data': {
-                    u'payment_processor_name': u'paypal',
-                    u'payment_form_data': {...},
-                    u'payment_page_url': u'https://www.someexternallyhostedpaymentpage.com'
+                'id': 7,
+                'order': None,
+                'payment_data': {
+                    'payment_processor_name': 'paypal',
+                    'payment_form_data': {...},
+                    'payment_page_url': 'https://www.someexternallyhostedpaymentpage.com'
                 }
             }
         """
@@ -129,7 +131,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         # (baskets, then orders) to ensure that we don't leave the system in a dirty state
         # in the event of an error.
         with transaction.atomic():
-            basket = Basket.get_basket(request.user, request.site)
+            basket = Basket.create_basket(request.site, request.user)
+            basket_id = basket.id
 
             requested_products = request.data.get(AC.KEYS.PRODUCTS)
             if requested_products:
@@ -162,7 +165,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                         )
 
                     basket.add_product(product)
-                    logger.info(u"Added product with SKU [%s] to basket [%d]", sku, basket.id)
+                    logger.info('Added product with SKU [%s] to basket [%d]', sku, basket_id)
             else:
                 # If no products were included in the request, we cannot checkout.
                 return self._report_bad_request(
@@ -187,8 +190,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             try:
                 response_data = self._checkout(basket, payment_processor())
             except Exception as ex:  # pylint: disable=broad-except
-                basket.thaw()
-                logger.exception('Failed to initiate checkout for Basket [%d]. Basket has been thawed.', basket.id)
+                basket.delete()
+                logger.exception('Failed to initiate checkout for Basket [%d]. The basket has been deleted.', basket_id)
                 return Response({'developer_message': ex.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             # Return a serialized basket, if checkout was not requested.
@@ -230,7 +233,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             order_metadata = data_api.get_order_metadata(basket)
 
             logger.info(
-                u"Preparing to place order [%s] for the contents of basket [%d]",
+                'Preparing to place order [%s] for the contents of basket [%d]',
                 order_metadata[AC.KEYS.ORDER_NUMBER],
                 basket.id,
             )
@@ -304,8 +307,8 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
     queryset = Order.objects.all()
 
     def dispatch(self, request, *args, **kwargs):
-        warnings.warn('The basket-order API view is deprecated. Use the order API (e.g. /api/v2/orders/<order-number>/',
-                      DeprecationWarning)
+        msg = 'The basket-order API view is deprecated. Use the order API (e.g. /api/v2/orders/<order-number>/).'
+        warnings.warn(msg, DeprecationWarning)
         # Change the basket ID to an order number.
         partner = request.site.siteconfiguration.partner
         kwargs['number'] = OrderNumberGenerator().order_number_from_basket_id(partner, kwargs['basket_id'])

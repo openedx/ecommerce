@@ -2,7 +2,6 @@
 from collections import namedtuple
 from decimal import Decimal
 import json
-import logging
 
 import ddt
 from django.contrib.auth import get_user_model
@@ -13,7 +12,6 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
-from testfixtures import LogCapture
 
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -92,18 +90,18 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         self.assert_successful_basket_creation(skus, checkout, payment_processor_name, requires_payment)
 
     def test_multiple_baskets(self):
-        """Test that basket operations succeed if multiple editable baskets exist for the user."""
-        user = User.objects.create_user(
-            username=self.USER_DATA['username'],
-        )
-
+        """ Test that basket operations succeed if the user has editable baskets. The endpoint should
+        ALWAYS create a new basket. """
         # Create two editable baskets for the user
-        for _ in xrange(2):
-            basket = Basket(owner=user, status='Open')
+        basket_count = 2
+        for _ in xrange(basket_count):
+            basket = Basket(owner=self.user, status='Open')
             basket.save()
 
+        self.assertEqual(self.user.baskets.count(), basket_count)
         response = self.create_basket(skus=[self.PAID_SKU], checkout=True)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.user.baskets.count(), basket_count + 1)
 
     @mock.patch('oscar.apps.partner.strategy.Structured.fetch_for_product')
     def test_order_unavailable_product(self, mock_fetch_for_product):
@@ -146,7 +144,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             self.PATH,
             data=json.dumps(request_data),
             content_type=JSON_CONTENT_TYPE,
-            HTTP_AUTHORIZATION='JWT ' + self.generate_token(self.USER_DATA)
+            HTTP_AUTHORIZATION=self.generate_jwt_token_header(self.user)
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
@@ -211,7 +209,11 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         # Verify that the basket creation endpoint requires user data to be signed with a valid secret;
         # guarantee an invalid secret by truncating the valid secret
         invalid_secret = self.JWT_SECRET_KEY[:-1]
-        token = self.generate_token(self.USER_DATA, secret=invalid_secret)
+        payload = {
+            'username': self.user.username,
+            'email': self.user.email,
+        }
+        token = self.generate_token(payload, secret=invalid_secret)
         response = self.create_basket(skus=[self.PAID_SKU], token=token)
         self.assertEqual(response.status_code, 401)
 
@@ -227,16 +229,11 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         """ If an exception is raised when initiating the checkout process, a PaymentProcessorResponse should be
         recorded, and the view should return HTTP status 500. """
 
-        with LogCapture(LOGGER_NAME, level=logging.ERROR) as l:
-            response = self.create_basket(skus=[self.PAID_SKU], checkout=True)
+        self.user.baskets.all().delete()
+        response = self.create_basket(skus=[self.PAID_SKU], checkout=True)
 
-            # Ensure the user's basket is thawed
-            user = User.objects.get(username=self.USERNAME)
-            basket = user.baskets.get()
-            self.assertEqual(basket.status, Basket.OPEN)
-
-            l.check((LOGGER_NAME, 'ERROR',
-                     'Failed to initiate checkout for Basket [{}]. Basket has been thawed.'.format(basket.id)))
+        # Verify no new basket was persisted to the database
+        self.assertEqual(self.user.baskets.count(), 0)
 
         # Validate the response status and content
         self.assertEqual(response.status_code, 500)

@@ -80,18 +80,15 @@ class JwtMixin(object):
         return token
 
 
-class BasketCreationMixin(JwtMixin):
+class BasketCreationMixin(UserMixin, JwtMixin):
     """Provides utility methods for creating baskets in test cases."""
     PATH = reverse('api:v2:baskets:create')
     FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
-    USERNAME = 'sgoodman'
-    USER_DATA = {
-        'username': USERNAME,
-        'email': 'saul@bettercallsaul.com',
-    }
 
     def setUp(self):
         super(BasketCreationMixin, self).setUp()
+
+        self.user = self.create_user()
 
         product_class = factories.ProductClassFactory(
             name=u'𝑨𝒖𝒕𝒐𝒎𝒐𝒃𝒊𝒍𝒆',
@@ -127,12 +124,11 @@ class BasketCreationMixin(JwtMixin):
             request_data[AC.KEYS.PAYMENT_PROCESSOR_NAME] = payment_processor_name
 
         if auth:
-            token = token or self.generate_token(self.USER_DATA)
             response = self.client.post(
                 self.PATH,
                 data=json.dumps(request_data),
                 content_type='application/json',
-                HTTP_AUTHORIZATION='JWT ' + token
+                HTTP_AUTHORIZATION='JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
             )
         else:
             response = self.client.post(
@@ -156,8 +152,7 @@ class BasketCreationMixin(JwtMixin):
             self.assertEqual(response.status_code, 200)
 
             basket = Basket.objects.get()
-            user = User.objects.get(username=self.USER_DATA['username'])
-            basket.strategy = Selector().strategy(user=user)
+            basket.strategy = Selector().strategy(user=self.user)
             self.assertEqual(response.data['id'], basket.id)
 
             if checkout:
