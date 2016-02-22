@@ -1,25 +1,25 @@
 import abc
 import urllib
 
+from factory.fuzzy import FuzzyText
 from bok_choy.javascript import wait_for_js
 from bok_choy.page_object import PageObject
 from bok_choy.promise import EmptyPromise
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 from selenium.webdriver.support.select import Select
 
 from acceptance_tests.config import (
     BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ECOMMERCE_URL_ROOT, LMS_URL_ROOT, MARKETING_URL_ROOT, VERIFIED_COURSE_ID
 )
 
-DISCOUNT_COUPON_NAME = "Acceptance Test Discount Code"
-ENROLLMENT_COUPON_NAME = "Acceptance Test Enrollment Code"
-
 
 def _get_coupon_name(is_discount):
     """
     Returns an appropriate coupon name
     """
-    return DISCOUNT_COUPON_NAME if is_discount else ENROLLMENT_COUPON_NAME
+    discount_name = FuzzyText(length=3, prefix='test-discount-code-').fuzz()
+    enrollment_name = FuzzyText(length=3, prefix='test-enrollment-code-').fuzz()
+    return discount_name if is_discount else enrollment_name
 
 
 class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method
@@ -54,22 +54,22 @@ class CouponsCreateEditPage(EcommerceAppPage):
     path = 'coupons/new'
 
     def is_browser_on_page(self):
-        return self.browser.title.startswith('Create New Coupon')
+        return self.q(css='form.coupon-form-view').visible
 
     @wait_for_js
     def fill_create_coupon_form(self, is_discount):
         course_id_input = 'input[name="course_id"]'
         self.q(css='input[name="title"]').fill(_get_coupon_name(is_discount))
-        self.browser.execute_script("$('{}').focus()".format(course_id_input))
-        self.q(css='{}'.format(course_id_input)).fill(VERIFIED_COURSE_ID)
+        self.browser.execute_script("$('{}')".format(course_id_input))
+        self.q(css=course_id_input).fill(VERIFIED_COURSE_ID)
         self.wait_for_ajax()
         self.wait_for_element_presence(
             'select[name="seat_type"] option[value="Verified"]',
             'Seat Type Drop-Down List is Present'
         )
 
-        self.q(css="input[name='start_date']").fill('15/10/2010/11:11')
-        self.q(css="input[name='end_date']").fill('15/10/5000/11:11')
+        self.q(css="input[name='start_date']").fill('01/01/2010')
+        self.q(css="input[name='end_date']").fill('01/01/5000')
         self.q(css="input[name='client_username']").fill('Test Client')
         self.q(css='select[name="seat_type"] option[value="Verified"]').first.click()
 
@@ -79,6 +79,23 @@ class CouponsCreateEditPage(EcommerceAppPage):
             self.q(css="input[name='benefit_value']").fill('50')
 
         self.q(css="div.form-actions > button.btn").click()
+
+        self.wait_for_ajax()
+
+    @wait_for_js
+    def update_coupon_date(self, start_date='01/01/2010', end_date='01/01/5000'):
+        self.q(css="input[name='start_date']").fill(start_date)
+        self.q(css="input[name='end_date']").fill(end_date)
+
+        self.q(css="div.form-actions > button.btn").click()
+
+        # An alert occurs in firefox here:
+        #     This web page is being redirected to a new location.
+        #     Would you like to resend the form data you have typed to the new location?
+        try:
+            self.browser.switch_to_alert().accept()
+        except NoAlertPresentException:
+            pass
 
         self.wait_for_ajax()
 
@@ -93,6 +110,11 @@ class CouponsDetailsPage(EcommerceAppPage):
         Get a redeem voucher URL
         """
         return self.q(css='table#vouchersTable tbody tr td')[1].text
+
+    @wait_for_js
+    def go_to_edit_coupon_form_page(self):
+        self.q(css='div.coupon-detail-view div.pull-right a.btn.btn-primary.btn-small').first.click()
+        self.wait_for_ajax()
 
 
 class CouponsListPage(EcommerceAppPage):
