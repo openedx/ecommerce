@@ -13,6 +13,15 @@
         padding-bottom: spacing-vertical(small);
     }
 
+    .course_name {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .course_description {
+        font-size: 14px;
+    }
+
     .course-price {
         .discount {
             font-weight: bold;
@@ -42,6 +51,60 @@
         }
     }
 
+    .discount-course-price {
+        margin: 0 10px;
+        border: 1px solid #eeeeee;
+        padding: 20px;
+
+        .data-row {
+            padding-bottom: 10px;
+
+            .text-right {
+                @include float(right);
+            }
+        }
+
+        .discount-row {
+            border-bottom: 1px solid #c5c5c5;
+            padding-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .total-row {
+            padding: 20px 0;
+            color: #0078b0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .btn-purchase {
+            width: 100%;
+        }
+
+        .verification-note {
+            color: #767676;
+            font-size: 11px;
+
+            span {
+                display: inline-block;
+            }
+        }
+    }
+
+    .verified-certificate-info {
+        padding: 30px 0;
+
+        h3 {
+            border-bottom: 1px solid #c5c5c5;
+            padding-bottom: 10px;
+        }
+
+        ul li {
+            padding-bottom: 20px;
+            font-size: 14px;
+        }
+    }
+
     .total-price {
         color: #065683;
     }
@@ -57,6 +120,7 @@
 
     .depth--3 {
         background: #34383a;
+        text-align: center;
         .copy {
             color: #e7e6e6;
             @include container-fixed;

@@ -17,6 +17,7 @@ from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
+from ecommerce.extensions.voucher.utils import get_voucher_discount_info
 from ecommerce.settings import get_lms_url
 
 Benefit = get_model('offer', 'Benefit')
@@ -87,17 +88,9 @@ class BasketSummaryView(BasketView):
 
             applied_offers = self.request.basket.applied_offers()
             benefit = applied_offers.values()[0].benefit if applied_offers else None
-            if benefit:
-                if benefit.type == Benefit.PERCENTAGE:
-                    line.discount_percentage = benefit.value
-                    line.is_discounted = True if benefit.value < 100 else False
-                else:
-                    line.is_discounted = True
-                    discount_percentage = float(benefit.value / line.unit_price_excl_tax) * 100.0
-                    line.discount_percentage = 100.0 if discount_percentage > 100 else discount_percentage
-            else:
-                line.is_discounted = False
-                line.discount_percentage = 0
+            discount_info = get_voucher_discount_info(benefit, line.unit_price_excl_tax)
+            line.discount_percentage = discount_info['discount_percentage']
+            line.is_discounted = discount_info['is_discounted']
 
         context.update({
             'payment_processors': self.get_payment_processors(),

@@ -254,3 +254,34 @@ def create_vouchers(
         vouchers.append(voucher)
 
     return vouchers
+
+
+def get_voucher_discount_info(benefit, price):
+    """
+    Get discount info that will describe the effect that benefit has on product price
+
+    Args:
+        benefit (Benefit): Benefit provided by an applied voucher
+        price (Decimal): Product price
+
+    Returns:
+        dict
+    """
+
+    if benefit and price > 0:
+        if benefit.type == Benefit.PERCENTAGE:
+            return {
+                'discount_percentage': float(benefit.value),
+                'is_discounted': True if benefit.value < 100 else False
+            }
+        else:
+            discount_percentage = float(benefit.value / price) * 100.0
+            return {
+                'discount_percentage': 100.00 if discount_percentage > 100 else float(discount_percentage),
+                'is_discounted': True if discount_percentage < 100 else False,
+            }
+    else:
+        return {
+            'discount_percentage': 0.00,
+            'is_discounted': False
+        }
