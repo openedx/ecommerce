@@ -14,6 +14,11 @@ define([
               CouponDetailTemplate) {
         'use strict';
 
+        var filters = {
+            voucher: function(obj){ return obj.name === 'Coupon vouchers'; },
+            note: function(obj){ return obj.name === 'Note'; }
+        };
+
         return Backbone.View.extend({
             className: 'coupon-detail-view',
 
@@ -81,7 +86,10 @@ define([
             render: function () {
                 var course_data = this.model.get('seats')[0].attribute_values,
                     html,
-                    voucher = this.model.get('vouchers')[0];
+                    voucher = this.model.get('attribute_values').filter(filters.voucher)[0].value[0],
+                    note = this.model.get('attribute_values').filter(filters.note);
+
+                note = note.length > 0 ? note[0].value : null;
 
                 html = this.template({
                     course_id: this.courseID(course_data),
@@ -94,7 +102,8 @@ define([
                     lastEdited: this.lastEdited(this.model.get('last_edited')),
                     price: '$' + this.model.get('price'),
                     startDateTime: this.formatDateTime(voucher.start_datetime),
-                    usage: this.usageLimitation(voucher)
+                    usage: this.usageLimitation(voucher),
+                    note: note
                 });
                 this.$el.html(html);
                 this.renderVoucherTable();
@@ -127,7 +136,7 @@ define([
             },
 
             refreshTableData: function () {
-                var data = this.model.get('vouchers'),
+                var data = this.model.get('attribute_values').filter(filters.voucher)[0].value,
                     $table = this.$el.find('#vouchersTable').DataTable();
 
                 $table.clear().rows.add(data).draw();

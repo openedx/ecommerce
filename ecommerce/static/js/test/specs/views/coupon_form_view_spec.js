@@ -64,42 +64,23 @@ define([
                 categoriesDropdownOptions = [
                     {
                         value: 4,
-                        label: 'NewCoursePromo',
+                        label: 'Affiliate Promotion',
                         selected: true
                     }
                 ],
                 mockedFetchedCategories = {
                     id: 3,
-                    name: 'Coupons',
-                    slug: 'coupons',
-                    description: 'All Coupons',
-                    path: '0002',
-                    depth: 1,
-                    numchild: 9,
-                    image: null,
-                    child: [
+                    children: [
                         {
                             id: 4,
-                            name: 'NewCoursePromo',
-                            slug: 'newcoursepromo',
-                            description: '',
+                            children: [],
                             path: '00020001',
                             depth: 2,
-                            numchild: 1,
+                            numchild: 0,
+                            name: 'Affiliate Promotion',
+                            description: '',
                             image: null,
-                            child: [
-                                {
-                                    id: 17,
-                                    name: 'None',
-                                    slug: 'none',
-                                    description: '',
-                                    path: '000200010001',
-                                    depth: 3,
-                                    numchild: 0,
-                                    image: null,
-                                    child: []
-                                }
-                                ]
+                            slug: 'affiliate-promotion'
                         }
                     ]
                 };
