@@ -60,7 +60,31 @@ define([
                             ]
                         }
                     ]
+                },
+                categoriesDropdownOptions = [
+                    {
+                        value: 4,
+                        label: 'Affiliate Promotion',
+                        selected: true
+                    }
+                ],
+                mockedFetchedCategories = {
+                    id: 3,
+                    children: [
+                        {
+                            id: 4,
+                            children: [],
+                            path: '00020001',
+                            depth: 2,
+                            numchild: 0,
+                            name: 'Affiliate Promotion',
+                            description: '',
+                            image: null,
+                            slug: 'affiliate-promotion'
+                        }
+                    ]
                 };
+
 
             /**
               * Helper function to check if a form field is shown.
@@ -75,8 +99,23 @@ define([
             }
 
             beforeEach(function () {
+                spyOn(CouponFormView.prototype.couponCategoryCollection, 'fetch')
+                    .and.returnValue(mockedFetchedCategories);
+                spyOn(CouponFormView.prototype, 'updateDropdown').and.callFake(function(){
+                    this.categories = categoriesDropdownOptions;
+                });
                 model = new Coupon();
                 view = new CouponFormView({ editing: false, model: model }).render();
+            });
+
+            describe('API call', function(){
+                it('should populate categories', function(){
+                    expect(view.couponCategoryCollection.fetch).toHaveBeenCalled();
+                    expect(view.couponCategoryCollection.fetch()).toEqual(mockedFetchedCategories);
+                    expect(view.couponCategoryCollection.parse(mockedFetchedCategories))
+                        .toEqual(categoriesDropdownOptions);
+                    expect(view.categories).toEqual(categoriesDropdownOptions);
+                });
             });
 
             describe('seat type dropdown', function () {
@@ -113,7 +152,6 @@ define([
                     expect(model.get('stock_record_ids')).toEqual([2]);
                 });
             });
-
 
             describe('enrollment code', function () {
                 beforeEach(function () {

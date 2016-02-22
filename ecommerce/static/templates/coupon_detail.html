@@ -45,6 +45,18 @@
                 <div class="value"><%= endDateTime %></div>
             </div>
         </div>
+        <div class="info-item category-info">
+            <div class="start-category-info">
+                <div class="heading"><%= gettext('Category:') %></div>
+                <div class="value"><%= coupon['category']['name'] %></div>
+            </div>
+            <div class="end-category-info">
+                <% if(note != null){ %>
+                <div class="heading"><%= gettext('Note:') %></div>
+                <div class="value"><%= note %></div>
+                <% } %>
+            </div>
+        </div>
         <div class="info-item usage-limitations">
             <div class="heading"><%= gettext('Usage Limitations:') %></div>
             <div class="value"><%= usage %></div>

@@ -13,6 +13,11 @@
             <p class="help-block"></p>
         </div>
 
+        <div class="form-group">
+            <label for="category"><%= gettext('Category') %></label>
+            <select class="form-control" name="category"></select>
+            <p class="help-block"></p>
+        </div>
         <div class="row">
             <div class="form-group col-md-6">
                 <label for="start_date"><%= gettext('Valid from') %> *</label>
@@ -90,6 +95,11 @@
         <div class="form-group">
             <label for="seat_type"><%= gettext('Seat Type') %> *</label>
             <select class="form-control" name="seat_type"></select>
+            <p class="help-block"></p>
+        </div>
+        <div class="form-group">
+            <label for="note"><%= gettext('Note') %></label>
+            <input type="text" class="form-control" name="note" id="note" />
             <p class="help-block"></p>
         </div>
     </div>

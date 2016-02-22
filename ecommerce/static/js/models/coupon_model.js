@@ -6,7 +6,7 @@ define([
         'jquery-cookie',
         'underscore',
         'moment',
-        'utils/validation_patterns',
+        'utils/validation_patterns'
     ],
     function (Backbone,
               BackboneSuper,
@@ -32,7 +32,9 @@ define([
                 quantity: 1,
                 stock_record_ids: [],
                 code: '',
-                price: 0
+                price: 0,
+                category: 4,
+                note: ''
             },
 
             validation: {
@@ -46,6 +48,8 @@ define([
                 seat_type: { required: true },
                 quantity: { pattern: 'number' },
                 price: { pattern: 'number' },
+                category: { required: true },
+                note: { required: false },
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
@@ -108,8 +112,9 @@ define([
             },
 
             updateVoucherData: function () {
-                var vouchers = this.get('vouchers'),
-                    voucher = vouchers[0],
+                //var vouchers = this.get('vouchers'),
+                var vouchers = this.get('attribute_values'),
+                    voucher = vouchers.filter(function(obj){ return obj.name === 'Coupon vouchers'; })[0].value[0],
                     code_count = _.findWhere(voucher, {'code': voucher.code});
                 this.set('start_date', voucher.start_datetime);
                 this.set('end_date', voucher.end_datetime);
@@ -138,6 +143,8 @@ define([
                 data.start_date = moment.utc(this.get('start_date'));
                 data.end_date = moment.utc(this.get('end_date'));
                 data.price = this.get('price');
+                data.category = this.get('category');
+                data.note = this.get('note');
 
                 // Enrollment code always gives 100% discount
                 switch (this.get('coupon_type')) {

@@ -21,11 +21,13 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 Partner = get_model('partner', 'Partner')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
@@ -385,13 +387,37 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
+
+    def get_children(self, obj):
+        children = obj.get_children()
+        serializer = CategorySerializer(children, many=True)
+        return serializer.data
+
+    class Meta(object):
+        model = Category
+
+
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
+    attribute_values = serializers.SerializerMethodField()
     coupon_type = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
     seats = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
-    vouchers = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
+    def get_attribute_values(self, product):
+        request = self.context.get('request')
+        attributes = product.attr
+        serializer = ProductAttributeValueSerializer(
+            attributes,
+            many=True,
+            read_only=True,
+            context={'request': request}
+        )
+        return serializer.data
 
     def get_coupon_type(self, obj):
         voucher = obj.attr.coupon_vouchers.vouchers.first()
@@ -414,14 +440,17 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_client(self, obj):
         return Basket.objects.filter(lines__product_id=obj.id).first().owner.username
 
-    def get_vouchers(self, obj):
-        vouchers = obj.attr.coupon_vouchers.vouchers.all()
-        serializer = VoucherSerializer(vouchers, many=True, context={'request': self.context['request']})
+    def get_category(self, obj):
+        category = ProductCategory.objects.get(product=obj).category
+        serializer = CategorySerializer(category)
         return serializer.data
 
     class Meta(object):
         model = Product
-        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers',)
+        fields = (
+            'id', 'title', 'coupon_type', 'last_edited', 'seats', 'client',
+            'price', 'category', 'attribute_values'
+        )
 
 
 class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-method
