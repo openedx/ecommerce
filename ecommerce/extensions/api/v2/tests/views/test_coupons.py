@@ -259,15 +259,17 @@ class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
         self.assertIsNotNone(coupon_data['last_edited'][0])
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][1]['value'], 'edx/Demo_Course2/DemoX')
-        self.assertEqual(coupon_data['vouchers'][0]['benefit'][1], 100.0)
-        self.assertIsNotNone(coupon_data['vouchers'][0]['redeem_url'])
-        self.assertEqual(coupon_data['vouchers'][0]['start_datetime'], '2015-01-01T05:00:00Z')
-        self.assertEqual(coupon_data['vouchers'][0]['end_datetime'], '2020-01-01T05:00:00Z')
-        self.assertIsNotNone(coupon_data['vouchers'][0]['code'])
-        self.assertTrue(coupon_data['vouchers'][0]['is_available_to_user'][0])
+
+        voucher_info = coupon_data['attribute_values'][0]['value'][0]
+        self.assertEqual(voucher_info['benefit'][1], 100.0)
+        self.assertIsNotNone(voucher_info['redeem_url'])
+        self.assertEqual(voucher_info['start_datetime'], '2015-01-01T05:00:00Z')
+        self.assertEqual(voucher_info['end_datetime'], '2020-01-01T05:00:00Z')
+        self.assertIsNotNone(voucher_info['code'])
+        self.assertTrue(voucher_info['is_available_to_user'][0])
         self.assertEqual(coupon_data['client'], 'TestX')
         self.assertEqual(coupon_data['price'], '100.00')
-        self.assertEqual(coupon_data['note'], 'Test note')
+        self.assertEqual(coupon_data['attribute_values'][1]['value'], 'Test note')
 
         self.data['title'] = 'Test discount code'
         self.data['benefit_value'] = 20
@@ -275,7 +277,7 @@ class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
         response = self.client.get(COUPONS_LINK)
         response_data = json.loads(response.content)
         self.assertEqual(response_data['results'][0]['coupon_type'], 'Discount code')
-        self.assertEqual(response_data['results'][0]['vouchers'][0]['benefit'][1], 20.0)
+        self.assertEqual(response_data['results'][0]['attribute_values'][0]['value'][0]['benefit'][1], 20.0)
 
     def test_existing_coupon_category_change(self):
         """ Test that the existing product category has been edited on change of category. """
@@ -326,11 +328,12 @@ class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().end_datetime.year, 2035)
 
     def test_no_note(self):
-        """ Test that there is no note returned when no note is provided. """
-        self.data.update({'note': None})
+        """ Test that there is no note returned when no note is exists. """
+        self.data.pop('note')
         self.client.post(COUPONS_LINK, data=self.data, format='json')
         response = self.client.get(COUPONS_LINK)
         response_data = json.loads(response.content)['results'][0]
 
         self.assertEqual(response_data['title'], 'Test coupon')
-        self.assertEqual(response_data['note'], 'None')
+        self.assertEqual(len(response_data['attribute_values']), 1)
+        self.assertEqual(response_data['attribute_values'][0]['name'], 'Coupon vouchers')
