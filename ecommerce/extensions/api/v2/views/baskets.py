@@ -1,4 +1,6 @@
 """HTTP endpoints for interacting with baskets."""
+from __future__ import unicode_literals
+
 import logging
 import warnings
 
@@ -92,9 +94,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
             >>> response.json()
             {
-                u'id': 7,
-                u'order': None,
-                u'payment_data': None
+                'id': 7,
+                'order': None,
+                'payment_data': None
             }
 
             If the product with SKU 'FREE-SEAT' is free and checkout is desired:
@@ -103,9 +105,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
             >>> response.json()
             {
-                u'id': 7,
-                u'order': {u'number': u'OSCR-100007'},
-                u'payment_data': None
+                'id': 7,
+                'order': {'number': 'OSCR-100007'},
+                'payment_data': None
             }
 
             If the product with SKU 'PAID-SEAT' is not free and checkout is desired:
@@ -114,12 +116,12 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             >>> response = requests.post(url, data=json.dumps(data), headers=headers)
             >>> response.json()
             {
-                u'id': 7,
-                u'order': None,
-                u'payment_data': {
-                    u'payment_processor_name': u'paypal',
-                    u'payment_form_data': {...},
-                    u'payment_page_url': u'https://www.someexternallyhostedpaymentpage.com'
+                'id': 7,
+                'order': None,
+                'payment_data': {
+                    'payment_processor_name': 'paypal',
+                    'payment_form_data': {...},
+                    'payment_page_url': 'https://www.someexternallyhostedpaymentpage.com'
                 }
             }
         """
@@ -229,7 +231,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             order_metadata = data_api.get_order_metadata(basket)
 
             logger.info(
-                u"Preparing to place order [%s] for the contents of basket [%d]",
+                'Preparing to place order [%s] for the contents of basket [%d]',
                 order_metadata[AC.KEYS.ORDER_NUMBER],
                 basket.id,
             )
