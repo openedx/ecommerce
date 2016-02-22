@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
@@ -113,7 +113,7 @@ class Course(models.Model):
         return name
 
     def create_or_update_seat(self, certificate_type, id_verification_required, price, partner,
-                              credit_provider=None, expires=None, credit_hours=None):
+                              credit_provider=None, expires=None, credit_hours=None, remove_stale_modes=True):
         """
         Creates course seat products.
 
@@ -148,10 +148,9 @@ class Course(models.Model):
                 attribute_values__value_text=credit_provider
             )
 
+        seats = self.seat_products.filter(certificate_type_query)
         try:
-            seat = self.seat_products.filter(
-                certificate_type_query
-            ).filter(
+            seat = seats.filter(
                 id_verification_required_query
             ).get(
                 credit_provider_query
@@ -213,5 +212,18 @@ class Course(models.Model):
         # TODO Expose via setting
         stock_record.price_currency = 'USD'
         stock_record.save()
+
+        if remove_stale_modes and self.certificate_type_for_mode(certificate_type) == 'professional':
+            id_verification_required_query = Q(
+                attributes__name='id_verification_required',
+                attribute_values__value_boolean=not id_verification_required
+            )
+
+            # Delete seats with a different verification requirement, assuming the seats
+            # have not been purchased.
+            seats.annotate(orders=Count('line')).filter(
+                id_verification_required_query,
+                orders=0
+            ).delete()
 
         return seat

@@ -1,6 +1,8 @@
 import ddt
 import mock
 from oscar.core.loading import get_model
+from oscar.test.factories import create_order
+from oscar.test.newfactories import BasketFactory
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
@@ -175,6 +177,63 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
         child_products = Product.objects.filter(structure=Product.CHILD).count()
         self.assertEqual(child_products, 2)
+
+    def test_prof_ed_stale_product_removal(self):
+        """
+        Verify that stale professional education seats are deleted if they have not been purchased.
+        """
+        course = CourseFactory()
+        course.create_or_update_seat('professional', False, 0, self.partner)
+        self.assertEqual(course.products.count(), 2)
+
+        course.create_or_update_seat('professional', True, 0, self.partner)
+        self.assertEqual(course.products.count(), 2)
+
+        product_mode = course.products.first()
+        self.assertEqual(product_mode.attr.id_verification_required, True)
+        self.assertEqual(product_mode.attr.certificate_type, 'professional')
+
+    def test_prof_ed_stale_product_removal_with_orders(self):
+        """
+        Verify that professional education seats are never deleted if they have been purchased.
+        """
+        user = self.create_user()
+        course = CourseFactory()
+        professional_product_no_verification = course.create_or_update_seat('professional', False, 0, self.partner)
+        self.assertEqual(course.products.count(), 2)
+
+        basket = BasketFactory(owner=user)
+        basket.add_product(professional_product_no_verification)
+        create_order(basket=basket, user=user)
+        course.create_or_update_seat('professional', True, 0, self.partner)
+        self.assertEqual(course.products.count(), 3)
+
+        product_mode = course.products.all()[0]
+        self.assertEqual(product_mode.attr.id_verification_required, True)
+        self.assertEqual(product_mode.attr.certificate_type, 'professional')
+
+        product_mode = course.products.all()[1]
+        self.assertEqual(product_mode.attr.id_verification_required, False)
+        self.assertEqual(product_mode.attr.certificate_type, 'professional')
+
+    def test_create_or_update_seat_without_stale_seat_removal(self):
+        """
+        Verify that professional education seats are not deleted if remove_stale_modes flag is not set.
+        """
+        course = CourseFactory()
+        course.create_or_update_seat('professional', False, 0, self.partner)
+        self.assertEqual(course.products.count(), 2)
+
+        course.create_or_update_seat('professional', True, 0, self.partner, remove_stale_modes=False)
+        self.assertEqual(course.products.count(), 3)
+
+        product_mode = course.products.all()[0]
+        self.assertEqual(product_mode.attr.id_verification_required, True)
+        self.assertEqual(product_mode.attr.certificate_type, 'professional')
+
+        product_mode = course.products.all()[1]
+        self.assertEqual(product_mode.attr.id_verification_required, False)
+        self.assertEqual(product_mode.attr.certificate_type, 'professional')
 
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
