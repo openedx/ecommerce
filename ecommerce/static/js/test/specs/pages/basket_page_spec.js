@@ -107,7 +107,16 @@ define([
 
             describe('onSuccess', function () {
                 it('should create and submit form', function () {
-                    //BasketPage.onSuccess(data);
+                    spyOn(BasketPage, 'submitForm').and.callFake(function(){
+                        return;
+                    });
+                    spyOn(BasketPage, 'onSuccess').and.callFake(function(data){
+                        var form = BasketPage.createForm(data);
+                        BasketPage.submitForm(form, data);
+                    });
+                    BasketPage.onSuccess(data);
+                    expect(BasketPage.onSuccess).toHaveBeenCalled();
+                    expect(BasketPage.submitForm).toHaveBeenCalled();
                 });
             });
 
