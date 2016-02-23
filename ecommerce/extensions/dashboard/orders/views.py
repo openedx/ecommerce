@@ -7,6 +7,8 @@ from oscar.apps.dashboard.orders.views import (
 )
 from oscar.core.loading import get_model
 
+from ecommerce.extensions.dashboard.views import FilterFieldsMixin
+
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 Refund = get_model('refund', 'Refund')
@@ -25,11 +27,13 @@ def queryset_orders_for_user(user):  # pylint: disable=unused-argument
     return Order._default_manager.select_related('user').prefetch_related('lines')  # pylint: disable=protected-access
 
 
-class OrderListView(CoreOrderListView):
+class OrderListView(FilterFieldsMixin, CoreOrderListView):
+    base_queryset = None
+    form = None
+
     def dispatch(self, request, *args, **kwargs):
         # NOTE: This method is overridden so that we can use our override of `queryset_orders_for_user`.
 
-        # pylint: disable=attribute-defined-outside-init
         # base_queryset is equal to all orders the user is allowed to access
         self.base_queryset = queryset_orders_for_user(request.user).order_by('-date_placed')
 
@@ -39,11 +43,16 @@ class OrderListView(CoreOrderListView):
     def get_queryset(self):
         queryset = super(OrderListView, self).get_queryset()
 
-        form = self.form_class(self.request.GET)
-        if form.is_valid():
-            for field, value in form.cleaned_data.iteritems():
-                if field == 'username' and value:
-                    queryset = queryset.filter(user__username__istartswith=value)
+        # Note (CCB): We set self.form here because the super method does not always pass request.GET
+        # to the form constructor. This results in the form not being populated when re-rendered.
+        self.form = self.form_class(self.request.GET)
+        if self.form.is_valid():
+            for field, value in self.form.cleaned_data.iteritems():
+                if value:
+                    _filter = self.get_filter_fields().get(field)
+
+                    if _filter:
+                        queryset = queryset.filter(**{_filter['query_filter']: value})
 
         return queryset
 
