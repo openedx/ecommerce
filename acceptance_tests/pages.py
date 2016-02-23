@@ -1,25 +1,29 @@
 import abc
 import urllib
+from datetime import date
 
-from factory.fuzzy import FuzzyText
 from bok_choy.javascript import wait_for_js
 from bok_choy.page_object import PageObject
 from bok_choy.promise import EmptyPromise
-from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
+from factory.fuzzy import FuzzyText
+from selenium.common.exceptions import (NoAlertPresentException,
+                                        NoSuchElementException)
 from selenium.webdriver.support.select import Select
 
-from acceptance_tests.config import (
-    BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ECOMMERCE_URL_ROOT, LMS_URL_ROOT, MARKETING_URL_ROOT, VERIFIED_COURSE_ID
-)
+from acceptance_tests.config import (BASIC_AUTH_PASSWORD, BASIC_AUTH_USERNAME,
+                                     ECOMMERCE_URL_ROOT, LMS_URL_ROOT,
+                                     MARKETING_URL_ROOT, VERIFIED_COURSE_ID)
+
+DEFAULT_START_DATE = date(2015, 1, 1)
+DEFAULT_END_DATE = date(2050, 1, 1)
 
 
 def _get_coupon_name(is_discount):
     """
-    Returns an appropriate coupon name
+    Returns an appropriate coupon name.
     """
-    discount_name = FuzzyText(length=3, prefix='test-discount-code-').fuzz()
-    enrollment_name = FuzzyText(length=3, prefix='test-enrollment-code-').fuzz()
-    return discount_name if is_discount else enrollment_name
+    prefix = 'test-discount-code-' if is_discount else 'test-enrollment-code-'
+    return FuzzyText(length=3, prefix=prefix).fuzz()
 
 
 class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method
@@ -58,8 +62,19 @@ class CouponsCreateEditPage(EcommerceAppPage):
 
     @wait_for_js
     def fill_create_coupon_form(self, is_discount):
+        """ Fills the coupon form with test data and creates the coupon.
+
+        Args:
+            is_discount(bool): Indicates if the code that's going to be created
+                               should be a discount or enrollment coupon code.
+
+        Returns:
+            coupon_name(str): Fuzzied name of the coupon that has been created.
+
+        """
         course_id_input = 'input[name="course_id"]'
-        self.q(css='input[name="title"]').fill(_get_coupon_name(is_discount))
+        coupon_name = _get_coupon_name(is_discount)
+        self.q(css='input[name="title"]').fill(coupon_name)
         self.browser.execute_script("$('{}')".format(course_id_input))
         self.q(css=course_id_input).fill(VERIFIED_COURSE_ID)
         self.wait_for_ajax()
@@ -68,8 +83,8 @@ class CouponsCreateEditPage(EcommerceAppPage):
             'Seat Type Drop-Down List is Present'
         )
 
-        self.q(css="input[name='start_date']").fill('01/01/2010')
-        self.q(css="input[name='end_date']").fill('01/01/5000')
+        self.q(css="input[name='start_date']").fill(str(DEFAULT_START_DATE))
+        self.q(css="input[name='end_date']").fill(str(DEFAULT_END_DATE))
         self.q(css="input[name='client_username']").fill('Test Client')
         self.q(css='select[name="seat_type"] option[value="Verified"]').first.click()
 
@@ -81,11 +96,12 @@ class CouponsCreateEditPage(EcommerceAppPage):
         self.q(css="div.form-actions > button.btn").click()
 
         self.wait_for_ajax()
+        return coupon_name
 
     @wait_for_js
-    def update_coupon_date(self, start_date='01/01/2010', end_date='01/01/5000'):
-        self.q(css="input[name='start_date']").fill(start_date)
-        self.q(css="input[name='end_date']").fill(end_date)
+    def update_coupon_date(self, start_date=DEFAULT_START_DATE, end_date=DEFAULT_END_DATE):
+        self.q(css="input[name='start_date']").fill(str(start_date))
+        self.q(css="input[name='end_date']").fill(str(end_date))
 
         self.q(css="div.form-actions > button.btn").click()
 
@@ -106,9 +122,6 @@ class CouponsDetailsPage(EcommerceAppPage):
 
     @wait_for_js
     def get_redeem_url(self):
-        """
-        Get a redeem voucher URL
-        """
         return self.q(css='table#vouchersTable tbody tr td')[1].text
 
     @wait_for_js
@@ -130,8 +143,8 @@ class CouponsListPage(EcommerceAppPage):
         self.wait_for_ajax()
 
     @wait_for_js
-    def go_to_coupon_details_page(self, is_discount=False):
-        self.q(css='input[type="search"]').fill(_get_coupon_name(is_discount))
+    def go_to_coupon_details_page(self, coupon_name):
+        self.q(css='input[type="search"]').fill(coupon_name)
         self.wait_for_ajax()
         self.q(css='table#couponTable tbody tr td a').first.click()
         self.wait_for_ajax()

@@ -3,10 +3,11 @@ from unittest import skipUnless
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import ENABLE_OAUTH2_TESTS, VERIFIED_COURSE_ID
-from acceptance_tests.mixins import EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin
-from acceptance_tests.pages import (
-    BasketPage, CouponsCreateEditPage, CouponsDetailsPage, CouponsListPage, DashboardHomePage, RedeemVoucherPage
-)
+from acceptance_tests.mixins import (EcommerceApiMixin, EnrollmentApiMixin,
+                                     LogistrationMixin)
+from acceptance_tests.pages import (BasketPage, CouponsCreateEditPage,
+                                    CouponsDetailsPage, CouponsListPage,
+                                    DashboardHomePage, RedeemVoucherPage)
 
 
 @skipUnless(ENABLE_OAUTH2_TESTS, 'OAuth2 tests are not enabled.')
@@ -33,17 +34,19 @@ class BasketFlowTests(EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, 
 
         self.coupons_list_page.visit().create_new_coupon()
         self.coupons_create_edit_page.fill_create_coupon_form(is_discount)
-        self.coupons_list_page.visit()
-        self.coupons_list_page.go_to_coupon_details_page(is_discount)
         self.assertTrue(self.coupons_details_page.is_browser_on_page())
 
     def test_basket_flow_for_enrollment_code(self):
+        """ Test redeeming an enrollment code enrolls the learner. """
         self.prepare_coupon()
 
+        # Get the redeem URL for the coupon's detail page and go to it.
         redeem_url = self.coupons_details_page.get_redeem_url()
         self.browser.get(redeem_url)
         self.assertTrue(self.redeem_voucher_page.is_browser_on_page())
 
+        # Click the 'Redeem and Enroll' button on the page.
+        # The order should be completed and the user enrolled.
         self.redeem_voucher_page.proceed_to_checkout()
         self.assert_order_created_and_completed()
         self.assert_user_enrolled(self.username, self.course_id, mode="verified")

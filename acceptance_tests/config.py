@@ -9,7 +9,7 @@ def str2bool(s):
 # GENERAL CONFIGURATION
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 ENABLE_OAUTH2_TESTS = str2bool(os.environ.get('ENABLE_OAUTH2_TESTS', True))
-HONOR_COURSE_ID = os.environ.get('HONOR_COURSE_ID', 'edX/DemoX/Demo_Course')
+HONOR_COURSE_ID = os.environ.get('HONOR_COURSE_ID', 'course-v1:edX+DemoX+Demo_Course')
 VERIFIED_COURSE_ID = os.environ.get('VERIFIED_COURSE_ID', 'course-v1:BerkeleyX+ColWri.3.6x+3T2015')
 PROFESSIONAL_COURSE_ID = os.environ.get('PROFESSIONAL_COURSE_ID', 'course-v1:UBCx+Marketing5501x+2T2015')
 

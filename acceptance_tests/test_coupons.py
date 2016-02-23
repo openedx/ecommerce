@@ -1,10 +1,13 @@
+from datetime import date
 from unittest import skipUnless
 
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import ENABLE_OAUTH2_TESTS
 from acceptance_tests.mixins import LogistrationMixin
-from acceptance_tests.pages import CouponsCreateEditPage, CouponsDetailsPage, CouponsListPage
+from acceptance_tests.pages import (DEFAULT_END_DATE, DEFAULT_START_DATE,
+                                    CouponsCreateEditPage, CouponsDetailsPage,
+                                    CouponsListPage)
 
 
 @skipUnless(ENABLE_OAUTH2_TESTS, 'OAuth2 tests are not enabled.')
@@ -41,8 +44,9 @@ class CouponsFlowTests(LogistrationMixin, WebAppTest):
         end_date = self.browser.find_elements_by_css_selector(
             'div.coupon-detail-view div.end-date-info div.value'
         )[0].text
-        self.assertEqual(start_date, expected_start_date)
-        self.assertEqual(end_date, expected_end_date)
+
+        self.assertEqual(start_date, expected_start_date.strftime('%m/%d/%Y %I:%M %p'))
+        self.assertEqual(end_date, expected_end_date.strftime('%m/%d/%Y %I:%M %p'))
 
     def test_create_coupon(self):
         """ Test creating a new coupon. """
@@ -51,11 +55,14 @@ class CouponsFlowTests(LogistrationMixin, WebAppTest):
     def test_update_coupon_dates(self):
         """ Test updating the dates on a coupon. """
         self.create_coupon()
-        self.assert_coupon_dates('01/01/2010 12:00 AM', '01/01/5000 12:00 AM')
+        self.assert_coupon_dates(DEFAULT_START_DATE, DEFAULT_END_DATE)
 
         self.coupons_details_page.go_to_edit_coupon_form_page()
         self.assertTrue(self.coupons_create_edit_page.is_browser_on_page())
 
-        self.coupons_create_edit_page.update_coupon_date(start_date='01/01/3000', end_date='01/01/4000')
+        future_start_date = date(3000, 1, 1)
+        future_end_date = date(4000, 1, 1)
+
+        self.coupons_create_edit_page.update_coupon_date(start_date=future_start_date, end_date=future_end_date)
         self.assertTrue(self.coupons_details_page.is_browser_on_page())
-        self.assert_coupon_dates('01/01/3000 12:00 AM', '01/01/4000 12:00 AM')
+        self.assert_coupon_dates(future_start_date, future_end_date)
