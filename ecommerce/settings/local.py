@@ -107,7 +107,7 @@ EDX_API_KEY = 'test'   # lms.EDX_API_KEY
 # END ORDER PROCESSING
 
 PAYMENT_PROCESSORS = (
-    'ecommerce.extensions.payment.processors.paybox_system.PayBoxSystem',
+    'ecommerce.extensions.payment.processors.paybox_system.PayboxSystem',
 )
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {

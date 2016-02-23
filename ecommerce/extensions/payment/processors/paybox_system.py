@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 
-
+import pprint
 
 import datetime
 import logging
@@ -39,7 +39,7 @@ import hmac
 from collections import OrderedDict
 
 
-class PayBoxSystem(BasePaymentProcessor):
+class PayboxSystem(BasePaymentProcessor):
     """
     CyberSource Secure Acceptance Web/Mobile (February 2015)
 
@@ -81,12 +81,13 @@ class PayBoxSystem(BasePaymentProcessor):
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
-        params = OrderedDict()
+        params = {}
         params['PBX_SITE'] = self.PBX_SITE
         params['PBX_RANG'] = self.PBX_RANG
         params['PBX_IDENTIFIANT'] = self.PBX_IDENTIFIANT
-        params['PBX_CMD'] = "FUN" + uuid.uuid4().hex
-        params['PBX_PORTEUR'] = 'richard@openfun.fr'  #basket.owner.username
+        params['PBX_REPONDRE_A'] = 'http://88.171.125.216:8080/paybox/notify/'
+        params['PBX_CMD'] = "FUN-%s" % basket.order_number
+        params['PBX_PORTEUR'] = basket.owner.username
         params['PBX_RETOUR'] = 'Mt:M;Ref:R;Auto:A;Erreur:E'
         params['PBX_TIME'] = self.utcnow().strftime(ISO_8601_FORMAT)
         params['PBX_TYPECARTE'] = 'CB'
@@ -97,17 +98,18 @@ class PayBoxSystem(BasePaymentProcessor):
         params['PBX_REFUSE'] = self.cancel_page_url
         params['PBX_ANNULE'] = self.cancel_page_url
         params['PBX_RUF1'] = 'POST'
-        params['reference_number'] = basket.order_number
-        params['amount'] = str(basket.total_incl_tax)
-        params['currency'] = basket.currency,
-        params['consumer_id'] = basket.owner.username,
+        #params['reference_number'] = basket.order_number
+        #params['amount'] = str(basket.total_incl_tax)
+        #params['currency'] = basket.currency,
+        #params['consumer_id'] = basket.owner.username,
 
         hmac_query = '&'.join(['%s=%s' % (key, value) for key, value in params.items()])
         binary_key = binascii.unhexlify(self.private_key)
         hmac_hash = hmac.new(binary_key, hmac_query, hashlib.sha512).hexdigest().upper()
         params['PBX_HMAC'] = hmac_hash
-
-        params['payment_page_url'] = '/payment/fake-payment-page/'  # self.payment_page_url
+        print pprint.pprint(params)
+        print params
+        params['payment_page_url'] = self.payment_page_url  # '/payment/fake-payment-page/'  
         #import ipdb; ipdb.set_trace()
         return params
 
