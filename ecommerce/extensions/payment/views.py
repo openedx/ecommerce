@@ -23,6 +23,7 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 
 logger = logging.getLogger(__name__)
 
+Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
@@ -70,6 +71,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
+            Applicator().apply(basket, basket.owner, self.request)
             return basket
         except (ValueError, ObjectDoesNotExist):
             return None
@@ -197,6 +199,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 transaction_id=payment_id
             ).basket
             basket.strategy = strategy.Default()
+            Applicator().apply(basket, basket.owner, self.request)
             return basket
         except MultipleObjectsReturned:
             logger.exception(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
