@@ -46,7 +46,7 @@ def remove_default_categories(apps, schema_editor):
 
 
 def assign_categories_to_coupons(self, schema_editor):
-    category = create_from_breadcrumbs('Coupons > Existing_coupon')
+    category = create_from_breadcrumbs('existing_coupon')
     existing_coupons = Product.objects.filter(product_class__name="Coupon")
     for coupon in existing_coupons:
         existing_categories = ProductCategory.objects.filter(product=coupon)
@@ -58,7 +58,7 @@ def assign_categories_to_coupons(self, schema_editor):
 
 
 def remove_categories_from_coupons(self, schema_editor):
-    category = create_from_breadcrumbs('Coupons > Existing_coupon')
+    category = create_from_breadcrumbs('existing_coupon')
     existing_coupons = Product.objects.filter(product_class__name="Coupon")
     for coupon in existing_coupons:
         ProductCategory.objects.get(product=coupon, category=category).delete()
