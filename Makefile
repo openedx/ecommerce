@@ -45,7 +45,7 @@ clean:
 	rm -rf coverage htmlcov
 
 clean_static:
-	rm -rf assets/ ecommerce/static/build
+	rm -rf assets/* ecommerce/static/build/*
 
 validate_js:
 	rm -rf coverage
