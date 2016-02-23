@@ -86,14 +86,6 @@ define([
                 });
             });
 
-            describe('onSuccess', function () {
-                it('should fill form inputs for each data key/value pair', function () {
-                    spyOn(_, 'each');
-                    BasketPage.onSuccess(data);
-                    expect(_.each.calls.count()).toEqual(1);
-                });
-            });
-
             describe('onFail', function () {
                 it('should report error to message div element', function () {
                     $('<div id="messages"></div>').appendTo('body');

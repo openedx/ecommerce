@@ -48,14 +48,21 @@ define([
         },
         onSuccess = function (data) {
             var $form = $('<form>', {
+                class: 'hidden',
                 action: data.payment_page_url,
                 method: 'POST',
                 'accept-method': 'UTF-8'
             });
 
-            _.each(data.payment_form_data, appendToForm($form));
+            _.each(data.payment_form_data, function (value, key) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: key,
+                        value: value
+                    }).appendTo($form);
+                  });
 
-            $form.submit();
+            $form.appendTo('body').submit();
         },
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
