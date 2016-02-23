@@ -98,7 +98,7 @@
         <div class="row">
             <div class="payment-buttons col-sm-3" data-basket-id="{{ basket.id }}">
                 {% for processor in payment_processors %}
-                    <button class="btn btn-primary payment-button" value="{{ processor.NAME|lower }}", id="{{ processor.NAME|lower }}>
+                    <button class="btn btn-primary payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}>
                         {% if processor.NAME == 'cybersource' %}
                             {% trans "Checkout" %}
                         {% elif processor.NAME == 'paypal' %}
