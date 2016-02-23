@@ -26,7 +26,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
         )
         toggle_switch('ENABLE_NOTIFICATIONS', True)
         user = UserFactory()
-        course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
+        course = Course.objects.create(id='course-v1:edX+DemoX+Demo_Course', name='Demo Course')
         seat = course.create_or_update_seat('credit', False, 50, self.partner, 'ASU', None, 2)
 
         basket = BasketFactory()

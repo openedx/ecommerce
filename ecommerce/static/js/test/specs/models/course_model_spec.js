@@ -31,7 +31,7 @@ define([
                 attribute_values: [
                     {
                         name: 'course_key',
-                        value: 'edX/DemoX/Demo_Course'
+                        value: 'course-v1:edX+DemoX+Demo_Course'
                     },
                     {
                         name: 'id_verification_required',
@@ -55,7 +55,7 @@ define([
                     },
                     {
                         name: 'course_key',
-                        value: 'edX/DemoX/Demo_Course'
+                        value: 'course-v1:edX+DemoX+Demo_Course'
                     },
                     {
                         name: 'id_verification_required',
@@ -79,7 +79,7 @@ define([
                     },
                     {
                         name: 'course_key',
-                        value: 'edX/DemoX/Demo_Course'
+                        value: 'course-v1:edX+DemoX+Demo_Course'
                     },
                     {
                         name: 'id_verification_required',
@@ -103,7 +103,7 @@ define([
                     },
                     {
                         name: 'course_key',
-                        value: 'edX/DemoX/Demo_Course'
+                        value: 'course-v1:edX+DemoX+Demo_Course'
                     },
                     {
                         name: 'id_verification_required',
@@ -135,7 +135,7 @@ define([
                     },
                     {
                         name: 'course_key',
-                        value: 'edX/DemoX/Demo_Course'
+                        value: 'course-v1:edX+DemoX+Demo_Course'
                     },
                     {
                         name: 'id_verification_required',
@@ -153,13 +153,13 @@ define([
                 is_available_to_buy: true
             },
             data = {
-                id: 'edX/DemoX/Demo_Course',
-                url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/',
+                id: 'course-v1:edX+DemoX+Demo_Course',
+                url: 'http://ecommerce.local:8002/api/v2/courses/course-v1:edX+DemoX+Demo_Course/',
                 name: 'edX Demonstration Course',
                 verification_deadline: '2015-10-01T00:00:00Z',
                 honor_mode: false,
                 type: 'credit',
-                products_url: 'http://ecommerce.local:8002/api/v2/courses/edX/DemoX/Demo_Course/products/',
+                products_url: 'http://ecommerce.local:8002/api/v2/courses/course-v1:edX+DemoX+Demo_Course/products/',
                 last_edited: '2015-07-27T00:27:23Z',
                 products: [
                     auditSeat,
@@ -178,7 +178,7 @@ define([
                         attribute_values: [
                             {
                                 name: 'course_key',
-                                value: 'edX/DemoX/Demo_Course'
+                                value: 'course-v1:edX+DemoX+Demo_Course'
                             }
                         ],
                         is_available_to_buy: false

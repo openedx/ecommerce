@@ -29,7 +29,7 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         self.course = self.create_course()
 
     def create_course(self):
-        return Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
+        return Course.objects.create(id='course-v1:edX+DemoX+Demo_Course', name='Test Course')
 
     def serialize_course(self, course, include_products=False):
         """ Serializes a course to a Python dict. """
@@ -68,7 +68,7 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         """ Verify the view can create a new Course."""
         Course.objects.all().delete()
 
-        course_id = 'edX/DemoX/Demo_Course'
+        course_id = 'course-v1:edX+DemoX+Demo_Course'
         course_name = 'Test Course'
         data = {
             'id': course_id,

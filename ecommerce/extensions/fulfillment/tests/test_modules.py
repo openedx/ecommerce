@@ -40,7 +40,7 @@ Voucher = get_model('voucher', 'Voucher')
 class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
 
-    course_id = 'edX/DemoX/Demo_Course'
+    course_id = 'course-v1:edX+DemoX+Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
 

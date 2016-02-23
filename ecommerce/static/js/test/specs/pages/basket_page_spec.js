@@ -11,10 +11,9 @@ define([
         'use strict';
 
         describe('Basket Page', function () {
-            var data,
-                form;
+            var data;
 
-            beforeEach(function () {
+            beforeEach(function() {
                 $('<div id="voucher_form_container"><input id="id_code">' +
                     '<a id="voucher_form_cancel"></a></button></div>' +
                     '<div id="voucher_form_link"><a href=""></a></div>' +
@@ -32,16 +31,20 @@ define([
                         color: 'white'
                     }
                 };
-
-                form = $('<form>', {
-                    action: data.payment_page_url,
-                    method: 'POST',
-                    'accept-method': 'UTF-8'
-                });
             });
 
             afterEach(function () {
                 $('body').empty();
+            });
+
+            describe('appendToForm', function () {
+                it('should append input data to form', function () {
+                    var form = BasketPage.createForm(data);
+                    _.each(data.payment_form_data, function(value, key) {
+                        BasketPage.appendToForm(value, key, form);
+                    });
+                    expect(form.children().length).toEqual(3);
+                });
             });
 
             describe('showVoucherForm', function () {
@@ -62,6 +65,31 @@ define([
                 });
             });
 
+            describe('createForm', function () {
+                it('should create a form based on data', function () {
+                    var form = BasketPage.createForm(data);
+                    expect(form.hasClass('hidden')).toBeTruthy();
+                    expect(form.attr('action')).toEqual(data.payment_page_url);
+                    expect(form.attr('accept-method')).toEqual('UTF-8');
+                    expect(form.attr('method')).toEqual('POST');
+                });
+            });
+
+            describe('submitForm', function () {
+                it('should submit the form', function () {
+                    var form = BasketPage.createForm(data);
+                    spyOn(_, 'each');
+                    spyOn(form, 'appendTo');
+                    spyOn(form, 'submit').and.callFake(function() {
+                        return;
+                    });
+                    BasketPage.submitForm(form, data);
+                    expect(_.each).toHaveBeenCalled();
+                    expect(form.appendTo).toHaveBeenCalledWith('body');
+                    expect(form.submit).toHaveBeenCalled();
+                });
+            });
+
             describe('onReady', function () {
                 it('should toggle voucher form on click', function () {
                     BasketPage.onReady();
@@ -77,20 +105,31 @@ define([
                 });
             });
 
-            describe('appendToForm', function () {
-                it('should append input data to form', function () {
-                    _.each(data.payment_form_data, function(value, key) {
-                        BasketPage.appendToForm(value, key, form);
-                    });
-                    expect(form.children().length).toEqual(3);
-                });
-            });
-
             describe('onSuccess', function () {
-                it('should fill form inputs for each data key/value pair', function () {
-                    spyOn(_, 'each');
+                beforeEach(function(){
+                    spyOn(BasketPage, 'createForm').and.callFake(function(){
+                        return $('<form>', {
+                            class: 'hidden',
+                            action: data.payment_page_url,
+                            method: 'POST',
+                            'accept-method': 'UTF-8'
+                        });
+                    });
+                    spyOn(BasketPage, 'submitForm').and.callFake(function(){
+                        return;
+                    });
+                    spyOn(BasketPage, 'onSuccess').and.callFake(function(data){
+                        var form = BasketPage.createForm(data);
+                        BasketPage.submitForm(form, data);
+                        return;
+                    });
+                });
+
+                it('should create and submit form', function () {
                     BasketPage.onSuccess(data);
-                    expect(_.each.calls.count()).toEqual(1);
+                    expect(BasketPage.onSuccess).toHaveBeenCalled();
+                    expect(BasketPage.createForm).toHaveBeenCalled();
+                    expect(BasketPage.submitForm).toHaveBeenCalled();
                 });
             });
 
@@ -122,6 +161,8 @@ define([
                         cookie = 'checkout-payment-test';
 
                     spyOn($, 'ajax');
+                    spyOn(BasketPage, 'onSuccess');
+
                     $.cookie('ecommerce_csrftoken', cookie);
 
                     BasketPage.checkoutPayment(data);
@@ -136,6 +177,8 @@ define([
                     expect(args.contentType).toEqual('application/json; charset=utf-8');
                     expect(args.headers).toEqual({'X-CSRFToken': cookie});
                     expect(JSON.parse(args.data)).toEqual(data);
+                    BasketPage.onSuccess(args);
+                    expect(BasketPage.onSuccess).toHaveBeenCalled();
                 });
             });
         });
