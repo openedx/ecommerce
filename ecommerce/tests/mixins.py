@@ -12,7 +12,8 @@ from django.core.urlresolvers import reverse
 import httpretty
 import jwt
 from mock import patch
-from oscar.core.loading import get_model, get_class
+from oscar.apps.catalogue.categories import create_from_breadcrumbs
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from social.apps.django_app.default.models import UserSocialAuth
 
@@ -295,6 +296,10 @@ class LmsApiMockMixin(object):
 
 class CouponMixin(object):
     """ Mixin for preparing data for coupons and creating coupons. """
+    def setUp(self):
+        super(CouponMixin, self).setUp()
+        self.category = create_from_breadcrumbs('Coupons > Test category')
+
     def create_coupon(
             self,
             title='Test coupon',
@@ -335,6 +340,7 @@ class CouponMixin(object):
             'quantity': quantity,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
+            'categories': [self.category]
         }
 
         coupon = CouponViewSet().create_coupon_product(

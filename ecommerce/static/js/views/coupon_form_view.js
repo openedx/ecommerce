@@ -6,6 +6,7 @@ define([
         'backbone.super',
         'backbone.validation',
         'backbone.stickit',
+        'ecommerce',
         'underscore',
         'underscore.string',
         'utils/utils',
@@ -18,6 +19,7 @@ define([
               BackboneSuper,
               BackboneValidation,
               BackboneStickit,
+              ecommerce,
               _,
               _s,
               Utils,
@@ -25,7 +27,7 @@ define([
               Course,
               FormView) {
         'use strict';
-
+        
         return FormView.extend({
             tagName: 'form',
 
@@ -38,12 +40,12 @@ define([
             codeTypes: [
                 {
                     value: 'enrollment',
-                    label: gettext('Enrollment Code'),
+                    label: gettext('Enrollment Code')
                 },
                 {
                     value: 'discount',
                     label: gettext('Discount Code')
-                },
+                }
             ],
 
             voucherTypes: [
@@ -62,13 +64,26 @@ define([
             ],
 
             bindings: {
+                'select[name=category]': {
+                    observe: 'category',
+                    selectOptions: {
+                        collection: function () {
+                            return ecommerce.coupons.categories;
+                        },
+                        labelPath: 'name',
+                        valuePath: 'id'
+                    },
+                    setOptions: {
+                        validate: true
+                    }
+                },
                 'input[name=title]': {
                     observe: 'title'
                 },
                 'select[name=code_type]': {
                     observe: 'coupon_type',
                     selectOptions: {
-                        collection: function() {
+                        collection: function () {
                             return this.codeTypes;
                         }
                     },
@@ -84,7 +99,7 @@ define([
                 'select[name=voucher_type]': {
                     observe: 'voucher_type',
                     selectOptions: {
-                        collection: function() {
+                        collection: function () {
                             return this.voucherTypes;
                         }
                     }
@@ -154,14 +169,14 @@ define([
                 this._super();
             },
 
-            changeUpperLimitForBenefitValue: function() {
+            changeUpperLimitForBenefitValue: function () {
                 var is_benefit_percentage = this.$el.find('[name=code_type]').val() === 'Percentage',
                     max_value = is_benefit_percentage ? '100' : '';
 
                 this.$el.find('[name=benefit_value]').attr('max', max_value);
             },
 
-            toggleFields: function() {
+            toggleFields: function () {
                 var couponType = this.model.get('coupon_type'),
                     voucherType = this.model.get('voucher_type'),
                     formGroup = function (sel) {
@@ -205,7 +220,7 @@ define([
                 this.model.set('course_id', courseId);
 
                 course.listenTo(course, 'sync', _.bind(function () {
-                    this.seatTypes = _.map(course.seats(), function(seat) {
+                    this.seatTypes = _.map(course.seats(), function (seat) {
                         var name = seat.getSeatTypeDisplayName();
                         return $('<option></option>')
                             .text(name)
@@ -240,7 +255,7 @@ define([
                     this.model.set('seat_type', seatType);
 
                     if (seatType && !this.editing) {
-                        data = this.$el.find('[value='+seatType+']').data();
+                        data = this.$el.find('[value=' + seatType + ']').data();
                         quantity = this.model.get('quantity');
                         price = data.price * quantity;
                         this.model.set('stock_record_ids', data.stockrecords);
@@ -262,6 +277,7 @@ define([
                 this.$el.find('input[name=benefit_value]').attr('disabled', true);
                 this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
+                this.$el.find('select[name=category]').attr('disabled', true);
             },
 
             render: function () {
@@ -272,13 +288,17 @@ define([
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.
                 this.$alerts = this.$el.find('.alerts');
 
-                if(this.editing) {
+                if (this.editing) {
+                    this.$el.find('select[name=category]').val(this.model.get('categories')[0].id).trigger('change');
                     this.disableNonEditableFields();
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
                     this.fillFromCourse();
                 } else {
+                    var firstEntry = function(obj, i){ return i === 0 ? obj : null; },
+                        defaultCategory = ecommerce.coupons.categories.filter(firstEntry);
                     this.model.set('coupon_type', this.codeTypes[0].value);
                     this.model.set('voucher_type', this.voucherTypes[0].value);
+                    this.model.set('category', defaultCategory[0].id);
                     this.model.set('benefit_type', 'Percentage');
                     this.$el.find('[name=benefit_value]').attr('max', 100);
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
@@ -293,8 +313,7 @@ define([
              */
             saveSuccess: function (model, response) {
                 this.goTo(response.coupon_id ? response.coupon_id.toString() : response.id.toString());
-            },
-
+            }
         });
     }
 );

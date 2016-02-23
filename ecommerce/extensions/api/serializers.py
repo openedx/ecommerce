@@ -14,13 +14,13 @@ import waffle
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.courses.models import Course
 
-
 logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -109,9 +109,8 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
 
     def get_attribute_values(self, product):
         request = self.context.get('request')
-        attributes = product.attr
         serializer = ProductAttributeValueSerializer(
-            attributes,
+            product.attr,
             many=True,
             read_only=True,
             context={'request': request}
@@ -379,10 +378,17 @@ class VoucherSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Voucher
         fields = (
-            'id', 'name', 'code', 'redeem_url', 'usage', 'start_datetime', 'end_datetime',
-            'num_basket_additions', 'num_orders', 'total_discount',
-            'date_created', 'offers', 'is_available_to_user', 'benefit'
+            'id', 'name', 'code', 'redeem_url', 'usage', 'start_datetime', 'end_datetime', 'num_basket_additions',
+            'num_orders', 'total_discount', 'date_created', 'offers', 'is_available_to_user', 'benefit'
         )
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    # NOTE (CCB): We are explicitly ignoring child categories. They are not relevant to our current needs. Support
+    # should be added later, if needed.
+
+    class Meta(object):
+        model = Category
 
 
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
@@ -392,17 +398,18 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
     vouchers = serializers.SerializerMethodField()
+    categories = CategorySerializer(many=True, read_only=True)
 
     def get_coupon_type(self, obj):
         voucher = obj.attr.coupon_vouchers.vouchers.first()
         benefit = voucher.offers.first().benefit
         if benefit.type == Benefit.PERCENTAGE and benefit.value == 100:
-            return "Enrollment code"
-        return "Discount code"
+            return 'Enrollment code'
+        return 'Discount code'
 
     def get_last_edited(self, obj):
         history = obj.history.latest()
-        return (history.history_user.username, history.history_date)
+        return history.history_user.username, history.history_date
 
     def get_seats(self, obj):
         voucher = obj.attr.coupon_vouchers.vouchers.first()
@@ -421,7 +428,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
 
     class Meta(object):
         model = Product
-        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers',)
+        fields = ('id', 'title', 'coupon_type', 'last_edited', 'seats', 'client', 'price', 'vouchers', 'categories',)
 
 
 class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-method

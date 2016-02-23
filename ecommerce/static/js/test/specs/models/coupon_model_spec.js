@@ -49,7 +49,8 @@ define([
                 course_id: 'a/b/c',
                 seat_type: 'verified',
                 course: course,
-                price: 100
+                price: 100,
+                category: 4
             },
             enrollment = {
                 title: 'Test Enrollment',

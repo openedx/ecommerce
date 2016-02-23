@@ -59,7 +59,7 @@ define([
             edit: function (id) {
                 var page = new CouponEditPage({id: id});
                 this.currentView = page;
-                $('#app').html(page.el);
+                this.$el.html(page.el);
             }
         });
     }

@@ -15,7 +15,7 @@ define([
             },
 
             initialize: function (options) {
-                this.model = new Coupon({id: options.id});
+                this.model = Coupon.findOrCreate({id: options.id});
                 this.view = new CouponCreateEditView({
                     editing: true,
                     model: this.model

@@ -3,13 +3,17 @@ define([
         'underscore',
         'views/coupon_form_view',
         'views/alert_view',
-        'models/coupon_model'
+        'models/coupon_model',
+        'test/mock_data/categories',
+        'ecommerce'
     ],
     function ($,
               _,
               CouponFormView,
               AlertView,
-              Coupon) {
+              Coupon,
+              Mock_Categories,
+              ecommerce) {
         'use strict';
 
         describe('coupon form view', function () {
@@ -62,6 +66,7 @@ define([
                     ]
                 };
 
+                
             /**
               * Helper function to check if a form field is shown.
               */
@@ -75,6 +80,9 @@ define([
             }
 
             beforeEach(function () {
+                ecommerce.coupons = {
+                    categories: Mock_Categories
+                };
                 model = new Coupon();
                 view = new CouponFormView({ editing: false, model: model }).render();
             });

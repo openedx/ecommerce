@@ -12,7 +12,7 @@ define([
             title: gettext('Create New Coupon'),
 
             initialize: function () {
-                this.model = new Coupon({});
+                this.model = new Coupon();
                 this.view = new CouponCreateEditView({model: this.model});
                 this.render();
             }

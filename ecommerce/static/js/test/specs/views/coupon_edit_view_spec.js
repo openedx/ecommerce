@@ -50,6 +50,12 @@ define([
                         verifiedSeat
                     ],
                     'client': 'Client Name',
+                    'categories': [
+                        {
+                            'id': 4,
+                            'name': 'TESTCAT'
+                        }
+                    ],
                     'price': '100.00',
                     'vouchers': [
                         {
@@ -91,6 +97,12 @@ define([
                     ],
                     'client': 'Client Name',
                     'price': '100.00',
+                    'categories': [
+                        {
+                            'id': 4,
+                            'name': 'TESTCAT'
+                        }
+                    ],
                     'vouchers': [
                         {
                             'id': 1,

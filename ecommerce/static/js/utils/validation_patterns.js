@@ -1,6 +1,6 @@
 define([
         'backbone',
-        'backbone.validation',
+        'backbone.validation'
     ],
     function (
         Backbone) {

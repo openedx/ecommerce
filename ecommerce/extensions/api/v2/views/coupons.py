@@ -7,18 +7,16 @@ import dateutil.parser
 from django.db import transaction
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import Client
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.serializers import CouponSerializer
+from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
-from ecommerce.extensions.catalogue.utils import (generate_coupon_slug,
-                                                  generate_sku,
-                                                  get_or_create_catalog)
+from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -26,6 +24,8 @@ from ecommerce.extensions.voucher.utils import create_vouchers
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -75,7 +75,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
-
+            categories = Category.objects.filter(id__in=request.data['category_ids'])
             client, __ = Client.objects.get_or_create(username=client_username)
 
             stock_records_string = ' '.join(str(id) for id in stock_record_ids)
@@ -96,7 +96,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 'code': code,
                 'quantity': quantity,
                 'start_date': start_date,
-                'voucher_type': voucher_type
+                'voucher_type': voucher_type,
+                'categories': categories,
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -129,6 +130,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 - quantity (int)
                 - start_date (Datetime)
                 - voucher_type (str)
+                - categories (list of Category objects)
 
         Returns:
             A coupon product object.
@@ -147,6 +149,9 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             product_class=product_class,
             slug=coupon_slug
         )
+
+        for category in data['categories']:
+            ProductCategory.objects.get_or_create(product=coupon_product, category=category)
 
         # Vouchers are created during order and not fulfillment like usual
         # because we want vouchers to be part of the line in the order.
@@ -254,3 +259,11 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
+
+
+class CouponCategoriesListView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        parent_category = Category.objects.get(slug='coupons')
+        return parent_category.get_children()

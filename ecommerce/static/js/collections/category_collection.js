@@ -1,14 +1,15 @@
 define([
         'collections/paginated_collection',
-        'models/coupon_model'
+        'models/category'
     ],
     function (PaginatedCollection,
-              CouponModel) {
+              Category) {
         'use strict';
 
         return PaginatedCollection.extend({
-            model: CouponModel,
-            url: '/api/v2/coupons/'
-        });
+                model: Category,
+                url: '/api/v2/coupons/categories/'
+            }
+        );
     }
 );

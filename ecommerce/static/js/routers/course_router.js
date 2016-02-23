@@ -74,7 +74,7 @@ define([
             edit: function (id) {
                 var page = new CourseEditPage({id: id});
                 this.currentView = page;
-                $('#app').html(page.el);
+                this.$el.html(page.el);
             }
         });
     }

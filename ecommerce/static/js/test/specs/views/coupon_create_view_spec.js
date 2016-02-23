@@ -2,20 +2,26 @@ define([
         'jquery',
         'views/coupon_create_edit_view',
         'views/alert_view',
-        'models/coupon_model'
+        'models/coupon_model',
+        'test/mock_data/categories',
+        'ecommerce'
     ],
     function ($,
               CouponCreateEditView,
               AlertView,
-              Coupon) {
+              Coupon,
+              Mock_Categories,
+              ecommerce) {
         'use strict';
 
         describe('coupon create view', function () {
             var view,
                 model;
 
-
             beforeEach(function () {
+                ecommerce.coupons = {
+                    categories: Mock_Categories
+                };
                 model = new Coupon();
                 view = new CouponCreateEditView({ model: model, editing: false }).render();
                 spyOn(model, 'save');
@@ -35,6 +41,7 @@ define([
                 view.$el.find('[name=start_date]').val('2015-01-01T00:00').trigger('change');
                 view.$el.find('[name=end_date]').val('2016-01-01T00:00').trigger('change');
                 view.$el.find('[name=price]').val('100').trigger('change');
+                view.$el.find('[name=category]').val('4').trigger('change');
                 spyOn(view.formView, 'fillFromCourse').and.callFake(function () {
                     var seatTypes = [$('<option></option>')
                         .text('Verified')
