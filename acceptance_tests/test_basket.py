@@ -4,14 +4,15 @@ from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import ENABLE_OAUTH2_TESTS, VERIFIED_COURSE_ID
 from acceptance_tests.mixins import (EcommerceApiMixin, EnrollmentApiMixin,
-                                     LogistrationMixin)
+                                     LogistrationMixin, UnenrollmentMixin, PaymentMixin)
 from acceptance_tests.pages import (BasketPage, CouponsCreateEditPage,
                                     CouponsDetailsPage, CouponsListPage,
                                     DashboardHomePage, RedeemVoucherPage)
 
 
 @skipUnless(ENABLE_OAUTH2_TESTS, 'OAuth2 tests are not enabled.')
-class BasketFlowTests(EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, WebAppTest):
+class BasketFlowTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, WebAppTest,
+                      PaymentMixin):
     def setUp(self):
         """ Instantiate the page objects. """
         super(BasketFlowTests, self).setUp()
@@ -47,7 +48,7 @@ class BasketFlowTests(EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, 
 
         # Click the 'Redeem and Enroll' button on the page.
         # The order should be completed and the user enrolled.
-        self.redeem_voucher_page.proceed_to_checkout()
+        self.redeem_voucher_page.proceed_to_enrollment()
         self.assert_order_created_and_completed()
         self.assert_user_enrolled(self.username, self.course_id, mode="verified")
 
@@ -60,3 +61,8 @@ class BasketFlowTests(EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, 
 
         self.redeem_voucher_page.proceed_to_checkout()
         self.assertTrue(self.basket_page.is_browser_on_page())
+        self.checkout_with_paypal()
+
+        self.assert_receipt_page_loads()
+        self.assert_order_created_and_completed()
+        self.assert_user_enrolled(self.username, self.course_id, 'verified')

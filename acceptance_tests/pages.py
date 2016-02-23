@@ -155,11 +155,19 @@ class RedeemVoucherPage(EcommerceAppPage):
         return self.browser.title.startswith('Redeem')
 
     @wait_for_js
-    def proceed_to_checkout(self):
+    def proceed_to_enrollment(self):
         """
         Enroll user to a course and redeem voucher code in the process
         """
         self.q(css='div#offer div.container div.text-right a.btn.btn-primary').first.click()
+        self.wait_for_ajax()
+
+    @wait_for_js
+    def proceed_to_checkout(self):
+        """
+        Purchase a course and redeem voucher code in the process
+        """
+        self.q(css='#offer a.btn-purchase').first.click()
         self.wait_for_ajax()
 
 
