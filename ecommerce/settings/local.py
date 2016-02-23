@@ -115,10 +115,11 @@ PAYMENT_PROCESSOR_CONFIG = {
         'PBX_SITE': '1999888',
         'PBX_RANG': '43',
         'PBX_IDENTIFIANT': '107975626',
+        'PBX_REPONDRE_A': 'http://paybox.sleepy.cat:8080/payment/notification/',  #  TCP 80, 443 (HTTPS), 8080, 8081, 8082, 8083, 8084 ou 8085
         'private_key': '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF',
         'payment_page_url': 'https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi',
-        'receipt_page_url': get_lms_url('/payment/postpay-success/'),
-        'cancel_page_url': get_lms_url('/payment/postpay-cancel/'),
+        'receipt_page_url': 'http://paybox.sleepy.cat:8000/payment/success/',
+        'cancel_page_url': 'http://paybox.sleepy.cat:8000/payment/cancel/',
     },
 }
 # END PAYMENT PROCESSING

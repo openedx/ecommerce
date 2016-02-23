@@ -61,6 +61,7 @@ class PayboxSystem(BasePaymentProcessor):
         self.PBX_SITE = configuration['PBX_SITE']
         self.PBX_RANG = configuration['PBX_RANG']
         self.PBX_IDENTIFIANT = configuration['PBX_IDENTIFIANT']
+        self.PBX_REPONDRE_A = configuration['PBX_REPONDRE_A']
         self.private_key = configuration['private_key']
         self.payment_page_url = configuration['payment_page_url']
         self.receipt_page_url = configuration['receipt_page_url']
@@ -81,35 +82,40 @@ class PayboxSystem(BasePaymentProcessor):
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
-        params = {}
-        params['PBX_SITE'] = self.PBX_SITE
-        params['PBX_RANG'] = self.PBX_RANG
+        params = OrderedDict()
+        params['PBX_ANNULE'] = self.cancel_page_url
+        params['PBX_CMD'] = basket.order_number
+        params['PBX_DEVISE'] = '978'   # basket.currency
+        params['PBX_EFFECTUE'] = self.receipt_page_url  # '{}?order={}'.format(self.receipt_page_url, basket.order_number)
         params['PBX_IDENTIFIANT'] = self.PBX_IDENTIFIANT
-        params['PBX_REPONDRE_A'] = 'http://88.171.125.216:8080/paybox/notify/'
-        params['PBX_CMD'] = "FUN-%s" % basket.order_number
-        params['PBX_PORTEUR'] = basket.owner.username
-        params['PBX_RETOUR'] = 'Mt:M;Ref:R;Auto:A;Erreur:E'
+        params['PBX_PORTEUR'] = basket.owner.email
+        params['PBX_RANG'] = self.PBX_RANG
+        params['PBX_REFUSE'] = self.cancel_page_url
+        params['PBX_REPONDRE_A'] = self.PBX_REPONDRE_A
+        params['PBX_RETOUR'] = 'amount:M;reference-fun:R;autorisation:A;erreur:E;appel-paybox:T;transaction-paybox:S'
+        params['PBX_RUF1'] = 'POST'
+        params['PBX_SITE'] = self.PBX_SITE
         params['PBX_TIME'] = self.utcnow().strftime(ISO_8601_FORMAT)
+        params['PBX_TOTAL'] = str(int(basket.total_incl_tax * 100))
         params['PBX_TYPECARTE'] = 'CB'
         params['PBX_TYPEPAIEMENT'] = 'CARTE'
-        params['PBX_DEVISE'] = '978',   # basket.currenc
-        params['PBX_TOTAL'] = str(basket.total_incl_tax)
-        params['PBX_EFFECTUE'] = '{}?order={}'.format(self.receipt_page_url, basket.order_number)
-        params['PBX_REFUSE'] = self.cancel_page_url
-        params['PBX_ANNULE'] = self.cancel_page_url
-        params['PBX_RUF1'] = 'POST'
+
         #params['reference_number'] = basket.order_number
         #params['amount'] = str(basket.total_incl_tax)
         #params['currency'] = basket.currency,
         #params['consumer_id'] = basket.owner.username,
-
+        #import ipdb; ipdb.set_trace()
         hmac_query = '&'.join(['%s=%s' % (key, value) for key, value in params.items()])
         binary_key = binascii.unhexlify(self.private_key)
         hmac_hash = hmac.new(binary_key, hmac_query, hashlib.sha512).hexdigest().upper()
+        #hmac_query += '&PBX_HMAC=' + hmac_hash
+        
         params['PBX_HMAC'] = hmac_hash
-        print pprint.pprint(params)
         print params
-        params['payment_page_url'] = self.payment_page_url  # '/payment/fake-payment-page/'  
+        
+        params['payment_page_url'] = self.payment_page_url
+        
+        # '/payment/fake-payment-page/'  
         #import ipdb; ipdb.set_trace()
         return params
 
@@ -149,42 +155,38 @@ class PayboxSystem(BasePaymentProcessor):
         #import ipdb; ipdb.set_trace()
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
-        decision = response['decision'].lower()
-        if decision != 'accept':
+        code = response['erreur']
+        if code != '00000':
             exception = {
                 'cancel': UserCancelled,
                 'decline': TransactionDeclined,
-                'error': GatewayError
-            }.get(decision, InvalidCybersourceDecision)
+                '00001': GatewayError
+            }.get(code, InvalidCybersourceDecision)
 
             raise exception
 
-        # Raise an exception if the authorized amount differs from the requested amount.
-        # Note (CCB): We should never reach this point in production since partial authorization is disabled
-        # for our account, and should remain that way until we have a proper solution to allowing users to
-        # complete authorization for the entire order.
-        if response['auth_amount'] != response['req_amount']:
-            raise PartialAuthorizationError
 
         # Create Source to track all transactions related to this processor and order
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
-        currency = response['req_currency']
-        total = Decimal(response['req_amount'])
-        transaction_id = response['transaction_id']
-        req_card_number = response['req_card_number']
-        card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
-
+        #currency = response['req_currency']
+        amount = Decimal(response['amount'])
+        transaction_id = response['transaction-paybox']
+        #req_card_number = response['req_card_number']
+        #card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
+        #import ipdb; ipdb.set_trace()
         source = Source(source_type=source_type,
-                        currency=currency,
-                        amount_allocated=total,
-                        amount_debited=total,
+                        currency='EUR',
+                        amount_allocated=amount,
+                        amount_debited=amount,
                         reference=transaction_id,
-                        label=req_card_number,
-                        card_type=card_type)
+                        #status=code,
+                        #label=req_card_number,
+                        #card_type=card_type
+                        )
 
         # Create PaymentEvent to track
         event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
-        event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id, processor_name=self.NAME)
+        event = PaymentEvent(event_type=event_type, amount=amount, reference=transaction_id, processor_name=self.NAME)
 
         return source, event
 
