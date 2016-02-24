@@ -1,7 +1,7 @@
-from django import forms
-from django.utils.translation import ugettext_lazy as _
 from oscar.apps.dashboard.orders.forms import OrderSearchForm as CoreOrderSearchForm
 
+from ecommerce.extensions.dashboard.forms import UserFormMixin
 
-class OrderSearchForm(CoreOrderSearchForm):
-    username = forms.CharField(required=False, label=_("Username"))
+
+class OrderSearchForm(UserFormMixin, CoreOrderSearchForm):
+    pass

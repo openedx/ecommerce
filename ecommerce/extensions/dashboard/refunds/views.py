@@ -1,13 +1,14 @@
 from django.views.generic import ListView, DetailView
-
 from oscar.core.loading import get_class, get_model
 from oscar.views import sort_queryset
+
+from ecommerce.extensions.dashboard.views import FilterFieldsMixin
 
 Refund = get_model('refund', 'Refund')
 RefundSearchForm = get_class('dashboard.refunds.forms', 'RefundSearchForm')
 
 
-class RefundListView(ListView):
+class RefundListView(FilterFieldsMixin, ListView):
     """ Dashboard view to list refunds. """
     model = Refund
     context_object_name = 'refunds'
@@ -15,6 +16,16 @@ class RefundListView(ListView):
     paginate_by = 25
     form_class = RefundSearchForm
     form = None
+
+    def get_filter_fields(self):
+        fields = super(RefundListView, self).get_filter_fields()
+        fields.update({
+            'status': {
+                'query_filter': 'status__in',
+                'exposed': False,
+            }
+        })
+        return fields
 
     def get_queryset(self):
         queryset = super(RefundListView, self).get_queryset()
@@ -24,12 +35,11 @@ class RefundListView(ListView):
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():
             for field, value in self.form.cleaned_data.iteritems():
-                if field == 'status' and value:
-                    queryset = queryset.filter(status__in=value)
-                elif field == 'username' and value:
-                    queryset = queryset.filter(user__username__istartswith=value)
-                elif value:
-                    queryset = queryset.filter(**{field: value})
+                if value:
+                    # Check if the field has a custom query filter setup.
+                    # If not, use a standard Django equals/match filter.
+                    _filter = self.get_filter_fields().get(field, {}).get('query_filter', field)
+                    queryset = queryset.filter(**{_filter: value})
 
         return queryset
 
