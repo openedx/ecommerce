@@ -134,7 +134,7 @@ BROKER_URL = 'amqp://'
 
 
 ENABLE_AUTO_AUTH = True
-LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
+LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG', edx_filename='ecommerce.log')
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.
