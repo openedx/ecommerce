@@ -2,7 +2,7 @@ from unittest import skipUnless
 
 from bok_choy.web_app_test import WebAppTest
 import ddt
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -164,25 +164,17 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         # Click the payment button
         self.browser.find_element_by_css_selector('#paypal').click()
 
-        # Make sure we are checking out with a PayPal account, instead of credit card
-        try:
-            WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'loadLogin')))
-            self.browser.find_element_by_css_selector('#loadLogin').click()
-        except (NoSuchElementException, TimeoutException):
-            # The PayPal form may be visible by default.
-            pass
-
         # Wait for form to load
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'login_email')))
+        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'loginFields')))
 
         # Log into PayPal
-        self.browser.find_element_by_css_selector('input#login_email').send_keys(PAYPAL_EMAIL)
-        self.browser.find_element_by_css_selector('input#login_password').send_keys(PAYPAL_PASSWORD)
-        self.browser.find_element_by_css_selector('input#submitLogin').click()
+        self.browser.find_element_by_css_selector('input#email').send_keys(PAYPAL_EMAIL)
+        self.browser.find_element_by_css_selector('input#password').send_keys(PAYPAL_PASSWORD)
+        self.browser.find_element_by_css_selector('input[type="submit"]').click()
 
         # Wait for the checkout form to load, then submit it.
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'continue')))
-        self.browser.find_element_by_css_selector('input#continue').click()
+        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'confirmButtonTop')))
+        self.browser.find_element_by_css_selector('input#confirmButtonTop').click()
 
     def test_paypal(self):
         """ Test checkout with PayPal. """
