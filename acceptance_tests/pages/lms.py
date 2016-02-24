@@ -6,52 +6,7 @@ from bok_choy.promise import EmptyPromise
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 
-from acceptance_tests.config import (
-    BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, ECOMMERCE_URL_ROOT, MARKETING_URL_ROOT, LMS_URL_ROOT
-)
-
-
-class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method
-    path = None
-
-    @property
-    def url(self):
-        return self.page_url
-
-    def __init__(self, browser, path=None):
-        super(EcommerceAppPage, self).__init__(browser)
-        path = path or self.path
-        self.server_url = ECOMMERCE_URL_ROOT
-        self.page_url = '{}/{}'.format(self.server_url, path)
-
-
-class DashboardHomePage(EcommerceAppPage):
-    path = 'dashboard'
-
-    def is_browser_on_page(self):
-        return self.browser.title.startswith('Dashboard | Oscar')
-
-
-class MarketingCourseAboutPage(PageObject):
-    def is_browser_on_page(self):
-        return self.q(css='.js-enroll-btn').visible
-
-    def _build_url(self, path):
-        url = '{}/{}'.format(MARKETING_URL_ROOT, path)
-
-        if BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD:
-            url = url.replace('://', '://{}:{}@'.format(BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD))
-
-        return url
-
-    @property
-    def url(self):
-        path = 'course/{}'.format(urllib.quote_plus(self.slug))
-        return self._build_url(path)
-
-    def __init__(self, browser, slug):
-        super(MarketingCourseAboutPage, self).__init__(browser)
-        self.slug = slug
+from acceptance_tests.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD
 
 
 class LMSPage(PageObject):  # pylint: disable=abstract-method
