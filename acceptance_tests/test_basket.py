@@ -30,6 +30,7 @@ class BasketFlowTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, 
         self.login_with_lms()
 
     def start_redeem_flow(self, is_discount=False):
+        """ Start redemption flow by creating a coupon via the UI and then accepting the offer """
         self.prepare_coupon()
 
         # Get the redeem URL for the coupon's detail page and go to it.
@@ -58,6 +59,7 @@ class BasketFlowTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, 
         self.assert_user_enrolled(self.username, self.course_id, mode="verified")
 
     def test_paypal_basket_flow_for_discount_code(self):
+        """ Test redemption of discount code and purchase of course via PayPal """
         self.start_redeem_flow(is_discount=True)
         self.assertTrue(self.basket_page.is_browser_on_page())
         self.checkout_with_paypal()
@@ -86,6 +88,7 @@ class BasketFlowTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, 
         }
     )
     def test_cubersource_basket_flow_for_discount_code(self, address):
+        """ Test redemption of discount code and purchase of course via Cybersource """
         self.start_redeem_flow(is_discount=True)
         self.assertTrue(self.basket_page.is_browser_on_page())
         self.checkout_with_cybersource(address)

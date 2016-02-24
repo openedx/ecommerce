@@ -22,7 +22,7 @@ class CouponsFlowTests(LogistrationMixin, WebAppTest):
         self.login_with_lms()
 
     def create_coupon(self):
-        """ Create a coupon. """
+        """ Create a coupon via UI. """
         # Verify we reach the coupons list page.
         self.coupons_list_page.visit()
         self.assertTrue(self.coupons_list_page.is_browser_on_page())
@@ -37,7 +37,7 @@ class CouponsFlowTests(LogistrationMixin, WebAppTest):
         self.assertTrue(self.coupons_details_page.is_browser_on_page())
 
     def assert_coupon_dates(self, expected_start_date, expected_end_date):
-        """ Assert the start and end dates of the coupon to be the expected ones. """
+        """ Assert the start/end dates displayed to the user match the expected dates. """
         start_date = self.browser.find_elements_by_css_selector(
             'div.coupon-detail-view div.start-date-info div.value'
         )[0].text
