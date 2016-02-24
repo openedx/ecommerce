@@ -58,6 +58,7 @@
                     <th>{% trans "Number of Items" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Username" %}</th>
+                    <th>{% trans "Email" %}</th>
                     <th>{% trans "Created" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
@@ -77,6 +78,13 @@
                         {% else %}
                             &lt;{% trans "Deleted" %}&gt;
                         {% endif %}
+                    </td>
+                    <td>
+                      {% if refund.user %}
+                        <a href="{% url 'dashboard:user-detail' pk=refund.user.id %}">{{ refund.user.email }}</a>
+                      {% else %}
+                        &lt;{% trans "Deleted" %}&gt;
+                      {% endif %}
                     </td>
                     <td>{{ refund.created }}</td>
                     <td>

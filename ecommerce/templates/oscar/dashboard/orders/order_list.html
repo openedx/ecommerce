@@ -71,6 +71,7 @@
                     <th>{% trans "Number of items" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Username" %}</th>
+                    <th>{% trans "Email" %}</th>
                     <th>{% trans "Date of purchase" %}</th>
                     <th></th>
                 </tr>
@@ -91,6 +92,13 @@
                             {% else %}
                                 &lt;{% trans "Deleted" %}&gt;
                             {% endif %}
+                        </td>
+                        <td>
+                          {% if order.user %}
+                            <a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.email }}</a>
+                          {% else %}
+                            &lt;{% trans "Deleted" %}&gt;
+                          {% endif %}
                         </td>
                         <td>{{ order.date_placed }}</td>
                         <td>
