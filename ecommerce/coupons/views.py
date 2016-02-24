@@ -20,7 +20,6 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.voucher.utils import get_voucher_discount_info
 from ecommerce.settings import get_lms_url
 
@@ -191,7 +190,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
             # Place an order. If order placement succeeds, the order is committed
             # to the database so that it can be fulfilled asynchronously.
-            order = self.handle_order_placement(
+            self.handle_order_placement(
                 order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
                 user=basket.owner,
                 basket=basket,
@@ -204,8 +203,4 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         else:
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        if order.status is ORDER.COMPLETE:
-            return HttpResponseRedirect(get_lms_url(''))
-        else:
-            logger.error('Order was not completed [%s]', order.id)
-            return render(request, template_name, {'error': _('Error when trying to redeem code')})
+        return HttpResponseRedirect(get_lms_url(''))
