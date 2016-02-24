@@ -13,9 +13,9 @@ import pytz
 
 from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.test.factories import create_coupon, prepare_voucher
+from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.settings import get_lms_url
-from ecommerce.tests.mixins import LmsApiMockMixin
+from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -199,7 +199,7 @@ class CouponOfferViewTests(LmsApiMockMixin, TestCase):
         self.assertEqual(response.context['new_price'], new_price)
 
 
-class CouponRedeemViewTests(TestCase):
+class CouponRedeemViewTests(CouponMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
@@ -214,7 +214,7 @@ class CouponRedeemViewTests(TestCase):
 
     def create_and_test_coupon(self):
         """ Creates enrollment code coupon. """
-        create_coupon(catalog=self.catalog, code=COUPON_CODE)
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE)
         self.assertEqual(Voucher.objects.filter(code=COUPON_CODE).count(), 1)
 
     def assert_redemption_page_redirects(self, expected_url, target=200):
@@ -250,7 +250,7 @@ class CouponRedeemViewTests(TestCase):
 
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
-        create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
 

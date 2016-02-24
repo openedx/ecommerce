@@ -18,10 +18,10 @@ from testfixtures import LogCapture
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
-from ecommerce.extensions.test.factories import create_coupon, prepare_voucher
+from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.settings import get_lms_url
 from ecommerce.tests.factories import StockRecordFactory
-from ecommerce.tests.mixins import LmsApiMockMixin
+from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -34,7 +34,7 @@ StockRecord = get_model('partner', 'StockRecord')
 COUPON_CODE = 'COUPONTEST'
 
 
-class BasketSingleItemViewTests(LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -91,7 +91,7 @@ class BasketSingleItemViewTests(LmsApiMockMixin, TestCase):
         """
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
-        create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_footer_api_response()
         self.mock_course_api_response()
