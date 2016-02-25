@@ -241,13 +241,6 @@ class CouponRedeemViewTests(CouponMixin, TestCase):
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('Coupon does not exist'))
 
-    def test_order_not_completed(self):
-        """ Verify a response message is returned when an order is not completed. """
-        self.create_and_test_coupon()
-        url = self.redeem_url + '?code={}'.format(COUPON_CODE)
-        response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('Error when trying to redeem code'))
-
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
