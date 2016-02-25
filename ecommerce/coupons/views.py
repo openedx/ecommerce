@@ -16,7 +16,6 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.views import StaffOnlyMixin
-from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import prepare_basket
@@ -184,27 +183,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == AC.FREE:
-            basket.freeze()
-            order_metadata = data_api.get_order_metadata(basket)
-
-            logger.info(
-                u"Preparing to place order [%s] for the contents of basket [%d]",
-                order_metadata[AC.KEYS.ORDER_NUMBER],
-                basket.id,
-            )
-
-            # Place an order. If order placement succeeds, the order is committed
-            # to the database so that it can be fulfilled asynchronously.
-            self.handle_order_placement(
-                order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
-                user=basket.owner,
-                basket=basket,
-                shipping_address=None,
-                shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
-                shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
-                billing_address=None,
-                order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
-            )
+            self.place_free_order(basket)
         else:
             return HttpResponseRedirect(reverse('basket:summary'))
 

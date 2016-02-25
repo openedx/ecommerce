@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 from decimal import Decimal
 import hashlib
 import logging
@@ -92,6 +93,7 @@ class BasketSummaryView(BasketView):
                 line.discount_percentage = 0
 
         context.update({
+            'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': self.get_payment_processors(),
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
