@@ -5,6 +5,23 @@ def str2bool(s):
     s = unicode(s)
     return s.lower() in (u'yes', u'true', u't', u'1')
 
+# cybersource data
+CYBERSOURCE_DATA = {
+    'country': 'US',
+    'state': 'MA',
+    'line1': '141 Portland Ave.',
+    'line2': '9th Floor',
+    'city': 'Cambridge',
+    'postal_code': '02141',
+},
+{
+    'country': 'FR',
+    'state': None,
+    'line1': 'Champ de Mars',
+    'line2': '5 Avenue Anatole',
+    'city': 'Paris',
+    'postal_code': '75007',
+}
 
 # GENERAL CONFIGURATION
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')

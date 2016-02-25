@@ -1,22 +1,19 @@
 from datetime import date
-from unittest import skipUnless
 
 from bok_choy.web_app_test import WebAppTest
 
-from acceptance_tests.config import ENABLE_OAUTH2_TESTS
 from acceptance_tests.mixins import LogistrationMixin
 from acceptance_tests.pages import (DEFAULT_END_DATE, DEFAULT_START_DATE,
-                                    CouponsCreateEditPage, CouponsDetailsPage,
+                                    CouponsCreatePage, CouponsDetailsPage,
                                     CouponsListPage)
 
 
-@skipUnless(ENABLE_OAUTH2_TESTS, 'OAuth2 tests are not enabled.')
 class CouponsFlowTests(LogistrationMixin, WebAppTest):
     def setUp(self):
         """ Instantiate the page objects. """
         super(CouponsFlowTests, self).setUp()
 
-        self.coupons_create_edit_page = CouponsCreateEditPage(self.browser)
+        self.coupons_create_edit_page = CouponsCreatePage(self.browser)
         self.coupons_details_page = CouponsDetailsPage(self.browser)
         self.coupons_list_page = CouponsListPage(self.browser)
         self.login_with_lms()

@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import (
     VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG, LMS_HTTPS, PAYPAL_PASSWORD, PAYPAL_EMAIL,
-    ENABLE_CYBERSOURCE_TESTS
+    ENABLE_CYBERSOURCE_TESTS, CYBERSOURCE_DATA
 )
 from acceptance_tests.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
                                      PaymentMixin, UnenrollmentMixin)
@@ -61,24 +61,7 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
                 pass
 
     @skipUnless(ENABLE_CYBERSOURCE_TESTS, 'CyberSource tests are not enabled.')
-    @ddt.data(
-        {
-            'country': 'US',
-            'state': 'MA',
-            'line1': '141 Portland Ave.',
-            'line2': '9th Floor',
-            'city': 'Cambridge',
-            'postal_code': '02141',
-        },
-        {
-            'country': 'FR',
-            'state': None,
-            'line1': 'Champ de Mars',
-            'line2': '5 Avenue Anatole',
-            'city': 'Paris',
-            'postal_code': '75007',
-        }
-    )
+    @ddt.data(CYBERSOURCE_DATA)
     def test_cybersource(self, address):
         """ Test checkout with CyberSource. """
         self._start_checkout()
