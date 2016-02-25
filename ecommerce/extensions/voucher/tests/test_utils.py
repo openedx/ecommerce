@@ -9,8 +9,8 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.test.factories import create_coupon
 from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report, get_voucher_discount_info
+from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -26,7 +26,7 @@ VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
 
-class UtilTests(CourseCatalogTestMixin, TestCase):
+class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
@@ -47,7 +47,7 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
         self.seat_price = self.stock_record.price_excl_tax
         self.catalog.stock_records.add(self.stock_record)
 
-        self.coupon = create_coupon(title='Test product', catalog=self.catalog)
+        self.coupon = self.create_coupon(title='Test product', catalog=self.catalog)
 
     def create_benefits(self):
         """
