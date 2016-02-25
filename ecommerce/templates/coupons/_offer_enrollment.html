@@ -27,7 +27,7 @@
         <p>
             <b class="total-price">{% trans "Total: $0" %}</b>
         </p>
-        <a href="{% url 'coupons:redeem' %}?code={{ code }}" class="btn btn-primary">{% trans "Enroll and Redeem Code" %}</a>
+        <a href="{% url 'coupons:redeem' %}?code={{ code }}" id="RedeemEnrollment" class="btn btn-primary">{% trans "Enroll and Redeem Code" %}</a>
     </div>
 
     {% if verified %}
