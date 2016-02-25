@@ -65,7 +65,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 
 # URL CONFIGURATION
-ECOMMERCE_URL_ROOT = 'http://localhost:8002'
+ECOMMERCE_URL_ROOT = 'http://localhost:8080'
 
 LMS_URL_ROOT = 'https://chaloupe.fun-mooc.fr'
 
@@ -119,7 +119,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'PBX_SITE': '1999888',
         'PBX_RANG': '43',
         'PBX_IDENTIFIANT': '107975626',
-        'PBX_REPONDRE_A': 'https://funteam:decappreu2014@chaloupe.fun-mooc.fr/payment/notification/',
+        'PBX_REPONDRE_A': 'http://chaloupe.fun-mooc.fr:8080/payment/paybox/notify/',
         #'PBX_REPONDRE_A': LMS_URL_ROOT + '/payment/notification/',  #  TCP 80, 443 (HTTPS), 8080, 8081, 8082, 8083, 8084 ou 8085
         'private_key': '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF',
         'payment_page_url': 'https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi',
