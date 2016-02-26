@@ -2,12 +2,16 @@ define([
         'backbone',
         'test/spec-utils',
         'utils/utils',
-        'views/coupon_form_view'
+        'views/coupon_form_view',
+        'test/mock_data/categories',
+        'ecommerce'
     ],
     function (Backbone,
               SpecUtils,
               Utils,
-              CouponFormView) {
+              CouponFormView,
+              Mock_Categories,
+              ecommerce) {
         'use strict';
 
         describe('Utils', function () {
@@ -63,6 +67,9 @@ define([
                     jasmine.addMatchers({
                         toHaveClass: SpecUtils.toHaveClass
                     });
+                    ecommerce.coupons = {
+                        categories: Mock_Categories
+                    };
                 });
 
                 it('adds "is-disabled" class to element while action is running and removes it after', function() {

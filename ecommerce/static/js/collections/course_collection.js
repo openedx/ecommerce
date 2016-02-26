@@ -1,17 +1,13 @@
 define([
-        'backbone',
-        'underscore',
         'collections/paginated_collection',
         'models/course_model'
     ],
-    function (Backbone,
-              _,
-              PaginatedCollection,
-              CourseModel) {
+    function (PaginatedCollection,
+              Course) {
         'use strict';
 
         return PaginatedCollection.extend({
-            model: CourseModel,
+            model: Course,
             url: '/api/v2/courses/'
         });
     }

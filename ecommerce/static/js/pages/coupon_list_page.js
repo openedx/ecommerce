@@ -15,7 +15,7 @@ define([
                 this.collection = new CouponCollection();
                 this.view = new CouponListView({collection: this.collection});
                 this.render();
-                this.collection.fetch({remove: false, data: {page_size: 50}});
+                this.collection.fetch({merge: true, data: {page_size: 50}});
             }
         });
     }

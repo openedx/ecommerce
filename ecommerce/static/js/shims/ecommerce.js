@@ -10,6 +10,7 @@ define([],
         'use strict';
 
         return {
+            coupons: {},
             credit: {}
         };
     }

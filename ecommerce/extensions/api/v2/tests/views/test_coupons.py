@@ -5,21 +5,24 @@ import json
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
+from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
-from ecommerce.tests.mixins import CouponMixin
+from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Course = get_model('courses', 'Course')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -51,6 +54,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'quantity': 2,
             'start_date': '2015-1-1',
             'voucher_type': Voucher.MULTI_USE,
+            'categories': [self.category]
         }
 
     def test_create(self):
@@ -64,6 +68,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
             'stock_record_ids': [1],
             'voucher_type': Voucher.SINGLE_USE,
             'price': 100,
+            'category_ids': [self.category.id]
         })
         request = RequestFactory()
         request.data = self.coupon_data
@@ -90,6 +95,8 @@ class CouponViewSetTest(CouponMixin, TestCase):
         self.assertEqual(stock_record.price_excl_tax, 100)
 
         self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), 5)
+        category = ProductCategory.objects.get(product=coupon).category
+        self.assertEqual(category, self.category)
 
     def test_append_to_existing_coupon(self):
         """Test adding additional vouchers to an existing coupon."""
@@ -176,7 +183,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponViewSetFunctionalTest(CouponMixin, TestCase):
+class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
@@ -203,6 +210,7 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
             'price': 100,
+            'category_ids': [self.category.id]
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 
@@ -243,8 +251,7 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
         """Test that the endpoint returns information needed for the details page."""
         response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
-        coupon_data = response_data['results'][0]
+        coupon_data = json.loads(response.content)['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
         self.assertEqual(coupon_data['coupon_type'], 'Enrollment code')
         self.assertIsNotNone(coupon_data['last_edited'][0])
@@ -301,3 +308,22 @@ class CouponViewSetFunctionalTest(CouponMixin, TestCase):
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().start_datetime.year, 2030)
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.first().end_datetime.year, 2035)
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().end_datetime.year, 2035)
+
+
+class CouponCategoriesListViewTests(TestCase):
+    """ Tests for the coupon category list view. """
+    path = reverse('api:v2:coupons:coupons_categories')
+
+    def setUp(self):
+        super(CouponCategoriesListViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        Category.objects.all().delete()
+        create_from_breadcrumbs('Coupons > Coupon test category')
+
+    def test_category_list(self):
+        """ Verify the endpoint returns successfully. """
+        response = self.client.get(self.path)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['count'], 1)
+        self.assertEqual(response_data['results'][0]['name'], 'Coupon test category')

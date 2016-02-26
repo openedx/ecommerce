@@ -23,22 +23,22 @@ define([
 
             template: _.template(CouponDetailTemplate),
 
-            capitalize: function(string) {
+            capitalize: function (string) {
                 return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase();
             },
 
-            codeStatus: function(voucher) {
+            codeStatus: function (voucher) {
                 var startDate = moment(new Date(voucher.start_datetime)),
                     endDate = moment(new Date(voucher.end_datetime)),
                     in_time_interval = (startDate.isBefore(Date.now()) && endDate.isAfter(Date.now()));
-                return gettext(in_time_interval ? 'ACTIVE':'INACTIVE');
+                return gettext(in_time_interval ? 'ACTIVE' : 'INACTIVE');
             },
 
-            couponType: function(voucher) {
+            couponType: function (voucher) {
                 var benefitType = voucher.benefit[0],
                     benefitValue = voucher.benefit[1];
                 return gettext(
-                    (benefitType === 'Percentage' && benefitValue === 100) ? 'Enrollment Code':'Discount Code'
+                    (benefitType === 'Percentage' && benefitValue === 100) ? 'Enrollment Code' : 'Discount Code'
                 );
             },
 
@@ -81,7 +81,8 @@ define([
             render: function () {
                 var course_data = this.model.get('seats')[0].attribute_values,
                     html,
-                    voucher = this.model.get('vouchers')[0];
+                    voucher = this.model.get('vouchers')[0],
+                    category = this.model.get('categories')[0].name;
 
                 html = this.template({
                     course_id: this.courseID(course_data),
@@ -94,43 +95,35 @@ define([
                     lastEdited: this.lastEdited(this.model.get('last_edited')),
                     price: '$' + this.model.get('price'),
                     startDateTime: this.formatDateTime(voucher.start_datetime),
-                    usage: this.usageLimitation(voucher)
+                    usage: this.usageLimitation(voucher),
+                    category: category
                 });
+
                 this.$el.html(html);
                 this.renderVoucherTable();
-                this.refreshTableData();
                 this.delegateEvents();
                 return this;
             },
 
             renderVoucherTable: function () {
-                if (!$.fn.dataTable.isDataTable('#vouchersTable')) {
-                    this.$el.find('#vouchersTable').DataTable({
-                        autoWidth: false,
-                        info: true,
-                        paging: false,
-                        ordering: false,
-                        searching: false,
-                        columns: [
-                            {
-                                title: gettext('Code'),
-                                data: 'code',
-                            },
-                            {
-                                title: gettext('Redemption URL'),
-                                data: 'redeem_url'
-                            }
-                        ]
-                    });
-                }
-                return this;
-            },
-
-            refreshTableData: function () {
-                var data = this.model.get('vouchers'),
-                    $table = this.$el.find('#vouchersTable').DataTable();
-
-                $table.clear().rows.add(data).draw();
+                this.$el.find('#vouchersTable').DataTable({
+                    autoWidth: false,
+                    info: true,
+                    paging: false,
+                    ordering: false,
+                    searching: false,
+                    columns: [
+                        {
+                            title: gettext('Code'),
+                            data: 'code'
+                        },
+                        {
+                            title: gettext('Redemption URL'),
+                            data: 'redeem_url'
+                        }
+                    ],
+                    data: this.model.get('vouchers')
+                });
                 return this;
             },
 

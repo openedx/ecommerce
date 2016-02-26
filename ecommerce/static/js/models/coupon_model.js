@@ -6,7 +6,9 @@ define([
         'jquery-cookie',
         'underscore',
         'moment',
-        'utils/validation_patterns',
+        'collections/category_collection',
+        'models/category',
+        'utils/validation_patterns'
     ],
     function (Backbone,
               BackboneSuper,
@@ -15,7 +17,7 @@ define([
               $cookie,
               _,
               moment
-            ) {
+              ) {
         'use strict';
 
         _.extend(Backbone.Validation.messages, {
@@ -25,7 +27,7 @@ define([
         });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
-        return Backbone.Model.extend({
+        return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/coupons/',
 
             defaults: {
@@ -36,16 +38,17 @@ define([
             },
 
             validation: {
+                category: {required: true},
                 course_id: {
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required')
                 },
-                title: { required: true },
-                client: { required: true },
+                title: {required: true},
+                client: {required: true},
                 // seat_type is for validation only, stock_record_ids holds the values
-                seat_type: { required: true },
-                quantity: { pattern: 'number' },
-                price: { pattern: 'number' },
+                seat_type: {required: true},
+                quantity: {pattern: 'number'},
+                price: {pattern: 'number'},
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
@@ -138,18 +141,19 @@ define([
                 data.start_date = moment.utc(this.get('start_date'));
                 data.end_date = moment.utc(this.get('end_date'));
                 data.price = this.get('price');
+                data.category_ids = [ this.get('category') ];
 
                 // Enrollment code always gives 100% discount
                 switch (this.get('coupon_type')) {
-                case 'enrollment':
-                    // this is the price paid for the code(s)
-                    data.benefit_type = 'Percentage';
-                    data.benefit_value = 100;
-                break;
-                case 'discount':
-                    data.benefit_type = this.get('benefit_type');
-                    data.benefit_value = this.get('benefit_value');
-                break;
+                    case 'enrollment':
+                        // this is the price paid for the code(s)
+                        data.benefit_type = 'Percentage';
+                        data.benefit_value = 100;
+                        break;
+                    case 'discount':
+                        data.benefit_type = this.get('benefit_type');
+                        data.benefit_value = this.get('benefit_value');
+                        break;
                 }
 
                 options.data = JSON.stringify(data);
