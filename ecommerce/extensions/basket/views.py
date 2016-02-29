@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from decimal import Decimal
 import hashlib
 import logging
 
@@ -17,7 +18,6 @@ from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.extensions.voucher.utils import get_voucher_discount_info
 from ecommerce.settings import get_lms_url
 
 Benefit = get_model('offer', 'Benefit')
@@ -63,7 +63,7 @@ class BasketSummaryView(BasketView):
     """
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
-        lines = self.request.basket.lines.all()
+        lines = context['line_list']
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
         for line in lines:
             course_id = line.product.course_id
@@ -86,11 +86,10 @@ class BasketSummaryView(BasketView):
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_id)
 
-            applied_offers = self.request.basket.applied_offers()
-            benefit = applied_offers.values()[0].benefit if applied_offers else None
-            discount_info = get_voucher_discount_info(benefit, line.unit_price_excl_tax)
-            line.discount_percentage = discount_info['discount_percentage']
-            line.is_discounted = discount_info['is_discounted']
+            if line.has_discount:
+                line.discount_percentage = line.discount_value / line.unit_price_incl_tax * Decimal(100)
+            else:
+                line.discount_percentage = 0
 
         context.update({
             'payment_processors': self.get_payment_processors(),

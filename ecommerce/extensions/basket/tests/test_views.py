@@ -128,13 +128,26 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
         course_url = get_lms_url('api/courses/v1/courses/{}/'.format(self.course))
         httpretty.register_uri(httpretty.GET, course_url, body=callback, content_type='application/json')
 
+    def create_basket_and_add_product(self, product):
+        basket = factories.BasketFactory(owner=self.user)
+        basket.add_product(product, 1)
+        return basket
+
+    def create_seat(self, course, seat_price=100):
+        return course.create_or_update_seat('verified', True, seat_price, self.partner)
+
+    def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
+        _range = factories.RangeFactory(products=[product, ])
+        voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket)
+
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
         """ Verify a connection error and timeout are logged when they happen. """
         self.mock_footer_api_response()
-        seat = self.course.create_or_update_seat('verified', True, 50, self.partner)
-        basket = factories.BasketFactory(owner=self.user)
-        basket.add_product(seat, 1)
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
         self.assertEqual(basket.lines.count(), 1)
 
         logger_name = 'ecommerce.extensions.basket.views'
@@ -151,38 +164,47 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
             )
 
     @ddt.data(
-        (Benefit.PERCENTAGE, 100, 100, False),
-        (Benefit.PERCENTAGE, 50, 50, True),
-        (Benefit.FIXED, 50, 10, True)
+        (Benefit.PERCENTAGE, 100),
+        (Benefit.PERCENTAGE, 50),
+        (Benefit.FIXED, 50)
     )
     @ddt.unpack
-    def test_response_success(self, benefit_type, benefit_value, expected_value, is_discounted):
+    def test_response_success(self, benefit_type, benefit_value):
         """ Verify a successful response is returned. """
-        seat = self.course.create_or_update_seat('verified', True, 500, self.partner)
-        basket = factories.BasketFactory(owner=self.user)
-        basket.add_product(seat, 1)
-
-        _range = factories.RangeFactory(products=[seat, ])
-        voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
-        basket.vouchers.add(voucher)
-        Applicator().apply(basket)
+        seat = self.create_seat(self.course, 500)
+        basket = self.create_basket_and_add_product(seat)
+        self.create_and_apply_benefit_to_basket(basket, seat, benefit_type, benefit_value)
 
         self.assertEqual(basket.lines.count(), 1)
         self.mock_course_api_response(self.course)
         self.mock_footer_api_response()
 
         response = self.client.get(self.path)
-        self.assertEqual(response.context['lines'][0].discount_percentage, expected_value)
-        self.assertEqual(response.context['lines'][0].is_discounted, is_discounted)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
         self.assertEqual(json.loads(response.context['footer']), {'footer': 'edX Footer'})
 
+    def test_line_item_discount_data(self):
+        """ Verify that line item has correct discount data. """
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, 50)
+
+        course_without_benefit = CourseFactory()
+        seat_without_benefit = self.create_seat(course_without_benefit)
+        basket.add_product(seat_without_benefit, 1)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.context['lines'][0].discount_percentage, 50)
+        self.assertEqual(response.context['lines'][0].has_discount, True)
+
+        self.assertEqual(response.context['lines'][1].discount_percentage, 0)
+        self.assertEqual(response.context['lines'][1].has_discount, False)
+
     def test_cached_course(self):
         """ Verify that the course info is cached. """
-        seat = self.course.create_or_update_seat('verified', True, 50, self.partner)
-        basket = factories.BasketFactory(owner=self.user)
-        basket.add_product(seat, 1)
+        seat = self.create_seat(self.course, 50)
+        basket = self.create_basket_and_add_product(seat)
         self.assertEqual(basket.lines.count(), 1)
         self.mock_course_api_response(self.course)
         self.mock_footer_api_response()

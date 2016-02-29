@@ -31,7 +31,7 @@
                                 <p class="course_name">{{ line.course.name }} - {{ line.course.org }} ({{ line.course.number }})</p>
                                 <p class="course_description">{{ line.course.short_description }}</p>
                             </div>
-                            {% if line.is_discounted %}
+                            {% if line.has_discount %}
                                 <div class="col-sm-3 discount">
                                     <div class="benefit">
                                         {% blocktrans with percentage=line.discount_percentage|stringformat:'d' %}
@@ -43,7 +43,7 @@
                                     </div>
                                 </div>
                             {% endif %}
-                            <div class="price {% if line.is_discounted %}discounted{% endif %}">
+                            <div class="price {% if line.has_discount %}discounted{% endif %}">
                                 {{ line.line_price_incl_tax_incl_discounts|currency:line.price_currency }}
                             </div>
                         </div>
