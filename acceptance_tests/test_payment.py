@@ -2,13 +2,12 @@ from unittest import skipUnless
 
 from bok_choy.web_app_test import WebAppTest
 import ddt
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import (VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG,
-                                     LMS_HTTPS, PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS)
+                                     PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS)
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
                                      PaymentMixin, UnenrollmentMixin)
@@ -46,18 +45,6 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         # Click the purchase button on the track selection page to take
         # the browser to the payment selection page.
         self.browser.find_element_by_css_selector('input[name=verified_mode]').click()
-
-    def _dismiss_alert(self):
-        """
-        If we are testing locally with a non-HTTPS LMS instance, a security alert may appear when transitioning to
-        secure pages. This method dismisses them.
-        """
-        if not LMS_HTTPS:
-            try:
-                WebDriverWait(self.browser, 2).until(EC.alert_is_present())
-                self.browser.switch_to_alert().accept()
-            except TimeoutException:
-                pass
 
     @skipUnless(ENABLE_CYBERSOURCE_TESTS, 'CyberSource tests are not enabled.')
     @ddt.data(CYBERSOURCE_DATA1, CYBERSOURCE_DATA2)

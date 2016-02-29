@@ -2,6 +2,10 @@ from bok_choy.javascript import wait_for_js
 
 from factory.fuzzy import FuzzyText
 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from acceptance_tests.config import VERIFIED_COURSE_ID
 from acceptance_tests.constants import DEFAULT_END_DATE, DEFAULT_START_DATE
 from acceptance_tests.pages.ecommerce import EcommerceAppPage
@@ -93,7 +97,12 @@ class CouponsListPage(EcommerceAppPage):
     def is_browser_on_page(self):
         return self.browser.title.startswith('Coupon Codes')
 
+    @wait_for_js
     def create_new_coupon(self):
+        # Wait for the coupon list page to load.
+        WebDriverWait(self.browser, 10).until(
+            EC.presence_of_element_located((By.ID, 'CreateCoupon'))
+        )
         self.browser.find_element_by_id('CreateCoupon').click()
         self.wait_for_ajax()
 
@@ -101,7 +110,6 @@ class CouponsListPage(EcommerceAppPage):
     def go_to_coupon_details_page(self, coupon_name):
         self.q(css='input[type="search"]').fill(coupon_name)
         self.wait_for_ajax()
-        # self.q(css='table#couponTable tbody tr td a').first.click()
         self.browser.find_element_by_id('couponTable').first.click()
         self.wait_for_ajax()
 

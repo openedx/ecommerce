@@ -12,6 +12,7 @@ from acceptance_tests.pages import (BasketPage, CouponsCreatePage,
                                     DashboardHomePage, RedeemVoucherPage)
 
 
+@ddt.ddt
 class CouponCheckoutTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin,
                           PaymentMixin, WebAppTest):
     def setUp(self):

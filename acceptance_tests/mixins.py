@@ -3,6 +3,7 @@ import uuid
 
 from ecommerce_api_client.client import EcommerceApiClient
 import requests
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -22,7 +23,8 @@ from acceptance_tests.config import (
     ECOMMERCE_API_TOKEN,
     MAX_COMPLETION_RETRIES,
     PAYPAL_PASSWORD,
-    PAYPAL_EMAIL
+    PAYPAL_EMAIL,
+    LMS_HTTPS
 )
 from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage
 
@@ -172,6 +174,18 @@ class UnenrollmentMixin(object):
 
 
 class PaymentMixin(object):
+    def dismiss_alert(self):
+        """
+        If we are testing locally with a non-HTTPS LMS instance, a security alert may appear when transitioning to
+        secure pages. This method dismisses them.
+        """
+        if not LMS_HTTPS:
+            try:
+                WebDriverWait(self.browser, 2).until(EC.alert_is_present())
+                self.browser.switch_to_alert().accept()
+            except TimeoutException:
+                pass
+
     def checkout_with_paypal(self):
         """ Completes the checkout process via PayPal. """
 
@@ -196,7 +210,7 @@ class PaymentMixin(object):
         # Click the payment button
         self.browser.find_element_by_css_selector('#cybersource').click()
 
-        self._dismiss_alert()
+        self.dismiss_alert()
 
         # Wait for form to load
         WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'billing_details')))
@@ -235,7 +249,7 @@ class PaymentMixin(object):
         # Click the payment button
         self.browser.find_element_by_css_selector('input[type=submit]').click()
 
-        self._dismiss_alert()
+        self.dismiss_alert()
 
     def assert_receipt_page_loads(self):
         """ Verifies the receipt page loaded in the browser. """
