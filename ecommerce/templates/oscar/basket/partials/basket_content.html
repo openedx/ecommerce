@@ -115,7 +115,7 @@
             {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
             {% for line in lines %}
                 {% if line.certificate_type == 'Professional' or line.certificate_type == 'Verified' %}
-                    {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b> before the course starts. " %}
+                    {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
                 {% else %}
                     {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
                 {% endif %}
