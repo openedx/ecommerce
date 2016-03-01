@@ -20,7 +20,7 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.voucher.utils import get_voucher_discount_info
+from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.settings import get_lms_url
 
 
@@ -126,7 +126,7 @@ class CouponOfferView(TemplateView):
                 benefit = voucher.offers.first().benefit
                 stock_record = benefit.range.catalog.stock_records.first()
                 price = stock_record.price_excl_tax
-                context.update(get_voucher_discount_info(benefit, price))
+                benefit_value = format_benefit_value(benefit)
                 if benefit.type == 'Percentage':
                     new_price = price - (price * (benefit.value / 100))
                 else:
@@ -134,7 +134,7 @@ class CouponOfferView(TemplateView):
                     if new_price < 0:
                         new_price = Decimal(0)
                 context.update({
-                    'benefit': benefit,
+                    'benefit_value': benefit_value,
                     'course': course,
                     'code': code,
                     'is_discount_value_percentage': benefit.type == 'Percentage',

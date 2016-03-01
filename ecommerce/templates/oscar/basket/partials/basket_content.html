@@ -36,8 +36,8 @@
                             {% if line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
-                                        {% blocktrans with percentage=line.discount_percentage|stringformat:'d' %}
-                                            {{percentage}}% off
+                                        {% blocktrans with benefit_value=line.benefit_value %}
+                                            {{benefit_value}} off
                                         {% endblocktrans %}
                                     </div>
                                     <div class="old-price">

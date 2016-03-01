@@ -47,24 +47,24 @@ define([
                 return course_id ? course_id.value : '';
             },
 
-            courseType: function(course_data) {
-                var course_type = _.findWhere(course_data, {'name': 'certificate_type'});
-                return course_type ? gettext(this.capitalize(course_type.value)) : '';
+            certificateType: function(course_data) {
+                var certificate_type = _.findWhere(course_data, {'name': 'certificate_type'});
+                return certificate_type ? gettext(this.capitalize(certificate_type.value)) : '';
             },
 
             discountValue: function(voucher) {
                 var benefitType = voucher.benefit[0],
-                    benefitValue = voucher.benefit[1];
-
-                return (benefitType === 'Percentage') ? benefitValue + '%':benefitValue;
+                    benefitValue = voucher.benefit[1],
+                    stringFormat = (benefitType === 'Percentage') ? '%u%%' : '$%u';
+                return _s.sprintf(stringFormat, benefitValue);
             },
 
             formatDateTime: function(dateTime) {
                 return moment.utc(dateTime).format('MM/DD/YYYY h:mm A');
             },
 
-            lastEdited: function(last_edited) {
-                return last_edited[0] + ' - ' + this.formatDateTime(last_edited[1]);
+            formatLastEditedData: function(last_edited) {
+                return _s.sprintf('%s - %s', last_edited[0], this.formatDateTime(last_edited[1]));
             },
 
             usageLimitation: function(voucher) {
@@ -86,14 +86,14 @@ define([
 
                 html = this.template({
                     course_id: this.courseID(course_data),
-                    course_type: this.courseType(course_data),
+                    certificate_type: this.certificateType(course_data),
                     coupon: this.model.attributes,
                     couponType: this.couponType(voucher),
                     codeStatus: this.codeStatus(voucher),
                     discountValue: this.discountValue(voucher),
                     endDateTime: this.formatDateTime(voucher.end_datetime),
-                    lastEdited: this.lastEdited(this.model.get('last_edited')),
-                    price: '$' + this.model.get('price'),
+                    lastEdited: this.formatLastEditedData(this.model.get('last_edited')),
+                    price: _s.sprintf('$%s', this.model.get('price')),
                     startDateTime: this.formatDateTime(voucher.start_datetime),
                     usage: this.usageLimitation(voucher),
                     category: category
@@ -128,7 +128,7 @@ define([
             },
 
             downloadCouponReport: function (event) {
-                var url = '/api/v2/coupons/coupon_reports/' + this.model.id;
+                var url = _s.sprintf('/api/v2/coupons/coupon_reports/%d', this.model.id);
 
                 event.preventDefault();
                 window.open(url, '_blank');

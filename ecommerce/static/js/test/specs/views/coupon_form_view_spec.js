@@ -5,6 +5,7 @@ define([
         'views/alert_view',
         'models/coupon_model',
         'test/mock_data/categories',
+        'test/mock_data/coupons',
         'ecommerce'
     ],
     function ($,
@@ -13,60 +14,15 @@ define([
               AlertView,
               Coupon,
               Mock_Categories,
+              Mock_Coupons,
               ecommerce) {
         'use strict';
 
         describe('coupon form view', function () {
             var view,
                 model,
-                courseData = {
-                    id: 'course-v1:edX+DemoX+Demo_Course',
-                    name: 'Demo Course',
-                    type: 'verified',
-                    products: [
-                        {
-                            id: 3,
-                            product_class: 'Seat',
-                            structure: 'child',
-                            expires: null,
-                            attribute_values: [
-                                {
-                                    name: 'certificate_type',
-                                    value: 'verified'
-                                }
-                            ],
-                            is_available_to_buy: true,
-                            stockrecords: [
-                                {
-                                    id: 2,
-                                    product: 3,
-                                    partner: 1
-                                }
-                            ]
-                        },
-                        {
-                            id: 2,
-                            product_class: 'Seat',
-                            structure: 'child',
-                            expires: null,
-                            attribute_values: [
-                                {
-                                    name: 'certificate_type',
-                                    value: 'honor'
-                                }
-                            ],
-                            stockrecords: [
-                                {
-                                    id: 1,
-                                    product: 2,
-                                    partner: 1
-                                }
-                            ]
-                        }
-                    ]
-                };
+                courseData = Mock_Coupons.courseData;
 
-                
             /**
               * Helper function to check if a form field is shown.
               */
