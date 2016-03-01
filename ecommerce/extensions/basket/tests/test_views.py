@@ -129,7 +129,7 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
         httpretty.register_uri(httpretty.GET, course_url, body=callback, content_type='application/json')
 
     def create_basket_and_add_product(self, product):
-        basket = factories.BasketFactory(owner=self.user)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(product, 1)
         return basket
 

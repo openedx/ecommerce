@@ -191,7 +191,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
-    'oscar.apps.basket.middleware.BasketMiddleware',
+    # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
+    # MUST appear AFTER CurrentSiteMiddleware.
+    'ecommerce.extensions.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
