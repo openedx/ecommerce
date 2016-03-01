@@ -63,7 +63,7 @@ class BasketSummaryView(BasketView):
     """
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
-        lines = context['line_list']
+        lines = context.get('line_list', [])
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
         for line in lines:
             course_id = line.product.course_id

@@ -181,8 +181,15 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['lines']), 1)
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
         self.assertEqual(json.loads(response.context['footer']), {'footer': 'edX Footer'})
+
+    def test_no_basket_response(self):
+        """ Verify there are no lines in the context for a non-existing basket. """
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['lines'], [])
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """
