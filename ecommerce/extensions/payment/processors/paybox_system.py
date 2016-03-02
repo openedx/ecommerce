@@ -158,7 +158,7 @@ class PayboxSystem(BasePaymentProcessor):
         code = response['erreur']
         if code != '00000':
             exception = {
-                'cancel': UserCancelled,
+                'cancel': UserCancelled,   #TODO: implement Paybox error codes
                 'decline': TransactionDeclined,
                 '00001': GatewayError
             }.get(code, InvalidCybersourceDecision)
@@ -168,20 +168,14 @@ class PayboxSystem(BasePaymentProcessor):
 
         # Create Source to track all transactions related to this processor and order
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
-        #currency = response['req_currency']
         amount = Decimal(response['amount'])
         transaction_id = response['transaction-paybox']
-        #req_card_number = response['req_card_number']
-        #card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
-        #import ipdb; ipdb.set_trace()
+
         source = Source(source_type=source_type,
-                        currency='EUR',
+                        currency=settings.OSCAR_DEFAULT_CURRENCY,
                         amount_allocated=amount,
                         amount_debited=amount,
                         reference=transaction_id,
-                        #status=code,
-                        #label=req_card_number,
-                        #card_type=card_type
                         )
 
         # Create PaymentEvent to track
@@ -198,47 +192,8 @@ class PayboxSystem(BasePaymentProcessor):
     def issue_credit(self, source, amount, currency):
         order = source.order
 
-        try:
-            order_request_token = source.reference
+        raise
 
-            security = Security()
-            token = UsernameToken(self.merchant_id, self.transaction_key)
-            security.tokens.append(token)
-
-            client = Client(self.soap_api_url, transport=RequestsTransport())
-            client.set_options(wsse=security)
-
-            credit_service = client.factory.create('ns0:CCCreditService')
-            credit_service._run = 'true'  # pylint: disable=protected-access
-            credit_service.captureRequestID = source.reference
-
-            purchase_totals = client.factory.create('ns0:PurchaseTotals')
-            purchase_totals.currency = currency
-            purchase_totals.grandTotalAmount = unicode(amount)
-
-            response = client.service.runTransaction(merchantID=self.merchant_id, merchantReferenceCode=order.number,
-                                                     orderRequestToken=order_request_token,
-                                                     ccCreditService=credit_service,
-                                                     purchaseTotals=purchase_totals)
-            request_id = response.requestID
-            ppr = self.record_processor_response(suds_response_to_dict(response), transaction_id=request_id,
-                                                 basket=order.basket)
-        except:
-            msg = 'An error occurred while attempting to issue a credit (via CyberSource) for order [{}].'.format(
-                order.number)
-            logger.exception(msg)
-            raise GatewayError(msg)
-
-        if response.decision == 'ACCEPT':
-            source.refund(amount, reference=request_id)
-            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
-            PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=request_id,
-                                        processor_name=self.NAME)
-        else:
-            raise GatewayError(
-                'Failed to issue CyberSource credit for order [{order_number}]. '
-                'Complete response has been recorded in entry [{response_id}]'.format(
-                    order_number=order.number, response_id=ppr.id))
 
     @classmethod
     def is_enabled(cls):
