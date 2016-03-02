@@ -30,6 +30,12 @@ class BasketMiddleware(OscarBasketMiddleware):
         cookie_basket = self.get_cookie_basket(cookie_key, request, manager)
 
         if hasattr(request, 'user') and request.user.is_authenticated():
+            # First check to see if there is a frozen basket from an abandonded checkout
+            # if so thaw it and let it get merged with the rest of the open ones.
+            basket = Basket.objects.filter(site=request.site, owner=request.user, status__in=(Basket.FROZEN, ))
+            if basket:
+                basket = basket[0]
+                basket.thaw()
             # Signed-in user: if they have a cookie basket too, it means
             # that they have just signed in and we need to merge their cookie
             # basket into their user basket, then delete the cookie.
