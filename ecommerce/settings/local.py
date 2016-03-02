@@ -67,6 +67,8 @@ INTERNAL_IPS = ('127.0.0.1',)
 # URL CONFIGURATION
 ECOMMERCE_URL_ROOT = 'http://localhost:8080'
 
+OSCAR_DEFAULT_CURRENCY = 'EUR'
+
 LMS_URL_ROOT = 'https://chaloupe.fun-mooc.fr'
 
 # The location of the LMS heartbeat page

@@ -1,6 +1,6 @@
-""" PayBoxSystem proto. """
-from __future__ import unicode_literals
+# -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 
 import pprint
 
@@ -85,7 +85,7 @@ class PayboxSystem(BasePaymentProcessor):
         params = OrderedDict()
         params['PBX_ANNULE'] = self.cancel_page_url
         params['PBX_CMD'] = basket.order_number
-        params['PBX_DEVISE'] = '978'   # basket.currency
+        params['PBX_DEVISE'] = '978'   # €EURO
         params['PBX_EFFECTUE'] = self.receipt_page_url  # '{}?order={}'.format(self.receipt_page_url, basket.order_number)
         params['PBX_IDENTIFIANT'] = self.PBX_IDENTIFIANT
         params['PBX_PORTEUR'] = basket.owner.email
@@ -109,13 +109,13 @@ class PayboxSystem(BasePaymentProcessor):
         binary_key = binascii.unhexlify(self.private_key)
         hmac_hash = hmac.new(binary_key, hmac_query, hashlib.sha512).hexdigest().upper()
         #hmac_query += '&PBX_HMAC=' + hmac_hash
-        
+
         params['PBX_HMAC'] = hmac_hash
         print params
-        
+
         params['payment_page_url'] = self.payment_page_url
-        
-        # '/payment/fake-payment-page/'  
+
+        # '/payment/fake-payment-page/'
         #import ipdb; ipdb.set_trace()
         return params
 
