@@ -36,6 +36,9 @@ class BasketMiddleware(OscarBasketMiddleware):
             if basket:
                 basket = basket[0]
                 basket.thaw()
+                # Delete any remaining stale FROZEN baskets.
+                for b in basket[1:]:
+                    b.delete()
             # Signed-in user: if they have a cookie basket too, it means
             # that they have just signed in and we need to merge their cookie
             # basket into their user basket, then delete the cookie.
