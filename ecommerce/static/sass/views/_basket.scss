@@ -1,6 +1,6 @@
 .basket {
     .container {
-        padding: 60px 0 30px 0;
+        padding: 60px 20px 30px 20px;
 
         .basket-items,
         .total,
@@ -123,6 +123,8 @@
 
         .payment-buttons {
             margin: 0 15px;
+
+            text-align: right;
         }
 
         .verification-note {
