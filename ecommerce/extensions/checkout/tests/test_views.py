@@ -10,6 +10,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.tests.testcases import TestCase
 
+Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 
 
@@ -54,3 +55,37 @@ class FreeCheckoutViewTests(TestCase):
 
         expected_url = '{}?orderNum={}'.format(receipt_page, Order.objects.first().number)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
+
+
+class CancelResponseViewTests(TestCase):
+    """ Tests for the CancelResponseView view. """
+
+    def setUp(self):
+        super(CancelResponseViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.basket = factories.BasketFactory(owner=self.user, site=self.site)
+        product = factories.ProductFactory()
+        voucher = factories.VoucherFactory()
+
+        self.basket.add_product(product, 1)
+        self.basket.vouchers.add(voucher)
+        self.path = reverse('checkout:cancel', kwargs={'basket_id': self.basket.id})
+
+    def test_cancel_response_redirect(self):
+        """ Verify the frozen basket is thawed. """
+        self.basket.freeze()
+        basket_url = self.get_full_url(reverse('basket:summary'))
+        response = self.client.get(self.path)
+        self.assertRedirects(response, basket_url, fetch_redirect_response=False)
+
+        basket = Basket.get_basket(self.user, self.site)
+        self.assertEqual(basket, self.basket)
+        self.assertEqual(basket.status, Basket.OPEN)
+
+    def test_no_basket(self):
+        """ Verify an error is returned for non-existing basket. """
+        self.basket.delete()
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 404)
