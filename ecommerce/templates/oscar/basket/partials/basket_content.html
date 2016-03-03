@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load core_extras %}
 {% load currency_filters %}
 {% load purchase_info_tags %}
 {% load widget_tweaks %}
@@ -96,7 +97,7 @@
         </div>
 
         <div class="row">
-            <div class="payment-buttons col-sm-3" data-basket-id="{{ basket.id }}">
+            <div class="payment-buttons col-sm-4" data-basket-id="{{ basket.id }}">
                 {% for processor in payment_processors %}
                     <button class="btn btn-success payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
                         {% if processor.NAME == 'cybersource' %}
@@ -128,9 +129,21 @@
     </div>
 {% else %}
     {% block emptybasket %}
-        <p>
-            {% trans "Your basket is empty." %}
-            <a href="{{ homepage_url }}">{% trans "Discover new courses." %}</a>
-        </p>
+    <div class="depth depth-2 message-error">
+        <h3>{% trans "Your purchase could not be completed" %}</h3>
+        {% captureas dashboard_link %}
+            <a href="{{ homepage_url }}">{% trans "Dashboard" %}</a>
+        {% endcaptureas %}
+        {% captureas support_link %}
+            <a href="{{ support_url }}">
+                {% blocktrans %}
+                    contact {{ platform_name }} Support
+                {% endblocktrans %}
+            </a>
+        {% endcaptureas %}
+        {% blocktrans %}
+            You have not been charged. Return to your {{dashboard_link}} to try again, or {{support_link}}.
+        {% endblocktrans %}
+    </div>
     {% endblock %}
 {% endif %}
