@@ -35,6 +35,7 @@ ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
+ShippingAddress = get_class('order.models', 'ShippingAddress')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 User = get_user_model()
@@ -66,6 +67,18 @@ class BillingAddressSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = BillingAddress
         fields = ('first_name', 'last_name', 'line1', 'line2', 'postcode', 'state', 'country', 'city')
+
+
+class ShippingAddressSerializer(serializers.ModelSerializer):
+    """Serializes a Shipping Address. """
+    formatted_shipping_address = serializers.SerializerMethodField()
+
+    def get_formatted_shipping_address(self, obj):
+        return '{city}, {state} {postcode}'.format(city=obj.city, postcode=obj.postcode, state=obj.state)
+
+    class Meta(object):
+        model = ShippingAddress
+        fields = ('country', 'formatted_shipping_address', 'line1', 'line2', 'line3', 'phone_number', 'salutation')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -163,14 +176,43 @@ class LineSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     """Serializer for parsing order data."""
-    date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
-    lines = LineSerializer(many=True)
     billing_address = BillingAddressSerializer(allow_null=True)
+    date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
+    discount = serializers.SerializerMethodField()
+    lines = LineSerializer(many=True)
+    payment_processor = serializers.SerializerMethodField()
+    shipping_address = ShippingAddressSerializer(allow_null=True)
     user = UserSerializer()
+    vouchers = serializers.SerializerMethodField()
+
+    def get_vouchers(self, obj):
+        try:
+            serializer = VoucherSerializer(
+                obj.basket.vouchers.all(), many=True, context={'request': self.context['request']}
+            )
+            return serializer.data
+        except (AttributeError, ValueError):
+            return None
+
+    def get_payment_processor(self, obj):
+        try:
+            return obj.sources.all()[0].source_type.name
+        except IndexError:
+            return None
+
+    def get_discount(self, obj):
+        try:
+            discount = obj.discounts.all()[0]
+            return str(discount.amount)
+        except IndexError:
+            return None
 
     class Meta(object):
         model = Order
-        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address', 'user')
+        fields = (
+            'billing_address', 'currency', 'date_placed', 'discount', 'lines', 'number', 'payment_processor',
+            'shipping_address', 'status', 'total_excl_tax', 'user', 'vouchers'
+        )
 
 
 class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abstract-method
@@ -610,3 +652,14 @@ class SiteConfigurationSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = SiteConfiguration
+
+
+class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    id = serializers.CharField()
+    display_name = serializers.CharField()
+    url = serializers.CharField()
+    status_url = serializers.CharField()
+    description = serializers.CharField()
+    enable_integration = serializers.BooleanField()
+    fulfillment_instructions = serializers.CharField()
+    thumbnail_url = serializers.CharField()

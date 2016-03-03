@@ -7,6 +7,7 @@ import abc
 import datetime
 import json
 import logging
+import waffle
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -16,7 +17,7 @@ import requests
 from requests.exceptions import ConnectionError, Timeout
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_ecommerce_url, get_lms_enrollment_api_url, get_lms_url
+from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
@@ -444,20 +445,31 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
     def send_email(self, order):
         """ Sends an email with enrollment code order information. """
         # Note (multi-courses): Change from a course_name to a list of course names.
+        site_configuration = order.site.siteconfiguration
         product = order.lines.first().product
         course = Course.objects.get(id=product.attr.course_key)
+        if waffle.switch_is_active('otto_receipt_page'):
+            receipt_page_url = site_configuration.build_ecommerce_url(
+                '{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
+            )
+        else:
+            receipt_page_url = site_configuration.build_lms_url(
+                '{}?orderNum={}'.format('/commerce/checkout/receipt', order.number)
+            )
         send_notification(
             order.user,
             'ORDER_WITH_CSV',
             context={
-                'contact_url': get_lms_url('/contact'),
+                'contact_url': site_configuration.build_lms_url('/contact'),
                 'course_name': course.name,
-                'download_csv_link': get_ecommerce_url(reverse('coupons:enrollment_code_csv', args=[order.number])),
+                'download_csv_link': site_configuration.build_ecommerce_url(
+                    reverse('coupons:enrollment_code_csv', args=[order.number])
+                ),
                 'enrollment_code_title': product.title,
+                'lms_url': site_configuration.lms_url_root,
                 'order_number': order.number,
-                'partner_name': order.site.siteconfiguration.partner.name,
-                'lms_url': get_lms_url(),
-                'receipt_page_url': get_lms_url('{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)),
+                'partner_name': site_configuration.partner.name,
+                'receipt_page_url': receipt_page_url,
             },
             site=order.site
         )

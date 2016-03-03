@@ -443,6 +443,7 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        toggle_switch('otto_receipt_page', True)
         course = CourseFactory()
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
@@ -470,6 +471,16 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
 
     def test_fulfill_product(self):
         """Test fulfilling an Enrollment code product."""
+        self.assertEqual(OrderLineVouchers.objects.count(), 0)
+        lines = self.order.lines.all()
+        __, completed_lines = EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
+        self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
+        self.assertEqual(OrderLineVouchers.objects.count(), 1)
+        self.assertEqual(OrderLineVouchers.objects.first().vouchers.count(), self.QUANTITY)
+
+    def test_fulfill_product_with_lms_receipt_page(self):
+        """Test disabling otto_receipt_page switch still results in successfully fulfilling Enrollment code product."""
+        toggle_switch('otto_receipt_page', False)
         self.assertEqual(OrderLineVouchers.objects.count(), 0)
         lines = self.order.lines.all()
         __, completed_lines = EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)

@@ -2,6 +2,7 @@
 from cStringIO import StringIO
 import logging
 import os
+import waffle
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.management import call_command
@@ -225,7 +226,10 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        receipt_url = u'{}?orderNum={}'.format(self.payment_processor.receipt_url, basket.order_number)
+        if not waffle.switch_is_active('otto_receipt_page'):
+            receipt_url = u'{}?orderNum={}'.format(self.payment_processor.receipt_url, basket.order_number)
+        else:
+            receipt_url = u'{}?order_number={}'.format(self.payment_processor.receipt_url, basket.order_number)
 
         try:
             with transaction.atomic():
