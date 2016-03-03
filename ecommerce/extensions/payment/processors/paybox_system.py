@@ -190,10 +190,12 @@ class PayboxSystem(BasePaymentProcessor):
         return response and (self._generate_signature(response) == response.get('signature'))
 
     def issue_credit(self, source, amount, currency):
-        order = source.order
+        """This method is call by Oscar backoffice when a user requested reimbursement and we accept it.
+        As 'Paybox system' do no allow reimbursemement, it have to be done manualy in Paybox's backoffice.
+        See: http://localhost:8080/dashboard/refunds/
+        """
 
-        raise
-
+        return
 
     @classmethod
     def is_enabled(cls):
