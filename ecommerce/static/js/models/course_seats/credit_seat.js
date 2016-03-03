@@ -1,7 +1,9 @@
 define([
-        'models/course_seats/course_seat'
+        'models/course_seats/course_seat',
+        'ecommerce'
     ],
-    function (CourseSeat) {
+    function (CourseSeat,
+              ecommerce) {
         'use strict';
 
         return CourseSeat.extend({
@@ -17,9 +19,14 @@ define([
 
             validation: _.extend({}, CourseSeat.prototype.validation,
                 {
-                    credit_provider: {
-                        required: true,
-                        msg: gettext('All credit seats must have a credit provider.')
+                    credit_provider: function (value) {
+                        if (!value) {
+                            return gettext('All credit seats must have a credit provider.');
+                        }
+
+                        if (!ecommerce.credit.providers.findWhere({id: value})) {
+                            return gettext('Please select a valid credit provider.');
+                        }
                     },
                     credit_hours: {
                         required: true,

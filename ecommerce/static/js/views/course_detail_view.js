@@ -65,7 +65,7 @@ define([
                         creditProvider = ecommerce.credit.providers.get(seat.get('credit_provider'));
 
                         if (creditProvider) {
-                            seat.set('credit_provider', creditProvider.get('display_name'));
+                            seat.set('credit_provider_display_name', creditProvider.get('display_name'));
                         }
                     });
                     html += _.template(CourseCreditSeatsTemplate)({creditSeats: seats.filtered, moment: moment});
