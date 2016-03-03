@@ -3,7 +3,6 @@ import json
 import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from requests import Timeout
 from testfixtures import LogCapture
 
 from ecommerce.settings import get_lms_url
@@ -78,11 +77,11 @@ class CourseAppViewTests(TestCase):
 
         return providers, provider_json
 
-    def mock_credit_api_timeout(self):
-        """ Mock a timeout when calling the Credit API providers endpoint. """
+    def mock_credit_api_error(self):
+        """ Mock an error response when calling the Credit API providers endpoint. """
 
         def callback(request, uri, headers):  # pylint: disable=unused-argument
-            raise Timeout
+            return 500, headers, 'Failure!'
 
         url = get_lms_url('/api/credit/v1/providers/')
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
@@ -133,7 +132,7 @@ class CourseAppViewTests(TestCase):
         user = self.create_user(is_staff=True)
         self.create_access_token(user)
         self.client.login(username=user.username, password=self.password)
-        self.mock_credit_api_timeout()
+        self.mock_credit_api_error()
 
         with LogCapture(LOGGER_NAME) as l:
             response = self.client.get(self.path)
