@@ -1,0 +1,52 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+    {{ page_title }}
+{% endblock title %}
+
+{% block javascript %}
+    <script src="{% static 'js/apps/receipt_app.js' %}"></script>
+{% endblock javascript %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block header_extras %}
+    <script type="text/template" id="receipt-tpl">{% include "checkout/receipt.underscore" %}</script>
+    <script type="text/template" id="provider-tpl">{% include "checkout/provider.underscore" %}</script>
+{% endblock header_extras %}
+
+{% block content %}
+<div class="receipt">
+    <div id="error-container" class="hidden">
+            <div class="error-message container">
+                <h3 class="title">
+                    <span class="sr">{% blocktrans %} {{ error_summary }} {% endblocktrans %}</span>
+                    {{ error_summary }}
+                </h3>
+                {% if error_text %}
+                <div class="copy">
+                    <p>{% blocktrans %} {{ error_text }} {% endblocktrans %}</p>
+                    <br/>
+                </div>
+                {% endif %}
+                <div class="msg">
+                    <p>{% autoescape off %}{% blocktrans %} {{ for_help_text }}
+                    {% endblocktrans %}{% endautoescape %}</p>
+                </div>
+            </div>
+    </div>
+
+    <div class="container content-container">
+        <div id="receipt-container" class="pay-and-verify hidden" data-is-payment-complete="{{ is_payment_complete }}"
+         data-platform-name="{{ platform_name }}" data-verified='true' data-username="{{ name }}"
+         data-lms-url="{{ lms_url }}">
+            <h1>{% trans "Loading Order Data..." %}</h1>
+            <span>{% trans "Please wait while we retrieve your order details." %}</span>
+        </div>
+    </div>
+</div>
+{% endblock content %}

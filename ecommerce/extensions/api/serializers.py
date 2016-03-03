@@ -167,10 +167,51 @@ class OrderSerializer(serializers.ModelSerializer):
     lines = LineSerializer(many=True)
     billing_address = BillingAddressSerializer(allow_null=True)
     user = UserSerializer()
+    vouchers = serializers.SerializerMethodField()
+    payment_processor = serializers.SerializerMethodField()
+    shipping_address = serializers.SerializerMethodField()
+    discount = serializers.SerializerMethodField()
+    shipping_address_format = '{city}, {state} {postcode}'
+
+    def get_vouchers(self, obj):
+        try:
+            serializer = VoucherSerializer(
+                obj.basket.vouchers.all(), many=True, context={'request': self.context['request']}
+            )
+            return serializer.data
+        except (AttributeError, ValueError):
+            return None
+
+    def get_payment_processor(self, obj):
+        try:
+            return obj.sources.all()[0].source_type.name
+        except IndexError:
+            return None
+
+    def get_shipping_address(self, obj):
+        try:
+            shipping_address = obj.shipping_address
+            formatted_shipping_address = self.shipping_address_format.format(city=shipping_address.city,
+                                                                             state=shipping_address.state,
+                                                                             postcode=shipping_address.postcode)
+            relevant_address_fields = [shipping_address.salutation, shipping_address.line1, shipping_address.line2,
+                                       shipping_address.line3, formatted_shipping_address, shipping_address.country_id,
+                                       shipping_address.phone_number]
+            return [field for field in relevant_address_fields if field]
+        except AttributeError:
+            return None
+
+    def get_discount(self, obj):
+        try:
+            discount = obj.discounts.all()[0]
+            return str(discount.amount)
+        except IndexError:
+            return None
 
     class Meta(object):
         model = Order
-        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address', 'user')
+        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address', 'user',
+                  'vouchers', 'payment_processor', 'shipping_address', 'discount')
 
 
 class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abstract-method

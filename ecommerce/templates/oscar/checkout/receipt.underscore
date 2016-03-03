@@ -1,0 +1,142 @@
+<div class="wrapper-content-main">
+  <article class="content-main">
+    <h3 class="thank-you">
+      <%= gettext( "Thank you!" ) %>
+    </h3>
+
+    <% if ( receipt ) { %>
+    <div class="list-info">
+      <div class="info-item payment-info">
+        <div class="copy">
+        <div class="confirm-message"><%= gettext( "Your order was processed successfully. Print this page for your \
+        records; it serves as your receipt. You will also receive a confirmation email with the same information at") %>
+        <a class="nav-link" href="mailto:<%- receipt.email %>"><%- receipt.email %></a>.</div>
+        <% if ( receipt.billedTo ) { %>
+            <div class="addressed-to">
+                  <span class="name-first"><%- receipt.billedTo.firstName %></span>
+                  <span class="name-last"><%- receipt.billedTo.lastName %></span><br />
+                  <span class="address-city"><%- receipt.billedTo.city %></span>,
+                  <span class="address-state"><%- receipt.billedTo.state %></span>
+                  <span class="address-postalcode"><%- receipt.billedTo.postalCode %></span><br />
+                  <span class="address-country"><%- receipt.billedTo.country.toUpperCase() %></span><br />
+            </div>
+        <% }  else if ( receipt.shipping_address ) { %>
+            <div class="addressed-to"><address>
+            <% for ( var i = 0; i < receipt.shipping_address.length; i++ ) { %>
+                  <%- receipt.shipping_address[i] %> <br/>
+                <% } %>
+            </address></div>
+        <% } %>
+
+        </div>
+        <div class="order-headers order-summary">
+            <span class="order-number-heading"><%= gettext( "Order Number" ) %>:</span>
+            <div class="order-info"><%- receipt.orderNum %></div>
+            <% if ( receipt.paymentProcessor ) { %>
+                <span class="order-payment-heading"><%= gettext( "Payment Method" ) %>:</span>
+                <div class="order-info"><%- receipt.paymentProcessor %></div>
+             <% } %>
+
+            <span class="order-date-heading"><%= gettext( "Order Date" ) %>:</span>
+            <div class="order-info"><%- receipt.purchasedDatetime %></div>
+            </div>
+        </div>
+
+        <div class="wrapper-report">
+          <div class="order-headers order-details"><%= gettext( "Order Details" ) %></div>
+          <table class="table">
+            <thead class="order-columns">
+              <tr>
+                <th scope="col" ><%- gettext( "Qty" ) %>.</th> <!-- Translators: Abbreviation for quantity.-->
+                <th scope="col" ><%- gettext( "Description" ) %></th>
+                <th class="order-amount" scope="col" ><%- gettext( "Amount" ) %></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% for ( var i = 0; i < receipt.items.length; i++ ) { %>
+                <% if ( receipt.isRefunded ) { %>
+                  <tr  class="order-line-data">
+                  <td class="order-line-data"><del><%- receipt.items[i].quantity %></del></td>
+                  <td class="order-line-data"><del><%- receipt.items[i].lineDescription %>
+                  <div class="partner"></div></del></td>
+                  <td class="order-line-data"><del><%- receipt.currency %><%- receipt.items[i].cost %></del></td>
+                  </tr>
+                <% } else { %>
+                  <tr class="order-line-data">
+                    <td><%- receipt.items[i].quantity %></td>
+                    <td><%- receipt.items[i].lineDescription %><div class="partner">
+                    </div>
+                    <% if ( receipt.vouchers.length > 0 ) { %>
+                        <div class="voucher-info"><%- gettext( "Coupon applied" ) %>:
+                             <span class="voucher-code"><%- receipt.vouchers[0].code %>
+                             <%- receipt.discountPercentage %>% off</span>
+                             <span class="discount">-<%- receipt.currency %><%- receipt.discount %></span>
+                       </div>
+                   <% } %>
+                    </td>
+                    <% if (receipt.discount) { %>
+                        <td><div class="old-price"><%- receipt.currency %><%- receipt.originalCost %></div>
+                        <div class="final-price"><%- receipt.currency %><%- receipt.items[i].cost %></div></td>
+                    <% } else { %>
+                        <td class="final-price"><%- receipt.currency %><%- receipt.items[i].cost %></td>
+                    <% } %>
+                  </tr>
+                <% } %>
+              <% } %>
+            </tbody>
+
+            <tfoot>
+              <tr class="order-total">
+                <td colspan="3">
+                <div class="total-value"> <%- gettext( "Total: " ) %>
+                  <%- receipt.currency %><span class="value-amount"><%- receipt.totalCost %></span>
+                </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <% if ( receipt.isRefunded ) { %>
+          <div class="msg msg-refunds">
+            <h4 class="title sr"><%- gettext( "Please Note" ) %>: </h4>
+            <div class="copy">
+              <p><%- gettext( "Crossed out items have been refunded." ) %></p>
+            </div>
+          </div>
+          <% } %>
+        </div>
+
+        <div class="report-receipt-provider hidden" id="receipt-provider"></div>
+
+      </div>
+    </div>
+    <% } else { %>
+        <p class="no-content"><%- gettext( "No receipt available" ) %></p>
+    <% } %>
+
+    <nav class="nav-wizard is-ready">
+        <% if ( !is_verification_required || verified ) { %>
+            <div id="verify_choices"><a class="verify-later nav-link" href="<%- lmsUrl %>/dashboard">
+            <%- gettext( "Go to Dashboard" ) %></a></div>
+        <% } else { %>
+          <div id="verify_message"><%- gettext( "Before you can receive a verified certificate for this course, \
+          you must verify your identity." )%></div>
+          <div id="verify_choices" class="right">
+          <a id="verify_now_button"
+             class="next action-primary"
+             href="<%- lmsUrl %>/verify_student/verify-now/<%- courseKey %>/"
+             data-track-type="click" data-track-event="edx.bi.user.verification.deferred"
+             data-track-category="verification"
+          ><%- gettext( "Verify Now" ) %>
+          </a>
+          <a id="verify_later_button" class="verify-later" href="<%- lmsUrl %>/dashboard"
+          data-track-type="click" data-track-event="edx.bi.user.verification.immediate"
+          data-track-category="verification">
+           <span class="nav-link"><%- gettext( "Take me to dashboard" ) %></span>
+          </a>
+          </div>
+      <% } %>
+    </nav>
+  </article>
+</div>

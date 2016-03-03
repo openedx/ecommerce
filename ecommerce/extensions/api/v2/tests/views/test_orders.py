@@ -6,7 +6,7 @@ import mock
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
 from django.test import override_settings, RequestFactory
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
 from ecommerce.extensions.api.serializers import OrderSerializer
@@ -17,7 +17,9 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
+Country = get_class('address.models', 'Country')
 Order = get_model('order', 'Order')
+ShippingAddress = get_class('order.models', 'ShippingAddress')
 ShippingEventType = get_model('order', 'ShippingEventType')
 
 
@@ -143,6 +145,25 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """ Helper method for making assertions. """
 
         response = self.client.get(self.path, {'username': user.username})
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            response.data['results'][0],
+            OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')}).data
+        )
+
+    def test_shipping_address_filter(self):
+        """
+        Verify that the OrderSerializer returns a properly-formatted shipping address.
+        """
+        country = Country.objects.create(printable_name='Fake', name='fake')
+        shipping_address = ShippingAddress.objects.create(line1='Fake Address', country=country)
+        order = factories.create_order(user=self.user, shipping_address=shipping_address)
+
+        requester = self.create_user(is_staff=True)
+        self.client.login(email=requester.email, password=self.password)
+
+        response = self.client.get(self.path, {'username': self.user.username})
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(

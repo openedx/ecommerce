@@ -21,7 +21,11 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(SignalTests, self).setUp()
         self.user = self.create_user()
+        self.request.user = self.user
+        self.credit_provider_id = 'HGW'
+        self.credit_provider_name = 'Hogwarts'
         toggle_switch('ENABLE_NOTIFICATIONS', True)
+        toggle_switch('otto_receipt_page', True)
 
     def prepare_order(self, seat_type, credit_provider_id=None):
         """
@@ -47,19 +51,17 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
         When the post_checkout signal is emitted, the receiver should attempt
         to fulfill the newly-placed order and send receipt email.
         """
-        credit_provider_id = 'HGW'
-        credit_provider_name = 'Hogwarts'
-        body = {'display_name': credit_provider_name}
+        body = {'display_name': self.credit_provider_name}
         httpretty.register_uri(
             httpretty.GET,
             self.site.siteconfiguration.build_lms_url(
-                'api/credit/v1/providers/{credit_provider_id}/'.format(credit_provider_id=credit_provider_id)
+                'api/credit/v1/providers/{credit_provider_id}/'.format(credit_provider_id=self.credit_provider_id)
             ),
             body=json.dumps(body),
             content_type='application/json'
         )
 
-        order = self.prepare_order('credit', credit_provider_id=credit_provider_id)
+        order = self.prepare_order('credit', credit_provider_id=self.credit_provider_id)
         self.mock_access_token_response()
         send_course_purchase_email(None, user=self.user, order=order)
         self.assertEqual(len(mail.outbox), 1)
@@ -85,7 +87,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                 course_title=order.lines.first().product.title,
                 full_name=self.user.get_full_name(),
                 credit_hours=2,
-                credit_provider_name=credit_provider_name,
+                credit_provider_name=self.credit_provider_name,
                 platform_name=self.site.name,
                 receipt_url=self.site.siteconfiguration.build_lms_url(
                     '{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)

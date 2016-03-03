@@ -319,7 +319,11 @@ class PaymentMixin(object):
         self.dismiss_alert()
 
     def assert_receipt_page_loads(self):
-        """ Verifies the receipt page loaded in the browser. """
+        """
+        Verifies the receipt page loaded in the browser.
+        If the waffle switch 'otto_receipt_page' is disabled, these assertions will fail
+        due to different CSS class names between the old and new receipt pages.
+        """
         refresh = False
 
         # In a test environment, it can take a while for the payment processor to respond.
@@ -343,7 +347,7 @@ class PaymentMixin(object):
         self.assertIn('receipt', self.browser.title.lower())
 
         # Check the content of the page
-        cells = self.browser.find_elements_by_css_selector('table.report-receipt tbody td')
+        cells = self.browser.find_elements_by_css_selector('table tbody td')
         self.assertGreater(len(cells), 0)
         order = self.ecommerce_api_client.orders.get()['results'][0]
         line = order['lines'][0]
@@ -356,11 +360,11 @@ class PaymentMixin(object):
         actual = [cell.text for cell in cells]
         self.assertListEqual(actual, expected)
 
-        # Confirm the thank you message is not broken (ref: WL-466 + edx/edx-platform#12476)
-        css_selector = 'span.course_name_placeholder'
-        course_name_placeholder_text = self.browser.find_elements_by_css_selector(css_selector)[0].text
-        title = line['product']['title']
-        self.assertIn(course_name_placeholder_text, title)
+        # Check that the thank you message has loaded correctly.
+        css_selector = 'confirm-message'
+        thank_you_message = self.browser.find_elements_by_css_selector(css_selector)[0].text
+        email = line['user']['email']
+        self.assertIn(email, thank_you_message)
 
 
 class CouponMixin(EcommerceApiMixin):
