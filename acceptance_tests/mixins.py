@@ -1,8 +1,8 @@
 import logging
 import uuid
 
-from ecommerce_api_client.client import EcommerceApiClient
 import requests
+from edx_rest_api_client.client import EdxRestApiClient
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -126,7 +126,7 @@ class EnrollmentApiMixin(object):
 class EcommerceApiMixin(object):
     @property
     def ecommerce_api_client(self):
-        return EcommerceApiClient(ECOMMERCE_API_URL, oauth_access_token=ECOMMERCE_API_TOKEN)
+        return EdxRestApiClient(ECOMMERCE_API_URL, oauth_access_token=ECOMMERCE_API_TOKEN)
 
     def assert_order_created_and_completed(self):
         orders = self.ecommerce_api_client.orders.get()['results']
