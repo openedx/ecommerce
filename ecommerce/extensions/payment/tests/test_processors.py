@@ -12,7 +12,6 @@ import ddt
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
-import httpretty
 import mock
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
 from oscar.core.loading import get_model
@@ -24,6 +23,7 @@ from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.order.constants import PaymentEventTypeName
