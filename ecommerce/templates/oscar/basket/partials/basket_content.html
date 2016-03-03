@@ -131,18 +131,16 @@
     {% block emptybasket %}
     <div class="depth depth-2 message-error">
         <h3>{% trans "Your purchase could not be completed" %}</h3>
-        {% captureas dashboard_link %}
-            <a href="{{ homepage_url }}">{% trans "Dashboard" %}</a>
+        {% captureas dashboard_link_start %}
+          <a href="{{ homepage_url }}">
         {% endcaptureas %}
-        {% captureas support_link %}
-            <a href="{{ support_url }}">
-                {% blocktrans %}
-                    contact {{ platform_name }} Support
-                {% endblocktrans %}
-            </a>
+
+        {% captureas support_link_start %}
+          <a href="{{ support_url }}">
         {% endcaptureas %}
-        {% blocktrans %}
-            You have not been charged. Return to your {{dashboard_link}} to try again, or {{support_link}}.
+
+        {% blocktrans with link_end="</a>" %}
+          You have not been charged. Return to your {{ dashboard_link_start }}dashboard{{ link_end }} to try again, or {{ support_link_start }}contact {{ platform_name }} Support{{ link_end }}.
         {% endblocktrans %}
     </div>
     {% endblock %}
