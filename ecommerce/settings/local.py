@@ -128,6 +128,18 @@ PAYMENT_PROCESSOR_CONFIG = {
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
         'error_url': get_lms_url('/commerce/checkout/error/'),
     },
+    'braintree': {
+        'merchant_id': 'fake-merchant-id',
+        'public_key': 'fake-public-key',
+        'private_key': 'fake-private-key',
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+    },
+    'stripe': {
+        'publishable_key': 'fake-publishable-key',
+        'secret_key': 'fake-secret-key',
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'image_url': get_lms_url('/static/images/default-theme/logo.png'),
+    },
 }
 # END PAYMENT PROCESSING
 
