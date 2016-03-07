@@ -72,7 +72,7 @@ msgstr "Professionnel"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor"
-msgstr "Honeur"
+msgstr "Honneur"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Audit"
