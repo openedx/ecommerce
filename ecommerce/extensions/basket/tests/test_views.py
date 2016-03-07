@@ -133,8 +133,8 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
         basket.add_product(product, 1)
         return basket
 
-    def create_seat(self, course, seat_price=100):
-        return course.create_or_update_seat('verified', True, seat_price, self.partner)
+    def create_seat(self, course, seat_price=100, cert_type='verified'):
+        return course.create_or_update_seat(cert_type, True, seat_price, self.partner)
 
     def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
         _range = factories.RangeFactory(products=[product, ])
@@ -190,6 +190,12 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['lines'], [])
+
+    def test_line_no_cert_type(self):
+        seat = self.create_seat(course=self.course, cert_type='TEST', seat_price=100)
+        self.create_basket_and_add_product(seat)
+        response = self.client.get(self.path)
+        self.assertIsNone(response.context['lines'][0].certificate_type)
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """

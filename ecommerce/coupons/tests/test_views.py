@@ -103,11 +103,21 @@ class GetVoucherTests(TestCase):
 
     def test_expired_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher has expired. """
-        future_datetime = now() + datetime.timedelta(days=10)
-        voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=future_datetime)
+        start_datetime = now() - datetime.timedelta(days=20)
+        end_datetime = now() - datetime.timedelta(days=10)
+        voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
         valid, msg = voucher_is_valid(voucher=voucher, product=product, request=None)
         self.assertFalse(valid)
-        self.assertEqual(msg, _('Coupon expired'))
+        self.assertEqual(msg, _('This coupon code has expired.'))
+
+    def test_future_voucher(self):
+        """ Verify voucher_is_valid() assess that the voucher has not started yet. """
+        start_datetime = now() + datetime.timedelta(days=10)
+        end_datetime = now() + datetime.timedelta(days=20)
+        voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
+        valid, msg = voucher_is_valid(voucher=voucher, product=product, request=None)
+        self.assertFalse(valid)
+        self.assertEqual(msg, _('This coupon code is not yet valid.'))
 
     def test_voucher_unavailable_to_buy(self):
         """ Verify that False is returned for unavialable products. """

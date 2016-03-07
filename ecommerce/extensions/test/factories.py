@@ -47,7 +47,7 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
     return order
 
 
-def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, benefit_value=100,
+def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_datetime=None, benefit_value=100,
                     benefit_type=Benefit.PERCENTAGE):
     """ Helper function to create a voucher and add an offer to it that contains a product. """
     if _range is None:
@@ -59,7 +59,11 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, benefit
     if start_datetime is None:
         start_datetime = now() - datetime.timedelta(days=1)
 
-    voucher = VoucherFactory(code=code, start_datetime=start_datetime, usage=Voucher.SINGLE_USE)
+    if end_datetime is None:
+        end_datetime = now() + datetime.timedelta(days=10)
+
+    voucher = VoucherFactory(code=code, start_datetime=start_datetime, end_datetime=end_datetime,
+                             usage=Voucher.SINGLE_USE)
     benefit = BenefitFactory(type=benefit_type, range=_range, value=benefit_value)
     condition = ConditionFactory(value=1, range=_range)
     offer = ConditionalOfferFactory(benefit=benefit, condition=condition)

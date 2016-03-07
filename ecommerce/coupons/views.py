@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
 
@@ -78,7 +79,11 @@ def voucher_is_valid(voucher, product, request):
         return False, _('Coupon does not exist')
 
     if not voucher.is_active():
-        return False, _('Coupon expired')
+        now = timezone.now()
+        if voucher.start_datetime > now:
+            return False, _('This coupon code is not yet valid.')
+        elif voucher.end_datetime < now:  # pragma: no cover
+            return False, _('This coupon code has expired.')
 
     avail, msg = voucher.is_available_to_user(request.user)
     if not avail:
