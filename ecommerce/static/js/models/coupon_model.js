@@ -144,6 +144,7 @@ define([
                 data.price = this.get('price');
                 data.category_ids = [ this.get('category') ];
                 data.note = this.get('note');
+                data.max_usage = this.get('max_usage');
 
                 // Enrollment code always gives 100% discount
                 switch (this.get('coupon_type')) {

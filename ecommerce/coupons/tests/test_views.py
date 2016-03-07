@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 import httpretty
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import OrderFactory, ConditionalOfferFactory, VoucherFactory, RangeFactory
+from oscar.test.factories import ConditionalOfferFactory, OrderFactory, RangeFactory, VoucherFactory
 from oscar.test.utils import RequestFactory
 import pytz
 
@@ -126,16 +126,38 @@ class GetVoucherTests(TestCase):
         valid, __ = voucher_is_valid(voucher=voucher, product=product, request=request)
         self.assertFalse(valid)
 
+    def assert_error_messages(self, voucher, product, user, error_msg):
+        """ Assert the proper error message is returned. """
+        voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
+        request = RequestFactory().request()
+        request.user = user
+        valid, msg = voucher_is_valid(voucher=voucher, product=product, request=request)
+        self.assertFalse(valid)
+        self.assertEqual(msg, error_msg)
+
     def test_used_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is unavailable. """
         voucher, product = prepare_voucher(code=COUPON_CODE)
-        order = OrderFactory()
         user = self.create_user()
+        order = OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=user, order=order)
+        error_msg = _('This coupon has already been used')
+        self.assert_error_messages(voucher, product, user, error_msg)
+
+    def test_usage_exceeded_coupon(self):
+        """ Verify voucher_is_valid() assess that the voucher exceeded it's usage limit. """
+        voucher, product = prepare_voucher(code=COUPON_CODE, usage=Voucher.ONCE_PER_CUSTOMER, max_usage=1)
+        user = self.create_user()
+        error_msg = _('This coupon code is no longer available.')
+        self.assert_error_messages(voucher, product, user, error_msg)
+
+    def test_once_per_customer_voucher(self):
+        """ Verify the coupon is valid for anonymous users. """
+        voucher, product = prepare_voucher(usage=Voucher.ONCE_PER_CUSTOMER)
         request = RequestFactory().request()
         valid, msg = voucher_is_valid(voucher=voucher, product=product, request=request)
-        self.assertFalse(valid)
-        self.assertEqual(msg, _('This coupon has already been used'))
+        self.assertTrue(valid)
+        self.assertEqual(msg, '')
 
 
 @httpretty.activate

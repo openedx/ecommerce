@@ -400,11 +400,16 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     vouchers = serializers.SerializerMethodField()
     categories = CategorySerializer(many=True, read_only=True)
     note = serializers.SerializerMethodField()
+    num_max_uses = serializers.SerializerMethodField()
+    num_uses = serializers.SerializerMethodField()
+
+    def retrieve_offer(self, obj):
+        """Helper method to retrieve the offer from coupon. """
+        return obj.attr.coupon_vouchers.vouchers.first().offers.first()
 
     def get_coupon_type(self, obj):
-        voucher = obj.attr.coupon_vouchers.vouchers.first()
-        benefit = voucher.offers.first().benefit
-        if benefit.type == Benefit.PERCENTAGE and benefit.value == 100:
+        offer = self.retrieve_offer(obj)
+        if offer.benefit.type == Benefit.PERCENTAGE and offer.benefit.value == 100:
             return 'Enrollment code'
         return 'Discount code'
 
@@ -413,8 +418,8 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return history.history_user.username, history.history_date
 
     def get_seats(self, obj):
-        voucher = obj.attr.coupon_vouchers.vouchers.first()
-        stockrecords = voucher.offers.first().condition.range.catalog.stock_records.all()
+        offer = self.retrieve_offer(obj)
+        stockrecords = offer.condition.range.catalog.stock_records.all()
         seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
         serializer = ProductSerializer(seats, many=True, context={'request': self.context['request']})
         return serializer.data
@@ -433,11 +438,19 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         except AttributeError:
             return None
 
+    def get_num_max_uses(self, obj):
+        offer = self.retrieve_offer(obj)
+        return offer.max_global_applications
+
+    def get_num_uses(self, obj):
+        offer = self.retrieve_offer(obj)
+        return offer.num_applications
+
     class Meta(object):
         model = Product
         fields = (
-            'id', 'title', 'coupon_type', 'last_edited', 'seats',
-            'client', 'price', 'vouchers', 'categories', 'note'
+            'id', 'title', 'coupon_type', 'last_edited', 'seats', 'client',
+            'price', 'vouchers', 'categories', 'note', 'num_max_uses', 'num_uses'
         )
 
 

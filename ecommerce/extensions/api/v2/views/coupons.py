@@ -86,6 +86,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             categories = Category.objects.filter(id__in=request.data['category_ids'])
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note', None)
+            max_uses = request.data.get('max_uses', None)
+
+            if max_uses:
+                max_uses = int(max_uses)
 
             # We currently do not support multi-use voucher types.
             if voucher_type == Voucher.MULTI_USE:
@@ -123,6 +127,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 'voucher_type': voucher_type,
                 'categories': categories,
                 'note': note,
+                'max_uses': max_uses,
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -152,6 +157,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 - voucher_type (str)
                 - categories (list of Category objects)
                 - note (str)
+                - max_uses (int)
 
         Returns:
             A coupon product object.
@@ -185,7 +191,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 code=data['code'] or None,
                 quantity=int(data['quantity']),
                 start_datetime=data['start_date'],
-                voucher_type=data['voucher_type']
+                voucher_type=data['voucher_type'],
+                max_uses=data['max_uses'],
+                coupon_id=coupon_product.id
             )
         except IntegrityError as ex:
             logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)

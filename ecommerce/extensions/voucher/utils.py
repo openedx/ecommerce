@@ -7,14 +7,15 @@ import uuid
 import pytz
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
+from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
-from edx_rest_api_client.client import EdxRestApiClient
 
-from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,97 @@ Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 
+def _get_voucher_status(voucher, offer):
+    """Retrieve the status of a voucher.
+
+    Arguments:
+        voucher(Voucher)
+        offer(Offer)
+
+    Returns
+        status(translate string object)
+    """
+
+    datetime_now = datetime.datetime.now(pytz.UTC)
+    not_expired = (
+        voucher.start_datetime < datetime_now and
+        voucher.end_datetime > datetime_now
+    )
+    if not_expired:
+        status = _('Redeemed') if not offer.is_available() else _('Active')
+    else:
+        status = _('Inactive')
+
+    return status
+
+
+def _get_info_for_coupon_report(coupon, voucher):
+    offer = voucher.offers.all().first()
+    seat_stockrecord = offer.condition.range.catalog.stock_records.first()
+    course_id = seat_stockrecord.product.attr.course_key
+    history = coupon.history.first()
+
+    coupon_stockrecord = StockRecord.objects.get(product=coupon)
+    course_organization = CourseKey.from_string(course_id).org
+
+    price = currency(seat_stockrecord.price_excl_tax)
+    invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
+    discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
+    coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
+    status = _get_voucher_status(voucher, offer)
+
+    discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
+    discount_amount = currency(discount_data['discount_value'])
+
+    path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
+    url = get_ecommerce_url(path)
+    author = history.history_user.full_name
+
+    try:
+        note = coupon.attr.note
+    except AttributeError:
+        note = ''
+
+    try:
+        category = get_object_or_404(ProductCategory, product=coupon).category.name
+    except Http404:
+        category = ''
+
+    # Set the max_uses_count for single-use vouchers to 1,
+    # for other usage limitations (once per customer and multi-use in the future)
+    # which don't have the max global applications limit set,
+    # set the max_uses_count to 10000 which is the arbitrary limit Oscar sets:
+    # https://github.com/django-oscar/django-oscar/blob/master/src/oscar/apps/offer/abstract_models.py#L253
+    if voucher.usage == Voucher.SINGLE_USE:
+        max_uses_count = 1
+    elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+        max_uses_count = 10000
+    else:
+        max_uses_count = offer.max_global_applications
+
+    return {
+        'Coupon Name': voucher.name,
+        'Code': voucher.code,
+        'Coupon Type': coupon_type,
+        'URL': url,
+        'Course ID': course_id,
+        'Organization': course_organization,
+        'Category': category,
+        'Note': note,
+        'Price': price,
+        'Invoiced Amount': invoiced_amount,
+        'Discount Percentage': discount_percentage,
+        'Discount Amount': discount_amount,
+        'Status': status,
+        'Created By': author,
+        'Create Date': history.history_date.strftime("%b %d, %y"),
+        'Coupon Start Date': voucher.start_datetime.strftime("%b %d, %y"),
+        'Coupon Expiry Date': voucher.end_datetime.strftime("%b %d, %y"),
+        'Maximum Coupon Usage': max_uses_count,
+        'Redemption Count': offer.num_applications,
+    }
+
+
 def generate_coupon_report(coupon_vouchers):
     """
     Generate coupon report data
@@ -48,10 +140,12 @@ def generate_coupon_report(coupon_vouchers):
     field_names = [
         _('Coupon Name'),
         _('Code'),
+        _('Maximum Coupon Usage'),
+        _('Redemption Count'),
         _('Coupon Type'),
         _('URL'),
-        _('CourseID'),
-        _('Partner'),
+        _('Course ID'),
+        _('Organization'),
         _('Client'),
         _('Category'),
         _('Note'),
@@ -60,7 +154,7 @@ def generate_coupon_report(coupon_vouchers):
         _('Discount Percentage'),
         _('Discount Amount'),
         _('Status'),
-        _('Redeemed By ID'),
+        _('Order Number'),
         _('Redeemed By Username'),
         _('Created By'),
         _('Create Date'),
@@ -72,7 +166,9 @@ def generate_coupon_report(coupon_vouchers):
     for coupon_voucher in coupon_vouchers:
         coupon = coupon_voucher.coupon
 
-        # Get client based on the invoice that was created during coupon creation
+        # Get client based on the invoice that was created during coupon creation.
+        # We used to save the client as the basket owner and therefor the exception
+        # catch is put in place for backwards compatibility with older coupons.
         basket = Basket.objects.filter(lines__product_id=coupon.id).first()
         try:
             order = get_object_or_404(Order, basket=basket)
@@ -82,83 +178,33 @@ def generate_coupon_report(coupon_vouchers):
             client = basket.owner.username
 
         for voucher in coupon_voucher.vouchers.all():
-            offer = voucher.offers.all().first()
+            row = _get_info_for_coupon_report(coupon, voucher)
 
-            stockrecords = offer.condition.range.catalog.stock_records.all()
-            course_seat = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords]).first()
-            seat_stockrecord = course_seat.stockrecords.first()
-            history = coupon.history.latest()
+            for item in ('Order Number', 'Redeemed By Username',):
+                row[item] = ''
 
-            coupon_stockrecord = StockRecord.objects.get(product=coupon)
-            course_id = course_seat.course.id
-            api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
-            course_organization = api.courses(course_id).get()['org']
-
-            price = currency(seat_stockrecord.price_excl_tax)
-            invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-            datetime_now = pytz.utc.localize(datetime.datetime.now())
-            in_datetime_interval = (
-                voucher.start_datetime < datetime_now and
-                voucher.end_datetime > datetime_now
-            )
-            discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
-            coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
-            if in_datetime_interval:
-                status = _('Redeemed') if voucher.num_orders > 0 else _('Active')
-            else:
-                status = _('Inactive')
-
-            discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
-            discount_amount = currency(discount_data['discount_value'])
-
+            row['Client'] = client
+            rows.append(row)
             if voucher.num_orders > 0:
-                voucher_applications = VoucherApplication.objects.filter(voucher=voucher).all()
-                redemption_users = [application.user for application in voucher_applications]
-                redemption_user_ids = ', '.join([str(user.id) for user in redemption_users])
-                redemption_user_usernames = ', '.join([user.username for user in redemption_users])
-            else:
-                redemption_user_ids = redemption_user_usernames = ''
+                voucher_applications = VoucherApplication.objects.filter(voucher=voucher)
+                for application in voucher_applications:
+                    redemption_user_username = application.user.username
 
-            URL = '{url}?code={code}'.format(url=get_ecommerce_url('/coupons/offer/'), code=voucher.code)
-            author = history.history_user.full_name
+                    new_row = row.copy()
+                    new_row.update({
+                        'Status': _('Redeemed'),
+                        'Order Number': application.order.number,
+                        'Redeemed By Username': redemption_user_username,
+                        'Maximum Coupon Usage': 1,
+                        'Redemption Count': 1,
+                    })
 
-            try:
-                note = coupon.attr.note
-            except AttributeError:
-                note = ''
-
-            try:
-                category = get_object_or_404(ProductCategory, product=coupon).category.name
-            except Http404:
-                category = ""
-
-            rows.append({
-                'Coupon Name': voucher.name,
-                'Code': voucher.code,
-                'Coupon Type': coupon_type,
-                'URL': URL,
-                'CourseID': course_id,
-                'Partner': course_organization,
-                'Client': client,
-                'Category': category,
-                'Note': note,
-                'Price': price,
-                'Invoiced Amount': invoiced_amount,
-                'Discount Percentage': discount_percentage,
-                'Discount Amount': discount_amount,
-                'Status': status,
-                'Redeemed By ID': redemption_user_ids,
-                'Redeemed By Username': redemption_user_usernames,
-                'Created By': author,
-                'Create Date': history.history_date.strftime("%b %d,%y"),
-                'Coupon Start Date': voucher.start_datetime.strftime("%b %d,%y"),
-                'Coupon Expiry Date': voucher.end_datetime.strftime("%b %d,%y"),
-            })
+                    rows.append(new_row)
 
     return field_names, rows
 
 
-def _get_or_create_offer(product_range, benefit_type, benefit_value):
+def _get_or_create_offer(product_range, benefit_type, benefit_value, coupon_id=None, max_uses=None):
     """
     Return an offer for a catalog with condition and benefit.
 
@@ -186,13 +232,18 @@ def _get_or_create_offer(product_range, benefit_type, benefit_value):
     )
 
     offer_name = "Catalog [{}]-{}-{}".format(product_range.catalog.id, offer_benefit.type, offer_benefit.value)
+    if max_uses:
+        # Offer needs to be unique for each multi-use coupon.
+        offer_name = "{} (Coupon [{}] - max_uses:{})".format(offer_name, coupon_id, max_uses)
 
     offer, __ = ConditionalOffer.objects.get_or_create(
         name=offer_name,
         offer_type=ConditionalOffer.VOUCHER,
         condition=offer_condition,
         benefit=offer_benefit,
+        max_global_applications=max_uses
     )
+
     return offer
 
 
@@ -266,7 +317,9 @@ def create_vouchers(
         quantity,
         start_datetime,
         voucher_type,
-        code=None):
+        coupon_id=None,
+        code=None,
+        max_uses=None):
     """
     Create vouchers
 
@@ -300,7 +353,9 @@ def create_vouchers(
     offer = _get_or_create_offer(
         product_range=product_range,
         benefit_type=benefit_type,
-        benefit_value=benefit_value
+        benefit_value=benefit_value,
+        max_uses=max_uses,
+        coupon_id=coupon_id
     )
     for __ in range(quantity):
         voucher = _create_new_voucher(

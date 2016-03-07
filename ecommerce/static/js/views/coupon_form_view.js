@@ -149,6 +149,9 @@ define([
                 },
                 'input[name=note]': {
                     observe: 'note'
+                },
+                'input[name=max_uses]': {
+                    observe: 'max_uses'
                 }
             },
 
@@ -180,6 +183,7 @@ define([
             },
 
             toggleFields: function () {
+                var hiddenClass = 'hidden';
                 var couponType = this.model.get('coupon_type'),
                     voucherType = this.model.get('voucher_type'),
                     formGroup = function (sel) {
@@ -187,27 +191,34 @@ define([
                     }.bind(this);
 
                 if (couponType === 'discount') {
-                    formGroup('[name=benefit_value]').removeClass('hidden');
+                    formGroup('[name=benefit_value]').removeClass(hiddenClass);
                 } else {
                     // enrollment
-                    formGroup('[name=benefit_value]').addClass('hidden');
+                    formGroup('[name=benefit_value]').addClass(hiddenClass);
                 }
 
                 // When creating a discount show the CODE field for both (they are both multi-use)
                 //     - Multiple times by multiple customers
                 //     - Once per customer
                 if (couponType === 'discount' && voucherType !== 'Single use') {
-                    formGroup('[name=code]').removeClass('hidden');
+                    formGroup('[name=code]').removeClass(hiddenClass);
                 } else {
-                    formGroup('[name=code]').addClass('hidden');
+                    formGroup('[name=code]').addClass(hiddenClass);
+                }
+
+                // When creating a Once by multiple customers code show the usage number field.
+                if (voucherType !== 'Single use') {
+                    formGroup('[name=max_uses]').removeClass(hiddenClass);
+                } else {
+                    formGroup('[name=max_uses]').addClass(hiddenClass);
                 }
 
                 // The only time we allow for a generation of multiple codes is
                 // when they are of type single use.
                 if (voucherType === 'Single use') {
-                    formGroup('[name=quantity]').removeClass('hidden');
+                    formGroup('[name=quantity]').removeClass(hiddenClass);
                 } else {
-                    formGroup('[name=quantity]').addClass('hidden');
+                    formGroup('[name=quantity]').addClass(hiddenClass);
                 }
             },
 
@@ -289,6 +300,7 @@ define([
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
                 this.$el.find('select[name=category]').attr('disabled', true);
                 this.$el.find('input[name=note]').attr('disabled', true);
+                this.$el.find('input[name=max_uses]').attr('disabled', true);
             },
 
             getSeatData: function () {
