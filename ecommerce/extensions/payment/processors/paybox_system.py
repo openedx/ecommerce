@@ -2,12 +2,14 @@
 
 from __future__ import unicode_literals
 
-import pprint
-
+import binascii
+from collections import OrderedDict
 import datetime
-import logging
-import uuid
 from decimal import Decimal
+import hashlib
+import hmac
+import logging
+
 
 from django.conf import settings
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
@@ -30,13 +32,6 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 ProductClass = get_model('catalogue', 'ProductClass')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
-
-
-
-import binascii
-import hashlib
-import hmac
-from collections import OrderedDict
 
 
 class PayboxSystem(BasePaymentProcessor):
@@ -65,6 +60,7 @@ class PayboxSystem(BasePaymentProcessor):
         self.private_key = configuration['private_key']
         self.payment_page_url = configuration['payment_page_url']
         self.receipt_page_url = configuration['receipt_page_url']
+        self.error_page_url = configuration['error_page_url']
         self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
 
@@ -90,9 +86,10 @@ class PayboxSystem(BasePaymentProcessor):
         params['PBX_IDENTIFIANT'] = self.PBX_IDENTIFIANT
         params['PBX_PORTEUR'] = basket.owner.email
         params['PBX_RANG'] = self.PBX_RANG
-        params['PBX_REFUSE'] = self.cancel_page_url
+        params['PBX_REFUSE'] = self.error_page_url
+        params['PBX_ANNULE'] = self.cancel_page_url
         params['PBX_REPONDRE_A'] = self.PBX_REPONDRE_A
-        params['PBX_RETOUR'] = 'amount:M;reference-fun:R;autorisation:A;erreur:E;appel-paybox:T;transaction-paybox:S'
+        params['PBX_RETOUR'] = 'amount:M;reference-fun:R;autorisation:A;reponse-paybox:E;appel-paybox:T;transaction-paybox:S'
         params['PBX_RUF1'] = 'POST'    # Initial form method
         params['PBX_SITE'] = self.PBX_SITE
         params['PBX_TIME'] = self.utcnow().strftime(ISO_8601_FORMAT)
@@ -155,16 +152,12 @@ class PayboxSystem(BasePaymentProcessor):
         #import ipdb; ipdb.set_trace()
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
-        code = response['erreur']
+        code = response['reponse-paybox']
         if code != '00000':
-            exception = {
-                'cancel': UserCancelled,   #TODO: implement Paybox error codes
-                'decline': TransactionDeclined,
-                '00001': GatewayError
-            }.get(code, InvalidCybersourceDecision)
-
-            raise exception
-
+            if code == '00001':
+                raise UserCancelled
+            else:
+                raise TransactionDeclined
 
         # Create Source to track all transactions related to this processor and order
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
@@ -184,10 +177,6 @@ class PayboxSystem(BasePaymentProcessor):
 
         return source, event
 
-
-    def is_signature_valid(self, response):
-        """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
-        return response and (self._generate_signature(response) == response.get('signature'))
 
     def issue_credit(self, source, amount, currency):
         """This method is call by Oscar backoffice when a user requested reimbursement and we accept it.

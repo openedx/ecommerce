@@ -127,6 +127,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'private_key': '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF',
         'payment_page_url': 'https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi',
         'receipt_page_url': LMS_URL_ROOT + '/payment/success/',
+        'error_page_url': LMS_URL_ROOT + '/payment/error/',
         'cancel_page_url': LMS_URL_ROOT + '/payment/cancel/',
     },
 }
