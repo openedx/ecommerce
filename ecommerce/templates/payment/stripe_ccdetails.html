@@ -1,0 +1,42 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+{% trans "Pay by Credit Card" %}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+{% block content %}
+
+    <div class="container">
+<form action="{{ stripe_process_payment_url }}" method="POST">
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="{{ stripe_publishable_key }}"
+    data-image="{{ stripe_image_url }}"
+    data-name="{{ platform_name }}"
+    data-description="{{ stripe_payment_description }}"
+    data-amount="{{ stripe_amount_cents }}"
+    data-currency="{{ stripe_currency }}"
+    data-email="{{ stripe_user_email }}"
+    data-locale="auto">
+  </script>
+</form>
+    </div>
+
+
+{% endblock content %}
+
+{% block footer %}
+    {# Not in javascript block as can't be compressed  #}
+{#    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>#}
+{#    <script type="text/javascript" src="https://checkout.stripe.com/checkout.js"></script>#}
+    {% if footer %}
+        {% autoescape off %}
+            {{ footer }}
+        {% endautoescape %}
+    {% endif %}
+{% endblock footer %}

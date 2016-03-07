@@ -8,5 +8,6 @@ urlpatterns = [
     url(r'^paypal/execute/$', views.PaypalPaymentExecutionView.as_view(), name='paypal_execute'),
     url(r'^paypal/profiles/$', views.PaypalProfileAdminView.as_view(), name='paypal_profiles'),
     url(r'^braintree/checkout/$', views.BraintreeCheckoutView.as_view(), name='braintree_checkout'),
-    url(r'^stripe/checkout/$', views.StripeCheckoutView.as_view(), name='stripe_checkout'),
+    url(r'^stripe/checkout/(?:(?P<basket>\d+)/)?$', views.StripeCheckoutView.as_view(), name='stripe_checkout'),
+    url(r'^stripe/ccdetails/(?:(?P<basket>\d+)/)??$', views.StripeFormView.as_view(), name='stripe_payment'),
 ]

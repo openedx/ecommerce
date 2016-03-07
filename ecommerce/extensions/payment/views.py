@@ -1,17 +1,22 @@
 """ Views for interacting with the payment processor. """
+import urllib
+from audioop import reverse
 from cStringIO import StringIO
 import logging
 import os
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, PermissionDenied
 from django.core.management import call_command
+from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseServerError
-from django.shortcuts import redirect
+from django.http.response import HttpResponseRedirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
+from django.views.generic import View, DetailView
+from django.views.generic.base import TemplateView
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
 from oscar.core.loading import get_class, get_model
@@ -21,7 +26,7 @@ from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.processors.braintree import Braintree
-from ecommerce.extensions.payment.processors.stripe import Stripe
+from ecommerce.extensions.payment.processors.stripe import StripeProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +38,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+UnableToPlaceOrder = get_class('order.exceptions', 'UnableToPlaceOrder')
 
 # TODO: REMOVE ME
 # class CSRFExemptViewMixin(object):
@@ -42,7 +48,37 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 #
 
 
-class CybersourceNotifyView(EdxOrderPlacementMixin, View):
+class BasketRetrievalMixin(object):
+    def get_basket(self, request, basket_id):
+        """
+
+        Args:
+            request:
+                HTTPRequest initiated by the paying user, used to apply offers
+            basket_id:
+                Id of basket
+
+        Returns:
+            Basket or none
+
+        """
+
+        try:
+            basket_id = int(basket_id)
+        except (ValueError, TypeError):
+            return None
+
+        try:
+            basket = Basket.objects.get(id=basket_id)
+        except Basket.ObjectDoesNotExist:
+            return None
+
+        basket.strategy = strategy.Default()
+        Applicator().apply(basket, basket.owner, request)
+        return basket
+
+
+class CybersourceNotifyView(BasketRetrievalMixin, EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
     payment_processor = Cybersource()
 
@@ -72,18 +108,6 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             country=Country.objects.get(
                 iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 
-    def _get_basket(self, basket_id):
-        if not basket_id:
-            return None
-
-        try:
-            basket_id = int(basket_id)
-            basket = Basket.objects.get(id=basket_id)
-            basket.strategy = strategy.Default()
-            Applicator().apply(basket, basket.owner, self.request)
-            return basket
-        except (ValueError, ObjectDoesNotExist):
-            return None
 
     #TODO: This was here in clintonb/stripe 99% its unneccessary
     # as dispatch already has this decorator. Check it though
@@ -109,7 +133,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                 basket_id
             )
 
-            basket = self._get_basket(basket_id)
+            basket = self.get_basket(self.request, basket_id)
 
             if not basket:
                 logger.error('Received payment for non-existent basket [%s].', basket_id)
@@ -193,7 +217,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(PaypalPaymentExecutionView, self).dispatch(request, *args, **kwargs)
 
-    def _get_basket(self, payment_id):
+    def _get_basket_by_payment_id(self, payment_id):
         """
         Retrieve a basket using a payment ID.
 
@@ -227,7 +251,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         logger.info(u"Payment [%s] approved by payer [%s]", payment_id, payer_id)
 
         paypal_response = request.GET.dict()
-        basket = self._get_basket(payment_id)
+        basket = self._get_basket_by_payment_id(payment_id)
 
         if not basket:
             return redirect(self.payment_processor.error_url)
@@ -335,17 +359,22 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
     def get_payment_data(self, request):
         raise NotImplementedError
 
-    def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
-        basket_id = request.POST['basket_id']
-        payment_data = self.get_payment_data(request)
-
-        # Retrieve the basket, or bail out, if it cannot be found.
-        basket = self.get_basket(basket_id)
+    def locate_basket(self):
+        basket_id = self.request.POST['basket_id']
+        basket = self.get_basket(self.request, basket_id)
 
         if not basket:
             logger.error('Payment requested for non-existent basket [%s].', basket_id)
             # TODO Handle this better (perhaps redirect to an error page).
-            return HttpResponseBadRequest()
+            raise Http404()
+
+        return basket
+
+    def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
+        payment_data = self.get_payment_data(request)
+
+        # Retrieve the basket, or bail out, if it cannot be found.
+        basket = self.locate_basket()
 
         try:
             with transaction.atomic():
@@ -395,8 +424,68 @@ class BraintreeCheckoutView(CheckoutViewMixin, View):
         return nonce, device_data
 
 
-class StripeCheckoutView(CheckoutViewMixin, View):
-    payment_processor = Stripe()
+class StripeGetBasketFromUrlMixin(BasketRetrievalMixin):
+
+    pk_url_kwarg = 'basket'
+
+    def locate_basket(self):
+
+        basket_id = self.kwargs[self.pk_url_kwarg]
+        basket = self.get_basket(self.request, basket_id)
+
+        if not basket:
+            logger.error('Payment requested for non-existent basket [%s].', basket_id)
+            # TODO Handle this better (perhaps redirect to an error page).
+            raise Http404()
+
+        return basket
+
+class StripeFormView(StripeGetBasketFromUrlMixin, DetailView):
+
+    ProcessorClass = StripeProcessor
+
+    http_method_names = ['get', 'post']
+    model = Basket
+    pk_url_kwarg = 'basket'
+    template_name = 'payment/stripe_ccdetails.html'
+
+    @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(StripeFormView, self).dispatch(request, *args, **kwargs)
+
+    def basic_sanity_check(self, request, basket):
+        if basket.status != basket.FROZEN:
+            raise Http404()
+        if basket.owner != request.user:
+            raise PermissionDenied()
+
+    def get_context_data(self, **kwargs):
+        processor = self.ProcessorClass()
+        kwargs.update(processor.get_stripe_template_data(self.request.user, self.object))
+        return super(StripeFormView, self).get_context_data(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.basic_sanity_check(request, self.object)
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwarg):
+        basket_pk = request.POST['basket']
+        self.basic_sanity_check(request, get_object_or_404(Basket, pk=basket_pk))
+
+        return HttpResponseRedirect(
+            status=302,
+            redirect_to= reverse("stripe_payment", kwargs={'basket': basket_pk})
+        )
+
+    def get_object(self, queryset=None):
+        return self.locate_basket()
+
+
+class StripeCheckoutView(StripeGetBasketFromUrlMixin, CheckoutViewMixin, View):
+    payment_processor = StripeProcessor()
 
     def get_payment_data(self, request):
         return request.POST['stripeToken']

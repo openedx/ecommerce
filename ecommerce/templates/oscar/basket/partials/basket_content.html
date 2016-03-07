@@ -97,17 +97,23 @@
         </div>
 
         <div class="row">
-            <div class="payment-buttons col-sm-4" data-basket-id="{{ basket.id }}">
-                {% for processor in payment_processors %}
-                    <button class="btn btn-success payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
-                        {% if processor.NAME == 'cybersource' %}
-                            {% trans "Checkout" %}
-                        {% elif processor.NAME == 'paypal' %}
-                            {# Translators: Do NOT translate the name PayPal. #}
-                            {% trans "Checkout with PayPal" %}
-                        {% endif %}
-                    </button>
-                {% endfor %}
+            <div class="col-sm-12">
+                <div class="payment-buttons" data-basket-id="{{ basket.id }}">
+                    {% for processor in payment_processors %}
+                        <button class="btn btn-success payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
+                            {% if processor.NAME == 'cybersource' %}
+                                {% trans "Checkout" %}
+                            {% elif processor.NAME == 'paypal' %}
+                                {# Translators: Do NOT translate the name PayPal. #}
+                                {% trans "Checkout with PayPal" %}
+                             {% elif processor.NAME == 'stripe' %}
+                                {# TODO: This elif tree is not exactly scalable. Please find sensible solution to store translated names of processors  #}
+                                {# Translators: FYI: This is a label for Stripe payment processor. #}
+                                {% trans "Pay using your credit card" %}
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 

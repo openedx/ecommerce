@@ -5,6 +5,7 @@ from urlparse import urljoin
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext as _
 from oscar.apps.payment.exceptions import GatewayError
 
 from oscar.core.loading import get_model
@@ -22,7 +23,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class Stripe(BasePaymentProcessor):
+class StripeProcessor(BasePaymentProcessor):
     NAME = 'stripe'
 
     def __init__(self):
@@ -40,34 +41,52 @@ class Stripe(BasePaymentProcessor):
         self.image_url = configuration['image_url']
         self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
 
-        stripe.api_key = self.secret_key
 
     def get_transaction_parameters(self, basket, request=None):
         return {
-            'payment_page_url': urljoin(self.ecommerce_url_root, reverse('stripe_checkout')),
-            'key': self.publishable_key,
-            'amount': self._dollars_to_cents(basket.total_incl_tax),
-            'currency': basket.currency,
-            'name': settings.PLATFORM_NAME,
-            'description': '',  # TODO Seat title
-            'image': self.image_url,
-            'bitcoin': True,
-            'alipay': 'auto',
-            'locale': 'auto'
+            'payment_page_url': urljoin(self.ecommerce_url_root, reverse('stripe_payment')),
+            'basket': basket.pk
+        }
+
+    def get_total(self, basket):
+        dollars_to_cents = lambda dollars: unicode((dollars * 100).to_integral_exact())
+        return dollars_to_cents(basket.total_incl_tax)
+
+    def get_description(self, basket):
+        return  _("Payment for order {order_sku} for {platform_name}").format(
+            order_sku=basket.order_number,
+            platform_name=settings.PLATFORM_NAME
+        )
+
+    def get_stripe_template_data(self, user, basket):
+        # import pudb; pudb.set_trace()
+        return {
+            'stripe_publishable_key': self.publishable_key,
+            'stripe_process_payment_url': reverse('stripe_checkout', kwargs={
+                'basket': basket.pk
+            }),
+            'stripe_amount_cents': self.get_total(basket),
+            'stripe_image_url': self.image_url,
+            'stripe_currency': basket.currency,
+            'stripe_user_email': user.email,
+            # TODO: Description could describe payment more.
+            'stripe_payment_description': self.get_description(basket)
         }
 
     def _dollars_to_cents(self, dollars):
-        return unicode((dollars * 100).to_integral())
+        # Throw error if any roubding occours
+        return
 
     def handle_processor_response(self, response, basket=None):
         token = response
         # Create the charge on Stripe's servers - this will charge the user's card
         try:
             charge = stripe.Charge.create(
-                amount=self._dollars_to_cents(basket.total_incl_tax),
-                currency="usd",
+                amount=self.get_total(basket),
+                currency=basket.currency,
                 source=token,
-                description="Example charge"
+                api_key=self.secret_key,
+                description=self.get_description(basket)
             )
             logger.info(charge)
 
@@ -90,7 +109,7 @@ class Stripe(BasePaymentProcessor):
                                  processor_name=self.NAME)
 
             return source, event
-        except stripe.error.CardError, e:
+        except stripe.error.CardError as e:
             # The card has been declined
             logger.exception('Payment failed!')
 
@@ -104,7 +123,11 @@ class Stripe(BasePaymentProcessor):
         PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=transaction_id,
                                     processor_name=self.NAME)
 
+    # TODO: Remove this note: issues refund for a given transaction
     def issue_credit(self, source, amount, currency):
+
+        # TODO: Technically stripe guarantees all fields to be shorter than 255
+        # chars and reference 128 chars long (from: AbstractSource)
         transaction_id = source.reference
 
         try:
