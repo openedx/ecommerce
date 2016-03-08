@@ -38,41 +38,45 @@
                     font-size: 14px;
                 }
 
+                .course_prices {
+                    @include text-align(right);
+                }
+
+
                 .course_image img {
                     margin: 0 auto;
-
                     width: 100%;
                 }
 
                 .benefit {
-                    @include float(left);
-                    @include text-align(right);
-
-                    width: 48%;
-
+                    display: inline-block;
                     font-size: 20px;
                 }
 
                 .old-price,
                 .price {
-                    @include text-align(right);
+                    display: inline-block;
                 }
 
                 .old-price {
-                    @include float(right);
-
-                    width: 48%;
-
                     color: gray;
                     text-decoration: line-through;
                 }
 
                 .price {
-                    padding: 0 15px;
+                    padding: 0 0 0 15px;
                 }
 
                 .remove-code {
                     display: none;
+                }
+
+                .discount {
+                    display: inline-block;
+                    margin-right: 30px;
+                    & > div {
+                        margin-right: 10px;
+                    }
                 }
             }
         }
