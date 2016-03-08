@@ -97,23 +97,17 @@ class PayboxSystem(BasePaymentProcessor):
         params['PBX_TYPECARTE'] = 'CB'    # Force payment mode to CB/VISA
         params['PBX_TYPEPAIEMENT'] = 'CARTE'
 
-        #params['reference_number'] = basket.order_number
-        #params['amount'] = str(basket.total_incl_tax)
-        #params['currency'] = basket.currency,
-        #params['consumer_id'] = basket.owner.username,
-        #import ipdb; ipdb.set_trace()
+        # Sign request sent to Paybox
+        # As the signature is made regarding fields order, this order has to be maintained
+        # in other steps of the process. See edx-platform/lms/djangoapps/verify_student/views.py:192 (6cb90df)
         hmac_query = '&'.join(['%s=%s' % (key, value) for key, value in params.items()])
         binary_key = binascii.unhexlify(self.private_key)
         hmac_hash = hmac.new(binary_key, hmac_query, hashlib.sha512).hexdigest().upper()
-        #hmac_query += '&PBX_HMAC=' + hmac_hash
 
         params['PBX_HMAC'] = hmac_hash
-        print params
 
         params['payment_page_url'] = self.payment_page_url
 
-        # '/payment/fake-payment-page/'
-        #import ipdb; ipdb.set_trace()
         return params
 
     @staticmethod

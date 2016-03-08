@@ -65,6 +65,8 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         paybox_response = request.POST.dict()
+        
+        logger.info(paybox_response)
 
         basket = None
         transaction_id = None
@@ -75,7 +77,7 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             basket_id = OrderNumberGenerator().basket_id(order_number)   # retrieve django ID of basket instance
 
             logger.info(
-                'Received CyberSource merchant notification for transaction [%s], associated with basket [%d].',
+                'Received Paybox merchant notification for transaction [%s], associated with basket [%d].',
                 transaction_id,
                 basket_id
             )
