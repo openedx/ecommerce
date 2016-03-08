@@ -1,6 +1,7 @@
 import logging
 
 import analytics
+from django.conf import settings
 from django.dispatch import receiver
 from oscar.core.loading import get_class
 import waffle
@@ -82,7 +83,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                         {
                             'course_title': product.title,
                             'receipt_page_url': get_lms_url(
-                                '/commerce/checkout/receipt/?orderNum={}'.format(order.number)
+                                '{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
                             ),
                             'credit_hours': product.attr.credit_hours,
                             'credit_provider': provider_data['display_name'],
