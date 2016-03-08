@@ -11,7 +11,7 @@ from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, StandardPaymentButtonMixin
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class Braintree(BasePaymentProcessor):
+class Braintree(StandardPaymentButtonMixin, BasePaymentProcessor):
     NAME = 'braintree'
 
     def __init__(self):

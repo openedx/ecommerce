@@ -19,7 +19,7 @@ from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.helpers import sign
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, StandardPaymentButtonMixin
 from ecommerce.extensions.payment.transport import RequestsTransport
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class Cybersource(BasePaymentProcessor):
+class Cybersource(StandardPaymentButtonMixin, BasePaymentProcessor):
     """
     CyberSource Secure Acceptance Web/Mobile (February 2015)
 
@@ -61,6 +61,9 @@ class Cybersource(BasePaymentProcessor):
         self.receipt_page_url = configuration['receipt_page_url']
         self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
+
+    def _get_button_label(self):
+        return _("Checkout")
 
     def get_transaction_parameters(self, basket, request=None):
         """

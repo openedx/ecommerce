@@ -5,6 +5,7 @@ from urlparse import urljoin
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 from oscar.apps.payment.exceptions import GatewayError
 
@@ -12,7 +13,7 @@ from oscar.core.loading import get_model
 import stripe
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, StandardPaymentButtonMixin
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +24,11 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class StripeProcessor(BasePaymentProcessor):
+class StripeProcessor(StandardPaymentButtonMixin, BasePaymentProcessor):
+
     NAME = 'stripe'
+
+    template = "payment/processors/stripe_payment_button.html"
 
     def __init__(self):
         """
@@ -48,7 +52,25 @@ class StripeProcessor(BasePaymentProcessor):
             'basket': basket.pk
         }
 
+    def _get_button_context(self, basket, user):
+        ctx =  self.get_stripe_template_data(user, basket)
+        ctx.update({
+            "basket": basket
+        })
+        return ctx
+
+    def get_payment_page_script(self, basket, user):
+        template = get_template("payment/processors/stripe_paymentscript.html")
+        return template.render(self._get_button_context(basket, user))
+
+    def get_payment_remote_script(self, basket, user):
+        return """
+        <script src="https://checkout.stripe.com/checkout.js"></script>
+        """
+
+
     def get_total(self, basket):
+        # Throw error if any rounding occours
         dollars_to_cents = lambda dollars: unicode((dollars * 100).to_integral_exact())
         return dollars_to_cents(basket.total_incl_tax)
 
@@ -70,12 +92,12 @@ class StripeProcessor(BasePaymentProcessor):
             'stripe_currency': basket.currency,
             'stripe_user_email': user.email,
             # TODO: Description could describe payment more.
-            'stripe_payment_description': self.get_description(basket)
+            'stripe_payment_description': self.get_description(basket),
+            'button_label': self._get_button_label()
         }
 
-    def _dollars_to_cents(self, dollars):
-        # Throw error if any roubding occours
-        return
+    def _get_button_label(self):
+        return _("Checkout using CreditCard")
 
     def handle_processor_response(self, response, basket=None):
         token = response

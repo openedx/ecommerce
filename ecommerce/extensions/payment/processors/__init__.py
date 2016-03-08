@@ -1,11 +1,35 @@
 import abc
 
 from django.conf import settings
+from django.template.loader import get_template
+from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 import waffle
 
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+
+
+class StandardPaymentButtonMixin(object):
+
+    template="payment/processors/standard_button.html"
+
+    # All processors display the same button, just add a switch for "standard" handler
+    def _get_button_label(self):
+        return _("Checkout with {processor_name}").format(
+            self.NAME.capitalize()
+        )
+
+    def _get_button_context(self, basket, user):
+        return {
+            "button_label": self._get_button_label(),
+            "processor_name": self.NAME
+        }
+
+    def render_payment_button(self, basket, user):
+        template = get_template(self.template)
+        return template.render(self._get_button_context(basket, user))
+
 
 
 class BasePaymentProcessor(object):  # pragma: no cover
@@ -32,6 +56,31 @@ class BasePaymentProcessor(object):  # pragma: no cover
                 hosted payment page.
         """
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def render_payment_button(self, basket, user):
+        """
+        This function renders a payment button to any page for which payment using this processor is enabled
+        usually the rendered button will look similar to:
+
+            <button class="btn btn-success payment-button payment-handler builtin-handling">
+                Pay using our processor
+            </button>
+
+        To render such a button please use
+
+        Returns:
+            str
+
+        """
+        raise NotImplementedError()
+
+
+    def get_payment_page_script(self, basket, user):
+        return None
+
+    def get_payment_remote_script(self, basket, user):
+        return None
 
     @abc.abstractmethod
     def handle_processor_response(self, response, basket=None):

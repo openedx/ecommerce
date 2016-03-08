@@ -37,6 +37,16 @@
 {% block footer %}
 {% endblock footer %}
 
+{% block remotejs%}
+    {% comment %}
+    This is a block for remotely loaded javascript, that can't be compressed,
+    it is in front of all other javascript files, as this code can't rely on
+    local code, whilst the opposite is not true.
+
+    {% endcomment %}
+
+{% endblock %}
+
 {# Translation support for JavaScript strings. #}
 <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 

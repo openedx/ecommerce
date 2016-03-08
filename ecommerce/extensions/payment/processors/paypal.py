@@ -5,13 +5,14 @@ from urlparse import urljoin
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext as _
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 import paypalrestsdk
 import waffle
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, StandardPaymentButtonMixin
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.utils import middle_truncate
 
@@ -26,7 +27,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class Paypal(BasePaymentProcessor):
+class Paypal(StandardPaymentButtonMixin, BasePaymentProcessor):
     """
     PayPal REST API (May 2015)
 
@@ -35,6 +36,10 @@ class Paypal(BasePaymentProcessor):
 
     NAME = u'paypal'
     DEFAULT_PROFILE_NAME = 'default'
+
+    def _get_button_label(self):
+        # Translators: Do NOT translate the name PayPal.
+        return _("Checkout with PayPal")
 
     def __init__(self):
         """

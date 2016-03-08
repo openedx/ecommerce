@@ -1,0 +1,7 @@
+<button class="btn btn-success payment-button stripe">
+    {{ button_label }}
+</button>
+<form id="hidden-stripe-form" class="hidden" method="POST"
+      action="{% url "stripe_checkout" basket=basket.pk %}">
+    <input type="hidden" name="stripeToken">
+</form>

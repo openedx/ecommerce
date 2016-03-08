@@ -13,6 +13,15 @@
 
 {% block javascript %}
     <script src="{% static 'js/apps/basket_app.js' %}"></script>
+    {% for processor_script in payment_processors_scripts %}
+        {{ processor_script|safe }}
+    {% endfor %}
+{% endblock %}
+
+{% block remotejs %}
+    {% for processor_script in payment_processors_remote_scripts %}
+        {{ processor_script|safe }}
+    {% endfor %}
 {% endblock %}
 
 {% block content %}

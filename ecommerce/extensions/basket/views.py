@@ -90,18 +90,42 @@ class BasketSummaryView(BasketView):
                 line.discount_percentage = line.discount_value / line.unit_price_incl_tax * Decimal(100)
             else:
                 line.discount_percentage = 0
-
         context.update({
-            'payment_processors': self.get_payment_processors(),
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
             'lines': lines,
             'faq_url': get_lms_url('') + '/verified-certificate',
         })
+        context.update(self.get_payment_processors())
         return context
 
     def get_payment_processors(self):
         """ Retrieve the list of active payment processors. """
         # TODO Retrieve this information from SiteConfiguration
-        processors = (get_processor_class(path) for path in settings.PAYMENT_PROCESSORS)
-        return [processor for processor in processors if processor.is_enabled()]
+        basket = self.request.basket
+        user = self.request.user
+        filter = lambda sequence: [item for item in sequence if item]
+        processors = (
+            get_processor_class(path)
+            for path in settings.PAYMENT_PROCESSORS
+        )
+        enabled_processors = [
+            processor() for processor in processors if processor.is_enabled()
+        ]
+        return {
+            "payment_processors": [
+                processor.render_payment_button(basket, user)
+                for processor in enabled_processors
+            ],
+            "payment_processors_scripts": filter(
+                processor.get_payment_page_script(basket, user)
+                for processor in enabled_processors
+            ),
+            "payment_processors_remote_scripts": filter(
+                processor.get_payment_remote_script(basket, user)
+                for processor in enabled_processors
+            )
+        }
+
+
+
