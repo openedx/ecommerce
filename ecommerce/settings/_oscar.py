@@ -99,7 +99,7 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
-    'ecommerce.extensions.payment.processors.paypal.Paypal'
+    'ecommerce.extensions.payment.processors.paypal.Paypal',
 )
 
 PAYMENT_PROCESSOR_CONFIG = {

@@ -1,22 +1,17 @@
 """ Views for interacting with the payment processor. """
-import urllib
-from audioop import reverse
 from cStringIO import StringIO
 import logging
 import os
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, PermissionDenied
+from django.core.exceptions import MultipleObjectsReturned
 from django.core.management import call_command
-from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseServerError
-from django.http.response import HttpResponseRedirect
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View, DetailView
-from django.views.generic.base import TemplateView
+from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
 from oscar.core.loading import get_class, get_model
@@ -39,13 +34,6 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 UnableToPlaceOrder = get_class('order.exceptions', 'UnableToPlaceOrder')
-
-# TODO: REMOVE ME
-# class CSRFExemptViewMixin(object):
-#     @method_decorator(csrf_exempt)
-#     def dispatch(self, request, *args, **kwargs):
-#         return super(CSRFExemptViewMixin, self).dispatch(request, *args, **kwargs)
-#
 
 
 class BasketRetrievalMixin(object):
@@ -424,7 +412,8 @@ class BraintreeCheckoutView(CheckoutViewMixin, View):
         return nonce, device_data
 
 
-class StripeGetBasketFromUrlMixin(BasketRetrievalMixin):
+class StripeCheckoutView(CheckoutViewMixin, View):
+    payment_processor = StripeProcessor()
 
     pk_url_kwarg = 'basket'
 
@@ -439,10 +428,6 @@ class StripeGetBasketFromUrlMixin(BasketRetrievalMixin):
             raise Http404()
 
         return basket
-
-
-class StripeCheckoutView(StripeGetBasketFromUrlMixin, CheckoutViewMixin, View):
-    payment_processor = StripeProcessor()
 
     def get_payment_data(self, request):
         return request.POST['stripeToken']

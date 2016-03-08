@@ -58,7 +58,7 @@ class StripeProcessor(BasePaymentProcessor):
         return ctx
 
     def payment_label(self):
-        return _("Checkout using CreditCard")
+        return _("Checkout using Credit-Card")
 
     def payment_button_classes(self):
         return "btn btn-success payment-button"

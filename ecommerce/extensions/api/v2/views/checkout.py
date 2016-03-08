@@ -44,7 +44,6 @@ class CheckoutView(APIView):
             return HttpResponseBadRequest(
                 'Payment processor [{}] not found.'.format(payment_processor)
             )
-        # import pudb; pudb.set_trace()
         parameters = payment_processor.get_transaction_parameters(basket, request=request)
         payment_page_url = parameters.pop('payment_page_url')
 

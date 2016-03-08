@@ -255,7 +255,6 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             # returned by this endpoint, simply returning the order number will suffice for now.
             response_data[AC.KEYS.ORDER] = {AC.KEYS.ORDER_NUMBER: order.number}
         else:
-            # import pudb; pudb.set_trace()
             parameters = payment_processor.get_transaction_parameters(basket, request=self.request)
             payment_page_url = parameters.pop('payment_page_url')
 
