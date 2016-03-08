@@ -1,7 +1,7 @@
 import abc
 
 from django.conf import settings
-from django.template.loader import get_template
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 import waffle
@@ -102,7 +102,10 @@ class BasePaymentProcessor(object):  # pragma: no cover
         Raises:
             KeyError: If no settings found for this payment processor
         """
-        return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]
+        try:
+            return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]
+        except KeyError:
+            raise ImproperlyConfigured("No configuration for {} processor".format(self.NAME))
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """

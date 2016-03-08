@@ -107,6 +107,12 @@ PAYMENT_PROCESSOR_CONFIG = {
         'private_key': 'fake-private-key',
         'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
     },
+    'stripe': {
+        'publishable_key': 'fake',
+        'secret_key': 'fake',
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'image_url': '/static/images/default-theme/logo.png',
+    },
 }
 # END PAYMENT PROCESSING
 
