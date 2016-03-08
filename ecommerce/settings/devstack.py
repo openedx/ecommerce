@@ -1,6 +1,7 @@
 """Devstack settings"""
 from os import environ
 
+from django.conf import settings
 import yaml
 
 from ecommerce.settings import get_lms_url
@@ -30,14 +31,14 @@ PAYMENT_PROCESSOR_CONFIG = {
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',
         'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
-        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'receipt_page_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
         'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
     },
     'paypal': {
         'mode': 'sandbox',
         'client_id': 'fake-client-id',
         'client_secret': 'fake-client-secret',
-        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
+        'receipt_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
         'error_url': get_lms_url('/commerce/checkout/error/'),
     },
