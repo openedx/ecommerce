@@ -1,41 +1,54 @@
-// TODO: Rewrite it loading
 <script>
-    (function(){
-        $(document).ready(function () {
+    requirejs.config({
+        paths: {
+            'stripeCheckout': 'https://checkout.stripe.com/checkout'
+        },
+        shim: {
+            'stripeCheckout': {
+                exports: 'StripeCheckout'
+            }
+        }
+    });
 
-            var handler = StripeCheckout.configure({
-                key: "{{ stripe_publishable_key }}",
-                image: "{{ stripe_image_url }}",
-                name: "{{ platform_name }}",
-                description: "{{ stripe_payment_description }}",
-                amount: "{{ stripe_amount_cents }}",
-                currency: "{{ stripe_currency }}",
-                email: "{{ stripe_user_email }}",
-                locale: 'auto',
-                token: function(token) {
-                    var stripeToken = token.id;
-                    var stripeEmail = token.email;
-                    $("#hidden-stripe-form").empty();
-                    $("#hidden-stripe-form").append(
-                        $("<input>").attr({
-                            type: 'hidden',
-                            name: "stripeToken",
-                            value: stripeToken
-                        })
-                    );
-                    $("#hidden-stripe-form").submit();
-                }
-            });
+    require(
+        ['jquery', 'stripeCheckout'],
+        function($, StripeCheckout){
+            $(document).ready(function () {
 
-             $('.payment-button.stripe').on('click', function(e) {
-                handler.open({});
-                e.preventDefault();
-                 return false;
-            });
+                var handler = StripeCheckout.configure({
+                    key: "{{ stripe_publishable_key }}",
+                    image: "{{ stripe_image_url }}",
+                    name: "{{ platform_name }}",
+                    description: "{{ stripe_payment_description }}",
+                    amount: "{{ stripe_amount_cents }}",
+                    currency: "{{ stripe_currency }}",
+                    email: "{{ stripe_user_email }}",
+                    locale: 'auto',
+                    token: function(token) {
+                        var stripeToken = token.id;
+                        var stripeEmail = token.email;
+                        $("#hidden-stripe-form").empty();
+                        $("#hidden-stripe-form").append(
+                                $("<input>").attr({
+                                    type: 'hidden',
+                                    name: "stripeToken",
+                                    value: stripeToken
+                                })
+                        );
+                        $("#hidden-stripe-form").submit();
+                    }
+                });
 
-            $(window).on('popstate', function() {
-                handler.close();
+                $('.payment-button.stripe').on('click', function(e) {
+                    handler.open({});
+                    e.preventDefault();
+                    return false;
+                });
+
+                $(window).on('popstate', function() {
+                    handler.close();
+                });
             });
-        });
-    })();
+        }
+    );
 </script>
