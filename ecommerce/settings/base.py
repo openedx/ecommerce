@@ -482,3 +482,6 @@ THEME_SCSS = 'sass/themes/default.scss'
 
 # Link to the support site
 SUPPORT_URL = 'SET-ME-PLEASE'
+
+# Path to the receipt page
+RECEIPT_PAGE_PATH = '/commerce/checkout/receipt/'

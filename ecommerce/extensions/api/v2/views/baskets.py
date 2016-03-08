@@ -230,26 +230,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         response_data = self._generate_basic_response(basket)
 
         if basket.total_excl_tax == AC.FREE:
-            order_metadata = data_api.get_order_metadata(basket)
-
-            logger.info(
-                'Preparing to place order [%s] for the contents of basket [%d]',
-                order_metadata[AC.KEYS.ORDER_NUMBER],
-                basket.id,
-            )
-
-            # Place an order. If order placement succeeds, the order is committed
-            # to the database so that it can be fulfilled asynchronously.
-            order = self.handle_order_placement(
-                order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
-                user=basket.owner,
-                basket=basket,
-                shipping_address=None,
-                shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
-                shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
-                billing_address=None,
-                order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
-            )
+            order = self.place_free_order(basket)
 
             # Note: Our order serializer could be used here, but in an effort to pare down the information
             # returned by this endpoint, simply returning the order number will suffice for now.

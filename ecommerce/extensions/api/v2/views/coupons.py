@@ -138,8 +138,6 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         Raises:
             IntegrityError: An error occured when create_vouchers method returns
                             an IntegrityError exception
-            ValidationError: An error occured clean() validation method returns
-                             a ValidationError exception
         """
         coupon_slug = generate_coupon_slug(title=title, catalog=data['catalog'], partner=data['partner'])
 

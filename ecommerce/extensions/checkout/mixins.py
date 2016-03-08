@@ -1,5 +1,8 @@
 # Note: If future versions of django-oscar include new mixins, they will need to be imported here.
+from __future__ import unicode_literals
+
 import abc
+import logging
 
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
@@ -8,8 +11,11 @@ from oscar.core.loading import get_class
 import waffle
 
 from ecommerce.extensions.analytics.utils import audit_log
+from ecommerce.extensions.api import data as data_api
+from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 
-
+logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
@@ -106,5 +112,46 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             fulfill_order.delay(order.number)
         else:
             post_checkout.send(sender=self, order=order)
+
+        return order
+
+    def place_free_order(self, basket):
+        """Fulfill a free order.
+
+        Arguments:
+            basket(Basket): the free basket.
+
+        Returns:
+            order(Order): the fulfilled order.
+
+        Raises:
+            BasketNotFreeError: if the basket is not free.
+        """
+
+        if basket.total_incl_tax != AC.FREE:
+            raise BasketNotFreeError
+
+        basket.freeze()
+
+        order_metadata = data_api.get_order_metadata(basket)
+
+        logger.info(
+            'Preparing to place order [%s] for the contents of basket [%d]',
+            order_metadata[AC.KEYS.ORDER_NUMBER],
+            basket.id,
+        )
+
+        # Place an order. If order placement succeeds, the order is committed
+        # to the database so that it can be fulfilled asynchronously.
+        order = self.handle_order_placement(
+            order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
+            user=basket.owner,
+            basket=basket,
+            shipping_address=None,
+            shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
+            shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
+            billing_address=None,
+            order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+        )
 
         return order

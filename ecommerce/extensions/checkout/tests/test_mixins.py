@@ -5,10 +5,12 @@ from decimal import Decimal
 
 from django.test import override_settings
 from mock import Mock, patch
-from oscar.test.newfactories import UserFactory
+from oscar.core.loading import get_model
+from oscar.test.newfactories import BasketFactory, ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 
+from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
@@ -16,6 +18,7 @@ from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
+Basket = get_model('basket', 'Basket')
 
 
 @override_settings(SEGMENT_KEY='dummy-key')
@@ -181,3 +184,20 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         with patch('ecommerce.extensions.checkout.mixins.fulfill_order.delay') as mock_delay:
             EdxOrderPlacementMixin().handle_successful_order(self.order)
             self.assertTrue(mock_delay.called)
+
+    def test_place_free_order(self, __):
+        """ Verify an order is placed and the basket is submitted. """
+        basket = BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(ProductFactory(stockrecords__price_excl_tax=0))
+        order = EdxOrderPlacementMixin().place_free_order(basket)
+
+        self.assertIsNotNone(order)
+        self.assertEqual(basket.status, Basket.SUBMITTED)
+
+    def test_non_free_basket_order(self, __):
+        """ Verify an error is raised for non-free basket. """
+        basket = BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(ProductFactory(stockrecords__price_excl_tax=10))
+
+        with self.assertRaises(BasketNotFreeError):
+            EdxOrderPlacementMixin().place_free_order(basket)
