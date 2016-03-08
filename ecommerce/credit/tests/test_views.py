@@ -93,6 +93,14 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
             body=json.dumps(body)
         )
 
+    def _enable_payment_providers(self):
+        for path in settings.PAYMENT_PROCESSORS:
+            processor = get_processor_class(path)
+            Switch.objects.get_or_create(
+                name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor.NAME,
+                defaults={'active': True}
+            )
+
     def test_get_with_disabled_flag(self):
         """
         Test checkout page accessibility. Page will return 404 if no flag is defined
@@ -132,6 +140,8 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self.course.create_or_update_seat(
             'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
         )
+
+        self._enable_payment_providers()
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -262,6 +272,8 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         """ Verify that payment processors can be disabled with their Waffle
         switches, and that an error is shown if none are available.
         """
+        self._enable_payment_providers()
+
         for path in disabled_processors:
             processor_class = get_processor_class(path)
             switch, __ = Switch.objects.get_or_create(
