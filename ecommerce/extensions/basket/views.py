@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from decimal import Decimal
 import hashlib
 import logging
 
@@ -17,6 +16,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.coupons.views import get_voucher_from_code
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
+from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.settings import get_lms_url
@@ -88,9 +88,10 @@ class BasketSummaryView(BasketView):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_id)
 
             if line.has_discount:
-                line.discount_percentage = line.discount_value / line.unit_price_incl_tax * Decimal(100)
+                benefit = self.request.basket.applied_offers().values()[0].benefit
+                line.benefit_value = format_benefit_value(benefit)
             else:
-                line.discount_percentage = 0
+                line.benefit_value = None
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,

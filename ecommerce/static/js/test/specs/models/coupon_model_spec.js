@@ -2,75 +2,24 @@ define([
         'jquery',
         'moment',
         'underscore',
-        'models/coupon_model'
+        'models/coupon_model',
+        'test/mock_data/coupons'
     ],
     function ($,
               moment,
               _,
-              Coupon) {
+              Coupon,
+              Mock_Coupons) {
         'use strict';
 
-        var course = {
-                id: 'a/b/c',
-                type: 'verified',
-                products: [
-                    {
-                        id: 9,
-                        product_class: 'Seat',
-                        certificate_type: 'verified',
-                        attribute_values: [
-                            {
-                                name: 'certificate_type',
-                                value: 'verified'
-                            },
-                            {
-                                name: 'course_key',
-                                value: 'edX/DemoX/Demo_Course'
-                            },
-                            {
-                                name: 'id_verification_required',
-                                value: true
-                            }
-                        ]
-                    }
-                ]
-            },
-            discount = {
-                title: 'Test Discount',
-                coupon_type: 'discount',
-                client: 'test_client',
-                start_date: '2015-01-01T00:00:00Z',
-                end_date: '2016-01-01T00:00:00Z',
-                stock_record_ids: [1],
-                code: 'TESTCODE',
-                voucher_type: 'Single use',
-                benefit_type: 'Percentage',
-                benefit_value: 25,
-                course_id: 'a/b/c',
-                seat_type: 'verified',
-                course: course,
-                price: 100,
-                category: 4
-            },
-            enrollment = {
-                title: 'Test Enrollment',
-                coupon_type: 'enrollment',
-                client: 'test_client',
-                start_date: '2015-01-01T00:00:00Z',
-                end_date: '2016-01-01T00:00:00Z',
-                stock_record_ids: [1],
-                voucher_type: 'Single use',
-                price: 100,
-                course_id: 'a/b/c',
-                seat_type: 'verified',
-                course: course
-            };
+        var discountCodeData = Mock_Coupons.discountCodeCouponModelData,
+            enrollmentCodeData = Mock_Coupons.enrollmentCodeCouponModelData;
 
         describe('Coupon model', function () {
             describe('validation', function () {
                 it('should validate dates', function () {
                     spyOn($, 'ajax');
-                    var model = new Coupon(discount);
+                    var model = Coupon.findOrCreate(discountCodeData, {parse: true});
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
 
@@ -87,7 +36,7 @@ define([
 
                 it('should validate discount code has discount type and value', function () {
                     spyOn($, 'ajax');
-                    var model = new Coupon(discount);
+                    var model = Coupon.findOrCreate(discountCodeData, {parse: true});
                     model.set('benefit_value', '');
                     model.set('benefit_type', '');
                     model.validate();
@@ -99,7 +48,7 @@ define([
                 it('should POST enrollment data', function () {
                     var model, args, ajaxData;
                     spyOn($, 'ajax');
-                    model = new Coupon(enrollment);
+                    model = Coupon.findOrCreate(enrollmentCodeData, {parse: true});
                     model.save();
                     expect($.ajax).toHaveBeenCalled();
                     args = $.ajax.calls.argsFor(0);
@@ -112,7 +61,7 @@ define([
                 it('should POST discount data', function () {
                     var model, args, ajaxData;
                     spyOn($, 'ajax');
-                    model = new Coupon(discount);
+                    model = Coupon.findOrCreate(discountCodeData, {parse: true});
                     model.save();
                     expect($.ajax).toHaveBeenCalled();
                     args = $.ajax.calls.argsFor(0);
