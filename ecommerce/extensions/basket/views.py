@@ -99,7 +99,6 @@ class BasketSummaryView(BasketView):
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
             'lines': lines,
-            'faq_url': get_lms_url('') + '/verified-certificate',
         })
         return context
 
