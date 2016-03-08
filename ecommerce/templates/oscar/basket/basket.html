@@ -13,6 +13,7 @@
 
 {% block javascript %}
     <script src="{% static 'js/apps/basket_app.js' %}"></script>
+    <script src="{% static 'js/apps/credit_checkout.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -22,7 +23,14 @@
             {% include 'basket/partials/basket_content.html' %}
         </div>
     </div>
+
+    {% if analytics_data %}
+        <script type="text/javascript">
+            var initModelData = {{ analytics_data|safe }};
+        </script>
+    {% endif %}
 {% endblock content %}
+
 
 {% block footer %}
     {% if footer %}

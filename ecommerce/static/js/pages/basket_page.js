@@ -7,12 +7,15 @@ define([
         'underscore',
         'underscore.string',
         'utils/utils',
-        'jquery-cookie'
+        'jquery-cookie',
+        'views/leaving_view',
     ],
     function ($,
               _,
               _s,
-              Utils) {
+              Utils,
+              $cookie,
+              LeavingView) {
         'use strict';
 
         var appendToForm = function (value, key, form) {
@@ -90,6 +93,13 @@ define([
 
                 Utils.disableElementWhileRunning($btn, function() { return promise; });
                 checkoutPayment(data);
+            });
+
+            var models = Utils.analyticsSetUp();
+
+            new LeavingView({
+                userModel: models.userModel,
+                model: models.trackingModel,
             });
         },
         showVoucherForm = function() {

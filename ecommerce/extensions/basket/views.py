@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import hashlib
+import json
 import logging
 
 from django.conf import settings
@@ -92,6 +93,22 @@ class BasketSummaryView(BasketView):
                 line.benefit_value = format_benefit_value(benefit)
             else:
                 line.benefit_value = None
+
+            context.update({
+                'analytics_data': json.dumps({
+                    'course': {
+                        'courseId': course_id
+                    },
+                    'tracking': {
+                        'segmentApplicationId': settings.SEGMENT_KEY
+                    },
+                    'user': {
+                        'username': self.request.user.get_username(),
+                        'name': self.request.user.get_full_name(),
+                        'email': self.request.user.email
+                    }
+                })
+            })
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,

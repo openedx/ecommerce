@@ -22,6 +22,9 @@ define([
                     '</div>'
                 ).appendTo('body');
 
+
+                $('<script type="text/javascript">var initModelData = {};</script>').appendTo('body');
+
                 data = {
                     basket_id: 1,
                     payment_processor: 'paypal',
