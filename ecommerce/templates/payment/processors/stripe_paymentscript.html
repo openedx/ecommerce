@@ -27,15 +27,20 @@
                     token: function(token) {
                         var stripeToken = token.id;
                         var stripeEmail = token.email;
-                        $("#hidden-stripe-form").empty();
-                        $("#hidden-stripe-form").append(
+
+                        var $form = $('<form>').attr({
+                            class: 'hidden',
+                            method: 'POST',
+                            action: '{% url "stripe_checkout" basket=basket.pk %}'
+                        });
+                        $form.append(
                                 $("<input>").attr({
                                     type: 'hidden',
                                     name: "stripeToken",
                                     value: stripeToken
                                 })
                         );
-                        $("#hidden-stripe-form").submit();
+                        $form.append('body').submit();
                     }
                 });
 

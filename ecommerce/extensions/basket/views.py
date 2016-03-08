@@ -104,7 +104,6 @@ class BasketSummaryView(BasketView):
         # TODO Retrieve this information from SiteConfiguration
         basket = self.request.basket
         user = self.request.user
-        filter = lambda sequence: [item for item in sequence if item]
         processors = (
             get_processor_class(path)
             for path in settings.PAYMENT_PROCESSORS
@@ -112,6 +111,7 @@ class BasketSummaryView(BasketView):
         enabled_processors = [
             processor() for processor in processors if processor.is_enabled()
         ]
+        filter = lambda sequence: [item for item in sequence if item]
         return {
             "payment_processors": [
                 processor.render_payment_button(basket, user)
@@ -119,10 +119,6 @@ class BasketSummaryView(BasketView):
             ],
             "payment_processors_scripts": filter(
                 processor.get_payment_page_script(basket, user)
-                for processor in enabled_processors
-            ),
-            "payment_processors_remote_scripts": filter(
-                processor.get_payment_remote_script(basket, user)
                 for processor in enabled_processors
             )
         }

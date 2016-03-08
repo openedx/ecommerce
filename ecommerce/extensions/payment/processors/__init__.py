@@ -10,33 +10,17 @@ import waffle
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
-class StandardPaymentButtonMixin(object):
-
-    template="payment/processors/standard_button.html"
-
-    # All processors display the same button, just add a switch for "standard" handler
-    def _get_button_label(self):
-        return _("Checkout with {processor_name}").format(
-            self.NAME.capitalize()
-        )
-
-    def _get_button_context(self, basket, user):
-        return {
-            "button_label": self._get_button_label(),
-            "processor_name": self.NAME
-        }
-
-    def render_payment_button(self, basket, user):
-        template = get_template(self.template)
-        return template.render(self._get_button_context(basket, user))
-
-
-
 class BasePaymentProcessor(object):  # pragma: no cover
     """Base payment processor class."""
     __metaclass__ = abc.ABCMeta
 
     NAME = None
+
+    STANDARD_BUTTON_TEMPLATE = u"""
+    <button class="{button_class}" value="{processor_name}">
+        {button_label}
+    </button>
+    """.strip()
 
     @abc.abstractmethod
     def get_transaction_parameters(self, basket, request=None):
@@ -57,7 +41,7 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
+
     def render_payment_button(self, basket, user):
         """
         This function renders a payment button to any page for which payment using this processor is enabled
@@ -73,13 +57,23 @@ class BasePaymentProcessor(object):  # pragma: no cover
             str
 
         """
-        raise NotImplementedError()
+        return self.STANDARD_BUTTON_TEMPLATE.format(
+            button_class=self.payment_button_classes,
+            button_label=self.payment_label,
+            processor_name=self.NAME
+        )
 
+    @property
+    def payment_label(self):
+        return _(u"Checkout with {processor_name}").format(
+            processor_name=self.NAME.capitalize()
+        )
+
+    @property
+    def payment_button_classes(self):
+        return u"btn btn-success payment-button builtin-handling"
 
     def get_payment_page_script(self, basket, user):
-        return None
-
-    def get_payment_remote_script(self, basket, user):
         return None
 
     @abc.abstractmethod

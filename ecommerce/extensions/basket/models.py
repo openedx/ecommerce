@@ -22,9 +22,6 @@ class Basket(AbstractBasket):
         basket.strategy = Selector().strategy(user=user)
         return basket
 
-    def get_basket_by_pk(cls, pk, user, site):
-        pass
-
     @classmethod
     def get_basket(cls, user, site):
         """Retrieve the basket belonging to the indicated user.

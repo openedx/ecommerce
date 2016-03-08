@@ -13,7 +13,7 @@ from oscar.core.loading import get_model
 import stripe
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, StandardPaymentButtonMixin
+from ecommerce.extensions.payment.processors import BasePaymentProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,9 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class StripeProcessor(StandardPaymentButtonMixin, BasePaymentProcessor):
+class StripeProcessor(BasePaymentProcessor):
 
     NAME = 'stripe'
-
-    template = "payment/processors/stripe_payment_button.html"
 
     def __init__(self):
         """
@@ -59,15 +57,15 @@ class StripeProcessor(StandardPaymentButtonMixin, BasePaymentProcessor):
         })
         return ctx
 
+    def payment_label(self):
+        return _("Checkout using CreditCard")
+
+    def payment_button_classes(self):
+        return "btn btn-success payment-button"
+
     def get_payment_page_script(self, basket, user):
         template = get_template("payment/processors/stripe_paymentscript.html")
         return template.render(self._get_button_context(basket, user))
-
-    def get_payment_remote_script(self, basket, user):
-        return """
-        <script src="https://checkout.stripe.com/checkout.js"></script>
-        """
-
 
     def get_total(self, basket):
         # Throw error if any rounding occours
@@ -95,9 +93,6 @@ class StripeProcessor(StandardPaymentButtonMixin, BasePaymentProcessor):
             'stripe_payment_description': self.get_description(basket),
             'button_label': self._get_button_label()
         }
-
-    def _get_button_label(self):
-        return _("Checkout using CreditCard")
 
     def handle_processor_response(self, response, basket=None):
         token = response

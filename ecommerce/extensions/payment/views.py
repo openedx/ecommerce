@@ -440,49 +440,6 @@ class StripeGetBasketFromUrlMixin(BasketRetrievalMixin):
 
         return basket
 
-class StripeFormView(StripeGetBasketFromUrlMixin, DetailView):
-
-    ProcessorClass = StripeProcessor
-
-    http_method_names = ['get', 'post']
-    model = Basket
-    pk_url_kwarg = 'basket'
-    template_name = 'payment/stripe_ccdetails.html'
-
-    @method_decorator(login_required)
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(StripeFormView, self).dispatch(request, *args, **kwargs)
-
-    def basic_sanity_check(self, request, basket):
-        if basket.status != basket.FROZEN:
-            raise Http404()
-        if basket.owner != request.user:
-            raise PermissionDenied()
-
-    def get_context_data(self, **kwargs):
-        processor = self.ProcessorClass()
-        kwargs.update(processor.get_stripe_template_data(self.request.user, self.object))
-        return super(StripeFormView, self).get_context_data(**kwargs)
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.basic_sanity_check(request, self.object)
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
-
-    def post(self, request, *args, **kwarg):
-        basket_pk = request.POST['basket']
-        self.basic_sanity_check(request, get_object_or_404(Basket, pk=basket_pk))
-
-        return HttpResponseRedirect(
-            status=302,
-            redirect_to= reverse("stripe_payment", kwargs={'basket': basket_pk})
-        )
-
-    def get_object(self, queryset=None):
-        return self.locate_basket()
-
 
 class StripeCheckoutView(StripeGetBasketFromUrlMixin, CheckoutViewMixin, View):
     payment_processor = StripeProcessor()

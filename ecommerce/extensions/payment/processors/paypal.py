@@ -12,7 +12,7 @@ import paypalrestsdk
 import waffle
 
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, StandardPaymentButtonMixin
+from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.utils import middle_truncate
 
@@ -27,7 +27,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class Paypal(StandardPaymentButtonMixin, BasePaymentProcessor):
+class Paypal(BasePaymentProcessor):
     """
     PayPal REST API (May 2015)
 
@@ -37,7 +37,8 @@ class Paypal(StandardPaymentButtonMixin, BasePaymentProcessor):
     NAME = u'paypal'
     DEFAULT_PROFILE_NAME = 'default'
 
-    def _get_button_label(self):
+    @property
+    def payment_label(self):
         # Translators: Do NOT translate the name PayPal.
         return _("Checkout with PayPal")
 
