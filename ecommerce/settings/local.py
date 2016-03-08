@@ -1,40 +1,28 @@
-# -*- coding: utf-8 -*-
-"""Development settings and globals."""
+
+"""Common settings and globals."""
 from __future__ import absolute_import
 
 import os
-from os.path import join, normpath
 
 from ecommerce.settings import get_lms_url
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 
 
+TIME_ZONE = 'Europe/Paris'
+
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
+LANGUAGE_CODE = 'fr'
+
+
 # DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = True
+DEBUG = False
 # END DEBUG CONFIGURATION
 
 # EMAIL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # END EMAIL CONFIGURATION
-
-
-# DATABASE CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': normpath(join(DJANGO_ROOT, 'default.db')),
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'ATOMIC_REQUESTS': True,
-    }
-}
-# END DATABASE CONFIGURATION
 
 
 # CACHE CONFIGURATION
@@ -65,12 +53,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 # END TOOLBAR CONFIGURATION
 
 
-# URL CONFIGURATION
-ECOMMERCE_URL_ROOT = 'http://localhost:8080'
 
-OSCAR_DEFAULT_CURRENCY = 'EUR'
-
-LMS_URL_ROOT = 'https://chaloupe.fun-mooc.fr'
 
 # The location of the LMS heartbeat page
 LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
@@ -84,54 +67,17 @@ COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
 # END URL CONFIGURATION
 
 
-# AUTHENTICATION
-# Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
-SOCIAL_AUTH_EDX_OIDC_KEY = 'f1a800994a803e570730'
-SOCIAL_AUTH_EDX_OIDC_SECRET = 'aa0921bc886b02ff31304c3aa5d93bf04f872c5f'
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = OAUTH2_PROVIDER_URL
-SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
-
-JWT_AUTH.update({
-    'JWT_SECRET_KEY': 'test',   # lms.ECOMMERCE_API_SIGNING_KEY
-    'JWT_ISSUERS': (
-        OAUTH2_PROVIDER_URL,
-        # Must match the value of JWT_ISSUER configured for the ecommerce worker.
-        'ecommerce_worker',
-    ),
-})
-# END AUTHENTICATION
-
-
-
-
-
-
 # ORDER PROCESSING
 ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
-ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 
-EDX_API_KEY = 'test'   # lms.EDX_API_KEY
-# END ORDER PROCESSING
 
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.paybox_system.PayboxSystem',
 )
-# PAYMENT PROCESSING
-PAYMENT_PROCESSOR_CONFIG = {
-    'paybox_system': {
-        'PBX_SITE': '1999888',
-        'PBX_RANG': '43',
-        'PBX_IDENTIFIANT': '107975626',
-        'PBX_REPONDRE_A': 'http://chaloupe.fun-mooc.fr:8080/payment/paybox/notify/',
-        #'PBX_REPONDRE_A': LMS_URL_ROOT + '/payment/notification/',  #  TCP 80, 443 (HTTPS), 8080, 8081, 8082, 8083, 8084 ou 8085
-        'private_key': '0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF',
-        'payment_page_url': 'https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi',
-        'receipt_page_url': LMS_URL_ROOT + '/payment/success/',
-        'error_page_url': LMS_URL_ROOT + '/payment/error/',
-        'cancel_page_url': LMS_URL_ROOT + '/payment/cancel/',
-    },
-}
-# END PAYMENT PROCESSING
+ECOMMERCE_URL_ROOT = 'http://localhost:8080'
+OSCAR_DEFAULT_CURRENCY = 'EUR'
+
+LMS_URL_ROOT = 'https://chaloupe.fun-mooc.fr'
 
 
 # CELERY
