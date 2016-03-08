@@ -83,7 +83,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(actual, expected)
 
 
-class CouponUtilsTests(CouponMixin, TestCase):
+class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(CouponUtilsTests, self).setUp()

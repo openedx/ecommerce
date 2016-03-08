@@ -6,6 +6,7 @@ from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import _remove_exponent_and_trailing_zeros, format_benefit_value
 from ecommerce.tests.testcases import TestCase
 
@@ -13,7 +14,7 @@ Benefit = get_model('offer', 'Benefit')
 
 
 @ddt.ddt
-class UtilTests(TestCase):
+class UtilTests(CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(UtilTests, self).setUp()

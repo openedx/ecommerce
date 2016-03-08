@@ -17,6 +17,7 @@ from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
@@ -35,7 +36,7 @@ StockRecord = get_model('partner', 'StockRecord')
 COUPON_CODE = 'COUPONTEST'
 
 
-class BasketSingleItemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -112,7 +113,7 @@ class BasketSingleItemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
 @httpretty.activate
 @ddt.ddt
 @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
-class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
+class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 

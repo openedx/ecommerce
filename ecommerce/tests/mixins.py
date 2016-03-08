@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse
 import httpretty
 import jwt
 from mock import patch
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from social.apps.django_app.default.models import UserSocialAuth
@@ -31,6 +30,8 @@ Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
+ProductAttribute = get_model('catalogue', 'ProductAttribute')
+ProductClass = get_model('catalogue', 'ProductClass')
 User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
@@ -298,7 +299,25 @@ class CouponMixin(object):
     """ Mixin for preparing data for coupons and creating coupons. """
     def setUp(self):
         super(CouponMixin, self).setUp()
-        self.category = create_from_breadcrumbs('Coupons > Test category')
+        self.category = factories.CategoryFactory()
+
+        # Force the creation of a coupon ProductClass
+        self.coupon_product_class  # pylint: disable=pointless-statement
+
+    @property
+    def coupon_product_class(self):
+        defaults = {'requires_shipping': False, 'track_stock': False, 'name': 'Coupon'}
+        pc, created = ProductClass.objects.get_or_create(slug='coupon', defaults=defaults)
+
+        if created:
+            factories.ProductAttributeFactory(
+                code='coupon_vouchers',
+                name='Coupon vouchers',
+                product_class=pc,
+                type='entity'
+            )
+
+        return pc
 
     def create_coupon(
             self,
