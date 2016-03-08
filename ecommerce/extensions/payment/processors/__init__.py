@@ -41,7 +41,6 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         raise NotImplementedError
 
-
     def render_payment_button(self, basket, user):
         """
         This function renders a payment button to any page for which payment using this processor is enabled
@@ -81,13 +80,18 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         Handle a response from the payment processor.
 
-        This method creates PaymentEvents and Sources for successful payments.
+        This method creates PaymentEvents and Sources for successful payments,
+        raising the exception from this method means payment fails.
 
         Arguments:
             response (dict): Dictionary of parameters received from the payment processor
 
         Keyword Arguments:
             basket (Basket): Basket whose contents have been purchased via the payment processor
+
+        Raises:
+            any exception raised from this method will delete the basket, and mean failed
+            payment.
         """
         raise NotImplementedError
 

@@ -43,7 +43,6 @@ class StripeProcessor(BasePaymentProcessor):
         self.image_url = configuration['image_url']
         self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
 
-
     def get_transaction_parameters(self, basket, request=None):
         return {
             'payment_page_url': urljoin(self.ecommerce_url_root, reverse('stripe_payment')),
@@ -51,17 +50,19 @@ class StripeProcessor(BasePaymentProcessor):
         }
 
     def _get_button_context(self, basket, user):
-        ctx =  self.get_stripe_template_data(user, basket)
+        ctx = self.get_stripe_template_data(user, basket)
         ctx.update({
             "basket": basket
         })
         return ctx
 
+    @property
     def payment_label(self):
         return _("Checkout using Credit-Card")
 
+    @property
     def payment_button_classes(self):
-        return "btn btn-success payment-button"
+        return "btn btn-success payment-button stripe"
 
     def get_payment_page_script(self, basket, user):
         template = get_template("payment/processors/stripe_paymentscript.html")
@@ -73,7 +74,7 @@ class StripeProcessor(BasePaymentProcessor):
         return dollars_to_cents(basket.total_incl_tax)
 
     def get_description(self, basket):
-        return  _("Payment for order {order_sku} for {platform_name}").format(
+        return _("Payment for order {order_sku} for {platform_name}").format(
             order_sku=basket.order_number,
             platform_name=settings.PLATFORM_NAME
         )
@@ -91,7 +92,7 @@ class StripeProcessor(BasePaymentProcessor):
             'stripe_user_email': user.email,
             # TODO: Description could describe payment more.
             'stripe_payment_description': self.get_description(basket),
-            'button_label': self._get_button_label()
+            'button_label': self.payment_label
         }
 
     def handle_processor_response(self, response, basket=None):
@@ -103,7 +104,12 @@ class StripeProcessor(BasePaymentProcessor):
                 currency=basket.currency,
                 source=token,
                 api_key=self.secret_key,
-                description=self.get_description(basket)
+                description=self.get_description(basket),
+                metadata={
+                    'basket_pk': basket.pk,
+                    'basket_sku': basket.order_number,
+                    'username': basket.owner.username
+                }
             )
             logger.info(charge)
 
@@ -112,6 +118,8 @@ class StripeProcessor(BasePaymentProcessor):
             total = basket.total_incl_tax
             transaction_id = charge.id
 
+            # TODO: stripe guarantees that transaction_id is shorter than 255
+            # and reference is 128 long
             source = Source(source_type=source_type,
                             currency=currency,
                             amount_allocated=total,
@@ -148,8 +156,14 @@ class StripeProcessor(BasePaymentProcessor):
         transaction_id = source.reference
 
         try:
-            charge = stripe.Charge.retrieve(transaction_id)
-            charge.refunds.create(amount=self._dollars_to_cents(amount))
+            charge = stripe.Charge.retrieve(
+                transaction_id,
+                api_key=self.secret_key
+            )
+            charge.refunds.create(
+                amount=self._dollars_to_cents(amount),
+                api_key=self.secret_key
+            )
             self._record_refund(source, amount)
         except stripe.error.CardError:
             logger.exception('Refund of Stripe charge [%s] failed!', transaction_id)
