@@ -3,11 +3,19 @@ define([
         'underscore',
         'pages/basket_page',
         'utils/utils',
+        'models/tracking_model',
+        'models/user_model',
+        'views/clickable_view',
+        'views/analytics_view',
     ],
     function ($,
               _,
               BasketPage,
-              Utils) {
+              Utils,
+              TrackingModel,
+              UserModel,
+              ClickableView,
+              AnalyticsView) {
         'use strict';
 
         describe('Basket Page', function () {
@@ -17,7 +25,9 @@ define([
             beforeEach(function () {
                 $('<div id="voucher_form_container"><input id="id_code">' +
                     '<a id="voucher_form_cancel"></a></button></div>' +
-                    '<div id="voucher_form_link"><a href=""></a></div>' +
+                    '<div id="voucher_form_link"><a href="" data-track-type="click"' +
+                    'data-track-event="edx.bi.ecommerce.basket.voucher_applied"' + 
+                    'data-course-id="{{ course.id }}"></a></div>' +
                     '<div class="payment-buttons"><button class="">' +
                     '</div>'
                 ).appendTo('body');
@@ -131,6 +141,23 @@ define([
                     expect(args.contentType).toEqual('application/json; charset=utf-8');
                     expect(args.headers).toEqual({'X-CSRFToken': cookie});
                     expect(JSON.parse(args.data)).toEqual(data);
+                });
+            });
+
+            describe('Analytics', function() {
+                it('should trigger analytics events', function() {
+                    /* jshint ignore:start */
+                    // jscs:disable
+                    analytics = window.analytics = window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.0.1";}
+                    // jscs:enable
+                    /* jshint ignore:end */
+                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function() {
+                        return true;
+                    });
+                    spyOn(AnalyticsView.prototype, 'track');
+                    BasketPage.onReady();
+                    $('#voucher_form_link a').trigger('click');
+                    expect(AnalyticsView.prototype.track).toHaveBeenCalled();
                 });
             });
         });
