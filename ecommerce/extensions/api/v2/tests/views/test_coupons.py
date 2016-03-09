@@ -9,8 +9,10 @@ from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import Client
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
 from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
@@ -30,7 +32,7 @@ Voucher = get_model('voucher', 'Voucher')
 COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
-class CouponViewSetTest(CouponMixin, TestCase):
+class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     """Unit tests for creating coupon order."""
 
     def setUp(self):
@@ -38,8 +40,7 @@ class CouponViewSetTest(CouponMixin, TestCase):
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        course_id = 'edx/Demo_Course/DemoX'
-        course = Course.objects.create(id=course_id)
+        course = CourseFactory(id='edx/Demo_Course/DemoX')
         course.create_or_update_seat('verified', True, 50, self.partner)
 
         self.catalog = Catalog.objects.create(partner=self.partner)
@@ -183,21 +184,15 @@ class CouponViewSetTest(CouponMixin, TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
 
-class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
+class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
         super(CouponViewSetFunctionalTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-
-        course_id = 'edx/Demo_Course/DemoX'
-        course = Course.objects.create(id=course_id)
-        course.create_or_update_seat('verified', True, 50, self.partner)
-
-        course_id = 'edx/Demo_Course2/DemoX'
-        course = Course.objects.create(id=course_id)
-        course.create_or_update_seat('verified', True, 100, self.partner)
+        self.create_course_and_seat('edx/Demo_Course1/DemoX', 50)
+        self.create_course_and_seat('edx/Demo_Course2/DemoX', 100)
         self.data = {
             'title': 'Test coupon',
             'client_username': 'TestX',
@@ -213,6 +208,11 @@ class CouponViewSetFunctionalTest(CouponMixin, ThrottlingMixin, TestCase):
             'category_ids': [self.category.id]
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+
+    def create_course_and_seat(self, course_id, price):
+        """Create a course and a seat product for that course."""
+        course = CourseFactory(id=course_id)
+        course.create_or_update_seat('verified', True, price, self.partner)
 
     def test_response(self):
         """Test the response data given after the order was created."""
