@@ -11,11 +11,11 @@ define(['underscore', 'backbone'],
             logLeaving: function() {
                 var userModel = this.options.userModel;
 
-                window.onbeforeunload = function(e) {
+                window.onbeforeunload = function() {
                     analytics.page('Leaving', {
                         user: userModel.get('username'),
                     });
-                }
+                };
             },
 
             initialize: function (options) {

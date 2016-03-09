@@ -60,6 +60,6 @@ define([
                     trackingModel: trackingModel
                 };
             }
-        }
+        };
     }
 );
