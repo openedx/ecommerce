@@ -7,6 +7,7 @@ define([
         'underscore',
         'underscore.string',
         'utils/utils',
+        'utils/analytics_utils',
         'jquery-cookie',
         'views/leaving_view',
     ],
@@ -14,6 +15,7 @@ define([
               _,
               _s,
               Utils,
+              AnalyticsUtils,
               $cookie,
               LeavingView) {
         'use strict';
@@ -95,7 +97,7 @@ define([
                 checkoutPayment(data);
             });
 
-            var models = Utils.analyticsSetUp();
+            var models = AnalyticsUtils.analyticsSetUp();
 
             new LeavingView({
                 userModel: models.userModel,
