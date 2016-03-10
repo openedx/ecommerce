@@ -16,6 +16,7 @@ from slumber.exceptions import SlumberHttpBaseException
 import waffle
 
 from ecommerce.courses.models import Course
+from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.settings import get_lms_url
@@ -88,19 +89,7 @@ class Checkout(TemplateView):
             'payment_processors': processors_dict,
             'deadline': deadline,
             'providers': providers,
-            'analytics_data': json.dumps({
-                'course': {
-                    'courseId': course.id
-                },
-                'tracking': {
-                    'segmentApplicationId': settings.SEGMENT_KEY
-                },
-                'user': {
-                    'username': self.request.user.get_username(),
-                    'name': self.request.user.get_full_name(),
-                    'email': self.request.user.email
-                }
-            })
+            'analytics_data': prepare_analytics_data(course.id, self.request.user)
         })
 
         return context

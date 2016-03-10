@@ -30,7 +30,15 @@
             <div class="data-row total-row">{% trans "Total:" %}
                 <div class="text-right">${{new_price}}</div>
             </div>
-            <a href="{% url 'coupons:redeem' %}?code={{ code }}" id="PurchaseCertificate" class="btn btn-success btn-purchase">{% trans "Purchase Certificate" %}</a>
+            <a href="{% url 'coupons:redeem' %}?code={{ code }}"
+                id="PurchaseCertificate"
+                class="btn btn-success btn-purchase"
+                data-track-type="click"
+                data-track-event="edx.bi.ecommerce.coupon_offer.purchased_certificate"
+                data-track-category="coupon_offer_purchase"
+                data-course-id="{{ course.id }}">
+                    {% trans "Purchase Certificate" %}
+                </a>
             {% if verified %}
                 <div class="verification-note">
                     {% blocktrans with verification_deadline=verification_deadline|date:"d M Y" %}
