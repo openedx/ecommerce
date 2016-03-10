@@ -3,11 +3,20 @@ define([
         'underscore',
         'pages/basket_page',
         'utils/utils',
+        'utils/analytics_utils',
+        'models/tracking_model',
+        'models/user_model',
+        'views/analytics_view',
     ],
     function ($,
               _,
               BasketPage,
-              Utils) {
+              Utils,
+              AnalyticsUtils,
+              TrackingModel,
+              UserModel,
+              AnalyticsView
+              ) {
         'use strict';
 
         describe('Basket Page', function () {
@@ -18,9 +27,21 @@ define([
                 $('<div id="voucher_form_container"><input id="id_code">' +
                     '<a id="voucher_form_cancel"></a></button></div>' +
                     '<div id="voucher_form_link"><a href=""></a></div>' +
-                    '<div class="payment-buttons"><button class="">' +
-                    '</div>'
+                    '<button type="submit" class="apply_voucher"' +
+                    'data-track-type="click" data-track-event="edx.bi.ecommerce.basket.voucher_applied"' +
+                    'data-voucher-code="ABCDEF"></button></div>' +
+                    '<div class="payment-buttons">' +
+                    '<button data-track-type="click"' +
+                    'data-track-event="edx.bi.ecommerce.basket.payment_selected"' +
+                    'data-track-category="cybersource"' +
+                    'data-processor-name="cybersource"' +
+                    'class="btn btn-success payment-button"' +
+                    'value="cybersource"' +
+                    'id="cybersource"></button></div>'
                 ).appendTo('body');
+
+
+                $('<script type="text/javascript">var initModelData = {};</script>').appendTo('body');
 
                 data = {
                     basket_id: 1,
@@ -75,6 +96,14 @@ define([
                     expect($('#voucher_form_container').is(':visible')).toBeFalsy();
                     expect($('#voucher_form_link').is(':visible')).toBeTruthy();
                 });
+
+                it('should disable payment button before making ajax call', function () {
+                    spyOn(Utils, 'disableElementWhileRunning').and.callThrough();
+                    BasketPage.onReady();
+                    $('button.payment-button').trigger('click');
+                    expect(Utils.disableElementWhileRunning).toHaveBeenCalled();
+                    expect($('button#cybersource').hasClass('is-disabled')).toBeTruthy();
+                });
             });
 
             describe('appendToForm', function () {
@@ -94,17 +123,6 @@ define([
                     expect(error_messages_div.text()).toEqual(
                         'Problem occurred during checkout. Please contact support'
                     );
-                });
-            });
-
-            describe('onReady', function () {
-                it('should disable payment button before making ajax call', function () {
-                    $('<div class="payment-buttons"><button class="payment-button">Pay</button></div>')
-                        .appendTo('body');
-                    spyOn(Utils, 'disableElementWhileRunning');
-                    BasketPage.onReady();
-                    $('button.payment-button').trigger('click');
-                    expect(Utils.disableElementWhileRunning).toHaveBeenCalled();
                 });
             });
 
@@ -128,6 +146,38 @@ define([
                     expect(args.contentType).toEqual('application/json; charset=utf-8');
                     expect(args.headers).toEqual({'X-CSRFToken': cookie});
                     expect(JSON.parse(args.data)).toEqual(data);
+                });
+            });
+
+            describe('Analytics', function() {
+                beforeEach(function () {
+                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function() {
+                        return true;
+                    });
+                    spyOn(AnalyticsView.prototype, 'track');
+                    BasketPage.onReady();
+                    spyOn(window.analytics, 'page');
+                });
+
+                it('should trigger voucher applied analytics event', function() {
+                    $('button.apply_voucher').trigger('click');
+                    expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
+                        'edx.bi.ecommerce.basket.voucher_applied',
+                        { type: 'click' }
+                    );
+                });
+
+                it('should trigger checkout analytics event', function() {
+                    $('button.payment-button').trigger('click');
+                    expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
+                        'edx.bi.ecommerce.basket.payment_selected',
+                        { category: 'cybersource', type: 'click' }
+                    );
+                });
+
+                it('should trigger page load analytics event', function() {
+                    AnalyticsUtils.analyticsSetUp();
+                    expect(window.analytics.page).toHaveBeenCalled();
                 });
             });
         });

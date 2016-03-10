@@ -1,8 +1,8 @@
 from functools import wraps
+import json
 import logging
 
 from django.conf import settings
-
 
 logger = logging.getLogger(__name__)
 
@@ -85,3 +85,38 @@ def audit_log(name, **kwargs):
     message = u'{name}: {payload}'.format(name=name, payload=payload)
 
     logger.info(message)
+
+
+def prepare_analytics_data(course_id, user):
+    """ Helper function for preparing necessary data for analytics.
+
+    Arguments:
+        course_id (str): The course ID.
+        user (User): The user making the request.
+
+    Returns:
+        JSON object with the data for analytics.
+    """
+    data = {
+        'course': {
+            'courseId': course_id
+        },
+        'tracking': {
+            'segmentApplicationId': settings.SEGMENT_KEY
+        }
+    }
+
+    if user.is_authenticated():
+        user_data = {
+            'user': {
+                'username': user.get_username(),
+                'name': user.get_full_name(),
+                'email': user.email
+            }
+        }
+    else:
+        user_data = {
+            'user': 'AnonymousUser'
+        }
+    data.update(user_data)
+    return json.dumps(data)

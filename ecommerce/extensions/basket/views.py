@@ -14,6 +14,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.views import get_voucher_from_code
+from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -92,6 +93,10 @@ class BasketSummaryView(BasketView):
                 line.benefit_value = format_benefit_value(benefit)
             else:
                 line.benefit_value = None
+
+            context.update({
+                'analytics_data': prepare_analytics_data(course_id, self.request.user)
+            })
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
