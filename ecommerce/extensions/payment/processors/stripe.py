@@ -80,7 +80,6 @@ class StripeProcessor(BasePaymentProcessor):
         )
 
     def get_stripe_template_data(self, user, basket):
-        # import pudb; pudb.set_trace()
         return {
             'stripe_publishable_key': self.publishable_key,
             'stripe_process_payment_url': reverse('stripe_checkout', kwargs={
@@ -156,12 +155,8 @@ class StripeProcessor(BasePaymentProcessor):
         transaction_id = source.reference
 
         try:
-            charge = stripe.Charge.retrieve(
-                transaction_id,
-                api_key=self.secret_key
-            )
-            charge.refunds.create(
-                amount=self._dollars_to_cents(amount),
+            stripe.Refund.create(
+                charge=transaction_id,
                 api_key=self.secret_key
             )
             self._record_refund(source, amount)
