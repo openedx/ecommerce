@@ -1,8 +1,12 @@
 """ Views for interacting with the payment processor. """
 from cStringIO import StringIO
+import json
 import logging
 import os
 
+import requests
+
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
@@ -65,7 +69,7 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         paybox_response = request.POST.dict()
-        
+
         logger.info(paybox_response)
 
         basket = None
@@ -97,25 +101,12 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             with transaction.atomic():
                 try:
                     self.handle_payment(paybox_response, basket)
-                except InvalidSignatureError:
-                    logger.exception(
-                        'Received an invalid CyberSource response. The payment response was recorded in entry [%d].',
-                        ppr.id
-                    )
-                    return HttpResponse(status=400)
                 except (UserCancelled, TransactionDeclined) as exception:
                     logger.info(
-                        'CyberSource payment did not complete for basket [%d] because [%s]. '
+                        'Paybox payment did not complete for basket [%d] because [%s]. '
                         'The payment response was recorded in entry [%d].',
                         basket.id,
                         exception.__class__.__name__,
-                        ppr.id
-                    )
-                    return HttpResponse()
-                except PaymentError:
-                    logger.exception(
-                        'CyberSource payment failed for basket [%d]. The payment response was recorded in entry [%d].',
-                        basket.id,
                         ppr.id
                     )
                     return HttpResponse()
@@ -144,9 +135,26 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
                 order_total=order_total,
             )
 
-            return HttpResponse()
         except:  # pylint: disable=bare-except
             logger.exception(self.order_placement_failure_msg, basket.id)
             return HttpResponse(status=500)
 
+        # Notify fun-apps of transaction result
 
+        url = settings.FUNAPPS_NOTIFY
+        data = {
+            'username': basket.owner.username,
+            'order_number': order_number
+            }
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Edx-Api-Key': settings.EDX_API_KEY
+            }
+
+        response = requests.post(url, data=json.dumps(data), headers=headers, timeout=30)
+        if response.status_code in (200, 201):
+            logger.info(u'Notified fun-apps of %s order SUCCESS for user %s.', order_number, basket.owner.username)
+        else:
+            logger.info(u'Notified fun-apps of %s order FAIL for user %s.', order_number, basket.owner.username)
+
+        return HttpResponse()
