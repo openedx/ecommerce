@@ -90,6 +90,7 @@ class BasketSummaryView(BasketView):
                 line.discount_percentage = line.discount_value / line.unit_price_incl_tax * Decimal(100)
             else:
                 line.discount_percentage = 0
+
         context.update({
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),

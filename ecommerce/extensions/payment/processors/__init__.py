@@ -50,8 +50,6 @@ class BasePaymentProcessor(object):  # pragma: no cover
                 Pay using our processor
             </button>
 
-        To render such a button please use
-
         Returns:
             str
 
@@ -64,15 +62,27 @@ class BasePaymentProcessor(object):  # pragma: no cover
 
     @property
     def payment_label(self):
+        """
+        Returns: Label for payment button
+        """
         return _(u"Checkout with {processor_name}").format(
             processor_name=self.NAME.capitalize()
         )
 
     @property
     def payment_button_classes(self):
+        """
+        Returns: CSS classes for payment button
+        """
         return u"btn btn-success payment-button builtin-handling"
 
     def get_payment_page_script(self, basket, user):
+        """
+
+        Returns: A string or None. If returns a string this string will be attached at the
+        bottom of a checkout page, indended use is to attach a <script> tag that will
+        handle given processor.
+        """
         return None
 
     @abc.abstractmethod

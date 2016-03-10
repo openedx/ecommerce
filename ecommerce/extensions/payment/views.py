@@ -96,10 +96,6 @@ class CybersourceNotifyView(BasketRetrievalMixin, EdxOrderPlacementMixin, View):
             country=Country.objects.get(
                 iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 
-
-    #TODO: This was here in clintonb/stripe 99% its unneccessary
-    # as dispatch already has this decorator. Check it though
-    @transaction.non_atomic_requests
     def post(self, request):
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
 

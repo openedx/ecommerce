@@ -4,6 +4,7 @@ import logging
 from urlparse import urljoin
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
@@ -36,25 +37,36 @@ class StripeProcessor(BasePaymentProcessor):
             KeyError: If no settings configured for this payment processor
             AttributeError: If ECOMMERCE_URL_ROOT setting is not set.
         """
-        configuration = self.configuration
-        self.publishable_key = configuration['publishable_key']
-        self.secret_key = configuration['secret_key']
-        self.receipt_page_url = configuration['receipt_page_url']
-        self.image_url = configuration['image_url']
-        self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
+        try:
+            configuration = self.configuration
+            self.publishable_key = configuration['publishable_key']
+            self.secret_key = configuration['secret_key']
+            self.receipt_page_url = configuration['receipt_page_url']
+            self.image_url = configuration['image_url']
+            self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
+        except KeyError as e:
+            raise ImproperlyConfigured(
+                "Missing key '{}' for stripe processor ".format(e.message)
+            )
 
     def get_transaction_parameters(self, basket, request=None):
-        return {
-            'payment_page_url': urljoin(self.ecommerce_url_root, reverse('stripe_payment')),
-            'basket': basket.pk
-        }
+        raise NotImplementedError("This method is not used by StripeProcessor")
 
     def _get_button_context(self, basket, user):
-        ctx = self.get_stripe_template_data(user, basket)
-        ctx.update({
+        return {
+            'stripe_publishable_key': self.publishable_key,
+            'stripe_process_payment_url': reverse('stripe_checkout', kwargs={
+                'basket': basket.pk
+            }),
+            'stripe_amount_cents': self.get_total(basket),
+            'stripe_image_url': self.image_url,
+            'stripe_currency': basket.currency,
+            'stripe_user_email': user.email,
+            # TODO: Description could describe payment more.
+            'stripe_payment_description': self.get_description(basket),
+            'button_label': self.payment_label,
             "basket": basket
-        })
-        return ctx
+        }
 
     @property
     def payment_label(self):
@@ -78,21 +90,6 @@ class StripeProcessor(BasePaymentProcessor):
             order_sku=basket.order_number,
             platform_name=settings.PLATFORM_NAME
         )
-
-    def get_stripe_template_data(self, user, basket):
-        return {
-            'stripe_publishable_key': self.publishable_key,
-            'stripe_process_payment_url': reverse('stripe_checkout', kwargs={
-                'basket': basket.pk
-            }),
-            'stripe_amount_cents': self.get_total(basket),
-            'stripe_image_url': self.image_url,
-            'stripe_currency': basket.currency,
-            'stripe_user_email': user.email,
-            # TODO: Description could describe payment more.
-            'stripe_payment_description': self.get_description(basket),
-            'button_label': self.payment_label
-        }
 
     def handle_processor_response(self, response, basket=None):
         token = response
