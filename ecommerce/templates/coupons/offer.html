@@ -20,6 +20,12 @@
             {% endif %}
         {% endif %}
     </div>
+
+    {% if analytics_data %}
+        <script type="text/javascript">
+            var initModelData = {{ analytics_data|safe }};
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block footer %}
