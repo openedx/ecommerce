@@ -144,6 +144,7 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
         url = settings.FUNAPPS_NOTIFY
         data = {
             'username': basket.owner.username,
+            'email': basket.owner.email,
             'order_number': order_number
             }
         headers = {
@@ -153,8 +154,10 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
 
         response = requests.post(url, data=json.dumps(data), headers=headers, timeout=30)
         if response.status_code in (200, 201):
-            logger.info(u'Notified fun-apps of %s order SUCCESS for user %s.', order_number, basket.owner.username)
+            logger.info(u'Notified fun-apps of %s order SUCCESS for user %s/%s.', 
+                    order_number, basket.owner.username, basket.owner.email)
         else:
-            logger.info(u'Notified fun-apps of %s order FAIL for user %s.', order_number, basket.owner.username)
+            logger.info(u'Notified fun-apps of %s order FAIL for user %s/%s.', 
+                    order_number, basket.owner.username, basket.owner.email)
 
         return HttpResponse()
