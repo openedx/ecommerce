@@ -17,6 +17,8 @@ from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.settings import get_lms_url
@@ -34,7 +36,7 @@ StockRecord = get_model('partner', 'StockRecord')
 COUPON_CODE = 'COUPONTEST'
 
 
-class BasketSingleItemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -111,7 +113,7 @@ class BasketSingleItemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
 @httpretty.activate
 @ddt.ddt
 @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
-class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
+class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -179,9 +181,13 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
         self.mock_course_api_response(self.course)
         self.mock_footer_api_response()
 
+        benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
+
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['lines']), 1)
+        self.assertEqual(response.context['lines'][0].benefit_value, format_benefit_value(benefit))
+        self.assertEqual(response.context['lines'][0].has_discount, True)
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
         self.assertEqual(json.loads(response.context['footer']), {'footer': 'edX Footer'})
 
@@ -208,10 +214,10 @@ class BasketSummaryViewTests(LmsApiMockMixin, TestCase):
         basket.add_product(seat_without_benefit, 1)
 
         response = self.client.get(self.path)
-        self.assertEqual(response.context['lines'][0].discount_percentage, 50)
+        self.assertEqual(response.context['lines'][0].benefit_value, '50%')
         self.assertEqual(response.context['lines'][0].has_discount, True)
 
-        self.assertEqual(response.context['lines'][1].discount_percentage, 0)
+        self.assertEqual(response.context['lines'][1].benefit_value, None)
         self.assertEqual(response.context['lines'][1].has_discount, False)
 
     def test_cached_course(self):

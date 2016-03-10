@@ -13,6 +13,7 @@ import pytz
 
 from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.settings import get_lms_url
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
@@ -141,7 +142,7 @@ class GetVoucherTests(TestCase):
 
 @httpretty.activate
 @ddt.ddt
-class CouponOfferViewTests(LmsApiMockMixin, TestCase):
+class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
     path_with_code = '{path}?code={code}'.format(path=path, code=COUPON_CODE)
 
@@ -209,14 +210,14 @@ class CouponOfferViewTests(LmsApiMockMixin, TestCase):
         self.assertEqual(response.context['new_price'], new_price)
 
 
-class CouponRedeemViewTests(CouponMixin, TestCase):
+class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        course = Course.objects.create(id='org/course/run')
+        course = CourseFactory()
         self.seat = course.create_or_update_seat('verified', True, 50, self.partner)
 
         self.catalog = Catalog.objects.create(partner=self.partner)

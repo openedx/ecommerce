@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from django.conf import settings
+
 from ecommerce.settings import get_lms_url
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
@@ -90,14 +92,14 @@ PAYMENT_PROCESSOR_CONFIG = {
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',
         'payment_page_url': 'https://replace-me/',
-        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'receipt_page_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
         'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
     },
     'paypal': {
         'mode': 'sandbox',
         'client_id': 'fake-client-id',
         'client_secret': 'fake-client-secret',
-        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
+        'receipt_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
         'error_url': get_lms_url('/commerce/checkout/error/'),
     },

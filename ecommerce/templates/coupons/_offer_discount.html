@@ -3,8 +3,8 @@
 
 <div class="depth depth--3">
     <div class="copy copy-meta">
-        {% blocktrans with discount_percentage=discount_percentage|floatformat %}
-            You are eligible for a {{discount_percentage}}% discount for this course.
+        {% blocktrans with benefit_value=benefit_value %}
+            You are eligible for a {{benefit_value}} discount for this course.
         {% endblocktrans %}
     </div>
 </div>
@@ -22,8 +22,8 @@
                 <div class="text-right">${{price}}</div>
             </div>
             <div class="data-row discount-row">
-                {% blocktrans with discount_percentage=discount_percentage|floatformat %}
-                    {{discount_percentage}}% Discount:
+                {% blocktrans with benefit_value=benefit_value %}
+                    {{benefit_value}} Discount:
                 {% endblocktrans %}
                 <div class="text-right">-${{discount_value}}</div>
             </div>

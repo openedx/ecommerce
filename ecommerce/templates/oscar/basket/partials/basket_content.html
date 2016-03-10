@@ -36,8 +36,8 @@
                             {% if line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
-                                        {% blocktrans with percentage=line.discount_percentage|stringformat:'d' %}
-                                            {{percentage}}% off
+                                        {% blocktrans with benefit_value=line.benefit_value %}
+                                            {{benefit_value}} off
                                         {% endblocktrans %}
                                     </div>
                                     <div class="old-price">
@@ -101,9 +101,13 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="payment-buttons" data-basket-id="{{ basket.id }}">
-                    {% for processor in payment_processors %}
-                       {{ processor|safe }}
-                    {% endfor %}
+                {% if free_basket %}
+                    <a href="{% url 'checkout:free-checkout' %}" class="btn btn-success checkout-button">{% trans "Place Order" %}</a>
+                {% else %}
+                {% for processor in payment_processors %}
+                    {{ processor|safe }}
+                {% endfor %}
+                {% endif %}
                 </div>
             </div>
         </div>
@@ -121,7 +125,7 @@
         </div>
         <div class="row help">
             <p><b>{% trans "Have questions?" %}</b></p>
-            <a href="{{ faq_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
+            <a href="{{ support_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
         </div>
     </div>
 {% else %}
