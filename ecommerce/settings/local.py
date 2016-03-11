@@ -52,7 +52,7 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
 INTERNAL_IPS = ('127.0.0.1',)
 # END TOOLBAR CONFIGURATION
 
-
+APPEND_SLASH = False
 
 
 # The location of the LMS heartbeat page
