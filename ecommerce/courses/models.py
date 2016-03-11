@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import logging
 
+from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
@@ -211,7 +212,7 @@ class Course(models.Model):
         stock_record.price_excl_tax = price
 
         # TODO Expose via setting
-        stock_record.price_currency = 'USD'
+        stock_record.price_currency = settings.OSCAR_DEFAULT_CURRENCY
         stock_record.save()
 
         return seat
