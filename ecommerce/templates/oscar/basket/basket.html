@@ -12,7 +12,7 @@
 
 {% block javascript %}
     <script src="{% static 'js/apps/basket_app.js' %}"></script>
-    {% for processor_script in payment_processors_scripts %}
+    {% for processor_script in payment_processor_scripts %}
         {{ processor_script|safe }}
     {% endfor %}
 {% endblock %}

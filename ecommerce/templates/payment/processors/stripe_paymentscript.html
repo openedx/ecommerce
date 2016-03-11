@@ -44,7 +44,7 @@
                     }
                 });
 
-                $('.payment-button.stripe').on('click', function(e) {
+                $('.payment-button[value="stripe"]').on('click', function(e) {
                     handler.open({});
                     e.preventDefault();
                     return false;

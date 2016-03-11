@@ -94,39 +94,22 @@ class BasketSummaryView(BasketView):
             else:
                 line.benefit_value = None
 
+        processors = self.get_payment_processors()
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
+            'payment_processors': processors,
+            'payment_processor_scripts': [
+                processor.get_basket_page_script(self.request.basket, self.request.user)
+                for processor in processors
+            ],
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
             'lines': lines,
-            'faq_url': get_lms_url('') + '/verified-certificate',
         })
-        context.update(self.get_payment_processors())
         return context
 
     def get_payment_processors(self):
         """ Retrieve the list of active payment processors. """
         # TODO Retrieve this information from SiteConfiguration
-        basket = self.request.basket
-        user = self.request.user
-        processors = (
-            get_processor_class(path)
-            for path in settings.PAYMENT_PROCESSORS
-        )
-        enabled_processors = [
-            processor() for processor in processors if processor.is_enabled()
-        ]
-        filter = lambda sequence: [item for item in sequence if item]
-        return {
-            "payment_processors": [
-                processor.render_payment_button(basket, user)
-                for processor in enabled_processors
-            ],
-            "payment_processors_scripts": filter(
-                processor.get_payment_page_script(basket, user)
-                for processor in enabled_processors
-            )
-        }
-
-
-
+        processors = (get_processor_class(path) for path in settings.PAYMENT_PROCESSORS)
+        return [processor() for processor in processors if processor.is_enabled()]

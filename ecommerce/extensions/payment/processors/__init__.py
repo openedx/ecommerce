@@ -16,12 +16,6 @@ class BasePaymentProcessor(object):  # pragma: no cover
 
     NAME = None
 
-    STANDARD_BUTTON_TEMPLATE = u"""
-    <button class="{button_class}" value="{processor_name}">
-        {button_label}
-    </button>
-    """.strip()
-
     @abc.abstractmethod
     def get_transaction_parameters(self, basket, request=None):
         """
@@ -41,46 +35,32 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         raise NotImplementedError
 
-    def render_payment_button(self, basket, user):
-        """
-        This function renders a payment button to any page for which payment using this processor is enabled
-        usually the rendered button will look similar to:
-
-            <button class="btn btn-success payment-button payment-handler builtin-handling">
-                Pay using our processor
-            </button>
-
-        Returns:
-            str
-
-        """
-        return self.STANDARD_BUTTON_TEMPLATE.format(
-            button_class=self.payment_button_classes,
-            button_label=self.payment_label,
-            processor_name=self.NAME
-        )
-
     @property
     def payment_label(self):
         """
-        Returns: Label for payment button
+        Returns: Label for payment button on the basket page
         """
         return _(u"Checkout with {processor_name}").format(
             processor_name=self.NAME.capitalize()
         )
 
     @property
-    def payment_button_classes(self):
+    def default_checkout_handler(self):
         """
-        Returns: CSS classes for payment button
-        """
-        return u"btn btn-success payment-button builtin-handling"
+        Specifies whether this processor instance is handled by the default handler
+        on the checkout page.
 
-    def get_payment_page_script(self, basket, user):
+        Returns: True if this basket uses default check out logic in javascript
+        on the basket Page.
         """
+        return True
+
+    def get_basket_page_script(self, basket, user):
+        """
+        Returns a script to be attached to basket page.
 
         Returns: A string or None. If returns a string this string will be attached at the
-        bottom of a checkout page, indended use is to attach a <script> tag that will
+        bottom of a checkout page, intended use is to attach a <script> tag that will
         handle given processor.
         """
         return None
@@ -114,7 +94,7 @@ class BasePaymentProcessor(object):  # pragma: no cover
             dict: Payment processor configuration
 
         Raises:
-            KeyError: If no settings found for this payment processor
+            ImproperlyConfigured: If no settings found for this payment processor
         """
         try:
             return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]

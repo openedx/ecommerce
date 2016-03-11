@@ -34,7 +34,8 @@ class StripeProcessor(BasePaymentProcessor):
         Constructs a new instance of the Stripe processor.
 
         Raises:
-            KeyError: If no settings configured for this payment processor
+            ImproperlyConfigured: If not all settings are configured for this
+                processor.
             AttributeError: If ECOMMERCE_URL_ROOT setting is not set.
         """
         try:
@@ -52,12 +53,11 @@ class StripeProcessor(BasePaymentProcessor):
     def get_transaction_parameters(self, basket, request=None):
         raise NotImplementedError("This method is not used by StripeProcessor")
 
-    def _get_button_context(self, basket, user):
+    def _get_script_context(self, basket, user):
         return {
             'stripe_publishable_key': self.publishable_key,
-            'stripe_process_payment_url': reverse('stripe_checkout', kwargs={
-                'basket': basket.pk
-            }),
+            'stripe_process_payment_url':
+                reverse('stripe_checkout', kwargs={'basket': basket.pk}),
             'stripe_amount_cents': self.get_total(basket),
             'stripe_image_url': self.image_url,
             'stripe_currency': basket.currency,
@@ -72,13 +72,13 @@ class StripeProcessor(BasePaymentProcessor):
     def payment_label(self):
         return _("Checkout using Credit-Card")
 
-    @property
-    def payment_button_classes(self):
-        return "btn btn-success payment-button stripe"
-
-    def get_payment_page_script(self, basket, user):
+    def get_basket_page_script(self, basket, user):
         template = get_template("payment/processors/stripe_paymentscript.html")
-        return template.render(self._get_button_context(basket, user))
+        return template.render(self._get_script_context(basket, user))
+
+    @property
+    def default_checkout_handler(self):
+        return False
 
     def get_total(self, basket):
         # Throw error if any rounding occours
@@ -114,18 +114,24 @@ class StripeProcessor(BasePaymentProcessor):
             total = basket.total_incl_tax
             transaction_id = charge.id
 
-            # TODO: stripe guarantees that transaction_id is shorter than 255
-            # and reference is 128 long
-            source = Source(source_type=source_type,
-                            currency=currency,
-                            amount_allocated=total,
-                            amount_debited=total,
-                            reference=transaction_id,
-                            label='Stripe',
-                            card_type=None)
+            # TODO: Stripe guarantees that transaction_id is shorter than 255
+            # and column for reference is 128 long. It works right now, but
+            # as stripes references are shorter than 128 chars, but that might
+            # change.
+            source = Source(
+                source_type=source_type,
+                currency=currency,
+                amount_allocated=total,
+                amount_debited=total,
+                reference=transaction_id,
+                label='Stripe',
+                card_type=None
+            )
 
             # Create PaymentEvent to track
-            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
+            event_type, __ = PaymentEventType.objects.get_or_create(
+                name=PaymentEventTypeName.PAID
+            )
             event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id,
                                  processor_name=self.NAME)
 
@@ -144,11 +150,8 @@ class StripeProcessor(BasePaymentProcessor):
         PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=transaction_id,
                                     processor_name=self.NAME)
 
-    # TODO: Remove this note: issues refund for a given transaction
     def issue_credit(self, source, amount, currency):
 
-        # TODO: Technically stripe guarantees all fields to be shorter than 255
-        # chars and reference 128 chars long (from: AbstractSource)
         transaction_id = source.reference
 
         try:
