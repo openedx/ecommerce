@@ -74,11 +74,11 @@ ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.paybox_system.PayboxSystem',
 )
-ECOMMERCE_URL_ROOT = 'http://localhost:8080'
 OSCAR_DEFAULT_CURRENCY = 'EUR'
 
-LMS_URL_ROOT = 'https://chaloupe.fun-mooc.fr'
-
+# production email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'infrasmtp02.cines.openfun.fr'
 
 # CELERY
 BROKER_URL = 'amqp://'
