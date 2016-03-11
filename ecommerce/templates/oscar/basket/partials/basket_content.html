@@ -76,13 +76,13 @@
                         {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                         {% if voucher_form %}
                             <div class="use-voucher col-sm-6">
-                                <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a promotion code" %}</a></p>
+                                <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a coupon code" %}</a></p>
 
                                 <div id="voucher_form_container">
                                     <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
                                         {% csrf_token %}
                                         <div class="code">
-                                            <input id="id_code" name="code" type="text" placeholder="{% trans 'enter promo code' %}">
+                                            <input id="id_code" name="code" type="text" placeholder="{% trans 'Enter a coupon code' %}">
                                             <button type="submit" class="btn btn-default" data-loading-text="{% trans 'Applying...' %}">{% trans "Apply" %}</button>
                                         </div>
                                     </form>
@@ -121,7 +121,7 @@
             <span><i class="fa fa-exclamation-circle"></i></span>
             {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
             {% for line in lines %}
-                {% if line.certificate_type == 'Professional' or line.certificate_type == 'Verified' %}
+                {% if line.product.attr.id_verification_required %}
                     {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
                 {% else %}
                     {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
