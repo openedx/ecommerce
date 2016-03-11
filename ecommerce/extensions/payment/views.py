@@ -20,7 +20,6 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-from ecommerce.extensions.payment.processors.braintree import Braintree
 from ecommerce.extensions.payment.processors.stripe import StripeProcessor
 
 logger = logging.getLogger(__name__)
@@ -397,15 +396,6 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
 
         receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_page_url, basket.id)
         return redirect(receipt_url)
-
-
-class BraintreeCheckoutView(CheckoutViewMixin, View):
-    payment_processor = Braintree()
-
-    def get_payment_data(self, request):
-        nonce = request.POST['payment_method_nonce']
-        device_data = request.POST.get('device_data', None)
-        return nonce, device_data
 
 
 class StripeCheckoutView(CheckoutViewMixin, View):
