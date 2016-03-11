@@ -157,7 +157,7 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             logger.info(u'Notified fun-apps of %s order SUCCESS for user %s/%s.', 
                     order_number, basket.owner.username, basket.owner.email)
         else:
-            logger.info(u'Notified fun-apps of %s order FAIL for user %s/%s.', 
-                    order_number, basket.owner.username, basket.owner.email)
+            logger.info(u'Notified fun-apps of %s(%d) order FAIL for user %s/%s.', 
+                    order_number, response.status_code, basket.owner.username, basket.owner.email)
 
         return HttpResponse()
