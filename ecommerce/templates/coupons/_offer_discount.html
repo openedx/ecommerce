@@ -11,7 +11,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-3">
-            <img class="img-responsive" src="{{course.image_url}}" alt="" />
+            <img class="img-responsive" src="{{course.image_url}}" alt="{{course.name}}" />
         </div>
         <div class="col-md-5">
             <p class="course_name">{{ course.name }} ({{ course.org }})</p>
@@ -51,7 +51,7 @@
             </div>
             <div>
                 <div class="col-md-3">
-                    <img class="img-responsive" src="{% static "images/example-certificate-verified.png" %}" alt="" />
+                    <img class="img-responsive" src="{% static "images/example-certificate-verified.png" %}" alt="{% trans "certificate example" %}" />
                 </div>
                 <div class="col-md-5">
                     <ul>
