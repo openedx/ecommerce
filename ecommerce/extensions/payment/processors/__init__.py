@@ -80,7 +80,8 @@ class BasePaymentProcessor(object):  # pragma: no cover
             basket (Basket): Basket whose contents have been purchased via the payment processor
 
         Raises:
-            any exception raised from this method will delete the basket, and mean failed
+            PaymentError: Means there is an error during Payment.
+            Exception: any exception raised from this method will delete the basket, and mean failed
             payment.
         """
         raise NotImplementedError

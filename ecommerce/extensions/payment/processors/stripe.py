@@ -1,13 +1,14 @@
 """ Stripe payment processing. """
 from __future__ import absolute_import, unicode_literals
+
 import logging
-from urlparse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
+from oscar.apps.checkout.views import PaymentError
 from oscar.apps.payment.exceptions import GatewayError
 
 from oscar.core.loading import get_model
@@ -42,7 +43,8 @@ class StripeProcessor(BasePaymentProcessor):
             configuration = self.configuration
             self.publishable_key = configuration['publishable_key']
             self.secret_key = configuration['secret_key']
-            self.receipt_page_url = configuration['receipt_page_url']
+            self.receipt_page_url = configuration['receipt_url']
+            self.error_page_url = configuration['error_url']
             self.image_url = configuration['image_url']
             self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
         except KeyError as e:
@@ -137,8 +139,7 @@ class StripeProcessor(BasePaymentProcessor):
 
             return source, event
         except stripe.error.CardError as e:
-            # The card has been declined
-            logger.exception('Payment failed!')
+            raise PaymentError(e.message)
 
     def _record_refund(self, source, amount):
         transaction_id = source.reference
@@ -160,6 +161,6 @@ class StripeProcessor(BasePaymentProcessor):
                 api_key=self.secret_key
             )
             self._record_refund(source, amount)
-        except stripe.error.CardError:
+        except stripe.error.CardError as e:
             logger.exception('Refund of Stripe charge [%s] failed!', transaction_id)
-            raise GatewayError
+            raise GatewayError(e.message)

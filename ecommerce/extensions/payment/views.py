@@ -6,7 +6,7 @@ import os
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.management import call_command
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.db import transaction
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -348,8 +348,7 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
 
         if not basket:
             logger.error('Payment requested for non-existent basket [%s].', basket_id)
-            # TODO Handle this better (perhaps redirect to an error page).
-            raise Http404()
+            return HttpResponseRedirect(self.payment_processor.error_page_url)
 
         return basket
 
@@ -363,13 +362,14 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
             with transaction.atomic():
                 try:
                     self.handle_payment(payment_data, basket)
-                except PaymentError:
-                    # TODO Handle this better (perhaps redirect to an error page).
-                    return HttpResponseBadRequest()
-        except:  # pylint: disable=bare-except
+                except PaymentError as e:
+                    # This can happen (card refused?)
+                    logger.info("Payment error for basket [%d] failed.", basket.id)
+                    return HttpResponseRedirect(self.payment_processor.error_page_url)
+        except Exception as e:
+            # This is an error that should be investigated
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-            # TODO Handle this better (perhaps redirect to an error page).
-            return HttpResponseBadRequest()
+            return HttpResponseRedirect(self.payment_processor.error_page_url)
 
         # Create the order in our system
         try:
@@ -390,9 +390,18 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
                         order_total=order_total
                     )
                 except UnableToPlaceOrder:
+                    # This is clearly an error: client got charged but didn't get what he paid for
                     logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+                    # Raise the error to give clear 500, in future (mabe?) introduce better another
+                    # Cybersorce payment processor also handles this error in this way
+                    raise
+
         except:  # pylint: disable=bare-except
+            # This is clearly an error: client got charged but didn't get what he paid for
             logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
+            # Raise the error to give clear 500, in future (mabe?) introduce better another
+            # Cybersorce payment processor also handles this error in this way
+            raise
 
         receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_page_url, basket.id)
         return redirect(receipt_url)
@@ -402,18 +411,6 @@ class StripeCheckoutView(CheckoutViewMixin, View):
     payment_processor = StripeProcessor()
 
     pk_url_kwarg = 'basket'
-
-    def locate_basket(self):
-
-        basket_id = self.kwargs[self.pk_url_kwarg]
-        basket = self.get_basket(self.request, basket_id)
-
-        if not basket:
-            logger.error('Payment requested for non-existent basket [%s].', basket_id)
-            # TODO Handle this better (perhaps redirect to an error page).
-            raise Http404()
-
-        return basket
 
     def get_payment_data(self, request):
         return request.POST['stripeToken']
