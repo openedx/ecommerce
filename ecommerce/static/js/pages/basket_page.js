@@ -7,12 +7,13 @@ define([
         'underscore',
         'underscore.string',
         'utils/utils',
-        'jquery-cookie'
+        'utils/analytics_utils',
     ],
     function ($,
               _,
               _s,
-              Utils) {
+              Utils,
+              AnalyticsUtils) {
         'use strict';
 
         var appendToForm = function (value, key, form) {
@@ -91,6 +92,8 @@ define([
                 Utils.disableElementWhileRunning($btn, function() { return promise; });
                 checkoutPayment(data);
             });
+
+            AnalyticsUtils.analyticsSetUp();
         },
         showVoucherForm = function() {
             $('#voucher_form_container').show();

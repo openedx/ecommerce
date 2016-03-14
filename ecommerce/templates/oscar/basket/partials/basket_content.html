@@ -77,13 +77,20 @@
                         {% if voucher_form %}
                             <div class="use-voucher col-sm-6">
                                 <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a coupon code" %}</a></p>
-
                                 <div id="voucher_form_container">
                                     <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
                                         {% csrf_token %}
                                         <div class="code">
                                             <input id="id_code" name="code" type="text" placeholder="{% trans 'Enter a coupon code' %}">
-                                            <button type="submit" class="btn btn-default" data-loading-text="{% trans 'Applying...' %}">{% trans "Apply" %}</button>
+                                            <button type="submit"
+                                                    class="btn btn-default"
+                                                    data-loading-text="{% trans 'Applying...' %}"
+                                                    data-track-type="click"
+                                                    data-track-event="edx.bi.ecommerce.basket.voucher_applied"
+                                                    data-track-category="voucher-application" 
+                                                    data-voucher-code="{{voucher_code}}">
+                                                {% trans "Apply" %}
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -101,10 +108,24 @@
         <div class="row">
             <div class="payment-buttons col-sm-4" data-basket-id="{{ basket.id }}">
                 {% if free_basket %}
-                <a href="{% url 'checkout:free-checkout' %}" class="btn btn-success checkout-button">{% trans "Place Order" %}</a>
+                <a  href="{% url 'checkout:free-checkout' %}"
+                    data-track-type="click"
+                    data-track-event="edx.bi.ecommerce.basket.free_checkout"
+                    data-track-category="checkout"
+                    data-course-id="{{ course.id }}"
+                    class="btn btn-success checkout-button">
+                    {% trans "Place Order" %}
+                </a>
                 {% else %}
                 {% for processor in payment_processors %}
-                    <button class="btn btn-success payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
+                    <button data-track-type="click"
+                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                            data-track-category="checkout"
+                            data-processor-name="{{ processor.NAME }}"
+                            data-course-id="{{ course.id }}"
+                            class="btn btn-success payment-button"
+                            value="{{ processor.NAME|lower }}"
+                            id="{{ processor.NAME|lower }}">
                         {% if processor.NAME == 'cybersource' %}
                             {% trans "Checkout" %}
                         {% elif processor.NAME == 'paypal' %}

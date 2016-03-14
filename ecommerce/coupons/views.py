@@ -16,6 +16,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.views import StaffOnlyMixin
+from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import prepare_basket
@@ -134,6 +135,7 @@ class CouponOfferView(TemplateView):
                     if new_price < 0:
                         new_price = Decimal(0)
                 context.update({
+                    'analytics_data': prepare_analytics_data(product.course_id, self.request.user),
                     'benefit_value': benefit_value,
                     'course': course,
                     'code': code,
