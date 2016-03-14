@@ -19,9 +19,24 @@ if CONFIG_FILE is not None:
 DEBUG = True
 ENABLE_AUTO_AUTH = True
 
+# PAYMENT PROCESSING
+PAYMENT_PROCESSORS = (
+    'ecommerce.extensions.payment.processors.adyen.Adyen',
+    'ecommerce.extensions.payment.processors.cybersource.Cybersource',
+    'ecommerce.extensions.payment.processors.paypal.Paypal',
+)
+
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
+    'adyen': {
+        'mode': 'sandbox',
+        'client_id': 'fake-client-id',
+        'client_secret': 'fake-client-secret',
+        'receipt_url': get_lms_url('/commerce/checkout/receipt/'),
+        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+        'error_url': get_lms_url('/commerce/checkout/error/'),
+    },
     'cybersource': {
         'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
         'merchant_id': 'fake-merchant-id',
