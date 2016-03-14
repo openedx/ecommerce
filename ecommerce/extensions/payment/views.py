@@ -1,5 +1,7 @@
-""" Views for interacting with the payment processor. """
-from cStringIO import StringIO
+# -*- coding: utf-8 -*-
+
+""" Views for interacting with the PAYBOX payment processor. """
+
 import json
 import logging
 import os
@@ -8,7 +10,6 @@ import requests
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.core.management import call_command
 from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
@@ -19,23 +20,16 @@ from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
 from oscar.core.loading import get_class, get_model
-from oscar.core import prices
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment.exceptions import InvalidSignatureError
-#from ecommerce.extensions.payment.processors.cybersource import Cybersource
-#from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.processors.paybox_system import PayboxSystem
 
 logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
-BillingAddress = get_model('order', 'BillingAddress')
-Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
-PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 Selector = get_class('partner.strategy', 'Selector')
 
@@ -62,6 +56,7 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             basket = None
         return basket
 
+
     def post(self, request):
         """Process a Paybox merchant notification and place an order for paid products as appropriate."""
 
@@ -77,7 +72,7 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
 
         try:
             transaction_id = paybox_response.get('transaction-paybox')    # paybox transaction id
-            order_number = paybox_response.get('reference-fun')     # edx transaction
+            order_number = paybox_response.get('reference-fun')     # edx/fun transaction (FUN-10XXX)
             basket_id = OrderNumberGenerator().basket_id(order_number)   # retrieve django ID of basket instance
 
             logger.info(
@@ -87,7 +82,6 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             )
 
             basket = self._get_basket(basket_id)
-            #import ipdb; ipdb.set_trace()
             if not basket:
                 logger.error('Received payment for non-existent basket [%s].', basket_id)
                 return HttpResponse(status=400)
@@ -122,7 +116,6 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
             # thus we use the amounts stored in the database rather than those received from the payment processor.
             order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-            #billing_address = self._get_billing_address(paybox_response)
 
             self.handle_order_placement(
                 order_number=order_number,
@@ -140,7 +133,6 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
             return HttpResponse(status=500)
 
         # Notify fun-apps of transaction result
-
         url = settings.FUNAPPS_NOTIFY
         data = {
             'username': basket.owner.username,
@@ -154,10 +146,10 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
 
         response = requests.post(url, data=json.dumps(data), headers=headers, timeout=30)
         if response.status_code in (200, 201):
-            logger.info(u'Notified fun-apps of %s order SUCCESS for user %s/%s.', 
+            logger.info(u'Notified fun-apps of %s order SUCCESS for user %s/%s.',
                     order_number, basket.owner.username, basket.owner.email)
         else:
-            logger.info(u'Notified fun-apps of %s(%d) order FAIL for user %s/%s.', 
+            logger.info(u'Notified fun-apps of %s(%d) order FAIL for user %s/%s.',
                     order_number, response.status_code, basket.owner.username, basket.owner.email)
 
         return HttpResponse()

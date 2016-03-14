@@ -29,29 +29,22 @@ logger = logging.getLogger(__name__)
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-ProductClass = get_model('catalogue', 'ProductClass')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
 class PayboxSystem(BasePaymentProcessor):
     """
-    CyberSource Secure Acceptance Web/Mobile (February 2015)
-
-    For reference, see
-    http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
+    Paybox
     """
 
     NAME = 'paybox_system'
 
     def __init__(self):
         """
-        Constructs a new instance of the CyberSource processor.
-
-        Raises:
-            KeyError: If no settings configured for this payment processor
-            AttributeError: If LANGUAGE_CODE setting is not set.
+        Constructs a new instance of the Paybox processor.
         """
+
         configuration = self.configuration
         self.PBX_SITE = configuration['PBX_SITE']
         self.PBX_RANG = configuration['PBX_RANG']
@@ -64,25 +57,22 @@ class PayboxSystem(BasePaymentProcessor):
         self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
 
+
     def get_transaction_parameters(self, basket, request=None):
         """
-        Generate a dictionary of signed parameters CyberSource requires to complete a transaction.
+        Generate a dictionary of signed parameters Paybox requires to complete a transaction.
 
         Arguments:
             basket (Basket): The basket of products being purchased.
 
-        Keyword Arguments:
-            request (Request): A Request object which could be used to construct an absolute URL; not
-                used by this method.
-
         Returns:
-            dict: CyberSource-specific parameters required to complete a transaction, including a signature.
+            dict: Paybox-specific parameters required to complete a transaction, including a signature.
         """
         params = OrderedDict()
         params['PBX_ANNULE'] = self.cancel_page_url
         params['PBX_CMD'] = basket.order_number
         params['PBX_DEVISE'] = '978'   # €EURO
-        params['PBX_EFFECTUE'] = self.receipt_page_url  # '{}?order={}'.format(self.receipt_page_url, basket.order_number)
+        params['PBX_EFFECTUE'] = self.receipt_page_url
         params['PBX_IDENTIFIANT'] = self.PBX_IDENTIFIANT
         params['PBX_PORTEUR'] = basket.owner.email
         params['PBX_RANG'] = self.PBX_RANG
@@ -105,10 +95,10 @@ class PayboxSystem(BasePaymentProcessor):
         hmac_hash = hmac.new(binary_key, hmac_query, hashlib.sha512).hexdigest().upper()
 
         params['PBX_HMAC'] = hmac_hash
-
         params['payment_page_url'] = self.payment_page_url
 
         return params
+
 
     @staticmethod
     def utcnow():
@@ -122,11 +112,10 @@ class PayboxSystem(BasePaymentProcessor):
 
     def handle_processor_response(self, response, basket=None):
         """
-        Handle a response (i.e., "merchant notification") from CyberSource.
+        Handle a response (i.e., "merchant notification") from Paybox.
 
         This method does the following:
-            1. Verify the validity of the response.
-            2. Create PaymentEvents and Sources for successful payments.
+            1. Create PaymentEvents and Sources for successful payments.
 
         Arguments:
             response (dict): Dictionary of parameters received from the payment processor.
@@ -137,10 +126,6 @@ class PayboxSystem(BasePaymentProcessor):
         Raises:
             UserCancelled: Indicates the user cancelled payment.
             TransactionDeclined: Indicates the payment was declined by the processor.
-            GatewayError: Indicates a general error on the part of the processor.
-            InvalidCyberSourceDecision: Indicates an unknown decision value.
-                Known values are ACCEPT, CANCEL, DECLINE, ERROR.
-            PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
         """
 
         #import ipdb; ipdb.set_trace()
@@ -155,7 +140,7 @@ class PayboxSystem(BasePaymentProcessor):
 
         # Create Source to track all transactions related to this processor and order
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
-        amount = Decimal(response['amount'])
+        amount = Decimal(response['amount']) / 100  # Paybox work in cents as Oscar stores Decimals
         transaction_id = response['transaction-paybox']
 
         source = Source(source_type=source_type,
