@@ -55,6 +55,8 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         return True
 
+    # pylint: disable=unused-argument
+    # Note parameters used in subclasses
     def get_basket_page_script(self, basket, user):
         """
         Returns a script to be attached to basket page.

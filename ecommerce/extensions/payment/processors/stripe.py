@@ -83,8 +83,9 @@ class StripeProcessor(BasePaymentProcessor):
         return False
 
     def get_total(self, basket):
-        # Throw error if any rounding occours
-        dollars_to_cents = lambda dollars: unicode((dollars * 100).to_integral_exact())
+        def dollars_to_cents(dollars):
+            # Throw error if any rounding occours
+            return unicode((dollars * 100).to_integral_exact())
         return dollars_to_cents(basket.total_incl_tax)
 
     def get_description(self, basket):
@@ -139,6 +140,7 @@ class StripeProcessor(BasePaymentProcessor):
 
             return source, event
         except stripe.error.CardError as e:
+            logger.info("Stripe Card error for basket [%d]", basket.pk, exc_info=True)
             raise PaymentError(e.message)
 
     def _record_refund(self, source, amount):

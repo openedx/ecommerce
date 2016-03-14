@@ -362,11 +362,12 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
             with transaction.atomic():
                 try:
                     self.handle_payment(payment_data, basket)
-                except PaymentError as e:
-                    # This can happen (card refused?)
-                    logger.info("Payment error for basket [%d] failed.", basket.id)
+                except PaymentError:
+                    # This can happen (card refused?) log the exception details, but this is
+                    # "normal"
+                    logger.info("Payment error for basket [%d] failed.", basket.id, exc_info=True)
                     return HttpResponseRedirect(self.payment_processor.error_page_url)
-        except Exception as e:
+        except Exception:  # pylint: disable=broad-except
             # This is an error that should be investigated
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return HttpResponseRedirect(self.payment_processor.error_page_url)

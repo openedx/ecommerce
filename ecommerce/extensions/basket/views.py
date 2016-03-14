@@ -1,13 +1,11 @@
 from __future__ import unicode_literals
 
-from decimal import Decimal
 import hashlib
 import logging
 
 from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from requests.exceptions import ConnectionError, Timeout
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
