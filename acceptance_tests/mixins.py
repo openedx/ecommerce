@@ -166,7 +166,7 @@ class UnenrollmentMixin(object):
             'a.action-unenroll[data-course-id="{}"]'.format(course_id))
 
         # Show the link by clicking on the parent element
-        unenroll_link.find_element_by_xpath(".//ancestor::div[contains(@class, 'wrapper-action-more')]/a").click()
+        unenroll_link.find_element_by_xpath(".//ancestor::div[contains(@class, 'wrapper-action-more')]/button").click()
 
         # Unenroll
         unenroll_link.click()
