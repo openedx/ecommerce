@@ -3,7 +3,9 @@ from unittest import skipUnless
 import ddt
 from bok_choy.web_app_test import WebAppTest
 
-from acceptance_tests.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
+from acceptance_tests.config import (
+    VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS, ENABLE_PAYPAL_TESTS
+)
 from acceptance_tests.mixins import (EcommerceApiMixin, EnrollmentApiMixin,
                                      LogistrationMixin, UnenrollmentMixin, PaymentMixin)
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
@@ -59,6 +61,7 @@ class CouponCheckoutTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMix
         self.assert_order_created_and_completed()
         self.assert_user_enrolled(self.username, self.course_id, mode='verified')
 
+    @skipUnless(ENABLE_PAYPAL_TESTS, "PayPal tests are not enabled")
     def test_discount_checkout_with_paypal(self):
         """ Test redemption of discount code and purchase of course via PayPal """
         self.start_redeem_flow(is_discount=True)

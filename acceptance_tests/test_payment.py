@@ -6,8 +6,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.config import (VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG,
-                                     PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS)
+from acceptance_tests.config import (
+    VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG,
+    PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS,
+    ENABLE_PAYPAL_TESTS
+)
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
                                      PaymentMixin, UnenrollmentMixin)
@@ -57,6 +60,7 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         self.assert_order_created_and_completed()
         self.assert_user_enrolled(self.username, self.course_id, 'verified')
 
+    @skipUnless(ENABLE_PAYPAL_TESTS, 'CyberSource tests are not enabled.')
     def test_paypal(self):
         """ Test checkout with PayPal. """
 
