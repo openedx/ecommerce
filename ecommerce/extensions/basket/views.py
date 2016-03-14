@@ -6,7 +6,6 @@ import logging
 from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from requests.exceptions import ConnectionError, Timeout
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -93,9 +92,14 @@ class BasketSummaryView(BasketView):
             else:
                 line.benefit_value = None
 
+        processors = self.get_payment_processors()
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': self.get_payment_processors(),
+            'payment_processors': processors,
+            'payment_processor_scripts': [
+                processor.get_basket_page_script(self.request.basket, self.request.user)
+                for processor in processors
+            ],
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
             'lines': lines,
@@ -106,4 +110,4 @@ class BasketSummaryView(BasketView):
         """ Retrieve the list of active payment processors. """
         # TODO Retrieve this information from SiteConfiguration
         processors = (get_processor_class(path) for path in settings.PAYMENT_PROCESSORS)
-        return [processor for processor in processors if processor.is_enabled()]
+        return [processor() for processor in processors if processor.is_enabled()]

@@ -99,21 +99,25 @@
         </div>
 
         <div class="row">
-            <div class="payment-buttons col-sm-4" data-basket-id="{{ basket.id }}">
+            <div class="col-sm-12">
+                <div class="payment-buttons" data-basket-id="{{ basket.id }}">
                 {% if free_basket %}
-                <a href="{% url 'checkout:free-checkout' %}" class="btn btn-success checkout-button">{% trans "Place Order" %}</a>
+                    <a href="{% url 'checkout:free-checkout' %}"
+                       class="btn btn-success checkout-button">{% trans "Place Order" %}</a>
                 {% else %}
-                {% for processor in payment_processors %}
-                    <button class="btn btn-success payment-button" value="{{ processor.NAME|lower }}" id="{{ processor.NAME|lower }}">
-                        {% if processor.NAME == 'cybersource' %}
-                            {% trans "Checkout" %}
-                        {% elif processor.NAME == 'paypal' %}
-                            {# Translators: Do NOT translate the name PayPal. #}
-                            {% trans "Checkout with PayPal" %}
-                        {% endif %}
-                    </button>
-                {% endfor %}
+                    {% for processor in payment_processors %}
+                       <button
+                           class="btn btn-success payment-button"
+                           value="{{ processor.NAME|lower }}"
+                           id="{{ processor.NAME|lower }}"
+                           {% if processor.default_checkout_handler %}
+                                data-default-handler="true"
+                           {% endif %}>
+                                {{ processor.payment_label }}
+                        </button>
+                    {% endfor %}
                 {% endif %}
+                </div>
             </div>
         </div>
 

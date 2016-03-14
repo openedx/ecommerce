@@ -130,6 +130,12 @@ PAYMENT_PROCESSOR_CONFIG = {
         'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
         'error_url': get_lms_url('/commerce/checkout/error/'),
     },
+    'stripe': {
+        'publishable_key': 'fake-publishable-key',
+        'secret_key': 'fake-secret-key',
+        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'image_url': get_lms_url('/static/images/default-theme/logo.png'),
+    },
 }
 # END PAYMENT PROCESSING
 

@@ -1,6 +1,8 @@
 import abc
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 import waffle
 
@@ -33,18 +35,56 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         raise NotImplementedError
 
+    @property
+    def payment_label(self):
+        """
+        Returns: Label for payment button on the basket page
+        """
+        return _(u"Checkout with {processor_name}").format(
+            processor_name=self.NAME.capitalize()
+        )
+
+    @property
+    def default_checkout_handler(self):
+        """
+        Specifies whether this processor instance is handled by the default handler
+        on the checkout page.
+
+        Returns: True if this basket uses default check out logic in javascript
+        on the basket Page.
+        """
+        return True
+
+    # pylint: disable=unused-argument
+    # Note parameters used in subclasses
+    def get_basket_page_script(self, basket, user):
+        """
+        Returns a script to be attached to basket page.
+
+        Returns: A string or None. If returns a string this string will be attached at the
+        bottom of a checkout page, intended use is to attach a <script> tag that will
+        handle given processor.
+        """
+        return None
+
     @abc.abstractmethod
     def handle_processor_response(self, response, basket=None):
         """
         Handle a response from the payment processor.
 
-        This method creates PaymentEvents and Sources for successful payments.
+        This method creates PaymentEvents and Sources for successful payments,
+        raising the exception from this method means payment fails.
 
         Arguments:
             response (dict): Dictionary of parameters received from the payment processor
 
         Keyword Arguments:
             basket (Basket): Basket whose contents have been purchased via the payment processor
+
+        Raises:
+            PaymentError: Means there is an error during Payment.
+            Exception: any exception raised from this method will delete the basket, and mean failed
+            payment.
         """
         raise NotImplementedError
 
@@ -57,9 +97,12 @@ class BasePaymentProcessor(object):  # pragma: no cover
             dict: Payment processor configuration
 
         Raises:
-            KeyError: If no settings found for this payment processor
+            ImproperlyConfigured: If no settings found for this payment processor
         """
-        return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]
+        try:
+            return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]
+        except KeyError:
+            raise ImproperlyConfigured("No configuration for {} processor".format(self.NAME))
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """
