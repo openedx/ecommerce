@@ -413,5 +413,17 @@ class StripeCheckoutView(CheckoutViewMixin, View):
 
     pk_url_kwarg = 'basket'
 
+    def locate_basket(self):
+
+        basket_id = self.kwargs[self.pk_url_kwarg]
+        basket = self.get_basket(self.request, basket_id)
+
+        if not basket:
+            logger.error('Payment requested for non-existent basket [%s].', basket_id)
+            # TODO Handle this better (perhaps redirect to an error page).
+            raise Http404()
+
+        return basket
+
     def get_payment_data(self, request):
         return request.POST['stripeToken']

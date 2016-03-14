@@ -24,7 +24,15 @@
 {% endblock content %}
 
 {% block footer %}
-    {% comment %} This is intentionally outside compressed blocks, the payment processor scripts
+    {% if footer %}
+        {% autoescape off %}
+            {{ footer }}
+        {% endautoescape %}
+    {% endif %}
+{% endblock footer %}
+
+{% block uncompressedjs %}
+     {% comment %} This is intentionally outside compressed blocks, the payment processor scripts
        are included contitionally so compressing them in offline compression would
        be messy and error-prone {% endcomment %}
     {% for processor_script in payment_processor_scripts %}
@@ -32,9 +40,4 @@
             {{ processor_script|safe }}
         {% endif %}
     {% endfor %}
-    {% if footer %}
-        {% autoescape off %}
-            {{ footer }}
-        {% endautoescape %}
-    {% endif %}
-{% endblock footer %}
+{% endblock uncompressedjs %}
