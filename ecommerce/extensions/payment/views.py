@@ -4,7 +4,7 @@ import logging
 import os
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.management import call_command
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.db import transaction
@@ -57,7 +57,7 @@ class BasketRetrievalMixin(object):
 
         try:
             basket = Basket.objects.get(id=basket_id)
-        except Basket.ObjectDoesNotExist:
+        except ObjectDoesNotExist:
             return None
 
         basket.strategy = strategy.Default()

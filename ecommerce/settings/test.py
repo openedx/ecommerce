@@ -106,8 +106,10 @@ PAYMENT_PROCESSOR_CONFIG = {
     'stripe': {
         'publishable_key': 'fake',
         'secret_key': 'fake',
-        'receipt_page_url': get_lms_url('/commerce/checkout/receipt/'),
+        'receipt_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
         'image_url': '/static/images/default-theme/logo.png',
+        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+        'error_url': get_lms_url('/commerce/checkout/error/'),
     },
 }
 # END PAYMENT PROCESSING
