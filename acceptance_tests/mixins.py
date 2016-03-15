@@ -1,5 +1,6 @@
 import logging
 import uuid
+import time
 
 import requests
 from edx_rest_api_client.client import EdxRestApiClient
@@ -203,6 +204,45 @@ class PaymentMixin(object):
         # Wait for the checkout form to load, then submit it.
         WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'confirmButtonTop')))
         self.browser.find_element_by_css_selector('input#confirmButtonTop').click()
+
+    def fill_stripe_cc_details(self, card_no, expiry, ccv):
+        WebDriverWait(self.browser, 10).until(
+            EC.frame_to_be_available_and_switch_to_it((
+                By.CSS_SELECTOR, 'iframe.stripe_checkout_app')))
+
+        # import pudb; pudb.set_trace()
+        WebDriverWait(self.browser, 10).until(
+            EC.element_to_be_clickable((
+                By.CSS_SELECTOR, 'input#card_number')))
+        card_input = self.browser.find_element_by_css_selector('input#card_number')
+        expiry_input = self.browser.find_element_by_css_selector('input#cc-exp')
+        ccv_input = self.browser.find_element_by_css_selector('input#cc-csc')
+
+        def send_keys_to_stripe(message, input):
+            for key in message:
+                input.send_keys(key)
+                # Note: this is to allow stripe JS to kick in
+                # chosen empirically
+                time.sleep(0.05)
+        send_keys_to_stripe(card_no, card_input)
+        send_keys_to_stripe(expiry, expiry_input)
+        send_keys_to_stripe(ccv, ccv_input)
+
+        submit_button = self.browser.find_element_by_css_selector("button#submitButton")
+
+        def submit_and_switch_back(swich_back=True):
+            submit_button.click()
+            if swich_back:
+                self.browser.switch_to_default_content()
+
+        return submit_and_switch_back
+
+    def checkout_with_stripe(self, card_no, expiry, ccv):
+        self.browser.find_element_by_css_selector('#stripe').click()
+
+        submitter = self.fill_stripe_cc_details(card_no, expiry, ccv)
+
+        submitter()
 
     def checkout_with_cybersource(self, address):
         """ Completes the checkout process via CyberSource. """
