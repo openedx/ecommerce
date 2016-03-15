@@ -273,3 +273,23 @@ class PaymentMixin(object):
         ]
         actual = [cell.text for cell in cells]
         self.assertListEqual(actual, expected)
+
+
+class CouponMixin(EcommerceApiMixin):
+    discount_coupon_name = 'test-discount-code-'
+    enrollment_coupon_name = 'test-enrollment-code-'
+
+    def tearDown(self):
+        """Remove coupons and vouchers"""
+        self.get_and_delete_coupons(self.discount_coupon_name)
+        self.get_and_delete_coupons(self.enrollment_coupon_name)
+        super(CouponMixin, self).tearDown()
+
+    def get_and_delete_coupons(self, partial_title):
+        """
+        Get all coupons created in the acceptance tests and delete those
+        and all associated stock records and vouchers.
+        """
+        coupons = self.ecommerce_api_client.coupons.get(title=partial_title)['results']
+        for coupon in coupons:
+            self.ecommerce_api_client.coupons(coupon['id']).delete()

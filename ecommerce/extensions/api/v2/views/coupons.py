@@ -4,18 +4,21 @@ import logging
 from decimal import Decimal
 
 import dateutil.parser
+
 from django.db import transaction
 from django.db.utils import IntegrityError
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
-from rest_framework import generics, status
+from rest_framework import filters, generics, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
-from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
@@ -31,9 +34,10 @@ Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 
-class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
+class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """Endpoint for creating coupons.
 
     Creates a new coupon product, adds it to a basket and creates a
@@ -42,6 +46,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
     queryset = Product.objects.filter(product_class__name='Coupon')
     serializer_class = CouponSerializer
     permission_classes = (IsAuthenticated, IsAdminUser)
+    filter_backends = (filters.DjangoFilterBackend, )
+    filter_class = ProductFilter
 
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
@@ -261,6 +267,19 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
+
+    def destroy(self, request, pk):  # pylint: disable=unused-argument
+        try:
+            coupon = get_object_or_404(Product, pk=pk)
+            self.perform_destroy(coupon)
+        except Http404:
+            return Response(status=404)
+        return Response(status=204)
+
+    def perform_destroy(self, coupon):
+        Voucher.objects.filter(coupon_vouchers__coupon=coupon).delete()
+        StockRecord.objects.filter(product=coupon).delete()
+        coupon.delete()
 
 
 class CouponCategoriesListView(generics.ListAPIView):

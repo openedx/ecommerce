@@ -14,6 +14,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
 from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
@@ -60,11 +61,14 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'note': None,
         }
 
-    def test_create(self):
-        """Test the create method."""
+    def setup_site_configuration(self):
         site_configuration = SiteConfigurationFactory(partner__name='TestX')
         site = SiteFactory()
         site.siteconfiguration = site_configuration
+        return site
+
+    def test_create(self):
+        """Test the create method."""
         self.coupon_data.update({
             'title': 'Test coupon',
             'client_username': 'Client',
@@ -74,9 +78,9 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'category_ids': [self.category.id]
         })
         request = RequestFactory()
-        request.data = self.coupon_data
-        request.site = site
         request.user = self.user
+        request.data = self.coupon_data
+        request.site = self.site
 
         response = CouponViewSet().create(request)
 
@@ -197,6 +201,29 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(Order.objects.first().status, 'Complete')
         self.assertEqual(Order.objects.first().total_incl_tax, 100)
         self.assertEqual(Basket.objects.first().status, 'Submitted')
+
+    def test_delete_coupon(self):
+        """Test the coupon deletion."""
+        coupon = self.create_coupon(partner=self.partner)
+        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
+        self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 1)
+        coupon_voucher_qs = CouponVouchers.objects.filter(coupon=coupon)
+        self.assertEqual(coupon_voucher_qs.count(), 1)
+        self.assertEqual(coupon_voucher_qs.first().vouchers.count(), 5)
+
+        request = RequestFactory()
+        request.site = self.setup_site_configuration()
+        response = CouponViewSet().destroy(request, coupon.id)
+
+        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 0)
+        self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 0)
+        coupon_voucher_qs = CouponVouchers.objects.filter(coupon=coupon)
+        self.assertEqual(coupon_voucher_qs.count(), 0)
+        self.assertEqual(Voucher.objects.count(), 0)
+        self.assertEqual(response.status_code, 204)
+
+        response = CouponViewSet().destroy(request, 100)
+        self.assertEqual(response.status_code, 404)
 
 
 class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
