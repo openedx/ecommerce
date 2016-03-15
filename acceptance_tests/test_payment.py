@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from acceptance_tests.config import (
     VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG,
     PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS,
-    ENABLE_PAYPAL_TESTS, ENABLE_STRIPE_TESTS, ENABLE_STRIPE_TESTS_EXTENDED
+    ENABLE_PAYPAL_TESTS, ENABLE_STRIPE_TESTS
 )
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
@@ -26,7 +26,6 @@ class VerifiedCertificateMixin(object):
         self.username, self.password, self.email = self.get_lms_user()
 
     def _start_checkout(self):
-
         """ Begin the checkout process for a verified certificate. """
         self.login_with_lms(self.email, self.password)
 
@@ -92,7 +91,8 @@ class TestStripePayment(
         # This is a clen-up action that raises an exception if a student
         # is not enrolled. Fot this test this is not desired as some of
         # the methods will have student enrolled, others don't.
-        # Anyways student needs to be unenrolled AFTER the test.
+        # However at the end of every test students need to be
+        # un-enrolled.
         try:
             super(TestStripePayment, self).unenroll_via_dashboard(*args, **kwargs)
         except NoSuchElementException:
@@ -127,26 +127,29 @@ class TestStripePayment(
         self.assert_user_enrolled(self.username, self.course_id, 'verified')
 
     @ddt.data(
+        # Format is: (card no, expiry MMYY, CCV code)
         # This is a special "Invalid" card no
-        (('4000000000000002', "1234", "1234"), "div.cardNumberInput"),
-        # Format is: ((card no, expiry MMYY, CCV code), div that will fail)
+        ('4000000000000002', "1234", "1234"),
         # This no fails control sum check
-        (('4242424242424241', "1234", "1234"), "div.cardNumberInput"),
+        ('4242424242424241', "1234", "1234"),
         # Card is OK but user entered expiry in the past
-        (('4242424242424242', "1111", "1234"), "div.cardExpiresInput"),
+        ('4242424242424242', "1111", "1234"),
         # Card is OK but CVC is too short
-        (('4242424242424242', "1234", "11"), "div.cardCVCInput"),
+        ('4242424242424242', "1234", "11"),
         # This card will fail on any CVC
-        (('4000000000000127', "1234", "1234"), "div.cardCVCInput"),
+        ('4000000000000127', "1234", "1234"),
         # This card is allways expired
-        (('4000000000000069', "1234", "1234"), "div.cardExpiresInput"),
+        ('4000000000000069', "1234", "1234"),
         # This card has a valid number, but no funds
-        (('4000000000000119', "1234", "1234"), None),
+        ('4000000000000119', "1234", "1234"),
     )
-    @ddt.unpack
-    def test_stripe_payment_failed_on_checkout(self, cc_data, invalidDiv):
+    def test_stripe_payment_failed_on_checkout(self, cc_data):
         # This test checks for various cases where payment fails
         # but failure is handled by checkout.js from stripe
+
+        # User interacts with the stripe checkout code.
+
+        # Sanity check:
         self.assert_user_not_verified(self.username, self.course_id)
         self._start_checkout()
         self.browser.find_element_by_css_selector('#stripe').click()
@@ -155,8 +158,7 @@ class TestStripePayment(
         WebDriverWait(self.browser, 10).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR, 'form.shake.checkoutView')))
-        if invalidDiv is not None:
-            self.browser.find_element_by_css_selector(invalidDiv + ".invalid")
+
         self.assert_user_not_verified(self.username, self.course_id)
 
     @ddt.data(
@@ -167,6 +169,8 @@ class TestStripePayment(
     def test_stripe_payment_that_fails_during_processing(self, cc_data):
         # This test checks for various cases where card passes through
         # checkout.js and fails during charging the card on our server.
+
+        # User is is redirected to payment error page
 
         # Sanity check
         self.assert_user_not_verified(self.username, self.course_id)

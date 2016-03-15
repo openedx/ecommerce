@@ -34,7 +34,6 @@ PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
 # tests to be disabled.
 ENABLE_CYBERSOURCE_TESTS = str2bool(os.environ.get('ENABLE_CYBERSOURCE_TESTS', True))
 ENABLE_STRIPE_TESTS = str2bool(os.environ.get('ENABLE_STRIPE_TESTS', False))
-ENABLE_STRIPE_TESTS_EXTENDED = str2bool(os.environ.get('ENABLE_STRIPE_TESTS_EXTENDED', False))
 # END OTTO CONFIGURATION
 
 

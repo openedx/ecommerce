@@ -346,25 +346,22 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
         basket_id = self.request.POST['basket_id']
         basket = self.get_basket(self.request, basket_id)
 
-        if not basket:
-            logger.error('Payment requested for non-existent basket [%s].', basket_id)
-            return HttpResponseRedirect(self.payment_processor.error_page_url)
-
         return basket
 
     def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
         payment_data = self.get_payment_data(request)
 
-        # Retrieve the basket, or bail out, if it cannot be found.
         basket = self.locate_basket()
+
+        if basket is None:
+            return HttpResponse(self.payment_processor.error_page_url)
 
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(payment_data, basket)
                 except PaymentError:
-                    # This can happen (card refused?) log the exception details, but this is
-                    # "normal"
+                    # This can happen (card refused?) log the exception details, but this is "normal"
                     logger.info("Payment error for basket [%d] failed.", basket.id, exc_info=True)
                     return HttpResponseRedirect(self.payment_processor.error_page_url)
         except Exception:  # pylint: disable=broad-except
@@ -393,15 +390,15 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
                 except UnableToPlaceOrder:
                     # This is clearly an error: client got charged but didn't get what he paid for
                     logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
-                    # Raise the error to give clear 500, in future (mabe?) introduce better another
-                    # Cybersorce payment processor also handles this error in this way
+                    # Raise the error to give clear 500, in future (maybe?) introduce better way of notifying
+                    # admins with clear message.
                     raise
 
         except:  # pylint: disable=bare-except
             # This is clearly an error: client got charged but didn't get what he paid for
-            logger.exception('Payment was received, but attempts to create an order for basket [%d] failed.', basket.id)
-            # Raise the error to give clear 500, in future (mabe?) introduce better another
-            # Cybersorce payment processor also handles this error in this way
+            logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+            # Raise the error to give clear 500, in future (maybe?) introduce better way of notifying
+            # admins with clear message.
             raise
 
         receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_page_url, basket.id)
@@ -417,11 +414,6 @@ class StripeCheckoutView(CheckoutViewMixin, View):
 
         basket_id = self.kwargs[self.pk_url_kwarg]
         basket = self.get_basket(self.request, basket_id)
-
-        if not basket:
-            logger.error('Payment requested for non-existent basket [%s].', basket_id)
-            # TODO Handle this better (perhaps redirect to an error page).
-            raise Http404()
 
         return basket
 

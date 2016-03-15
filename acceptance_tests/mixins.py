@@ -217,11 +217,11 @@ class PaymentMixin(object):
         expiry_input = self.browser.find_element_by_css_selector('input#cc-exp')
         ccv_input = self.browser.find_element_by_css_selector('input#cc-csc')
 
-        def send_keys_to_stripe(message, input):
+        def send_keys_to_stripe(message, input_element):
             for key in message:
-                input.send_keys(key)
-                # Note: this is to allow stripe JS to kick in
-                # chosen empirically
+                input_element.send_keys(key)
+                # Note: this is to allow stripe JS to kick in.
+                # Wait value established empirically.
                 time.sleep(0.05)
         send_keys_to_stripe(card_no, card_input)
         send_keys_to_stripe(expiry, expiry_input)

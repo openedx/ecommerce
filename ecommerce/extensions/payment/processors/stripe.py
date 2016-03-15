@@ -72,7 +72,7 @@ class StripeProcessor(BasePaymentProcessor):
 
     @property
     def payment_label(self):
-        return _("Checkout using Credit-Card")
+        return _("Checkout using Credit Card")
 
     def get_basket_page_script(self, basket, user):
         template = get_template("payment/processors/stripe_paymentscript.html")
