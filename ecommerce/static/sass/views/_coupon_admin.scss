@@ -8,6 +8,10 @@
     input[name="benefit_value"] {
         width: 174px;
     }
+
+    .help-block {
+        margin: 0;
+    }
 }
 
 .coupon-detail-view {
@@ -48,6 +52,8 @@
             @include padding-left(10px);
         }
 
+        .category,
+        .note,
         .discount-value,
         .course-info,
         .date-info,

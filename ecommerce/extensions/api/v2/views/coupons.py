@@ -52,8 +52,8 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
         Arguments:
             request (HttpRequest): With parameters title, client_username,
-            stock_record_ids, start_date, end_date, code, benefit_type,
-            benefit_value, voucher_type, quantity and price in the body.
+            stock_record_ids, start_date, end_date, code, benefit_type, benefit_value,
+            voucher_type, quantity, price, category and note in the body.
 
         Returns:
             200 if the order was created successfully; the basket ID is included in the response
@@ -77,6 +77,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             partner = request.site.siteconfiguration.partner
             categories = Category.objects.filter(id__in=request.data['category_ids'])
             client, __ = Client.objects.get_or_create(username=client_username)
+            note = request.data.get('note', None)
 
             stock_records_string = ' '.join(str(id) for id in stock_record_ids)
 
@@ -98,6 +99,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 'start_date': start_date,
                 'voucher_type': voucher_type,
                 'categories': categories,
+                'note': note,
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -131,6 +133,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
                 - start_date (Datetime)
                 - voucher_type (str)
                 - categories (list of Category objects)
+                - note (str)
 
         Returns:
             A coupon product object.
@@ -173,6 +176,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 
         coupon_product.attr.coupon_vouchers = coupon_vouchers
+        coupon_product.attr.note = data['note']
         coupon_product.save()
 
         sku = generate_sku(

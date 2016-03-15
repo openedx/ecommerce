@@ -27,7 +27,7 @@ define([
               Course,
               FormView) {
         'use strict';
-        
+
         return FormView.extend({
             tagName: 'form',
 
@@ -147,6 +147,9 @@ define([
                 },
                 'input[name=code]': {
                     observe: 'code'
+                },
+                'input[name=note]': {
+                    observe: 'note'
                 }
             },
 
@@ -278,6 +281,7 @@ define([
                 this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
                 this.$el.find('select[name=category]').attr('disabled', true);
+                this.$el.find('input[name=note]').attr('disabled', true);
             },
 
             render: function () {
