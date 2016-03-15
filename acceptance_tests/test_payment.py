@@ -104,36 +104,6 @@ class TestStripePayment(
             not status['is_active'] or status['mode'] != 'verified'
         )
 
-    def make_succesfull_payment(self, cc_data):
-        self._start_checkout()
-        self.checkout_with_stripe(*cc_data)
-        self.assert_receipt_page_loads()
-        self.assert_order_created_and_completed()
-        self.assert_user_enrolled(self.username, self.course_id, 'verified')
-
-    def make_make_payment_that_fails_during_card_processing(self, cc_data):
-        self._start_checkout()
-        self.checkout_with_stripe(*cc_data)
-        WebDriverWait(self.browser, 10).until(
-            EC.title_contains("Checkout Error")
-        )
-        self.assert_user_not_verified(self.username, self.course_id)
-
-    def make_payment_that_fails_on_checkout(self, cc_data, invalidDiv):
-        # Sanity check
-        self.assert_user_not_verified(self.username, self.course_id)
-        self._start_checkout()
-        self.browser.find_element_by_css_selector('#stripe').click()
-        submitter = self.fill_stripe_cc_details(*cc_data)
-        submitter(False)
-        WebDriverWait(self.browser, 10).until(
-            EC.presence_of_element_located((
-                By.CSS_SELECTOR, 'form.shake.checkoutView')))
-        if invalidDiv is not None:
-            self.browser.find_element_by_css_selector(invalidDiv + ".invalid")
-        self.assert_user_not_verified(self.username, self.course_id)
-        # import pudb; pudb.set_trace();
-
     @ddt.data(
         # These are valid cards of different kinds
         # (different issuers, debit vs credit)
@@ -174,16 +144,35 @@ class TestStripePayment(
         (('4000000000000119', "1234", "1234"), None),
     )
     @ddt.unpack
-    def test_stripe_payment_failed_on_checkout(self, cc_data, error_input):
+    def test_stripe_payment_failed_on_checkout(self, cc_data, invalidDiv):
         # This test checks for various cases where payment fails
         # but failure is handled by checkout.js from stripe
-        self.make_payment_that_fails_on_checkout(cc_data, error_input)
+        self.assert_user_not_verified(self.username, self.course_id)
+        self._start_checkout()
+        self.browser.find_element_by_css_selector('#stripe').click()
+        submitter = self.fill_stripe_cc_details(*cc_data)
+        submitter(False)
+        WebDriverWait(self.browser, 10).until(
+            EC.presence_of_element_located((
+                By.CSS_SELECTOR, 'form.shake.checkoutView')))
+        if invalidDiv is not None:
+            self.browser.find_element_by_css_selector(invalidDiv + ".invalid")
+        self.assert_user_not_verified(self.username, self.course_id)
 
     @ddt.data(
+        # (different issuers, debit vs credit)
         ("4000000000000341", "1234", "1234"),
         ("4100000000000019", "1234", "1234"),
     )
     def test_stripe_payment_that_fails_during_processing(self, cc_data):
         # This test checks for various cases where card passes through
         # checkout.js and fails during charging the card on our server.
-        self.make_make_payment_that_fails_during_card_processing(cc_data)
+
+        # Sanity check
+        self.assert_user_not_verified(self.username, self.course_id)
+        self._start_checkout()
+        self.checkout_with_stripe(*cc_data)
+        WebDriverWait(self.browser, 10).until(
+            EC.title_contains("Checkout Error")
+        )
+        self.assert_user_not_verified(self.username, self.course_id)

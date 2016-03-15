@@ -210,7 +210,6 @@ class PaymentMixin(object):
             EC.frame_to_be_available_and_switch_to_it((
                 By.CSS_SELECTOR, 'iframe.stripe_checkout_app')))
 
-        # import pudb; pudb.set_trace()
         WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((
                 By.CSS_SELECTOR, 'input#card_number')))
