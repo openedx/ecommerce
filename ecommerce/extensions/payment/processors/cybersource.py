@@ -13,6 +13,7 @@ from suds.client import Client
 from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
@@ -58,9 +59,15 @@ class Cybersource(BasePaymentProcessor):
         self.access_key = configuration['access_key']
         self.secret_key = configuration['secret_key']
         self.payment_page_url = configuration['payment_page_url']
-        self.receipt_page_url = configuration['receipt_page_url']
-        self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
+
+    @property
+    def receipt_page_url(self):
+        return get_lms_url(self.configuration['receipt_path'])
+
+    @property
+    def cancel_page_url(self):
+        return get_lms_url(self.configuration['cancel_path'])
 
     def get_transaction_parameters(self, basket, request=None):
         """

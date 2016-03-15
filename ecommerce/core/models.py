@@ -34,6 +34,13 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False
     )
+    oauth_settings = JSONField(
+        verbose_name=_('OAuth settings'),
+        help_text=_("JSON string containing OAuth backend settings."),
+        null=False,
+        blank=False,
+        default='{}'
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')

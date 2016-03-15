@@ -197,6 +197,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'threadlocals.middleware.ThreadLocalMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
@@ -205,24 +206,8 @@ MIDDLEWARE_CLASSES = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
 
-# Absolute URL used to construct URLs pointing back to the ecommerce service.
-ECOMMERCE_URL_ROOT = None
-
-# Absolute URL used to construct LMS URLs.
-LMS_URL_ROOT = None
-
-# The location of the LMS heartbeat page
-LMS_HEARTBEAT_URL = None
-
-# The location of the LMS student dashboard
-LMS_DASHBOARD_URL = None
-
-# URL to which enrollment requests should be made
-ENROLLMENT_API_URL = None
-
 # Commerce API settings used for publishing information to LMS.
 COMMERCE_API_TIMEOUT = 7
-COMMERCE_API_URL = None
 
 # Cache course info from course API.
 COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
@@ -230,9 +215,6 @@ COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
-
-# OAuth2 provider URL used for OAuth2 transactions (e.g. validating access tokens)
-OAUTH2_PROVIDER_URL = None
 # END URL CONFIGURATION
 
 
@@ -341,6 +323,8 @@ AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 INSTALLED_APPS += ['social.apps.django_app.default']
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOpenIdConnect',) + AUTHENTICATION_BACKENDS
+
+SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
 # Set to true if using SSL and running behind a proxy
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False

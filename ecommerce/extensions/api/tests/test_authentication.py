@@ -16,11 +16,10 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework_jwt import utils
 
+from ecommerce.core.url_utils import get_oauth2_provider_url
 from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAuthentication
 from ecommerce.tests.mixins import JwtMixin
 from ecommerce.tests.testcases import TestCase
-
-OAUTH2_PROVIDER_URL = 'https://example.com/oauth2'
 
 User = get_user_model()
 
@@ -41,13 +40,12 @@ class AccessTokenMixin(object):
     DEFAULT_TOKEN = 'abc123'
 
     def _mock_access_token_response(self, status=200, token=DEFAULT_TOKEN, username='fake-user'):
-        httpretty.register_uri(httpretty.GET, '{}/access_token/{}/'.format(OAUTH2_PROVIDER_URL, token),
+        httpretty.register_uri(httpretty.GET, '{}/access_token/{}/'.format(get_oauth2_provider_url(), token),
                                body=json.dumps({'username': username, 'scope': 'read', 'expires_in': 60}),
                                content_type="application/json",
                                status=status)
 
 
-@override_settings(OAUTH2_PROVIDER_URL=OAUTH2_PROVIDER_URL)
 class BearerAuthenticationTests(AccessTokenMixin, TestCase):
     def setUp(self):
         super(BearerAuthenticationTests, self).setUp()
@@ -63,15 +61,9 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
         """ The method should return the string Bearer. """
         self.assertEqual(self.auth.authenticate_header(self._create_request()), 'Bearer')
 
-    @override_settings(OAUTH2_PROVIDER_URL=None)
+    @mock.patch('ecommerce.core.url_utils.get_lms_url', mock.Mock(return_value=None))
     def test_authenticate_no_provider(self):
-        """ If the setting OAUTH2_PROVIDER_URL is not set, the method returns None. """
-
-        # Empty value
-        self.assertIsNone(self.auth.authenticate(self._create_request()))
-
-        # Missing value
-        del settings.OAUTH2_PROVIDER_URL
+        """ If the we cannot get the LMS URL, the method returns None. """
         self.assertIsNone(self.auth.authenticate(self._create_request()))
 
     def test_authenticate_invalid_token(self):

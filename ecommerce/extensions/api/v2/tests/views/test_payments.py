@@ -14,6 +14,7 @@ class PaymentProcessorListViewTests(TestCase):
     """ Ensures correct behavior of the payment processors list view."""
 
     def setUp(self):
+        super(PaymentProcessorListViewTests, self).setUp()
         self.token = self.generate_jwt_token_header(self.create_user())
         self.toggle_payment_processor('dummy', True)
         self.toggle_payment_processor('another-dummy', True)

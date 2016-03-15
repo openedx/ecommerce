@@ -4,8 +4,8 @@ import mock
 import requests
 from requests import ConnectionError, Timeout
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.checkout.utils import get_provider_data
-from ecommerce.settings import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 

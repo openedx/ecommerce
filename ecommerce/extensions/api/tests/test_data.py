@@ -1,14 +1,13 @@
 import json
 
-from django.conf import settings
 import httpretty
 import mock
 import requests
 from testfixtures import LogCapture
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.tests.testcases import TestCase
-from ecommerce.settings import get_lms_url
 
 LOGGER_NAME = 'ecommerce.extensions.api.data'
 
@@ -17,10 +16,9 @@ LOGGER_NAME = 'ecommerce.extensions.api.data'
 
 class DataFunctionsTests(TestCase):
     """ Tests for api data functions. """
-    footer_url = get_lms_url('api/branding/v1/footer')
-
     def setUp(self):
         super(DataFunctionsTests, self).setUp()
+        self.footer_url = get_lms_url('api/branding/v1/footer')
 
     @httpretty.activate
     def test_get_lms_footer_success(self):
@@ -49,7 +47,7 @@ class DataFunctionsTests(TestCase):
                     (
                         LOGGER_NAME, 'ERROR',
                         u'Connection error occurred during getting data for {lms_url} provider'.format(
-                            lms_url=settings.LMS_URL_ROOT
+                            lms_url=get_lms_url()
                         )
                     )
                 )
@@ -64,7 +62,7 @@ class DataFunctionsTests(TestCase):
                     (
                         LOGGER_NAME, 'ERROR',
                         u'Failed to retrieve data for {lms_url} provider, connection timeout'.format(
-                            lms_url=settings.LMS_URL_ROOT
+                            lms_url=get_lms_url()
                         )
                     )
                 )

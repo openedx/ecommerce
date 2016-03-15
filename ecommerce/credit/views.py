@@ -14,11 +14,11 @@ from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import SlumberHttpBaseException
 import waffle
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.helpers import get_processor_class
-from ecommerce.settings import get_lms_url
 
 logger = logging.getLogger(__name__)
 

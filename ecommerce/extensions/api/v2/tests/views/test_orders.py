@@ -9,7 +9,7 @@ from django.test import override_settings
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin, OAUTH2_PROVIDER_URL
+from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -42,7 +42,6 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['results'], [])
 
     @httpretty.activate
-    @override_settings(OAUTH2_PROVIDER_URL=OAUTH2_PROVIDER_URL)
     def test_access_token(self):
         """ Verifies that the view accepts OAuth2 access tokens for authentication."""
         auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)

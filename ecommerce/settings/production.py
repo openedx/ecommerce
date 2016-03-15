@@ -11,6 +11,10 @@ from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 
 
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#site-id
+# This needs to be set to None in order to support multitenancy
+SITE_ID = None
+
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
@@ -58,3 +62,13 @@ DB_OVERRIDES = dict(
 
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
+
+
+# PAYMENT PROCESSOR OVERRIDES
+for __, config in PAYMENT_PROCESSOR_CONFIG.iteritems():
+    config.update({
+        'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+        'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+        'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+    })
+# END PAYMENT PROCESSOR OVERRIDES
