@@ -13,7 +13,9 @@ def prepare_basket(request, product, voucher=None):
     Create or get the basket, add the product, and apply a voucher.
 
     Existing baskets are merged. The specified product will
-    be added to the remaining open basket. The Voucher is applied to the basket.
+    be added to the remaining open basket. If a voucher is passed, all existing
+    ones added to the basket are removed because we allow only one voucher per
+    basket after the Voucher is applied to the basket.
 
     Arguments:
         request (Request): The request object made to the view.
@@ -27,6 +29,8 @@ def prepare_basket(request, product, voucher=None):
     basket.flush()
     basket.add_product(product, 1)
     if voucher:
+        for v in basket.vouchers.all():
+            basket.vouchers.remove(v)
         basket.vouchers.add(voucher)
         Applicator().apply(basket, request.user, request)
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
