@@ -64,7 +64,6 @@ class StripeProcessor(BasePaymentProcessor):
             'stripe_image_url': self.image_url,
             'stripe_currency': basket.currency,
             'stripe_user_email': user.email,
-            # TODO: Description could describe payment more.
             'stripe_payment_description': self.get_description(basket),
             'button_label': self.payment_label,
             "basket": basket
@@ -96,7 +95,6 @@ class StripeProcessor(BasePaymentProcessor):
 
     def handle_processor_response(self, response, basket=None):
         token = response
-        # Create the charge on Stripe's servers - this will charge the user's card
         try:
             charge = stripe.Charge.create(
                 amount=self.get_total(basket),

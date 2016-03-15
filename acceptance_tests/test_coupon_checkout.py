@@ -4,7 +4,7 @@ import ddt
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import (
-    VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS, ENABLE_PAYPAL_TESTS
+    VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS, ENABLE_PAYPAL_TESTS, ENABLE_STRIPE_TESTS
 )
 from acceptance_tests.mixins import (EcommerceApiMixin, EnrollmentApiMixin,
                                      LogistrationMixin, UnenrollmentMixin, PaymentMixin)
@@ -79,6 +79,17 @@ class CouponCheckoutTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMix
         self.start_redeem_flow(is_discount=True)
         self.assertTrue(self.basket_page.is_browser_on_page())
         self.checkout_with_cybersource(address)
+
+        self.assert_receipt_page_loads()
+        self.assert_order_created_and_completed()
+        self.assert_user_enrolled(self.username, self.course_id, 'verified')
+
+    @skipUnless(ENABLE_STRIPE_TESTS, "Stripe tests are not enabled")
+    def test_discount_checkout_with_stripe(self):
+        """ Test redemption of discount code and purchase of course via Stripe """
+        self.start_redeem_flow(is_discount=True)
+        self.assertTrue(self.basket_page.is_browser_on_page())
+        self.checkout_with_stripe()
 
         self.assert_receipt_page_loads()
         self.assert_order_created_and_completed()

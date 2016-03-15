@@ -25,14 +25,13 @@ except AttributeError:
 
 ECOMMERCE_API_URL = os.environ.get('ECOMMERCE_API_URL', ECOMMERCE_URL_ROOT + '/api/v2')
 ECOMMERCE_API_TOKEN = os.environ.get('ECOMMERCE_API_TOKEN', ACCESS_TOKEN)
-
 MAX_COMPLETION_RETRIES = int(os.environ.get('MAX_COMPLETION_RETRIES', 3))
-ENABLE_PAYPAL_TESTS = str2bool(os.environ.get('ENABLE_PAYPAL_TESTS', True))
 PAYPAL_EMAIL = os.environ.get('PAYPAL_EMAIL')
 PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
 # It can be a pain to set up CyberSource for local testing. This flag allows CyberSource
 # tests to be disabled.
 ENABLE_CYBERSOURCE_TESTS = str2bool(os.environ.get('ENABLE_CYBERSOURCE_TESTS', True))
+ENABLE_PAYPAL_TESTS = str2bool(os.environ.get('ENABLE_PAYPAL_TESTS', True))
 ENABLE_STRIPE_TESTS = str2bool(os.environ.get('ENABLE_STRIPE_TESTS', False))
 # END OTTO CONFIGURATION
 

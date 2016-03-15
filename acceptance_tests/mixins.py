@@ -236,7 +236,26 @@ class PaymentMixin(object):
 
         return submit_and_switch_back
 
-    def checkout_with_stripe(self, card_no, expiry, ccv):
+    def checkout_with_stripe(
+            self,
+            card_no="4242424242424242",
+            expiry="1234",
+            ccv="1234"):
+        """
+        Performs a successful checkout with stripe. This function does not
+        assert if payment is successful, if you need check if browser
+        got redirected to receipt page.
+
+        Args:
+            card_no: Card number, string no spaces.
+            expiry: Expiry date in MMYY format, should be later than now,
+                    String no spaces.
+            ccv: CCV code to use, for Stripe in test mode any 3 or 4
+                 digit code will do. String no spaces.
+
+        Returns: None
+
+        """
         self.browser.find_element_by_css_selector('#stripe').click()
 
         submitter = self.fill_stripe_cc_details(card_no, expiry, ccv)
