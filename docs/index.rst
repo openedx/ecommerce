@@ -3,27 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Documentation for the edX E-Commerce Service
-============================================
+edX E-Commerce Service
+======================
 
-These are the developer docs for the edX E-Commerce Service.
-
-.. toctree::
-   :maxdepth: 2
-
-   getting_started
-   asset_pipeline
-   testing
-   features
-   partner_config
-   fulfillment
-   coupons
-   notifications
-   internationalization
-   maintenance
-
-TODO
-   - Oscar Dashboard
-   - Payment processors
-   - API
-   - Course Administration Tool
+These docs have moved to the `Open edX Installing, Configuring, and Running (ICR) guide <http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html>`_. To contribute, please open a PR against https://github.com/edx/edx-documentation.

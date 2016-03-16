@@ -16,10 +16,10 @@ Prerequisites
 
 Documentation |ReadtheDocs|_
 ----------------------------
-.. |ReadtheDocs| image:: https://readthedocs.org/projects/open-edx-ecommerce-guide/badge/?version=latest
-.. _ReadtheDocs: https://open-edx-ecommerce-guide.readthedocs.org/en/latest/
+.. |ReadtheDocs| image:: https://readthedocs.org/projects/edx/badge/?version=latest
+.. _ReadtheDocs: http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html
 
-`Documentation <https://open-edx-ecommerce-guide.readthedocs.org/en/latest/>`_ is hosted on Read the Docs.
+`Documentation <http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html>`_ is hosted on Read the Docs. To contribute, please open a PR against https://github.com/edx/edx-documentation.
 
 License
 -------
