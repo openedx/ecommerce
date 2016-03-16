@@ -16,12 +16,12 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.settings import get_lms_url
 from ecommerce.tests.factories import StockRecordFactory
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase

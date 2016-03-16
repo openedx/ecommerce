@@ -8,8 +8,8 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 import requests
 
-from ecommerce.core.url_utils import get_lms_url, get_lms_commerce_api_url
 from ecommerce.courses.utils import mode_for_seat
+from ecommerce.settings import get_lms_url
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +74,8 @@ class LMSPublisher(object):
             course_id=course_id
         )
 
-        commerce_api_url = get_lms_commerce_api_url()
-        if not commerce_api_url:
-            logger.error('Commerce API URL is not set. Commerce data will not be published!')
+        if not settings.COMMERCE_API_URL:
+            logger.error('COMMERCE_API_URL is not set. Commerce data will not be published!')
             return error_message
 
         name = course.name
@@ -110,7 +109,7 @@ class LMSPublisher(object):
             'modes': modes,
         }
 
-        url = '{}/courses/{}/'.format(commerce_api_url.rstrip('/'), course_id)
+        url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), course_id)
 
         headers = {
             'Content-Type': 'application/json',

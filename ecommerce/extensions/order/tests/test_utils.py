@@ -1,7 +1,5 @@
 """Test Order Utility classes """
-import mock
-
-from django.test.client import RequestFactory
+from django.test import override_settings
 from oscar.core.loading import get_class
 from oscar.test.factories import create_basket as oscar_create_basket
 from oscar.test.newfactories import BasketFactory
@@ -35,11 +33,7 @@ class OrderNumberGeneratorTests(TestCase):
         partner = site_configuration.partner
         basket = BasketFactory(site=None)
 
-        request = RequestFactory().get('')
-        request.session = None
-        request.site = site
-
-        with mock.patch('ecommerce.extensions.order.utils.get_current_request', mock.Mock(return_value=request)):
+        with override_settings(SITE_ID=site.id):
             self.assert_order_number_matches_basket(basket, partner)
 
     def test_order_number_from_basket_id(self):

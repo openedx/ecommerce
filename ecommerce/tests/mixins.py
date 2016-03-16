@@ -9,20 +9,18 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.test.client import RequestFactory
 import httpretty
 import jwt
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from threadlocals.threadlocals import set_thread_variable
 from social.apps.django_app.default.models import UserSocialAuth
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
+from ecommerce.settings import get_lms_url
 from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 
 Basket = get_model('basket', 'Basket')
@@ -257,11 +255,6 @@ class SiteMixin(object):
         )
         self.partner = site_configuration.partner
         self.site = site_configuration.site
-
-        request = RequestFactory().get('')
-        request.session = None
-        request.site = self.site
-        set_thread_variable('request', request)
 
 
 class TestServerUrlMixin(object):

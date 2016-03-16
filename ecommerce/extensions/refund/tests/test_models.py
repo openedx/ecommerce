@@ -7,7 +7,6 @@ from oscar.core.loading import get_model, get_class
 from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
@@ -130,7 +129,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         httpretty.register_uri(
             httpretty.POST,
-            get_lms_enrollment_api_url(),
+            settings.ENROLLMENT_API_URL,
             status=200,
             body='{}',
             content_type='application/json'

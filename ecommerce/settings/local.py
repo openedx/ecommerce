@@ -1,6 +1,12 @@
 """Development settings and globals."""
 from __future__ import absolute_import
 
+import os
+from os.path import join, normpath
+
+from django.conf import settings
+
+from ecommerce.settings import get_lms_url
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 
@@ -60,11 +66,34 @@ INTERNAL_IPS = ('127.0.0.1',)
 # END TOOLBAR CONFIGURATION
 
 
+# URL CONFIGURATION
+ECOMMERCE_URL_ROOT = 'http://localhost:8002'
+
+LMS_URL_ROOT = 'http://127.0.0.1:8000'
+
+# The location of the LMS heartbeat page
+LMS_HEARTBEAT_URL = get_lms_url('/heartbeat')
+
+# The location of the LMS student dashboard
+LMS_DASHBOARD_URL = get_lms_url('/dashboard')
+
+OAUTH2_PROVIDER_URL = get_lms_url('/oauth2')
+
+COMMERCE_API_URL = get_lms_url('/api/commerce/v1/')
+# END URL CONFIGURATION
+
+
 # AUTHENTICATION
+# Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
+SOCIAL_AUTH_EDX_OIDC_KEY = 'replace-me'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'replace-me'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = OAUTH2_PROVIDER_URL
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
+
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'insecure-secret-key',
     'JWT_ISSUERS': (
-        '127.0.0.1:8000/oauth2',
+        OAUTH2_PROVIDER_URL,
         # Must match the value of JWT_ISSUER configured for the ecommerce worker.
         'ecommerce_worker',
     ),
@@ -73,6 +102,7 @@ JWT_AUTH.update({
 
 
 # ORDER PROCESSING
+ENROLLMENT_API_URL = get_lms_url('/api/enrollment/v1/enrollment')
 ENROLLMENT_FULFILLMENT_TIMEOUT = 15  # devstack is slow!
 
 EDX_API_KEY = 'replace-me'
@@ -89,16 +119,16 @@ PAYMENT_PROCESSOR_CONFIG = {
         'access_key': 'fake-access-key',
         'secret_key': 'fake-secret-key',
         'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
-        'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-        'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+        'receipt_page_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
+        'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
     },
     'paypal': {
         'mode': 'sandbox',
         'client_id': 'fake-client-id',
         'client_secret': 'fake-client-secret',
-        'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-        'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
-        'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        'receipt_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
+        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+        'error_url': get_lms_url('/commerce/checkout/error/'),
     },
 }
 # END PAYMENT PROCESSING
