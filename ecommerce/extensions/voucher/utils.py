@@ -11,8 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 
-from ecommerce.core.url_utils import get_ecommerce_url
-
 logger = logging.getLogger(__name__)
 
 Benefit = get_model('offer', 'Benefit')
@@ -79,7 +77,7 @@ def generate_coupon_report(coupon_vouchers):
                 discount = _("{percentage} %").format(percentage=benefit_value)
             else:
                 discount = currency(benefit_value)
-            URL = '{url}?code={code}'.format(url=get_ecommerce_url('/coupons/redeem/'), code=voucher.code)
+            URL = '{}/coupons/redeem/?code={}'.format(settings.ECOMMERCE_URL_ROOT, voucher.code)
             author = history.history_user.full_name
 
             rows.append({

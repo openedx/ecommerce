@@ -23,7 +23,6 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     class Meta(object):
         model = SiteConfiguration
 
-    lms_url_root = factory.LazyAttribute(lambda obj: "http://lms.testserver.fake")
     site = factory.SubFactory(SiteFactory)
     partner = factory.SubFactory(PartnerFactory)
 

@@ -11,9 +11,8 @@ from django.conf import settings
 from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
-
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.utils import mode_for_seat
+
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
 
@@ -95,7 +94,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     """
 
     def _post_to_enrollment_api(self, data, user):
-        enrollment_api_url = get_lms_enrollment_api_url()
+        enrollment_api_url = settings.ENROLLMENT_API_URL
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
         headers = {
             'Content-Type': 'application/json',
@@ -149,10 +148,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         """
         logger.info("Attempting to fulfill 'Seat' product types for order [%s]", order.number)
 
+        enrollment_api_url = getattr(settings, 'ENROLLMENT_API_URL', None)
         api_key = getattr(settings, 'EDX_API_KEY', None)
-        if not api_key:
+        if not (enrollment_api_url and api_key):
             logger.error(
-                'EDX_API_KEY must be set to use the EnrollmentFulfillmentModule'
+                'ENROLLMENT_API_URL and EDX_API_KEY must be set to use the EnrollmentFulfillmentModule'
             )
             for line in lines:
                 line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)

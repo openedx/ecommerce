@@ -11,11 +11,11 @@ from oscar.test.factories import OrderFactory, ConditionalOfferFactory, VoucherF
 from oscar.test.utils import RequestFactory
 import pytz
 
-from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_api_url
 from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.settings import get_lms_url
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -187,7 +187,7 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         response = self.client.get(self.path_with_code)
         response_text = (
             'Could not get course information. '
-            '[Client Error 404: http://lms.testserver.fake/api/courses/v1/courses/{}/]'
+            '[Client Error 404: http://127.0.0.1:8000/api/courses/v1/courses/{}/]'
         ).format(course.id)
         self.assertEqual(response.context['error'], _(response_text))
 
@@ -264,8 +264,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to LMS when an enrollment code is provided. """
         self.create_and_test_coupon()
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200)
-        self.assert_redemption_page_redirects(get_lms_url())
+        httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200)
+        self.assert_redemption_page_redirects(settings.LMS_URL_ROOT)
 
     @httpretty.activate
     def test_multiple_vouchers(self):
@@ -273,5 +273,5 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.create_and_test_coupon()
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=COUPON_CODE))
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200)
-        self.assert_redemption_page_redirects(get_lms_url())
+        httpretty.register_uri(httpretty.POST, settings.ENROLLMENT_API_URL, status=200)
+        self.assert_redemption_page_redirects(settings.LMS_URL_ROOT)

@@ -6,11 +6,11 @@ from django.dispatch import receiver
 from oscar.core.loading import get_class
 import waffle
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
 from ecommerce.extensions.checkout.utils import get_provider_data
 from ecommerce.notifications.notifications import send_notification
+from ecommerce.settings import get_lms_url
 
 
 logger = logging.getLogger(__name__)
