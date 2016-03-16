@@ -2,7 +2,7 @@ import ddt
 
 from django.test import RequestFactory
 from oscar.core.loading import get_model
-from oscar.test.factories import ProductFactory, RangeFactory
+from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
 
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.partner.models import StockRecord
@@ -44,6 +44,20 @@ class BasketUtilsTests(TestCase):
         self.assertIsNotNone(basket.applied_offers())
         self.assertEqual(basket.total_discount, 10.00)
         self.assertEqual(basket.total_excl_tax, 90.00)
+
+    def test_multiple_vouchers(self):
+        """ Verify only the last entered voucher is contained in the basket. """
+        product = ProductFactory()
+        voucher1 = VoucherFactory(code='FIRST')
+        basket = prepare_basket(self.request, product, voucher1)
+        self.assertEqual(basket.vouchers.count(), 1)
+        self.assertEqual(basket.vouchers.first(), voucher1)
+
+        voucher2 = VoucherFactory(code='SECOND')
+        new_basket = prepare_basket(self.request, product, voucher2)
+        self.assertEqual(basket, new_basket)
+        self.assertEqual(new_basket.vouchers.count(), 1)
+        self.assertEqual(new_basket.vouchers.first(), voucher2)
 
     def test_prepare_basket_without_voucher(self):
         """ Verify a basket is returned and does not contain a voucher. """
