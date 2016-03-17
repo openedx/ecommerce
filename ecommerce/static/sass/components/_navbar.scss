@@ -44,6 +44,37 @@
 
 }
 
+.administration-navbar {
+  padding: 10px;
+  border-bottom: 2px solid #cacaca;
+
+  background-color: #f6f6f6;
+  height: 50px;
+
+  font-size: 18px;
+  font-weight: 600;
+
+  .container {
+    background-color: #f6f6f6;
+  }
+
+  div a {
+    padding: 10px;
+    border-bottom: none;
+
+    color: #0ea6ec;
+
+    &.selected,
+    &:active,
+    &:focus,
+    &:hover {
+      border-bottom: 4px solid #0ea6ec;
+
+      color: black;
+    }
+  }
+}
+
 @media (min-width: $grid-float-breakpoint-max) {
   .navbar {
     // Display the user menu as a .navbar-btn when not collapsed to handle vertical centering.

@@ -25,6 +25,7 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CourseAppView, self).get_context_data(**kwargs)
+        context['admin'] = 'course'
 
         user = self.request.user
         if user.access_token:

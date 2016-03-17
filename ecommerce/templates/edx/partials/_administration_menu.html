@@ -1,0 +1,8 @@
+{% load i18n %}
+
+<nav class="administration-navbar">
+    <div class="container">
+        <a {% if admin == "course" %}class="selected"{% endif %} href="/courses/">{% trans "Courses" %}</a>
+        <a {% if admin == "coupon" %}class="selected"{% endif %} href="/coupons/">{% trans "Coupons" %}</a>
+    </div>
+</nav>
