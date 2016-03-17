@@ -339,17 +339,21 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
     def dispatch(self, request, *args, **kwargs):
         return super(CheckoutViewMixin, self).dispatch(request, *args, **kwargs)
 
-    def get_payment_data(self, request):
+    def get_payment_data(self):
+        """
+        Returns: Returns payment that will be passed to payment processor.
+        """
         raise NotImplementedError
 
     def locate_basket(self):
-        basket_id = self.request.POST['basket_id']
-        basket = self.get_basket(self.request, basket_id)
-
-        return basket
+        """
+        Returns: Basket or None, basket should be located using either HTTP request or url.
+                 If basket can't be located return None.
+        """
+        raise NotImplementedError
 
     def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
-        payment_data = self.get_payment_data(request)
+        payment_data = self.get_payment_data()
 
         basket = self.locate_basket()
 
@@ -417,5 +421,5 @@ class StripeCheckoutView(CheckoutViewMixin, View):
 
         return basket
 
-    def get_payment_data(self, request):
-        return request.POST['stripeToken']
+    def get_payment_data(self):
+        return self.request.POST['stripeToken']

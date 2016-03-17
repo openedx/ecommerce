@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import traceback
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -55,7 +56,7 @@ class StripeProcessor(BasePaymentProcessor):
     def get_transaction_parameters(self, basket, request=None):
         raise NotImplementedError("This method is not used by StripeProcessor")
 
-    def _get_script_context(self, basket, user):
+    def get_script_context(self, basket, user):
         return {
             'stripe_publishable_key': self.publishable_key,
             'stripe_process_payment_url':
@@ -75,17 +76,17 @@ class StripeProcessor(BasePaymentProcessor):
 
     def get_basket_page_script(self, basket, user):
         template = get_template("payment/processors/stripe_paymentscript.html")
-        return template.render(self._get_script_context(basket, user))
+        return template.render(self.get_script_context(basket, user))
 
     @property
     def default_checkout_handler(self):
         return False
 
+    def _dollars_to_cents(self, dollars):
+        return unicode((dollars * 100).to_integral_exact())
+
     def get_total(self, basket):
-        def dollars_to_cents(dollars):
-            # Throw error if any rounding occours
-            return unicode((dollars * 100).to_integral_exact())
-        return dollars_to_cents(basket.total_incl_tax)
+        return self._dollars_to_cents(basket.total_incl_tax)
 
     def get_description(self, basket):
         return _("Payment for order {order_sku} for {platform_name}").format(
@@ -94,6 +95,8 @@ class StripeProcessor(BasePaymentProcessor):
         )
 
     def handle_processor_response(self, response, basket=None):
+        if basket is None:
+            raise ValueError("Basket is needed for handle_processor_response in Stripe processor")
         token = response
         try:
             charge = stripe.Charge.create(
@@ -109,6 +112,8 @@ class StripeProcessor(BasePaymentProcessor):
                 }
             )
             logger.info(charge)
+
+            self.record_processor_response(charge, basket=basket, transaction_id=charge.id)
 
             source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
             currency = basket.currency
@@ -137,8 +142,17 @@ class StripeProcessor(BasePaymentProcessor):
                                  processor_name=self.NAME)
 
             return source, event
-        except stripe.error.CardError as e:
+        except stripe.error.StripeError as e:
             logger.info("Stripe Card error for basket [%d]", basket.pk, exc_info=True)
+            exception_detail = traceback.format_exc()
+            # We don't touch Stripe API directly so any exception that it
+            # threw IS a processor response.
+            self.record_processor_response(basket=basket, response={
+                "type": "error",
+                "operation": "pay",
+                "token": token,
+                "exception_detail": exception_detail,
+            })
             raise PaymentError(e.message)
 
     def _record_refund(self, source, amount):
@@ -154,13 +168,33 @@ class StripeProcessor(BasePaymentProcessor):
     def issue_credit(self, source, amount, currency):
 
         transaction_id = source.reference
+        basket = source.order.basket
 
         try:
-            stripe.Refund.create(
+            refund = stripe.Refund.create(
                 charge=transaction_id,
-                api_key=self.secret_key
+                api_key=self.secret_key,
+                reason="requested_by_customer",
+                amount=self._dollars_to_cents(amount),
+                currency=currency,
+                receipt_number=basket.order_number,
             )
-            self._record_refund(source, amount)
-        except stripe.error.CardError as e:
+        except stripe.error.StripeError as e:
             logger.exception('Refund of Stripe charge [%s] failed!', transaction_id)
+            # We don't touch Stripe API directly so any exception that it
+            # threw IS a processor response.
+            exception_detail = traceback.format_exc()
+            self.record_processor_response(basket=basket, response={
+                "type": "error",
+                "operation": "refund",
+                "payment": transaction_id,
+                "exception_detail": exception_detail,
+            })
             raise GatewayError(e.message)
+
+        self.record_processor_response(
+            refund,
+            basket=basket,
+            transaction_id=transaction_id
+        )
+        self._record_refund(source, amount)

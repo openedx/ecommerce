@@ -162,7 +162,6 @@ class TestStripePayment(
         self.assert_user_not_verified(self.username, self.course_id)
 
     @ddt.data(
-        # (different issuers, debit vs credit)
         ("4000000000000341", "1234", "1234"),
         ("4100000000000019", "1234", "1234"),
     )
