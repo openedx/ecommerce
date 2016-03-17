@@ -667,7 +667,7 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
                 token_id, self.basket
             )
 
-        charge_create.assert_called_with(
+        charge_create.assert_called_once_with(
             amount=self.processor.get_total(self.basket),
             currency=self.basket.currency,
             source=token_id,
@@ -746,7 +746,7 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
         with mock.patch.object(stripe.Refund, 'create', return_value=stripe_refund) as refund_create:
             self.processor.issue_credit(source, refund_amount, currency)
 
-        refund_create.assert_called_with(
+        refund_create.assert_called_once_with(
             charge=source.reference,
             api_key=self.processor.configuration['secret_key'],
             reason="requested_by_customer",

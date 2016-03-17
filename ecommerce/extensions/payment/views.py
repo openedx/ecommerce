@@ -358,15 +358,16 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
         basket = self.locate_basket()
 
         if basket is None:
-            return HttpResponse(self.payment_processor.error_page_url)
+            return HttpResponseRedirect(self.payment_processor.error_page_url)
 
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(payment_data, basket)
                 except PaymentError:
-                    # This can happen (card refused?) log the exception details, but this is "normal"
-                    logger.info("Payment error for basket [%d] failed.", basket.id, exc_info=True)
+                    # This can happen (e.g. when card is refused) log the exception details,
+                    # but this is "normal"
+                    logger.info('Payment error for basket [%d] failed.', basket.id, exc_info=True)
                     return HttpResponseRedirect(self.payment_processor.error_page_url)
         except Exception:  # pylint: disable=broad-except
             # This is an error that should be investigated
@@ -380,23 +381,16 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
                 shipping_charge = shipping_method.calculate(basket)
                 order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
 
-                try:
-                    self.handle_order_placement(
-                        order_number=basket.order_number,
-                        user=basket.owner,
-                        basket=basket,
-                        shipping_address=None,
-                        shipping_method=shipping_method,
-                        shipping_charge=shipping_charge,
-                        billing_address=None,
-                        order_total=order_total
-                    )
-                except UnableToPlaceOrder:
-                    # This is clearly an error: client got charged but didn't get what he paid for
-                    logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
-                    # Raise the error to give clear 500, in future (maybe?) introduce better way of notifying
-                    # admins with clear message.
-                    raise
+                self.handle_order_placement(
+                    order_number=basket.order_number,
+                    user=basket.owner,
+                    basket=basket,
+                    shipping_address=None,
+                    shipping_method=shipping_method,
+                    shipping_charge=shipping_charge,
+                    billing_address=None,
+                    order_total=order_total
+                )
 
         except:  # pylint: disable=bare-except
             # This is clearly an error: client got charged but didn't get what he paid for

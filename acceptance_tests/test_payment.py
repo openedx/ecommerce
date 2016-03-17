@@ -109,15 +109,8 @@ class TestStripePayment(
         # (different issuers, debit vs credit)
         # Format is: (card no, expiry MMYY, CCV code)
         ("4242424242424242", "1234", "1234"),
-        ("4012888888881881", "1234", "1234"),
-        ("4000056655665556", "1234", "1234"),
-        ("5555555555554444", "1234", "1234"),
-        ("5200828282828210", "1234", "1234"),
-        ("5105105105105100", "1234", "1234"),
-        ("371449635398431", "1234", "1234"),
-        ("6011111111111117", "1234", "1234"),
         ("30569309025904", "1234", "1234"),
-        ("3530111333300000", "1234", "1234"),
+        ("30569309025904", "1234", "1234"),
     )
     def test_stripe_payment(self, cc_data):
         self._start_checkout()
@@ -130,16 +123,8 @@ class TestStripePayment(
         # Format is: (card no, expiry MMYY, CCV code)
         # This is a special "Invalid" card no
         ('4000000000000002', "1234", "1234"),
-        # This no fails control sum check
-        ('4242424242424241', "1234", "1234"),
-        # Card is OK but user entered expiry in the past
-        ('4242424242424242', "1111", "1234"),
-        # Card is OK but CVC is too short
-        ('4242424242424242', "1234", "11"),
         # This card will fail on any CVC
         ('4000000000000127', "1234", "1234"),
-        # This card is allways expired
-        ('4000000000000069', "1234", "1234"),
         # This card has a valid number, but no funds
         ('4000000000000119', "1234", "1234"),
     )
@@ -162,6 +147,9 @@ class TestStripePayment(
         self.assert_user_not_verified(self.username, self.course_id)
 
     @ddt.data(
+        # These two are special cards that fail only when we
+        # attempt to make an actual charge (and not on checkout.js
+        # code)
         ("4000000000000341", "1234", "1234"),
         ("4100000000000019", "1234", "1234"),
     )
