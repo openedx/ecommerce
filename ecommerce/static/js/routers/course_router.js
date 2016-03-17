@@ -66,6 +66,9 @@ define([
              * Display a form for creating a new course.
              */
             new: function () {
+                _.each(Backbone.Relational.store._collections, function (collection) {
+                    collection.reset();
+                });
                 var page = new CourseCreatePage();
                 this.currentView = page;
                 this.$el.html(page.el);
