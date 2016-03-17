@@ -82,11 +82,11 @@ class StripeProcessor(BasePaymentProcessor):
     def default_checkout_handler(self):
         return False
 
-    def _dollars_to_cents(self, dollars):
+    def dollars_to_cents(self, dollars):
         return unicode((dollars * 100).to_integral_exact())
 
     def get_total(self, basket):
-        return self._dollars_to_cents(basket.total_incl_tax)
+        return self.dollars_to_cents(basket.total_incl_tax)
 
     def get_description(self, basket):
         return _("Payment for order {order_sku} for {platform_name}").format(
@@ -175,7 +175,7 @@ class StripeProcessor(BasePaymentProcessor):
                 charge=transaction_id,
                 api_key=self.secret_key,
                 reason="requested_by_customer",
-                amount=self._dollars_to_cents(amount),
+                amount=self.dollars_to_cents(amount),
                 currency=currency,
                 receipt_number=basket.order_number,
             )

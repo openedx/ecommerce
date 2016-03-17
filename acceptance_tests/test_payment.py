@@ -110,7 +110,7 @@ class TestStripePayment(
         # Format is: (card no, expiry MMYY, CCV code)
         ("4242424242424242", "1234", "1234"),
         ("30569309025904", "1234", "1234"),
-        ("30569309025904", "1234", "1234"),
+        ("5105105105105100", "1234", "1234"),
     )
     def test_stripe_payment(self, cc_data):
         self._start_checkout()

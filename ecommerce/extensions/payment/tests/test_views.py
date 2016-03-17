@@ -629,8 +629,8 @@ class StripeCheckoutTest(TestCase):
 
     def test_successful_payment(self):
         self._login_user()
-        handle_payment_response = self.payment_source, self.payment_event
 
+        handle_payment_response = self.payment_source, self.payment_event
         with mock.patch.object(
             StripeProcessor, 'handle_processor_response', return_value=handle_payment_response
         ) as handle_payment:
@@ -638,7 +638,6 @@ class StripeCheckoutTest(TestCase):
 
         handle_payment.assert_called_once_with(self.stripe_cc_token, basket=self.basket)
 
-        # Assert the payment objects are eventually saved
         self.assertTrue(self.payment_source.pk is not None)
         self.assertTrue(self.payment_event.pk is not None)
 
@@ -661,7 +660,6 @@ class StripeCheckoutTest(TestCase):
 
         self.assertFalse(handle_payment.called)
 
-        # Assert the payment objects are eventually saved
         self.assertTrue(self.payment_source.pk is None)
         self.assertTrue(self.payment_event.pk is None)
 
@@ -670,7 +668,6 @@ class StripeCheckoutTest(TestCase):
 
     def test_not_logged_user(self):
         handle_payment_response = self.payment_source, self.payment_event
-
         with mock.patch.object(
             StripeProcessor, 'handle_processor_response', return_value=handle_payment_response
         ) as handle_payment:
@@ -678,7 +675,6 @@ class StripeCheckoutTest(TestCase):
 
         handle_payment.assert_not_called()
 
-        # Assert the payment objects are eventually saved
         self.assertTrue(self.payment_source.pk is None)
         self.assertTrue(self.payment_event.pk is None)
 
