@@ -138,8 +138,12 @@ class StripeProcessor(BasePaymentProcessor):
             event_type, __ = PaymentEventType.objects.get_or_create(
                 name=PaymentEventTypeName.PAID
             )
-            event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id,
-                                 processor_name=self.NAME)
+            event = PaymentEvent(
+                event_type=event_type,
+                amount=total,
+                reference=transaction_id,
+                processor_name=self.NAME
+            )
 
             return source, event
         except stripe.error.StripeError as e:
@@ -162,8 +166,12 @@ class StripeProcessor(BasePaymentProcessor):
         source.refund(amount, reference=transaction_id)
 
         event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
-        PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=transaction_id,
-                                    processor_name=self.NAME)
+        PaymentEvent.objects.create(
+            event_type=event_type,
+            order=order, amount=amount,
+            reference=transaction_id,
+            processor_name=self.NAME
+        )
 
     def issue_credit(self, source, amount, currency):
 

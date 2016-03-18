@@ -662,7 +662,7 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
             self.processor.get_script_context(self.basket, self.basket.owner)
         )
 
-    def test_handle_processor_response_valid(self):
+    def test_handle_processor_response(self):
         """
         Tests a valid payment.
         """
@@ -674,7 +674,8 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
 
         with mock.patch.object(stripe.Charge, 'create', return_value=charge) as charge_create:
             source, payment_event = self.processor.handle_processor_response(
-                token_id, self.basket
+                token_id,
+                self.basket
             )
 
         charge_create.assert_called_once_with(
@@ -696,13 +697,27 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
 
         # Check if source_type and payment_type are as expected:
         self.assert_basket_matches_source(
-            self.basket, source, source_type, charge_id, 'Stripe')
+            basket=self.basket,
+            source=source,
+            source_type=source_type,
+            reference=charge_id,
+            label='Stripe'
+        )
         self.assert_valid_payment_event_fields(
-            payment_event, amount, payment_type, self.processor.NAME, charge_id)
+            payment_event=payment_event,
+            amount=amount,
+            payment_event_type=payment_type,
+            processor_name=self.processor.NAME,
+            reference=charge_id
+        )
 
         # Check processor response is recorded:
         self.assert_processor_response_recorded(
-            self.processor.NAME, charge_id, charge, self.basket)
+            processor_name=self.processor.NAME,
+            transaction_id=charge_id,
+            response=charge,
+            basket=self.basket
+        )
 
     def test_handle_processor_response_declined(self):
         """
@@ -750,7 +765,7 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
 
     def test_issue_credit(self):
         """
-        Tests succesfully issuing a credit.
+        Tests successfully issuing a credit.
         """
         refund = self.create_refund(self.processor_name)
         order = refund.order
@@ -778,8 +793,6 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
             api_key=self.processor.configuration['secret_key'],
             reason="requested_by_customer",
             amount="123400",
-            currency=currency,
-            receipt_number=basket.order_number,
         )
 
         self.assert_processor_response_recorded(
@@ -793,7 +806,12 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
         payment_event = order.payment_events.first()
 
         self.assert_valid_payment_event_fields(
-            payment_event, refund_amount, payment_type, self.processor.NAME, source.reference)
+            payment_event=payment_event,
+            amount=refund_amount,
+            payment_event_type=payment_type,
+            processor_name=self.processor.NAME,
+            reference=source.reference
+        )
 
     def test_issue_credit_error(self):
         """
