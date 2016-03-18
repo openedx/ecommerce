@@ -1,5 +1,6 @@
 """Production settings and globals."""
 from os import environ
+import psycopg2.extensions
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
@@ -58,3 +59,5 @@ DB_OVERRIDES = dict(
 
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
+
+DATABASES['OPTIONS']['isolation_level'] = psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED
