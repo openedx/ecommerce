@@ -1,8 +1,8 @@
 import logging
 
-from django.conf import settings
 from oscar.core.loading import get_model, get_class
 from premailer import transform
+from threadlocals.threadlocals import get_current_request
 
 from ecommerce.extensions.analytics.utils import parse_tracking_context
 
@@ -29,7 +29,7 @@ def send_notification(user, commtype_code, context):
     full_name = user.get_full_name()
     context.update({
         'full_name': full_name,
-        'platform_name': settings.PLATFORM_NAME,
+        'platform_name': get_current_request().site.name,
         'tracking_pixel': tracking_pixel,
     })
 

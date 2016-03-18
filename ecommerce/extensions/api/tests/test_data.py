@@ -4,8 +4,8 @@ import httpretty
 import mock
 import requests
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.api.data import get_lms_footer
-from ecommerce.settings import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 # TODO: test get_product() and get_order_metadata()
@@ -13,10 +13,9 @@ from ecommerce.tests.testcases import TestCase
 
 class DataFunctionsTests(TestCase):
     """Tests for API data helpers."""
-    footer_url = get_lms_url('api/branding/v1/footer')
-
     def setUp(self):
         super(DataFunctionsTests, self).setUp()
+        self.footer_url = get_lms_url('api/branding/v1/footer')
 
     @httpretty.activate
     def test_get_lms_footer_success(self):

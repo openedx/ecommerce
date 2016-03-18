@@ -2,10 +2,13 @@
 from __future__ import unicode_literals
 import logging
 
-from django.contrib.sites.models import Site
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
+from oscar.core.loading import get_model
+from threadlocals.threadlocals import get_current_request
 
 logger = logging.getLogger(__name__)
+
+Order = get_model('order', 'Order')
 
 
 class OrderNumberGenerator(object):
@@ -23,7 +26,7 @@ class OrderNumberGenerator(object):
         """
         site = basket.site
         if not site:
-            site = Site.objects.get_current()
+            site = get_current_request().site
             logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
 
         partner = site.siteconfiguration.partner
@@ -67,11 +70,33 @@ class OrderCreator(OscarOrderCreator):
         site is used. The site value can be overridden by setting the `site` kwarg.
         """
 
-        # Pull the order's site from the basket, if the basket has a site and
-        # a site is not already being explicitly set.
-        if basket.site and 'site' not in extra_order_fields:
-            extra_order_fields['site'] = basket.site
+        # If a site was not passed in with extra_order_fields,
+        # use the basket's site if it has one, else get the site
+        # from the current request.
+        site = basket.site
+        if not site:
+            site = get_current_request().site
 
-        return super(OrderCreator, self).create_order_model(
-            user, basket, shipping_address, shipping_method, shipping_charge, billing_address, total, order_number,
-            status, **extra_order_fields)
+        order_data = {'basket': basket,
+                      'number': order_number,
+                      'site': site,
+                      'currency': total.currency,
+                      'total_incl_tax': total.incl_tax,
+                      'total_excl_tax': total.excl_tax,
+                      'shipping_incl_tax': shipping_charge.incl_tax,
+                      'shipping_excl_tax': shipping_charge.excl_tax,
+                      'shipping_method': shipping_method.name,
+                      'shipping_code': shipping_method.code}
+        if shipping_address:
+            order_data['shipping_address'] = shipping_address
+        if billing_address:
+            order_data['billing_address'] = billing_address
+        if user and user.is_authenticated():
+            order_data['user_id'] = user.id
+        if status:
+            order_data['status'] = status
+        if extra_order_fields:
+            order_data.update(extra_order_fields)
+        order = Order(**order_data)
+        order.save()
+        return order

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from testfixtures import LogCapture
 
-from ecommerce.settings import get_lms_url
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.courses.views'

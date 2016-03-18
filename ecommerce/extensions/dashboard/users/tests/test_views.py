@@ -1,6 +1,5 @@
 import json
 
-from django.conf import settings
 from django.contrib.messages import constants as MSG
 from django.core.urlresolvers import reverse
 import httpretty
@@ -9,6 +8,7 @@ from requests import Timeout
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.dashboard.users.views import UserDetailView
 from ecommerce.tests.testcases import TestCase
@@ -26,7 +26,7 @@ class UserDetailViewTests(DashboardViewTestMixin, TestCase):
 
     def mock_enrollment_api(self, status=200):
         self.assertTrue(httpretty.is_enabled())
-        httpretty.register_uri(httpretty.GET, settings.ENROLLMENT_API_URL, status=status,
+        httpretty.register_uri(httpretty.GET, get_lms_enrollment_api_url(), status=status,
                                body=json.dumps(self.data),
                                content_type='application/json')
 

@@ -16,6 +16,8 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 
 from ecommerce.core.constants import Status, UnavailabilityMessage
+from ecommerce.core.url_utils import get_lms_heartbeat_url
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -53,7 +55,7 @@ def health(_):
         database_status = Status.UNAVAILABLE
 
     try:
-        response = requests.get(settings.LMS_HEARTBEAT_URL, timeout=1)
+        response = requests.get(get_lms_heartbeat_url(), timeout=1)
 
         if response.status_code == status.HTTP_200_OK:
             lms_status = Status.OK
