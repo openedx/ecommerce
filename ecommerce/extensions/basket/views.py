@@ -13,6 +13,7 @@ from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused
 from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.views import get_voucher_from_code
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.data import get_lms_footer
@@ -20,7 +21,6 @@ from ecommerce.extensions.basket.utils import get_certificate_type_display_value
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.settings import get_lms_url
 
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)

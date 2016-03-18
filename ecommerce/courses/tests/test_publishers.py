@@ -2,17 +2,16 @@ import datetime
 import json
 
 import ddt
-from django.conf import settings
 from django.test import override_settings
 import httpretty
 import mock
 from requests import Timeout
 from testfixtures import LogCapture
 
+from ecommerce.core.url_utils import get_lms_url, get_lms_commerce_api_url
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.settings import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 EDX_API_KEY = 'edx'
@@ -21,7 +20,7 @@ LOGGER_NAME = 'ecommerce.courses.publishers'
 
 
 @ddt.ddt
-@override_settings(COMMERCE_API_URL='http://example.com/commerce/api/v1/', EDX_API_KEY=EDX_API_KEY)
+@override_settings(EDX_API_KEY=EDX_API_KEY)
 class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
@@ -37,7 +36,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Commerce API calls.')
 
         body = body or {}
-        url = '{}/courses/{}/'.format(settings.COMMERCE_API_URL.rstrip('/'), self.course.id)
+        url = '{}/courses/{}/'.format(get_lms_commerce_api_url().rstrip('/'), self.course.id)
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
                                content_type=JSON)
 
@@ -53,15 +52,16 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             content_type=JSON
         )
 
-    @ddt.data('', None)
-    def test_commerce_api_url_not_set(self, setting_value):
-        """ If the Commerce API is not setup, the method should log an INFO message and return """
-        with override_settings(COMMERCE_API_URL=setting_value):
-            with LogCapture(LOGGER_NAME) as l:
-                response = self.publisher.publish(self.course)
-                l.check((LOGGER_NAME, 'ERROR', 'COMMERCE_API_URL is not set. Commerce data will not be published!'))
-                self.assertIsNotNone(response)
-                self.assertEqual(response, self.error_message)
+    @mock.patch('ecommerce.courses.publishers.get_lms_commerce_api_url', mock.Mock(return_value=None))
+    def test_commerce_api_url_not_set(self):
+        """ If the commerce API url cannot be retrieved, the method should log an ERROR message and return """
+        with LogCapture(LOGGER_NAME) as l:
+            response = self.publisher.publish(self.course)
+            l.check(
+                (LOGGER_NAME, 'ERROR', 'Commerce API URL is not set. Commerce data will not be published!')
+            )
+            self.assertIsNotNone(response)
+            self.assertEqual(response, self.error_message)
 
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """

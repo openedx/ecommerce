@@ -1,12 +1,9 @@
-import datetime
-
-from django.conf import settings
 from django.db import IntegrityError
 from django.test import override_settings
-from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report, get_voucher_discount_info
@@ -232,7 +229,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         enrollment_code_row = rows[-2]
         self.assertEqual(enrollment_code_row['Name'], 'Discount code')
         self.assertEqual(enrollment_code_row['Code'], VOUCHER_CODE)
-        self.assertEqual(enrollment_code_row['URL'], settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(VOUCHER_CODE))
+        self.assertEqual(enrollment_code_row['URL'], get_ecommerce_url() + REDEMPTION_URL.format(VOUCHER_CODE))
         self.assertEqual(enrollment_code_row['CourseID'], self.course.id)
         self.assertEqual(enrollment_code_row['Price'], currency(100.00))
         self.assertEqual(enrollment_code_row['Invoiced Amount'], currency(100.00))
@@ -248,7 +245,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(enrollment_code_row['Discount'], '$100.00')
         self.assertEqual(
             enrollment_code_row['URL'],
-            settings.ECOMMERCE_URL_ROOT + REDEMPTION_URL.format(enrollment_code_row['Code'])
+            get_ecommerce_url() + REDEMPTION_URL.format(enrollment_code_row['Code'])
         )
 
     def test_get_voucher_discount_info(self):

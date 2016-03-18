@@ -12,7 +12,9 @@ from oscar.core.loading import get_model
 from suds.client import Client
 from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
+from threadlocals.threadlocals import get_current_request
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
@@ -58,10 +60,16 @@ class Cybersource(BasePaymentProcessor):
         self.access_key = configuration['access_key']
         self.secret_key = configuration['secret_key']
         self.payment_page_url = configuration['payment_page_url']
-        self.receipt_page_url = configuration['receipt_page_url']
-        self.cancel_page_url = configuration['cancel_page_url']
         self.send_level_2_3_details = configuration.get('send_level_2_3_details', True)
         self.language_code = settings.LANGUAGE_CODE
+
+    @property
+    def receipt_page_url(self):
+        return get_lms_url(self.configuration['receipt_path'])
+
+    @property
+    def cancel_page_url(self):
+        return get_lms_url(self.configuration['cancel_path'])
 
     def get_transaction_parameters(self, basket, request=None):
         """
@@ -104,7 +112,7 @@ class Cybersource(BasePaymentProcessor):
 
         # Level 2/3 details
         if self.send_level_2_3_details:
-            parameters['amex_data_taa1'] = '{}'.format(settings.PLATFORM_NAME)
+            parameters['amex_data_taa1'] = '{}'.format(get_current_request().site.name)
             parameters['purchasing_level'] = '3'
             parameters['line_item_count'] = basket.lines.count()
             # Note (CCB): This field (purchase order) is required for Visa;

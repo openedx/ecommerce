@@ -1,4 +1,3 @@
-{% load core_extras %}
 {% load i18n %}
 
 <nav class="navbar navbar-default" aria-label="Account">
@@ -13,7 +12,7 @@
         <span aria-hidden="true" class="icon-bar"></span>
       </button>
       <div class="navbar-brand">
-        <div class="navbar-brand-logo" alt="{% settings_value 'PLATFORM_NAME' %}"></div>
+        <div class="navbar-brand-logo" alt="{{ platform_name }}"></div>
       </div>
     </div>
 
@@ -22,7 +21,7 @@
         {% if user.is_authenticated %}
           <li class="btn-group user-menu">
             <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
-                    onclick="window.open('{% settings_value 'LMS_DASHBOARD_URL' %}');">
+                    onclick="window.open('{{ lms_dashboard_url }}');">
               <i class="icon fa fa-home" aria-hidden="true"></i>
               <span class="sr-only">{% trans "Dashboard for:" %}</span>
               {{ user.username }}
