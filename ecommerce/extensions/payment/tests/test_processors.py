@@ -50,6 +50,7 @@ SourceType = get_model('payment', 'SourceType')
 log = logging.getLogger(__name__)
 
 
+@ddt.ddt
 class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, PaymentEventsMixin):
     """ Mixin for payment processor tests. """
 
@@ -60,6 +61,18 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
     processor_name = None
 
     CERTIFICATE_TYPE = 'test-certificate-type'
+
+    @classmethod
+    def setUpClass(cls):
+        super(PaymentProcessorTestCaseMixin, cls).setUpClass()
+        paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG['edX'].get('paypal')
+        if paypal_configuration:
+            # Initialize the PayPal REST SDK
+            paypalrestsdk.configure({
+                'mode': paypal_configuration['mode'],
+                'client_id': paypal_configuration['client_id'],
+                'client_secret': paypal_configuration['client_secret']
+            })
 
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
@@ -73,9 +86,18 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
         self.basket.owner = factories.UserFactory()
         self.basket.save()
 
-    def test_configuration(self):
+    @ddt.data('edX', 'other')
+    def test_configuration(self, request_partner):
         """ Verifies configuration is read from settings. """
-        self.assertDictEqual(self.processor.configuration, settings.PAYMENT_PROCESSOR_CONFIG[self.processor.NAME])
+        mock_request = mock.Mock()
+        mock_request.site.siteconfiguration.partner.short_code = request_partner
+        with mock.patch(
+            'ecommerce.extensions.payment.processors.get_current_request', mock.Mock(return_value=mock_request)
+        ):
+            self.assertDictEqual(
+                self.processor.configuration,
+                settings.PAYMENT_PROCESSOR_CONFIG[request_partner][self.processor.NAME]
+            )
 
     def test_name(self):
         """Test that the name constant on the processor class is correct."""
@@ -108,7 +130,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     processor_name = 'cybersource'
 
     def get_expected_transaction_parameters(self, transaction_uuid, include_level_2_3_details=True):
-        configuration = settings.PAYMENT_PROCESSOR_CONFIG[self.processor_name]
+        configuration = settings.PAYMENT_PROCESSOR_CONFIG['edX'][self.processor_name]
         access_key = configuration['access_key']
         profile_id = configuration['profile_id']
 
@@ -183,7 +205,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         # NOTE (CCB): Make a deepcopy of the settings so that we can modify them without affecting the real settings.
         # This is a bit simpler than using modify_copy(), which would does not support nested dictionaries.
         payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
-        payment_processor_config[self.processor_name]['send_level_2_3_details'] = False
+        payment_processor_config['edX'][self.processor_name]['send_level_2_3_details'] = False
 
         with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
             self.assert_correct_transaction_parameters(include_level_2_3_details=False)
@@ -578,7 +600,8 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         paypal_refund = paypalrestsdk.Refund({'id': transaction_id})
 
         payment = Payment(
-            {'transactions': [Resource({'related_resources': [Resource({'sale': Sale({'id': 'PAY-SALE-1'})})]})]})
+            {'transactions': [Resource({'related_resources': [Resource({'sale': Sale({'id': 'PAY-SALE-1'})})]})]}
+        )
         with mock.patch.object(Payment, 'find', return_value=payment):
             with mock.patch.object(Sale, 'refund', return_value=paypal_refund):
                 self.processor.issue_credit(source, amount, currency)
@@ -650,7 +673,7 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
     processor_class = InvoicePayment
     processor_name = 'invoice'
 
-    def test_configuration(self):
+    def test_configuration(self):  # pylint: disable=arguments-differ
         self.skipTest('Invoice processor does not currently require configuration.')
 
     def test_handle_processor_response(self):

@@ -47,6 +47,14 @@ class Paypal(BasePaymentProcessor):
         self.retry_attempts = self.configuration.get('retry_attempts', 1)
 
     @property
+    def paypal_api(self):
+        return paypalrestsdk.Api({
+            'mode': self.configuration['mode'],
+            'client_id': self.configuration['client_id'],
+            'client_secret': self.configuration['client_secret']
+        })
+
+    @property
     def receipt_url(self):
         return get_lms_url(self.configuration['receipt_path'])
 
@@ -113,7 +121,7 @@ class Paypal(BasePaymentProcessor):
         except PaypalWebProfile.DoesNotExist:
             pass
 
-        payment = paypalrestsdk.Payment(data)
+        payment = paypalrestsdk.Payment(data, api=self.paypal_api)
         payment.create()
 
         # Raise an exception for payments that were not successfully created. Consuming code is
@@ -180,7 +188,7 @@ class Paypal(BasePaymentProcessor):
 
         for attempt_count in range(1, available_attempts + 1):
 
-            payment = paypalrestsdk.Payment.find(response.get('paymentId'))
+            payment = paypalrestsdk.Payment.find(response.get('paymentId'), api=self.paypal_api)
             payment.execute(data)
 
             if payment.success():
@@ -267,7 +275,7 @@ class Paypal(BasePaymentProcessor):
         order = source.order
 
         try:
-            payment = paypalrestsdk.Payment.find(source.reference)
+            payment = paypalrestsdk.Payment.find(source.reference, api=self.paypal_api)
             sale = self._get_payment_sale(payment)
 
             if not sale:
