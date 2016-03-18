@@ -578,7 +578,6 @@ class PaypalProfileAdminViewTests(TestCase):
 
 
 class StripeCheckoutTest(TestCase):
-
     def setUp(self):
         super(StripeCheckoutTest, self).setUp()
 
@@ -638,6 +637,7 @@ class StripeCheckoutTest(TestCase):
 
         handle_payment.assert_called_once_with(self.stripe_cc_token, basket=self.basket)
 
+        # Check if payment_source and payment_event got saved to the db
         self.assertTrue(self.payment_source.pk is not None)
         self.assertTrue(self.payment_event.pk is not None)
 
@@ -658,7 +658,7 @@ class StripeCheckoutTest(TestCase):
         ) as handle_payment:
             response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
 
-        self.assertFalse(handle_payment.called)
+        handle_payment.assert_not_called()
 
         self.assertTrue(self.payment_source.pk is None)
         self.assertTrue(self.payment_event.pk is None)
@@ -688,12 +688,12 @@ class StripeCheckoutTest(TestCase):
             StripeProcessor, 'handle_processor_response', side_effect=GatewayError
         ):
             logger_name = 'ecommerce.extensions.payment.views'
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as log_capture:
                 response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
 
         self.assertTrue(response.status_code, 302)
         self.assertTrue(response['Location'], StripeProcessor().error_page_url)
-        l.check(
+        log_capture.check(
             (
                 logger_name,
                 'INFO',
@@ -708,13 +708,13 @@ class StripeCheckoutTest(TestCase):
             StripeProcessor, 'handle_processor_response', side_effect=ValueError
         ):
             logger_name = 'ecommerce.extensions.payment.views'
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as log_capture:
                 response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
 
         self.assertTrue(response.status_code, 302)
         self.assertTrue(response['Location'], StripeProcessor().error_page_url)
 
-        l.check(
+        log_capture.check(
             (
                 logger_name,
                 'ERROR',
@@ -733,11 +733,11 @@ class StripeCheckoutTest(TestCase):
             StripeCheckoutView, 'handle_order_placement', side_effect=UnableToPlaceOrder
         ):
             logger_name = 'ecommerce.extensions.payment.views'
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as log_capture:
                 with self.assertRaises(UnableToPlaceOrder):
                     self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
 
-        l.check(
+        log_capture.check(
             (
                 logger_name,
                 'ERROR',

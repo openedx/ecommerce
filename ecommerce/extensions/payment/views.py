@@ -348,7 +348,7 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
     def locate_basket(self):
         """
         Returns: Basket or None, basket should be located using either HTTP request or url.
-                 If basket can't be located return None.
+                 If basket can't be located returns None.
         """
         raise NotImplementedError
 

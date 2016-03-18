@@ -175,9 +175,7 @@ class StripeProcessor(BasePaymentProcessor):
                 charge=transaction_id,
                 api_key=self.secret_key,
                 reason="requested_by_customer",
-                amount=self.dollars_to_cents(amount),
-                currency=currency,
-                receipt_number=basket.order_number,
+                amount=self.dollars_to_cents(amount)
             )
         except stripe.error.StripeError as e:
             logger.exception('Refund of Stripe charge [%s] failed!', transaction_id)

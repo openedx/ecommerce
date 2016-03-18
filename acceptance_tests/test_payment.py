@@ -88,9 +88,10 @@ class TestStripePayment(
         VerifiedCertificateMixin, PaymentMixin, WebAppTest):
 
     def unenroll_via_dashboard(self, *args, **kwargs):
-        # This is a clen-up action that raises an exception if a student
-        # is not enrolled. Fot this test this is not desired as some of
-        # the methods will have student enrolled, others don't.
+        # This is a clean-up action that raises an exception if a student
+        # is not enrolled. Fot this test this behaviour is not desired as some of
+        # the methods will result in student being enrolled, and some
+        # (for example: failed payments) don't.
         # However at the end of every test students need to be
         # un-enrolled.
         try:
@@ -131,15 +132,14 @@ class TestStripePayment(
     def test_stripe_payment_failed_on_checkout(self, cc_data):
         # This test checks for various cases where payment fails
         # but failure is handled by checkout.js from stripe
-
-        # User interacts with the stripe checkout code.
+        # (and user primarily interacts with the stripe checkout code).
 
         # Sanity check:
         self.assert_user_not_verified(self.username, self.course_id)
         self._start_checkout()
         self.browser.find_element_by_css_selector('#stripe').click()
         submitter = self.fill_stripe_cc_details(*cc_data)
-        submitter(False)
+        submitter(switch_back=False)
         WebDriverWait(self.browser, 10).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR, 'form.shake.checkoutView')))
@@ -156,8 +156,7 @@ class TestStripePayment(
     def test_stripe_payment_that_fails_during_processing(self, cc_data):
         # This test checks for various cases where card passes through
         # checkout.js and fails during charging the card on our server.
-
-        # User is is redirected to payment error page
+        # In this test user is redirected to the payment error page on LMS
 
         # Sanity check
         self.assert_user_not_verified(self.username, self.course_id)
