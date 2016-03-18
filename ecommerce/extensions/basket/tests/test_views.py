@@ -15,6 +15,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
+from ecommerce.core.models import SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
@@ -122,6 +123,19 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='BasketSummaryTest')
+        site_configuration = SiteConfiguration.objects.get(site__id=1)
+
+        old_payment_processors = site_configuration.payment_processors
+        site_configuration.payment_processors = DummyProcessor.NAME
+        site_configuration.save()
+
+        def reset_site_config():
+            """ Reset method - resets site_config to pre-test state """
+            site_configuration.payment_processors = old_payment_processors
+            site_configuration.save()
+
+        self.addCleanup(reset_site_config)
+
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
 
     def mock_course_api_error(self, error):
