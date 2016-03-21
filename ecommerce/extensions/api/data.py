@@ -67,12 +67,14 @@ def get_lms_footer():
             return response.text
         else:
             logger.error(
-                'Failed retrieve provider information for %s provider. Provider API returned status code %d. Error: %s',
-                settings.LMS_URL_ROOT, response.status_code, response.text)
+                'Unable to retrieve footer from %s. Branding API returned status code %d.',
+                settings.LMS_URL_ROOT,
+                response.status_code
+            )
             return None
     except requests.exceptions.ConnectionError:
-        logger.exception('Connection error occurred during getting data for %s provider', settings.LMS_URL_ROOT)
+        logger.exception('Connection error occurred while retrieving footer from %s.', settings.LMS_URL_ROOT)
         return None
     except requests.Timeout:
-        logger.exception('Failed to retrieve data for %s provider, connection timeout', settings.LMS_URL_ROOT)
+        logger.exception('Connection timed out while retrieving footer from %s.', settings.LMS_URL_ROOT)
         return None

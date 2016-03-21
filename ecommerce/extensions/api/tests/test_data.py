@@ -1,22 +1,18 @@
 import json
 
-from django.conf import settings
 import httpretty
 import mock
 import requests
-from testfixtures import LogCapture
 
 from ecommerce.extensions.api.data import get_lms_footer
-from ecommerce.tests.testcases import TestCase
 from ecommerce.settings import get_lms_url
-
-LOGGER_NAME = 'ecommerce.extensions.api.data'
+from ecommerce.tests.testcases import TestCase
 
 # TODO: test get_product() and get_order_metadata()
 
 
 class DataFunctionsTests(TestCase):
-    """ Tests for api data functions. """
+    """Tests for API data helpers."""
     footer_url = get_lms_url('api/branding/v1/footer')
 
     def setUp(self):
@@ -24,7 +20,7 @@ class DataFunctionsTests(TestCase):
 
     @httpretty.activate
     def test_get_lms_footer_success(self):
-        """ Verify footer information is retrieved. """
+        """Verify footer information is retrieved."""
         content = {
             'footer': 'edX Footer'
         }
@@ -35,37 +31,25 @@ class DataFunctionsTests(TestCase):
 
     @httpretty.activate
     def test_get_lms_footer_failure(self):
-        """ Verify None is returned on a non-200 status code. """
+        """Verify None is returned on a non-200 status code while retrieving LMS footer."""
         httpretty.register_uri(httpretty.GET, self.footer_url, status=404, content_type='application/json')
         response = get_lms_footer()
         self.assertIsNone(response)
 
-    def test_get_lms_footer_conn_error(self):
-        """ Verify proper logger message is displayed in case of a connection error. """
+    def test_get_lms_footer_connection_error(self):
+        """Verify behavior in the event of a connection error while retrieving LMS footer."""
         with mock.patch('requests.get', side_effect=requests.exceptions.ConnectionError()):
-            with LogCapture(LOGGER_NAME) as l:
+            with mock.patch('ecommerce.extensions.api.data.logger.exception') as mock_logger:
                 response = get_lms_footer()
-                l.check(
-                    (
-                        LOGGER_NAME, 'ERROR',
-                        u'Connection error occurred during getting data for {lms_url} provider'.format(
-                            lms_url=settings.LMS_URL_ROOT
-                        )
-                    )
-                )
+
+                self.assertTrue(mock_logger.called)
                 self.assertIsNone(response)
 
     def test_get_lms_footer_timeout(self):
-        """ Verify proper logger message is displayed in case of a time out. """
+        """Verify behavior in the event of a timeout while retrieving LMS footer."""
         with mock.patch('requests.get', side_effect=requests.Timeout()):
-            with LogCapture(LOGGER_NAME) as l:
+            with mock.patch('ecommerce.extensions.api.data.logger.exception') as mock_logger:
                 response = get_lms_footer()
-                l.check(
-                    (
-                        LOGGER_NAME, 'ERROR',
-                        u'Failed to retrieve data for {lms_url} provider, connection timeout'.format(
-                            lms_url=settings.LMS_URL_ROOT
-                        )
-                    )
-                )
+
+                self.assertTrue(mock_logger.called)
                 self.assertIsNone(response)
