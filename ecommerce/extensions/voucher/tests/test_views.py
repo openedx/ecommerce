@@ -1,5 +1,6 @@
 from django.test import RequestFactory
 from oscar.core.loading import get_model
+from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -8,6 +9,7 @@ from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
+Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
@@ -37,9 +39,13 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.coupon2 = self.create_coupon(partner=partner2, catalog=catalog2)
         self.coupon2.history.all().update(history_user=self.user)
 
-    def request_specific_voucher_report(self, coupon_id):
+    def request_specific_voucher_report(self, coupon):
+        client = factories.UserFactory()
+        basket = Basket.get_basket(client, self.site)
+        basket.add_product(coupon)
+
         request = RequestFactory()
-        response = CouponReportCSVView().get(request, coupon_id=coupon_id)
+        response = CouponReportCSVView().get(request, coupon_id=coupon.id)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.content.splitlines()), 6)
@@ -49,5 +55,5 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         Test the get method.
         CSV voucher report should contain coupon specific voucher data.
         """
-        self.request_specific_voucher_report(self.coupon1.id)
-        self.request_specific_voucher_report(self.coupon2.id)
+        self.request_specific_voucher_report(self.coupon1)
+        self.request_specific_voucher_report(self.coupon2)

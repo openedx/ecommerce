@@ -304,6 +304,9 @@ class LmsApiMockMixin(object):
 
 class CouponMixin(object):
     """ Mixin for preparing data for coupons and creating coupons. """
+
+    REDEMPTION_URL = "/coupons/offer/?code={}"
+
     def setUp(self):
         super(CouponMixin, self).setUp()
         self.category = factories.CategoryFactory()
@@ -339,7 +342,8 @@ class CouponMixin(object):
             partner=None,
             catalog=None,
             code='',
-            benefit_value=100
+            benefit_value=100,
+            note=None
     ):
         """Helper method for creating a coupon.
 
@@ -373,7 +377,7 @@ class CouponMixin(object):
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
             'categories': [self.category],
-            'note': None
+            'note': note,
         }
 
         coupon = CouponViewSet().create_coupon_product(

@@ -15,14 +15,17 @@ from ecommerce.core.url_utils import get_ecommerce_url
 
 logger = logging.getLogger(__name__)
 
+Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 Product = get_model('catalogue', 'Product')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 
 def generate_coupon_report(coupon_vouchers):
@@ -38,62 +41,96 @@ def generate_coupon_report(coupon_vouchers):
     """
 
     field_names = [
-        _('Name'),
+        _('Coupon Name'),
         _('Code'),
+        _('Coupon Type'),
         _('URL'),
         _('CourseID'),
+        _('Partner'),
+        _('Client'),
+        _('Category'),
+        _('Note'),
         _('Price'),
         _('Invoiced Amount'),
-        _('Discount'),
+        _('Discount Percentage'),
+        _('Discount Amount'),
         _('Status'),
+        _('Redeemed By ID'),
+        _('Redeemed By Username'),
         _('Created By'),
         _('Create Date'),
-        _('Expiry Date'),
+        _('Coupon Start Date'),
+        _('Coupon Expiry Date'),
     ]
     rows = []
 
     for coupon_voucher in coupon_vouchers:
+        coupon = coupon_voucher.coupon
+
         for voucher in coupon_voucher.vouchers.all():
             offer = voucher.offers.all().first()
 
             stockrecords = offer.condition.range.catalog.stock_records.all()
             course_seat = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords]).first()
             seat_stockrecord = course_seat.stockrecords.first()
-            history = coupon_voucher.coupon.history.latest()
+            history = coupon.history.latest()
 
-            coupon_stockrecord = StockRecord.objects.get(product=coupon_voucher.coupon)
+            coupon_stockrecord = StockRecord.objects.get(product=coupon)
             course_id = course_seat.course.id
             price = currency(seat_stockrecord.price_excl_tax)
             invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-            benefit_value = offer.benefit.value
             datetime_now = pytz.utc.localize(datetime.datetime.now())
             in_datetime_interval = (
                 voucher.start_datetime < datetime_now and
                 voucher.end_datetime > datetime_now
             )
+            discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
+            coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
             if in_datetime_interval:
                 status = _('Redeemed') if voucher.num_orders > 0 else _('Active')
             else:
                 status = _('Inactive')
-            if offer.benefit.type == Benefit.PERCENTAGE:
-                discount = _("{percentage} %").format(percentage=benefit_value)
+
+            discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
+            discount_amount = currency(discount_data['discount_percentage'])
+
+            if voucher.num_orders > 0:
+                voucher_applications = VoucherApplication.objects.filter(voucher=voucher).all()
+                redemption_users = [application.user for application in voucher_applications]
+                redemption_user_ids = ', '.join([str(user.id) for user in redemption_users])
+                redemption_user_usernames = ', '.join([user.username for user in redemption_users])
             else:
-                discount = currency(benefit_value)
-            URL = '{url}?code={code}'.format(url=get_ecommerce_url('/coupons/redeem/'), code=voucher.code)
+                redemption_user_ids = redemption_user_usernames = ''
+
+            URL = '{url}?code={code}'.format(url=get_ecommerce_url('/coupons/offer/'), code=voucher.code)
             author = history.history_user.full_name
 
+            try:
+                note = coupon.attr.note
+            except AttributeError:
+                note = ''
+
             rows.append({
-                'Name': voucher.name,
+                'Coupon Name': voucher.name,
                 'Code': voucher.code,
+                'Coupon Type': coupon_type,
                 'URL': URL,
                 'CourseID': course_id,
+                'Partner': seat_stockrecord.partner.name,
+                'Client': Basket.objects.filter(lines__product_id=coupon.id).first().owner.username,
+                'Category': ProductCategory.objects.get(product=coupon).category.name,
+                'Note': note,
                 'Price': price,
                 'Invoiced Amount': invoiced_amount,
-                'Discount': discount,
+                'Discount Percentage': discount_percentage,
+                'Discount Amount': discount_amount,
                 'Status': status,
+                'Redeemed By ID': redemption_user_ids,
+                'Redeemed By Username': redemption_user_usernames,
                 'Created By': author,
-                'Create Date': voucher.start_datetime.strftime("%b %d,%y"),
-                'Expiry Date': voucher.end_datetime.strftime("%b %d,%y"),
+                'Create Date': history.history_date.strftime("%b %d,%y"),
+                'Coupon Start Date': voucher.start_datetime.strftime("%b %d,%y"),
+                'Coupon Expiry Date': voucher.end_datetime.strftime("%b %d,%y"),
             })
 
     return field_names, rows
@@ -271,19 +308,30 @@ def get_voucher_discount_info(benefit, price):
     """
 
     if benefit and price > 0:
+        benefit_value = float(benefit.value)
+        price = float(price)
         if benefit.type == Benefit.PERCENTAGE:
             return {
-                'discount_percentage': float(benefit.value),
+                'discount_percentage': benefit_value,
+                'discount_value': benefit_value * price / 100.0,
                 'is_discounted': True if benefit.value < 100 else False
             }
         else:
-            discount_percentage = float(benefit.value / price) * 100.0
+            discount_percentage = benefit_value / price * 100.0
+            if discount_percentage > 100:
+                discount_percentage = 100.00
+                discount_value = price
+            else:
+                discount_percentage = float(discount_percentage)
+                discount_value = benefit.value
             return {
-                'discount_percentage': 100.00 if discount_percentage > 100 else float(discount_percentage),
+                'discount_percentage': discount_percentage,
+                'discount_value': float(discount_value),
                 'is_discounted': True if discount_percentage < 100 else False,
             }
     else:
         return {
             'discount_percentage': 0.00,
+            'discount_value': 0.00,
             'is_discounted': False
         }

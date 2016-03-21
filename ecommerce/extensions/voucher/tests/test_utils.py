@@ -10,15 +10,16 @@ from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_
 from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
+Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 Product = get_model('catalogue', 'Product')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
-REDEMPTION_URL = "/coupons/redeem/?code={}"
 VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
@@ -44,7 +45,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.seat_price = self.stock_record.price_excl_tax
         self.catalog.stock_records.add(self.stock_record)
 
-        self.coupon = self.create_coupon(title='Test product', catalog=self.catalog)
+        self.coupon = self.create_coupon(title='Test product', catalog=self.catalog, note='Test note')
 
     def create_benefits(self):
         """
@@ -62,6 +63,53 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         benefit_value_half = BenefitFactory(type=Benefit.FIXED, range=_range, value=self.seat_price / 2)
 
         return [benefit_percentage_all, benefit_percentage_half, benefit_value_all, benefit_value_half]
+
+    def setup_coupons_for_report(self):
+        """ Create specific coupons to test report generation """
+        create_vouchers(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=50.00,
+            catalog=self.catalog,
+            coupon=self.coupon,
+            end_datetime=datetime.date(2015, 10, 30),
+            name="Discount code",
+            quantity=1,
+            start_datetime=datetime.date(2015, 10, 1),
+            voucher_type=Voucher.MULTI_USE,
+            code=VOUCHER_CODE
+        )
+
+        create_vouchers(
+            benefit_type=Benefit.FIXED,
+            benefit_value=100.00,
+            catalog=self.catalog,
+            coupon=self.coupon,
+            end_datetime=datetime.date.today() + datetime.timedelta(10),
+            name="Enrollment code",
+            quantity=1,
+            start_datetime=datetime.date.today() - datetime.timedelta(1),
+            voucher_type=Voucher.MULTI_USE
+        )
+
+    def use_voucher(self, voucher, users):
+        """
+        Mark voucher as used by provided users
+
+        Args:
+            voucher (Voucher): voucher to be marked as used
+            users (list): list of users
+        """
+        for user in users:
+            voucher.record_usage(OrderFactory(), user)
+
+    def validate_report_of_redeemed_vouchers(self, row, user_ids, usernames):
+        self.assertEqual(row['Status'], 'Redeemed')
+        self.assertEqual(row['Redeemed By ID'], user_ids)
+        self.assertEqual(row['Redeemed By Username'], usernames)
+
+        self.assertEqual(row['Status'], 'Redeemed')
+        self.assertEqual(row['Redeemed By ID'], user_ids)
+        self.assertEqual(row['Redeemed By Username'], usernames)
 
     def test_create_vouchers(self):
         """
@@ -183,69 +231,90 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         """
         Test generate coupon report
         """
-        create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=100.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2015, 10, 30),
-            name="Discount code",
-            quantity=1,
-            start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE,
-            code=VOUCHER_CODE
-        )
+        self.setup_coupons_for_report()
 
-        create_vouchers(
-            benefit_type=Benefit.FIXED,
-            benefit_value=100.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2015, 10, 30),
-            name="Enrollment code",
-            quantity=1,
-            start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE
-        )
+        client = UserFactory()
+        basket = Basket.get_basket(client, self.site)
+        basket.add_product(self.coupon)
 
-        self.coupon.history.all().update(history_user=self.user)
+        coupon_history = self.coupon.history
+        coupon_history.all().update(history_user=self.user)
         coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
+
+        vouchers = coupon_vouchers.first().vouchers.all()
+        self.use_voucher(vouchers.first(), [self.user])
+
+        user2 = UserFactory()
+        self.use_voucher(vouchers[1], [self.user, user2])
+
+        category = ProductCategory.objects.get(product=self.coupon).category.name
 
         field_names, rows = generate_coupon_report(coupon_vouchers)
 
         self.assertEqual(field_names, [
-            'Name',
+            'Coupon Name',
             'Code',
+            'Coupon Type',
             'URL',
             'CourseID',
+            'Partner',
+            'Client',
+            'Category',
+            'Note',
             'Price',
             'Invoiced Amount',
-            'Discount',
+            'Discount Percentage',
+            'Discount Amount',
             'Status',
+            'Redeemed By ID',
+            'Redeemed By Username',
             'Created By',
             'Create Date',
-            'Expiry Date',
+            'Coupon Start Date',
+            'Coupon Expiry Date',
         ])
+
+        self.validate_report_of_redeemed_vouchers(rows[0], str(self.user.id), self.user.username)
+        self.validate_report_of_redeemed_vouchers(
+            rows[1],
+            '{}, {}'.format(self.user.id, user2.id),
+            '{}, {}'.format(self.user.username, user2.username)
+        )
+
         enrollment_code_row = rows[-2]
-        self.assertEqual(enrollment_code_row['Name'], 'Discount code')
+        self.assertEqual(enrollment_code_row['Coupon Name'], 'Discount code')
         self.assertEqual(enrollment_code_row['Code'], VOUCHER_CODE)
-        self.assertEqual(enrollment_code_row['URL'], get_ecommerce_url() + REDEMPTION_URL.format(VOUCHER_CODE))
+        self.assertEqual(enrollment_code_row['Coupon Type'], 'Discount')
+        self.assertEqual(enrollment_code_row['URL'], get_ecommerce_url() + self.REDEMPTION_URL.format(VOUCHER_CODE))
         self.assertEqual(enrollment_code_row['CourseID'], self.course.id)
+        self.assertEqual(enrollment_code_row['Partner'], self.partner.name)
+        self.assertEqual(enrollment_code_row['Client'], client.username)
+        self.assertEqual(enrollment_code_row['Category'], category)
+        self.assertEqual(enrollment_code_row['Note'], self.coupon.attr.note)
         self.assertEqual(enrollment_code_row['Price'], currency(100.00))
         self.assertEqual(enrollment_code_row['Invoiced Amount'], currency(100.00))
-        self.assertEqual(enrollment_code_row['Discount'], '100.00 %')
+        self.assertEqual(enrollment_code_row['Discount Percentage'], '50.0 %')
+        self.assertEqual(enrollment_code_row['Discount Amount'], '$50.00')
         self.assertEqual(enrollment_code_row['Status'], 'Inactive')
+        self.assertEqual(enrollment_code_row['Redeemed By ID'], '')
+        self.assertEqual(enrollment_code_row['Redeemed By Username'], '')
         self.assertEqual(enrollment_code_row['Created By'], self.user.full_name)
-        self.assertEqual(enrollment_code_row['Create Date'], 'Oct 01,15')
-        self.assertEqual(enrollment_code_row['Expiry Date'], 'Oct 30,15')
+        self.assertEqual(enrollment_code_row['Create Date'], coupon_history.latest().history_date.strftime("%b %d,%y"))
+        self.assertEqual(enrollment_code_row['Coupon Start Date'], 'Oct 01,15')
+        self.assertEqual(enrollment_code_row['Coupon Expiry Date'], 'Oct 30,15')
 
         enrollment_code_row = rows[-1]
-        self.assertEqual(enrollment_code_row['Name'], 'Enrollment code')
+        self.assertEqual(enrollment_code_row['Coupon Name'], 'Enrollment code')
         self.assertEqual(len(enrollment_code_row['Code']), settings.VOUCHER_CODE_LENGTH)
-        self.assertEqual(enrollment_code_row['Discount'], '$100.00')
+        self.assertEqual(enrollment_code_row['Coupon Type'], 'Enrollment')
+        self.assertEqual(enrollment_code_row['Category'], category)
+        self.assertEqual(enrollment_code_row['Discount Percentage'], '100.0 %')
+        self.assertEqual(enrollment_code_row['Discount Amount'], '$100.00')
+        self.assertEqual(enrollment_code_row['Redeemed By ID'], '')
+        self.assertEqual(enrollment_code_row['Redeemed By Username'], '')
         self.assertEqual(
             enrollment_code_row['URL'],
-            get_ecommerce_url() + REDEMPTION_URL.format(enrollment_code_row['Code'])
+            get_ecommerce_url() + self.REDEMPTION_URL.format(enrollment_code_row['Code'])
         )
 
     def test_get_voucher_discount_info(self):
@@ -261,19 +330,29 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                     benefit.type == "Absolute" and benefit.value == self.seat_price
             ):
                 self.assertEqual(discount_info['discount_percentage'], 100.00)
+                self.assertEqual(discount_info['discount_value'], 100.00)
                 self.assertFalse(discount_info['is_discounted'])
             else:
                 self.assertEqual(discount_info['discount_percentage'], 50.00)
+                self.assertEqual(discount_info['discount_value'], 50.00)
                 self.assertTrue(discount_info['is_discounted'])
 
             discount_info = get_voucher_discount_info(benefit, 0.0)
             self.assertEqual(discount_info['discount_percentage'], 0.00)
+            self.assertEqual(discount_info['discount_value'], 0.00)
             self.assertFalse(discount_info['is_discounted'])
 
             discount_info = get_voucher_discount_info(None, 0.0)
             self.assertEqual(discount_info['discount_percentage'], 0.00)
+            self.assertEqual(discount_info['discount_value'], 0.00)
             self.assertFalse(discount_info['is_discounted'])
 
             discount_info = get_voucher_discount_info(None, self.seat_price)
             self.assertEqual(discount_info['discount_percentage'], 0.00)
+            self.assertEqual(discount_info['discount_value'], 0.00)
             self.assertFalse(discount_info['is_discounted'])
+
+        discount_info = get_voucher_discount_info(benefits[-1], 20.00)
+        self.assertEqual(discount_info['discount_percentage'], 100.00)
+        self.assertEqual(discount_info['discount_value'], 20.00)
+        self.assertFalse(discount_info['is_discounted'])
