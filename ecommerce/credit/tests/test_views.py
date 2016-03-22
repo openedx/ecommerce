@@ -158,6 +158,11 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
             'Congratulations! You are eligible to purchase academic course credit for this course.'
         )
 
+        self.assertContains(
+            response,
+            self.provider_data[0]['fulfillment_instructions']
+        )
+
     def test_course_not_found(self):
         """ The view should return HTTP 404 if the course cannot be found. """
         path = reverse('credit:checkout', args=['course/not/found'])

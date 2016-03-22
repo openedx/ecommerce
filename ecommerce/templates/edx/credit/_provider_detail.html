@@ -29,39 +29,7 @@
             </button>
 
             <div class="collapse" id="fulfillment-instructions-{{ provider.id|lower }}">
-                <p>
-                    {% blocktrans with display_name=provider.display_name %}
-                        You can purchase credit through {{ display_name }} for this course for up to one year
-                        after the course end date. You can use the credit at {{ display_name }} or transfer the
-                        credit to another institution that accepts the credit.
-                    {% endblocktrans %}
-                </p>
-
-                <p>{% trans "To purchase course credit:" %}</p>
-
-                <ol>
-                    <li>
-                        {% trans "On this page, select a checkout option." %}
-                    </li>
-                    <li>{% trans "On the payment page, enter your payment information." %}</li>
-                    <li>
-                        {% blocktrans with display_name=provider.display_name %}
-                            When your payment is complete, follow the link to the {{ display_name }} website.
-                        {% endblocktrans %}
-                    </li>
-                    <li>
-                        {% blocktrans with display_name=provider.display_name %}
-                            On the {{ display_name }} website, enter all required information to request your course
-                            credit.
-                        {% endblocktrans %}
-                    </li>
-                </ol>
-                <p>
-                    {% blocktrans with display_name=provider.display_name %}
-                        After {{ display_name }} approves your credit, you can request an official transcript from
-                        {{ display_name }}.
-                    {% endblocktrans %}
-                </p>
+                {{ provider.fulfillment_instructions|safe }}
             </div>
         </div>
         <div class="col-sm-2 col-xs-2 hidden-xs">

@@ -10,9 +10,9 @@ class Range(AbstractRange):
         if self.catalog:
             return (
                 product.id in self.catalog.stock_records.values_list('product', flat=True) or
-                super(Range, self).contains_product(product)
+                super(Range, self).contains_product(product)  # pylint: disable=bad-super-call
             )
-        return super(Range, self).contains_product(product)
+        return super(Range, self).contains_product(product)  # pylint: disable=bad-super-call
 
     contains = contains_product
 
@@ -22,7 +22,7 @@ class Range(AbstractRange):
     def all_products(self):
         if self.catalog:
             catalog_products = [record.product for record in self.catalog.stock_records.all()]
-            return catalog_products + list(super(Range, self).all_products())
-        return super(Range, self).all_products()
+            return catalog_products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call
+        return super(Range, self).all_products()  # pylint: disable=bad-super-call
 
 from oscar.apps.offer.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
