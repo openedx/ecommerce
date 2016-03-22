@@ -9,7 +9,7 @@ from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 
-from ecommerce.core.models import Client
+from ecommerce.core.models import BusinessClient
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -76,6 +76,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         request = RequestFactory()
         request.data = self.coupon_data
         request.site = site
+        request.user = self.user
 
         response = CouponViewSet().create(request)
 
@@ -165,10 +166,9 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
         coupon = self.create_coupon(partner=self.partner)
-        coupon_client = Client.objects.create(username='TestX')
         basket = CouponViewSet().add_product_to_basket(
             product=coupon,
-            client=coupon_client,
+            client=self.user,
             site=self.site,
             partner=self.partner
         )
@@ -181,14 +181,14 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_create_order(self):
         """Test the order creation."""
         coupon = self.create_coupon(partner=self.partner)
-        coupon_client = Client.objects.create(username='TestX')
+        coupon_client = BusinessClient.objects.create(name='TestX')
         basket = CouponViewSet().add_product_to_basket(
             product=coupon,
-            client=coupon_client,
+            client=self.user,
             site=self.site,
             partner=self.partner
         )
-        response_data = CouponViewSet().create_order_for_invoice(basket, coupon_id=coupon.id)
+        response_data = CouponViewSet().create_order_for_invoice(basket, coupon_id=coupon.id, client=coupon_client)
         self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
         self.assertEqual(response_data[AC.KEYS.ORDER], 1)
         self.assertEqual(response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
@@ -272,7 +272,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
         self.assertIsNotNone(coupon_data['last_edited'][0])
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][1]['value'], 'edx/Demo_Course2/DemoX')
-        self.assertEqual(coupon_data['client'], 'TestX')
+        self.assertEqual(coupon_data['client'], self.user.username)
         self.assertEqual(coupon_data['price'], '100.00')
         self.assertIsNone(coupon_data['note'])
 

@@ -1,4 +1,4 @@
-from ecommerce.core.models import User
+from ecommerce.core.models import BusinessClient, User
 from ecommerce.tests.testcases import TestCase
 
 
@@ -38,3 +38,10 @@ class UserTests(TestCase):
 
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
         self.assertEquals(user.get_full_name(), full_name)
+
+
+class BusinessClientTests(TestCase):
+
+    def test_str(self):
+        client = BusinessClient.objects.create(name='TestClient')
+        self.assertEquals(str(client), 'TestClient')

@@ -11,7 +11,7 @@ class InvoiceTests(TestCase):
         self.basket.owner = factories.UserFactory()
         self.basket.order = factories.OrderFactory()
         self.basket.save()
-        self.invoice = Invoice.objects.create(basket=self.basket, state='Paid')
+        self.invoice = Invoice.objects.create(order=self.basket.order, state='Paid')
 
     def test_string(self):
         """Test to check to Invoice string matches what is expected"""
@@ -20,7 +20,7 @@ class InvoiceTests(TestCase):
 
     def test_order(self):
         """Test to check invoice order"""
-        self.assertEqual(self.basket.order, self.invoice.basket.order)
+        self.assertEqual(self.basket.order, self.invoice.order)
 
     def test_client(self):
         """Test to check invoice client"""
