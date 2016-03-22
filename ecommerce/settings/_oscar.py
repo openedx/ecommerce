@@ -110,6 +110,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'payment_page_url': None,
         'receipt_page_url': None,
         'cancel_page_url': None,
+        'send_level_2_3_details': True,
     },
     'paypal': {
         # 'mode' can be either 'sandbox' or 'live'

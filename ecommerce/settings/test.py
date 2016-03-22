@@ -94,6 +94,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         'payment_page_url': 'https://replace-me/',
         'receipt_page_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
         'cancel_page_url': get_lms_url('/commerce/checkout/cancel/'),
+        'send_level_2_3_details': True,
     },
     'paypal': {
         'mode': 'sandbox',
