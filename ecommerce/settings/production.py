@@ -58,3 +58,5 @@ DB_OVERRIDES = dict(
 
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
+
+DATABASES['OPTIONS']['init_command'] = 'SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED'
