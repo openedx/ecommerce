@@ -1,7 +1,8 @@
+import random
+# The string module is not deprecated. This is a bug in Pylint: https://www.logilab.org/ticket/2481.
+import string  # pylint: disable=deprecated-module
+
 from bok_choy.javascript import wait_for_js
-
-from factory.fuzzy import FuzzyText
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,7 +15,9 @@ from acceptance_tests.pages.ecommerce import EcommerceAppPage
 def _get_coupon_name(is_discount):
     """ Returns an appropriate coupon name. """
     prefix = 'test-discount-code-' if is_discount else 'test-enrollment-code-'
-    return FuzzyText(length=3, prefix=prefix).fuzz()
+    postfix = ''.join(random.choice(string.ascii_letters) for _ in range(3))
+
+    return prefix + postfix
 
 
 class BasketPage(EcommerceAppPage):
