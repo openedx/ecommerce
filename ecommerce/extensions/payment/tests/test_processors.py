@@ -2,6 +2,7 @@
 """Unit tests of payment processor implementations."""
 from __future__ import unicode_literals
 
+import copy
 import datetime
 import json
 import logging
@@ -11,6 +12,7 @@ from uuid import UUID
 import ddt
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.test import override_settings
 from django.test.client import RequestFactory
 import mock
 from oscar.apps.payment.exceptions import TransactionDeclined, UserCancelled, GatewayError
@@ -30,8 +32,8 @@ from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
                                                      PartialAuthorizationError)
 from ecommerce.extensions.payment.models import PaypalWebProfile
-from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.payment.processors.cybersource import Cybersource, suds_response_to_dict
+from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
@@ -103,7 +105,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     processor_class = Cybersource
     processor_name = 'cybersource'
 
-    def get_expected_transaction_parameters(self, transaction_uuid):
+    def get_expected_transaction_parameters(self, transaction_uuid, include_level_2_3_details=True):
         configuration = settings.PAYMENT_PROCESSOR_CONFIG[self.processor_name]
         access_key = configuration['access_key']
         profile_id = configuration['profile_id']
@@ -125,24 +127,28 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             'override_custom_cancel_page': self.processor.cancel_page_url,
             'merchant_defined_data1': self.course.id,
             'merchant_defined_data2': self.CERTIFICATE_TYPE,
-            'line_item_count': self.basket.lines.count(),
-            'amex_data_taa1': settings.PLATFORM_NAME,
-            'purchasing_level': '3',
-            'user_po': 'BLANK',
         }
 
-        for index, line in enumerate(self.basket.lines.all()):
-            expected['item_{}_code'.format(index)] = line.product.get_product_class().slug
-            expected['item_{}_discount_amount '.format(index)] = str(line.discount_value)
-            expected['item_{}_gross_net_indicator'.format(index)] = 'Y'
-            expected['item_{}_name'.format(index)] = line.product.title
-            expected['item_{}_quantity'.format(index)] = line.quantity
-            expected['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
-            expected['item_{}_tax_amount'.format(index)] = str(line.line_tax)
-            expected['item_{}_tax_rate'.format(index)] = '0'
-            expected['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
-            expected['item_{}_unit_of_measure'.format(index)] = 'ITM'
-            expected['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+        if include_level_2_3_details:
+            expected.update({
+                'line_item_count': self.basket.lines.count(),
+                'amex_data_taa1': settings.PLATFORM_NAME,
+                'purchasing_level': '3',
+                'user_po': 'BLANK',
+            })
+
+            for index, line in enumerate(self.basket.lines.all()):
+                expected['item_{}_code'.format(index)] = line.product.get_product_class().slug
+                expected['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+                expected['item_{}_gross_net_indicator'.format(index)] = 'Y'
+                expected['item_{}_name'.format(index)] = line.product.title
+                expected['item_{}_quantity'.format(index)] = line.quantity
+                expected['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+                expected['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+                expected['item_{}_tax_rate'.format(index)] = '0'
+                expected['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+                expected['item_{}_unit_of_measure'.format(index)] = 'ITM'
+                expected['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
 
         signed_field_names = expected.keys() + ['transaction_uuid']
         expected['signed_field_names'] = ','.join(sorted(signed_field_names))
@@ -153,17 +159,36 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         return expected
 
-    def test_get_transaction_parameters(self):
-        """ Verify the processor returns parameters including Level 2/3 details. """
+    def assert_correct_transaction_parameters(self, include_level_2_3_details=True):
+        """ Verifies the processor returns the correct parameters required to complete a transaction.
+
+         Arguments
+            include_level_23_details (bool): Determines if Level 2/3 details should be included in the parameters.
+        """
         # Patch the datetime object so that we can validate the signed_date_time field
         with mock.patch.object(Cybersource, 'utcnow', return_value=self.PI_DAY):
-            actual = self.processor.get_transaction_parameters(self.basket)
+            # NOTE (CCB): Instantiate a new processor object to ensure we reload any overridden settings.
+            actual = self.processor_class().get_transaction_parameters(self.basket)
 
-        expected = self.get_expected_transaction_parameters(actual['transaction_uuid'])
+        expected = self.get_expected_transaction_parameters(actual['transaction_uuid'], include_level_2_3_details)
         self.assertDictContainsSubset(expected, actual)
 
         # If this raises an exception, the value is not a valid UUID4.
         UUID(actual['transaction_uuid'], version=4)
+
+    def test_get_transaction_parameters(self):
+        """ Verify the processor returns the appropriate parameters required to complete a transaction. """
+        # NOTE (CCB): Make a deepcopy of the settings so that we can modify them without affecting the real settings.
+        # This is a bit simpler than using modify_copy(), which would does not support nested dictionaries.
+        payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
+        payment_processor_config[self.processor_name]['send_level_2_3_details'] = False
+
+        with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
+            self.assert_correct_transaction_parameters(include_level_2_3_details=False)
+
+    def test_get_transaction_parameters_with_level2_3_details(self):
+        """ Verify the processor returns parameters including Level 2/3 details. """
+        self.assert_correct_transaction_parameters()
 
     def test_is_signature_valid(self):
         """ Verify that the is_signature_valid method properly validates the response's signature. """
