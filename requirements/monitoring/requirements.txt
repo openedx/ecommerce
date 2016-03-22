@@ -10,3 +10,4 @@
 -r ../optional.txt
 -r ../production.txt
 -r ../test.txt
+-r ../../acceptance_tests/requirements.txt
