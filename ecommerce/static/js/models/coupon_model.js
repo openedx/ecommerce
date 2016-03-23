@@ -142,6 +142,7 @@ define([
                 data.end_date = moment.utc(this.get('end_date'));
                 data.price = this.get('price');
                 data.category_ids = [ this.get('category') ];
+                data.note = this.get('note');
 
                 // Enrollment code always gives 100% discount
                 switch (this.get('coupon_type')) {

@@ -82,7 +82,8 @@ define([
                 var course_data = this.model.get('seats')[0].attribute_values,
                     html,
                     voucher = this.model.get('vouchers')[0],
-                    category = this.model.get('categories')[0].name;
+                    category = this.model.get('categories')[0].name,
+                    note = this.model.get('note');
 
                 html = this.template({
                     course_id: this.courseID(course_data),
@@ -96,7 +97,8 @@ define([
                     price: _s.sprintf('$%s', this.model.get('price')),
                     startDateTime: this.formatDateTime(voucher.start_datetime),
                     usage: this.usageLimitation(voucher),
-                    category: category
+                    category: category,
+                    note: note,
                 });
 
                 this.$el.html(html);

@@ -316,6 +316,12 @@ class CouponMixin(object):
                 product_class=pc,
                 type='entity'
             )
+            factories.ProductAttributeFactory(
+                code='note',
+                name='Note',
+                product_class=pc,
+                type='text'
+            )
 
         return pc
 
@@ -359,7 +365,8 @@ class CouponMixin(object):
             'quantity': quantity,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
-            'categories': [self.category]
+            'categories': [self.category],
+            'note': None
         }
 
         coupon = CouponViewSet().create_coupon_product(

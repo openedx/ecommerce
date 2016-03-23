@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import json
@@ -55,7 +56,8 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'quantity': 2,
             'start_date': '2015-1-1',
             'voucher_type': Voucher.MULTI_USE,
-            'categories': [self.category]
+            'categories': [self.category],
+            'note': None,
         }
 
     def test_create(self):
@@ -147,6 +149,19 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
                 data=self.coupon_data
             )
 
+    def test_coupon_note(self):
+        """Test creating a coupon with a note."""
+        self.coupon_data.update({
+            'note': '𝑵𝑶𝑻𝑬',
+        })
+        note_coupon = CouponViewSet().create_coupon_product(
+            title='Coupon',
+            price=100,
+            data=self.coupon_data
+        )
+        self.assertEqual(note_coupon.attr.note, '𝑵𝑶𝑻𝑬')
+        self.assertEqual(note_coupon.title, 'Coupon')
+
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
         coupon = self.create_coupon(partner=self.partner)
@@ -205,7 +220,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
             'price': 100,
-            'category_ids': [self.category.id]
+            'category_ids': [self.category.id],
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 
@@ -259,6 +274,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
         self.assertEqual(coupon_data['seats'][0]['attribute_values'][1]['value'], 'edx/Demo_Course2/DemoX')
         self.assertEqual(coupon_data['client'], 'TestX')
         self.assertEqual(coupon_data['price'], '100.00')
+        self.assertIsNone(coupon_data['note'])
 
         voucher_data = coupon_data['vouchers'][0]
         self.assertEqual(voucher_data['benefit'][1], 100.0)
@@ -267,6 +283,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
         self.assertEqual(voucher_data['end_datetime'], '2020-01-01T05:00:00Z')
         self.assertIsNotNone(voucher_data['code'])
         self.assertTrue(voucher_data['is_available_to_user'][0])
+
+    def test_list_coupon_note(self):
+        """Test note is returned for coupon with note."""
+        self.data.update({
+            'note': 'Coupon note',
+        })
+        self.client.post(COUPONS_LINK, data=self.data, format='json')
+        response = self.client.get(COUPONS_LINK)
+        response_data = json.loads(response.content)
+        self.assertEqual(response_data['results'][0]['note'], 'Coupon note')
 
     def test_list_discount_coupons(self):
         """Test discount code values are returned for discount coupon."""
