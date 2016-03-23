@@ -1,5 +1,6 @@
 # Packages required in a production environment
 -r base.txt
+-r extra.txt
 
 django-ses==0.7.0
 MySQL-python==1.2.5
