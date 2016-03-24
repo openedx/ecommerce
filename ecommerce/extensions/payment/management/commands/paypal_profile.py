@@ -1,8 +1,10 @@
 import json
 import logging
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
+import paypalrestsdk
 from paypalrestsdk import WebProfile
 
 from ecommerce.extensions.payment.models import PaypalWebProfile
@@ -26,7 +28,7 @@ class Command(BaseCommand):
 
     The 'enable' and 'disable' actions are idempotent so it is safe to run them repeatedly in the same environment.
     """
-    args = "action [id] [json]"
+    args = "action config [id] [json]"
 
     @staticmethod
     def _get_argument(args, variable_name, action_name):
@@ -47,9 +49,31 @@ class Command(BaseCommand):
         Main dispatch.
         """
         args = list(args)
-        action = None
+
+        if len(args) < 2:
+            raise CommandError("Required arguments 'config' and 'action' are missing")
+
+        config = args.pop(0)
+        action = args.pop(0)
+
+        if config not in settings.PAYMENT_PROCESSOR_CONFIG:
+            raise CommandError("Payment Processor configuration {0} not found".format(config))
+
+        payment_processor_config = settings.PAYMENT_PROCESSOR_CONFIG[config]
+
+        if 'paypal' not in payment_processor_config:
+            raise CommandError("Payment Processor configuration {0} does not contain PayPal settings".format(config))
+
+        paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG[config].get('paypal')
+
+        # Initialize the PayPal REST SDK
+        paypalrestsdk.configure({
+            'mode': paypal_configuration['mode'],
+            'client_id': paypal_configuration['client_id'],
+            'client_secret': paypal_configuration['client_secret']
+        })
+
         try:
-            action = args.pop(0)
             handler = getattr(self, 'handle_{}'.format(action))
         except IndexError:
             raise CommandError("no action specified.")

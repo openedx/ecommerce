@@ -45,6 +45,15 @@ class SiteConfiguration(models.Model):
     class Meta(object):
         unique_together = ('site', 'partner')
 
+    @property
+    def allowed_payment_processors(self):
+        payment_processors = (
+            raw_processor_value.strip()
+            for raw_processor_value in self.payment_processors.split(',')
+            if raw_processor_value and not raw_processor_value.isspace()
+        )
+        return set(payment_processors)
+
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""

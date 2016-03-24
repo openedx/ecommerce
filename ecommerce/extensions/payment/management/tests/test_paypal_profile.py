@@ -4,6 +4,7 @@ import json
 import ddt
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.test import override_settings
 import mock
 
 from ecommerce.extensions.payment.management.commands.paypal_profile import Command as PaypalProfileCommand
@@ -17,6 +18,7 @@ class TestPaypalProfileCommand(TestCase):
     TEST_ID = 'test-id'
     TEST_JSON = '{"test": "json"}'
     TEST_NAME = 'test-name'
+    PAYMENT_PROCESSOR_CONFIG_KEY = 'edX'
 
     def setUp(self):
         self.stdout = StringIO()
@@ -44,7 +46,7 @@ class TestPaypalProfileCommand(TestCase):
             self.assertFalse(is_enabled)
 
     def call_command_action(self, action, *args, **options):
-        call_command('paypal_profile', action, *args, stdout=self.stdout, **options)
+        call_command('paypal_profile', self.PAYMENT_PROCESSOR_CONFIG_KEY, action, *args, stdout=self.stdout, **options)
 
     def test_list(self, mock_profile):
         mock_profile.all.return_value = [self.mock_profile_instance]
@@ -102,6 +104,33 @@ class TestPaypalProfileCommand(TestCase):
         # test idempotency
         self.call_command_action("disable", self.TEST_ID)
         self.check_enabled(False)
+
+    @override_settings(PAYMENT_PROCESSOR_CONFIG={
+        'edX': {'paypal': {}, 'cybersource': {}},
+        'no_paypal': {'cybersource': {}}
+    })
+    def test_missing_required_parameters(self, mock_profile):  # pylint: disable=unused-argument
+        # pylint: disable=protected-access
+        args = ['foo']
+        self.assertEqual('foo', PaypalProfileCommand._get_argument(args, 'dummy', 'dummy'))
+        self.assertEqual(args, [])
+        with self.assertRaises(CommandError) as exception:
+            call_command('paypal_profile', stdout=self.stdout)  # no config and action
+            self.assertEqual(exception.message, "Required arguments 'action' and 'config' are missing")
+
+        with self.assertRaises(CommandError) as exception:
+            call_command('paypal_profile', 'edX', stdout=self.stdout)  # no action
+            self.assertEqual(exception.message, "Required arguments 'action' and 'config' are missing")
+
+        with self.assertRaises(CommandError) as exception:
+            call_command('paypal_profile', 'asd', 'list', stdout=self.stdout)  # unknown profile
+            self.assertEqual(exception.message, "Payment Processor configuration asd not found")
+
+        with self.assertRaises(CommandError) as exception:
+            call_command('paypal_profile', 'no_paypal', 'list', stdout=self.stdout)  # unknown profile
+            self.assertEqual(
+                exception.message, "Payment Processor configuration no_paypal does not contain PayPal settings"
+            )
 
     def test_get_argument(self, mock_profile):  # pylint: disable=unused-argument
         # pylint: disable=protected-access

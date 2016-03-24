@@ -1,4 +1,6 @@
-from ecommerce.core.models import User
+import ddt
+
+from ecommerce.core.models import User, SiteConfiguration
 from ecommerce.tests.testcases import TestCase
 
 
@@ -38,3 +40,22 @@ class UserTests(TestCase):
 
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
         self.assertEquals(user.get_full_name(), full_name)
+
+
+@ddt.ddt
+class SiteConfigurationTests(TestCase):
+    @ddt.data(
+        ("", set()),
+        (",,", set()),
+        ("paypal", {"paypal"}),
+        ("paypal,", {"paypal"}),
+        ("paypal,cybersource", {"paypal", "cybersource"}),
+        ("paypal,,cybersource", {"paypal", "cybersource"}),
+        (",paypal,,cybersource", {"paypal", "cybersource"}),
+        (" ,paypal ,  , cybersource", {"paypal", "cybersource"}),
+        ("paypal,cybersource,something_else", {"paypal", "cybersource", "something_else"}),
+    )
+    @ddt.unpack
+    def test_allowed_payment_processors(self, payment_processors, expected_result):
+        site_config = SiteConfiguration(payment_processors=payment_processors)
+        self.assertEqual(site_config.allowed_payment_processors, expected_result)

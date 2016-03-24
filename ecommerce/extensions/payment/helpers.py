@@ -5,8 +5,10 @@ import hashlib
 
 from django.conf import settings
 from django.utils import importlib
+from threadlocals.threadlocals import get_current_request
 
 from ecommerce.extensions.payment import exceptions
+from ecommerce.core.exceptions import MissingRequestError
 
 
 def get_processor_class(path):
@@ -87,3 +89,16 @@ def sign(message, secret):
     signature = base64.b64encode(digest).decode()
 
     return signature
+
+
+def get_payment_processors():
+    request = get_current_request()
+    if request:
+        all_processors = [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
+        site_config = request.site.siteconfiguration
+        available_processors = [
+            processor for processor in all_processors
+            if processor.NAME in site_config.allowed_payment_processors and processor.is_enabled()
+        ]
+        return available_processors
+    raise MissingRequestError
