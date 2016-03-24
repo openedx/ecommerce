@@ -21,6 +21,10 @@ class PaymentProcessorResponse(models.Model):
         verbose_name = _('Payment Processor Response')
         verbose_name_plural = _('Payment Processor Responses')
 
+    @classmethod
+    def is_already_exist(cls, processor_name, transaction_id):
+        return cls.objects.filter(processor_name=processor_name, transaction_id=transaction_id).count() > 0
+
 
 class Source(AbstractSource):
     card_type = models.CharField(max_length=255, choices=CARD_TYPE_CHOICES, null=True, blank=True)

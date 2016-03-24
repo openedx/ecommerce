@@ -9,8 +9,11 @@ import hmac
 import hashlib
 import binascii
 from collections import OrderedDict
+from urlparse import urljoin
+
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 from suds.client import Client
@@ -58,11 +61,14 @@ class Adyen(BasePaymentProcessor):
         self.merchant_account = configuration.get("merchant_account")
         self.secret_key = configuration.get('secret_key')
         self.language_code = settings.LANGUAGE_CODE
+        self.receipt_url = configuration.get("receipt_url")
+        self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
 
     def get_transaction_parameters(self, basket, request=None):
         """
         Generate a dictionary of signed parameters Adyen requires to complete a transaction.
         """
+        result_url = urljoin(self.ecommerce_url_root, reverse('adyen_execute'))
         parameters = {
             'skinCode': self.skin_code,
             'currencyCode': basket.currency,
@@ -71,7 +77,10 @@ class Adyen(BasePaymentProcessor):
             'merchantAccount': self.merchant_account,
             'sessionValidity': self.utcnow().strftime(ISO_8601_FORMAT),
             'shipBeforeDate': self.utcnow().strftime(ISO_8601_FORMAT),
-            'shopperLocale': self.language_code
+            'shopperLocale': self.language_code,
+            'countryCode': 'NL',
+            'resURL': result_url,
+            'merchantReturnData': str(basket.id)
         }
 
         parameters.update({

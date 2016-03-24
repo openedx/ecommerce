@@ -19,6 +19,7 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
+from ecommerce.extensions.payment.processors.adyen import Adyen
 
 
 logger = logging.getLogger(__name__)
@@ -299,3 +300,38 @@ class PaypalProfileAdminView(View):
         logger.removeHandler(log_handler)
 
         return HttpResponse(output, content_type='text/plain', status=200 if success else 500)
+
+
+class AdyenPaymentExecutionView(EdxOrderPlacementMixin, View):
+    """Execute an approved Adyen payment and place an order for paid products as appropriate."""
+    payment_processor = Adyen()
+
+    def _get_basket(self, basket_id):
+        if not basket_id:
+            return None
+        try:
+            basket_id = int(basket_id)
+            basket = Basket.objects.get(id=basket_id)
+            basket.strategy = strategy.Default()
+            return basket
+        except (ValueError, ObjectDoesNotExist):
+            return None
+
+    @transaction.non_atomic_requests
+    def get(self, request):
+        """Process a Adyen merchant notification and place an order for paid products as appropriate."""
+        response_result = request.GET.get('authResult')
+        if response_result != "AUTHORISED":
+            # error handling
+            pass
+        # merchantReturnData field is reserved for basket_id
+        basket = self._get_basket(request.GET.get('merchantReturnData'))
+        transaction_id = request.GET.get('pspReference')
+        if not PaymentProcessorResponse.is_already_exist(self.payment_processor.NAME, transaction_id):
+            self.payment_processor.record_processor_response(
+                request.GET.dict(),
+                transaction_id=transaction_id,
+                basket=basket
+            )
+            logger.info(u"Successfully created Adyen payment [%s] for basket [%d].", transaction_id, basket.id)
+        return redirect(self.payment_processor.receipt_url)

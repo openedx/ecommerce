@@ -33,7 +33,8 @@ PAYMENT_PROCESSOR_CONFIG = {
         'skin_code': '69LHboek',
         'merchant_reference': 'SKINTEST-1457382180204',
         'merchant_account': 'EdXORG',
-        'secret_key': '5F1C8A4C07575478D32D55729A962C4390C3E5604CA57C72563FB7C3B8EC918F'
+        'secret_key': '5F1C8A4C07575478D32D55729A962C4390C3E5604CA57C72563FB7C3B8EC918F',
+        'receipt_url': get_lms_url('/commerce/checkout/receipt/')
     },
     'cybersource': {
         'merchant_id': 'edx_org',
