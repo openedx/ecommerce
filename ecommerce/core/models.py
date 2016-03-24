@@ -69,5 +69,13 @@ class User(AbstractUser):
 
 
 class Client(User):
-    """The model for the business client."""
     pass
+
+
+class BusinessClient(models.Model):
+    """The model for the business client."""
+
+    name = models.CharField(_('Name'), unique=True, max_length=255, blank=False, null=False)
+
+    def __str__(self):
+        return self.name

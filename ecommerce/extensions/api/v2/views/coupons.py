@@ -11,7 +11,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.core.models import Client
+from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
@@ -76,7 +76,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
             categories = Category.objects.filter(id__in=request.data['category_ids'])
-            client, __ = Client.objects.get_or_create(username=client_username)
+            client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note', None)
 
             stock_records_string = ' '.join(str(id) for id in stock_record_ids)
@@ -106,13 +106,13 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
 
             basket = self.add_product_to_basket(
                 product=coupon_product,
-                client=client,
+                client=request.user,
                 site=request.site,
                 partner=partner
             )
 
             # Create an order now since payment is handled out of band via an invoice.
-            response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id)
+            response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id, client=client)
 
             return Response(response_data, status=status.HTTP_200_OK)
 
@@ -207,7 +207,7 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         )
         return basket
 
-    def create_order_for_invoice(self, basket, coupon_id):
+    def create_order_for_invoice(self, basket, coupon_id, client):
         """Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
 
@@ -219,13 +219,6 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
         }
         basket.freeze()
 
-        # Invoice payment processor invocation.
-        payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(response={}, basket=basket)
-        response_data[AC.KEYS.PAYMENT_DATA] = {
-            AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
-        }
-
         order = self.handle_order_placement(
             order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
             user=basket.owner,
@@ -236,6 +229,13 @@ class CouponViewSet(EdxOrderPlacementMixin, NonDestroyableModelViewSet):
             billing_address=None,
             order_total=order_metadata[AC.KEYS.ORDER_TOTAL]
         )
+
+        # Invoice payment processor invocation.
+        payment_processor = InvoicePayment
+        payment_processor().handle_processor_response(response={}, order=order, business_client=client)
+        response_data[AC.KEYS.PAYMENT_DATA] = {
+            AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
+        }
 
         response_data[AC.KEYS.ORDER] = order.id
         logger.info(

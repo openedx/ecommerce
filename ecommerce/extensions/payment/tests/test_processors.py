@@ -656,7 +656,9 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
     def test_handle_processor_response(self):
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
 
-        source, payment_event = self.processor_class().handle_processor_response({}, basket=self.basket)
+        order = factories.OrderFactory()
+
+        source, payment_event = self.processor_class().handle_processor_response({}, order)
 
         # Validate PaymentEvent
         self.assertEqual(payment_event.event_type.name, PaymentEventTypeName.PAID)

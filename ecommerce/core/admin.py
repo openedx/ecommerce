@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
 
-from ecommerce.core.models import SiteConfiguration, User
+from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 
 
 class SiteConfigurationAdmin(admin.ModelAdmin):
@@ -20,6 +20,10 @@ class EcommerceUserAdmin(UserAdmin):
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
 
+
+@admin.register(BusinessClient)
+class BusinessClientAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(SiteConfiguration, SiteConfigurationAdmin)
 admin.site.register(User, EcommerceUserAdmin)

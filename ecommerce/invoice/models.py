@@ -10,20 +10,22 @@ class Invoice(TimeStampedModel):
         (NOT_PAID, _('Not Paid')),
         (PAID, _('Paid')),
     )
-    basket = models.ForeignKey('basket.Basket', null=False, blank=False)
+    basket = models.ForeignKey('basket.Basket', null=True, blank=True)
+    order = models.ForeignKey('order.Order', null=True, blank=False)
+    business_client = models.ForeignKey('core.BusinessClient', null=True, blank=False)
     state = models.CharField(max_length=255, default=NOT_PAID, choices=state_choices)
 
     history = HistoricalRecords()
 
     def __str__(self):
-        return 'Invoice {id} for order number {order}'.format(id=self.id, order=self.basket.order.number)
+        return 'Invoice {id} for order number {order}'.format(id=self.id, order=self.order.number)
 
     @property
     def total(self):
         """Total amount paid for this Invoice"""
-        return self.basket.order.total_incl_tax
+        return self.order.total_incl_tax
 
     @property
     def client(self):
         """Client for this invoice"""
-        return self.basket.order.user
+        return self.business_client

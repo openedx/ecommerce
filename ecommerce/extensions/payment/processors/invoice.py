@@ -18,7 +18,7 @@ class InvoicePayment(BasePaymentProcessor):
 
     NAME = u'invoice'
 
-    def handle_processor_response(self, response, basket=None):
+    def handle_processor_response(self, response, order=None, business_client=None):  # pylint: disable=arguments-differ
         """
         Since this is an Invoice just record the transaction.
 
@@ -34,7 +34,7 @@ class InvoicePayment(BasePaymentProcessor):
         event = PaymentEvent(event_type=event_type, processor_name=self.NAME)
 
         # Create an Invoice.
-        Invoice.objects.create(basket=basket)
+        Invoice.objects.create(order=order, business_client=business_client)
 
         return source, event
 
