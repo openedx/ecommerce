@@ -67,7 +67,11 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-us'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#site-id
-SITE_ID = 1
+# This needs to be set to None in order to support multitenancy
+SITE_ID = None
+
+# See: https://github.com/edx/edx-django-sites-extensions
+DEFAULT_SITE_ID = 1
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#use-i18n
 USE_I18N = True
@@ -188,7 +192,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.contrib.sites.middleware.CurrentSiteMiddleware',
+    'django_sites_extensions.middleware.CurrentSiteWithDefaultMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
@@ -197,6 +201,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'threadlocals.middleware.ThreadLocalMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
@@ -205,24 +210,8 @@ MIDDLEWARE_CLASSES = (
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = '{}.urls'.format(SITE_NAME)
 
-# Absolute URL used to construct URLs pointing back to the ecommerce service.
-ECOMMERCE_URL_ROOT = None
-
-# Absolute URL used to construct LMS URLs.
-LMS_URL_ROOT = None
-
-# The location of the LMS heartbeat page
-LMS_HEARTBEAT_URL = None
-
-# The location of the LMS student dashboard
-LMS_DASHBOARD_URL = None
-
-# URL to which enrollment requests should be made
-ENROLLMENT_API_URL = None
-
 # Commerce API settings used for publishing information to LMS.
 COMMERCE_API_TIMEOUT = 7
-COMMERCE_API_URL = None
 
 # Cache course info from course API.
 COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
@@ -230,9 +219,6 @@ COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
-
-# OAuth2 provider URL used for OAuth2 transactions (e.g. validating access tokens)
-OAUTH2_PROVIDER_URL = None
 # END URL CONFIGURATION
 
 
@@ -341,6 +327,8 @@ AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 INSTALLED_APPS += ['social.apps.django_app.default']
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOpenIdConnect',) + AUTHENTICATION_BACKENDS
+
+SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
 # Set to true if using SSL and running behind a proxy
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
@@ -477,7 +465,6 @@ CELERY_ALWAYS_EAGER = False
 # END CELERY
 
 
-PLATFORM_NAME = 'Your Platform Name Here'
 THEME_SCSS = 'sass/themes/default.scss'
 
 # Link to the support site

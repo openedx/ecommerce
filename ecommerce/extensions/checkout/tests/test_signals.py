@@ -3,12 +3,13 @@ from django.core import mail
 import httpretty
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory, UserFactory
+from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
-from ecommerce.settings import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 
@@ -56,7 +57,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                 full_name=user.get_full_name(),
                 credit_hours=2,
                 credit_provider='Hogwarts',
-                platform_name=settings.PLATFORM_NAME,
+                platform_name=get_current_request().site.name,
                 receipt_url=get_lms_url('{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number))
             )
         )

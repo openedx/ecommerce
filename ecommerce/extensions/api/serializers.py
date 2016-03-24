@@ -3,7 +3,6 @@ from decimal import Decimal
 import logging
 
 from dateutil.parser import parse
-from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model, get_class
@@ -12,6 +11,7 @@ from rest_framework.reverse import reverse
 import waffle
 
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 
 logger = logging.getLogger(__name__)
@@ -372,8 +372,8 @@ class VoucherSerializer(serializers.ModelSerializer):
         return (obj.offers.first().benefit.type, obj.offers.first().benefit.value)
 
     def get_redeem_url(self, obj):
-        domain = settings.ECOMMERCE_URL_ROOT
-        return "{}/coupons/offer/?code={}".format(domain, obj.code)
+        url = get_ecommerce_url('/coupons/offer/')
+        return '{url}?code={code}'.format(url=url, code=obj.code)
 
     class Meta(object):
         model = Voucher

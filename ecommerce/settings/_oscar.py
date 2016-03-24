@@ -102,14 +102,18 @@ PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.paypal.Paypal',
 )
 
+PAYMENT_PROCESSOR_RECEIPT_PATH = '/commerce/checkout/receipt/'
+PAYMENT_PROCESSOR_CANCEL_PATH = '/commerce/checkout/cancel/'
+PAYMENT_PROCESSOR_ERROR_PATH = '/commerce/checkout/error/'
+
 PAYMENT_PROCESSOR_CONFIG = {
     'cybersource': {
         'profile_id': None,
         'access_key': None,
         'secret_key': None,
         'payment_page_url': None,
-        'receipt_page_url': None,
-        'cancel_page_url': None,
+        'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+        'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
         'send_level_2_3_details': True,
     },
     'paypal': {
@@ -117,9 +121,9 @@ PAYMENT_PROCESSOR_CONFIG = {
         'mode': None,
         'client_id': None,
         'client_secret': None,
-        'receipt_url': None,
-        'cancel_url': None,
-        'error_url': None,
+        'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+        'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+        'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
     },
 }
 

@@ -1,5 +1,4 @@
 {% extends 'edx/base.html' %}
-{% load core_extras %}
 {% load i18n %}
 {% load staticfiles %}
 
@@ -18,7 +17,7 @@
                     <span aria-hidden="true" class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="/coupons/">
-                    <div class="navbar-brand-logo" alt="{% settings_value 'PLATFORM_NAME' %}"></div>
+                    <div class="navbar-brand-logo" alt="{{ platform_name }}"></div>
                     <div class="navbar-brand-app">{% trans "Coupon Code Administration" %}</div>
                 </a>
             </div>
@@ -28,7 +27,7 @@
                     {% if user.is_authenticated %}
                         <li class="btn-group user-menu">
                             <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
-                                    onclick="window.open('{% settings_value 'LMS_DASHBOARD_URL' %}');">
+                                    onclick="window.open('{{ lms_dashboard_url }}');">
                                 <i class="icon fa fa-home" aria-hidden="true"></i>
                                 <span class="sr-only">{% trans "Dashboard for:" %}</span>
                                 {{ user.username }}

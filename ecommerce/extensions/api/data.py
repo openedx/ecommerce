@@ -2,12 +2,11 @@
 import logging
 import requests
 
-from django.conf import settings
 from oscar.core.loading import get_model, get_class
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.settings import get_lms_url
 
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
@@ -59,8 +58,9 @@ def get_lms_footer():
         str: HTML representation of the footer.
     """
     try:
+        footer_api_url = get_lms_url('api/branding/v1/footer')
         response = requests.get(
-            get_lms_url('api/branding/v1/footer'),
+            footer_api_url,
             data={'language': 'en'}
         )
         if response.status_code == 200:
@@ -68,13 +68,13 @@ def get_lms_footer():
         else:
             logger.error(
                 'Unable to retrieve footer from %s. Branding API returned status code %d.',
-                settings.LMS_URL_ROOT,
+                footer_api_url,
                 response.status_code
             )
             return None
     except requests.exceptions.ConnectionError:
-        logger.exception('Connection error occurred while retrieving footer from %s.', settings.LMS_URL_ROOT)
+        logger.exception('Connection error occurred while retrieving footer from %s.', get_lms_url())
         return None
     except requests.Timeout:
-        logger.exception('Connection timed out while retrieving footer from %s.', settings.LMS_URL_ROOT)
+        logger.exception('Connection timed out while retrieving footer from %s.', get_lms_url())
         return None

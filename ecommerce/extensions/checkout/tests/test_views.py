@@ -6,9 +6,9 @@ import httpretty
 from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.tests.testcases import TestCase
-from ecommerce.settings import get_lms_url
 
 Order = get_model('order', 'Order')
 

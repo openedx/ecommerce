@@ -1,5 +1,7 @@
 """Test Order Utility classes """
-from django.test import override_settings
+import mock
+
+from django.test.client import RequestFactory
 from oscar.core.loading import get_class
 from oscar.test.factories import create_basket as oscar_create_basket
 from oscar.test.newfactories import BasketFactory
@@ -8,10 +10,12 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.tests.factories import SiteConfigurationFactory, PartnerFactory
 from ecommerce.tests.testcases import TestCase
 
+Country = get_class('address.models', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderCreator = get_class('order.utils', 'OrderCreator')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
+ShippingAddress = get_class('order.models', 'ShippingAddress')
 
 
 class OrderNumberGeneratorTests(TestCase):
@@ -33,7 +37,11 @@ class OrderNumberGeneratorTests(TestCase):
         partner = site_configuration.partner
         basket = BasketFactory(site=None)
 
-        with override_settings(SITE_ID=site.id):
+        request = RequestFactory().get('')
+        request.session = None
+        request.site = site
+
+        with mock.patch('ecommerce.extensions.order.utils.get_current_request', mock.Mock(return_value=request)):
             self.assert_order_number_matches_basket(basket, partner)
 
     def test_order_number_from_basket_id(self):
@@ -57,14 +65,25 @@ class OrderCreatorTests(TestCase):
     def setUp(self):
         super(OrderCreatorTests, self).setUp()
         self.user = self.create_user()
+        self.country = Country.objects.create(printable_name='Fake', name='fake')
+        self.shipping_address = ShippingAddress.objects.create(line1='Fake Address', country=self.country)
 
     def create_order_model(self, basket):
         """ Call the create_order_model method to create an Order from the given Basket. """
         shipping_method = NoShippingRequired()
         shipping_charge = shipping_method.calculate(basket)
         total = OrderTotalCalculator().calculate(basket, shipping_charge)
-        return self.order_creator.create_order_model(self.user, basket, None, shipping_method, shipping_charge,
-                                                     None, total, basket.order_number, ORDER.OPEN)
+        return self.order_creator.create_order_model(
+            self.user, basket,
+            self.shipping_address,
+            shipping_method,
+            shipping_charge,
+            None,
+            total,
+            basket.order_number,
+            ORDER.OPEN,
+            currency='fake'
+        )
 
     def create_basket(self, site):
         """ Returns a new Basket with the specified Site. """
