@@ -100,6 +100,11 @@ def voucher_is_valid(voucher, product, request):
 class CouponAppView(StaffOnlyMixin, TemplateView):
     template_name = 'coupons/coupon_app.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(CouponAppView, self).get_context_data(**kwargs)
+        context['admin'] = 'coupon'
+        return context
+
 
 class CouponOfferView(TemplateView):
     template_name = 'coupons/offer.html'
