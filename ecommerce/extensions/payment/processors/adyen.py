@@ -108,11 +108,42 @@ class Adyen(BasePaymentProcessor):
     def escape_value(val):
         return val.replace('\\', '\\\\').replace(':', '\\:')
 
+    def is_signature_valid(self, response):
+        """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
+        return response and (self._generate_signature(response) == response.get('merchantSig'))
+
     def handle_processor_response(self, response, basket=None):
         """
         Handle a response (i.e., "merchant notification") from Adyen.
         """
-        pass
+        transaction_id = response.get('pspReference')
+        if not PaymentProcessorResponse.is_already_exist(self.NAME, transaction_id):
+            self.record_processor_response(
+                response,
+                transaction_id=transaction_id,
+                basket=basket
+            )
+            logger.info(u"Successfully created Adyen payment [%s] for basket [%d].", transaction_id, basket.id)
+
+        # Create Source to track all transactions related to this processor and order
+        source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
+        total = str(int(basket.total_incl_tax * 100))
+        email = basket.owner.email if basket and basket.owner else None
+        label = 'PayPal ({})'.format(email) if email else 'PayPal Account'
+        source = Source(
+            source_type=source_type,
+            currency=basket.currency,
+            amount_allocated=total,
+            amount_debited=total,
+            reference=transaction_id,
+            label=label,
+            card_type=None
+        )
+
+        # Create PaymentEvent to track payment
+        event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
+        event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id, processor_name=self.NAME)
+        return source, event
 
     def issue_credit(self, source, amount, currency):
         pass

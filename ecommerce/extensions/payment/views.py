@@ -320,18 +320,38 @@ class AdyenPaymentExecutionView(EdxOrderPlacementMixin, View):
     @transaction.non_atomic_requests
     def get(self, request):
         """Process a Adyen merchant notification and place an order for paid products as appropriate."""
-        response_result = request.GET.get('authResult')
-        if response_result != "AUTHORISED":
+        response = request.GET.dict()
+        response_status = response.get('authResult')
+        if response_status != "AUTHORISED":
             # error handling
             pass
+
         # merchantReturnData field is reserved for basket_id
-        basket = self._get_basket(request.GET.get('merchantReturnData'))
-        transaction_id = request.GET.get('pspReference')
-        if not PaymentProcessorResponse.is_already_exist(self.payment_processor.NAME, transaction_id):
-            self.payment_processor.record_processor_response(
-                request.GET.dict(),
-                transaction_id=transaction_id,
-                basket=basket
-            )
-            logger.info(u"Successfully created Adyen payment [%s] for basket [%d].", transaction_id, basket.id)
-        return redirect(self.payment_processor.receipt_url)
+        basket = self._get_basket(response.get('merchantReturnData'))
+        receipt_url = self.payment_processor.receipt_url
+
+        try:
+            with transaction.atomic():
+                try:
+                    self.handle_payment(response, basket)
+                except PaymentError:
+                    return redirect(receipt_url)
+        except:  # pylint: disable=bare-except
+            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
+            return redirect(receipt_url)
+
+        shipping_method = NoShippingRequired()
+        shipping_charge = shipping_method.calculate(basket)
+        order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+        self.handle_order_placement(
+            order_number=basket.order_number,
+            user=basket.owner,
+            basket=basket,
+            shipping_address=None,
+            shipping_method=shipping_method,
+            shipping_charge=shipping_charge,
+            billing_address=None,
+            order_total=order_total
+        )
+        return redirect(receipt_url)
