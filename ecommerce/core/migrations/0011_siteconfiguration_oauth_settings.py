@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='siteconfiguration',
             name='oauth_settings',
-            field=jsonfield.fields.JSONField(default=b'{}', help_text='JSON string containing OAuth backend settings.', verbose_name='OAuth settings'),
+            field=jsonfield.fields.JSONField(default={}, help_text='JSON string containing OAuth backend settings.', verbose_name='OAuth settings'),
         ),
     ]
