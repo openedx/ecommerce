@@ -103,9 +103,11 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
                 (
                     LOGGER_NAME,
                     'INFO',
-                    'order_placed: amount="{}", basket_id="{}", currency="{}", order_number="{}", user_id="{}"'.format(
+                    'order_placed: amount="{}", basket_id="{}", contains_coupon="{}", currency="{}",'
+                    ' order_number="{}", user_id="{}"'.format(
                         self.order.total_excl_tax,
                         self.order.basket.id,
+                        self.order.contains_coupon,
                         self.order.currency,
                         self.order.number,
                         self.order.user.id

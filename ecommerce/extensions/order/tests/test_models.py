@@ -27,3 +27,14 @@ class OrderTests(TestCase):
         self.order.status = status
         self.order.save()
         self.assertFalse(self.order.is_fulfillable)
+
+    def test_contains_coupon(self):
+        self.assertFalse(self.order.contains_coupon)
+
+        product_class = u'Coupon'
+        product = factories.create_product(product_class=product_class)
+        basket = factories.create_basket(empty=True)
+        factories.create_stockrecord(product, num_in_stock=1)
+        basket.add_product(product)
+        order = factories.create_order(basket=basket)
+        self.assertTrue(order.contains_coupon)
