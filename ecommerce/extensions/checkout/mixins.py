@@ -101,7 +101,8 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             basket_id=order.basket.id,
             currency=order.currency,
             order_number=order.number,
-            user_id=order.user.id
+            user_id=order.user.id,
+            contains_coupon=order.contains_coupon
         )
 
         if waffle.sample_is_active('async_order_fulfillment'):

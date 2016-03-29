@@ -15,6 +15,12 @@ class Order(AbstractOrder):
         """Returns a boolean indicating if order can be fulfilled."""
         return self.status in (ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
 
+    @property
+    def contains_coupon(self):
+        """ Return a boolean if the order contains a Coupon. """
+        return any(line.product.get_product_class().name == 'Coupon' for line in
+                   self.basket.all_lines())
+
 
 class PaymentEvent(AbstractPaymentEvent):
     processor_name = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)
