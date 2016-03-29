@@ -14,6 +14,7 @@ import pytz
 from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_api_url
 from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
@@ -72,21 +73,18 @@ class GetVoucherTests(TestCase):
         self.assertEqual(product, original_product)
 
     def test_no_product(self):
-        """ Verify that None is returned if there is no product. """
+        """ Verify that an exception is raised if there is no product. """
         voucher = VoucherFactory(code='NOPRODUCT')
         offer = ConditionalOfferFactory()
         voucher.offers.add(offer)
-        voucher, product = get_voucher_from_code(code='NOPRODUCT')
 
-        self.assertIsNotNone(voucher)
-        self.assertEqual(voucher.code, 'NOPRODUCT')
-        self.assertIsNone(product)
+        with self.assertRaises(exceptions.ProductNotFoundError):
+            get_voucher_from_code(code='NOPRODUCT')
 
     def test_get_non_existing_voucher(self):
-        """ Verify that get_voucher_from_code() returns None for a non-existing voucher. """
-        voucher, product = get_voucher_from_code(code='INVALID')
-        self.assertIsNone(voucher)
-        self.assertIsNone(product)
+        """ Verify that get_voucher_from_code() raises exception for a non-existing voucher. """
+        with self.assertRaises(Voucher.DoesNotExist):
+            get_voucher_from_code(code='INVALID')
 
     def test_valid_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is valid. """
@@ -169,10 +167,18 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(response.context['error'], _('This coupon code is invalid.'))
 
     def test_invalid_voucher(self):
-        """ Verify a proper response is returned when voucher with provided code does not exist. """
+        """ Verify an error is returned when voucher with provided code does not exist. """
         url = self.path + '?code={}'.format('DOESNTEXIST')
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('Coupon does not exist'))
+
+    def test_no_product(self):
+        """ Verify an error is returned for voucher with no product. """
+        no_product_range = RangeFactory()
+        prepare_voucher(code='NOPRODUCT', _range=no_product_range)
+        url = self.path + '?code={}'.format('NOPRODUCT')
+        response = self.client.get(url)
+        self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
 
     def test_course_information_error(self):
         """ Verify a response is returned when course information is not accessable. """
@@ -249,10 +255,20 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(response.context['error'], _('Code not provided'))
 
     def test_invalid_voucher(self):
-        """ Verify a response message is returned when voucher does not exist. """
-        url = self.redeem_url + '?code={}'.format('DOESNTEXIST')
+        """ Verify an error is returned when voucher does not exist. """
+        code = 'DOESNTEXIST'
+        url = self.redeem_url + '?code={}'.format(code)
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('Coupon does not exist'))
+        msg = 'No voucher found with code {code}'.format(code=code)
+        self.assertEqual(response.context['error'], _(msg))
+
+    def test_no_product(self):
+        """ Verify an error is returned for voucher with no product. """
+        no_product_range = RangeFactory()
+        prepare_voucher(code='NOPRODUCT', _range=no_product_range)
+        url = self.redeem_url + '?code={}'.format('NOPRODUCT')
+        response = self.client.get(url)
+        self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
 
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """

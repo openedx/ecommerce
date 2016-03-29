@@ -17,6 +17,7 @@ from edx_rest_api_client.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
+from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.data import get_lms_footer
@@ -44,20 +45,19 @@ def get_voucher_from_code(code):
     Returns:
         voucher (Voucher): The Voucher for the passed code.
         product (Product): The Product associated with the Voucher.
+
+    Raises:
+        Voucher.DoesNotExist: When no vouchers with provided code exist.
+        ProductNotFoundError: When no products are associated with the voucher.
     """
-    voucher = None
-    product = None
-    # Check to see if a voucher exists for the code.
-    try:
-        voucher = Voucher.objects.get(code=code)
-    except Voucher.DoesNotExist:
-        logger.exception('Voucher does not exist for code [%s].', code)
-        return voucher, product
+    voucher = Voucher.objects.get(code=code)
 
     # Just get the first product.
     products = voucher.offers.all()[0].benefit.range.all_products()
     if products:
         product = products[0]
+    else:
+        raise exceptions.ProductNotFoundError()
     return voucher, product
 
 
@@ -114,7 +114,18 @@ class CouponOfferView(TemplateView):
         footer = get_lms_footer()
         code = self.request.GET.get('code', None)
         if code is not None:
-            voucher, product = get_voucher_from_code(code=code)
+            try:
+                voucher, product = get_voucher_from_code(code=code)
+            except Voucher.DoesNotExist:
+                return {
+                    'error': _('Coupon does not exist'),
+                    'footer': footer,
+                }
+            except exceptions.ProductNotFoundError:
+                return {
+                    'error': _('The voucher is not applicable to your current basket.'),
+                    'footer': footer,
+                }
             valid_voucher, msg = voucher_is_valid(voucher, product, self.request)
             if valid_voucher:
                 api = EdxRestApiClient(
@@ -182,8 +193,14 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         if not code:
             return render(request, template_name, {'error': _('Code not provided')})
+        try:
+            voucher, product = get_voucher_from_code(code=code)
+        except Voucher.DoesNotExist:
+            msg = 'No voucher found with code {code}'.format(code=code)
+            return render(request, template_name, {'error': _(msg)})
+        except exceptions.ProductNotFoundError:
+            return render(request, template_name, {'error': _('The voucher is not applicable to your current basket.')})
 
-        voucher, product = get_voucher_from_code(code=code)
         valid_voucher, msg = voucher_is_valid(voucher, product, request)
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
