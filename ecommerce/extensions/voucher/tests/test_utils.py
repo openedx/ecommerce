@@ -1,3 +1,4 @@
+import httpretty
 from django.db import IntegrityError
 from django.test import override_settings
 from oscar.templatetags.currency_filters import currency
@@ -7,13 +8,14 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report, get_voucher_discount_info
-from ecommerce.tests.mixins import CouponMixin
+from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 CouponVouchers = get_model('voucher', 'CouponVouchers')
+Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -24,7 +26,7 @@ VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
 
-class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
@@ -46,6 +48,8 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.catalog.stock_records.add(self.stock_record)
 
         self.coupon = self.create_coupon(title='Test product', catalog=self.catalog, note='Test note')
+        self.coupon.history.all().update(history_user=self.user)
+        self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
     def create_benefits(self):
         """
@@ -227,21 +231,15 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                 code=VOUCHER_CODE
             )
 
+    @httpretty.activate
     def test_generate_coupon_report(self):
-        """
-        Test generate coupon report
-        """
         self.setup_coupons_for_report()
 
         client = UserFactory()
         basket = Basket.get_basket(client, self.site)
         basket.add_product(self.coupon)
 
-        coupon_history = self.coupon.history
-        coupon_history.all().update(history_user=self.user)
-        coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
-
-        vouchers = coupon_vouchers.first().vouchers.all()
+        vouchers = self.coupon_vouchers.first().vouchers.all()
         self.use_voucher(vouchers.first(), [self.user])
 
         user2 = UserFactory()
@@ -249,7 +247,8 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
         category = ProductCategory.objects.get(product=self.coupon).category.name
 
-        field_names, rows = generate_coupon_report(coupon_vouchers)
+        self.mock_course_api_response(course=self.course)
+        field_names, rows = generate_coupon_report(self.coupon_vouchers)
 
         self.assertEqual(field_names, [
             'Coupon Name',
@@ -287,8 +286,8 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(enrollment_code_row['Coupon Type'], 'Discount')
         self.assertEqual(enrollment_code_row['URL'], get_ecommerce_url() + self.REDEMPTION_URL.format(VOUCHER_CODE))
         self.assertEqual(enrollment_code_row['CourseID'], self.course.id)
-        self.assertEqual(enrollment_code_row['Partner'], self.partner.name)
-        self.assertEqual(enrollment_code_row['Client'], client.username)
+        self.assertEqual(enrollment_code_row['Partner'], 'test')
+        self.assertEqual(enrollment_code_row['Client'], self.coupon.client.name)
         self.assertEqual(enrollment_code_row['Category'], category)
         self.assertEqual(enrollment_code_row['Note'], self.coupon.attr.note)
         self.assertEqual(enrollment_code_row['Price'], currency(100.00))
@@ -299,7 +298,10 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(enrollment_code_row['Redeemed By ID'], '')
         self.assertEqual(enrollment_code_row['Redeemed By Username'], '')
         self.assertEqual(enrollment_code_row['Created By'], self.user.full_name)
-        self.assertEqual(enrollment_code_row['Create Date'], coupon_history.latest().history_date.strftime("%b %d,%y"))
+        self.assertEqual(
+            enrollment_code_row['Create Date'],
+            self.coupon.history.latest().history_date.strftime("%b %d,%y")
+        )
         self.assertEqual(enrollment_code_row['Coupon Start Date'], 'Oct 01,15')
         self.assertEqual(enrollment_code_row['Coupon Expiry Date'], 'Oct 30,15')
 
@@ -317,10 +319,19 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, TestCase):
             get_ecommerce_url() + self.REDEMPTION_URL.format(enrollment_code_row['Code'])
         )
 
+    @httpretty.activate
+    def test_generate_coupon_report_for_old_coupons(self):
+        self.setup_coupons_for_report()
+
+        Order.objects.get(basket=self.basket).delete()
+
+        self.mock_course_api_response(course=self.course)
+        __, rows = generate_coupon_report(self.coupon_vouchers)
+
+        for row in rows:
+            self.assertEqual(row['Client'], self.basket.owner.username)
+
     def test_get_voucher_discount_info(self):
-        """
-        Test get voucher discount info
-        """
         benefits = self.create_benefits()
 
         for benefit in benefits:

@@ -18,6 +18,7 @@ from oscar.test import factories
 from threadlocals.threadlocals import set_thread_variable
 from social.apps.django_app.default.models import UserSocialAuth
 
+from ecommerce.core.models import BusinessClient
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -285,7 +286,8 @@ class LmsApiMockMixin(object):
                     'uri': '/asset-v1:test+test+test+type@asset+block@images_course_image.jpg'
                 }
             },
-            'name': course.name if course else 'Test course'
+            'name': course.name if course else 'Test course',
+            'org': 'test'
         }
         course_info_json = json.dumps(course_info)
         course_id = course.id if course else 'course-v1:test+test+test'
@@ -339,6 +341,7 @@ class CouponMixin(object):
             self,
             title='Test coupon',
             price=100,
+            client=None,
             partner=None,
             catalog=None,
             code='',
@@ -361,6 +364,8 @@ class CouponMixin(object):
         """
         if partner is None:
             partner = PartnerFactory(name='Tester')
+        if client is None:
+            client, __ = BusinessClient.objects.get_or_create(name='Test Client')
         if catalog is None:
             catalog = Catalog.objects.create(partner=partner)
         quantity = 5
@@ -385,4 +390,15 @@ class CouponMixin(object):
             price=price,
             data=data
         )
+
+        self.basket = CouponViewSet().add_product_to_basket(
+            product=coupon,
+            client=factories.UserFactory(),
+            site=self.site,
+            partner=partner
+        )
+
+        self.response_data = CouponViewSet().create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
+        coupon.client = client
+
         return coupon

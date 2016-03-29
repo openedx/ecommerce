@@ -7,11 +7,15 @@ import uuid
 import pytz
 
 from django.conf import settings
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
+from edx_rest_api_client.client import EdxRestApiClient
 
-from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +24,7 @@ Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 CouponVouchers = get_model('voucher', 'CouponVouchers')
+Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 Range = get_model('offer', 'Range')
@@ -67,6 +72,15 @@ def generate_coupon_report(coupon_vouchers):
     for coupon_voucher in coupon_vouchers:
         coupon = coupon_voucher.coupon
 
+        # Get client based on the invoice that was created during coupon creation
+        basket = Basket.objects.filter(lines__product_id=coupon.id).first()
+        try:
+            order = get_object_or_404(Order, basket=basket)
+            invoice = get_object_or_404(Invoice, order=order)
+            client = invoice.client.name
+        except Http404:
+            client = basket.owner.username
+
         for voucher in coupon_voucher.vouchers.all():
             offer = voucher.offers.all().first()
 
@@ -77,6 +91,9 @@ def generate_coupon_report(coupon_vouchers):
 
             coupon_stockrecord = StockRecord.objects.get(product=coupon)
             course_id = course_seat.course.id
+            api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
+            course_organization = api.courses(course_id).get()['org']
+
             price = currency(seat_stockrecord.price_excl_tax)
             invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
             datetime_now = pytz.utc.localize(datetime.datetime.now())
@@ -116,8 +133,8 @@ def generate_coupon_report(coupon_vouchers):
                 'Coupon Type': coupon_type,
                 'URL': URL,
                 'CourseID': course_id,
-                'Partner': seat_stockrecord.partner.name,
-                'Client': Basket.objects.filter(lines__product_id=coupon.id).first().owner.username,
+                'Partner': course_organization,
+                'Client': client,
                 'Category': ProductCategory.objects.get(product=coupon).category.name,
                 'Note': note,
                 'Price': price,

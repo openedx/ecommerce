@@ -9,7 +9,6 @@ from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 
-from ecommerce.core.models import BusinessClient
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -169,33 +168,20 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
-        coupon = self.create_coupon(partner=self.partner)
-        basket = CouponViewSet().add_product_to_basket(
-            product=coupon,
-            client=self.user,
-            site=self.site,
-            partner=self.partner
-        )
+        self.create_coupon(partner=self.partner)
 
-        self.assertIsInstance(basket, Basket)
+        self.assertIsInstance(self.basket, Basket)
         self.assertEqual(Basket.objects.count(), 1)
-        self.assertEqual(basket.lines.count(), 1)
-        self.assertEqual(basket.lines.first().price_excl_tax, 100)
+        self.assertEqual(self.basket.lines.count(), 1)
+        self.assertEqual(self.basket.lines.first().price_excl_tax, 100)
 
     def test_create_order(self):
         """Test the order creation."""
-        coupon = self.create_coupon(partner=self.partner)
-        coupon_client = BusinessClient.objects.create(name='TestX')
-        basket = CouponViewSet().add_product_to_basket(
-            product=coupon,
-            client=self.user,
-            site=self.site,
-            partner=self.partner
-        )
-        response_data = CouponViewSet().create_order_for_invoice(basket, coupon_id=coupon.id, client=coupon_client)
-        self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
-        self.assertEqual(response_data[AC.KEYS.ORDER], 1)
-        self.assertEqual(response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
+        self.create_coupon(partner=self.partner)
+
+        self.assertEqual(self.response_data[AC.KEYS.BASKET_ID], 1)
+        self.assertEqual(self.response_data[AC.KEYS.ORDER], 1)
+        self.assertEqual(self.response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
 
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(Order.objects.first().status, 'Complete')

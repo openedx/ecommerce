@@ -1,3 +1,4 @@
+import httpretty
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -6,7 +7,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import CouponMixin
+from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -14,7 +15,7 @@ Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, TestCase):
+class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """Unit tests for getting coupon report."""
 
     def setUp(self):
@@ -50,10 +51,12 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.content.splitlines()), 6)
 
+    @httpretty.activate
     def test_get_csv_report_for_specific_coupon(self):
         """
         Test the get method.
         CSV voucher report should contain coupon specific voucher data.
         """
+        self.mock_course_api_response(course=self.course)
         self.request_specific_voucher_report(self.coupon1)
         self.request_specific_voucher_report(self.coupon2)
