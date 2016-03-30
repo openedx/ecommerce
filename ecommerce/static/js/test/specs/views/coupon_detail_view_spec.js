@@ -104,9 +104,6 @@ define([
 
             it('should get usage limitation from voucher data', function () {
                 expect(view.usageLimitation(enrollmentCodeVoucher)).toBe('Can be used once by one customer');
-                expect(view.usageLimitation(percentageDiscountCodeVoucher)).toBe(
-                    'Can be used multiple times by multiple customers'
-                );
                 expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe('Can only be used once per customer');
 
                 valueDiscountCodeVoucher.usage = '';

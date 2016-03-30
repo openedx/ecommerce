@@ -79,7 +79,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
             name="Discount code",
             quantity=1,
             start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.MULTI_USE,
+            voucher_type=Voucher.SINGLE_USE,
             code=VOUCHER_CODE
         )
 
@@ -92,7 +92,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
             name="Enrollment code",
             quantity=1,
             start_datetime=datetime.date.today() - datetime.timedelta(1),
-            voucher_type=Voucher.MULTI_USE
+            voucher_type=Voucher.SINGLE_USE
         )
 
     def use_voucher(self, voucher, users):

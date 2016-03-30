@@ -55,7 +55,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'code': '',
             'quantity': 2,
             'start_date': '2015-1-1',
-            'voucher_type': Voucher.MULTI_USE,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
             'categories': [self.category],
             'note': None,
         }
@@ -117,7 +117,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
         self.assertEqual(StockRecord.objects.filter(product=coupon_append).count(), 1)
         self.assertEqual(coupon_append.attr.coupon_vouchers.vouchers.count(), 7)
-        self.assertEqual(coupon_append.attr.coupon_vouchers.vouchers.filter(usage=Voucher.MULTI_USE).count(), 2)
+        self.assertEqual(coupon_append.attr.coupon_vouchers.vouchers.filter(usage=Voucher.ONCE_PER_CUSTOMER).count(), 2)
 
     def test_custom_code_string(self):
         """Test creating a coupon with custom voucher code."""
@@ -347,6 +347,15 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().start_datetime.year, 2030)
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.first().end_datetime.year, 2035)
         self.assertEqual(new_coupon.attr.coupon_vouchers.vouchers.last().end_datetime.year, 2035)
+
+    def test_exception_for_multi_use_voucher_type(self):
+        """Test that an exception is raised for multi-use voucher types."""
+        self.data.update({
+            'voucher_type': Voucher.MULTI_USE,
+        })
+
+        with self.assertRaises(NotImplementedError):
+            self.client.post(COUPONS_LINK, data=self.data, format='json')
 
 
 class CouponCategoriesListViewTests(TestCase):

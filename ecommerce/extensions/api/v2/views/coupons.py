@@ -85,6 +85,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note', None)
 
+            # We currently do not support multi-use voucher types.
+            if voucher_type == Voucher.MULTI_USE:
+                raise NotImplementedError('Multi-use voucher types are not supported')
+
             stock_records_string = ' '.join(str(id) for id in stock_record_ids)
 
             coupon_catalog, __ = get_or_create_catalog(

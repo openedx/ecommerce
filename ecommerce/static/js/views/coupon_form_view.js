@@ -56,10 +56,6 @@ define([
                 {
                     value: 'Once per customer',
                     label: gettext('Can be used once by multiple customers')
-                },
-                {
-                    value: 'Multi-use',
-                    label: gettext('Can be used multiple times by multiple customers'),
                 }
             ],
 
