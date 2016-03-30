@@ -1,13 +1,6 @@
 {% load staticfiles %}
 {% load i18n %}
 
-<div class="depth depth--3">
-    <div class="copy copy-meta">
-        {% blocktrans with benefit_value=benefit_value %}
-            You are eligible for a {{benefit_value}} discount for this course.
-        {% endblocktrans %}
-    </div>
-</div>
 <div class="container">
     <div class="row">
         <div class="col-md-3">
@@ -37,7 +30,7 @@
                 data-track-event="edx.bi.ecommerce.coupons.accept_offer"
                 data-track-category="coupon-codes"
                 data-course-id="{{ course.id }}">
-                    {% trans "Purchase Certificate" %}
+                    {% trans "Checkout" %}
                 </a>
             {% if verified %}
                 <div class="verification-note">
