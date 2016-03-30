@@ -7,11 +7,8 @@ require.config({
         'backbone.stickit': 'bower_components/backbone.stickit/backbone.stickit',
         'backbone.super': 'bower_components/backbone-super/backbone-super/backbone-super',
         'backbone.validation': 'bower_components/backbone-validation/dist/backbone-validation-amd',
-        'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
-        'bootstrap_accessibility': 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
         'collections': 'js/collections',
         'datatables.net': 'bower_components/datatables/media/js/jquery.dataTables',
-        'dataTablesBootstrap': 'bower_components/datatables/media/js/dataTables.bootstrap',
         'ecommerce': 'js/shims/ecommerce',
         'jquery': 'bower_components/jquery/dist/jquery',
         'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
@@ -29,17 +26,8 @@ require.config({
         'views': 'js/views'
     },
     shim: {
-        bootstrap: {
-            deps: ['jquery']
-        },
-        bootstrap_accessibility: {
-            deps: ['bootstrap']
-        },
         'datatables.net': {
             deps: ['jquery']
-        },
-        dataTablesBootstrap: {
-            deps: ['jquery', 'datatables.net']
         },
         'jquery-cookie': {
             deps: ['jquery']
