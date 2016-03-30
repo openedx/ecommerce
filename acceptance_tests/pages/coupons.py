@@ -107,7 +107,6 @@ class CouponsListPage(EcommerceAppPage):
             EC.presence_of_element_located((By.ID, 'CreateCoupon'))
         )
         self.browser.find_element_by_id('CreateCoupon').click()
-        self.wait_for_ajax()
 
     @wait_for_js
     def go_to_coupon_details_page(self, coupon_name):

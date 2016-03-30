@@ -3,11 +3,11 @@ from datetime import date
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.constants import DEFAULT_END_DATE, DEFAULT_START_DATE
-from acceptance_tests.mixins import LogistrationMixin
+from acceptance_tests.mixins import CouponMixin, LogistrationMixin
 from acceptance_tests.pages import CouponsCreatePage, CouponsDetailsPage, CouponsListPage
 
 
-class CouponAdministrationTests(LogistrationMixin, WebAppTest):
+class CouponAdministrationTests(CouponMixin, LogistrationMixin, WebAppTest):
     def setUp(self):
         """ Instantiate the page objects. """
         super(CouponAdministrationTests, self).setUp()

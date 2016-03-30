@@ -4,7 +4,7 @@ import ddt
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
-from acceptance_tests.mixins import (EcommerceApiMixin, EnrollmentApiMixin,
+from acceptance_tests.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
                                      LogistrationMixin, UnenrollmentMixin, PaymentMixin)
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.pages import (BasketPage, CouponsCreatePage,
@@ -13,7 +13,7 @@ from acceptance_tests.pages import (BasketPage, CouponsCreatePage,
 
 
 @ddt.ddt
-class CouponCheckoutTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin,
+class CouponCheckoutTests(CouponMixin, UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin,
                           PaymentMixin, WebAppTest):
     def setUp(self):
         """ Instantiate the page objects. """
