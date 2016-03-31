@@ -34,7 +34,7 @@ define([], function(){
         'name': 'Test Discount Code',
         'code': 'TST1234',
         'redeem_url': 'http://localhost:8002/coupons/offer/?code=TST1234',
-        'usage': 'Multi-use',
+        'usage': 'Single use',
         'start_datetime': '2015-01-01T00:00:00Z',
         'end_datetime': '3500-01-01T00:00:00Z',
         'num_basket_additions': 0,
