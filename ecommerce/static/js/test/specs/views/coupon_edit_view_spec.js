@@ -33,7 +33,7 @@ define([
                         startDate = Utils.stripTimezone(model.get('start_date')),
                         endDate = Utils.stripTimezone(model.get('end_date'));
                     expect(view.$el.find('[name=title]').val()).toEqual(model.get('title'));
-                    expect(view.$el.find('[name=code_type]').val()).toEqual('enrollment');
+                    expect(view.$el.find('[name=code_type]').val()).toEqual('Enrollment code');
                     expect(view.$el.find('[name=start_date]').val()).toEqual(startDate);
                     expect(view.$el.find('[name=end_date]').val()).toEqual(endDate);
                     expect(voucherType.children().length).toBe(2);
@@ -58,7 +58,7 @@ define([
                         startDate = Utils.stripTimezone(model.get('start_date')),
                         endDate = Utils.stripTimezone(model.get('end_date'));
                     expect(view.$el.find('[name=title]').val()).toEqual(model.get('title'));
-                    expect(view.$el.find('[name=code_type]').val()).toEqual('discount');
+                    expect(view.$el.find('[name=code_type]').val()).toEqual('Discount code');
                     expect(view.$el.find('[name=start_date]').val()).toEqual(startDate);
                     expect(view.$el.find('[name=end_date]').val()).toEqual(endDate);
                     expect(voucherType.children().length).toBe(2);

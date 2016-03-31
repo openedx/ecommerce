@@ -77,19 +77,20 @@ define([
                     expect(model.get('stock_record_ids')).toEqual([2]);
                 });
 
-                it('changePrice should call updatePrice', function () {
-                    spyOn(view, 'updatePrice');
+                it('changeTotalValue should call updateTotalValue', function () {
+                    spyOn(view, 'updateTotalValue');
                     spyOn(view, 'getSeatData');
-                    view.changePrice();
-                    expect(view.updatePrice).toHaveBeenCalled();
+                    view.changeTotalValue();
+                    expect(view.updateTotalValue).toHaveBeenCalled();
                     expect(view.getSeatData).toHaveBeenCalled();
                 });
 
-                it('updatePrice should calculate the price and update model and form fields', function () {
+                it('updateTotalValue should calculate the price and update model and form fields', function () {
                     view.$el.find('[name=quantity]').val(5).trigger('input');
-                    view.updatePrice({price: 100});
-                    expect(view.$el.find('input[name=invoiced_amount]').val()).toEqual('500');
-                    expect(model.get('price')).toEqual(500);
+                    view.updateTotalValue({price: 100});
+                    expect(view.$el.find('input[name=price]').val()).toEqual('500');
+                    expect(view.$el.find('input[name=total_value]').val()).toEqual('500');
+                    expect(model.get('total_value')).toEqual(500);
                 });
             });
 
@@ -120,7 +121,7 @@ define([
 
             describe('discount', function () {
                 beforeEach(function () {
-                    view.$el.find('[name=code_type]').val('discount').trigger('change');
+                    view.$el.find('[name=code_type]').val('Discount code').trigger('change');
                 });
 
                 it('should show the discount field', function () {
@@ -130,14 +131,14 @@ define([
                 it('should indicate the benefit type', function () {
                     view.$el.find('[name=code_type]').val('enrollment').trigger('change');
                     expect(view.$el.find('.benefit-addon').html()).toBe('%');
-                    view.$el.find('[name=benefit_type]').val('Fixed').trigger('change');
+                    view.$el.find('[name=benefit_type]').val('Absolute').trigger('change');
                     expect(view.$el.find('.benefit-addon').html()).toBe('$');
                 });
 
                 it('should toggle upper limit on the benefit value input', function () {
                     view.$el.find('[name=code_type]').val('enrollment').trigger('change');
                     expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('100');
-                    view.$el.find('[name=benefit_type]').val('Fixed').trigger('change');
+                    view.$el.find('[name=benefit_type]').val('Absolute').trigger('change');
                     expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('');
                 });
 

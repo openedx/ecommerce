@@ -15,7 +15,7 @@ from rest_framework import filters, generics, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.core.models import BusinessClient
+from ecommerce.core.models import BusinessClient, User
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
@@ -25,7 +25,8 @@ from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.extensions.voucher.utils import create_vouchers, update_voucher_offer
+from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
@@ -87,7 +88,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             quantity = request.data[AC.KEYS.QUANTITY]
             price = request.data[AC.KEYS.PRICE]
             partner = request.site.siteconfiguration.partner
-            categories = Category.objects.filter(id__in=request.data['category_ids'])
+            categories = Category.objects.filter(id__in=request.data[AC.KEYS.CATEGORY_IDS])
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note', None)
             max_uses = request.data.get('max_uses', None)
@@ -179,8 +180,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             slug=coupon_slug
         )
 
-        for category in data['categories']:
-            ProductCategory.objects.get_or_create(product=coupon_product, category=category)
+        self.assign_categories_to_coupon(coupon=coupon_product, categories=data['categories'])
 
         # Vouchers are created during order and not fulfillment like usual
         # because we want vouchers to be part of the line in the order.
@@ -226,6 +226,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         return coupon_product
 
+    def assign_categories_to_coupon(self, coupon, categories):
+        """
+        Assign categories to a coupon. If a category is already assigned, it will be fetch instead.
+        Arguments:
+            coupon (Product): Coupon product
+            categories (List): List of categories to be assigned to a coupon
+        """
+        for category in categories:
+            ProductCategory.objects.get_or_create(product=coupon, category=category)
+
     def create_order_for_invoice(self, basket, coupon_id, client):
         """Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
@@ -268,18 +278,110 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         """Update start and end dates of all vouchers associated with the coupon."""
         super(CouponViewSet, self).update(request, *args, **kwargs)
+
         coupon = self.get_object()
+        vouchers = coupon.attr.coupon_vouchers.vouchers
+        baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
+        data = {}
 
-        start_datetime = request.data.get(AC.KEYS.START_DATE, '')
-        if start_datetime:
-            coupon.attr.coupon_vouchers.vouchers.all().update(start_datetime=start_datetime)
+        for field in AC.UPDATEABLE_VOUCHER_FIELDS:
+            self.create_update_data_dict(
+                request_data=request.data,
+                request_data_key=field['request_data_key'],
+                update_dict=data,
+                update_dict_key=field['attribute']
+            )
 
-        end_datetime = request.data.get(AC.KEYS.END_DATE, '')
-        if end_datetime:
-            coupon.attr.coupon_vouchers.vouchers.all().update(end_datetime=end_datetime)
+        if data:
+            vouchers.all().update(**data)
+
+        benefit_value = request.data.get(AC.KEYS.BENEFIT_VALUE, '')
+        if benefit_value:
+            self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers)
+
+        category_ids = request.data.get(AC.KEYS.CATEGORY_IDS, '')
+        if category_ids:
+            self.update_coupon_category(category_ids=category_ids, coupon=coupon)
+
+        client_username = request.data.get(AC.KEYS.CLIENT_USERNAME, '')
+        if client_username:
+            self.update_coupon_client(baskets=baskets, client_username=client_username)
+
+        coupon_price = request.data.get(AC.KEYS.PRICE, '')
+        if coupon_price:
+            StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
+
+        note = request.data.get(AC.KEYS.NOTE, None)
+        if note is not None:
+            coupon.attr.note = note
+            coupon.save()
 
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
+
+    def create_update_data_dict(self, request_data, request_data_key, update_dict, update_dict_key):
+        """
+        Adds the value from request data to the update data dictionary
+        Arguments:
+            request_data (QueryDict): Request data
+            request_data_key (str): Request data dictionary key
+            update_dict (dict): Dictionary containing the coupon update data
+            update_dict_key (str): Update data dictionary key
+        """
+        value = request_data.get(request_data_key, '')
+        if value:
+            update_dict[update_dict_key] = value
+
+    def update_coupon_benefit_value(self, benefit_value, vouchers):
+        """
+        Remove all offers from the vouchers and add a new offer
+        Arguments:
+            benefit_value (Decimal): Benefit value associated with a new offer
+            vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
+        """
+        voucher_offers = vouchers.first().offers
+        voucher_offer = voucher_offers.first()
+
+        new_offer = update_voucher_offer(
+            offer=voucher_offer,
+            benefit_value=benefit_value,
+            benefit_type=voucher_offer.benefit.type
+        )
+        for voucher in vouchers.all():
+            voucher.offers.clear()
+            voucher.offers.add(new_offer)
+
+    def update_coupon_category(self, category_ids, coupon):
+        """
+        Remove categories currently assigned to a coupon and assigned new categories
+        Arguments:
+            category_ids (list): List of category IDs
+            coupon (Product): Coupon product to be updated
+        """
+        new_categories = Category.objects.filter(id__in=category_ids)
+
+        ProductCategory.objects.filter(product=coupon).exclude(category__in=new_categories).delete()
+
+        self.assign_categories_to_coupon(coupon=coupon, categories=new_categories)
+
+    def update_coupon_client(self, baskets, client_username):
+        """
+        Update Invoice client for new coupons or Basket owner for old coupons
+        Arguments:
+            baskets (QuerySet): Baskets associated with the coupons
+            client_username (str): Client username
+        """
+        try:
+            client, __ = BusinessClient.objects.get_or_create(name=client_username)
+            order = get_object_or_404(Order, basket=baskets.first())
+            invoices = Invoice.objects.filter(order=order)
+            if invoices:
+                invoices.update(business_client=client)
+            else:
+                raise Http404
+        except Http404:
+            user, __ = User.objects.get_or_create(username=client_username)
+            baskets.update(owner=user)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:

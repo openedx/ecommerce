@@ -174,7 +174,7 @@ def generate_coupon_report(coupon_vouchers):
         try:
             order = get_object_or_404(Order, basket=basket)
             invoice = get_object_or_404(Invoice, order=order)
-            client = invoice.client.name
+            client = invoice.business_client.name
         except Http404:
             client = basket.owner.username
 
@@ -253,7 +253,7 @@ def _generate_code_string(length):
     Create a string of random characters of specified length
 
     Args:
-        length (int): Defines the length of randomly generated string
+        length (int): Defines the length of randomly generated string.
 
     Raises:
         ValueError raised if length is less than one.
@@ -322,16 +322,16 @@ def create_vouchers(
         code=None,
         max_uses=None):
     """
-    Create vouchers
+    Create vouchers.
 
     Args:
             benefit_type (str): Type of benefit associated with vouchers.
             benefit_value (Decimal): Value of benefit associated with vouchers.
             catalog (Catalog): Catalog associated with range of products
-                               to which a voucher can be applied to
+                               to which a voucher can be applied to.
             coupon (Coupon): Coupon entity associated with vouchers.
-            end_datetime (datetime): End date for voucher offer
-            name (str): Voucher name
+            end_datetime (datetime): End date for voucher offer.
+            name (str): Voucher name.
             quantity (int): Number of vouchers to be created.
             start_datetime (datetime): Start date for voucher offer.
             voucher_type (str): Type of voucher.
@@ -375,11 +375,11 @@ def create_vouchers(
 
 def get_voucher_discount_info(benefit, price):
     """
-    Get discount info that will describe the effect that benefit has on product price
+    Get discount info that will describe the effect that benefit has on product price.
 
     Args:
-        benefit (Benefit): Benefit provided by an applied voucher
-        price (Decimal): Product price
+        benefit (Benefit): Benefit provided by an applied voucher.
+        price (Decimal): Product price.
 
     Returns:
         dict
@@ -413,3 +413,22 @@ def get_voucher_discount_info(benefit, price):
             'discount_value': 0.00,
             'is_discounted': False
         }
+
+
+def update_voucher_offer(offer, benefit_value, benefit_type):
+    """
+    Update voucher offer with new benefit value.
+
+    Args:
+        offer (Offer): Offer associated with a voucher.
+        benefit_value (Decimal): Value of benefit associated with vouchers.
+        benefit_type (str): Type of benefit associated with vouchers.
+
+    Returns:
+        Offer
+    """
+    return _get_or_create_offer(
+        product_range=offer.benefit.range,
+        benefit_value=benefit_value,
+        benefit_type=benefit_type
+    )
