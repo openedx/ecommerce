@@ -23,6 +23,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
+from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 
@@ -391,12 +392,11 @@ class CouponMixin(object):
             data=data
         )
 
-        self.basket = CouponViewSet().add_product_to_basket(
-            product=coupon,
-            client=factories.UserFactory(),
-            site=self.site,
-            partner=partner
-        )
+        request = RequestFactory()
+        request.site = self.site
+        request.user = factories.UserFactory()
+
+        self.basket = prepare_basket(request, coupon)
 
         self.response_data = CouponViewSet().create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
         coupon.client = client

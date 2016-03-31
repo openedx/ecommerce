@@ -19,6 +19,7 @@ from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
+from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
@@ -114,12 +115,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             coupon_product = self.create_coupon_product(title, price, data)
 
-            basket = self.add_product_to_basket(
-                product=coupon_product,
-                client=request.user,
-                site=request.site,
-                partner=partner
-            )
+            basket = prepare_basket(request, coupon_product)
 
             # Create an order now since payment is handled out of band via an invoice.
             response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id, client=client)
@@ -205,17 +201,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         stock_record.save()
 
         return coupon_product
-
-    def add_product_to_basket(self, product, client, site, partner):
-        """Adds the coupon product to the user's basket."""
-        basket = Basket.get_basket(client, site)
-        basket.add_product(product)
-        logger.info(
-            'Added product with SKU [%s] to basket [%d]',
-            product.stockrecords.filter(partner=partner).first().partner_sku,
-            basket.id
-        )
-        return basket
 
     def create_order_for_invoice(self, basket, coupon_id, client):
         """Creates an order from the basket and invokes the invoice payment processor."""
