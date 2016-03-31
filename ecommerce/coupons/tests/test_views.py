@@ -172,6 +172,16 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('Coupon does not exist'))
 
+    def test_expired_voucher(self):
+        """ Verify proper response is returned for expired vouchers. """
+        start_datetime = now() - datetime.timedelta(days=20)
+        end_datetime = now() - datetime.timedelta(days=10)
+        prepare_voucher(code='EXPIRED', start_datetime=start_datetime, end_datetime=end_datetime)
+
+        url = self.path + '?code={}'.format('EXPIRED')
+        response = self.client.get(url)
+        self.assertEqual(response.context['error'], _('This coupon code has expired.'))
+
     def test_no_product(self):
         """ Verify an error is returned for voucher with no product. """
         no_product_range = RangeFactory()
