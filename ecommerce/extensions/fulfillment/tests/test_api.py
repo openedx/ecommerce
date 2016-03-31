@@ -1,6 +1,7 @@
 """Tests for the Fulfillment API"""
 import ddt
 from django.test.utils import override_settings
+from mock import patch
 from nose.tools import raises
 from testfixtures import LogCapture
 
@@ -50,6 +51,16 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         api.fulfill_order(self.order, self.order.lines)
         self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
         self.assertEquals(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
+
+    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
+    @patch('ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule.get_supported_lines')
+    def test_fulfill_order_invalid_module(self, mocked_method):
+        """Verify an exception is logged when an unexpected error occurs."""
+        mocked_method.return_value = Exception
+        with patch('ecommerce.extensions.fulfillment.api.logger.exception') as mock_logger:
+            api.fulfill_order(self.order, self.order.lines)
+            self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
+            self.assertTrue(mock_logger.called)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule',
                                             'ecommerce.extensions.fulfillment.tests.modules.NotARealModule'])
