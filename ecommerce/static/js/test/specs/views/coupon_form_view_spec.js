@@ -76,6 +76,21 @@ define([
                     seatType.trigger('change');
                     expect(model.get('stock_record_ids')).toEqual([2]);
                 });
+
+                it('changePrice should call updatePrice', function () {
+                    spyOn(view, 'updatePrice');
+                    spyOn(view, 'getSeatData');
+                    view.changePrice();
+                    expect(view.updatePrice).toHaveBeenCalled();
+                    expect(view.getSeatData).toHaveBeenCalled();
+                });
+
+                it('updatePrice should calculate the price and update model and form fields', function () {
+                    view.$el.find('[name=quantity]').val(5).trigger('input');
+                    view.updatePrice({price: 100});
+                    expect(view.$el.find('input[name=invoiced_amount]').val()).toEqual('500');
+                    expect(model.get('price')).toEqual(500);
+                });
             });
 
 
