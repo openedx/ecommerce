@@ -1,7 +1,17 @@
+import logging
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from jsonfield.fields import JSONField
+
+from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
+from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
+
+
+log = logging.getLogger(__name__)
 
 
 class SiteConfiguration(models.Model):
@@ -45,6 +55,68 @@ class SiteConfiguration(models.Model):
     class Meta(object):
         unique_together = ('site', 'partner')
 
+    @property
+    def payment_processors_set(self):
+        """
+        Returns a set of enabled payment processor keys
+        Returns:
+            set[string]: Returns a set of enabled payment processor keys
+        """
+        return {
+            raw_processor_value.strip()
+            for raw_processor_value in self.payment_processors.split(',')
+        }
+
+    def _clean_payment_processors(self):
+        """
+        Validates payment_processors field value
+
+        Raises:
+            ValidationError: If `payment_processors` field contains invalid/unknown payment_processor names
+        """
+        value = self.payment_processors.strip()
+        if not value:
+            raise ValidationError('Invalid payment processors field: must not only contain whitespace characters')
+
+        processor_names = value.split(',')
+        for name in processor_names:
+            try:
+                get_processor_class_by_name(name.strip())
+            except ProcessorNotFoundError as exc:
+                log.exception(
+                    "Exception validating site configuration for site `%s` - payment processor %s could not be found",
+                    self.site.id,
+                    name
+                )
+                raise ValidationError(exc.message)
+
+    def get_payment_processors(self):
+        """
+        Returns payment processor classes enabled for the corresponding Site
+
+        Returns:
+            list[BasePaymentProcessor]: Returns payment processor classes enabled for the corresponding Site
+        """
+        all_processors = [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
+        all_processor_names = {processor.NAME for processor in all_processors}
+
+        missing_processor_configurations = self.payment_processors_set - all_processor_names
+        if missing_processor_configurations:
+            processor_config_repr = ", ".join(missing_processor_configurations)
+            log.warning(
+                'Unknown payment processors [%s] are configured for site %s', processor_config_repr, self.site.id
+            )
+
+        return [
+            processor for processor in all_processors
+            if processor.NAME in self.payment_processors_set and processor.is_enabled()
+        ]
+
+    def clean_fields(self, exclude=None):
+        """ Validates model fields """
+        if not exclude or 'payment_processors' not in exclude:
+            self._clean_payment_processors()
+
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""
@@ -79,3 +151,9 @@ class BusinessClient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+def validate_configuration():
+    """ Validates all existing SiteConfiguration models """
+    for config in SiteConfiguration.objects.all():
+        config.clean_fields()

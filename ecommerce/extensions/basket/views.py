@@ -19,7 +19,6 @@ from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value
-from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
 Benefit = get_model('offer', 'Benefit')
@@ -100,15 +99,9 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': self.get_payment_processors(),
+            'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
             'homepage_url': get_lms_url(''),
             'footer': get_lms_footer(),
             'lines': lines,
         })
         return context
-
-    def get_payment_processors(self):
-        """ Retrieve the list of active payment processors. """
-        # TODO Retrieve this information from SiteConfiguration
-        processors = (get_processor_class(path) for path in settings.PAYMENT_PROCESSORS)
-        return [processor for processor in processors if processor.is_enabled()]
