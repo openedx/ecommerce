@@ -4,7 +4,6 @@ import logging
 from urlparse import urljoin
 
 from django.core.urlresolvers import reverse
-from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 import paypalrestsdk
@@ -46,18 +45,6 @@ class Paypal(BasePaymentProcessor):
         """
         # Number of times payment execution is retried after failure.
         self.retry_attempts = self.configuration.get('retry_attempts', 1)
-
-    @cached_property
-    def paypal_api(self):
-        """
-        Returns Paypal API instance with appropriate configuration
-        Returns: Paypal API instance
-        """
-        return paypalrestsdk.Api({
-            'mode': self.configuration['mode'],
-            'client_id': self.configuration['client_id'],
-            'client_secret': self.configuration['client_secret']
-        })
 
     @property
     def receipt_url(self):
@@ -126,7 +113,7 @@ class Paypal(BasePaymentProcessor):
         except PaypalWebProfile.DoesNotExist:
             pass
 
-        payment = paypalrestsdk.Payment(data, api=self.paypal_api)
+        payment = paypalrestsdk.Payment(data)
         payment.create()
 
         # Raise an exception for payments that were not successfully created. Consuming code is
@@ -193,7 +180,7 @@ class Paypal(BasePaymentProcessor):
 
         for attempt_count in range(1, available_attempts + 1):
 
-            payment = paypalrestsdk.Payment.find(response.get('paymentId'), api=self.paypal_api)
+            payment = paypalrestsdk.Payment.find(response.get('paymentId'))
             payment.execute(data)
 
             if payment.success():
@@ -280,7 +267,7 @@ class Paypal(BasePaymentProcessor):
         order = source.order
 
         try:
-            payment = paypalrestsdk.Payment.find(source.reference, api=self.paypal_api)
+            payment = paypalrestsdk.Payment.find(source.reference)
             sale = self._get_payment_sale(payment)
 
             if not sale:

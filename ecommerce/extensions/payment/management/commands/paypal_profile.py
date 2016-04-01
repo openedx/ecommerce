@@ -1,13 +1,12 @@
 import json
 import logging
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
-import paypalrestsdk
 from paypalrestsdk import WebProfile
 
 from ecommerce.extensions.payment.models import PaypalWebProfile
+
 
 log = logging.getLogger(__name__)
 
@@ -27,9 +26,7 @@ class Command(BaseCommand):
 
     The 'enable' and 'disable' actions are idempotent so it is safe to run them repeatedly in the same environment.
     """
-    args = "action partner [id] [json]"
-
-    PAYPAL_CONFIG_KEY = "paypal"
+    args = "action [id] [json]"
 
     @staticmethod
     def _get_argument(args, variable_name, action_name):
@@ -50,28 +47,9 @@ class Command(BaseCommand):
         Main dispatch.
         """
         args = list(args)
-
-        if len(args) < 2:
-            raise CommandError("Required arguments `partner` and `action` are missing")
-
-        partner = args.pop(0)
-        action = args.pop(0)
-
+        action = None
         try:
-            paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner.lower()][self.PAYPAL_CONFIG_KEY.lower()]
-        except KeyError:
-            raise CommandError(
-                "Payment Processor configuration for partner `{0}` does not contain PayPal settings".format(partner)
-            )
-
-        # Initialize the PayPal REST SDK
-        paypalrestsdk.configure({
-            'mode': paypal_configuration['mode'],
-            'client_id': paypal_configuration['client_id'],
-            'client_secret': paypal_configuration['client_secret']
-        })
-
-        try:
+            action = args.pop(0)
             handler = getattr(self, 'handle_{}'.format(action))
         except IndexError:
             raise CommandError("no action specified.")
@@ -88,7 +66,7 @@ class Command(BaseCommand):
         if not result:
             raise CommandError("Could not create web profile: {}".format(profile.error))
         else:
-            log.info("Created profile `%s` (id=%s).", profile.name, profile.id)
+            log.info('Created profile "%s" (id=%s).', profile.name, profile.id)
         return profile
 
     def _do_update(self, profile_id, profile_data):
@@ -113,9 +91,9 @@ class Command(BaseCommand):
         try:
             __, created = PaypalWebProfile.objects.get_or_create(id=profile_id, name=profile_name)
             if created:
-                log.info("Enabled profile `%s` (id=%s)", profile_name, profile_id)
+                log.info('Enabled profile "%s" (id=%s)', profile_name, profile_id)
             else:
-                log.info("Profile `%s` (id=%s) is already enabled", profile_name, profile_id)
+                log.info('Profile "%s" (id=%s) is already enabled', profile_name, profile_id)
         except IntegrityError:
             # this should never happen, unless the data in the database has gotten out of
             # sync with the profiles stored in the PayPal account that this application

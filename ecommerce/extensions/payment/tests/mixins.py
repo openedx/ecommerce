@@ -146,7 +146,7 @@ class CybersourceMixin(object):
         for filename in files:
             path = os.path.join(os.path.dirname(__file__), filename)
             body = open(path, 'r').read()
-            url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
+            url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['cybersource']['soap_api_url'], filename)
             httpretty.register_uri(httpretty.GET, url, body=body)
 
     def get_soap_mock(self, amount=100, currency=CURRENCY, transaction_id=None, basket_id=None, decision='ACCEPT'):
@@ -385,7 +385,7 @@ class PaypalMixin(object):
         return payment_execution_response
 
     def _create_api_url(self, path):
-        mode = settings.PAYMENT_PROCESSOR_CONFIG['edx']['paypal']['mode']
+        mode = settings.PAYMENT_PROCESSOR_CONFIG['paypal']['mode']
         root = u'https://api.sandbox.paypal.com' if mode == 'sandbox' else u'https://api.paypal.com'
 
         return urljoin(root, path)

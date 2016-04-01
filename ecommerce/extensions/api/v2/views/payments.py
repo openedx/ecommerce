@@ -1,9 +1,11 @@
 """HTTP endpoints for interacting with payments."""
+from django.conf import settings
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_extensions.cache.decorators import cache_response
 
 from ecommerce.extensions.api import serializers
+from ecommerce.extensions.payment.helpers import get_processor_class
 
 
 PAYMENT_PROCESSOR_CACHE_KEY = 'PAYMENT_PROCESSOR_LIST'
@@ -26,4 +28,5 @@ class PaymentProcessorListView(generics.ListAPIView):
 
     def get_queryset(self):
         """Fetch the list of payment processor classes based on Django settings."""
-        return self.request.site.siteconfiguration.get_payment_processors()
+        processors = (get_processor_class(path) for path in settings.PAYMENT_PROCESSORS)
+        return [processor for processor in processors if processor.is_enabled()]

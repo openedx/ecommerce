@@ -35,9 +35,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 class CybersourceNotifyView(EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
-    @property
-    def payment_processor(self):
-        return Cybersource()
+    payment_processor = Cybersource()
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block
@@ -173,9 +171,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
 
 class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     """Execute an approved PayPal payment and place an order for paid products as appropriate."""
-    @property
-    def payment_processor(self):
-        return Paypal()
+    payment_processor = Paypal()
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block
