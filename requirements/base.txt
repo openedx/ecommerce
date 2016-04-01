@@ -32,3 +32,4 @@ python-social-auth==0.2.14
 pytz==2015.7
 requests==2.9.1
 suds==0.4
+path.py==7.2
