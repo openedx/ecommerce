@@ -2,10 +2,8 @@ import abc
 
 from django.conf import settings
 from oscar.core.loading import get_model
-from threadlocals.threadlocals import get_current_request
 import waffle
 
-from ecommerce.core.exceptions import MissingRequestError
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -60,13 +58,8 @@ class BasePaymentProcessor(object):  # pragma: no cover
 
         Raises:
             KeyError: If no settings found for this payment processor
-            MissingRequestError: if no `request` is available
         """
-        request = get_current_request()
-        if request:
-            partner_short_code = request.site.siteconfiguration.partner.short_code
-            return settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.NAME.lower()]
-        raise MissingRequestError
+        return settings.PAYMENT_PROCESSOR_CONFIG[self.NAME]
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """

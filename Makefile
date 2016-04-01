@@ -1,5 +1,4 @@
 NODE_BIN=./node_modules/.bin
-DIFF_COVER_BASE_BRANCH=master
 
 help:
 	@echo '                                                                                     		'
@@ -78,12 +77,6 @@ static:
 
 html_coverage:
 	coverage html && open htmlcov/index.html
-
-diff_coverage: validate fast_diff_coverage
-
-fast_diff_coverage:
-	coverage xml
-	diff-cover coverage.xml --compare-branch=$(DIFF_COVER_BASE_BRANCH)
 
 accept:
 	nosetests --with-ignore-docstrings -v acceptance_tests

@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 from django.test import override_settings
 from waffle.models import Switch
 
-from ecommerce.core.models import SiteConfiguration
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
 from ecommerce.tests.testcases import TestCase
 
@@ -17,22 +16,8 @@ class PaymentProcessorListViewTests(TestCase):
     def setUp(self):
         super(PaymentProcessorListViewTests, self).setUp()
         self.token = self.generate_jwt_token_header(self.create_user())
-        self.toggle_payment_processor(DummyProcessor.NAME, True)
-        self.toggle_payment_processor(AnotherDummyProcessor.NAME, True)
-
-        site_config, __ = SiteConfiguration.objects.get_or_create(site__id=1)
-
-        old_payment_processors = site_config.payment_processors
-        site_config.payment_processors = ",".join([DummyProcessor.NAME, AnotherDummyProcessor.NAME])
-        site_config.save()
-
-        def reset_site_config():
-            """ Reset method - resets site_config to pre-test state """
-            site_config.payment_processors = old_payment_processors
-            site_config.save()
-
-        self.addCleanup(reset_site_config)
-
+        self.toggle_payment_processor('dummy', True)
+        self.toggle_payment_processor('another-dummy', True)
         # Clear the view cache
         cache.clear()
 
@@ -70,8 +55,7 @@ class PaymentProcessorListViewTests(TestCase):
         'ecommerce.extensions.payment.tests.processors.DummyProcessor',
     ])
     def test_processor_disabled(self):
-        """  Tests that disabloing payment processor works """
-        self.toggle_payment_processor(DummyProcessor.NAME, False)
+        self.toggle_payment_processor('dummy', False)
         self.assert_processor_list_matches([])
 
     @override_settings(PAYMENT_PROCESSORS=[
@@ -79,7 +63,6 @@ class PaymentProcessorListViewTests(TestCase):
         'ecommerce.extensions.payment.tests.processors.AnotherDummyProcessor',
     ])
     def test_waffle_switches_clear_cache(self):
-        """ Tests that adding a new Switch resets processor cache """
         self.assert_processor_list_matches([DummyProcessor.NAME, AnotherDummyProcessor.NAME])
-        self.toggle_payment_processor(DummyProcessor.NAME, False)
+        self.toggle_payment_processor('dummy', False)
         self.assert_processor_list_matches([AnotherDummyProcessor.NAME])
