@@ -53,8 +53,10 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
     if _range is None:
         product = ProductFactory(title='Test product')
         _range = RangeFactory(products=[product, ])
-    else:
+    elif _range.num_products() > 0:
         product = _range.all_products()[0]
+    else:
+        product = ProductFactory(title='Test product')
 
     if start_datetime is None:
         start_datetime = now() - datetime.timedelta(days=1)
