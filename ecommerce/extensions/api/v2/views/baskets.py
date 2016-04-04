@@ -5,14 +5,16 @@ import warnings
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from oscar.core.loading import get_class, get_model
-from rest_framework import status, generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, generics, viewsets
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
 from ecommerce.extensions.analytics.utils import audit_log
-from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
+from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions, serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_default_processor_class, get_processor_class_by_name)
@@ -319,3 +321,19 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
             queryset = queryset.filter(user=user)
 
         return queryset
+
+
+class BasketByOrderRetrieveView(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated, IsStaffOrOwner, DjangoModelPermissions,)
+    serializer_class = serializers.BasketSerializer
+    queryset = Basket.objects.all()
+
+    def get_object(self):
+        basket_id = OrderNumberGenerator().basket_id(self.kwargs['order_id'])
+
+        params = {'id': basket_id}
+        user = self.request.user
+        if not user.is_staff:
+            params['owner__id'] = user.id
+
+        return Basket.objects.get(**params)

@@ -18,6 +18,7 @@ from ecommerce.courses.models import Course
 logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
+BasketLine = get_model('basket', 'Line')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
@@ -33,7 +34,6 @@ Voucher = get_model('voucher', 'Voucher')
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
-
 
 class ProductPaymentInfoMixin(serializers.ModelSerializer):
     """ Mixin class used for retrieving price information from products. """
@@ -152,6 +152,26 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Order
         fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address')
+
+
+
+class BasketLineSerializer(serializers.ModelSerializer):
+    """Serializer for parsing line item data."""
+    product = ProductSerializer()
+
+    class Meta(object):
+        model = BasketLine
+        #fields = ('title', 'quantity', 'description', 'status', 'line_price_excl_tax', 'unit_price_excl_tax', 'product')
+
+
+class BasketSerializer(serializers.ModelSerializer):
+    """Serializer for parsing basket data."""
+    date_created = serializers.DateTimeField(format=ISO_8601_FORMAT)
+    lines = BasketLineSerializer(many=True)
+
+    class Meta(object):
+        model = Basket
+        fields = ('id', 'date_created', 'lines', )  # 'total_excl_tax'
 
 
 class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abstract-method

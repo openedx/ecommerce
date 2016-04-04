@@ -12,17 +12,12 @@ import logging
 
 
 from django.conf import settings
-from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
+from oscar.apps.payment.exceptions import UserCancelled, TransactionDeclined
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
-from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
-                                                     PartialAuthorizationError)
-from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
-from ecommerce.extensions.payment.transport import RequestsTransport
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +51,6 @@ class PayboxSystem(BasePaymentProcessor):
         self.error_page_url = configuration['error_page_url']
         self.cancel_page_url = configuration['cancel_page_url']
         self.language_code = settings.LANGUAGE_CODE
-
 
     def get_transaction_parameters(self, basket, request=None):
         """
@@ -99,7 +93,6 @@ class PayboxSystem(BasePaymentProcessor):
 
         return params
 
-
     @staticmethod
     def utcnow():
         """
@@ -108,7 +101,6 @@ class PayboxSystem(BasePaymentProcessor):
         This is primarily here as a test helper, since we cannot mock datetime.datetime.
         """
         return datetime.datetime.utcnow()
-
 
     def handle_processor_response(self, response, basket=None):
         """
@@ -128,7 +120,6 @@ class PayboxSystem(BasePaymentProcessor):
             TransactionDeclined: Indicates the payment was declined by the processor.
         """
 
-        #import ipdb; ipdb.set_trace()
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
         code = response['reponse-paybox']
@@ -156,16 +147,13 @@ class PayboxSystem(BasePaymentProcessor):
 
         return source, event
 
-
     def issue_credit(self, source, amount, currency):
         """This method is call by Oscar backoffice when a user requested reimbursement and we accept it.
         As 'Paybox system' do no allow reimbursemement, it have to be done manualy in Paybox's backoffice.
         See: http://localhost:8080/dashboard/refunds/
         """
-
         return
 
     @classmethod
     def is_enabled(cls):
         return True   # override waffle switch system, as I currently do not understand it
-

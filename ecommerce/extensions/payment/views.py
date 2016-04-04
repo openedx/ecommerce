@@ -127,7 +127,6 @@ class PayboxSystemNotifyView(EdxOrderPlacementMixin, View):
                 shipping_charge=shipping_charge,
                 order_total=order_total,
             )
-
         except:  # pylint: disable=bare-except
             logger.exception(self.order_placement_failure_msg, basket.id)
             return HttpResponse(status=500)

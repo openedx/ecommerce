@@ -17,9 +17,13 @@ BASKET_ID_PATTERN = r'(?P<basket_id>[\w]+)'
 BASKET_URLS = [
     url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
     url(
-        r'^{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
-        basket_views.OrderByBasketRetrieveView.as_view(),
-        name='retrieve_order'
+       r'^{basket_id}/order/$'.format(basket_id=BASKET_ID_PATTERN),
+       basket_views.OrderByBasketRetrieveView.as_view(),
+       name='retrieve_order'
+    ),
+    url(r'(?P<order_id>\w*\-\d*)/$',
+        basket_views.BasketByOrderRetrieveView.as_view(),
+        name='retrieve_basket_by_order'
     ),
 ]
 
@@ -60,6 +64,7 @@ urlpatterns = [
 ]
 
 router = ExtendedSimpleRouter()
+
 router.register(r'courses', course_views.CourseViewSet) \
     .register(r'products', product_views.ProductViewSet,
               base_name='course-product', parents_query_lookups=['course_id'])
