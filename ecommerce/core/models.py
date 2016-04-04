@@ -151,3 +151,9 @@ class BusinessClient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+def validate_configuration():
+    """ Validates all existing SiteConfiguration models """
+    for config in SiteConfiguration.objects.all():
+        config.clean_fields()
