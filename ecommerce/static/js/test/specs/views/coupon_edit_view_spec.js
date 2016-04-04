@@ -39,7 +39,7 @@ define([
                     expect(voucherType.children().length).toBe(2);
                     expect(voucherType.val()).toEqual(model.get('voucher_type'));
                     expect(view.$el.find('[name=quantity]').val()).toEqual(model.get('quantity').toString());
-                    expect(view.$el.find('[name=client_username]').val()).toEqual(model.get('client'));
+                    expect(view.$el.find('[name=client]').val()).toEqual(model.get('client'));
                     expect(view.$el.find('[name=price]').val()).toEqual(model.get('price'));
                     expect(view.$el.find('[name=course_id]').val()).toEqual(model.get('course_id'));
                 });
@@ -64,7 +64,7 @@ define([
                     expect(voucherType.children().length).toBe(2);
                     expect(voucherType.val()).toEqual(model.get('voucher_type'));
                     expect(view.$el.find('[name=quantity]').val()).toEqual(model.get('quantity').toString());
-                    expect(view.$el.find('[name=client_username]').val()).toEqual(model.get('client'));
+                    expect(view.$el.find('[name=client]').val()).toEqual(model.get('client'));
                     expect(view.$el.find('[name=price]').val()).toEqual(model.get('price'));
                     expect(view.$el.find('[name=course_id]').val()).toEqual(model.get('course_id'));
                     expect(view.$el.find('[name=benefit_type]').val()).toEqual(model.get('benefit_type'));

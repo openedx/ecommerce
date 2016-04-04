@@ -37,7 +37,7 @@ define([
             it('should submit form with valid fields', function () {
                 view.$el.find('[name=title]').val('Test Enrollment').trigger('change');
                 view.$el.find('[name=code_type]').val('enrollment').trigger('change');
-                view.$el.find('[name=client_username]').val('test_client').trigger('change');
+                view.$el.find('[name=client]').val('test_client').trigger('change');
                 view.$el.find('[name=start_date]').val('2015-01-01T00:00').trigger('change');
                 view.$el.find('[name=end_date]').val('2016-01-01T00:00').trigger('change');
                 view.$el.find('[name=price]').val('100').trigger('change');

@@ -117,7 +117,7 @@ define([
                 'input[name=benefit_value]': {
                     observe: 'benefit_value'
                 },
-                'input[name=client_username]': {
+                'input[name=client]': {
                     observe: 'client'
                 },
                 'input[name=course_id]': {
@@ -269,7 +269,7 @@ define([
                 this.$el.find('select[name=code_type]').attr('disabled', true);
                 this.$el.find('select[name=voucher_type]').attr('disabled', true);
                 this.$el.find('input[name=quantity]').attr('disabled', true);
-                this.$el.find('input[name=client_username]').attr('disabled', true);
+                this.$el.find('input[name=client]').attr('disabled', true);
                 this.$el.find('input[name=price]').attr('disabled', true);
                 this.$el.find('input[name=course_id]').attr('disabled', true);
                 this.$el.find('input[name=code]').attr('disabled', true);
