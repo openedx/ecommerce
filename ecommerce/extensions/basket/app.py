@@ -6,6 +6,7 @@ from oscar.core.loading import get_class
 
 class BasketApplication(app.BasketApplication):
     single_item_view = get_class('basket.views', 'BasketSingleItemView')
+    bulk_purchase_view = get_class('basket.views', 'BasketBulkPurchaseView')
     summary_view = get_class('basket.views', 'BasketSummaryView')
 
     def get_urls(self):
@@ -16,6 +17,7 @@ class BasketApplication(app.BasketApplication):
             url(r'^vouchers/(?P<pk>\d+)/remove/$', self.remove_voucher_view.as_view(), name='vouchers-remove'),
             url(r'^saved/$', login_required(self.saved_view.as_view()), name='saved'),
             url(r'^single-item/$', login_required(self.single_item_view.as_view()), name='single-item'),
+            url(r'^bulk-purchase/$', login_required(self.bulk_purchase_view.as_view()), name='bulk-purchase'),
         ]
         return self.post_process_urls(urls)
 

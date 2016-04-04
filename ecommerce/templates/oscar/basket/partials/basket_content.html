@@ -28,6 +28,14 @@
                                 {{ form.id }}
                                     <img class="thumbnail" src="{{ line.course.image_url }}" alt="{{ line.course.name }}"/>
                             </div>
+                            <div class="checkout-quantity">
+                                <div class="input-group  {% if form.errors %}error{% endif %}">
+                                    {% render_field form.quantity class+="form-control" %}
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit" data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
+                                </span>
+                                </div>
+                            </div>
                             <div class="col-sm-5">
                                 <p class="course_name">{{ line.course.name }} - {{ line.course.org }} ({{ line.course.number }})</p>
                                 <p class="course_description">{{ line.course.short_description }}</p>
@@ -87,7 +95,7 @@
                                                     data-loading-text="{% trans 'Applying...' %}"
                                                     data-track-type="click"
                                                     data-track-event="edx.bi.ecommerce.basket.voucher_applied"
-                                                    data-track-category="voucher-application" 
+                                                    data-track-category="voucher-application"
                                                     data-voucher-code="{{voucher_code}}">
                                                 {% trans "Apply" %}
                                             </button>
