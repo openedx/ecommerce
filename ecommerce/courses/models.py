@@ -227,3 +227,13 @@ class Course(models.Model):
             ).delete()
 
         return seat
+
+    def create_or_update_enrollment_code():
+        """
+        Creates course enrollment code products.  Enrollment codes enable bulk purchasing use cases
+        for courses from services such as the LMS.
+
+        Returns:
+            Product:  The enrollment code that has been created or updated.
+        """
+        return enrollment_code
