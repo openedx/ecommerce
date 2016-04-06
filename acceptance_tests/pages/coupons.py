@@ -57,7 +57,7 @@ class CouponsCreatePage(EcommerceAppPage):
 
         self.q(css="input[name='start_date']").fill(str(DEFAULT_START_DATE))
         self.q(css="input[name='end_date']").fill(str(DEFAULT_END_DATE))
-        self.q(css="input[name='client_username']").fill('Test Client')
+        self.q(css="input[name='client']").fill('Test Client')
         self.q(css='select[name="seat_type"] option[value="Verified"]').first.click()
 
         if is_discount:
