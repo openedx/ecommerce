@@ -61,10 +61,11 @@ for override, value in DB_OVERRIDES.iteritems():
 
 
 # PAYMENT PROCESSOR OVERRIDES
-for __, config in PAYMENT_PROCESSOR_CONFIG.iteritems():
-    config.update({
-        'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-        'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
-        'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
-    })
+for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
+    for __, config in configs.iteritems():
+        config.update({
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        })
 # END PAYMENT PROCESSOR OVERRIDES
