@@ -1,13 +1,11 @@
 from __future__ import unicode_literals
 
 import logging
-from decimal import Decimal
 
 import dateutil.parser
 
 from django.conf import settings
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -16,16 +14,15 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import BusinessClient
+from ecommerce.coupons import api as coupons_api
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
-from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
@@ -160,59 +157,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             IntegrityError: An error occured when create_vouchers method returns
                             an IntegrityError exception
         """
-        coupon_slug = generate_coupon_slug(title=title, catalog=data['catalog'], partner=data['partner'])
-
-        product_class = ProductClass.objects.get(slug='coupon')
-        coupon_product, __ = Product.objects.get_or_create(
-            title=title,
-            product_class=product_class,
-            slug=coupon_slug
-        )
-
-        for category in data['categories']:
-            ProductCategory.objects.get_or_create(product=coupon_product, category=category)
-
-        # Vouchers are created during order and not fulfillment like usual
-        # because we want vouchers to be part of the line in the order.
-        try:
-            create_vouchers(
-                name=title,
-                benefit_type=data['benefit_type'],
-                benefit_value=Decimal(data['benefit_value']),
-                catalog=data['catalog'],
-                coupon=coupon_product,
-                end_datetime=data['end_date'],
-                code=data['code'] or None,
-                quantity=int(data['quantity']),
-                start_datetime=data['start_date'],
-                voucher_type=data['voucher_type']
-            )
-        except IntegrityError as ex:
-            logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-            raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
-
-        coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
-
-        coupon_product.attr.coupon_vouchers = coupon_vouchers
-        coupon_product.attr.note = data['note']
-        coupon_product.save()
-
-        sku = generate_sku(
-            product=coupon_product,
-            partner=data['partner'],
-            catalog=data['catalog'],
-        )
-
-        stock_record, __ = StockRecord.objects.get_or_create(
-            product=coupon_product,
-            partner=data['partner'],
-            partner_sku=sku
-        )
-        stock_record.price_currency = 'USD'
-        stock_record.price_excl_tax = price
-        stock_record.save()
-
-        return coupon_product
+        return coupons_api.create_coupon_product(title, price, data)
 
     def create_order_for_invoice(self, basket, coupon_id, client):
         """Creates an order from the basket and invokes the invoice payment processor."""
