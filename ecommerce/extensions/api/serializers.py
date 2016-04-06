@@ -301,6 +301,10 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                     )
 
+                    # In addition to the seat product, we also need to create an enrollment code product
+                    # for each new course.  This enables bulk purchasing of course seats via the LMS service.
+                    #course.create_or_update_enrollment_code()
+
                 resp_message = course.publish_to_lms(access_token=self.access_token)
                 published = (resp_message is None)
 

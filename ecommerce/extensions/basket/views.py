@@ -57,6 +57,27 @@ class BasketSingleItemView(View):
         prepare_basket(request, product, voucher)
         return HttpResponseRedirect(reverse('basket:summary'), status=303)
 
+class BasketBulkPurchaseView(View):
+    """
+    View that adds a single bulk purchase product (eg, coupon) to a user's basket.
+    """
+    def get(self, request):
+        partner = get_partner_for_site(request)
+        sku = request.GET.get('sku', None)
+        voucher = None
+
+        try:
+            product = StockRecord.objects.get(partner=partner, partner_sku=sku).product
+        except StockRecord.DoesNotExist:
+            return HttpResponseBadRequest(_('SKU [{sku}] does not exist.'.format(sku=sku)))
+
+        purchase_info = request.strategy.fetch_for_product(product)
+        if not purchase_info.availability.is_available_to_buy:
+            return HttpResponseBadRequest(_('Product [{product}] not available to buy.'.format(product=product.title)))
+
+        prepare_basket(request, product, voucher)
+        return HttpResponseRedirect(reverse('basket:summary'), status=303)
+
 
 class BasketSummaryView(BasketView):
     """
