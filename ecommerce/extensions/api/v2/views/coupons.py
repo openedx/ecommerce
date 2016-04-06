@@ -122,7 +122,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 'note': note,
             }
 
-            coupon_product = self.create_coupon_product(title, price, data)
+            # Create the coupon product and the specified number of vouchers
+            create_vouchers = True
+            coupon_product = coupons_api.create_coupon_product(
+                title, price, data['catalog'], data['partner'], data['categories'], data['note'], create_vouchers,
+                data['benefit_type'], data['benefit_value'], data['start_date'], data['end_date'],
+                data['code'], data['quantity'], data['voucher_type']
+            )
 
             basket = prepare_basket(request, coupon_product)
 
@@ -130,34 +136,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id, client=client)
 
             return Response(response_data, status=status.HTTP_200_OK)
-
-    def create_coupon_product(self, title, price, data):
-        """Creates a coupon product and a stock record for it.
-
-        Arguments:
-            title (str): The name of the coupon.
-            price (int): The price of the coupon(s).
-            data (dict): Contains data needed to create vouchers,SKU and UPC:
-                - partner (User)
-                - benefit_type (str)
-                - benefit_value (int)
-                - catalog (Catalog)
-                - end_date (Datetime)
-                - code (str)
-                - quantity (int)
-                - start_date (Datetime)
-                - voucher_type (str)
-                - categories (list of Category objects)
-                - note (str)
-
-        Returns:
-            A coupon product object.
-
-        Raises:
-            IntegrityError: An error occured when create_vouchers method returns
-                            an IntegrityError exception
-        """
-        return coupons_api.create_coupon_product(title, price, data)
 
     def create_order_for_invoice(self, basket, coupon_id, client):
         """Creates an order from the basket and invokes the invoice payment processor."""

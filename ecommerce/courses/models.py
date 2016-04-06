@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
 
+from ecommerce.coupons import api as coupons_api
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.utils import generate_sku
 
@@ -227,3 +228,19 @@ class Course(models.Model):
             ).delete()
 
         return seat
+
+    def create_or_update_coupon_product(type="enrollment_code|bulk_purchase"):
+        """
+        Creates course coupon products.
+
+        Returns:
+            Product:  The coupon product that was created or updated.
+        """
+
+        create_vouchers = False
+        return coupons_api.create_coupon_product(
+            'Test coupon', 100, self.coupon_data['catalog'], self.coupon_data['partner'], self.coupon_data['categories'], self.coupon_data['note'], create_vouchers,
+            self.coupon_data['benefit_type'], self.coupon_data['benefit_value'], self.coupon_data['start_date'], self.coupon_data['end_date'],
+            data['code'], data['quantity'], data['voucher_type']
+        )
+

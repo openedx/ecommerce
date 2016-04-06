@@ -20,6 +20,7 @@ from social.apps.django_app.default.models import UserSocialAuth
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.coupons import api as coupons_api
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -386,10 +387,11 @@ class CouponMixin(object):
             'note': note,
         }
 
-        coupon = CouponViewSet().create_coupon_product(
-            title=title,
-            price=price,
-            data=data
+        create_vouchers = True
+        coupon = coupons_api.create_coupon_product(
+            title, price, data['catalog'], data['partner'], data['categories'], data['note'], create_vouchers,
+            data['benefit_type'], data['benefit_value'], data['start_date'], data['end_date'],
+            data['code'], data['quantity'], data['voucher_type']
         )
 
         request = RequestFactory()

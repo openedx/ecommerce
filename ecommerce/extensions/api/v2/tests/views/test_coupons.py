@@ -11,6 +11,7 @@ from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 from rest_framework import status
 
+from ecommerce.coupons import api as coupons_api
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -62,6 +63,29 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'note': None,
         }
 
+    def _create_test_coupon_product(self, title, price):
+        """
+        Generate a new coupon product for use by tests
+        """
+
+        create_vouchers = True
+        return coupons_api.create_coupon_product(
+            title,
+            price,
+            self.coupon_data['catalog'],
+            self.coupon_data['partner'],
+            self.coupon_data['categories'],
+            self.coupon_data['note'],
+            create_vouchers,
+            self.coupon_data['benefit_type'],
+            self.coupon_data['benefit_value'],
+            self.coupon_data['start_date'],
+            self.coupon_data['end_date'],
+            self.coupon_data['code'],
+            self.coupon_data['quantity'],
+            self.coupon_data['voucher_type']
+        )
+
     def setup_site_configuration(self):
         site_configuration = SiteConfigurationFactory(partner__name='TestX')
         site = SiteFactory()
@@ -91,29 +115,12 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 3}
         )
 
-    def test_create_coupon_product(self):
-        """Test the created coupon data."""
-        coupon = self.create_coupon()
-        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
-        self.assertIsInstance(coupon, Product)
-        self.assertEqual(coupon.title, 'Test coupon')
-
-        self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 1)
-        stock_record = StockRecord.objects.get(product=coupon)
-        self.assertEqual(stock_record.price_currency, 'USD')
-        self.assertEqual(stock_record.price_excl_tax, 100)
-
-        self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), 5)
-        category = ProductCategory.objects.get(product=coupon).category
-        self.assertEqual(category, self.category)
-
     def test_append_to_existing_coupon(self):
         """Test adding additional vouchers to an existing coupon."""
         self.create_coupon(partner=self.partner, catalog=self.catalog)
-        coupon_append = CouponViewSet().create_coupon_product(
-            title='Test coupon',
-            price=100,
-            data=self.coupon_data
+        coupon_append = self._create_test_coupon_product(
+            'Test coupon',
+            100
         )
 
         self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
@@ -128,10 +135,9 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'code': 'CUSTOMCODE',
             'quantity': 1,
         })
-        custom_coupon = CouponViewSet().create_coupon_product(
+        custom_coupon = self._create_test_coupon_product(
             title='Custom coupon',
-            price=100,
-            data=self.coupon_data
+            price=100
         )
         self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.count(), 1)
         self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.first().code, 'CUSTOMCODE')
@@ -142,17 +148,15 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'code': 'CUSTOMCODE',
             'quantity': 1,
         })
-        CouponViewSet().create_coupon_product(
+        self._create_test_coupon_product(
             title='Custom coupon',
-            price=100,
-            data=self.coupon_data
+            price=100
         )
 
         with self.assertRaises(IntegrityError):
-            CouponViewSet().create_coupon_product(
+            self._create_test_coupon_product(
                 title='Coupon with integrity issue',
-                price=100,
-                data=self.coupon_data
+                price=100
             )
 
     def test_coupon_note(self):
@@ -160,10 +164,9 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.coupon_data.update({
             'note': '𝑵𝑶𝑻𝑬',
         })
-        note_coupon = CouponViewSet().create_coupon_product(
+        note_coupon = self._create_test_coupon_product(
             title='Coupon',
-            price=100,
-            data=self.coupon_data
+            price=100
         )
         self.assertEqual(note_coupon.attr.note, '𝑵𝑶𝑻𝑬')
         self.assertEqual(note_coupon.title, 'Coupon')
