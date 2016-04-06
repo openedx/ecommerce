@@ -129,6 +129,9 @@ define([
                 'input[name=price]': {
                     observe: 'price'
                 },
+                'input[name=invoiced_amount]': {
+                    observe: 'invoiced_amount'
+                },
                 'input[name=start_date]': {
                     observe: 'start_date',
                     onGet: function (val) {
@@ -151,6 +154,7 @@ define([
 
             events: {
                 'input [name=course_id]': 'fillFromCourse',
+                'input [name=quantity]': 'changePrice',
 
                 // catch value after autocomplete
                 'blur [name=course_id]': 'fillFromCourse',
@@ -247,21 +251,28 @@ define([
              * Update price field and model.stockrecords
              */
             changeSeatType: function () {
-                var data, quantity, price,
-                    seatType = this.$el.find('[name=seat_type]').val();
+                var seatType = this.getSeatType(),
+                    seatData = this.getSeatData();
 
                 if (!this.editing) {
                     this.model.set('seat_type', seatType);
 
                     if (seatType && !this.editing) {
-                        data = this.$el.find('[value=' + seatType + ']').data();
-                        quantity = this.model.get('quantity');
-                        price = data.price * quantity;
-                        this.model.set('stock_record_ids', data.stockrecords);
-                        this.model.set('price', price);
-                        this.$el.find('[name=price]').val(price);
+                        this.model.set('stock_record_ids', seatData.stockrecords);
+                        this.updatePrice(seatData);
                     }
                 }
+            },
+
+            changePrice: function () {
+                this.updatePrice(this.getSeatData());
+            },
+
+            updatePrice: function (seatData) {
+                var quantity = this.$el.find('input[name=quantity]').val(),
+                    price = quantity * seatData.price;
+                this.model.set('price', price);
+                this.$el.find('input[name=invoiced_amount]').val(price);
             },
 
             disableNonEditableFields: function () {
@@ -278,6 +289,14 @@ define([
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
                 this.$el.find('select[name=category]').attr('disabled', true);
                 this.$el.find('input[name=note]').attr('disabled', true);
+            },
+
+            getSeatData: function () {
+                return this.$el.find('[value=' + this.getSeatType() + ']').data();
+            },
+
+            getSeatType: function () {
+                return this.$el.find('[name=seat_type]').val();
             },
 
             render: function () {
