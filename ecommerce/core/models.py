@@ -49,7 +49,7 @@ class SiteConfiguration(models.Model):
         help_text=_('JSON string containing OAuth backend settings.'),
         null=False,
         blank=False,
-        default='{}'
+        default={}
     )
 
     class Meta(object):
