@@ -233,17 +233,12 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
-        self.user = self.create_user()
+        self.user = self.create_user(full_name="CouponRedeemView User", is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        course = CourseFactory()
-        self.seat = course.create_or_update_seat('verified', True, 50, self.partner)
-
-        self.catalog = Catalog.objects.create(partner=self.partner)
-        self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
 
     def create_and_test_coupon(self):
         """ Creates enrollment code coupon. """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE)
+        self.create_coupon(code=COUPON_CODE)
         self.assertEqual(Voucher.objects.filter(code=COUPON_CODE).count(), 1)
 
     def assert_redemption_page_redirects(self, expected_url, target=200):
@@ -282,7 +277,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.create_coupon(code=COUPON_CODE, benefit_value=5)
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
 

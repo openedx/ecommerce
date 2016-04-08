@@ -20,7 +20,6 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 
@@ -99,35 +98,22 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 except AttributeError:
                     raise Exception('Course mode not supported')
 
-            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-
-            coupon_catalog, __ = get_or_create_catalog(
-                name='Catalog for stock records: {}'.format(stock_records_string),
-                partner=partner,
-                stock_record_ids=stock_record_ids
-            )
-
-            data = {
-                'partner': partner,
-                'title': title,
-                'benefit_type': benefit_type,
-                'benefit_value': benefit_value,
-                'catalog': coupon_catalog,
-                'end_date': end_date,
-                'code': code,
-                'quantity': quantity,
-                'start_date': start_date,
-                'voucher_type': voucher_type,
-                'categories': categories,
-                'note': note,
-            }
-
             # Create the coupon product and the specified number of vouchers
-            create_vouchers = True
-            coupon_product = coupons_api.create_coupon_product(
-                title, price, data['catalog'], data['partner'], data['categories'], data['note'], create_vouchers,
-                data['benefit_type'], data['benefit_value'], data['start_date'], data['end_date'],
-                data['code'], data['quantity'], data['voucher_type']
+            coupon_product = coupons_api.create_or_update_coupon_product(
+                title=title,
+                price=price,
+                stock_record_ids=stock_record_ids,
+                partner=partner,
+                categories=categories,
+                note=note,
+                create_vouchers=True,
+                benefit_type=benefit_type,
+                benefit_value=benefit_value,
+                start_date=start_date,
+                end_date=end_date,
+                code=code,
+                quantity=quantity,
+                voucher_type=voucher_type
             )
 
             basket = prepare_basket(request, coupon_product)

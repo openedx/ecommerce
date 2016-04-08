@@ -71,7 +71,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
     def test_generate_coupon_slug(self):
         """Verify the method generates proper slug."""
-        title = 'Test coupon'
+        title = 'Test Slug Coupon'
         _hash = ' '.join((
             unicode(title),
             unicode(self.catalog.id),
@@ -92,7 +92,7 @@ class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_generate_sku_for_coupon(self):
         """Verify the method generates a SKU for a coupon."""
-        coupon = self.create_coupon(partner=self.partner, catalog=self.catalog)
+        coupon = self.create_coupon()
         _hash = ' '.join((
             unicode(coupon.id),
             unicode(self.catalog.id),

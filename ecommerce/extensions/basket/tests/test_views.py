@@ -94,7 +94,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         """
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.create_coupon(code=COUPON_CODE, benefit_value=5)
 
         self.mock_footer_api_response()
         self.mock_course_api_response()

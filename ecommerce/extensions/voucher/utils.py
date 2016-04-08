@@ -17,8 +17,6 @@ from edx_rest_api_client.client import EdxRestApiClient
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.invoice.models import Invoice
 
-logger = logging.getLogger(__name__)
-
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
@@ -31,6 +29,8 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
+
+logger = logging.getLogger(__name__)
 
 
 def generate_coupon_report(coupon_vouchers):
@@ -79,6 +79,7 @@ def generate_coupon_report(coupon_vouchers):
             invoice = get_object_or_404(Invoice, order=order)
             client = invoice.client.name
         except Http404:
+            logger.debug('Unable to determine client from basket order invoice, using basket owner.')
             client = basket.owner.username
 
         for voucher in coupon_voucher.vouchers.all():
@@ -282,11 +283,11 @@ def create_vouchers(
             List[Voucher]
     """
 
-    logger.info("Creating [%d] vouchers catalog [%s]", quantity, catalog.id)
+    logger.info("Creating [%d] new vouchers for coupon [%s]", quantity, coupon)
 
     vouchers = []
 
-    range_name = (_('Range for {catalog_name}').format(catalog_name=catalog.name))
+    range_name = (_('Range for {name} [id={id}]').format(name=catalog.name, id=catalog.id))
     product_range, __ = Range.objects.get_or_create(
         name=range_name,
         catalog=catalog,

@@ -2,7 +2,10 @@
 """Broadly-useful mixins for use in automated tests."""
 import datetime
 from decimal import Decimal
-import json
+import json  # Must come before httpretty
+import httpretty
+import jwt
+from mock import patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,9 +13,7 @@ from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
-import httpretty
-import jwt
-from mock import patch
+
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from threadlocals.threadlocals import set_thread_variable
@@ -21,6 +22,7 @@ from social.apps.django_app.default.models import UserSocialAuth
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons import api as coupons_api
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -31,12 +33,13 @@ from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
-Selector = get_class('partner.strategy', 'Selector')
-ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductClass = get_model('catalogue', 'ProductClass')
+Selector = get_class('partner.strategy', 'Selector')
+ShippingEventType = get_model('order', 'ShippingEventType')
+StockRecord = get_model('partner', 'StockRecord')
 User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
@@ -341,14 +344,25 @@ class CouponMixin(object):
 
     def create_coupon(
             self,
-            title='Test coupon',
+            title='Test CouponMixin Coupon',
             price=100,
             client=None,
-            partner=None,
-            catalog=None,
-            code='',
+            partner_name=None,
+            catalog_name="Test CouponMixin Catalog",
+            client_username="Test CouponMixin Client",
+            stock_record_ids=None,
+            seat_type="verified",
+            code=None,
+            benefit_type=Benefit.PERCENTAGE,
             benefit_value=100,
-            note=None
+            start_date=datetime.date(2015, 1, 1),
+            end_date=datetime.date(2020, 1, 1),
+            note=None,
+            voucher_type=Voucher.SINGLE_USE,
+            create_vouchers=True,
+            categories=None,
+            quantity=5,
+            course=None
     ):
         """Helper method for creating a coupon.
 
@@ -356,7 +370,7 @@ class CouponMixin(object):
             title(str): Title of the coupon
             price(int): Price of the coupon
             partner(Partner): Partner used for creating a catalog
-            catalog(Catalog): Catalog of courses for which the coupon applies
+            catalog(Catalog): Catalog of seat products for which the coupon applies
             code(str): Custom coupon code
             benefit_value(int): The voucher benefit value
 
@@ -364,43 +378,45 @@ class CouponMixin(object):
             coupon (Coupon)
 
         """
-        if partner is None:
-            partner = PartnerFactory(name='Tester')
-        if client is None:
-            client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None:
-            catalog = Catalog.objects.create(partner=partner)
-        quantity = 5
-        if code is not '':
-            quantity = 1
-        data = {
-            'partner': partner,
-            'benefit_type': Benefit.PERCENTAGE,
-            'benefit_value': benefit_value,
-            'catalog': catalog,
-            'end_date': datetime.date(2020, 1, 1),
-            'code': code,
-            'quantity': quantity,
-            'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE,
-            'categories': [self.category],
-            'note': note,
-        }
+        self.user = self.create_user(full_name="CouponMixin User", is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+        self.course = course if course else CourseFactory()
+        self.partner = PartnerFactory(name=partner_name) if partner_name else self.partner
+        seat_product = self.course.create_or_update_seat(seat_type, False, price, self.partner)
+        self.catalog = Catalog.objects.create(name=catalog_name, partner=self.partner)
+        if stock_record_ids is None:
+            stock_record = StockRecord.objects.filter(product=seat_product).first()
+            self.catalog.stock_records.add(stock_record)
+            stock_record_ids = [stock_record.id for stock_record in self.catalog.stock_records.all()]
+        client, __ = BusinessClient.objects.get_or_create(name=client_username)
+        quantity = 1 if code else quantity
 
-        create_vouchers = True
-        coupon = coupons_api.create_coupon_product(
-            title, price, data['catalog'], data['partner'], data['categories'], data['note'], create_vouchers,
-            data['benefit_type'], data['benefit_value'], data['start_date'], data['end_date'],
-            data['code'], data['quantity'], data['voucher_type']
+        # Create the coupon
+        coupon = coupons_api.create_or_update_coupon_product(
+            title=title,
+            price=price,
+            stock_record_ids=stock_record_ids,
+            partner=self.partner,
+            categories=categories if categories else [self.category],
+            note=note,
+            create_vouchers=create_vouchers,
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            start_date=start_date,
+            end_date=end_date,
+            code=code,
+            quantity=quantity,
+            voucher_type=voucher_type,
+            catalog_name=catalog_name
         )
 
         request = RequestFactory()
         request.site = self.site
         request.user = factories.UserFactory()
-
         self.basket = prepare_basket(request, coupon)
-
         self.response_data = CouponViewSet().create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
+
         coupon.client = client
+        coupon.history.all().update(history_user=self.user)
 
         return coupon
