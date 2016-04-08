@@ -3,18 +3,20 @@ from __future__ import unicode_literals
 
 import json
 
+import ddt
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
+from rest_framework import status
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
+from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, SiteFactory
 from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -212,6 +214,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+@ddt.ddt
 class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
     """Test the coupon order creation functionality."""
 
@@ -356,6 +359,19 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
 
         with self.assertRaises(NotImplementedError):
             self.client.post(COUPONS_LINK, data=self.data, format='json')
+
+    @ddt.data('audit', 'honor')
+    def test_restricted_course_mode(self, mode):
+        """Test that an exception is raised when a black-listed course mode is used."""
+        course = CourseFactory(id='black/list/mode')
+        seat = course.create_or_update_seat(mode, False, 0, self.partner)
+        # Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
+        if mode == 'audit':
+            seat = ProductFactory()
+        self.data.update({'stock_record_ids': [StockRecord.objects.get(product=seat).id], })
+        with self.assertRaises(Exception):
+            response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CouponCategoriesListViewTests(TestCase):

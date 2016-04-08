@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import dateutil.parser
 
+from django.conf import settings
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import Http404
@@ -89,6 +90,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             # We currently do not support multi-use voucher types.
             if voucher_type == Voucher.MULTI_USE:
                 raise NotImplementedError('Multi-use voucher types are not supported')
+
+            # When a black-listed course mode is received raise an exception.
+            # Audit modes do not have a certificate type and therefor will raise
+            # an AttributeError exception.
+            seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
+            for seat in seats:
+                try:
+                    if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                        raise Exception('Course mode not supported')
+                except AttributeError:
+                    raise Exception('Course mode not supported')
 
             stock_records_string = ' '.join(str(id) for id in stock_record_ids)
 

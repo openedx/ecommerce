@@ -473,3 +473,6 @@ SUPPORT_URL = 'SET-ME-PLEASE'
 
 # Path to the receipt page
 RECEIPT_PAGE_PATH = '/commerce/checkout/receipt/'
+
+# Black-listed course modes not allowed to create coupons with
+BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
