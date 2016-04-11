@@ -86,7 +86,7 @@ fast_diff_coverage:
 	diff-cover coverage.xml --compare-branch=$(DIFF_COVER_BASE_BRANCH)
 
 accept:
-	nosetests --with-ignore-docstrings -v acceptance_tests
+	nosetests --with-ignore-docstrings -v acceptance_tests --with-xunit --xunit-file=acceptance_tests/xunit.xml
 
 extract_translations:
 	cd ecommerce && i18n_tool extract -v
