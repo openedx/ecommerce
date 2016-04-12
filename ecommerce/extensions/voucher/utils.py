@@ -109,7 +109,7 @@ def generate_coupon_report(coupon_vouchers):
                 status = _('Inactive')
 
             discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
-            discount_amount = currency(discount_data['discount_percentage'])
+            discount_amount = currency(discount_data['discount_value'])
 
             if voucher.num_orders > 0:
                 voucher_applications = VoucherApplication.objects.filter(voucher=voucher).all()
