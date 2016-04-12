@@ -324,12 +324,14 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.setup_coupons_for_report()
 
         Order.objects.get(basket=self.basket).delete()
+        ProductCategory.objects.all().delete()
 
         self.mock_course_api_response(course=self.course)
         __, rows = generate_coupon_report(self.coupon_vouchers)
 
         for row in rows:
             self.assertEqual(row['Client'], self.basket.owner.username)
+            self.assertEqual(row['Category'], '')
 
     def test_get_voucher_discount_info(self):
         benefits = self.create_benefits()
