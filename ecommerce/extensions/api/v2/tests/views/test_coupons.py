@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from rest_framework import status
 
 from ecommerce.courses.tests.factories import CourseFactory
@@ -20,6 +20,7 @@ from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, 
 from ecommerce.tests.mixins import CouponMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
+Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -60,6 +61,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
             'categories': [self.category],
             'note': None,
+            'max_uses': None,
         }
 
     def setup_site_configuration(self):
@@ -167,6 +169,20 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         )
         self.assertEqual(note_coupon.attr.note, '𝑵𝑶𝑻𝑬')
         self.assertEqual(note_coupon.title, 'Coupon')
+
+    def test_multi_use_coupon_creation(self):
+        """Test that the endpoint supports the creation of multi-usage coupons."""
+        max_uses_number = 2
+        self.coupon_data.update({
+            'max_uses': max_uses_number,
+        })
+        coupon = CouponViewSet().create_coupon_product(
+            title='Test coupon',
+            price=100,
+            data=self.coupon_data
+        )
+        voucher = coupon.attr.coupon_vouchers.vouchers.first()
+        self.assertEqual(voucher.offers.first().max_global_applications, max_uses_number)
 
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""

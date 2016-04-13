@@ -10,5 +10,5 @@ class CourseFactory(factory.DjangoModelFactory):
     class Meta(object):
         model = Course
 
-    id = FuzzyText(prefix='course-id-')
+    id = FuzzyText(prefix='course-v1:test-org+course+')
     name = FuzzyText(prefix='course-name-')

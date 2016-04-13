@@ -144,13 +144,17 @@ define([
                 it('should show the code field only for multi-use vouchers', function () {
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
                     expect(visible('[name=code]')).toBe(false);
-                    view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(visible('[name=code]')).toBe(true);
                 });
-            });
 
+                it('should show the usage number field only for multi-use vouchers', function () {
+                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    expect(visible('[name=max_uses]')).toBe(false);
+                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    expect(visible('[name=max_uses]')).toBe(true);
+                });
+            });
         });
     }
 );

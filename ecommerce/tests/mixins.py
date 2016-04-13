@@ -27,6 +27,7 @@ from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 
+Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -347,7 +348,9 @@ class CouponMixin(object):
             catalog=None,
             code='',
             benefit_value=100,
-            note=None
+            note=None,
+            max_uses=None,
+            quantity=5
     ):
         """Helper method for creating a coupon.
 
@@ -369,7 +372,6 @@ class CouponMixin(object):
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
         if catalog is None:
             catalog = Catalog.objects.create(partner=partner)
-        quantity = 5
         if code is not '':
             quantity = 1
         data = {
@@ -384,6 +386,7 @@ class CouponMixin(object):
             'voucher_type': Voucher.SINGLE_USE,
             'categories': [self.category],
             'note': note,
+            'max_uses': max_uses,
         }
 
         coupon = CouponViewSet().create_coupon_product(
@@ -402,3 +405,12 @@ class CouponMixin(object):
         coupon.client = client
 
         return coupon
+
+    def apply_voucher(self, user, site, voucher):
+        """ Apply the voucher to a basket. """
+        basket = factories.BasketFactory(owner=user, site=site)
+        product = voucher.offers.first().benefit.range.all_products()[0]
+        basket.add_product(product)
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket, self.user)
+        return basket

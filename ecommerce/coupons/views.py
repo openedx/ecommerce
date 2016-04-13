@@ -85,14 +85,21 @@ def voucher_is_valid(voucher, product, request):
         elif voucher.end_datetime < now:  # pragma: no cover
             return False, _('This coupon code has expired.')
 
-    avail, msg = voucher.is_available_to_user(request.user)
-    if not avail:
-        voucher_msg = msg.replace('voucher', 'coupon')
-        return False, voucher_msg
+    # We want to display the offer page to all users, including anonymous.
+    if request.user.is_authenticated():
+        avail, msg = voucher.is_available_to_user(request.user)
+        if not avail:
+            voucher_msg = msg.replace('voucher', 'coupon')
+            return False, voucher_msg
 
     purchase_info = request.strategy.fetch_for_product(product)
     if not purchase_info.availability.is_available_to_buy:
         return False, _('Product [{product}] not available for purchase.'.format(product=product))
+
+    # If the voucher's number of applications exceeds it's limit.
+    offer = voucher.offers.first()
+    if offer.get_max_applications(request.user) == 0:
+        return False, _('This coupon code is no longer available.')
 
     return True, ''
 
