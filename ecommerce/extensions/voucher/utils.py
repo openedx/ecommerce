@@ -34,7 +34,7 @@ Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 
-def _get_voucher_status(voucher, offer):
+def get_voucher_status(voucher, offer):
     """Retrieve the status of a voucher.
 
     Arguments:
@@ -71,7 +71,7 @@ def _get_info_for_coupon_report(coupon, voucher):
     invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
     discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
     coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
-    status = _get_voucher_status(voucher, offer)
+    status = get_voucher_status(voucher, offer)
 
     discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
     discount_amount = currency(discount_data['discount_value'])
