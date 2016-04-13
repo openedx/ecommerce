@@ -28,27 +28,16 @@ VOUCHER_CODE_LENGTH = 1
 
 class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
-    course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
 
     def setUp(self):
         super(UtilTests, self).setUp()
-
-        self.user = self.create_user(full_name="Test User", is_staff=True)
-        self.client.login(username=self.user.username, password=self.password)
-
-        self.course = CourseFactory()
+        self.course = CourseFactory(id='edX/DemoX/Demo_Course')
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100, self.partner)
-
-        self.catalog = Catalog.objects.create(partner=self.partner)
-
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
         self.seat_price = self.stock_record.price_excl_tax
-        self.catalog.stock_records.add(self.stock_record)
-
-        self.coupon = self.create_coupon(title='Test product', catalog=self.catalog, note='Test note')
-        self.coupon.history.all().update(history_user=self.user)
+        self.coupon = self.create_coupon(note='UtilTests Note', course=self.course)
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
     def create_benefits(self):

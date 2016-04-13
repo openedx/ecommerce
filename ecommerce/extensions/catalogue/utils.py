@@ -66,7 +66,7 @@ def generate_coupon_slug(partner, title, catalog):
     _hash = ' '.join((
         unicode(title),
         unicode(catalog.id),
-        str(partner.id)
+        unicode(partner.id)
     ))
     md5_hash = md5(_hash.lower())
     digest = md5_hash.hexdigest()[-10:]

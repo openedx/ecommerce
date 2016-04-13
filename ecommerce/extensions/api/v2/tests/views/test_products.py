@@ -138,8 +138,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         self.assertEqual(response.status_code, 200)
 
         response_data = json.loads(response.content)
-        self.assertEqual(response_data['id'], 3)
-        self.assertEqual(response_data['title'], 'Test coupon')
+        self.assertEqual(response_data['title'], 'Test CouponMixin Coupon')
         self.assertEqual(response_data['price'], '100.00')
         self.assertEqual(response_data['attribute_values'][0]['name'], 'Coupon vouchers')
         self.assertEqual(len(response_data['attribute_values'][0]['value']), 5)
@@ -153,7 +152,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
 
         response_data = json.loads(response.content)
         voucher = response_data['attribute_values'][0]['value'][0]
-        self.assertEqual(voucher['name'], 'Test coupon')
+        self.assertEqual(voucher['name'], 'Test CouponMixin Coupon')
         self.assertEqual(voucher['usage'], Voucher.SINGLE_USE)
         self.assertEqual(voucher['benefit'][0], Benefit.PERCENTAGE)
         self.assertEqual(voucher['benefit'][1], 100.0)
@@ -165,7 +164,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
-        self.assertEqual(response_data['count'], 3)
+        self.assertEqual(response_data['count'], 5)
 
         filtered_url = '{}?product_class=CoUpOn'.format(url)
         response = self.client.get(filtered_url)

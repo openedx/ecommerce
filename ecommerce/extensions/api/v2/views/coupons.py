@@ -1,13 +1,11 @@
 from __future__ import unicode_literals
 
 import logging
-from decimal import Decimal
 
 import dateutil.parser
 
 from django.conf import settings
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -16,16 +14,14 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import BusinessClient
+from ecommerce.coupons import api as coupons_api
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
-from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers
 
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
@@ -102,30 +98,23 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 except AttributeError:
                     raise Exception('Course mode not supported')
 
-            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-
-            coupon_catalog, __ = get_or_create_catalog(
-                name='Catalog for stock records: {}'.format(stock_records_string),
+            # Create the coupon product and the specified number of vouchers
+            coupon_product = coupons_api.create_or_update_coupon_product(
+                title=title,
+                price=price,
+                stock_record_ids=stock_record_ids,
                 partner=partner,
-                stock_record_ids=stock_record_ids
+                categories=categories,
+                note=note,
+                create_vouchers=True,
+                benefit_type=benefit_type,
+                benefit_value=benefit_value,
+                start_date=start_date,
+                end_date=end_date,
+                code=code,
+                quantity=quantity,
+                voucher_type=voucher_type
             )
-
-            data = {
-                'partner': partner,
-                'title': title,
-                'benefit_type': benefit_type,
-                'benefit_value': benefit_value,
-                'catalog': coupon_catalog,
-                'end_date': end_date,
-                'code': code,
-                'quantity': quantity,
-                'start_date': start_date,
-                'voucher_type': voucher_type,
-                'categories': categories,
-                'note': note,
-            }
-
-            coupon_product = self.create_coupon_product(title, price, data)
 
             basket = prepare_basket(request, coupon_product)
 
@@ -133,86 +122,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id, client=client)
 
             return Response(response_data, status=status.HTTP_200_OK)
-
-    def create_coupon_product(self, title, price, data):
-        """Creates a coupon product and a stock record for it.
-
-        Arguments:
-            title (str): The name of the coupon.
-            price (int): The price of the coupon(s).
-            data (dict): Contains data needed to create vouchers,SKU and UPC:
-                - partner (User)
-                - benefit_type (str)
-                - benefit_value (int)
-                - catalog (Catalog)
-                - end_date (Datetime)
-                - code (str)
-                - quantity (int)
-                - start_date (Datetime)
-                - voucher_type (str)
-                - categories (list of Category objects)
-                - note (str)
-
-        Returns:
-            A coupon product object.
-
-        Raises:
-            IntegrityError: An error occured when create_vouchers method returns
-                            an IntegrityError exception
-        """
-        coupon_slug = generate_coupon_slug(title=title, catalog=data['catalog'], partner=data['partner'])
-
-        product_class = ProductClass.objects.get(slug='coupon')
-        coupon_product, __ = Product.objects.get_or_create(
-            title=title,
-            product_class=product_class,
-            slug=coupon_slug
-        )
-
-        for category in data['categories']:
-            ProductCategory.objects.get_or_create(product=coupon_product, category=category)
-
-        # Vouchers are created during order and not fulfillment like usual
-        # because we want vouchers to be part of the line in the order.
-        try:
-            create_vouchers(
-                name=title,
-                benefit_type=data['benefit_type'],
-                benefit_value=Decimal(data['benefit_value']),
-                catalog=data['catalog'],
-                coupon=coupon_product,
-                end_datetime=data['end_date'],
-                code=data['code'] or None,
-                quantity=int(data['quantity']),
-                start_datetime=data['start_date'],
-                voucher_type=data['voucher_type']
-            )
-        except IntegrityError as ex:
-            logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-            raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
-
-        coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
-
-        coupon_product.attr.coupon_vouchers = coupon_vouchers
-        coupon_product.attr.note = data['note']
-        coupon_product.save()
-
-        sku = generate_sku(
-            product=coupon_product,
-            partner=data['partner'],
-            catalog=data['catalog'],
-        )
-
-        stock_record, __ = StockRecord.objects.get_or_create(
-            product=coupon_product,
-            partner=data['partner'],
-            partner_sku=sku
-        )
-        stock_record.price_currency = 'USD'
-        stock_record.price_excl_tax = price
-        stock_record.save()
-
-        return coupon_product
 
     def create_order_for_invoice(self, basket, coupon_id, client):
         """Creates an order from the basket and invokes the invoice payment processor."""
