@@ -10,7 +10,9 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
-from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report, get_voucher_discount_info
+from ecommerce.extensions.voucher.utils import (
+    create_vouchers, generate_coupon_report, get_voucher_discount_info, get_voucher_status
+)
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -25,6 +27,7 @@ ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
@@ -251,6 +254,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
         discount_amount = currency(discount_data['discount_value'])
 
+        self.assertEqual(row['Code'], voucher.code)
         self.assertEqual(row['Coupon Type'], coupon_type)
         self.assertEqual(row['Category'], ProductCategory.objects.get(product=coupon).category.name)
         self.assertEqual(row['Discount Percentage'], discount_percentage)
@@ -265,6 +269,20 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(row['Create Date'], coupon.history.latest().history_date.strftime("%b %d, %y"))
         self.assertEqual(row['Coupon Start Date'], voucher.start_datetime.strftime("%b %d, %y"))
         self.assertEqual(row['Coupon Expiry Date'], voucher.end_datetime.strftime("%b %d, %y"))
+
+        application = VoucherApplication.objects.filter(voucher=voucher, order__number=row['Order Number']).first()
+        if application:
+            self.assertEqual(
+                row['Status'],
+                _('Redeemed') if voucher.num_orders > 0 else get_voucher_status(voucher, offer)
+            )
+            self.assertEqual(row['Order Number'], application.order.number if voucher.num_orders > 0 else '')
+            self.assertEqual(row['Redeemed By Username'], application.user.username if voucher.num_orders > 0 else '')
+            self.assertEqual(
+                row['Maximum Coupon Usage'],
+                1 if voucher.num_orders > 0 else offer.max_global_applications
+            )
+            self.assertEqual(row['Redemption Count'], 1 if voucher.num_orders > 0 else offer.num_applications)
 
     @httpretty.activate
     def test_generate_coupon_report(self):
