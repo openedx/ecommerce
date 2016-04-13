@@ -127,6 +127,11 @@ def generate_coupon_report(coupon_vouchers):
             except AttributeError:
                 note = ''
 
+            try:
+                category = get_object_or_404(ProductCategory, product=coupon).category.name
+            except Http404:
+                category = ""
+
             rows.append({
                 'Coupon Name': voucher.name,
                 'Code': voucher.code,
@@ -135,7 +140,7 @@ def generate_coupon_report(coupon_vouchers):
                 'CourseID': course_id,
                 'Partner': course_organization,
                 'Client': client,
-                'Category': ProductCategory.objects.get(product=coupon).category.name,
+                'Category': category,
                 'Note': note,
                 'Price': price,
                 'Invoiced Amount': invoiced_amount,
