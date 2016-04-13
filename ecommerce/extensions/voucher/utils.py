@@ -85,10 +85,11 @@ def _get_info_for_coupon_report(coupon, voucher):
     except AttributeError:
         note = ''
 
-    try:
-        category = get_object_or_404(ProductCategory, product=coupon).category.name
-    except Http404:
-        category = ''
+    product_categories = ProductCategory.objects.filter(product=coupon)
+    if product_categories:
+        category_names = ', '.join([pc.category.name for pc in product_categories])
+    else:
+        category_names = ''
 
     # Set the max_uses_count for single-use vouchers to 1,
     # for other usage limitations (once per customer and multi-use in the future)
@@ -109,7 +110,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         'URL': url,
         'Course ID': course_id,
         'Organization': course_organization,
-        'Category': category,
+        'Category': category_names,
         'Note': note,
         'Price': price,
         'Invoiced Amount': invoiced_amount,
