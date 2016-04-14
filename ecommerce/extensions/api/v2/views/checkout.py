@@ -25,6 +25,15 @@ class CheckoutView(APIView):
         basket_id = request.data['basket_id']
         payment_processor = request.data['payment_processor']
 
+        # Seats quantities
+        seat_quantities = request.data['seat_quantities']
+        logger.info('seat_quantities', seat_quantities)
+
+        # handle these here or access these in "get_transaction_parameters" function
+        # get_transaction_parameters function if different for all,
+        # and gets the amount by: basket.total_incl_tax
+        # so will have to handle here.
+
         # Get the basket, and make sure it belongs to the current user.
         try:
             basket = request.user.baskets.get(id=basket_id)

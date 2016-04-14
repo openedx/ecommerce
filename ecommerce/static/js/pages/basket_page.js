@@ -79,6 +79,17 @@ define([
                 hideVoucherForm();
             });
 
+            $("input[id^=quantity_]").on('change', function(event) {
+                event.preventDefault();
+                var $line = $(this),
+                price = $line.data('line-price'),
+                currency = $line.data('line-currency');
+
+                //TODO: Currency symbol
+                $line.closest('.col-sm-2').next().find('.price').text( (price * $line.val()) + currency);
+                //TODO: can pass a ID to this price HTML tag
+            });
+
             $paymentButtons.find('.payment-button').click(function (e) {
                 var $btn = $(e.target),
                     deferred = new $.Deferred(),
@@ -88,6 +99,7 @@ define([
                         basket_id: basketId,
                         payment_processor: paymentProcessor
                     };
+                data = appendBasketItems(data);
 
                 Utils.disableElementWhileRunning($btn, function() { return promise; });
                 checkoutPayment(data);
@@ -99,6 +111,15 @@ define([
             $('#voucher_form_container').show();
             $('#voucher_form_link').hide();
             $('#id_code').focus();
+        },
+        appendBasketItems = function(data) {
+            data['seat_quantities'] = {};
+
+            $("input[id^=quantity_]").each(function() {
+                //Trim full id of field
+                var $line = $(this), id = $line.attr('id').split('quantity_')[1];
+                data['seat_quantities'][id] = $line.val();
+            });
         };
 
         return {
