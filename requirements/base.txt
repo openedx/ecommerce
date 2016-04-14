@@ -25,6 +25,9 @@ paypalrestsdk==1.11.5
 premailer==2.9.2
 pycountry==1.18
 python-dateutil==2.4.2
+# The following pin is needed for https://github.com/omab/python-social-auth/pull/897
+# we can remove once merged.
+python-social-auth==0.2.14
 pytz==2015.7
 requests==2.9.1
 suds==0.4
