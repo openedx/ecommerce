@@ -19,7 +19,7 @@ from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
-from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer
+from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer, CouponListSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -46,10 +46,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     new order from that basket.
     """
     queryset = Product.objects.filter(product_class__name='Coupon')
-    serializer_class = CouponSerializer
     permission_classes = (IsAuthenticated, IsAdminUser)
     filter_backends = (filters.DjangoFilterBackend, )
     filter_class = ProductFilter
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CouponListSerializer
+        return CouponSerializer
 
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
