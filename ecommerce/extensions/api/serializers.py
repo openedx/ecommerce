@@ -400,7 +400,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     vouchers = serializers.SerializerMethodField()
     categories = CategorySerializer(many=True, read_only=True)
     note = serializers.SerializerMethodField()
-    num_max_uses = serializers.SerializerMethodField()
+    max_uses = serializers.SerializerMethodField()
     num_uses = serializers.SerializerMethodField()
 
     def retrieve_offer(self, obj):
@@ -438,7 +438,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         except AttributeError:
             return None
 
-    def get_num_max_uses(self, obj):
+    def get_max_uses(self, obj):
         offer = self.retrieve_offer(obj)
         return offer.max_global_applications
 
@@ -450,7 +450,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         model = Product
         fields = (
             'id', 'title', 'coupon_type', 'last_edited', 'seats', 'client',
-            'price', 'vouchers', 'categories', 'note', 'num_max_uses', 'num_uses'
+            'price', 'vouchers', 'categories', 'note', 'max_uses', 'num_uses'
         )
 
 
