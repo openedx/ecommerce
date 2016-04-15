@@ -13,11 +13,6 @@ class InvoiceTests(TestCase):
         self.basket.save()
         self.invoice = Invoice.objects.create(order=self.basket.order, state='Paid')
 
-    def test_string(self):
-        """Test to check to Invoice string matches what is expected"""
-        self.assertEqual(str(self.invoice), 'Invoice {id} for order number {order}'.format(
-            id=self.invoice.id, order=self.basket.order.number))
-
     def test_order(self):
         """Test to check invoice order"""
         self.assertEqual(self.basket.order, self.invoice.order)
