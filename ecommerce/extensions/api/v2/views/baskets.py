@@ -6,6 +6,7 @@ import warnings
 
 from django.db import transaction
 from django.utils.decorators import method_decorator
+from edx_rest_framework_extensions.permissions import IsSuperuser
 from oscar.core.loading import get_class, get_model
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +15,6 @@ from rest_framework.response import Response
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.permissions import IsSuperUser
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
@@ -308,5 +308,5 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
 
 class BasketDestroyView(generics.DestroyAPIView):
     lookup_url_kwarg = 'basket_id'
-    permission_classes = (IsAuthenticated, IsSuperUser,)
+    permission_classes = (IsAuthenticated, IsSuperuser,)
     queryset = Basket.objects.all()
