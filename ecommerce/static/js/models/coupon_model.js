@@ -35,7 +35,8 @@ define([
                 stock_record_ids: [],
                 code: '',
                 price: 0,
-                invoiced_amount: 0
+                invoiced_amount: 0,
+                max_uses: 1
             },
 
             validation: {
