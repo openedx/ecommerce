@@ -17,9 +17,6 @@ class Invoice(TimeStampedModel):
 
     history = HistoricalRecords()
 
-    def __str__(self):
-        return 'Invoice {id} for order number {order}'.format(id=self.id, order=self.order.number)
-
     @property
     def total(self):
         """Total amount paid for this Invoice"""
