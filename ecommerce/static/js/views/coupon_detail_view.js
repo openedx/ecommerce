@@ -71,7 +71,7 @@ define([
                 if (voucher.usage === 'Single use') {
                     return gettext('Can be used once by one customer');
                 } else if (voucher.usage === 'Once per customer') {
-                    return gettext('Can only be used once per customer');
+                    return gettext('Can be used once by multiple customers');
                 }
                 return '';
             },
