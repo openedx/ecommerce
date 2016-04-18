@@ -25,7 +25,11 @@ from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers, update_voucher_offer
+from ecommerce.extensions.voucher.utils import (
+    create_vouchers,
+    update_voucher_offer,
+    create_vouchers as utils_create_vouchers
+)
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
@@ -92,6 +96,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note', None)
             max_uses = request.data.get('max_uses', None)
+            create_vouchers = request.data.get('create_vouchers', False)
 
             if max_uses:
                 max_uses = int(max_uses)
@@ -133,6 +138,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 'categories': categories,
                 'note': note,
                 'max_uses': max_uses,
+                'create_vouchers': create_vouchers,
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -184,28 +190,29 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Vouchers are created during order and not fulfillment like usual
         # because we want vouchers to be part of the line in the order.
-        try:
-            create_vouchers(
-                name=title,
-                benefit_type=data['benefit_type'],
-                benefit_value=Decimal(data['benefit_value']),
-                catalog=data['catalog'],
-                coupon=coupon_product,
-                end_datetime=data['end_date'],
-                code=data['code'] or None,
-                quantity=int(data['quantity']),
-                start_datetime=data['start_date'],
-                voucher_type=data['voucher_type'],
-                max_uses=data['max_uses'],
-                coupon_id=coupon_product.id
-            )
-        except IntegrityError as ex:
-            logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-            raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
+        if data.get('create_vouchers', False):
+            try:
+                utils_create_vouchers(
+                    name=title,
+                    benefit_type=data['benefit_type'],
+                    benefit_value=Decimal(data['benefit_value']),
+                    catalog=data['catalog'],
+                    coupon=coupon_product,
+                    end_datetime=data['end_date'],
+                    code=data['code'] or None,
+                    quantity=int(data['quantity']),
+                    start_datetime=data['start_date'],
+                    voucher_type=data['voucher_type'],
+                    max_uses=data['max_uses'],
+                    coupon_id=coupon_product.id
+                )
+                coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
+                coupon_product.attr.coupon_vouchers = coupon_vouchers
 
-        coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
+            except IntegrityError as ex:
+                logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
+                raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
 
-        coupon_product.attr.coupon_vouchers = coupon_vouchers
         coupon_product.attr.note = data['note']
         coupon_product.save()
 
