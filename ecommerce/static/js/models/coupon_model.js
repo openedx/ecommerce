@@ -31,6 +31,7 @@ define([
             urlRoot: '/api/v2/coupons/',
 
             defaults: {
+                id: null,
                 quantity: 1,
                 stock_record_ids: [],
                 code: '',
