@@ -391,6 +391,12 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
 
 
+class CouponListSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Product
+        fields = ('id', 'title',)
+
+
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
     coupon_type = serializers.SerializerMethodField()

@@ -300,41 +300,6 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
         self.assertEqual(response.status_code, 200)
         coupon_data = json.loads(response.content)['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
-        self.assertEqual(coupon_data['coupon_type'], 'Enrollment code')
-        self.assertIsNotNone(coupon_data['last_edited'][0])
-        self.assertEqual(coupon_data['seats'][0]['attribute_values'][0]['value'], 'verified')
-        self.assertEqual(coupon_data['seats'][0]['attribute_values'][1]['value'], 'edx/Demo_Course2/DemoX')
-        self.assertEqual(coupon_data['client'], self.user.username)
-        self.assertEqual(coupon_data['price'], '100.00')
-        self.assertIsNone(coupon_data['note'])
-
-        voucher_data = coupon_data['vouchers'][0]
-        self.assertEqual(voucher_data['benefit'][1], 100.0)
-        self.assertIsNotNone(voucher_data['redeem_url'])
-        self.assertEqual(voucher_data['start_datetime'], '2015-01-01T05:00:00Z')
-        self.assertEqual(voucher_data['end_datetime'], '2020-01-01T05:00:00Z')
-        self.assertIsNotNone(voucher_data['code'])
-        self.assertTrue(voucher_data['is_available_to_user'][0])
-
-    def test_list_coupon_note(self):
-        """Test note is returned for coupon with note."""
-        self.data.update({
-            'note': 'Coupon note',
-        })
-        self.client.post(COUPONS_LINK, data=self.data, format='json')
-        response = self.client.get(COUPONS_LINK)
-        response_data = json.loads(response.content)
-        self.assertEqual(response_data['results'][0]['note'], 'Coupon note')
-
-    def test_list_discount_coupons(self):
-        """Test discount code values are returned for discount coupon."""
-        self.data['title'] = 'Test discount code'
-        self.data['benefit_value'] = 20
-        self.client.post(COUPONS_LINK, data=self.data, format='json')
-        response = self.client.get(COUPONS_LINK)
-        response_data = json.loads(response.content)
-        self.assertEqual(response_data['results'][0]['coupon_type'], 'Discount code')
-        self.assertEqual(response_data['results'][0]['vouchers'][0]['benefit'][1], 20.0)
 
     def test_update(self):
         """Test updating a coupon."""
