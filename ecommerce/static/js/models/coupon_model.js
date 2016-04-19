@@ -58,6 +58,11 @@ define([
                         return this.get('coupon_type') === 'Discount code';
                     }
                 },
+                code: {
+                    required: false,
+                    rangeLength: [8, 16],
+                    msg: gettext('Code field must be empty or between 8 and 16 characters')
+                },
                 start_date: function (val) {
                     var startDate,
                         endDate;
