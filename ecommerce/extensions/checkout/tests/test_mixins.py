@@ -3,13 +3,13 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 """
 from decimal import Decimal
 
-from django.test import override_settings
 from mock import Mock, patch
 from oscar.core.loading import get_model
 from oscar.test.newfactories import BasketFactory, ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 
+from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -21,8 +21,7 @@ LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Basket = get_model('basket', 'Basket')
 
 
-@override_settings(SEGMENT_KEY='dummy-key')
-@patch('analytics.track')
+@patch.object(SegmentClient, 'track')
 class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
@@ -143,12 +142,12 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
             self.order.total_excl_tax
         )
 
-    @override_settings(SEGMENT_KEY=None)
     def test_handle_successful_order_no_segment_key(self, mock_track):
         """
         Ensure that tracking events do not fire when there is no Segment key
         configured.
         """
+        self.site.siteconfiguration.segment_key = None
         EdxOrderPlacementMixin().handle_successful_order(self.order)
         # ensure no event was fired
         self.assertFalse(mock_track.called)
@@ -166,7 +165,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         # ensure we logged a warning.
         self.assertTrue(mock_log_exc.called_with("Failed to emit tracking event upon order placement."))
 
-    @override_settings(SEGMENT_KEY=None)
     def test_handle_successful_async_order(self, __):
         """
         Verify that a Waffle Sample can be used to control async order fulfillment.

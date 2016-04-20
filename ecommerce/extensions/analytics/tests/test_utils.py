@@ -1,13 +1,11 @@
 import json
 
 from django.contrib.auth.models import AnonymousUser
-from django.test import override_settings
 
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.tests.testcases import TestCase
 
 
-@override_settings(SEGMENT_KEY='TEST123')
 class UtilsTest(TestCase):
     """ Tests for the analytics utils. """
 
@@ -22,7 +20,7 @@ class UtilsTest(TestCase):
         data = prepare_analytics_data('a/b/c', user)
         self.assertDictEqual(json.loads(data), {
             'course': {'courseId': 'a/b/c'},
-            'tracking': {'segmentApplicationId': 'TEST123'},
+            'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
             'user': {'username': 'Tester', 'name': 'John Doe', 'email': 'test@example.com'}
         })
 
@@ -32,6 +30,6 @@ class UtilsTest(TestCase):
         data = prepare_analytics_data('a/b/c', user)
         self.assertDictEqual(json.loads(data), {
             'course': {'courseId': 'a/b/c'},
-            'tracking': {'segmentApplicationId': 'TEST123'},
+            'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
             'user': 'AnonymousUser'
         })

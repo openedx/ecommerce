@@ -23,6 +23,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.payment_processors = 'cybersource,paypal'
         self.client_id = 'ecommerce-key'
         self.client_secret = 'ecommerce-secret'
+        self.segment_key = 'test-segment-key'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -33,6 +34,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_processors, self.payment_processors)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'], self.client_id)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
+        self.assertEqual(site_configuration.segment_key, self.segment_key)
 
     def test_create_site(self):
         """ Verify the command creates Site, Partner, and SiteConfiguration. """
@@ -45,7 +47,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             '--theme-scss-path={theme_scss_path}'.format(theme_scss_path=self.theme_scss_path),
             '--payment-processors={payment_processors}'.format(payment_processors=self.payment_processors),
             '--client-id={client_id}'.format(client_id=self.client_id),
-            '--client-secret={client_secret}'.format(client_secret=self.client_secret)
+            '--client-secret={client_secret}'.format(client_secret=self.client_secret),
+            '--segment-key={segment_key}'.format(segment_key=self.segment_key)
         )
 
         site = Site.objects.get(domain=site_domain)
@@ -69,7 +72,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             '--theme-scss-path={theme_scss_path}'.format(theme_scss_path=self.theme_scss_path),
             '--payment-processors={payment_processors}'.format(payment_processors=self.payment_processors),
             '--client-id={client_id}'.format(client_id=self.client_id),
-            '--client-secret={client_secret}'.format(client_secret=self.client_secret)
+            '--client-secret={client_secret}'.format(client_secret=self.client_secret),
+            '--segment-key={segment_key}'.format(segment_key=self.segment_key)
         )
 
         site = Site.objects.get(id=site.id)

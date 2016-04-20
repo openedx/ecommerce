@@ -1,15 +1,14 @@
-from django.test import override_settings
 from mock import patch
 from oscar.test.newfactories import UserFactory
 
+from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
 
 
-@override_settings(SEGMENT_KEY='dummy-key')
-@patch('analytics.track')
+@patch.object(SegmentClient, 'track')
 class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
     """Tests verifying the behavior of refund tracking."""
 
@@ -76,9 +75,10 @@ class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
             self.refund.total_credit_excl_tax
         )
 
-    @override_settings(SEGMENT_KEY=None)
     def test_successful_refund_no_segment_key(self, mock_track):
         """Verify that a successfully placed refund is not tracked when Segment is disabled."""
+        self.site.siteconfiguration.segment_key = None
+
         # Approve the refund.
         self.approve(self.refund)
 

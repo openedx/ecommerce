@@ -256,7 +256,8 @@ class SiteMixin(object):
         site_configuration = SiteConfigurationFactory(
             partner__name='edX',
             site__id=settings.SITE_ID,
-            site__domain=domain
+            site__domain=domain,
+            segment_key='fake_segment_key'
         )
         self.partner = site_configuration.partner
         self.site = site_configuration.site

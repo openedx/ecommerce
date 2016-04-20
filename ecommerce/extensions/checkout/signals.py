@@ -1,6 +1,5 @@
 import logging
 
-import analytics
 from django.conf import settings
 from django.dispatch import receiver
 from oscar.core.loading import get_class
@@ -29,7 +28,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
     user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(order.user)
 
-    analytics.track(
+    order.site.siteconfiguration.segment_client.track(
         user_tracking_id,
         'Completed Order',
         {
