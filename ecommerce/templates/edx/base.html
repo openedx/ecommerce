@@ -40,6 +40,10 @@
 {# Translation support for JavaScript strings. #}
 <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
+<script type="text/javascript">
+    var initModelData = {{ analytics_data|safe }};
+</script>
+
 {% compress js %}
     <script src="{% static 'bower_components/requirejs/require.js' %}"></script>
     <script src="{% static 'js/config.js' %}"></script>

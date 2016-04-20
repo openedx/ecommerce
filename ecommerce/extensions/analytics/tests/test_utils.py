@@ -17,7 +17,7 @@ class UtilsTest(TestCase):
             last_name='Doe',
             email='test@example.com'
         )
-        data = prepare_analytics_data('a/b/c', user)
+        data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key, 'a/b/c')
         self.assertDictEqual(json.loads(data), {
             'course': {'courseId': 'a/b/c'},
             'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
@@ -27,7 +27,7 @@ class UtilsTest(TestCase):
     def test_anon_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for an anonymous user."""
         user = AnonymousUser()
-        data = prepare_analytics_data('a/b/c', user)
+        data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key, 'a/b/c')
         self.assertDictEqual(json.loads(data), {
             'course': {'courseId': 'a/b/c'},
             'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},

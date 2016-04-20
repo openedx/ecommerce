@@ -94,7 +94,11 @@ class BasketSummaryView(BasketView):
                 line.benefit_value = None
 
             context.update({
-                'analytics_data': prepare_analytics_data(course_id, self.request.user)
+                'analytics_data': prepare_analytics_data(
+                    self.request.user,
+                    self.request.site.siteconfiguration.segment_key,
+                    course_id
+                ),
             })
 
         context.update({

@@ -4,6 +4,7 @@ import logging
 
 from threadlocals.threadlocals import get_current_request
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -87,22 +88,23 @@ def audit_log(name, **kwargs):
     logger.info(message)
 
 
-def prepare_analytics_data(course_id, user):
+def prepare_analytics_data(user, segment_key, course_id=None):
     """ Helper function for preparing necessary data for analytics.
 
     Arguments:
-        course_id (str): The course ID.
         user (User): The user making the request.
+        segment_key (str): Segment write/API key.
+        course_id (str): The course ID.
 
     Returns:
-        JSON object with the data for analytics.
+        str: JSON object with the data for analytics.
     """
     data = {
         'course': {
             'courseId': course_id
         },
         'tracking': {
-            'segmentApplicationId': get_current_request().site.siteconfiguration.segment_key
+            'segmentApplicationId': segment_key
         }
     }
 
