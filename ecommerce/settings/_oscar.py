@@ -79,6 +79,7 @@ OSCAR_ORDER_STATUS_CASCADE = {
 FULFILLMENT_MODULES = [
     'ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.CouponFulfillmentModule',
+    'ecommerce.extensions.fulfillment.modules.EnrollmentCodeFulfillmentModule',
 ]
 
 HAYSTACK_CONNECTIONS = {

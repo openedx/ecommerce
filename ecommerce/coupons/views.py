@@ -1,21 +1,23 @@
 from __future__ import unicode_literals
+
+import csv
 import logging
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.decorators import method_decorator
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
-
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
@@ -30,6 +32,8 @@ Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
+OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
+Order = get_model('order', 'Order')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -148,7 +152,11 @@ class CouponOfferView(TemplateView):
                     }
                 course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
                 benefit = voucher.offers.first().benefit
-                stock_record = benefit.range.catalog.stock_records.first()
+                # Note (multi-courses): fix this to work for all stock records / courses.
+                if benefit.range.catalog:
+                    stock_record = benefit.range.catalog.stock_records.first()
+                else:
+                    stock_record = StockRecord.objects.get(product=benefit.range.included_products.first())
                 price = stock_record.price_excl_tax
                 benefit_value = format_benefit_value(benefit)
                 if benefit.type == 'Percentage':
@@ -224,3 +232,69 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             return HttpResponseRedirect(reverse('basket:summary'))
 
         return HttpResponseRedirect(get_lms_url(''))
+
+
+class EnrollmentCodeCsvView(View):
+    """ Download enrollment code CSV file view. """
+
+    def get(self, request, number):  # pylint: disable=unused-argument
+        """
+        Creates a CSV for the order. The structure of the CSV looks like this:
+
+           > Order Number:,EDX-100001
+
+           > Seat in Demo with verified certificate (and ID verification)
+           > Code,Redemption URL
+           > J4HDI5OAUGCSUJJ3,ecommerce.server?code=J4HDI5OAUGCSUJJ3
+           > OZCRR6WXLWGAFWZR,ecommerce.server?code=OZCRR6WXLWGAFWZR
+           > 6KPYL6IO6Y3XL7SI,ecommerce.server?code=6KPYL6IO6Y3XL7SI
+           > NPIJWIKNLRURYVU2,ecommerce.server?code=NPIJWIKNLRURYVU2
+           > 6SZULKPZQYACAODC,ecommerce.server?code=6SZULKPZQYACAODC
+           >
+
+        Args:
+            order (Order): The bulk enrollment order.
+            csv_lines(list): List of the order lines together with the particular
+                vouchers for that line:
+                [{
+                    'title'(str): The title of the product in the line.
+                    'vouchers'(list): List of the vouchers associated to that line.
+                }]
+        """
+        template_name = 'coupons/offer.html'
+
+        try:
+            order = Order.objects.get(number=number)
+        except Order.DoesNotExist:
+            return render(request, template_name, {'error': _('Invalid order.')})
+
+        if request.user != order.user:
+            return render(request, template_name, {'error': _('Invalid order.')})
+
+        file_name = 'Enrollment code CSV order num {}'.format(order.number)
+        file_name = '{filename}.csv'.format(filename=slugify(file_name))
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=file_name)
+
+        redeem_url = get_ecommerce_url(reverse('coupons:offer'))
+        voucher_field_names = ('Code', 'Redemption URL')
+        voucher_writer = csv.DictWriter(response, fieldnames=voucher_field_names)
+
+        writer = csv.writer(response)
+        writer.writerow(('Order Number:', order.number))
+        writer.writerow([])
+
+        order_line_vouchers = OrderLineVouchers.objects.filter(line__order=order)
+        for order_line_voucher in order_line_vouchers:
+            writer.writerow([order_line_voucher.line.product.title])
+            voucher_writer.writeheader()
+
+            for voucher in order_line_voucher.vouchers.all():
+                voucher_writer.writerow({
+                    voucher_field_names[0]: voucher.code,
+                    voucher_field_names[1]: '{url}?code={code}'.format(url=redeem_url, code=voucher.code)
+                })
+            writer.writerow([])
+
+        return response
