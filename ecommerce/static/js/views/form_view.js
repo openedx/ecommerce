@@ -67,6 +67,44 @@ define([
                 return this;
             },
 
+            validateCourseID : function(){
+                var self = this;
+                var courseIdInput = self.$('input[name=id]');
+                courseIdInput.focusout(function() {
+                    var courseId = courseIdInput.val();
+                    self.checkCourseAlreadyExist(courseId);
+                });
+            },
+            /**
+             * Validate the courseId input if it already exists
+             */
+            checkCourseAlreadyExist : function(courseId){
+                var courseIDFound = false, _this = this, url = '/api/v2/courses/' + courseId,
+                    redirected_url = '/courses/' + courseId,
+                    html = '<a href="'+redirected_url+'"> Click here to view the existing course</a>',
+                    message = gettext('A course with the specified ID already exists.' + html);
+
+                $.ajax({
+                    url: url,
+                    method: 'get',
+                    contentType: 'application/json',
+                    async: false,
+                    success: function (data) {
+                        if(data.id === courseId) {
+                            _this.clearAlerts();
+                            _this.renderAlert('danger', message);
+                            courseIDFound = true;
+                        }
+                    },
+                    error: function (response) {
+                        if (response.status === 404) {
+                            _this.clearAlerts();
+                        }
+                    }
+                });
+                return courseIDFound;
+
+            },
             /**
              * Remove all alerts currently on display.
              */
@@ -109,6 +147,7 @@ define([
                     $submitButton,
                     btnDefaultText,
                     self = this,
+                    courseId = $('input[name=id]').val(),
                     btnSavingContent = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' +
                         gettext('Saving...');
 
@@ -118,6 +157,10 @@ define([
                 if (!this.model.isValid(true)) {
                     this.clearAlerts();
                     this.renderAlert('danger', gettext('You must complete all required fields.'));
+                    return;
+                }
+                // Check if the courseID already exists.
+                else if(courseId && !self.editing && self.checkCourseAlreadyExist(courseId)){
                     return;
                 }
 

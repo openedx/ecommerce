@@ -127,6 +127,7 @@ define([
                     this.renderVerificationDeadline);
                 this.listenTo(this.model, 'change:type change:honor_mode',
                     this.renderHonorMode);
+                this.listenTo(this.model, 'change:id' , this.validateCourseID);
 
                 // Listen for the sync event so that we can keep track of the original course type.
                 // This helps us determine which course types the course can be upgraded to.
