@@ -11,7 +11,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.utils import (
-    create_vouchers, generate_coupon_report, get_voucher_discount_info, update_voucher_offer
+    create_vouchers, create_voucher_csv, generate_coupon_report, get_voucher_discount_info, update_voucher_offer
 )
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -431,3 +431,18 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(new_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(new_offer.benefit.value, 50.00)
         self.assertEqual(new_offer.benefit.range.catalog, self.catalog)
+
+
+class VoucherCSVTests(CouponMixin, TestCase):
+    """Tests for bulk enrollment CSV creation methods."""
+    VOUCHER_NUMBER = 5
+
+    def setUp(self):
+        super(VoucherCSVTests, self).setUp()
+        self.coupon = self.create_coupon(quantity=self.VOUCHER_NUMBER)
+
+    def test_create_voucher_csv(self):
+        """Verify the method returns the correct rows."""
+        vouchers = self.coupon.attr.coupon_vouchers.vouchers.all()
+        voucher_row = create_voucher_csv(vouchers)
+        self.assertEqual(len(voucher_row), self.VOUCHER_NUMBER)
