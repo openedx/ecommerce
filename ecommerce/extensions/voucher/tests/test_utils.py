@@ -10,7 +10,9 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
-from ecommerce.extensions.voucher.utils import create_vouchers, generate_coupon_report, get_voucher_discount_info
+from ecommerce.extensions.voucher.utils import (
+    create_vouchers, generate_coupon_report, get_voucher_discount_info, update_voucher_offer
+)
 from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -405,3 +407,27 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         # Verify that the voucher with now 0 usage number wasn't applied to the basket.
         new_basket = self.apply_voucher(self.user, self.site, voucher)
         self.assertEqual(len(new_basket.applied_offers()), 0)
+
+    def test_update_voucher_offer(self):
+        vouchers = create_vouchers(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.00,
+            catalog=self.catalog,
+            coupon=self.coupon,
+            end_datetime=datetime.date(2015, 10, 30),
+            name="Test voucher",
+            quantity=10,
+            start_datetime=datetime.date(2015, 10, 1),
+            voucher_type=Voucher.SINGLE_USE
+        )
+
+        voucher = vouchers[0]
+        voucher_offer = voucher.offers.first()
+        self.assertEqual(voucher_offer.benefit.type, Benefit.PERCENTAGE)
+        self.assertEqual(voucher_offer.benefit.value, 100.00)
+        self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
+
+        new_offer = update_voucher_offer(voucher_offer, 50.00, Benefit.PERCENTAGE)
+        self.assertEqual(new_offer.benefit.type, Benefit.PERCENTAGE)
+        self.assertEqual(new_offer.benefit.value, 50.00)
+        self.assertEqual(new_offer.benefit.range.catalog, self.catalog)

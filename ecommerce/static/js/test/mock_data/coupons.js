@@ -165,7 +165,7 @@ define([], function(){
     },
     discountCodeCouponModelData = {
         title: 'Test Discount',
-        coupon_type: 'discount',
+        coupon_type: 'Discount code',
         client: 'test_client',
         start_date: '2015-01-01T00:00:00Z',
         end_date: '2016-01-01T00:00:00Z',
@@ -183,7 +183,7 @@ define([], function(){
     enrollmentCodeCouponData = {
         'id': 10,
         'title': 'Test Enrollment Code',
-        'code_type': 'enrollment',
+        'code_type': 'Enrollment code',
         'last_edited': lastEditData,
         'seats': [verifiedSeat],
         'client': 'Client Name',
@@ -198,7 +198,7 @@ define([], function(){
     },
     enrollmentCodeCouponModelData = {
         title: 'Test Enrollment',
-        coupon_type: 'enrollment',
+        coupon_type: 'Enrollment code',
         client: 'test_client',
         start_date: '2015-01-01T00:00:00Z',
         end_date: '2016-01-01T00:00:00Z',

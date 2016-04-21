@@ -39,11 +39,11 @@ define([
 
             codeTypes: [
                 {
-                    value: 'enrollment',
+                    value: 'Enrollment code',
                     label: gettext('Enrollment Code')
                 },
                 {
-                    value: 'discount',
+                    value: 'Discount code',
                     label: gettext('Discount Code')
                 }
             ],
@@ -82,14 +82,6 @@ define([
                         collection: function () {
                             return this.codeTypes;
                         }
-                    },
-                    onGet: function (val) {
-                        if (val === 'Enrollment code') {
-                            return 'enrollment';
-                        } else if (val === 'Discount code') {
-                            return 'discount';
-                        }
-                        return '';
                     }
                 },
                 'select[name=voucher_type]': {
@@ -101,14 +93,22 @@ define([
                     }
                 },
                 'input[name=benefit_type]': {
-                    observe: 'benefit_type'
+                    observe: 'benefit_type',
+                    onGet: function (val) {
+                        if (val === 'Percentage') {
+                            return val;
+                        } else if (val === 'Absolute') {
+                            return 'Absolute';
+                        }
+                        return '';
+                    }
                 },
                 '.benefit-addon': {
                     observe: 'benefit_type',
                     onGet: function (val) {
                         if (val === 'Percentage') {
                             return '%';
-                        } else if (val === 'Fixed') {
+                        } else if (val === 'Absolute') {
                             return '$';
                         }
                         return '';
@@ -129,8 +129,8 @@ define([
                 'input[name=price]': {
                     observe: 'price'
                 },
-                'input[name=invoiced_amount]': {
-                    observe: 'invoiced_amount'
+                'input[name=total_value]': {
+                    observe: 'total_value'
                 },
                 'input[name=start_date]': {
                     observe: 'start_date',
@@ -157,12 +157,12 @@ define([
 
             events: {
                 'input [name=course_id]': 'fillFromCourse',
-                'input [name=quantity]': 'changePrice',
+                'input [name=quantity]': 'changeTotalValue',
 
                 // catch value after autocomplete
                 'blur [name=course_id]': 'fillFromCourse',
                 'change [name=seat_type]': 'changeSeatType',
-                'change [name=benefit_type]': 'changeUpperLimitForBenefitValue'
+                'change [name=benefit_type]': 'changeUpperLimitForBenefitValue',
             },
 
             initialize: function (options) {
@@ -190,7 +190,7 @@ define([
                         return this.$el.find(sel).closest('.form-group');
                     }.bind(this);
 
-                if (couponType === 'discount') {
+                if (couponType === 'Discount code') {
                     formGroup('[name=benefit_value]').removeClass(hiddenClass);
                 } else {
                     // enrollment
@@ -200,7 +200,7 @@ define([
                 // When creating a discount show the CODE field for both (they are both multi-use)
                 //     - Multiple times by multiple customers
                 //     - Once per customer
-                if (couponType === 'discount' && voucherType !== 'Single use') {
+                if (couponType === 'Discount code' && voucherType !== 'Single use') {
                     formGroup('[name=code]').removeClass(hiddenClass);
                 } else {
                     formGroup('[name=code]').addClass(hiddenClass);
@@ -270,36 +270,30 @@ define([
 
                     if (seatType && !this.editing) {
                         this.model.set('stock_record_ids', seatData.stockrecords);
-                        this.updatePrice(seatData);
+                        this.updateTotalValue(seatData);
                     }
                 }
             },
 
-            changePrice: function () {
-                this.updatePrice(this.getSeatData());
+            changeTotalValue: function () {
+                this.updateTotalValue(this.getSeatData());
             },
 
-            updatePrice: function (seatData) {
+            updateTotalValue: function (seatData) {
                 var quantity = this.$el.find('input[name=quantity]').val(),
-                    price = quantity * seatData.price;
-                this.model.set('price', price);
-                this.$el.find('input[name=invoiced_amount]').val(price);
+                    totalValue = quantity * seatData.price;
+                this.model.set('total_value', totalValue);
+                this.$el.find('input[name=price]').val(totalValue);
             },
 
             disableNonEditableFields: function () {
-                this.$el.find('input[name=title]').attr('disabled', true);
                 this.$el.find('select[name=code_type]').attr('disabled', true);
                 this.$el.find('select[name=voucher_type]').attr('disabled', true);
                 this.$el.find('input[name=quantity]').attr('disabled', true);
-                this.$el.find('input[name=client]').attr('disabled', true);
-                this.$el.find('input[name=price]').attr('disabled', true);
                 this.$el.find('input[name=course_id]').attr('disabled', true);
                 this.$el.find('input[name=code]').attr('disabled', true);
-                this.$el.find('input[name=benefit_value]').attr('disabled', true);
                 this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
-                this.$el.find('select[name=category]').attr('disabled', true);
-                this.$el.find('input[name=note]').attr('disabled', true);
                 this.$el.find('input[name=max_uses]').attr('disabled', true);
             },
 
@@ -322,6 +316,7 @@ define([
                 if (this.editing) {
                     this.$el.find('select[name=category]').val(this.model.get('categories')[0].id).trigger('change');
                     this.disableNonEditableFields();
+                    this.toggleFields();
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
                     this.fillFromCourse();
                 } else {

@@ -4,6 +4,8 @@ import logging
 
 from dateutil.parser import parse
 from django.db import transaction
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model, get_class
 from rest_framework import serializers
@@ -13,6 +15,7 @@ import waffle
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
+from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
 
@@ -431,7 +434,13 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return serializer.data
 
     def get_client(self, obj):
-        return Basket.objects.filter(lines__product_id=obj.id).first().owner.username
+        basket = Basket.objects.filter(lines__product_id=obj.id).first()
+        try:
+            order = get_object_or_404(Order, basket=basket)
+            invoice = get_object_or_404(Invoice, order=order)
+            return invoice.business_client.name
+        except Http404:
+            return basket.owner.username
 
     def get_vouchers(self, obj):
         vouchers = obj.attr.coupon_vouchers.vouchers.all()

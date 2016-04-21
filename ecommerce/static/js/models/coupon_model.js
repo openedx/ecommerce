@@ -36,7 +36,7 @@ define([
                 stock_record_ids: [],
                 code: '',
                 price: 0,
-                invoiced_amount: 0,
+                total_value: 0,
                 max_uses: 1
             },
 
@@ -55,7 +55,7 @@ define([
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
-                        return this.get('coupon_type') === 'discount';
+                        return this.get('coupon_type') === 'Discount code';
                     }
                 },
                 start_date: function (val) {
@@ -92,8 +92,9 @@ define([
 
             initialize: function () {
                 this.on('change:voucher_type', this.changeVoucherType, this);
-                this.on('change:seats', this.updateSeatData);
                 this.on('change:vouchers', this.updateVoucherData);
+                this.on('change:seats', this.updateSeatData);
+                this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
             },
 
             /**
@@ -105,12 +106,21 @@ define([
                 }
             },
 
+            getSeatPrice: function () {
+                return this.get('seats')[0].price;
+            },
+
+            updateTotalValue: function (seat_price) {
+                this.set('total_value', this.get('quantity') * seat_price);
+            },
+
             updateSeatData: function () {
                 var seat_data = this.get('seats')[0].attribute_values,
                     seat_type = _.findWhere(seat_data, {'name': 'certificate_type'}),
                     course_id = _.findWhere(seat_data, {'name': 'course_key'});
                 this.set('seat_type', seat_type ? seat_type.value : '');
                 this.set('course_id', course_id ? course_id.value : '');
+                this.updateTotalValue(this.getSeatPrice());
             },
 
             updateVoucherData: function () {
@@ -120,6 +130,8 @@ define([
                 this.set('start_date', voucher.start_datetime);
                 this.set('end_date', voucher.end_datetime);
                 this.set('voucher_type', voucher.usage);
+                this.set('quantity', _.size(vouchers));
+                this.updateTotalValue(this.getSeatPrice());
                 if (this.get('coupon_type') === 'Discount code') {
                     this.set('benefit_type', voucher.benefit[0]);
                     this.set('benefit_value', voucher.benefit[1]);
@@ -143,19 +155,16 @@ define([
                 data.client_username = this.get('client');
                 data.start_date = moment.utc(this.get('start_date'));
                 data.end_date = moment.utc(this.get('end_date'));
-                data.price = this.get('price');
                 data.category_ids = [ this.get('category') ];
-                data.note = this.get('note');
-                data.max_usage = this.get('max_usage');
 
                 // Enrollment code always gives 100% discount
                 switch (this.get('coupon_type')) {
-                    case 'enrollment':
+                    case 'Enrollment code':
                         // this is the price paid for the code(s)
                         data.benefit_type = 'Percentage';
                         data.benefit_value = 100;
                         break;
-                    case 'discount':
+                    case 'Discount code':
                         data.benefit_type = this.get('benefit_type');
                         data.benefit_value = this.get('benefit_value');
                         break;
