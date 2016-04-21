@@ -121,5 +121,5 @@
 
 <div class="form-actions">
     <button type="submit" class="btn btn-primary"></button>
-    <a class="btn btn-default" href="/"><%= gettext('Cancel') %></a>
+    <a class="btn btn-default" href="/coupons/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
 </div>

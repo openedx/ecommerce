@@ -12,6 +12,10 @@ define([
              */
             getModelForValidation: function (valid) {
                 return Backbone.Model.extend({
+                    defaults: {
+                        id: null
+                    },
+
                     isValid: function () {
                         return valid;
                     },
