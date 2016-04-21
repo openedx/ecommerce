@@ -439,7 +439,7 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type):
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon):
     """
     Update voucher offer with new benefit value.
 
@@ -454,5 +454,6 @@ def update_voucher_offer(offer, benefit_value, benefit_type):
     return _get_or_create_offer(
         product_range=offer.benefit.range,
         benefit_value=benefit_value,
-        benefit_type=benefit_type
+        benefit_type=benefit_type,
+        coupon_id=coupon.id
     )

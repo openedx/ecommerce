@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import BusinessClient, User
+from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
@@ -35,8 +36,17 @@ Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
+Range = Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+
+CATALOG_QUERY = 'catalog_query'
+COURSE_SEAT_TYPES = 'course_seat_types'
+
+UPDATABLE_RANGE_FIELDS = [
+    CATALOG_QUERY,
+    COURSE_SEAT_TYPES,
+]
 
 
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
@@ -73,7 +83,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         with transaction.atomic():
             title = request.data[AC.KEYS.TITLE]
             client_username = request.data[AC.KEYS.CLIENT_USERNAME]
-            stock_record_ids = request.data.get(AC.KEYS.STOCK_RECORD_IDS, None)
+            stock_record_ids = request.data.get(AC.KEYS.STOCK_RECORD_IDS)
             start_date = dateutil.parser.parse(request.data[AC.KEYS.START_DATE])
             end_date = dateutil.parser.parse(request.data[AC.KEYS.END_DATE])
             code = request.data[AC.KEYS.CODE]
@@ -85,13 +95,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             partner = request.site.siteconfiguration.partner
             categories = Category.objects.filter(id__in=request.data[AC.KEYS.CATEGORY_IDS])
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
-            note = request.data.get('note', None)
-            max_uses = request.data.get('max_uses', None)
-            catalog_query = request.data.get(AC.KEYS.CATALOG_QUERY, None)
-            course_seat_types = request.data.get(AC.KEYS.COURSE_SEAT_TYPES, None)
+            note = request.data.get('note')
+            max_uses = request.data.get('max_uses')
+            catalog_query = request.data.get(CATALOG_QUERY)
+            course_seat_types = request.data.get(COURSE_SEAT_TYPES)
 
             if course_seat_types:
-                course_seat_types = ','.join(seat_type.lower() for seat_type in course_seat_types)
+                course_seat_types = prepare_course_seat_types(course_seat_types)
 
             # Maximum number of uses can be set for each voucher type and disturb
             # the predefined behaviours of the different voucher types. Therefor
@@ -101,10 +111,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 max_uses = int(max_uses)
             else:
                 max_uses = None
-
-            # We currently do not support multi-use voucher types.
-            if voucher_type == Voucher.MULTI_USE:
-                raise NotImplementedError('Multi-use voucher types are not supported')
 
             # When a black-listed course mode is received raise an exception.
             # Audit modes do not have a certificate type and therefore will raise
@@ -301,9 +307,23 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if data:
             vouchers.all().update(**data)
 
+        range_data = {}
+
+        for field in UPDATABLE_RANGE_FIELDS:
+            self.create_update_data_dict(
+                request_data=request.data,
+                request_data_key=field,
+                update_dict=range_data,
+                update_dict_key=field
+            )
+
+        if range_data:
+            voucher_range = vouchers.first().offers.first().benefit.range
+            Range.objects.filter(id=voucher_range.id).update(**range_data)
+
         benefit_value = request.data.get(AC.KEYS.BENEFIT_VALUE, '')
         if benefit_value:
-            self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers)
+            self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
 
         category_ids = request.data.get(AC.KEYS.CATEGORY_IDS, '')
         if category_ids:
@@ -336,14 +356,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """
         value = request_data.get(request_data_key, '')
         if value:
-            update_dict[update_dict_key] = value
+            update_dict[update_dict_key] = prepare_course_seat_types(value) \
+                if update_dict_key == COURSE_SEAT_TYPES else value
 
-    def update_coupon_benefit_value(self, benefit_value, vouchers):
+    def update_coupon_benefit_value(self, benefit_value, vouchers, coupon):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
             benefit_value (Decimal): Benefit value associated with a new offer
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
+            coupon (Product): Coupon product associated with vouchers
         """
         voucher_offers = vouchers.first().offers
         voucher_offer = voucher_offers.first()
@@ -351,7 +373,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         new_offer = update_voucher_offer(
             offer=voucher_offer,
             benefit_value=benefit_value,
-            benefit_type=voucher_offer.benefit.type
+            benefit_type=voucher_offer.benefit.type,
+            coupon=coupon
         )
         for voucher in vouchers.all():
             voucher.offers.clear()

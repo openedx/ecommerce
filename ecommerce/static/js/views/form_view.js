@@ -210,9 +210,9 @@ define([
          * Override Backbone.View.extend so that the child view inherits events.
          */
         FormView.extend = function (child) {
-        	  var view = Backbone.View.extend.apply(this, arguments);
-        	  view.prototype.events = _.extend({}, this.prototype.events, child.events);
-        	  return view;
+            var view = Backbone.View.extend.apply(this, arguments);
+            view.prototype.events = _.extend({}, this.prototype.events, child.events);
+            return view;
         };
 
         return FormView;

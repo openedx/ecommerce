@@ -119,7 +119,7 @@ define([
                 });
             });
 
-            describe('discount', function () {
+            describe('discount code', function () {
                 beforeEach(function () {
                     view.$el.find('[name=code_type]').val('Discount code').trigger('change');
                 });
@@ -177,6 +177,20 @@ define([
                     view.$el.find('[name=quantity]').val(111).trigger('change');
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(visible('[name=code]')).toBe(true);
+                });
+            });
+
+            describe('dynamic catalog coupon', function () {
+                it('should update dynamic catalog view query with coupon catalog query', function() {
+                    model.set('catalog_query', '*:*');
+                    view.updateCatalogQuery();
+                    expect(view.dynamic_catalog_view.query).toEqual(model.get('catalog_query'));
+                });
+
+                it('should update dynamic catalog view course seat types with coupon seat types', function() {
+                    model.set('course_seat_types', ['verified']);
+                    view.updateCourseSeatTypes();
+                    expect(view.dynamic_catalog_view.seat_types).toEqual(model.get('course_seat_types'));
                 });
             });
         });

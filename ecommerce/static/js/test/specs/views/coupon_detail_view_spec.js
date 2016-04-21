@@ -35,11 +35,6 @@ define([
                 verifiedSeat = Mock_Coupons.verifiedSeat;
             });
 
-            it('should capitalize string value', function () {
-                expect(view.capitalize('abc')).toBe('Abc');
-                expect(view.capitalize('aBC')).toBe('Abc');
-            });
-
             it('should get code status from voucher data', function () {
                 expect(view.codeStatus(enrollmentCodeVoucher)).toBe('ACTIVE');
 
@@ -54,38 +49,6 @@ define([
             it('should get coupon type from voucher data', function () {
                 expect(view.couponType(percentageDiscountCodeVoucher)).toBe('Discount Code');
                 expect(view.couponType(enrollmentCodeVoucher)).toBe('Enrollment Code');
-            });
-
-            it('should get course ID from seat data', function () {
-                expect(view.courseID(verifiedSeat.attribute_values)).toBe('course-v1:edX+DemoX+Demo_Course');
-
-                verifiedSeat.attribute_values = [
-                    {
-                        name: 'certificate_type',
-                        value: 'verified'
-                    },
-                    {
-                        name: 'id_verification_required',
-                        value: true
-                    }
-                ];
-                expect(view.courseID(verifiedSeat.attribute_values)).toBe('');
-            });
-
-            it('should get certificate type from seat data', function () {
-                expect(view.certificateType(verifiedSeat.attribute_values)).toBe('Verified');
-
-                verifiedSeat.attribute_values = [
-                    {
-                        name: 'course_key',
-                        value: 'course-v1:edX+DemoX+Demo_Course'
-                    },
-                    {
-                        name: 'id_verification_required',
-                        value: true
-                    }
-                ];
-                expect(view.certificateType(verifiedSeat.attribute_values)).toBe('');
             });
 
             it('should get discount value from voucher data', function () {
@@ -106,13 +69,17 @@ define([
                 expect(view.usageLimitation(enrollmentCodeVoucher)).toBe('Can be used once by one customer');
                 expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe('Can be used once by multiple customers');
 
+                valueDiscountCodeVoucher.usage = 'Multi-use';
+                expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe(
+                    'Can be used multiple times by multiple customers'
+                );
+
                 valueDiscountCodeVoucher.usage = '';
                 expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe('');
             });
 
             it('should display correct data upon rendering', function () {
-                var course_data = model.get('seats')[0].attribute_values,
-                    voucher = model.get('vouchers')[0],
+                var voucher = model.get('vouchers')[0],
                     category = model.get('categories')[0].name;
 
                 spyOn(view, 'renderVoucherTable');
@@ -125,10 +92,10 @@ define([
                 );
                 expect(view.$el.find('.category > .value').text()).toEqual(category);
                 expect(view.$el.find('.discount-value > .value').text()).toEqual(view.discountValue(voucher));
-                expect($.trim(view.$el.find('.course-info > .value').text())).toEqual(view.courseID(course_data));
-                expect(view.$el.find('.course-info > .value > .pull-right').text()).toEqual(
-                    view.certificateType(course_data)
+                expect(view.$el.find('.course-info > .value').contents().get(0).nodeValue).toEqual(
+                    'course-v1:edX+DemoX+Demo_Course'
                 );
+                expect(view.$el.find('.course-info > .value > .pull-right').text()).toEqual('verified');
                 expect(view.$el.find('.start-date-info > .value').text()).toEqual(
                     view.formatDateTime(voucher.start_datetime)
                 );
@@ -141,6 +108,31 @@ define([
                     _s.sprintf('$%s', model.get('price'))
                 );
                 expect(view.renderVoucherTable).toHaveBeenCalled();
+            });
+
+            it('should render course data', function () {
+                view.model.set({
+                    'catalog_type': 'Single course',
+                    'course_id': 'a/b/c',
+                    'seat_type': 'Verified'
+                });
+
+                view.render();
+
+                var course_info = view.$el.find('.course-info .value');
+                expect(course_info.length).toEqual(1);
+                expect(course_info.text()).toEqual('a/b/cVerified');
+
+                view.model.set({
+                    'catalog_type': 'Multiple courses',
+                    'catalog_query': 'id:*',
+                    'course_seat_types': ['verified', 'professional']
+                });
+
+                view.render();
+
+                expect(view.$el.find('.catalog-query .value').text()).toEqual('id:*');
+                expect(view.$el.find('.seat-types .value').text()).toEqual('verified,professional');
             });
 
             it('should display data table', function () {

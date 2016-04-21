@@ -4,14 +4,16 @@ define([
         'underscore',
         'underscore.string',
         'moment',
-        'text!templates/coupon_detail.html'
+        'text!templates/coupon_detail.html',
+        'views/dynamic_catalog_view',
     ],
     function ($,
               Backbone,
               _,
               _s,
               moment,
-              CouponDetailTemplate) {
+              CouponDetailTemplate,
+              DynamicCatalogView) {
         'use strict';
 
         return Backbone.View.extend({
@@ -22,10 +24,6 @@ define([
             },
 
             template: _.template(CouponDetailTemplate),
-
-            capitalize: function (string) {
-                return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase();
-            },
 
             codeStatus: function (voucher) {
                 var startDate = moment(new Date(voucher.start_datetime)),
@@ -40,16 +38,6 @@ define([
                 return gettext(
                     (benefitType === 'Percentage' && benefitValue === 100) ? 'Enrollment Code' : 'Discount Code'
                 );
-            },
-
-            courseID: function(course_data) {
-                var course_id = _.findWhere(course_data, {'name': 'course_key'});
-                return course_id ? course_id.value : '';
-            },
-
-            certificateType: function(course_data) {
-                var certificate_type = _.findWhere(course_data, {'name': 'certificate_type'});
-                return certificate_type ? gettext(this.capitalize(certificate_type.value)) : '';
             },
 
             discountValue: function(voucher) {
@@ -70,6 +58,8 @@ define([
             usageLimitation: function(voucher) {
                 if (voucher.usage === 'Single use') {
                     return gettext('Can be used once by one customer');
+                } else if (voucher.usage === 'Multi-use') {
+                    return gettext('Can be used multiple times by multiple customers');
                 } else if (voucher.usage === 'Once per customer') {
                     return gettext('Can be used once by multiple customers');
                 }
@@ -77,16 +67,13 @@ define([
             },
 
             render: function () {
-                var course_data = this.model.get('seats')[0].attribute_values,
-                    html,
+                var html,
                     voucher = this.model.get('vouchers')[0],
                     category = this.model.get('categories')[0].name,
                     note = this.model.get('note');
 
                 html = this.template({
-                    course_id: this.courseID(course_data),
-                    certificate_type: this.certificateType(course_data),
-                    coupon: this.model.attributes,
+                    coupon: this.model.toJSON(),
                     couponType: this.couponType(voucher),
                     codeStatus: this.codeStatus(voucher),
                     discountValue: this.discountValue(voucher),
@@ -101,7 +88,17 @@ define([
 
                 this.$el.html(html);
                 this.renderVoucherTable();
+                this.renderCourseData();
                 this.delegateEvents();
+
+                this.dynamic_catalog_view = new DynamicCatalogView({
+                    'query': this.model.get('catalog_query'),
+                    'seat_types': this.model.get('course_seat_types')
+                });
+
+                this.dynamic_catalog_view.$el = this.$('.catalog_buttons');
+                this.dynamic_catalog_view.render();
+                this.dynamic_catalog_view.delegateEvents();
                 return this;
             },
 
@@ -124,6 +121,26 @@ define([
                     ],
                     data: this.model.get('vouchers')
                 });
+                return this;
+            },
+
+            renderCourseData: function () {
+                if (this.model.get('catalog_type') === 'Single course') {
+                    this.$el.find('.course-info').append(
+                        _s.sprintf(
+                            '<div class="value">%s<span class="pull-right">%s</span></div>',
+                            this.model.get('course_id'),
+                            this.model.get('seat_type'))
+                    );
+
+                    this.$el.find('.catalog-query').addClass('hidden');
+                    this.$el.find('.seat-types').addClass('hidden');
+                    this.$el.find('.course-info').removeClass('hidden');
+                } else if (this.model.get('catalog_type') === 'Multiple courses') {
+                    this.$el.find('.course-info').addClass('hidden');
+                    this.$el.find('.catalog-query').removeClass('hidden');
+                    this.$el.find('.seat-types').removeClass('hidden');
+                }
                 return this;
             },
 

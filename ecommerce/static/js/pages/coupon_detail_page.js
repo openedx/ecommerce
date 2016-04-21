@@ -16,7 +16,7 @@ define([
             initialize: function (options) {
                 this.model = Coupon.findOrCreate({id: options.id});
                 this.view = new CouponDetailView({model: this.model});
-                this.listenTo(this.model, 'sync', this.render);
+                this.listenTo(this.model, 'sync', this.refresh);
                 this.model.fetch();
             }
         });

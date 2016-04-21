@@ -12,7 +12,9 @@ define([
         'utils/utils',
         'text!templates/coupon_form.html',
         'models/course_model',
-        'views/form_view'
+        'collections/course_collection',
+        'views/form_view',
+        'views/dynamic_catalog_view',
     ],
     function ($,
               Backbone,
@@ -25,7 +27,9 @@ define([
               Utils,
               CouponFormTemplate,
               Course,
-              FormView) {
+              Courses,
+              FormView,
+              DynamicCatalogView) {
         'use strict';
 
         return FormView.extend({
@@ -56,6 +60,10 @@ define([
                 {
                     value: 'Once per customer',
                     label: gettext('Can be used once by multiple customers')
+                },
+                {
+                    value: 'Multi-use',
+                    label: gettext('Can be used multiple times by multiple customers'),
                 }
             ],
 
@@ -152,7 +160,16 @@ define([
                 },
                 'input[name=max_uses]': {
                     observe: 'max_uses'
-                }
+                },
+                'input[name=catalog_type]': {
+                    observe: 'catalog_type'
+                },
+                'textarea[name=catalog_query]': {
+                    observe: 'catalog_query'
+                },
+                'input[name=course_seat_types]': {
+                    observe: 'course_seat_types'
+                },
             },
 
             events: {
@@ -170,10 +187,18 @@ define([
                 this.editing = options.editing || false;
                 this.hiddenClass = 'hidden';
 
+                this.dynamic_catalog_view = new DynamicCatalogView({
+                    'query': this.model.get('catalog_query'),
+                    'seat_types': this.model.get('course_seat_types')
+                });
+
                 this.listenTo(this.model, 'change:coupon_type', this.toggleCouponTypeField);
                 this.listenTo(this.model, 'change:voucher_type', this.toggleVoucherTypeField);
                 this.listenTo(this.model, 'change:code', this.toggleCodeField);
                 this.listenTo(this.model, 'change:quantity', this.toggleQuantityField);
+                this.listenTo(this.model, 'change:catalog_type', this.toggleCatalogTypeField);
+                this.listenTo(this.model, 'change:catalog_query', this.updateCatalogQuery);
+                this.listenTo(this.model, 'change:course_seat_types', this.updateCourseSeatTypes);
 
                 this._super();
             },
@@ -213,6 +238,20 @@ define([
                 } else {
                     this.formGroup('[name=benefit_value]').addClass(this.hiddenClass);
                     this.formGroup('[name=code]').addClass(this.hiddenClass);
+                }
+            },
+
+            toggleCatalogTypeField: function () {
+                if (this.model.get('catalog_type') === 'Single course') {
+                    this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
+                    this.formGroup('[name=seat_type]').removeClass(this.hiddenClass);
+                } else {
+                    this.formGroup('[name=catalog_query]').removeClass(this.hiddenClass);
+                    this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
+                    this.formGroup('[name=course_id]').addClass(this.hiddenClass);
+                    this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
                 }
             },
 
@@ -343,6 +382,7 @@ define([
                 this.$el.find('input[name=benefit_type]').attr('disabled', true);
                 this.$el.find('select[name=seat_type]').attr('disabled', true);
                 this.$el.find('input[name=max_uses]').attr('disabled', true);
+                this.$el.find('input[name=catalog_type]').attr('disabled', true);
             },
 
             getSeatData: function () {
@@ -353,10 +393,21 @@ define([
                 return this.$el.find('[name=seat_type]').val();
             },
 
+            updateCatalogQuery: function() {
+                this.dynamic_catalog_view.query = this.model.get('catalog_query');
+            },
+
+            updateCourseSeatTypes: function() {
+                this.dynamic_catalog_view.seat_types = this.model.get('course_seat_types');
+            },
+
             render: function () {
                 // Render the parent form/template
                 this.$el.html(this.template(this.model.attributes));
                 this.stickit();
+
+                this.toggleCatalogTypeField();
+                this.dynamic_catalog_view.setElement(this.$el.find('.catalog_buttons')).render();
 
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.
                 this.$alerts = this.$el.find('.alerts');
@@ -368,6 +419,7 @@ define([
                     this.toggleVoucherTypeField();
                     this.toggleCodeField();
                     this.toggleQuantityField();
+                    this.$el.find('.catalog-query').addClass('editing');
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
                     this.fillFromCourse();
                 } else {
@@ -377,8 +429,10 @@ define([
                     this.model.set('voucher_type', this.voucherTypes[0].value);
                     this.model.set('category', defaultCategory[0].id);
                     this.model.set('benefit_type', 'Percentage');
+                    this.model.set('catalog_type', 'Single course');
                     this.$el.find('[name=benefit_value]').attr('max', 100);
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
+                    this.$el.find('.catalog-query').removeClass('editing');
                 }
 
                 // Add date picker

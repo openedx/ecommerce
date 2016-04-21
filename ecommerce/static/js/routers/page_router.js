@@ -1,5 +1,7 @@
 define([
-        'backbone'
+        'backbone',
+        'backbone.route-filter',
+        'backbone.super'
     ],
     function (Backbone) {
         'use strict';
@@ -8,7 +10,6 @@ define([
          * Base Router class.
          */
         return Backbone.Router.extend({
-
             // Keeps track of the page/view currently on display
             currentView: null,
 
