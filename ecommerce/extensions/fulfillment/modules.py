@@ -4,10 +4,12 @@ Fulfillment Modules are designed to allow specific fulfillment logic based on th
 in an Order.
 """
 import abc
+import datetime
 import json
 import logging
 
 from django.conf import settings
+from oscar.core.loading import get_model
 from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
@@ -16,8 +18,14 @@ from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.voucher.models import BulkEnrollmentCoupon
+from ecommerce.extensions.voucher.utils import create_vouchers
 
-
+Benefit = get_model('offer', 'Benefit')
+Catalog = get_model('catalogue', 'Catalog')
+ProductCategory = get_model('catalogue', 'ProductCategory')
+StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
@@ -291,7 +299,7 @@ class CouponFulfillmentModule(BaseFulfillmentModule):
         Check whether the product in line is a Coupon
 
         Args:
-            line (Line): Defines the length of randomly generated string
+            line (Line): Line to be considered.
 
         Returns:
             True if the line contains product of product class Coupon.
@@ -326,6 +334,94 @@ class CouponFulfillmentModule(BaseFulfillmentModule):
             line.set_status(LINE.COMPLETE)
 
         logger.info("Finished fulfilling 'Coupon' product types for order [%s]", order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        """ Revokes the specified line.
+
+        Args:
+            line (Line): Order Line to be revoked.
+
+        Returns:
+            True, if the product is revoked; otherwise, False.
+        """
+        raise NotImplementedError("Revoke method not implemented!")
+
+
+class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
+
+    def supports_line(self, line):
+        """
+        Check whether the product in line is a Bulk enrollment coupon.
+
+        Args:
+            line (Line): Line to be considered.
+
+        Returns:
+            True if the line contains a bulk enrollment coupon.
+            False otherwise.
+        """
+        product_category = ProductCategory.objects.get(product=line.product).category
+        if line.product.get_product_class().name == 'Coupon' and \
+           product_category.name == 'Bulk enrollment':
+            return True
+        return False
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines containing bulk enrollment coupon products that can be fulfilled.
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+        Returns:
+            A supported list of unmodified lines associated with a bulk enrollment coupon product.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of a bulk enrollment coupon products.
+        For each line creates number of vouchers equal to that line's quantity. Creates a new BulkEnrollmentCoupon
+        object to tie the order with the created voucher and adds the vouchers to the coupon's total vouchers.
+
+        Creates a CSV file with all the voucher information and mails it to the buyers email.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+        logger.info("Attempting to fulfill 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
+
+        for line in lines:
+            catalog_name = 'Bulk enrollment catalog [{}]'.format(line.product.title)
+            catalog, created = Catalog.objects.get_or_create(name=catalog_name, partner=line.partner)
+            if created:
+                stock_record = StockRecord.objects.get(product=line.product)
+                catalog.stock_records.add(stock_record)
+
+            vouchers = create_vouchers(
+                name='Bulk enrollment voucher [{}]'.format(line.product.title),
+                benefit_type=Benefit.PERCENTAGE,
+                benefit_value=100,
+                catalog=catalog,
+                coupon=line.product,
+                end_datetime=datetime.datetime.now() + datetime.timedelta(days=3640),
+                quantity=line.quantity,
+                start_datetime=datetime.datetime.now(),
+                voucher_type=Voucher.SINGLE_USE,
+            )
+
+            bulk_coupon = BulkEnrollmentCoupon.objects.create(order=order)
+            for voucher in vouchers:
+                bulk_coupon.vouchers.add(voucher)
+                line.product.attr.coupon_vouchers.vouchers.add(voucher)
+
+            # csv = create_csv(order, line, vouchers)
+            # Send the csv to email
+            line.set_status(LINE.COMPLETE)
+
+        logger.info("Finished fulfilling 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
         return order, lines
 
     def revoke_line(self, line):
