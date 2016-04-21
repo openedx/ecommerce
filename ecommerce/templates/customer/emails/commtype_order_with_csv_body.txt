@@ -1,0 +1,19 @@
+{% load i18n %}
+{% trans "Payment confirmation for: " %}{{enrollment_code_title}}
+
+{% blocktrans %}Dear {{full_name}},{% endblocktrans %}
+
+{% blocktrans %}Thank you for purchasing enrollment codes. A charge will appear on your credit or debit card statement with a company name of "{{platform_name}}".
+{% endblocktrans %}
+
+{% blocktrans %}To download a CSV file with the enrollment codes visit this link: {{download_csv_link}}{% endblocktrans %}
+
+{% blocktrans %}To explore other courses, visit the {{platform_name}} website. We add new courses frequently!{% endblocktrans %}
+
+{% trans "To view your payment information, visit the following website." %}
+{{receipt_page_url}}
+
+{% trans "Thank you." %}
+{% blocktrans %}The {{platform_name}} team{% endblocktrans %}
+
+{% blocktrans %}You received this message because you purchased enrollment codes for courses, on {{platform_name}}.{% endblocktrans %}
