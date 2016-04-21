@@ -4,6 +4,7 @@ Fulfillment Modules are designed to allow specific fulfillment logic based on th
 in an Order.
 """
 import abc
+import csv
 import datetime
 import json
 import logging
@@ -19,7 +20,7 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import BulkEnrollmentCoupon
-from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.extensions.voucher.utils import create_vouchers, create_voucher_csv
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -393,6 +394,12 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
         """
         logger.info("Attempting to fulfill 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
 
+        file_name = 'Bulk enrollment CSV order num {}.csv'.format(order.number)
+        f = open(file_name, 'w')
+        writer = csv.writer(f)
+        writer.writerow(['Order Number', order.number])
+        writer.writerow([])
+
         for line in lines:
             catalog_name = 'Bulk enrollment catalog [{}]'.format(line.product.title)
             catalog, created = Catalog.objects.get_or_create(name=catalog_name, partner=line.partner)
@@ -417,10 +424,19 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
                 bulk_coupon.vouchers.add(voucher)
                 line.product.attr.coupon_vouchers.vouchers.add(voucher)
 
-            # csv = create_csv(order, line, vouchers)
-            # Send the csv to email
+            writer.writerow(line.product.title)
+            voucher_rows = create_voucher_csv(vouchers)
+
+            voucher_writer = csv.DictWriter(f, fieldnames=voucher_rows[0].keys())
+            voucher_writer.writeheader()
+            for row in voucher_rows:
+                voucher_writer.writerow(row)
+
+            writer.writerow([])
             line.set_status(LINE.COMPLETE)
 
+        # Send the csv to email
+        f.close()
         logger.info("Finished fulfilling 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
         return order, lines
 

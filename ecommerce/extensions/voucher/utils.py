@@ -432,3 +432,26 @@ def update_voucher_offer(offer, benefit_value, benefit_type):
         benefit_value=benefit_value,
         benefit_type=benefit_type
     )
+
+
+def create_voucher_csv(vouchers):
+    """
+    Create rows for the bulk enrollment coupon CSV.
+
+    Args:
+        vouchers (Voucher): Bulk enrollment vouchers.
+
+    Returns:
+        voucher_rows (list): List of dictionaries with voucher code and redemption URLS
+                             for each voucher.
+    """
+    voucher_rows = []
+    redeem_url = get_ecommerce_url(reverse('coupons:offer'))
+    for voucher in vouchers:
+        voucher_row = {
+            'Code': voucher.code,
+            'Redemption URL': '{}?code={}'.format(redeem_url, voucher.code)
+        }
+        voucher_rows.append(voucher_row)
+
+    return voucher_rows
