@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
-import logging
+from datetime import datetime
+import logging  # Must come before dateutil.relativedelta
+from dateutil.relativedelta import relativedelta
 
 from django.db import models, transaction
 from django.db.models import Q, Count
@@ -7,16 +9,20 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
 
+from ecommerce.coupons import api as coupons_api
 from ecommerce.courses.publishers import LMSPublisher
-from ecommerce.extensions.catalogue.utils import generate_sku
+from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
 
 logger = logging.getLogger(__name__)
+
+Benefit = get_model('offer', 'Benefit')
 Category = get_model('catalogue', 'Category')
 Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 
 class Course(models.Model):
@@ -29,6 +35,7 @@ class Course(models.Model):
     )
     history = HistoricalRecords()
     thumbnail_url = models.URLField(null=True, blank=True)
+    bulk_purchasing_enabled = models.BooleanField(default=False)
 
     def __unicode__(self):
         return unicode(self.id)
@@ -225,5 +232,58 @@ class Course(models.Model):
                 id_verification_required_query,
                 orders=0
             ).delete()
+        if self.bulk_purchasing_enabled:
+            self.create_or_update_bulk_seat_product(seat, partner, [stock_record.id], "Coupons", price)
 
         return seat
+
+    def create_or_update_bulk_seat_product(self, seat, partner, stock_record_ids, category, price, note=None,
+                                           create_vouchers=False, voucher_data=None):
+        """
+        Adds (or edits) a "Bulk Seat" coupon product to the course.  Bulk Seats are enrollment codes
+        (ie, 100-percent discount coupons) which can be purchased directly through the system without
+        going through a middleman.
+
+        Returns:
+            Product:  The "Bulk Seat" coupon product that has been created or updated.
+        """
+        stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+        coupon_catalog, __ = get_or_create_catalog(
+            name='Catalog for stock records: {}'.format(stock_records_string),
+            partner=partner,
+            stock_record_ids=stock_record_ids
+        )
+
+        category, __ = Category.objects.get_or_create(name='Coupons', defaults={'depth': 1, 'path': 'coupons'})
+
+        data = {
+            'partner': partner,
+            'catalog': coupon_catalog,
+            'categories': [category],
+            'note': note,
+            'create_vouchers': create_vouchers,
+        }
+
+        if create_vouchers and voucher_data:
+            default_start = datetime.today()
+            default_end = default_start + relativedelta(years=5)
+            data.update({
+                'benefit_type': voucher_data.get('benefit_type', Benefit.PERCENTAGE),
+                'benefit_value': voucher_data.get('benefit_value', 100),
+                'code': voucher_data.get('code', ''),
+                'quantity': voucher_data.get('quantity', 1),
+                'voucher_type': voucher_data.get('voucher_type', Voucher.SINGLE_USE),
+                'max_uses': voucher_data.get('max_uses', 1),
+                'start_date': voucher_data.get('start_date', default_start),
+                'end_date': voucher_data.get('end_date', default_end),
+            })
+
+        # Create the coupon product
+        coupon_title = 'Bulk Seat Coupon: {seat_title}'.format(seat_title=seat.title)
+        coupon = coupons_api.create_coupon_product(
+            title=coupon_title,
+            price=price,
+            data=data
+        )
+
+        return coupon

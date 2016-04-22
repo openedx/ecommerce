@@ -45,16 +45,15 @@ def create_coupon_product(title, price, data):
                         an IntegrityError exception
     """
     coupon_slug = generate_coupon_slug(title=title, catalog=data['catalog'], partner=data['partner'])
-    defaults = {'requires_shipping': False, 'track_stock': False, 'name': 'Coupon'}
-    product_class, __ = ProductClass.objects.get_or_create(slug='coupon', defaults=defaults)
+    pc_defaults = {'requires_shipping': False, 'track_stock': False, 'name': 'Coupon'}
+    product_class, __ = ProductClass.objects.get_or_create(slug='coupon', defaults=pc_defaults)
     coupon_product, __ = Product.objects.get_or_create(
         title=title,
         product_class=product_class,
         slug=coupon_slug
     )
 
-    for category in data['categories']:
-        ProductCategory.objects.get_or_create(product=coupon_product, category=category)
+    assign_categories_to_coupon(coupon=coupon_product, categories=data['categories'])
 
     # Vouchers are created during order and not fulfillment like usual
     # because we want vouchers to be part of the line in the order.
@@ -100,3 +99,14 @@ def create_coupon_product(title, price, data):
     stock_record.save()
 
     return coupon_product
+
+
+def assign_categories_to_coupon(coupon, categories):
+    """
+    Assign categories to a coupon. If a category is already assigned, it will be fetch instead.
+    Arguments:
+        coupon (Product): Coupon product
+        categories (List): List of categories to be assigned to a coupon
+    """
+    for category in categories:
+        ProductCategory.objects.get_or_create(product=coupon, category=category)
