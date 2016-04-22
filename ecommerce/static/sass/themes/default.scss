@@ -5,7 +5,8 @@ $brand-logo-width: 72px !default;
 $brand-logo-height: 48px !default;
 
 // utilities
-@import "utilities/mixins";
+// --------------------
+@import "../utilities/mixins";
 
 // overrides
 // --------------------
