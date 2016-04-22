@@ -21,6 +21,7 @@ from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_conte
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import BulkEnrollmentCoupon
 from ecommerce.extensions.voucher.utils import create_vouchers, create_voucher_csv
+from ecommerce.notifications.notifications import send_notification
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -435,8 +436,8 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
             writer.writerow([])
             line.set_status(LINE.COMPLETE)
 
-        # Send the csv to email
         f.close()
+        send_notification(order.user, 'ORDER_WITH_CSV', context={}, csv=file_name)
         logger.info("Finished fulfilling 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
         return order, lines
 
