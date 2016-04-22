@@ -12,7 +12,7 @@ CommunicationEventType = get_model('customer', 'CommunicationEventType')
 Dispatcher = get_class('customer.utils', 'Dispatcher')
 
 
-def send_notification(user, commtype_code, context):
+def send_notification(user, commtype_code, context, csv=None):
     """Send different notification mail to the user based on the triggering event.
 
     Args:
@@ -47,4 +47,6 @@ def send_notification(user, commtype_code, context):
 
     if messages and (messages['body'] or messages['html']):
         messages['html'] = transform(messages['html'])
+        if csv:
+            messages['attachments'] = open(csv)
         Dispatcher().dispatch_user_messages(user, messages)
