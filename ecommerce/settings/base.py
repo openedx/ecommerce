@@ -111,17 +111,27 @@ STATICFILES_DIRS = (
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
+# ThemeFilesFinder looks for static assets inside theme directories. It presents static assets according to the
+# current theme. More details on ThemeFilesFinder can be seen at /ecommerce/theming/__init__.py
 STATICFILES_FINDERS = (
+    'ecommerce.theming.finders.ThemeFilesFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 )
+
+# ThemeStorage stores and retrieves files with theming in mind.
+# More details on ThemeStorage can be seen at /ecommerce/theming/__init__.py
+STATICFILES_STORAGE = "ecommerce.theming.storage.ThemeStorage"
 
 COMPRESS_PRECOMPILERS = (
     ('text/x-scss', 'django_libsass.SassCompiler'),
 )
 
 COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
+
+COMPRESS_OFFLINE_CONTEXT = 'ecommerce.theming.compressor.offline_context'
+
 # END STATIC FILE CONFIGURATION
 
 
@@ -152,7 +162,6 @@ FIXTURE_DIRS = (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'APP_DIRS': True,
         'DIRS': (
             normpath(join(DJANGO_ROOT, 'templates')),
             # Templates which override default Oscar templates
@@ -160,6 +169,12 @@ TEMPLATES = [
             OSCAR_MAIN_TEMPLATE_DIR,
         ),
         'OPTIONS': {
+            'loaders': [
+                # ThemeTemplateLoader should come before any other loader to give theme templates
+                # priority over system templates
+                'ecommerce.theming.template_loaders.ThemeTemplateLoader',
+                'django.template.loaders.app_directories.Loader',
+            ],
             'context_processors': (
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
@@ -246,6 +261,9 @@ LOCAL_APPS = [
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',
+
+    # Theming app for customizing visual and behavioral attributes of a site
+    'ecommerce.theming',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -476,3 +494,20 @@ RECEIPT_PAGE_PATH = '/commerce/checkout/receipt/'
 
 # Black-listed course modes not allowed to create coupons with
 BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
+
+# Theme settings
+# enable or disbale comprehensive theming
+ENABLE_COMPREHENSIVE_THEMING = True
+
+# name for waffle switch to use for disabling theming on runtime.
+# Note: management command ignore this switch
+DISABLE_THEMING_ON_RUNTIME_SWITCH = "disable_theming_on_runtime"
+
+# Directory that contains all themes
+COMPREHENSIVE_THEME_DIR = DJANGO_ROOT + "/themes"
+
+# Cache time out for theme templates and related assets
+
+THEME_CACHE_TIMEOUT = 30 * 60
+
+# End Theme settings
