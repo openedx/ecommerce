@@ -1,7 +1,7 @@
 analytics-python==1.1.0
 Django==1.8.9
 django-appconf==0.6
-django-compressor==2.0
+django-compressor==1.5
 django_extensions==1.5.5
 django-filter==0.11.0
 django-libsass==0.5
@@ -32,4 +32,3 @@ python-social-auth==0.2.14
 pytz==2015.7
 requests==2.9.1
 suds==0.4
-path.py==7.2
