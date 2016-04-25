@@ -414,7 +414,7 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
                 benefit_value=100,
                 catalog=catalog,
                 coupon=line.product,
-                end_datetime=datetime.datetime.now() + datetime.timedelta(days=3640),
+                end_datetime=datetime.datetime.strptime(settings.BULK_ENROLLMENT_VOUCHER_END_DATE, '%Y-%m-%d'),
                 quantity=line.quantity,
                 start_datetime=datetime.datetime.now(),
                 voucher_type=Voucher.SINGLE_USE,

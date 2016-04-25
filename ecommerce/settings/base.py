@@ -512,3 +512,6 @@ COMPREHENSIVE_THEME_DIR = DJANGO_ROOT + "/themes"
 THEME_CACHE_TIMEOUT = 30 * 60
 
 # End Theme settings
+
+# Expiration date for bulk enrollment vouchers
+BULK_ENROLLMENT_VOUCHER_END_DATE = '2026-01-01'
