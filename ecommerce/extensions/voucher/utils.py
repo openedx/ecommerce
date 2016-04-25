@@ -1,5 +1,6 @@
 """Voucher Utility Methods. """
 import base64
+import csv
 import datetime
 import hashlib
 import logging
@@ -10,12 +11,14 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.notifications.notifications import send_notification
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -434,24 +437,54 @@ def update_voucher_offer(offer, benefit_value, benefit_type):
     )
 
 
-def create_voucher_csv(vouchers):
+def send_bulk_enrollment_csv(order, csv_lines):
     """
-    Create rows for the bulk enrollment coupon CSV.
+    Sends an email to the order user containing the bulk enrollment vouchers CSV.
+    The structure of the CSV looks like this:
+
+       > Order Number:,EDX-100001
+
+       > Seat in Demo with verified certificate (and ID verification)
+       > Code,Redemption URL
+       > J4HDI5OAUGCSUJJ3,ecommerce.server?code=J4HDI5OAUGCSUJJ3
+       > OZCRR6WXLWGAFWZR,ecommerce.server?code=OZCRR6WXLWGAFWZR
+       > 6KPYL6IO6Y3XL7SI,ecommerce.server?code=6KPYL6IO6Y3XL7SI
+       > NPIJWIKNLRURYVU2,ecommerce.server?code=NPIJWIKNLRURYVU2
+       > 6SZULKPZQYACAODC,ecommerce.server?code=6SZULKPZQYACAODC
+       >
 
     Args:
-        vouchers (Voucher): Bulk enrollment vouchers.
-
-    Returns:
-        voucher_rows (list): List of dictionaries with voucher code and redemption URLS
-                             for each voucher.
+        order (Order): The bulk enrollment order.
+        csv_lines(list): List of the order lines together with the particular
+            vouchers for that line:
+            [{
+                'title'(str): The title of the product in the line.
+                'vouchers'(list): List of the vouchers associated to that line.
+            }]
     """
-    voucher_rows = []
-    redeem_url = get_ecommerce_url(reverse('coupons:offer'))
-    for voucher in vouchers:
-        voucher_row = {
-            'Code': voucher.code,
-            'Redemption URL': '{}?code={}'.format(redeem_url, voucher.code)
-        }
-        voucher_rows.append(voucher_row)
+    file_name = 'Bulk enrollment CSV order num {}'.format(order.number)
+    file_name = '{}.csv'.format(slugify(file_name))
 
-    return voucher_rows
+    redeem_url = get_ecommerce_url(reverse('coupons:offer'))
+    voucher_field_names = ('Code', 'Redemption URL')
+
+    f = open(file_name, 'w')
+    writer = csv.writer(f)
+    voucher_writer = csv.DictWriter(f, fieldnames=voucher_field_names)
+
+    writer.writerow(('Order Number:', order.number))
+    writer.writerow([])
+
+    for line in csv_lines:
+        writer.writerow([line['title']])
+        voucher_writer.writeheader()
+
+        for voucher in line['vouchers']:
+            voucher_writer.writerow({
+                'Code': voucher.code,
+                'Redemption URL': '{}?code={}'.format(redeem_url, voucher.code)
+            })
+        writer.writerow([])
+
+    send_notification(order.user, 'ORDER_WITH_CSV', context={}, csv=file_name)
+    f.close()

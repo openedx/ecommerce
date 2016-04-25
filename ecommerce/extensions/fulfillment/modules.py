@@ -20,8 +20,7 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import OrderVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers, create_voucher_csv
-from ecommerce.notifications.notifications import send_notification
+from ecommerce.extensions.voucher.utils import create_vouchers, send_bulk_enrollment_csv
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -394,12 +393,7 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
             The original set of lines, with new statuses set based on the success or failure of fulfillment.
         """
         logger.info("Attempting to fulfill 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
-
-        file_name = 'Bulk enrollment CSV order num {}.csv'.format(order.number)
-        f = open(file_name, 'w')
-        writer = csv.writer(f)
-        writer.writerow(['Order Number', order.number])
-        writer.writerow([])
+        csv_lines = []
 
         for line in lines:
             catalog_name = 'Bulk enrollment catalog [{}]'.format(line.product.title)
@@ -425,19 +419,15 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
                 bulk_coupon.vouchers.add(voucher)
                 line.product.attr.coupon_vouchers.vouchers.add(voucher)
 
-            writer.writerow(line.product.title)
-            voucher_rows = create_voucher_csv(vouchers)
-
-            voucher_writer = csv.DictWriter(f, fieldnames=voucher_rows[0].keys())
-            voucher_writer.writeheader()
-            for row in voucher_rows:
-                voucher_writer.writerow(row)
-
-            writer.writerow([])
+            csv_line = {
+                'title': line.product.title,
+                'vouchers': vouchers
+            }
+            csv_lines.append(csv_line)
             line.set_status(LINE.COMPLETE)
 
-        f.close()
-        send_notification(order.user, 'ORDER_WITH_CSV', context={}, csv=file_name)
+        send_bulk_enrollment_csv(order, csv_lines)
+
         logger.info("Finished fulfilling 'Bulk Enrollment Coupon' product types for order [%s]", order.number)
         return order, lines
 
