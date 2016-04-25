@@ -55,7 +55,7 @@ define([
              * this.segment is set for convenience.
              */
             initSegment: function (applicationKey) {
-                var analytics;
+                var analytics, pageData;
 
                 /* jshint ignore:start */
                 // jscs:disable
@@ -66,8 +66,19 @@ define([
                 // provide our application key for logging
                 analytics.load(applicationKey);
 
-                // this needs to be called once
-                analytics.page(this.buildCourseProperties());
+                pageData = this.getSegmentPageData();
+                analytics.page(pageData);
+            },
+
+            /**
+             * Get data for initializing segment.
+             */
+            getSegmentPageData: function () {
+                if (this.options.courseModel.get('courseId')) {
+                    return this.buildCourseProperties();
+                }
+
+                return {};
             },
 
             /**

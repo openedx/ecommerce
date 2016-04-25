@@ -157,8 +157,13 @@ class CouponOfferView(TemplateView):
                     new_price = price - benefit.value
                     if new_price < 0:
                         new_price = Decimal(0)
+
                 context.update({
-                    'analytics_data': prepare_analytics_data(product.course_id, self.request.user),
+                    'analytics_data': prepare_analytics_data(
+                        self.request.user,
+                        self.request.site.siteconfiguration.segment_key,
+                        product.course_id
+                    ),
                     'benefit_value': benefit_value,
                     'course': course,
                     'code': code,

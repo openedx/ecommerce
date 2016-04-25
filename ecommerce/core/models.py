@@ -1,9 +1,11 @@
 import logging
 
+from analytics import Client as SegmentClient
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from jsonfield.fields import JSONField
 
@@ -50,6 +52,13 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False,
         default={}
+    )
+    segment_key = models.CharField(
+        verbose_name=_('Segment key'),
+        help_text=_('Segment write/API key.'),
+        max_length=255,
+        null=True,
+        blank=True
     )
 
     class Meta(object):
@@ -116,6 +125,10 @@ class SiteConfiguration(models.Model):
         """ Validates model fields """
         if not exclude or 'payment_processors' not in exclude:
             self._clean_payment_processors()
+
+    @cached_property
+    def segment_client(self):
+        return SegmentClient(self.segment_key, debug=settings.DEBUG)
 
 
 class User(AbstractUser):

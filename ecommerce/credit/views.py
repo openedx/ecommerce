@@ -88,7 +88,11 @@ class Checkout(TemplateView):
             'payment_processors': processors_dict,
             'deadline': deadline,
             'providers': providers,
-            'analytics_data': prepare_analytics_data(course.id, self.request.user)
+            'analytics_data': prepare_analytics_data(
+                self.request.user,
+                self.request.site.siteconfiguration.segment_key,
+                course.id
+            ),
         })
 
         return context

@@ -185,6 +185,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         If payment refund and fulfillment revocation succeed, the method should update the status of the Refund and
         RefundLine objects to Complete, and return True.
         """
+        self.site.siteconfiguration.segment_key = None
         refund = self.create_refund()
         with LogCapture(LOGGER_NAME) as l:
             self.approve(refund)

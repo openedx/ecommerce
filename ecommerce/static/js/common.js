@@ -4,14 +4,25 @@ require([
         'backbone.validation',
         'bootstrap',
         'bootstrap_accessibility',
-        'underscore'
+        'underscore',
+        'utils/analytics_utils'
     ],
-    function () {
+    function (
+        $,
+        Backbone,
+        BackboneValidation,
+        Bootstrap,
+        BootstrapAccessibility,
+        _,
+        AnalyticsUtils) {
         'use strict';
 
         $(function () {
             // Activate all pre-rendered tooltips.
             $('[data-toggle="tooltip"]').tooltip();
+
+            // Initialize analytics.js
+            AnalyticsUtils.analyticsSetUp();
         });
 
         // NOTE (CCB): Even if validation fails, force the model to be updated. This will ensure calls

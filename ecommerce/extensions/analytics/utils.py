@@ -2,14 +2,15 @@ from functools import wraps
 import json
 import logging
 
-from django.conf import settings
+from threadlocals.threadlocals import get_current_request
+
 
 logger = logging.getLogger(__name__)
 
 
 def is_segment_configured():
     """Returns a Boolean indicating if Segment has been configured for use."""
-    return bool(settings.SEGMENT_KEY)
+    return bool(get_current_request().site.siteconfiguration.segment_key)
 
 
 def parse_tracking_context(user):
@@ -87,22 +88,23 @@ def audit_log(name, **kwargs):
     logger.info(message)
 
 
-def prepare_analytics_data(course_id, user):
+def prepare_analytics_data(user, segment_key, course_id=None):
     """ Helper function for preparing necessary data for analytics.
 
     Arguments:
-        course_id (str): The course ID.
         user (User): The user making the request.
+        segment_key (str): Segment write/API key.
+        course_id (str): The course ID.
 
     Returns:
-        JSON object with the data for analytics.
+        str: JSON object with the data for analytics.
     """
     data = {
         'course': {
             'courseId': course_id
         },
         'tracking': {
-            'segmentApplicationId': settings.SEGMENT_KEY
+            'segmentApplicationId': segment_key
         }
     }
 
