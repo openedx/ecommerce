@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='BulkEnrollmentCoupon',
+            name='OrderVouchers',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('order', models.ForeignKey(related_name='bulk_enrollment', to='order.Order')),
-                ('vouchers', models.ManyToManyField(related_name='bulk_enrollment', to='voucher.Voucher', blank=True)),
+                ('order', models.ForeignKey(related_name='order_vouchers', to='order.Order')),
+                ('vouchers', models.ManyToManyField(related_name='order_vouchers', to='voucher.Voucher', blank=True)),
             ],
         ),
     ]

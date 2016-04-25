@@ -22,7 +22,7 @@ from ecommerce.extensions.fulfillment.modules import (
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.voucher.utils import create_vouchers
-from ecommerce.extensions.voucher.models import BulkEnrollmentCoupon
+from ecommerce.extensions.voucher.models import OrderVouchers
 from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -470,12 +470,12 @@ class BulkEnrollmentFulfillmentModuleTests(CouponMixin, FulfillmentTestMixin, Te
 
     def test_fulfill_product(self):
         """Test fulfill_product method fulfills the order and creates a new bulk enrollment coupon."""
-        self.assertEqual(BulkEnrollmentCoupon.objects.count(), 0)
+        self.assertEqual(OrderVouchers.objects.count(), 0)
         self.assertEqual(self.enrollment_coupon.attr.coupon_vouchers.vouchers.count(), 1)
         __, completed_lines = self.module.fulfill_product(self.order, self.order.lines.all())
-        self.assertEqual(BulkEnrollmentCoupon.objects.count(), 1)
+        self.assertEqual(OrderVouchers.objects.count(), 1)
 
-        bulk_coupon = BulkEnrollmentCoupon.objects.get(order=self.order)
+        bulk_coupon = OrderVouchers.objects.get(order=self.order)
         self.assertEqual(bulk_coupon.vouchers.count(), self.QUANTITY)
         self.assertEqual(self.enrollment_coupon.attr.coupon_vouchers.vouchers.count(), self.QUANTITY + 1)
         self.assertEqual(bulk_coupon.order.number, self.ORDER_NUMBER)

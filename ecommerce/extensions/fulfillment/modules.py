@@ -19,7 +19,7 @@ from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
-from ecommerce.extensions.voucher.models import BulkEnrollmentCoupon
+from ecommerce.extensions.voucher.models import OrderVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers, create_voucher_csv
 from ecommerce.notifications.notifications import send_notification
 
@@ -381,7 +381,7 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
 
     def fulfill_product(self, order, lines):
         """ Fulfills the purchase of a bulk enrollment coupon products.
-        For each line creates number of vouchers equal to that line's quantity. Creates a new BulkEnrollmentCoupon
+        For each line creates number of vouchers equal to that line's quantity. Creates a new OrderVouchers
         object to tie the order with the created voucher and adds the vouchers to the coupon's total vouchers.
 
         Creates a CSV file with all the voucher information and mails it to the buyers email.
@@ -420,7 +420,7 @@ class BulkEnrollmentFulfillmentModule(BaseFulfillmentModule):
                 voucher_type=Voucher.SINGLE_USE,
             )
 
-            bulk_coupon = BulkEnrollmentCoupon.objects.create(order=order)
+            bulk_coupon = OrderVouchers.objects.create(order=order)
             for voucher in vouchers:
                 bulk_coupon.vouchers.add(voucher)
                 line.product.attr.coupon_vouchers.vouchers.add(voucher)
