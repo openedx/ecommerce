@@ -8,14 +8,21 @@
 
 {% block style %}
   {{ block.super }}
+
   {% compress css %}
-    <link rel="stylesheet" href="{% static 'sass/base/main.scss' %}" type="text/x-scss">
-    {% captureas theme_scss %}
-      {% settings_value 'THEME_SCSS' %}
-    {% endcaptureas %}
-    <link rel="stylesheet" href="{% static theme_scss %}" type="text/x-scss">
-    <link rel="stylesheet" href="{% static 'sass/edx-swagger.scss' %}" type="text/x-scss">
+    {% if main_css %}
+        <link rel="stylesheet" href="{{ main_css }}" type="text/x-scss">
+    {% else %}
+        <link rel="stylesheet" href="{% static 'css/base/main.css' %}" type="text/x-scss">
+    {% endif %}
+
+    {% if swagger_css %}
+        <link rel="stylesheet" href="{{ swagger_css }}" type="text/x-scss">
+    {% else %}
+        <link rel="stylesheet" href="{% static 'css/base/edx-swagger.css' %}" type="text/x-scss">
+    {% endif %}
   {% endcompress %}
+
 {% endblock %}
 
 

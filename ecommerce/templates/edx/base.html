@@ -13,11 +13,11 @@
     <title>{% block title %}{% endblock title %}</title>
 
     {% compress css %}
-        <link rel="stylesheet" href="{% static 'sass/base/main.scss' %}" type="text/x-scss">
-        {% captureas theme_scss %}
-            {% settings_value 'THEME_SCSS' %}
-        {% endcaptureas %}
-        <link rel="stylesheet" href="{% static theme_scss %}" type="text/x-scss">
+        {% if main_css %}
+            <link rel="stylesheet" href="{{ main_css }}" type="text/x-scss">
+        {% else %}
+            <link rel="stylesheet" href="{% static 'css/base/main.css' %}" type="text/x-scss">
+        {% endif %}
     {% endcompress %}
 
     {% compress css %}
