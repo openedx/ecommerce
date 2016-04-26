@@ -142,18 +142,41 @@ define([
                     expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('');
                 });
 
-                it('should show the code field only for multi-use vouchers', function () {
+                it('should show the code field for once-per-customer and singe-use vouchers', function () {
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(visible('[name=code]')).toBe(false);
+                    expect(visible('[name=code]')).toBe(true);
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(visible('[name=code]')).toBe(true);
                 });
 
-                it('should show the usage number field only for multi-use vouchers', function () {
+                it('should show the usage number field only for once-per-customer vouchers', function () {
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
                     expect(visible('[name=max_uses]')).toBe(false);
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(visible('[name=max_uses]')).toBe(true);
+                });
+
+                it('should hide quantity field when code entered and single-use voucher selected', function () {
+                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    view.$el.find('[name=code]').val('E34T4GR342').trigger('input');
+                    expect(visible('[name=quantity]')).toBe(false);
+                    view.$el.find('[name=code]').val('').trigger('input');
+                    expect(visible('[name=quantity]')).toBe(true);
+                });
+
+                it('should hide code field when quantity not 1 and single-use voucher selected', function () {
+                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    view.$el.find('[name=quantity]').val(21).trigger('change');
+                    expect(visible('[name=code]')).toBe(false);
+                    view.$el.find('[name=quantity]').val(1).trigger('change');
+                    expect(visible('[name=code]')).toBe(true);
+                });
+
+                it('should show code field when changing to once-per-customer', function () {
+                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    view.$el.find('[name=quantity]').val(111).trigger('change');
+                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    expect(visible('[name=code]')).toBe(true);
                 });
             });
         });
