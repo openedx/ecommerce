@@ -71,7 +71,10 @@ quality:
 
 validate: validate_python validate_js
 
-static:
+theme_static:
+	python manage.py update_assets --skip-collect
+
+static: theme_static
 	$(NODE_BIN)/r.js -o build.js
 	python manage.py collectstatic --noinput -v0
 	python manage.py compress -v0 --force
