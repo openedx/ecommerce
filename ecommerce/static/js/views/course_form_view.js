@@ -17,7 +17,8 @@ define([
         'views/course_seat_form_fields/professional_course_seat_form_field_view',
         'views/course_seat_form_fields/credit_course_seat_form_field_view',
         'views/form_view',
-        'utils/course_utils'
+        'utils/course_utils',
+        'utils/utils'
     ],
     function ($,
               Backbone,
@@ -35,7 +36,8 @@ define([
               ProfessionalCourseSeatFormFieldView,
               CreditCourseSeatFormFieldView,
               FormView,
-              CourseUtils) {
+              CourseUtils,
+              Utils) {
         'use strict';
 
         return FormView.extend({
@@ -311,6 +313,9 @@ define([
                 _.each(activeSeats, function (seat) {
                     $courseSeats.filter('.' + seat).show();
                 });
+
+                // Add date picker
+                Utils.addDatePicker(this);
 
                 return this;
             }

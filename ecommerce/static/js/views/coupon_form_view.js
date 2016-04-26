@@ -12,7 +12,7 @@ define([
         'utils/utils',
         'text!templates/coupon_form.html',
         'models/course_model',
-        'views/form_view',
+        'views/form_view'
     ],
     function ($,
               Backbone,
@@ -329,6 +329,9 @@ define([
                     this.$el.find('[name=benefit_value]').attr('max', 100);
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
                 }
+
+                // Add date picker
+                Utils.addDatePicker(this);
 
                 this._super();
                 return this;

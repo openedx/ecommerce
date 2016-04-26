@@ -4,6 +4,11 @@
 
 {% block title %}{% trans "Coupon Codes" %}{% endblock %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'bower_components/pikaday/css/pikaday.css' %}"
+          type="text/x-scss">
+{% endblock %}
+
 {% block navbar %}
     <nav class="navbar navbar-default" aria-label="Account">
         <div class="container">

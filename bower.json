@@ -22,6 +22,7 @@
     "edx-ux-pattern-library": "https://github.com/edx/ux-pattern-library.git#82fa1c823bc322ba8b0742f0c546a89b0c69e952",
     "text": "~2.0.14",
     "moment": "~2.10.3",
+    "pikaday": "https://github.com/owenmead/Pikaday.git#1.4.0",
     "underscore.string": "~3.1.1",
     "backbone-super": "~1.0.4",
     "backbone-route-filter": "~0.1.2",
