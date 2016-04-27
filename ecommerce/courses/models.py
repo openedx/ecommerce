@@ -8,6 +8,7 @@ from oscar.core.loading import get_model
 from simple_history.models import HistoricalRecords
 
 from ecommerce.courses.publishers import LMSPublisher
+from ecommerce.courses.utils import get_default_seat_upgrade_deadline
 from ecommerce.extensions.catalogue.utils import generate_sku
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,10 @@ class Course(models.Model):
         """
         certificate_type = certificate_type.lower()
         course_id = unicode(self.id)
+
+        # If upgrade deadline is not provided for a verified track, use the default upgrade deadline.
+        if certificate_type == 'verified' and expires is None:
+            expires = get_default_seat_upgrade_deadline(course_id)
 
         if certificate_type == self.certificate_type_for_mode('audit'):
             # Yields a match if attribute names do not include 'certificate_type'.
