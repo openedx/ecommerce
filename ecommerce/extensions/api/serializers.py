@@ -294,7 +294,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                     credit_hours = attrs.get('credit_hours')
                     credit_hours = int(credit_hours) if credit_hours else None
 
-                    course.create_or_update_seat(
+                    seat_product = course.create_or_update_seat(
                         certificate_type,
                         id_verification_required,
                         price,
@@ -303,6 +303,9 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_provider=credit_provider,
                         credit_hours=credit_hours,
                     )
+
+                if course.bulk_purchasing_enabled:
+                    course.create_or_update_bulk_seat_product(seat_product)
 
                 resp_message = course.publish_to_lms(access_token=self.access_token)
                 published = (resp_message is None)
