@@ -16,10 +16,13 @@ from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule, EnrollmentFulfillmentModule
+from ecommerce.extensions.fulfillment.modules import (
+    BulkEnrollmentFulfillmentModule, CouponFulfillmentModule, EnrollmentFulfillmentModule
+)
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.extensions.voucher.models import OrderVouchers
 from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -33,6 +36,7 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+CouponVouchers = get_model('voucher', 'CouponVouchers')
 
 
 @ddt.ddt
@@ -424,6 +428,58 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
 
     def test_revoke_line(self):
+        """Test revoking a Coupon product line."""
         line = self.order.lines.first()
         with self.assertRaises(NotImplementedError):
             CouponFulfillmentModule().revoke_line(line)
+
+
+class BulkEnrollmentFulfillmentModuleTests(CouponMixin, FulfillmentTestMixin, TestCase):
+    """ Tests for the bulk enrollment fulfillment module. """
+    QUANTITY = 5
+    ORDER_NUMBER = 'ORDER-1'
+
+    def setUp(self):
+        super(BulkEnrollmentFulfillmentModuleTests, self).setUp()
+        self.module = BulkEnrollmentFulfillmentModule()
+        self.enrollment_coupon = self.prepare_enrollment_coupon()
+        user = UserFactory()
+        basket = BasketFactory()
+        basket.add_product(self.enrollment_coupon, self.QUANTITY)
+        self.order = factories.create_order(number=self.ORDER_NUMBER, basket=basket, user=user)
+
+    def prepare_enrollment_coupon(self):
+        """Helper function for creating a bulk enrollment coupon."""
+        # TODO: refactor when functionality for creating enrollment coupons on
+        # create_or_update_seat is merged.
+        bulk_enrollment_category = factories.CategoryFactory(name='Bulk enrollment')
+        coupon = self.create_coupon(category=bulk_enrollment_category, quantity=1)
+        return coupon
+
+    def test_supports_line(self):
+        """Test that a line containing bulk enrollment coupon returns True."""
+        line = self.order.lines.first()
+        supports_line = self.module.supports_line(line)
+        self.assertTrue(supports_line)
+
+    def test_get_supported_lines(self):
+        """Test that bulk enrollment coupon lines where returned."""
+        lines = self.order.lines.all()
+        supported_lines = self.module.get_supported_lines(lines)
+        self.assertEqual(len(supported_lines), 1)
+
+    def test_fulfill_product(self):
+        """Test fulfill_product method fulfills the order and creates a new bulk enrollment coupon."""
+        self.assertEqual(OrderVouchers.objects.count(), 0)
+        self.assertEqual(self.enrollment_coupon.attr.coupon_vouchers.vouchers.count(), 1)
+        __, completed_lines = self.module.fulfill_product(self.order, self.order.lines.all())
+        self.assertEqual(OrderVouchers.objects.count(), 1)
+
+        bulk_coupon = OrderVouchers.objects.get(order=self.order)
+        self.assertEqual(bulk_coupon.vouchers.count(), self.QUANTITY)
+        self.assertEqual(self.enrollment_coupon.attr.coupon_vouchers.vouchers.count(), self.QUANTITY + 1)
+        self.assertEqual(bulk_coupon.order.number, self.ORDER_NUMBER)
+        self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
+
+    def test_revoke_line(self):
+        pass

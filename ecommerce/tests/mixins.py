@@ -353,6 +353,7 @@ class CouponMixin(object):
             max_uses=None,
             quantity=5,
             create_vouchers=True,
+            category=None
     ):
         """Helper method for creating a coupon.
 
@@ -376,6 +377,8 @@ class CouponMixin(object):
             catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
+        if category is None:
+            category = self.category
         data = {
             'partner': partner,
             'benefit_type': Benefit.PERCENTAGE,
@@ -386,7 +389,7 @@ class CouponMixin(object):
             'quantity': quantity,
             'start_date': datetime.date(2015, 1, 1),
             'voucher_type': Voucher.SINGLE_USE,
-            'categories': [self.category],
+            'categories': [category],
             'note': note,
             'max_uses': max_uses,
             'create_vouchers': create_vouchers,
