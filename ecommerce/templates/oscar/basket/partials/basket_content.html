@@ -26,11 +26,18 @@
                                 {{ form.id }}
                                     <img class="thumbnail" src="{{ line.course.image_url }}" alt="{{ line.course.name }}"/>
                             </div>
-                            <div class="col-sm-5">
+                            <div class="col-sm-4">
                                 <p class="course_name">{{ line.course.name }} - {{ line.course.org }} ({{ line.course.number }})</p>
                                 <p class="course_description">{{ line.course.short_description }}</p>
                             </div>
-                            <div class="col-sm-5 course_prices">
+                            <div class="col-sm-2 checkout-quantity">
+                                <input type="hidden" value="{{line.id}}" name="line-id">
+                                <input type="number" value="{{line.quantity}}" name="line-quantity" class="input-group" min="1">
+                                <span class="input-group-btn">
+                                    <button type="submit" name="update" class="btn btn-default">Update</button>
+                                </span>
+                            </div>
+                            <div class="col-sm-4 course_prices">
                             {% if line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
