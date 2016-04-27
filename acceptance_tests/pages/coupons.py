@@ -61,7 +61,7 @@ class CouponsCreatePage(EcommerceAppPage):
         self.q(css='select[name="seat_type"] option[value="Verified"]').first.click()
 
         if is_discount:
-            self.q(css='select[name="code_type"] option[value="discount"]').first.click()
+            self.q(css='select[name="code_type"] option[value="Discount code"]').first.click()
             self.wait_for_element_presence('input[name="benefit_value"]', 'Benefit Value Input is Present')
             self.q(css="input[name='benefit_value']").fill('50')
 
