@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.config import (VERIFIED_COURSE_ID, ENABLE_MARKETING_SITE, VERIFIED_COURSE_SLUG,
+from acceptance_tests.config import (VERIFIED_COURSE_ID, MARKETING_URL_ROOT,
                                      PAYPAL_PASSWORD, PAYPAL_EMAIL, ENABLE_CYBERSOURCE_TESTS)
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
@@ -26,18 +26,17 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
         """ Begin the checkout process for a verified certificate. """
         self.login_with_lms(self.email, self.password)
 
-        # If a slug is provided, use the marketing site.
-        if ENABLE_MARKETING_SITE:
-            course_about_page = MarketingCourseAboutPage(self.browser, VERIFIED_COURSE_SLUG)
+        if MARKETING_URL_ROOT:
+            course_about_page = MarketingCourseAboutPage(self.browser, self.course_id)
             course_about_page.visit()
 
             # Click the first enroll button on the page to take the browser to the track selection page.
             course_about_page.q(css='.js-enroll-btn').first.click()
 
             # Wait for the track selection page to load.
-            WebDriverWait(self.browser, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'form-register-choose'))
-            )
+            wait = WebDriverWait(self.browser, 10)
+            track_selection_present = EC.presence_of_element_located((By.CLASS_NAME, 'form-register-choose'))
+            wait.until(track_selection_present)
         else:
             course_modes_page = LMSCourseModePage(self.browser, self.course_id)
             course_modes_page.visit()
@@ -59,7 +58,6 @@ class VerifiedCertificatePaymentTests(UnenrollmentMixin, EcommerceApiMixin, Enro
 
     def test_paypal(self):
         """ Test checkout with PayPal. """
-
         if not (PAYPAL_EMAIL and PAYPAL_PASSWORD):
             self.fail('No PayPal credentials supplied!')
 

@@ -20,7 +20,7 @@ from acceptance_tests.config import (
     BASIC_AUTH_PASSWORD,
     ECOMMERCE_API_URL,
     LMS_USERNAME,
-    ECOMMERCE_API_TOKEN,
+    ACCESS_TOKEN,
     MAX_COMPLETION_RETRIES,
     PAYPAL_PASSWORD,
     PAYPAL_EMAIL,
@@ -126,7 +126,7 @@ class EnrollmentApiMixin(object):
 class EcommerceApiMixin(object):
     @property
     def ecommerce_api_client(self):
-        return EdxRestApiClient(ECOMMERCE_API_URL, oauth_access_token=ECOMMERCE_API_TOKEN)
+        return EdxRestApiClient(ECOMMERCE_API_URL, oauth_access_token=ACCESS_TOKEN)
 
     def assert_order_created_and_completed(self):
         orders = self.ecommerce_api_client.orders.get()['results']
@@ -192,17 +192,29 @@ class PaymentMixin(object):
         # Click the payment button
         self.browser.find_element_by_css_selector('#paypal').click()
 
-        # Wait for form to load
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'loginFields')))
+        # Wait for login form to load. PayPal's test environment is slow.
+        wait = WebDriverWait(self.browser, 30)
+        iframe_present = EC.presence_of_element_located((By.CSS_SELECTOR, '#injectedUnifiedLogin > iframe'))
+        iframe = wait.until(iframe_present)
 
         # Log into PayPal
+        self.browser.switch_to.frame(iframe)
         self.browser.find_element_by_css_selector('input#email').send_keys(PAYPAL_EMAIL)
         self.browser.find_element_by_css_selector('input#password').send_keys(PAYPAL_PASSWORD)
-        self.browser.find_element_by_css_selector('input[type="submit"]').click()
+        self.browser.find_element_by_css_selector('button[type="submit"]').click()
+        self.browser.switch_to.default_content()
 
-        # Wait for the checkout form to load, then submit it.
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'confirmButtonTop')))
-        self.browser.find_element_by_css_selector('input#confirmButtonTop').click()
+        # Wait for the checkout form to load. PayPal's test environment is slow.
+        wait = WebDriverWait(self.browser, 30)
+        confirmation_button_present = EC.presence_of_element_located((By.ID, 'confirmButtonTop'))
+        confirmation_button = wait.until(confirmation_button_present)
+
+        # PayPal's loading spinner sticks around for longer than it should.
+        wait = WebDriverWait(self.browser, 2)
+        spinner_invisibility = EC.invisibility_of_element_located((By.ID, 'spinner'))
+        wait.until(spinner_invisibility)
+
+        confirmation_button.click()
 
     def checkout_with_cybersource(self, address):
         """ Completes the checkout process via CyberSource. """
@@ -213,7 +225,9 @@ class PaymentMixin(object):
         self.dismiss_alert()
 
         # Wait for form to load
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.ID, 'billing_details')))
+        wait = WebDriverWait(self.browser, 10)
+        billing_details_present = EC.presence_of_element_located((By.ID, 'billing_details'))
+        wait.until(billing_details_present)
 
         # Select the credit card type (Visa) first since it triggers the display of additional fields
         self.browser.find_element_by_css_selector('#card_type_001').click()  # Visa
@@ -253,9 +267,24 @@ class PaymentMixin(object):
 
     def assert_receipt_page_loads(self):
         """ Verifies the receipt page loaded in the browser. """
+        refresh = False
 
-        # Wait for the payment processor response to be processed, and the receipt page updated.
-        WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'content-main')))
+        # In a test environment, it can take a while for the payment processor to respond.
+        for _ in range(MAX_COMPLETION_RETRIES):
+            try:
+                if refresh:
+                    self.browser.refresh()
+                    WebDriverWait(self.browser, 2).until(EC.alert_is_present())
+                    self.browser.switch_to.alert.accept()
+
+                # Wait for the payment processor response to be processed, and the receipt page updated.
+                wait = WebDriverWait(self.browser, 10)
+                receipt_loaded = EC.presence_of_element_located((By.CLASS_NAME, 'content-main'))
+                wait.until(receipt_loaded)
+
+                break
+            except TimeoutException:
+                refresh = True
 
         # Verify we reach the receipt page.
         self.assertIn('receipt', self.browser.title.lower())
