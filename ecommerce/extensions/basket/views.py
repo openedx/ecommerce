@@ -115,13 +115,16 @@ class BasketSummaryView(BasketView):
     def post(self, *args, **kwargs):
         line = Line.objects.get(id=self.request.POST.get('line-id'))
         quantity = self.request.POST.get('line-quantity')
-        bulk_enrollment_coupon = ProductCategory.objects.get(product=line.product).category.name == 'Bulk enrollment'
+        try:
+            product_category = ProductCategory.objects.get(product=line.product).category.name
+        except ProductCategory.DoesNotExist:
+            raise Exception('Product is not an enrollment coupon.')
 
         # If the provided line is not in the list of basket lines and no quantity
         # has been provided and the line product is not a bulk enrollment coupon
         # then change the line quantity.
         if line in self.request.basket.lines.all() \
-                and quantity and bulk_enrollment_coupon:
+                and quantity and product_category == 'Bulk enrollment':
             line.quantity = quantity
             line.save()
 

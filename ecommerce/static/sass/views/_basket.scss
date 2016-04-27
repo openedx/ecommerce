@@ -42,7 +42,19 @@
                     @include text-align(right);
                 }
 
+                .checkout-quantity {
+                    .quantity {
+                        display: inline-block;
+                        width: 40%;
+                        padding: 3px;
+                    }
 
+                    button {
+                        display: inline-block;
+                        width: 50%;
+                        vertical-align:top;
+                    }
+                }
                 .course_image img {
                     margin: 0 auto;
                     width: 100%;
