@@ -1,4 +1,5 @@
 """Common settings and globals."""
+import datetime
 import os
 from os.path import basename, normpath
 from sys import path
@@ -516,3 +517,7 @@ DEFAULT_SITE_THEME = None
 THEME_CACHE_TIMEOUT = 30 * 60
 
 # End Theme settings
+
+# Enrollment Code product settings
+AUTOGENERATE_ENROLLMENT_CODES = True  # Default behavior is to create bulk enrollment codes for seats
+ENROLLMENT_CODE_VOUCHER_END_DATE = datetime.datetime.now() + datetime.timedelta(days=3650)
