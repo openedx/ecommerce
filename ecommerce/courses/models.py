@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import logging
 
+from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q, Count
 from django.utils.translation import ugettext_lazy as _
@@ -113,7 +114,8 @@ class Course(models.Model):
         return name
 
     def create_or_update_seat(self, certificate_type, id_verification_required, price, partner,
-                              credit_provider=None, expires=None, credit_hours=None, remove_stale_modes=True):
+                              credit_provider=None, expires=None, credit_hours=None,
+                              remove_stale_modes=True, create_enrollment_code=False):
         """
         Creates course seat products.
 
@@ -182,6 +184,10 @@ class Course(models.Model):
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
 
+        if create_enrollment_code:
+            enrollment_code = self._create_enrollment_code(course_id, certificate_type, partner, price)
+            seat.attr.enrollment_code = enrollment_code
+
         if credit_provider:
             seat.attr.credit_provider = credit_provider
 
@@ -208,9 +214,7 @@ class Course(models.Model):
             )
 
         stock_record.price_excl_tax = price
-
-        # TODO Expose via setting
-        stock_record.price_currency = 'USD'
+        stock_record.price_currency = settings.OSCAR_DEFAULT_CURRENCY
         stock_record.save()
 
         if remove_stale_modes and self.certificate_type_for_mode(certificate_type) == 'professional':
@@ -227,3 +231,47 @@ class Course(models.Model):
             ).delete()
 
         return seat
+
+    def _create_enrollment_code(self, course_id, certificate_type, partner, price):
+        """
+        Creates an enrollment code product for the created seat, setting the course ID
+        and seat type in it's attributes. Also creates a purchasable stock record for the
+        enrollment code product.
+
+        Args:
+            course_id (str): ID of the seat's course.
+            certificate_type (str): Seat type.
+            partner (Partner): Seat provider set in the stock record.
+            price (int): Price of the seat.
+
+        Returns:
+            Enrollment code product.
+        """
+
+        enrollment_code_product_class = ProductClass.objects.get(slug='enrollment_code')
+        title = '{} ({}) Enrollment Code'.format(self.name, certificate_type)
+        enrollment_code, created = Product.objects.get_or_create(
+            title=title,
+            product_class=enrollment_code_product_class
+        )
+
+        if created:
+            enrollment_code.attr.course_key = course_id
+            enrollment_code.attr.seat_type = certificate_type
+            enrollment_code.save()
+
+        try:
+            stock_record = StockRecord.objects.get(product=enrollment_code, partner=partner)
+        except StockRecord.DoesNotExist:
+            enrollment_code_sku = generate_sku(enrollment_code, partner)
+            stock_record = StockRecord.objects.create(
+                product=enrollment_code,
+                partner=partner,
+                partner_sku=enrollment_code_sku
+            )
+
+        stock_record.price_excl_tax = price
+        stock_record.price_currency = settings.OSCAR_DEFAULT_CURRENCY
+        stock_record.save()
+
+        return enrollment_code

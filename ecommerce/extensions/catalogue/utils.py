@@ -4,6 +4,8 @@ from hashlib import md5
 
 from oscar.core.loading import get_model
 
+from ecommerce.core.constants import ENROLLMENT_CODE
+
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
@@ -22,6 +24,12 @@ def generate_sku(product, partner, **kwargs):
             unicode(product.id),
             unicode(catalog.id),
             str(partner.id)
+        ))
+    elif product.product_class and product.product_class.name == ENROLLMENT_CODE:
+        _hash = ' '.join((
+            getattr(product.attr, 'course_key', ''),
+            getattr(product.attr, 'seat_type', ''),
+            unicode(partner.id)
         ))
     else:
         # Seats

@@ -3,6 +3,7 @@ from decimal import Decimal
 import logging
 
 from dateutil.parser import parse
+from django.conf import settings
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -12,7 +13,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 import waffle
 
-from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
+from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE, ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.invoice.models import Invoice
@@ -77,6 +78,10 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
             vouchers = obj.value.vouchers.all()
             serializer = VoucherSerializer(vouchers, many=True, context={'request': request})
             return serializer.data
+        if obj.attribute.name == ENROLLMENT_CODE:
+            request = self.context.get('request')
+            product_serializer = ProductSerializer(obj.value, many=False, context={'request': request})
+            return product_serializer.data
         return obj.value
 
     class Meta(object):
@@ -302,6 +307,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         expires=expires,
                         credit_provider=credit_provider,
                         credit_hours=credit_hours,
+                        create_enrollment_code=settings.AUTOGENERATE_ENROLLMENT_CODES
                     )
 
                 resp_message = course.publish_to_lms(access_token=self.access_token)
