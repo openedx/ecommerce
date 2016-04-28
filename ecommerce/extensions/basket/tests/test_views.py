@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import override_settings
+from django.utils.translation import ugettext_lazy as _
 import httpretty
 from oscar.core.loading import get_class, get_model
 from oscar.test import newfactories as factories
@@ -15,6 +16,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
@@ -31,6 +33,7 @@ Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 
@@ -46,9 +49,9 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
-        course = CourseFactory()
-        course.create_or_update_seat('verified', True, 50, self.partner)
-        product = course.create_or_update_seat('verified', False, 0, self.partner)
+        self.course = CourseFactory()
+        self.course.create_or_update_seat('verified', True, 50, self.partner)
+        product = self.course.create_or_update_seat('verified', False, 0, self.partner)
         self.stock_record = StockRecordFactory(product=product, partner=self.partner)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
@@ -97,7 +100,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_footer_api_response()
-        self.mock_course_api_response()
+        self.mock_course_api_response(course=self.course)
         url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,
                                                     code=COUPON_CODE)
         response = self.client.get(url)
@@ -141,7 +144,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     def mock_course_api_error(self, error):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(self.course))
+        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
         httpretty.register_uri(httpretty.GET, course_url, body=callback, content_type='application/json')
 
     def create_basket_and_add_product(self, product):
@@ -179,6 +182,20 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
                 )
             )
 
+    def test_enrollment_code_seat_type(self):
+        """Verify the correct seat type attribute is retrieved."""
+        course = CourseFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course.create_or_update_seat('verified', False, 10, self.partner)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        self.create_basket_and_add_product(enrollment_code)
+        self.mock_course_api_response(course)
+        self.mock_footer_api_response()
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        line_data = response.context['formset_lines_data'][0][1]
+        self.assertEqual(line_data['seat_type'], _(enrollment_code.attr.seat_type.capitalize()))
+
     @ddt.data(
         (Benefit.PERCENTAGE, 100),
         (Benefit.PERCENTAGE, 50),
@@ -199,26 +216,24 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['lines']), 1)
-        self.assertEqual(response.context['lines'][0].benefit_value, format_benefit_value(benefit))
-        self.assertEqual(response.context['lines'][0].has_discount, True)
+        self.assertEqual(len(response.context['formset_lines_data']), 1)
+        line_data = response.context['formset_lines_data'][0][1]
+        self.assertEqual(line_data['benefit_value'], format_benefit_value(benefit))
+        self.assertEqual(line_data['seat_type'], _(seat.attr.certificate_type.capitalize()))
+        self.assertEqual(line_data['course_name'], self.course.name)
+        self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
         self.assertEqual(json.loads(response.context['footer']), {'footer': 'edX Footer'})
 
     def test_no_basket_response(self):
-        """ Verify there are no lines in the context for a non-existing basket. """
+        """ Verify there are no form and line data in the context for a non-existing basket. """
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['lines'], [])
-
-    def test_line_no_cert_type(self):
-        seat = self.create_seat(course=self.course, cert_type='TEST', seat_price=100)
-        self.create_basket_and_add_product(seat)
-        response = self.client.get(self.path)
-        self.assertIsNone(response.context['lines'][0].certificate_type)
+        self.assertEqual(response.context['formset_lines_data'], [])
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """
+        self.mock_course_api_response(self.course)
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
         self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, 50)
@@ -228,11 +243,9 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         basket.add_product(seat_without_benefit, 1)
 
         response = self.client.get(self.path)
-        self.assertEqual(response.context['lines'][0].benefit_value, '50%')
-        self.assertEqual(response.context['lines'][0].has_discount, True)
-
-        self.assertEqual(response.context['lines'][1].benefit_value, None)
-        self.assertEqual(response.context['lines'][1].has_discount, False)
+        lines = response.context['formset_lines_data']
+        self.assertEqual(lines[0][1]['benefit_value'], '50%')
+        self.assertEqual(lines[1][1]['benefit_value'], None)
 
     def test_cached_course(self):
         """ Verify that the course info is cached. """

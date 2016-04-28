@@ -284,6 +284,7 @@ class LmsApiMockMixin(object):
     def mock_course_api_response(self, course=None):
         """ Helper function to register an API endpoint for the course information. """
         course_info = {
+            'short_description': 'Test description',
             'media': {
                 'course_image': {
                     'uri': '/asset-v1:test+test+test+type@asset+block@images_course_image.jpg'

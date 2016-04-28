@@ -7,9 +7,9 @@ from acceptance_tests.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
 from acceptance_tests.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
                                      LogistrationMixin, UnenrollmentMixin, PaymentMixin)
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
-from acceptance_tests.pages import (BasketPage, CouponsCreatePage,
-                                    CouponsDetailsPage, CouponsListPage,
+from acceptance_tests.pages import (CouponsCreatePage, CouponsDetailsPage, CouponsListPage,
                                     DashboardHomePage, RedeemVoucherPage)
+from acceptance_tests.pages.basket import BasketPage
 
 
 @ddt.ddt

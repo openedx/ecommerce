@@ -250,15 +250,15 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(response.context['new_price'], new_price)
 
 
-class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        course = CourseFactory()
-        self.seat = course.create_or_update_seat('verified', True, 50, self.partner)
+        self.course = CourseFactory()
+        self.seat = self.course.create_or_update_seat('verified', True, 50, self.partner)
 
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
@@ -302,8 +302,10 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
 
+    @httpretty.activate
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
+        self.mock_course_api_response(course=self.course)
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
