@@ -6,12 +6,14 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog, generate_coupon_slug
+from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
+Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -26,6 +28,17 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
         self.course.create_or_update_seat('verified', False, 0, self.partner)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
+
+    def test_generate_sku_with_missing_product_class(self):
+        """Verify the method raises an exception if the product class is missing."""
+        with self.assertRaises(AttributeError):
+            generate_sku(Product(), self.partner)
+
+    def test_generate_sku_with_unexpected_product_class(self):
+        """Verify the method raises an exception for unsupported product class."""
+        product = ProductFactory()
+        with self.assertRaises(Exception):
+            generate_sku(product, self.partner)
 
     def test_generate_sku_for_course_seat(self):
         """Verify the method generates a SKU for a course seat."""

@@ -145,7 +145,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
     def test_enrollment_module_fulfill_bad_attributes(self):
         """Test that use of the Fulfillment Module fails when the product does not have attributes."""
-        ProductAttribute.objects.get(code='course_key').delete()
+        ProductAttribute.objects.get(product_class__name='Seat', code='course_key').delete()
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
 

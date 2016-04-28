@@ -4,6 +4,8 @@ from hashlib import md5
 
 from oscar.core.loading import get_model
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
@@ -14,17 +16,25 @@ def generate_sku(product, partner, **kwargs):
 
     Example: 76E4E71
     """
-    # Note: This currently supports coupons and seats.
-    # A new product type can be added via a new else if block.
-    if product.product_class and product.product_class.name == 'Coupon':
+    product_class = product.get_product_class()
+
+    if not product_class:
+        raise AttributeError('Product has no product class')
+
+    if product_class.name == 'Coupon':
         catalog = kwargs.get('catalog', '')
         _hash = ' '.join((
             unicode(product.id),
             unicode(catalog.id),
             str(partner.id)
         ))
-    else:
-        # Seats
+    elif product_class.name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        _hash = ' '.join((
+            getattr(product.attr, 'course_key', ''),
+            getattr(product.attr, 'seat_type', ''),
+            unicode(partner.id)
+        ))
+    elif product_class.name == 'Seat':
         _hash = ' '.join((
             getattr(product.attr, 'certificate_type', ''),
             product.attr.course_key,
@@ -32,6 +42,8 @@ def generate_sku(product, partner, **kwargs):
             getattr(product.attr, 'credit_provider', ''),
             str(partner.id)
         ))
+    else:
+        raise Exception('Unexpected product class')
 
     md5_hash = md5(_hash.lower())
     digest = md5_hash.hexdigest()[-7:]

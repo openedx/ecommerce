@@ -1,9 +1,12 @@
 import ddt
+from django.conf import settings
 import mock
 from oscar.core.loading import get_model
 from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
@@ -12,6 +15,7 @@ from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
+StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
@@ -129,10 +133,27 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         seat = course.seat_products[0]
         self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price)
 
+    def test_create_seat_with_enrollment_code(self):
+        """Verify an enrollment code product is created."""
+        course = CourseFactory()
+        seat_type = 'verified'
+        price = 5
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course.create_or_update_seat(seat_type, True, price, self.partner)
+
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        self.assertEqual(enrollment_code.attr.course_key, course.id)
+        self.assertEqual(enrollment_code.attr.seat_type, seat_type)
+
+        stock_record = StockRecord.objects.get(product=enrollment_code)
+        self.assertEqual(stock_record.price_excl_tax, price)
+        self.assertEqual(stock_record.price_currency, settings.OSCAR_DEFAULT_CURRENCY)
+        self.assertEqual(stock_record.partner, self.partner)
+
     def test_create_credit_seats(self):
         """Verify that the model's seat creation method allows the creation of multiple credit seats."""
         course = Course.objects.create(id='a/b/c', name='Test Course')
-        credit_data = {'MIT': 2, 'Harvard': 0.5}
+        credit_data = {'MIT': 2, 'Harvard': 1}
         certificate_type = 'credit'
         id_verification_required = True
         price = 10
@@ -256,3 +277,28 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
         course.create_or_update_seat('credit', True, 1000, self.partner, credit_provider='SMU')
         self.assertEqual(course.type, 'credit')
+
+    def test_enrollment_code_seat_type_filter(self):
+        """ Verify that the ENROLLMENT_CODE_SEAT_TYPES constant is properly applied during seat creation """
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course = Course.objects.create(id='test/course/123', name='Test Course 123')
+
+        # Audit seat products should not have a corresponding enrollment code
+        course.create_or_update_seat('audit', False, 0, self.partner)
+        with self.assertRaises(Product.DoesNotExist):
+            enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+
+        # Honor seat products should not have a corresponding enrollment code
+        course.create_or_update_seat('honor', False, 0, self.partner)
+        with self.assertRaises(Product.DoesNotExist):
+            enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+
+        # Verified seat products should have a corresponding enrollment code
+        course.create_or_update_seat('verified', True, 10, self.partner)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        self.assertEqual(enrollment_code.attr.course_key, course.id)
+        self.assertEqual(enrollment_code.attr.seat_type, 'verified')
+
+        # One parent product, three seat products, one enrollment code product (verified) -> five total products
+        self.assertEqual(course.products.count(), 5)
+        self.assertEqual(len(course.seat_products), 3)  # Definitely three seat products...
