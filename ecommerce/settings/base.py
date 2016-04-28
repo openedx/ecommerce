@@ -1,4 +1,5 @@
 """Common settings and globals."""
+import datetime
 import os
 from os.path import basename, normpath
 from sys import path
@@ -517,6 +518,12 @@ THEME_CACHE_TIMEOUT = 30 * 60
 
 # End Theme settings
 
+
 EDX_DRF_EXTENSIONS = {
     'JWT_PAYLOAD_USER_ATTRIBUTES': ('full_name', 'email', 'tracking_context',),
 }
+
+
+# Enrollment codes voucher end datetime used for setting the end dates for vouchers
+# created for the Enrollment code products.
+ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(weeks=520)

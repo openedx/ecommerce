@@ -1,0 +1,81 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% block body %}
+
+    <tr>
+        <table class="cn-body">
+            <!-- Message header -->
+            <tr align="left" class="cn-img-wrapper">
+                <td colspan="2" align="left" class="cn-img-wrapper cn-full-width" style="font-size: 20px; vertical-align: middle; padding-left: 20px; color: #127eb1;">
+                    <img src="http://gallery.mailchimp.com/1822a33c054dc20e223ca40e2/images/logo_web_edx_studio01aad778f34f.png"
+                        height="30" alt="{{partner_name}} Logo" border="0" hspace="0" vspace="0"
+                        class="platform-img">
+                    {% trans "Order Confirmation" %}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="cn-content-clear" colspan="2"></td>
+            </tr>
+
+            <!-- Message sub-header -->
+            <tr class="force-col" valign="middle" style="background-color: #f3f3f3;">
+                <td style="padding: 20px;">
+                    <table border="0" cellspacing="0" cellpadding="0" width="280" align="left" class="col-2">
+                        <tr>
+                            <td align="left" valign="top" style="font-size:13px; line-height: 20px; color: #aaaaaa;">
+                                {% trans "Order confirmation for" %}:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left" valign="top" style="line-height: 26px; font-size:24px; color: #002D40;">
+                                {{ order_number }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="padding: 20px;">
+                    <table border="0" cellspacing="0" cellpadding="10" width="100" align="right" class="col-2">
+                        <tr>
+                            <td align="center" valign="middle"
+                                style="font-size:13px; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
+                                <a href="{{ receipt_page_url }}" style="color: #ffffff; text-decoration: none;">
+                                    {% trans "View Order Information" %}
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            <tr>
+
+            <!-- Message Body -->
+            <tr class="cn-content cn-full-width">
+                <td colspan="2">
+                    <p>{% blocktrans %}Dear {{full_name}},{% endblocktrans %}</p>
+                    <p>{% blocktrans %}Thank you for purchasing access to {{course_name}}.
+                    Please click <a href="{{download_csv_link}}">HERE</a> to download a CSV file with the enrollment codes for this course.
+                    Once you have the codes you can distribute them to your team. {% endblocktrans %}</p>
+                    <p>{% blocktrans %}To view your payment information, please visit {{receipt_page_url}}.{% endblocktrans %}</p>
+                    <p>{% blocktrans %}To explore other courses, please visit {{lms_url}}.{% endblocktrans %}</p>
+                    <p>{% trans "Thank you," %}</p>
+                    <p>{% blocktrans %}The {{partner_name}} team{% endblocktrans %}</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="cn-content-clear cn-footer" colspan="2"></td>
+            </tr>
+
+            <!-- Footer content -->
+            <tr class="cn-full-width">
+                <td class="cn-footer-content" colspan="2">
+                    <p>{% blocktrans %}You received this message because you purchased enrollment codes for {{course_name}} on {{lms_url}}. If you have any questions, please visit {{contact_url}}.{% endblocktrans %}</p>
+                </td>
+            </tr>
+
+            <!-- Empty base footer -->
+            {% block footer %}{% endblock footer %}
+        </table>
+    </tr>
+
+{% endblock body %}

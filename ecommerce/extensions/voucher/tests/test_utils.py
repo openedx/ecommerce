@@ -1,7 +1,7 @@
-import httpretty
 from django.db import IntegrityError
 from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _
+import httpretty
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 

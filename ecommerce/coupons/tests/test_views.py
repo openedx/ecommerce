@@ -7,7 +7,9 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 import httpretty
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import ConditionalOfferFactory, OrderFactory, RangeFactory, VoucherFactory
+from oscar.test.factories import (
+    ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
+)
 from oscar.test.utils import RequestFactory
 import pytz
 
@@ -25,6 +27,8 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
+Product = get_model('catalogue', 'Product')
+OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
@@ -324,3 +328,38 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         basket.vouchers.add(Voucher.objects.get(code=COUPON_CODE))
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200)
         self.assert_redemption_page_redirects(get_lms_url())
+
+
+class EnrollmentCodeCsvViewTests(TestCase):
+    """ Tests for the EnrollmentCodeCsvView view. """
+    path = 'coupons:enrollment_code_csv'
+
+    def setUp(self):
+        super(EnrollmentCodeCsvViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+    def test_invalid_order_number(self):
+        """ Verify a 404 error is raised for an invalid order number. """
+        response = self.client.get(reverse(self.path, args=['INVALID']))
+        self.assertEqual(response.status_code, 404)
+
+    def test_invalid_user(self):
+        """ Verify an unauthorized request is redirected to the LMS dashboard. """
+        order = OrderFactory()
+        order.user = self.create_user()
+        response = self.client.get(reverse(self.path, args=[order.number]))
+        self.assertEqual(response.status_code, 302)
+        redirect_location = get_lms_url('dashboard')
+        self.assertEqual(response['location'], redirect_location)
+
+    def test_successful_response(self):
+        """ Verify a successful response is returned. """
+        voucher = VoucherFactory(code='ENROLLMENT')
+        order = OrderFactory(user=self.user)
+        line = OrderLineFactory(order=order)
+        order_line_vouchers = OrderLineVouchers.objects.create(line=line)
+        order_line_vouchers.vouchers.add(voucher)
+        response = self.client.get(reverse(self.path, args=[order.number]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['content-type'], 'text/csv')
