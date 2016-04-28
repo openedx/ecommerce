@@ -129,3 +129,4 @@ COMPRESS_OFFLINE = True
 
 # Comprehensive theme settings for testing environment
 COMPREHENSIVE_THEME_DIR = DJANGO_ROOT + "/tests/themes"
+DEFAULT_SITE_THEME = "test-theme"

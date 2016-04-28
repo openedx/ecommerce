@@ -507,6 +507,10 @@ DISABLE_THEMING_ON_RUNTIME_SWITCH = "disable_theming_on_runtime"
 # Directory that contains all themes
 COMPREHENSIVE_THEME_DIR = DJANGO_ROOT + "/themes"
 
+# Theme to use when no site or site theme is defined,
+# set to None if you want to use openedx theme
+DEFAULT_SITE_THEME = None
+
 # Cache time out for theme templates and related assets
 
 THEME_CACHE_TIMEOUT = 30 * 60

@@ -5,6 +5,8 @@ from mock import patch
 
 from django.test import override_settings
 from django.conf import settings, ImproperlyConfigured
+from django.contrib.sites.models import Site
+
 from path import Path
 
 from ecommerce.tests.testcases import TestCase
@@ -62,6 +64,27 @@ class TestHelpers(TestCase):
         with override_settings(ENABLE_COMPREHENSIVE_THEMING=False):
             theme_dir = get_theme_dir()
             self.assertIsNone(theme_dir)
+
+    def test_default_site_theme(self):
+        """
+        Tests get_theme_dir returns DEFAULT_SITE_THEME if theming is enabled and no site theme is present.
+        """
+        site, __ = Site.objects.get_or_create(domain="test.edx.org", name="test.edx.org")
+        with patch('ecommerce.theming.helpers.get_current_site', return_value=site):
+            theme_dir = get_theme_dir()
+            self.assertEqual(
+                settings.DJANGO_ROOT + "/tests/themes/{}".format(settings.DEFAULT_SITE_THEME),
+                theme_dir,
+            )
+
+    def test_default_current_site_theme_dir(self):
+        """
+        Tests get_current_site_theme_dir returns DEFAULT_SITE_THEME if theming is enabled and no site theme is present.
+        """
+        site, __ = Site.objects.get_or_create(domain="test.edx.org", name="test.edx.org")
+        with patch('ecommerce.theming.helpers.get_current_site', return_value=site):
+            theme_dir = get_current_site_theme_dir()
+            self.assertEqual(settings.DEFAULT_SITE_THEME, theme_dir)
 
     def test_improperly_configured_error(self):
         """

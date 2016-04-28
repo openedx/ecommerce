@@ -10,6 +10,8 @@ import waffle
 from path import Path
 from threadlocals.threadlocals import get_current_request
 
+from ecommerce.theming.models import SiteTheme
+
 
 def get_current_site():
     """
@@ -153,7 +155,7 @@ def get_theme_dir():
     if not is_comprehensive_theming_enabled():
         return None
 
-    site_theme = site and site.themes.first()
+    site_theme = SiteTheme.get_theme(site)
     theme_dir = getattr(site_theme, "theme_dir_name") if site_theme else None
 
     if theme_dir:
@@ -207,11 +209,15 @@ def get_current_site_theme_dir():
     site = get_current_site()
     if not site:
         return None
+
+    if not is_comprehensive_theming_enabled():
+        return None
+
     site_theme_dir = cache.get(get_site_theme_cache_key(site))
 
     # if site theme dir is not in cache and comprehensive theming is enabled then pull it from db.
-    if not site_theme_dir and is_comprehensive_theming_enabled():
-        site_theme = site.themes.first()  # pylint: disable=no-member
+    if not site_theme_dir:
+        site_theme = SiteTheme.get_theme(site)
         if site_theme:
             site_theme_dir = site_theme.theme_dir_name
             cache_site_theme_dir(site, site_theme_dir)
