@@ -2,6 +2,10 @@
     .container {
         padding: 60px 20px 30px 20px;
 
+        .alertinner p:last-child {
+            display: none;
+        }
+
         .basket-items,
         .total,
         .verification-note,
@@ -42,6 +46,20 @@
                     @include text-align(right);
                 }
 
+               .checkout-quantity {
+                   .quantity {
+                       display: inline-block;
+                       width: 40%;
+                       padding: 3px;
+                   }
+ 
+                   button {
+                       display: inline-block;
+                       vertical-align:top;
+                       margin-left: 5px;
+                       width: 50%;
+                   }
+               }
 
                 .course_image img {
                     margin: 0 auto;

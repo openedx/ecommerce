@@ -13,10 +13,11 @@
                 {% csrf_token %}
                 {{ formset.management_form }}
 
+                {% for form, line_data in formset_lines_data %}
+                {% with line=form.instance product=form.instance.product %}
+                    {% purchase_info_for_line request line as session %}
                 <div class="basket-items">
-                    {% for line in lines %}
-                        {% purchase_info_for_line request line as session %}
-                        {% if line.certificate_type %}
+                        {% if line_data.seat_type %}
                         <p class="certificate_type">
                             {% trans "Earn a valuable certificate to showcase the skills you learn in" %}
                         </p>
@@ -24,17 +25,27 @@
                         <div class="row">
                             <div class="col-sm-2 course_image">
                                 {{ form.id }}
-                                    <img class="thumbnail" src="{{ line.course.image_url }}" alt="{{ line.course.name }}"/>
+                                    <img class="thumbnail" src="{{ line_data.image_url }}" alt="{{ line_data.course_name }}"/>
                             </div>
                             <div class="col-sm-5">
-                                <p class="course_name">{{ line.course.name }} - {{ line.course.org }} ({{ line.course.number }})</p>
-                                <p class="course_description">{{ line.course.short_description }}</p>
+                                <p class="course_name">{{ line_data.course_name }} - {{ line_data.course_org }} ({{ line.course.number }})</p>
+                                <p class="course_description">{{ line_data.course_short_description }}</p>
                             </div>
-                            <div class="col-sm-5 course_prices">
+                            {% if line_data.enrollment_code %}
+                            <div class="col-sm-2">
+                                <div class="checkout-quantity">
+                                    <div class="input-group  {% if form.errors %}error{% endif %}">
+                                        {% render_field form.quantity class+="quantity" %}
+                                    <button class="btn btn-default" type="submit" data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-sm-{% if line_data.enrollment_code %}3{% else %}5{% endif %} course_prices">
                             {% if line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
-                                        {% blocktrans with benefit_value=line.benefit_value %}
+                                        {% blocktrans with benefit_value=line_data.benefit_value %}
                                             {{benefit_value}} off
                                         {% endblocktrans %}
                                     </div>
@@ -48,6 +59,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endwith %}
                     {% endfor %}
                 </div>
             </form>
@@ -55,6 +67,7 @@
 
         <div class="total">
             <div class="row">
+            {% if not line_data.enrollment_code %}
                 {% block vouchers %}
                     {% if basket.contains_a_voucher %}
                         <div class="vouchers col-sm-6">
@@ -96,6 +109,7 @@
                         {% endif %}
                     {% endif %}
                 {% endblock vouchers %}
+                {% endif %}
 
                 {% block baskettotals %}
                     {% include 'basket/partials/basket_totals.html' with editable=1 %}
