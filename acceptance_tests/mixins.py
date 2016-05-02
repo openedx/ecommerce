@@ -26,6 +26,7 @@ from acceptance_tests.config import (
     PAYPAL_EMAIL,
     LMS_HTTPS
 )
+from acceptance_tests.expected_conditions import input_provided
 from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage
 
 log = logging.getLogger(__name__)
@@ -199,8 +200,18 @@ class PaymentMixin(object):
 
         # Log into PayPal
         self.browser.switch_to.frame(iframe)
-        self.browser.find_element_by_css_selector('input#email').send_keys(PAYPAL_EMAIL)
-        self.browser.find_element_by_css_selector('input#password').send_keys(PAYPAL_PASSWORD)
+
+        email = self.browser.find_element_by_css_selector('input#email')
+        password = self.browser.find_element_by_css_selector('input#password')
+
+        email.send_keys(PAYPAL_EMAIL)
+        password.send_keys(PAYPAL_PASSWORD)
+
+        # Prevent the test from advancing before credentials are entered.
+        wait = WebDriverWait(self.browser, 2)
+        credentials_provided = input_provided(email, password)
+        wait.until(credentials_provided)
+
         self.browser.find_element_by_css_selector('button[type="submit"]').click()
         self.browser.switch_to.default_content()
 

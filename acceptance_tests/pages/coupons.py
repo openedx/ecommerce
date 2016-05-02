@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import VERIFIED_COURSE_ID
 from acceptance_tests.constants import DEFAULT_END_DATE, DEFAULT_START_DATE
+from acceptance_tests.expected_conditions import option_selected
 from acceptance_tests.pages.ecommerce import EcommerceAppPage
 
 
@@ -19,15 +20,6 @@ def _get_coupon_name(is_discount):
     suffix = ''.join(random.choice(string.ascii_letters) for _ in range(10))
 
     return prefix + suffix
-
-
-class verified_option_selected(object):
-    """An expectation for checking that the verified option has been selected."""
-    def __init__(self, select):
-        self.select = select
-
-    def __call__(self, _):
-        return self.select.first_selected_option.text == 'Verified'
 
 
 class BasketPage(EcommerceAppPage):
@@ -61,7 +53,7 @@ class CouponsCreatePage(EcommerceAppPage):
         self.q(css=course_id_input).fill(VERIFIED_COURSE_ID)
         self.wait_for_ajax()
 
-        wait = WebDriverWait(self.browser, 5)
+        wait = WebDriverWait(self.browser, 2)
         verified_option_present = EC.presence_of_element_located(
             (By.CSS_SELECTOR, 'select[name="seat_type"] option[value="Verified"]')
         )
@@ -74,15 +66,16 @@ class CouponsCreatePage(EcommerceAppPage):
         select = Select(self.browser.find_element_by_css_selector('select[name="seat_type"]'))
         select.select_by_visible_text('Verified')
 
-        # This prevents the test from advancing before the seat type is selected.
-        wait = WebDriverWait(self.browser, 5)
+        # Prevent the test from advancing before the seat type is selected.
+        wait = WebDriverWait(self.browser, 2)
+        verified_option_selected = option_selected(select, 'Verified')
         wait.until(verified_option_selected)
 
         if is_discount:
             select = Select(self.browser.find_element_by_css_selector('select[name="code_type"]'))
             select.select_by_visible_text('Discount Code')
 
-            wait = WebDriverWait(self.browser, 5)
+            wait = WebDriverWait(self.browser, 2)
             benefit_input_present = EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="benefit_value"]'))
             wait.until(benefit_input_present)
 
