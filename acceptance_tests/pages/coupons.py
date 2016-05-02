@@ -5,6 +5,7 @@ import string  # pylint: disable=deprecated-module
 from bok_choy.javascript import wait_for_js
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import VERIFIED_COURSE_ID
@@ -15,9 +16,18 @@ from acceptance_tests.pages.ecommerce import EcommerceAppPage
 def _get_coupon_name(is_discount):
     """ Returns an appropriate coupon name. """
     prefix = 'test-discount-code-' if is_discount else 'test-enrollment-code-'
-    postfix = ''.join(random.choice(string.ascii_letters) for _ in range(3))
+    suffix = ''.join(random.choice(string.ascii_letters) for _ in range(10))
 
-    return prefix + postfix
+    return prefix + suffix
+
+
+class verified_option_selected(object):
+    """An expectation for checking that the verified option has been selected."""
+    def __init__(self, select):
+        self.select = select
+
+    def __call__(self, _):
+        return self.select.first_selected_option.text == 'Verified'
 
 
 class BasketPage(EcommerceAppPage):
@@ -50,19 +60,32 @@ class CouponsCreatePage(EcommerceAppPage):
         self.q(css='input[name="title"]').fill(coupon_name)
         self.q(css=course_id_input).fill(VERIFIED_COURSE_ID)
         self.wait_for_ajax()
-        self.wait_for_element_presence(
-            'select[name="seat_type"] option[value="Verified"]',
-            'Seat Type Drop-Down List is Present'
+
+        wait = WebDriverWait(self.browser, 5)
+        verified_option_present = EC.presence_of_element_located(
+            (By.CSS_SELECTOR, 'select[name="seat_type"] option[value="Verified"]')
         )
+        wait.until(verified_option_present)
 
         self.q(css="input[name='start_date']").fill(str(DEFAULT_START_DATE))
         self.q(css="input[name='end_date']").fill(str(DEFAULT_END_DATE))
         self.q(css="input[name='client']").fill('Test Client')
-        self.q(css='select[name="seat_type"] option[value="Verified"]').first.click()
+
+        select = Select(self.browser.find_element_by_css_selector('select[name="seat_type"]'))
+        select.select_by_visible_text('Verified')
+
+        # This prevents the test from advancing before the seat type is selected.
+        wait = WebDriverWait(self.browser, 5)
+        wait.until(verified_option_selected)
 
         if is_discount:
-            self.q(css='select[name="code_type"] option[value="Discount code"]').first.click()
-            self.wait_for_element_presence('input[name="benefit_value"]', 'Benefit Value Input is Present')
+            select = Select(self.browser.find_element_by_css_selector('select[name="code_type"]'))
+            select.select_by_visible_text('Discount Code')
+
+            wait = WebDriverWait(self.browser, 5)
+            benefit_input_present = EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="benefit_value"]'))
+            wait.until(benefit_input_present)
+
             self.q(css="input[name='benefit_value']").fill('50')
 
         self.q(css="div.form-actions > button.btn").click()
@@ -90,7 +113,6 @@ class CouponsDetailsPage(EcommerceAppPage):
     @wait_for_js
     def go_to_edit_coupon_form_page(self):
         self.browser.find_element_by_id('CouponEdit').click()
-        # self.q(css='div.coupon-detail-view div.pull-right a.btn.btn-primary.btn-small').first.click()
         self.wait_for_ajax()
 
 

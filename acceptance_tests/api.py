@@ -1,7 +1,7 @@
 import requests
 from requests.auth import AuthBase
 
-from acceptance_tests.config import ENROLLMENT_API_URL, ENROLLMENT_API_TOKEN
+from acceptance_tests.config import ACCESS_TOKEN, ENROLLMENT_API_URL
 
 
 class BearerAuth(AuthBase):
@@ -20,7 +20,7 @@ class BearerAuth(AuthBase):
 class EnrollmentApiClient(object):
     def __init__(self, host=None, key=None):
         self.host = host or ENROLLMENT_API_URL
-        self.key = key or ENROLLMENT_API_TOKEN
+        self.key = key or ACCESS_TOKEN
 
     def get_enrollment_status(self, username, course_id):
         """

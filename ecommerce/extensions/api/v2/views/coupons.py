@@ -101,7 +101,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 raise NotImplementedError('Multi-use voucher types are not supported')
 
             # When a black-listed course mode is received raise an exception.
-            # Audit modes do not have a certificate type and therefor will raise
+            # Audit modes do not have a certificate type and therefore will raise
             # an AttributeError exception.
             seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
             for seat in seats:
