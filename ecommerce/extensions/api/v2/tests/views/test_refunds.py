@@ -11,9 +11,10 @@ from rest_framework import status
 from ecommerce.extensions.api.serializers import RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
+from ecommerce.extensions.refund.status import REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.tests.mixins import JwtMixin
+from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Refund = get_model('refund', 'Refund')
@@ -177,7 +178,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
 
 @ddt.ddt
-class RefundProcessViewTests(TestCase):
+class RefundProcessViewTests(ThrottlingMixin, TestCase):
     def setUp(self):
         super(RefundProcessViewTests, self).setUp()
 
@@ -210,10 +211,35 @@ class RefundProcessViewTests(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data, RefundSerializer(self.refund).data)
 
-    @ddt.data('approve', 'deny')
-    def test_failure(self, action):
+    @mock.patch('ecommerce.extensions.refund.models.Refund._issue_credit')
+    def test_success_approve_payment_only(self, mock_issue_credit):
+        """ If the action succeeds, the view should return HTTP 200 and the serialized Refund. """
+        def mock_fulfillment(refund_obj):
+            for refund_line in refund_obj.lines.all():
+                refund_line.set_status(REFUND_LINE.COMPLETE)
+
+        mock_issue_credit.return_value = None
+
+        with mock.patch("ecommerce.extensions.fulfillment.api.revoke_fulfillment_for_refund",
+                        side_effect=mock_fulfillment):
+            with mock.patch("ecommerce.extensions.refund.models.logger") as patched_log:
+                response = self.put('approve_payment_only')
+                self.assertEqual(response.status_code, 200)
+                refund = Refund.objects.get(id=self.refund.id)
+                self.assertEqual(response.data['status'], refund.status)
+                self.assertEqual(response.data['status'], "Complete")
+                patched_log.info.assert_called_once_with(
+                    "Skipping the revocation step for refund [%d].", self.refund.id)
+
+    @ddt.data(
+        ('approve', 'approve'),
+        ('approve', 'approve_payment_only'),
+        ('deny', 'deny')
+    )
+    @ddt.unpack
+    def test_failure(self, action, decision):
         """ If the action fails, the view should return HTTP 500 and the serialized Refund. """
         with mock.patch('ecommerce.extensions.refund.models.Refund.{}'.format(action), mock.Mock(return_value=False)):
-            response = self.put(action)
+            response = self.put(decision)
             self.assertEqual(response.status_code, 500)
             self.assertEqual(response.data, RefundSerializer(self.refund).data)
