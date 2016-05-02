@@ -204,10 +204,16 @@ class PaymentMixin(object):
         email = self.browser.find_element_by_css_selector('input#email')
         password = self.browser.find_element_by_css_selector('input#password')
 
-        email.send_keys(PAYPAL_EMAIL)
-        password.send_keys(PAYPAL_PASSWORD)
+        # Sometimes, keys aren't sent to the inputs on the first attempt.
+        for _ in range(3):
+            if not email.get_attribute('value'):
+                email.send_keys(PAYPAL_EMAIL)
 
-        # Prevent the test from advancing before credentials are entered.
+            if not password.get_attribute('value'):
+                password.send_keys(PAYPAL_PASSWORD)
+
+        # If credentials can't be entered, prevent the test from advancing.
+        # This makes debugging easier.
         wait = WebDriverWait(self.browser, 2)
         credentials_provided = input_provided(email, password)
         wait.until(credentials_provided)
