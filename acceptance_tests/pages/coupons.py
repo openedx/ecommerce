@@ -64,7 +64,7 @@ class CouponsCreatePage(EcommerceAppPage):
         self.q(css="input[name='client']").fill('Test Client')
 
         select = Select(self.browser.find_element_by_css_selector('select[name="seat_type"]'))
-        select.select_by_visible_text('Verified')
+        select.select_by_value('Verified')
 
         # Prevent the test from advancing before the seat type is selected.
         wait = WebDriverWait(self.browser, 2)
@@ -73,7 +73,7 @@ class CouponsCreatePage(EcommerceAppPage):
 
         if is_discount:
             select = Select(self.browser.find_element_by_css_selector('select[name="code_type"]'))
-            select.select_by_visible_text('Discount Code')
+            select.select_by_value('Discount code')
 
             wait = WebDriverWait(self.browser, 2)
             benefit_input_present = EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="benefit_value"]'))
