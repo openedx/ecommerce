@@ -262,7 +262,7 @@ class PaypalMixin(object):
                         {
                             u'quantity': line.quantity,
                             u'name': line.product.title,
-                            u'price': unicode(line.price_incl_tax),
+                            u'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
                             u'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
@@ -325,7 +325,7 @@ class PaypalMixin(object):
                         {
                             u'quantity': line.quantity,
                             u'name': line.product.title,
-                            u'price': unicode(line.price_incl_tax),
+                            u'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
                             u'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
