@@ -18,6 +18,7 @@ require.config({
         'models': 'js/models',
         'moment': 'bower_components/moment/moment',
         'pages': 'js/pages',
+        'pikaday': 'bower_components/pikaday/pikaday',
         'requirejs': 'bower_components/requirejs/require',
         'routers': 'js/routers',
         'templates': 'templates',
@@ -43,6 +44,9 @@ require.config({
         },
         'jquery-cookie': {
             deps: ['jquery']
+        },
+        'pikaday': {
+            deps: ['moment']
         }
     }
 });

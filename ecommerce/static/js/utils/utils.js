@@ -2,10 +2,12 @@ define([
         'backbone',
         'backbone.validation',
         'moment',
+        'pikaday',
         'underscore'],
     function (Backbone,
               BackboneValidation,
               moment,
+              Pikaday,
               _) {
         'use strict';
 
@@ -137,6 +139,28 @@ define([
                 element.addClass('is-disabled').attr('aria-disabled', true);
                 return operation().always(function() {
                     element.removeClass('is-disabled').attr('aria-disabled', false);
+                });
+            },
+
+            /**
+             * Adds Pikaday date picker for given element in format required.
+             * For now this function is required in coupon_form_view.js and
+             * course_form_view.js.
+             */
+            addDatePicker: function(context) {
+                _.each(context.$el.find('.add-pikaday'), function(el) {
+                    if (el.getAttribute('datepicker-initialized') !== 'true') {
+                        new Pikaday({
+                            field: el,
+                            format: 'YYYY-MM-DDTHH:mm:ss',
+                            defaultDate: context.model.get(el.name),
+                            setDefaultDate: true,
+                            showTime: true,
+                            use24hour: false,
+                            autoClose: false
+                        });
+                        el.setAttribute('datepicker-initialized', 'true');
+                    }
                 });
             }
         };
