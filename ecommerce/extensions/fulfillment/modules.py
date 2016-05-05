@@ -432,11 +432,14 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             line.set_status(LINE.COMPLETE)
 
         send_notification(order.user, 'ORDER_WITH_CSV', context={
-            'enrollment_code_title': lines[0].product.title,
+            'contact_url': "{}/contact".format(site.siteconfiguration.lms_url_root)
+            'course_name': order.lines.first().product.course.name,
             'download_csv_link': get_ecommerce_url(reverse('coupons:enrollment_code_csv', args=[order.number])),
+            'enrollment_code_title': lines[0].product.title,
             'order_number': order.number,
+            'partner_name': order.lines.first().partner.name,
+            'lms_url': site.siteconfiguration.lms_url_root,
             'receipt_page_url': get_lms_url('{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)),
-            'partner_short_code': order.lines.first().partner.short_code,
         })
 
         logger.info("Finished fulfilling 'Enrollment code' product types for order [%s]", order.number)
