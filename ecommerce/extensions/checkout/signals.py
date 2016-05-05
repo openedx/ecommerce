@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.dispatch import receiver
 from oscar.core.loading import get_class
+from threadlocals import threadlocals
 import waffle
 
 from ecommerce.core.url_utils import get_lms_url
@@ -86,7 +87,8 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                             ),
                             'credit_hours': product.attr.credit_hours,
                             'credit_provider': provider_data['display_name'],
-                        }
+                        },
+                        threadlocals.get_current_request().site
                     )
 
         else:

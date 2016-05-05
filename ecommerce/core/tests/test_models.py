@@ -8,13 +8,18 @@ from django.test import override_settings
 from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 
 def _make_site_config(payment_processors_str, site_id=1):
     site = Site.objects.get(id=site_id)
 
-    return SiteConfiguration(site=site, payment_processors=payment_processors_str)
+    return SiteConfiguration(
+        site=site,
+        payment_processors=payment_processors_str,
+        from_email='sender@example.com'
+    )
 
 
 class UserTests(TestCase):
@@ -181,6 +186,18 @@ class SiteConfigurationTests(TestCase):
 
         result = site_config.get_payment_processors()
         self.assertEqual(result, expected_result)
+
+    def test_get_from_email(self):
+        """
+        Validate SiteConfiguration.get_from_email() along with whether, or not,
+        the base from email address is actually changed when a site-specific value is specified.
+        """
+        site_config = SiteConfigurationFactory(from_email='', partner__name='TestX')
+        self.assertEqual(site_config.get_from_email(), settings.OSCAR_FROM_EMAIL)
+
+        expected_from_email = "expected@email.com"
+        site_config = SiteConfigurationFactory(from_email=expected_from_email, partner__name='TestX')
+        self.assertEqual(site_config.get_from_email(), expected_from_email)
 
 
 class HelperMethodTests(TestCase):

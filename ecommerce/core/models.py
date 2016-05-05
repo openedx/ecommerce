@@ -60,6 +60,13 @@ class SiteConfiguration(models.Model):
         null=True,
         blank=True
     )
+    from_email = models.CharField(
+        verbose_name=_('From email'),
+        help_text=_('Address from which emails are sent.'),
+        max_length=255,
+        null=False,
+        blank=False
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
@@ -120,6 +127,16 @@ class SiteConfiguration(models.Model):
             processor for processor in all_processors
             if processor.NAME in self.payment_processors_set and processor.is_enabled()
         ]
+
+    def get_from_email(self):
+        """
+        Returns the configured from_email value for the specified site.  If no from_email is
+        available we return the base OSCAR_FROM_EMAIL setting
+
+        Returns:
+            string: Returns sender address for use in customer emails/alerts
+        """
+        return self.from_email or settings.OSCAR_FROM_EMAIL
 
     def clean_fields(self, exclude=None):
         """ Validates model fields """
