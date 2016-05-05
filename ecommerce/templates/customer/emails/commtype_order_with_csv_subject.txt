@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}{{partner_short_code}}: Enrollment Code Order Receipt [Order No. {{order_number}}]{% endblocktrans %}
+{% blocktrans %}{{partner_name}}: Order Confirmation: [{{order_number}}]{% endblocktrans %}

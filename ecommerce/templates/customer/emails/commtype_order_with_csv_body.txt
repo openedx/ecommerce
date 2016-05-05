@@ -1,19 +1,14 @@
 {% load i18n %}
-{% trans "Payment confirmation for: " %}{{enrollment_code_title}}
+{% trans "Order confirmation for: " %}{{course_name}}
 
 {% blocktrans %}Dear {{full_name}},{% endblocktrans %}
 
-{% blocktrans %}Thank you for purchasing enrollment codes. A charge will appear on your credit or debit card statement with a company name of "{{platform_name}}".
-{% endblocktrans %}
+{% blocktrans %}Thank you for purchasing access to {{course_name}}. Please click <a href="{{download_csv_link}}" target="_blank">HERE</a> to download a CSV file with the enrollment codes for this course. Once you have the codes you can distribute them to your team. {% endblocktrans %}
 
-{% blocktrans %}To download a CSV file with the enrollment codes visit this link: {{download_csv_link}}{% endblocktrans %}
+{% blocktrans %}To explore other courses, please visit {{lms_url}}{% endblocktrans %}
 
-{% blocktrans %}To explore other courses, visit the {{platform_name}} website. We add new courses frequently!{% endblocktrans %}
+{% trans "Thank you" %},
 
-{% trans "To view your payment information, visit the following website." %}
-{{receipt_page_url}}
+{% blocktrans %}The {{partner_name}} team{% endblocktrans %}
 
-{% trans "Thank you." %}
-{% blocktrans %}The {{platform_name}} team{% endblocktrans %}
-
-{% blocktrans %}You received this message because you purchased enrollment codes for courses, on {{platform_name}}.{% endblocktrans %}
+{% blocktrans %}{% blocktrans %}You received this message because you purchased enrollment codes for {{course_name}} on {{lms_url}}. If you have any questions, please visit {{contact_url}}.{% endblocktrans %}{% endblocktrans %}
