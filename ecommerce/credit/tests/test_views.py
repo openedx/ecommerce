@@ -4,15 +4,17 @@ Tests for the checkout page.
 from __future__ import unicode_literals
 
 import json
+from datetime import timedelta
 
 import ddt
+import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
-import httpretty
+from django.utils import timezone
 from waffle.models import Switch
 
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.tests.mixins import JwtMixin
@@ -31,20 +33,12 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         user = self.create_user(is_superuser=False)
         self.create_access_token(user)
         self.client.login(username=user.username, password=self.password)
-        self.course_name = 'credit course'
         self.provider = 'ASU'
         self.price = 100
-        self.thumbnail_url = 'http://www.edx.org/course.jpg'
         self.credit_hours = 2
         self.eligibility_url = get_lms_url('/api/credit/v1/eligibility/')
         self.provider_url = get_lms_url('/api/credit/v1/providers/')
-
-        # Create the course
-        self.course = Course.objects.create(
-            id='edx/Demo_Course/DemoX',
-            name=self.course_name,
-            thumbnail_url=self.thumbnail_url
-        )
+        self.course = CourseFactory(thumbnail_url='http://www.edx.org/course.jpg')
 
         self.provider_data = [
             {
@@ -232,16 +226,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
 
         self._assert_success_checkout_page()
 
-    @httpretty.activate
-    def test_get_without_credit_seat(self):
-        """ Verify an error is shown if the Credit API returns an empty list
-        of providers.
-        """
-        self._mock_eligibility_api(body=self.eligibilities)
-
-        response = self.client.get(self.path)
-        self.assertEqual(response.context['error'], 'No credit seat is available for this course.')
-
     @ddt.data(
         (settings.PAYMENT_PROCESSORS, {
             'payment_processors': {},
@@ -285,3 +269,23 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(expected_context, response.context)
+
+    @httpretty.activate
+    def test_seat_unavailable(self):
+        """ Verify the view displays an error message to the user if no seat is available for purchase. """
+        expires = timezone.now() - timedelta(days=1)
+        self.course.create_or_update_seat(
+            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours, expires=expires
+        )
+        self._mock_eligibility_api(body=self.eligibilities)
+
+        response = self.client.get(self.path)
+        expected = (
+            'Credit is not currently available for "{course_name}". If you are currently enrolled in the '
+            'course, please try again after all grading is complete. If you need additional assistance, '
+            'please contact the {site_name} Support Team.'
+        ).format(
+            course_name=self.course.name,
+            site_name=self.site.name
+        )
+        self.assertEqual(response.context['error'], expected)

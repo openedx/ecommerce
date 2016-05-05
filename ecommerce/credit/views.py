@@ -1,5 +1,7 @@
-from collections import OrderedDict
+from __future__ import unicode_literals
+
 import logging
+from collections import OrderedDict
 
 from dateutil.parser import parse
 from django.conf import settings
@@ -32,34 +34,50 @@ class Checkout(TemplateView):
         context = super(Checkout, self).get_context_data(**kwargs)
 
         course = get_object_or_404(Course, id=kwargs.get('course_id'))
+        context['course'] = course
 
         deadline = self._check_credit_eligibility(self.request.user, kwargs.get('course_id'))
         if not deadline:
-            return {
-                'error': _(u'An error has occurred. We could not confirm that you are eligible for course credit. '
-                           u'Try the transaction again.')
-            }
+            context.update({
+                'error': _('An error has occurred. We could not confirm that you are eligible for course credit. '
+                           'Try the transaction again.')
+            })
+            return context
 
         partner = get_partner_for_site(self.request)
+        strategy = self.request.strategy
         # Audit seats do not have a `certificate_type` attribute, so
         # we use getattr to avoid an exception.
-        credit_seats = [
-            seat for seat in course.seat_products
-            if getattr(seat.attr, 'certificate_type', None) == self.CREDIT_MODE and
-            seat.stockrecords.filter(partner=partner).exists()
-        ]
+        credit_seats = []
+
+        for seat in course.seat_products:
+            if getattr(seat.attr, 'certificate_type', None) != self.CREDIT_MODE:
+                continue
+
+            purchase_info = strategy.fetch_for_product(seat)
+            if purchase_info.availability.is_available_to_buy and seat.stockrecords.filter(partner=partner).exists():
+                credit_seats.append(seat)
 
         if not credit_seats:
-            return {
-                'error': _(u'No credit seat is available for this course.')
-            }
+            msg = _(
+                'Credit is not currently available for "{course_name}". If you are currently enrolled in the '
+                'course, please try again after all grading is complete. If you need additional assistance, '
+                'please contact the {site_name} Support Team.'
+            ).format(
+                course_name=course.name,
+                site_name=self.request.site.name
+            )
+
+            context.update({'error': msg})
+            return context
 
         providers = self._get_providers_detail(credit_seats)
         if not providers:
-            return {
-                'error': _(u'An error has occurred. We could not confirm that the institution you selected offers this '
-                           u'course credit. Try the transaction again.')
-            }
+            context.update({
+                'error': _('An error has occurred. We could not confirm that the institution you selected offers this '
+                           'course credit. Try the transaction again.')
+            })
+            return context
 
         # Make button text for each processor which will be shown to user.
         processors_dict = OrderedDict()
@@ -77,7 +95,7 @@ class Checkout(TemplateView):
         if len(processors_dict) == 0:
             context.update({
                 'error': _(
-                    u'All payment options are currently unavailable. Try the transaction again in a few minutes.'
+                    'All payment options are currently unavailable. Try the transaction again in a few minutes.'
                 )
             })
 
@@ -119,7 +137,7 @@ class Checkout(TemplateView):
 
         except SlumberHttpBaseException:
             logging.exception(
-                u"Credit API request failed to get eligibility for user [%s] for course [%s].",
+                'Credit API request failed to get eligibility for user [%s] for course [%s].',
                 user.username,
                 course_key
             )
@@ -168,7 +186,7 @@ class Checkout(TemplateView):
         try:
             return self.credit_api_client.providers.get(provider_ids=provider_ids)
         except SlumberHttpBaseException:
-            logger.exception(u'An error occurred while retrieving credit provider details.')
+            logger.exception('An error occurred while retrieving credit provider details.')
             return None
 
     @cached_property
