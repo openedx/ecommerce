@@ -4,7 +4,6 @@ import logging
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
@@ -12,7 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import SlumberHttpBaseException
-import waffle
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
@@ -99,10 +97,6 @@ class Checkout(TemplateView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        """Get method for checkout page."""
-        if not waffle.switch_is_active('ENABLE_CREDIT_APP'):
-            raise Http404
-
         return super(Checkout, self).get(request, args, **kwargs)
 
     def _check_credit_eligibility(self, user, course_key):

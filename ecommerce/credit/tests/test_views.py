@@ -2,6 +2,7 @@
 Tests for the checkout page.
 """
 from __future__ import unicode_literals
+
 import json
 
 import ddt
@@ -10,7 +11,6 @@ from django.core.urlresolvers import reverse
 import httpretty
 from waffle.models import Switch
 
-from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -27,7 +27,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
 
     def setUp(self):
         super(CheckoutPageTest, self).setUp()
-        self.switch = toggle_switch('ENABLE_CREDIT_APP', True)
 
         user = self.create_user(is_superuser=False)
         self.create_access_token(user)
@@ -100,17 +99,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
                 name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor.NAME,
                 defaults={'active': True}
             )
-
-    def test_get_with_disabled_flag(self):
-        """
-        Test checkout page accessibility. Page will return 404 if no flag is defined
-        of it is disabled.
-        """
-        self.switch.active = False
-        self.switch.save()
-        response = self.client.get(self.path)
-
-        self.assertEqual(response.status_code, 404)
 
     def _assert_error_without_deadline(self):
         """ Verify that response has eligibility error message if no eligibility
