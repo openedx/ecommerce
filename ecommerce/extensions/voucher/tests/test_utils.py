@@ -1,4 +1,5 @@
 import httpretty
+
 from django.db import IntegrityError
 from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _

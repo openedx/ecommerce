@@ -4,7 +4,6 @@ import datetime
 import hashlib
 import logging
 import uuid
-import pytz
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -14,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
+import pytz
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.invoice.models import Invoice
@@ -232,7 +232,7 @@ def _get_or_create_offer(product_range, benefit_type, benefit_value, coupon_id=N
         max_affected_items=1,
     )
 
-    offer_name = "Catalog [{}]-{}-{}".format(product_range.catalog.id, offer_benefit.type, offer_benefit.value)
+    offer_name = "Catalog [{}]-{}-{}".format(product_range.id, offer_benefit.type, offer_benefit.value)
     if max_uses:
         # Offer needs to be unique for each multi-use coupon.
         offer_name = "{} (Coupon [{}] - max_uses:{})".format(offer_name, coupon_id, max_uses)
@@ -320,7 +320,8 @@ def create_vouchers(
         voucher_type,
         coupon_id=None,
         code=None,
-        max_uses=None):
+        max_uses=None,
+        _range=None):
     """
     Create vouchers.
 
@@ -340,16 +341,19 @@ def create_vouchers(
     Returns:
             List[Voucher]
     """
-
-    logger.info("Creating [%d] vouchers catalog [%s]", quantity, catalog.id)
-
     vouchers = []
 
-    range_name = (_('Range for {catalog_name}').format(catalog_name=catalog.name))
-    product_range, __ = Range.objects.get_or_create(
-        name=range_name,
-        catalog=catalog,
-    )
+    if catalog is None and _range:
+        # Enrollment code
+        logger.info("Creating [%d] enrollment code vouchers", quantity)
+        product_range = _range
+    else:
+        logger.info("Creating [%d] vouchers catalog [%s]", quantity, catalog.id)
+        range_name = (_('Range for {catalog_name}').format(catalog_name=catalog.name))
+        product_range, __ = Range.objects.get_or_create(
+            name=range_name,
+            catalog=catalog,
+        )
 
     offer = _get_or_create_offer(
         product_range=product_range,
