@@ -66,6 +66,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'categories': [self.category],
             'note': None,
             'max_uses': None,
+            'create_vouchers': True,
         }
 
     def setup_site_configuration(self):
@@ -82,7 +83,8 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'stock_record_ids': [1],
             'voucher_type': Voucher.SINGLE_USE,
             'price': 100,
-            'category_ids': [self.category.id]
+            'category_ids': [self.category.id],
+            'create_vouchers': True,
         })
         request = RequestFactory()
         request.user = self.user
@@ -147,6 +149,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.coupon_data.update({
             'code': 'CUSTOMCODE',
             'quantity': 1,
+            'create_vouchers': True,
         })
         CouponViewSet().create_coupon_product(
             title='Custom coupon',
@@ -179,6 +182,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         max_uses_number = 2
         self.coupon_data.update({
             'max_uses': max_uses_number,
+            'create_vouchers': True,
         })
         coupon = CouponViewSet().create_coupon_product(
             title='Test coupon',
@@ -275,6 +279,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
             'quantity': 2,
             'price': 100,
             'category_ids': [self.category.id],
+            'create_vouchers': True,
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 

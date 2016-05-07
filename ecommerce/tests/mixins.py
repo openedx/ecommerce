@@ -351,7 +351,8 @@ class CouponMixin(object):
             benefit_value=100,
             note=None,
             max_uses=None,
-            quantity=5
+            quantity=5,
+            create_vouchers=True,
     ):
         """Helper method for creating a coupon.
 
@@ -388,6 +389,7 @@ class CouponMixin(object):
             'categories': [self.category],
             'note': note,
             'max_uses': max_uses,
+            'create_vouchers': create_vouchers,
         }
 
         coupon = CouponViewSet().create_coupon_product(

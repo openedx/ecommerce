@@ -256,3 +256,31 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
         course.create_or_update_seat('credit', True, 1000, self.partner, credit_provider='SMU')
         self.assertEqual(course.type, 'credit')
+
+    def test_create_or_update_bulk_seat(self):
+        """ Verify the method creates or updates a seat Product. """
+        course = Course.objects.create(
+            id='a/b/c',
+            name='Test Course',
+            bulk_purchasing_enabled=True
+        )
+
+        # Test seat creation
+        certificate_type = 'verified'
+        id_verification_required = True
+        price = 5
+        course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
+
+        # Two seats: one verified, the other the parent seat product
+        self.assertEqual(course.products.count(), 2)
+        seat = course.seat_products[0]
+        self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price)
+
+        # Test seat update
+        price = 10
+        course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
+
+        # Again, only two seats with one being the parent seat product.
+        self.assertEqual(course.products.count(), 2)
+        seat = course.seat_products[0]
+        self.assert_course_seat_valid(seat, course, certificate_type, id_verification_required, price)
