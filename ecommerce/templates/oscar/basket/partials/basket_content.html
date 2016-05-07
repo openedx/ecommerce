@@ -26,11 +26,28 @@
                                 {{ form.id }}
                                     <img class="thumbnail" src="{{ line.course.image_url }}" alt="{{ line.course.name }}"/>
                             </div>
-                            <div class="col-sm-5">
+                            <div class="col-sm-4">
                                 <p class="course_name">{{ line.course.name }} - {{ line.course.org }} ({{ line.course.number }})</p>
                                 <p class="course_description">{{ line.course.short_description }}</p>
                             </div>
-                            <div class="col-sm-5 course_prices">
+                            <div class="col-sm-2 form-inline">
+                                {#% if not line.certificate_type %#}
+                                {% if True %}
+                                    <p class="course_name">{% trans "Quantity" %}</p>
+                                    <div class="form-group">
+                                        <input class="form-control"
+                                               id="quantity_{{ line.course.id }}"
+                                               name="quantity_{{ line.course.id }}"
+                                               style="width:50%"
+                                               type="number"
+                                               value="1"
+                                               min="0"
+                                               data-line-price="{{ line.line_price_incl_tax_incl_discounts}}"
+                                               data-line-currency="{{ line.price_currency }}">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-4 course_prices">
                             {% if line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
