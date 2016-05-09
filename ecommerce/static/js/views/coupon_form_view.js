@@ -168,9 +168,12 @@ define([
             initialize: function (options) {
                 this.alertViews = [];
                 this.editing = options.editing || false;
+                this.hiddenClass = 'hidden';
 
-                this.listenTo(this.model, 'change:coupon_type', this.toggleFields);
-                this.listenTo(this.model, 'change:voucher_type', this.toggleFields);
+                this.listenTo(this.model, 'change:coupon_type', this.toggleCouponTypeField);
+                this.listenTo(this.model, 'change:voucher_type', this.toggleVoucherTypeField);
+                this.listenTo(this.model, 'change:code', this.toggleCodeField);
+                this.listenTo(this.model, 'change:quantity', this.toggleQuantityField);
 
                 this._super();
             },
@@ -182,43 +185,88 @@ define([
                 this.$el.find('[name=benefit_value]').attr('max', max_value);
             },
 
-            toggleFields: function () {
-                var hiddenClass = 'hidden';
-                var couponType = this.model.get('coupon_type'),
-                    voucherType = this.model.get('voucher_type'),
-                    formGroup = function (sel) {
-                        return this.$el.find(sel).closest('.form-group');
-                    }.bind(this);
+            formGroup: function (el) {
+                return this.$el.find(el).closest('.form-group');
+            },
 
-                if (couponType === 'Discount code') {
-                    formGroup('[name=benefit_value]').removeClass(hiddenClass);
-                } else {
-                    // enrollment
-                    formGroup('[name=benefit_value]').addClass(hiddenClass);
+            emptyCodeField: function () {
+                this.model.set('code', '');
+            },
+
+            /**
+             * When creating a discount show the DISCOUNT VALUE and CODE field for both
+             * - Can be used once by one customer
+             * - Can be used once by multiple customers
+             */
+            toggleCouponTypeField: function () {
+                if (!this.editing) {
+                    this.emptyCodeField();
                 }
-
-                // When creating a discount show the CODE field for both (they are both multi-use)
-                //     - Multiple times by multiple customers
-                //     - Once per customer
-                if (couponType === 'Discount code' && voucherType !== 'Single use') {
-                    formGroup('[name=code]').removeClass(hiddenClass);
+                if (this.model.get('coupon_type') === 'Discount code') {
+                    this.formGroup('[name=benefit_value]').removeClass(this.hiddenClass);
+                    if (parseInt(this.model.get('quantity')) === 1) {
+                        this.formGroup('[name=code]').removeClass(this.hiddenClass);
+                    }
+                    if (this.model.get('voucher_type') !== 'Single use') {
+                        this.formGroup('[name=code]').removeClass(this.hiddenClass);
+                    }
                 } else {
-                    formGroup('[name=code]').addClass(hiddenClass);
+                    this.formGroup('[name=benefit_value]').addClass(this.hiddenClass);
+                    this.formGroup('[name=code]').addClass(this.hiddenClass);
                 }
+            },
 
+            toggleVoucherTypeField: function () {
+                var voucherType = this.model.get('voucher_type');
+                if (!this.editing) {
+                    this.emptyCodeField();
+                }
                 // When creating a Once by multiple customers code show the usage number field.
                 if (voucherType !== 'Single use') {
-                    formGroup('[name=max_uses]').removeClass(hiddenClass);
+                    if (this.model.get('coupon_type') === 'Discount code') {
+                        this.formGroup('[name=code]').removeClass(this.hiddenClass);
+                    }
+                    this.formGroup('[name=max_uses]').removeClass(this.hiddenClass);
                 } else {
-                    formGroup('[name=max_uses]').addClass(hiddenClass);
+                    this.formGroup('[name=max_uses]').addClass(this.hiddenClass);
                 }
 
                 // The only time we allow for a generation of multiple codes is
                 // when they are of type single use.
                 if (voucherType === 'Single use') {
-                    formGroup('[name=quantity]').removeClass(hiddenClass);
+                    this.formGroup('[name=quantity]').removeClass(this.hiddenClass);
                 } else {
-                    formGroup('[name=quantity]').addClass(hiddenClass);
+                    this.formGroup('[name=quantity]').addClass(this.hiddenClass);
+                }
+            },
+
+            /**
+             * When Discount code selected, code entered and Single use selected hide quantity field
+             * Show field when code empty and Single use selected
+             */
+            toggleCodeField: function () {
+                var voucherType = this.model.get('voucher_type');
+                if (this.model.get('coupon_type') === 'Discount code') {
+                    if (this.model.get('code') !== '' && voucherType === 'Single use') {
+                        this.formGroup('[name=quantity]').addClass(this.hiddenClass);
+                    } else if (voucherType === 'Single use') {
+                        this.formGroup('[name=quantity]').removeClass(this.hiddenClass);
+                    }
+                }
+            },
+
+            /**
+             * When Discount code selected, Single use selected and
+             * quantity greater than 1 hide code field
+             */
+            toggleQuantityField: function () {
+                var voucherType = this.model.get('voucher_type');
+                if (this.model.get('coupon_type') === 'Discount code') {
+                    if (parseInt(this.model.get('quantity')) !== 1 && voucherType === 'Single use') {
+                        this.formGroup('[name=code]').addClass(this.hiddenClass);
+                    } else if (voucherType === 'Single use') {
+                        this.formGroup('[name=code]').removeClass(this.hiddenClass);
+                    }
                 }
             },
 
@@ -316,7 +364,10 @@ define([
                 if (this.editing) {
                     this.$el.find('select[name=category]').val(this.model.get('categories')[0].id).trigger('change');
                     this.disableNonEditableFields();
-                    this.toggleFields();
+                    this.toggleCouponTypeField();
+                    this.toggleVoucherTypeField();
+                    this.toggleCodeField();
+                    this.toggleQuantityField();
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
                     this.fillFromCourse();
                 } else {
