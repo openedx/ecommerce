@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import json
 
 import ddt
 from django.conf import settings
@@ -99,7 +98,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         """
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
-        self.mock_footer_api_response()
         self.mock_course_api_response(course=self.course)
         url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,
                                                     code=COUPON_CODE)
@@ -164,7 +162,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
         """ Verify a connection error and timeout are logged when they happen. """
-        self.mock_footer_api_response()
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
         self.assertEqual(basket.lines.count(), 1)
@@ -190,7 +187,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.create_basket_and_add_product(enrollment_code)
         self.mock_course_api_response(course)
-        self.mock_footer_api_response()
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         line_data = response.context['formset_lines_data'][0][1]
@@ -210,7 +206,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
         self.assertEqual(basket.lines.count(), 1)
         self.mock_course_api_response(self.course)
-        self.mock_footer_api_response()
 
         benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
 
@@ -223,7 +218,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(line_data['course_name'], self.course.name)
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
-        self.assertEqual(json.loads(response.context['footer']), {'footer': 'edX Footer'})
 
     def test_no_basket_response(self):
         """ Verify there are no form and line data in the context for a non-existing basket. """
@@ -253,7 +247,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         basket = self.create_basket_and_add_product(seat)
         self.assertEqual(basket.lines.count(), 1)
         self.mock_course_api_response(self.course)
-        self.mock_footer_api_response()
 
         cache_key = 'courses_api_detail_{}'.format(self.course.id)
         cache_hash = hashlib.md5(cache_key).hexdigest()

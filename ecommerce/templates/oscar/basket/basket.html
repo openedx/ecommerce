@@ -29,12 +29,3 @@
         </script>
     {% endif %}
 {% endblock content %}
-
-
-{% block footer %}
-    {% if footer %}
-        {% autoescape off %}
-            {{ footer }}
-        {% endautoescape %}
-    {% endif %}
-{% endblock footer %}
