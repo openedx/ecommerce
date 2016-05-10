@@ -6,6 +6,8 @@ from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
 from threadlocals.threadlocals import get_current_request
 
+from ecommerce.referrals.models import Referral
+
 logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
@@ -99,4 +101,14 @@ class OrderCreator(OscarOrderCreator):
             order_data.update(extra_order_fields)
         order = Order(**order_data)
         order.save()
+
+        try:
+            referral = Referral.objects.get(basket=basket)
+            referral.order = order
+            referral.save()
+        except Referral.DoesNotExist:
+            logger.debug('Order [%d] has no referral associated with its basket.', order.id)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Referral for Order [%d] failed to save.', order.id)
+
         return order

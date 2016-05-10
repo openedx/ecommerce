@@ -263,6 +263,7 @@ LOCAL_APPS = [
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',
+    'ecommerce.referrals',
 
     # Theming app for customizing visual and behavioral attributes of a site
     'ecommerce.theming',
@@ -526,7 +527,9 @@ EDX_DRF_EXTENSIONS = {
     'JWT_PAYLOAD_USER_ATTRIBUTES': ('full_name', 'email', 'tracking_context',),
 }
 
-
 # Enrollment codes voucher end datetime used for setting the end dates for vouchers
 # created for the Enrollment code products.
 ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(weeks=520)
+
+# Affiliate cookie key
+AFFILIATE_COOKIE_KEY = 'affiliate_id'

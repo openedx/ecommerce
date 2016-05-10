@@ -7,6 +7,7 @@ from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -21,6 +22,7 @@ class BasketUtilsTests(TestCase):
     def setUp(self):
         super(BasketUtilsTests, self).setUp()
         self.request = RequestFactory()
+        self.request.COOKIES = {}
         self.request.user = self.create_user()
         site_configuration = SiteConfigurationFactory(partner__name='Tester')
         self.request.site = site_configuration.site
@@ -81,6 +83,34 @@ class BasketUtilsTests(TestCase):
         self.assertEqual(basket.lines.count(), 1)
         self.assertEqual(basket.lines.first().product, product2)
         self.assertEqual(basket.product_quantity(product2), 1)
+
+    def test_prepare_basket_affiliate_cookie_lifecycle(self):
+        """ Verify a basket is returned and referral captured. """
+        product = ProductFactory()
+        affiliate_id = 'test_affiliate'
+        self.request.COOKIES['affiliate_id'] = affiliate_id
+        basket = prepare_basket(self.request, product)
+
+        # test affiliate id from cookie saved in referral
+        referral = Referral.objects.get(basket_id=basket.id)
+        self.assertEqual(referral.affiliate_id, affiliate_id)
+
+        # update cookie
+        new_affiliate_id = 'new_affiliate'
+        self.request.COOKIES['affiliate_id'] = new_affiliate_id
+        basket = prepare_basket(self.request, product)
+
+        # test new affiliate id saved
+        referral = Referral.objects.get(basket_id=basket.id)
+        self.assertEqual(referral.affiliate_id, new_affiliate_id)
+
+        # expire cookie
+        del self.request.COOKIES['affiliate_id']
+        basket = prepare_basket(self.request, product)
+
+        # test referral record is deleted when no cookie set
+        with self.assertRaises(Referral.DoesNotExist):
+            Referral.objects.get(basket_id=basket.id)
 
     @ddt.data(
         ('honor', 'Honor'),

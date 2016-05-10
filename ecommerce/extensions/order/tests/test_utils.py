@@ -1,14 +1,19 @@
 """Test Order Utility classes """
+import logging
 import mock
 
 from django.test.client import RequestFactory
 from oscar.core.loading import get_class
 from oscar.test.factories import create_basket as oscar_create_basket
 from oscar.test.newfactories import BasketFactory
+from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import SiteConfigurationFactory, PartnerFactory
 from ecommerce.tests.testcases import TestCase
+
+LOGGER_NAME = 'ecommerce.extensions.order.utils'
 
 Country = get_class('address.models', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
@@ -92,6 +97,10 @@ class OrderCreatorTests(TestCase):
         basket.save()
         return basket
 
+    def create_referral(self, basket, affiliate_id):
+        """ Returns a new Referral associated with the specified basket. """
+        return Referral.objects.create(basket=basket, affiliate_id=affiliate_id)
+
     def test_create_order_model_default_site(self):
         """
         Verify the create_order_model method associates the order with the default site
@@ -116,3 +125,45 @@ class OrderCreatorTests(TestCase):
         # Ensure the order has the non-default site
         order = self.create_order_model(basket)
         self.assertEqual(order.site, site)
+
+    def test_create_order_model_basket_referral(self):
+        """ Verify the create_order_model method associates the order with the basket's site. """
+        affiliate_id = 'test affiliate'
+
+        # Create the basket and associated referral
+        basket = self.create_basket(None)
+        self.create_referral(basket, affiliate_id)
+
+        # Ensure the referral is now associated with the order and has the correct affiliate id
+        order = self.create_order_model(basket)
+        referral = Referral.objects.get(order_id=order.id)
+        self.assertEqual(referral.affiliate_id, affiliate_id)
+
+    def test_create_order_model_basket_no_referral(self):
+        """ Verify the create_order_model method logs error if no referral."""
+        # Create a site config to clean up log messages
+        site_configuration = SiteConfigurationFactory(site__domain='star.fake', partner__name='star')
+        site = site_configuration.site
+        # Create the basket WITHOUT an associated referral
+        basket = self.create_basket(site)
+
+        with LogCapture(LOGGER_NAME, level=logging.DEBUG) as l:
+            order = self.create_order_model(basket)
+            message = 'Order [{order_id}] has no referral associated with its basket.'.format(order_id=order.id)
+            l.check((LOGGER_NAME, 'DEBUG', message))
+
+    def test_create_order_model_basket_referral_error(self):
+        """ Verify the create_order_model method logs error for referral errors. """
+        # Create a site config to clean up log messages
+        site_configuration = SiteConfigurationFactory(site__domain='star.fake', partner__name='star')
+        site = site_configuration.site
+        # Create the basket WITHOUT an associated referral
+        basket = self.create_basket(site)
+
+        with LogCapture(LOGGER_NAME, level=logging.ERROR) as l:
+            Referral.objects.get = mock.Mock()
+            Referral.objects.get.side_effect = Exception
+
+            order = self.create_order_model(basket)
+            message = 'Referral for Order [{order_id}] failed to save.'.format(order_id=order.id)
+            l.check((LOGGER_NAME, 'ERROR', message))
