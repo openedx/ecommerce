@@ -96,10 +96,11 @@ def voucher_is_valid(voucher, product, request):
     if not purchase_info.availability.is_available_to_buy:
         return False, _('Product [{product}] not available for purchase.'.format(product=product))
 
-    # If the voucher's number of applications exceeds it's limit.
-    offer = voucher.offers.first()
-    if offer.get_max_applications(request.user) == 0:
-        return False, _('This coupon code is no longer available.')
+    if voucher.usage != Voucher.SINGLE_USE:
+        # If the voucher's number of applications exceeds it's limit.
+        offer = voucher.offers.first()
+        if offer.get_max_applications(request.user) == 0:
+            return False, _('This coupon code is no longer available.')
 
     return True, ''
 
