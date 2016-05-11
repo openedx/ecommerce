@@ -4,7 +4,10 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 from decimal import Decimal
 
 from mock import Mock, patch
+from django.core import mail
+from django.test import RequestFactory
 from oscar.core.loading import get_model
+from oscar.test import factories
 from oscar.test.newfactories import BasketFactory, ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
@@ -14,6 +17,7 @@ from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -201,3 +205,41 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
 
         with self.assertRaises(BasketNotFreeError):
             EdxOrderPlacementMixin().place_free_order(basket)
+
+    def test_send_confirmation_message(self, __):
+        """
+        Verify the send confirmation message override functions as expected
+        """
+        request = RequestFactory()
+        user = self.create_user()
+        user.email = 'test_user@example.com'
+        request.user = user
+        site_from_email = 'from@example.com'
+        site_configuration = SiteConfigurationFactory(partner__name='Tester', from_email=site_from_email)
+        request.site = site_configuration.site
+        order = factories.create_order()
+        order.user = user
+        mixin = EdxOrderPlacementMixin()
+        mixin.request = request
+
+        # Happy path
+        mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
+        self.assertEqual(mail.outbox[0].from_email, site_from_email)
+        mail.outbox = []
+
+        # Invalid code path (graceful exit)
+        mixin.send_confirmation_message(order, 'INVALID_CODE', request.site)
+        self.assertEqual(len(mail.outbox), 0)
+
+        # Invalid messages container path (graceful exit)
+        with patch('ecommerce.extensions.checkout.mixins.CommunicationEventType.objects.get') as mock_get:
+            mock_event_type = Mock()
+            mock_event_type.get_messages.return_value = {}
+            mock_get.return_value = mock_event_type
+            mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
+            self.assertEqual(len(mail.outbox), 0)
+
+            mock_event_type.get_messages.return_value = {'body': None}
+            mock_get.return_value = mock_event_type
+            mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
+            self.assertEqual(len(mail.outbox), 0)

@@ -12,7 +12,8 @@ Partner = get_model('partner', 'Partner')
 
 @ddt
 class CreateOrUpdateSiteCommandTests(TestCase):
-    command = 'create_or_update_site'
+
+    command_name = 'create_or_update_site'
 
     def setUp(self):
         super(CreateOrUpdateSiteCommandTests, self).setUp()
@@ -24,6 +25,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.client_id = 'ecommerce-key'
         self.client_secret = 'ecommerce-secret'
         self.segment_key = 'test-segment-key'
+        self.from_email = 'site_from_email@example.com'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -35,20 +37,53 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'], self.client_id)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
         self.assertEqual(site_configuration.segment_key, self.segment_key)
+        self.assertEqual(site_configuration.from_email, self.from_email)
+
+    def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
+                      site_id=None, site_name=None, partner_name=None, theme_scss_path=None,
+                      payment_processors=None, segment_key=None):
+        """
+        Internal helper method for interacting with the create_or_update_site management command
+        """
+        # Required arguments
+        command_args = [
+            '--site-domain={site_domain}'.format(site_domain=site_domain),
+            '--partner-code={partner_code}'.format(partner_code=partner_code),
+            '--lms-url-root={lms_url_root}'.format(lms_url_root=lms_url_root),
+            '--client-id={client_id}'.format(client_id=client_id),
+            '--client-secret={client_secret}'.format(client_secret=client_secret),
+            '--from-email={from_email}'.format(from_email=from_email)
+        ]
+
+        # Optional arguments
+        if site_id:
+            command_args.append('--site-id={site_id}'.format(site_id=site_id))
+        if site_name:
+            command_args.append('--site-name={site_name}'.format(site_name=site_name))
+        if partner_name:
+            command_args.append('--partner-name={partner_name}'.format(partner_name=partner_name))
+        if theme_scss_path:
+            command_args.append('--theme-scss-path={theme_scss_path}'.format(theme_scss_path=theme_scss_path))
+        if payment_processors:
+            command_args.append('--payment-processors={payment_processors}'.format(payment_processors=payment_processors))  # pylint: disable=line-too-long
+        if segment_key:
+            command_args.append('--segment-key={segment_key}'.format(segment_key=segment_key))
+        call_command(self.command_name, *command_args)
 
     def test_create_site(self):
         """ Verify the command creates Site, Partner, and SiteConfiguration. """
         site_domain = 'ecommerce-fake1.server'
-        call_command(
-            self.command,
-            '--site-domain={domain}'.format(domain=site_domain),
-            '--partner-code={partner}'.format(partner=self.partner),
-            '--lms-url-root={lms_url_root}'.format(lms_url_root=self.lms_url_root),
-            '--theme-scss-path={theme_scss_path}'.format(theme_scss_path=self.theme_scss_path),
-            '--payment-processors={payment_processors}'.format(payment_processors=self.payment_processors),
-            '--client-id={client_id}'.format(client_id=self.client_id),
-            '--client-secret={client_secret}'.format(client_secret=self.client_secret),
-            '--segment-key={segment_key}'.format(segment_key=self.segment_key)
+
+        self._call_command(
+            site_domain=site_domain,
+            partner_code=self.partner,
+            lms_url_root=self.lms_url_root,
+            theme_scss_path=self.theme_scss_path,
+            payment_processors=self.payment_processors,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            segment_key=self.segment_key,
+            from_email=self.from_email
         )
 
         site = Site.objects.get(domain=site_domain)
@@ -62,18 +97,19 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         updated_site_domain = 'ecommerce-fake3.server'
         updated_site_name = 'Fake Ecommerce Server'
         site = Site.objects.create(domain=site_domain)
-        call_command(
-            self.command,
-            '--site-id={site_id}'.format(site_id=site.id),
-            '--site-domain={domain}'.format(domain=updated_site_domain),
-            '--site-name={site_name}'.format(site_name=updated_site_name),
-            '--partner-code={partner}'.format(partner=self.partner),
-            '--lms-url-root={lms_url_root}'.format(lms_url_root=self.lms_url_root),
-            '--theme-scss-path={theme_scss_path}'.format(theme_scss_path=self.theme_scss_path),
-            '--payment-processors={payment_processors}'.format(payment_processors=self.payment_processors),
-            '--client-id={client_id}'.format(client_id=self.client_id),
-            '--client-secret={client_secret}'.format(client_secret=self.client_secret),
-            '--segment-key={segment_key}'.format(segment_key=self.segment_key)
+
+        self._call_command(
+            site_id=site.id,
+            site_domain=updated_site_domain,
+            site_name=updated_site_name,
+            partner_code=self.partner,
+            lms_url_root=self.lms_url_root,
+            theme_scss_path=self.theme_scss_path,
+            payment_processors=self.payment_processors,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            segment_key=self.segment_key,
+            from_email=self.from_email
         )
 
         site = Site.objects.get(id=site.id)
@@ -85,14 +121,17 @@ class CreateOrUpdateSiteCommandTests(TestCase):
 
     @data(
         ['--site-id=1'],
-        ['--site-id=1', '--site-domain=fake.server'],
-        ['--site-id=1', '--site-domain=fake.server', '--partner-code=fake_partner'],
-        ['--site-id=1', '--site-domain=fake.server', '--partner-code=fake_partner',
-         '--lms-url-root=http://fake.server'],
-        ['--site-id=1', '--site-domain=fake.server', '--partner-code=fake_partner',
-         '--lms-url-root=http://fake.server', '--client-id=fake'],
+        ['--site-id=1', '--site-name=fake.server'],
+        ['--site-id=1', '--site-name=fake.server', '--partner-name=fake_partner'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc']
     )
-    def test_missing_arguments(self, arguments):
+    def test_missing_arguments(self, command_args):
         """ Verify CommandError is raised when required arguments are missing """
         with self.assertRaises(CommandError):
-            call_command(self.command, *arguments)
+            call_command(self.command_name, *command_args)

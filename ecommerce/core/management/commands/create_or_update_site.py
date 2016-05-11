@@ -82,6 +82,12 @@ class Command(BaseCommand):
                             type=str,
                             required=False,
                             help='segment key')
+        parser.add_argument('--from-email',
+                            action='store',
+                            dest='from_email',
+                            type=str,
+                            required=True,
+                            help='from email')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -93,6 +99,7 @@ class Command(BaseCommand):
         client_id = options.get('client_id')
         client_secret = options.get('client_secret')
         segment_key = options.get('segment_key')
+        from_email = options.get('from_email')
 
         try:
             site = Site.objects.get(id=site_id)
@@ -121,6 +128,7 @@ class Command(BaseCommand):
                 'theme_scss_path': options['theme_scss_path'],
                 'payment_processors': options['payment_processors'],
                 'segment_key': segment_key,
+                'from_email': from_email,
                 'oauth_settings': {
                     'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),
                     'SOCIAL_AUTH_EDX_OIDC_KEY': client_id,

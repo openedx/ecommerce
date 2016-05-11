@@ -27,6 +27,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.basket',
     'ecommerce.extensions.catalogue',
     'ecommerce.extensions.checkout',
+    'ecommerce.extensions.customer',
     'ecommerce.extensions.dashboard',
     'ecommerce.extensions.dashboard.orders',
     'ecommerce.extensions.dashboard.users',
@@ -261,3 +262,5 @@ ENROLLMENT_FULFILLMENT_TIMEOUT = 7
 VOUCHER_CODE_LENGTH = 16
 
 THUMBNAIL_DEBUG = False
+
+OSCAR_FROM_EMAIL = 'testing@example.com'

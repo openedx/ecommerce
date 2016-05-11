@@ -2,7 +2,6 @@ import logging
 
 from oscar.core.loading import get_model, get_class
 from premailer import transform
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.extensions.analytics.utils import parse_tracking_context
 
@@ -12,7 +11,7 @@ CommunicationEventType = get_model('customer', 'CommunicationEventType')
 Dispatcher = get_class('customer.utils', 'Dispatcher')
 
 
-def send_notification(user, commtype_code, context):
+def send_notification(user, commtype_code, context, site):
     """Send different notification mail to the user based on the triggering event.
 
     Args:
@@ -29,7 +28,7 @@ def send_notification(user, commtype_code, context):
     full_name = user.get_full_name()
     context.update({
         'full_name': full_name,
-        'platform_name': get_current_request().site.name,
+        'platform_name': site.name,
         'tracking_pixel': tracking_pixel,
     })
 
@@ -47,4 +46,4 @@ def send_notification(user, commtype_code, context):
 
     if messages and (messages['body'] or messages['html']):
         messages['html'] = transform(messages['html'])
-        Dispatcher().dispatch_user_messages(user, messages)
+        Dispatcher().dispatch_user_messages(user, messages, site)
