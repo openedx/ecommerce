@@ -258,4 +258,3 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
 
         # Check if response wasn't saved
         self.assertEqual(PaymentProcessorResponse.objects.count(), 0)
-
