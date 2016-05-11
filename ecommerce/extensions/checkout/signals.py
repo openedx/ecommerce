@@ -81,7 +81,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                         'CREDIT_RECEIPT',
                         {
                             'course_title': product.title,
-                            'receipt_page_url': get_lms_url(
+                            'receipt_url': get_lms_url(
                                 '{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
                             ),
                             'credit_hours': product.attr.credit_hours,

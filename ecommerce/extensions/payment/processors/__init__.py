@@ -8,6 +8,7 @@ from threadlocals.threadlocals import get_current_request
 import waffle
 
 from ecommerce.core.exceptions import MissingRequestError
+from ecommerce.core.url_utils import get_lms_url
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -36,6 +37,18 @@ class BasePaymentProcessor(object):  # pragma: no cover
                 hosted payment page.
         """
         raise NotImplementedError
+
+    @property
+    def receipt_url(self):
+        return get_lms_url(self.configuration['receipt_path'])
+
+    @property
+    def cancel_url(self):
+        return get_lms_url(self.configuration['cancel_path'])
+
+    @property
+    def error_url(self):
+        return get_lms_url(self.configuration['error_path'])
 
     @property
     def payment_label(self):

@@ -65,18 +65,6 @@ class Paypal(BasePaymentProcessor):
             'client_secret': self.configuration['client_secret']
         })
 
-    @property
-    def receipt_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
-
-    @property
-    def cancel_url(self):
-        return get_lms_url(self.configuration['cancel_path'])
-
-    @property
-    def error_url(self):
-        return get_lms_url(self.configuration['error_path'])
-
     def get_transaction_parameters(self, basket, request=None):
         """
         Create a new PayPal payment.

@@ -45,10 +45,7 @@ class StripeProcessor(BasePaymentProcessor):
             configuration = self.configuration
             self.publishable_key = configuration['publishable_key']
             self.secret_key = configuration['secret_key']
-            self.receipt_page_url = configuration['receipt_url']
-            self.error_page_url = configuration['error_url']
             self.image_url = configuration['image_url']
-            self.ecommerce_url_root = settings.ECOMMERCE_URL_ROOT
         except KeyError as e:
             raise ImproperlyConfigured(
                 "Missing key '{}' for stripe processor ".format(e.message)

@@ -642,7 +642,7 @@ class StripeCheckoutTest(TestCase):
         self.assertTrue(self.payment_event.pk is not None)
 
         self.assertTrue(response.status_code, 302)
-        self.assertTrue(response['Location'], StripeProcessor().receipt_page_url)
+        self.assertTrue(response['Location'], StripeProcessor().receipt_url)
 
     def test_invalid_basket_id(self):
         self._login_user()
@@ -664,7 +664,7 @@ class StripeCheckoutTest(TestCase):
         self.assertTrue(self.payment_event.pk is None)
 
         self.assertTrue(response.status_code, 302)
-        self.assertTrue(response['Location'], StripeProcessor().error_page_url)
+        self.assertTrue(response['Location'], StripeProcessor().error_url)
 
     def test_not_logged_user(self):
         handle_payment_response = self.payment_source, self.payment_event
@@ -692,7 +692,7 @@ class StripeCheckoutTest(TestCase):
                 response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
 
         self.assertTrue(response.status_code, 302)
-        self.assertTrue(response['Location'], StripeProcessor().error_page_url)
+        self.assertTrue(response['Location'], StripeProcessor().error_url)
         log_capture.check(
             (
                 logger_name,
@@ -712,7 +712,7 @@ class StripeCheckoutTest(TestCase):
                 response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
 
         self.assertTrue(response.status_code, 302)
-        self.assertTrue(response['Location'], StripeProcessor().error_page_url)
+        self.assertTrue(response['Location'], StripeProcessor().error_url)
 
         log_capture.check(
             (

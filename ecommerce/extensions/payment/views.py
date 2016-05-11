@@ -362,7 +362,7 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
         basket = self.locate_basket()
 
         if basket is None:
-            return HttpResponseRedirect(self.payment_processor.error_page_url)
+            return HttpResponseRedirect(self.payment_processor.error_url)
 
         try:
             with transaction.atomic():
@@ -372,11 +372,11 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
                     # This can happen (e.g. when card is refused) log the exception details,
                     # but this is "normal"
                     logger.info('Payment error for basket [%d] failed.', basket.id, exc_info=True)
-                    return HttpResponseRedirect(self.payment_processor.error_page_url)
+                    return HttpResponseRedirect(self.payment_processor.error_url)
         except Exception:  # pylint: disable=broad-except
             # This is an error that should be investigated
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-            return HttpResponseRedirect(self.payment_processor.error_page_url)
+            return HttpResponseRedirect(self.payment_processor.error_url)
 
         # Create the order in our system
         try:
@@ -403,7 +403,7 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
             # admins with clear message.
             raise
 
-        receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_page_url, basket.id)
+        receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_url, basket.id)
         return redirect(receipt_url)
 
 
