@@ -93,8 +93,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             note = request.data.get('note', None)
             max_uses = request.data.get('max_uses', None)
 
-            if max_uses:
+            # Maximum number of uses can be set for each voucher type and disturb
+            # the predefined behaviours of the different voucher types. Therefor
+            # here we enforce that the max_uses variable is used only for
+            # ONCE_PER_CUSTOMER types
+            if max_uses and voucher_type == Voucher.ONCE_PER_CUSTOMER:
                 max_uses = int(max_uses)
+            else:
+                max_uses = None
 
             # We currently do not support multi-use voucher types.
             if voucher_type == Voucher.MULTI_USE:

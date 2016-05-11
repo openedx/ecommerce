@@ -39,6 +39,7 @@ Voucher = get_model('voucher', 'Voucher')
 COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
+@ddt.ddt
 class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     """Unit tests for creating coupon order."""
 
@@ -74,15 +75,22 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         site.siteconfiguration = site_configuration
         return site
 
-    def test_create(self):
+    @ddt.data(
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2),
+        (Voucher.SINGLE_USE, 2, None)
+    )
+    @ddt.unpack
+    def test_create(self, voucher_type, max_uses, expected_max_uses):
         """Test the create method."""
+        title = 'Test coupon'
         self.coupon_data.update({
-            'title': 'Test coupon',
+            'title': title,
             'client_username': 'Client',
             'stock_record_ids': [1],
-            'voucher_type': Voucher.SINGLE_USE,
+            'voucher_type': voucher_type,
             'price': 100,
-            'category_ids': [self.category.id]
+            'category_ids': [self.category.id],
+            'max_uses': max_uses,
         })
         request = RequestFactory()
         request.user = self.user
@@ -95,6 +103,12 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertDictEqual(
             response.data,
             {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 3}
+        )
+
+        coupon = Product.objects.get(title=title)
+        self.assertEqual(
+            coupon.attr.coupon_vouchers.vouchers.first().offers.first().max_global_applications,
+            expected_max_uses
         )
 
     def test_create_coupon_product(self):
