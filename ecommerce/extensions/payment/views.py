@@ -408,9 +408,11 @@ class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
 
 
 class StripeCheckoutView(CheckoutViewMixin, View):
-    payment_processor = StripeProcessor()
-
     pk_url_kwarg = 'basket'
+
+    @property
+    def payment_processor(self):
+        return StripeProcessor()
 
     def locate_basket(self):
 

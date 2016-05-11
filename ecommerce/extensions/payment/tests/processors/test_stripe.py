@@ -10,7 +10,7 @@ from oscar.core.loading import get_model
 from oscar.apps.checkout.views import PaymentError
 from oscar.apps.payment.exceptions import GatewayError
 from ecommerce.extensions.payment.processors.stripe import StripeProcessor
-from ecommerce.extensions.payment.tests.mixins import PaymentProcessorTestCaseMixin
+from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
 
 PaymentEventType = get_model('order', 'PaymentEventType')

@@ -11,6 +11,7 @@ from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 from oscar.apps.checkout.views import PaymentError
 from oscar.apps.payment.exceptions import GatewayError
+from threadlocals.threadlocals import get_current_request
 
 from oscar.core.loading import get_model
 import stripe
@@ -91,7 +92,7 @@ class StripeProcessor(BasePaymentProcessor):
     def get_description(self, basket):
         return _("Payment for order {order_sku} for {platform_name}").format(
             order_sku=basket.order_number,
-            platform_name=settings.PLATFORM_NAME
+            platform_name=get_current_request().site.name,
         )
 
     def handle_processor_response(self, response, basket=None):

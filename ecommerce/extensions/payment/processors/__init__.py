@@ -104,15 +104,12 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         request = get_current_request()
         if request:
-            partner_short_code = request.site.siteconfiguration.partner.short_code.lower()
-        else:
-            raise MissingRequestError
-        try:
-            config = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code][self.NAME.lower()]
-        except KeyError:
-            raise ImproperlyConfigured("No configuration for {} {} processor".format(partner_short_code, self.NAME.lower()))
-        return config
-
+            partner_short_code = request.site.siteconfiguration.partner.short_code
+            try:
+                return settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.NAME.lower()]
+            except KeyError:
+                raise ImproperlyConfigured("No configuration for {} processor".format(self.NAME.lower()))
+        raise MissingRequestError
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """

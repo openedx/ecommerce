@@ -105,7 +105,7 @@ class BasketSummaryView(BasketView):
             'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': processors,
             'payment_processor_scripts': [
-                processor.get_basket_page_script(self.request.basket, self.request.user)
+                processor().get_basket_page_script(self.request.basket, self.request.user)
                 for processor in processors
             ],
             'homepage_url': get_lms_url(''),
