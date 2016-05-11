@@ -7,6 +7,7 @@ import uuid
 from decimal import Decimal
 
 from django.conf import settings
+from django.utils.translation import ugettext as _
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 from suds.client import Client
@@ -70,6 +71,9 @@ class Cybersource(BasePaymentProcessor):
     @property
     def cancel_page_url(self):
         return get_lms_url(self.configuration['cancel_path'])
+
+    def payment_label(self):
+        return _("Checkout")
 
     def get_transaction_parameters(self, basket, request=None):
         """

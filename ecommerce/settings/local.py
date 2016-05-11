@@ -103,6 +103,14 @@ PAYMENT_PROCESSOR_CONFIG = {
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
     },
+    'stripe': {
+        'publishable_key': 'fake',
+        'secret_key': 'fake',
+        'receipt_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
+        'image_url': '/static/images/default-theme/logo.png',
+        'cancel_url': get_lms_url('/commerce/checkout/cancel/'),
+        'error_url': get_lms_url('/commerce/checkout/error/'),
+    },
 }
 # END PAYMENT PROCESSING
 
