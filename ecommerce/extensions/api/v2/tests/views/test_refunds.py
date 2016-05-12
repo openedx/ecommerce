@@ -95,13 +95,13 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         self.assert_ok_response(response)
 
     @httpretty.activate
-    def test_oauth_authentication(self):
-        """ Client can authenticate with OAuth. """
+    def test_oauth2_authentication(self):
+        """Verify clients can authenticate with OAuth 2.0."""
         self.client.logout()
 
         data = self._get_data(self.user.username, self.course_id)
         auth_header = 'Bearer ' + self.DEFAULT_TOKEN
-        self._mock_access_token_response(username=self.user.username)
+        self.mock_user_info_response(username=self.user.username)
 
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
         self.assert_ok_response(response)

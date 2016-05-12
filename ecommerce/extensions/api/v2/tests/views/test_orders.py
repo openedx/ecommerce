@@ -42,11 +42,11 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['results'], [])
 
     @httpretty.activate
-    def test_access_token(self):
-        """ Verifies that the view accepts OAuth2 access tokens for authentication."""
+    def test_oauth2_authentication(self):
+        """Verify clients can authenticate with OAuth 2.0."""
         auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
 
-        self._mock_access_token_response(username=self.user.username)
+        self.mock_user_info_response(username=self.user.username)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
         self.assert_empty_result_response(response)
 
