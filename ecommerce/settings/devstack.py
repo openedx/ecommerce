@@ -42,9 +42,24 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
+        'stripe': {
+            'publishable_key': 'fake',
+            'secret_key': 'fake',
+            'image_url': '/static/images/default-theme/logo.png',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        },
     },
 }
 # END PAYMENT PROCESSING
+
+# OIDC CLIENT
+SOCIAL_AUTH_EDX_OIDC_KEY='ecommerce-key'
+SOCIAL_AUTH_EDX_OIDC_SECRET='ecommerce-secret'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT='http://localhost:8000'
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY=''
+# END OIDC CLIENT
 
 # Load private settings
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):

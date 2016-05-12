@@ -87,6 +87,14 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
+        'stripe': {
+            'publishable_key': 'fake',
+            'secret_key': 'fake',
+            'image_url': '/static/images/default-theme/logo.png',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        },
         'invoice': {}
     },
     'other': {
@@ -106,6 +114,14 @@ PAYMENT_PROCESSOR_CONFIG = {
             'mode': 'sandbox',
             'client_id': 'pther-fake-client-id',
             'client_secret': 'pther-fake-client-secret',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        },
+        'stripe': {
+            'publishable_key': 'fake',
+            'secret_key': 'fake',
+            'image_url': '/static/images/default-theme/logo.png',
             'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
             'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,

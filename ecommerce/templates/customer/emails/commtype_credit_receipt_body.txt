@@ -10,7 +10,7 @@
 {% blocktrans %}To explore other credit-eligible courses, visit the {{platform_name}} website. We add new courses frequently!{% endblocktrans %}
 
 {% trans "To view your payment information, visit the following website." %}
-{{receipt_page_url}}
+{{receipt_url}}
 
 {% trans "Thank you. We hope you enjoyed your course!" %}
 {% blocktrans %}The {{platform_name}} team{% endblocktrans %}

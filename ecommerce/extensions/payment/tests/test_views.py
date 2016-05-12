@@ -1,21 +1,26 @@
 """ Tests of the Payment Views. """
 import ddt
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from factory.django import mute_signals
+
 import mock
 from oscar.apps.order.exceptions import UnableToPlaceOrder
-from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
+from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined, GatewayError
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
+
 from testfixtures import LogCapture
+from ecommerce.extensions.order.constants import PaymentEventTypeName
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
+from ecommerce.extensions.payment.processors.stripe import StripeProcessor
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
-from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
+from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView, StripeCheckoutView
 from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.tests.testcases import TestCase
 
@@ -24,6 +29,7 @@ Order = get_model('order', 'Order')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
@@ -569,3 +575,172 @@ class PaypalProfileAdminViewTests(TestCase):
         mock_call_command.side_effect = Exception("oof")
         self.get_response(True, 500, {"action": "list"})
         self.assertTrue(mock_call_command.called)
+
+
+class StripeCheckoutTest(TestCase):
+    def setUp(self):
+        super(StripeCheckoutTest, self).setUp()
+
+        self.basket = factories.create_basket()
+        self.user = factories.UserFactory()
+        self.user.set_password('password')
+        self.user.save()
+        self.basket.owner = self.user
+        self.basket.freeze()
+
+        self.stripe_cc_token = "tok_stripeMockToken"
+        self.charge_id = "tx_stripeMockToken"
+
+        self.processor = Paypal()
+        self.processor_name = self.processor.NAME
+
+        self.url = reverse("stripe_checkout", kwargs={"basket": self.basket.pk})
+
+        source_type, __ = SourceType.objects.get_or_create(name='stripe')
+        total = self.basket.total_incl_tax
+
+        self.payment_source = Source(
+            source_type=source_type,
+            currency="usd",
+            amount_allocated=total,
+            amount_debited=total,
+            reference=self.charge_id,
+            label='Stripe',
+            card_type=None
+        )
+
+        event_type, __ = PaymentEventType.objects.get_or_create(
+            name=PaymentEventTypeName.PAID
+        )
+
+        self.payment_event = PaymentEvent(
+            event_type=event_type,
+            amount=total,
+            reference=self.charge_id,
+            processor_name='stripe'
+        )
+
+    def _login_user(self):
+        self.assertTrue(self.client.login(
+            username=self.user.username,
+            password='password'
+        ), "Couldn't login the client")
+
+    def test_successful_payment(self):
+        self._login_user()
+
+        handle_payment_response = self.payment_source, self.payment_event
+        with mock.patch.object(
+            StripeProcessor, 'handle_processor_response', return_value=handle_payment_response
+        ) as handle_payment:
+            response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
+
+        handle_payment.assert_called_once_with(self.stripe_cc_token, basket=self.basket)
+
+        # Check if payment_source and payment_event got saved to the db
+        self.assertTrue(self.payment_source.pk is not None)
+        self.assertTrue(self.payment_event.pk is not None)
+
+        self.assertTrue(response.status_code, 302)
+        self.assertTrue(response['Location'], StripeProcessor().receipt_url)
+
+    def test_invalid_basket_id(self):
+        self._login_user()
+
+        invalid_id = 9999
+        self.assertNotEqual(self.basket.pk, invalid_id)
+
+        self.url = reverse("stripe_checkout", kwargs={"basket": invalid_id})
+
+        handle_payment_response = self.payment_source, self.payment_event
+        with mock.patch.object(
+            StripeProcessor, 'handle_processor_response', return_value=handle_payment_response
+        ) as handle_payment:
+            response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
+
+        handle_payment.assert_not_called()
+
+        self.assertTrue(self.payment_source.pk is None)
+        self.assertTrue(self.payment_event.pk is None)
+
+        self.assertTrue(response.status_code, 302)
+        self.assertTrue(response['Location'], StripeProcessor().error_url)
+
+    def test_not_logged_user(self):
+        handle_payment_response = self.payment_source, self.payment_event
+        with mock.patch.object(
+            StripeProcessor, 'handle_processor_response', return_value=handle_payment_response
+        ) as handle_payment:
+            response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
+
+        handle_payment.assert_not_called()
+
+        self.assertTrue(self.payment_source.pk is None)
+        self.assertTrue(self.payment_event.pk is None)
+
+        self.assertTrue(response.status_code, 302)
+        self.assertTrue(response['Location'], settings.LOGIN_URL)
+
+    def test_payment_failed(self):
+        self._login_user()
+
+        with mock.patch.object(
+            StripeProcessor, 'handle_processor_response', side_effect=GatewayError
+        ):
+            logger_name = 'ecommerce.extensions.payment.views'
+            with LogCapture(logger_name) as log_capture:
+                response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
+
+        self.assertTrue(response.status_code, 302)
+        self.assertTrue(response['Location'], StripeProcessor().error_url)
+        log_capture.check(
+            (
+                logger_name,
+                'INFO',
+                'Payment error for basket [%d] failed.' % self.basket.id
+            )
+        )
+
+    def test_payment_threw_an_exception(self):
+        self._login_user()
+
+        with mock.patch.object(
+            StripeProcessor, 'handle_processor_response', side_effect=ValueError
+        ):
+            logger_name = 'ecommerce.extensions.payment.views'
+            with LogCapture(logger_name) as log_capture:
+                response = self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
+
+        self.assertTrue(response.status_code, 302)
+        self.assertTrue(response['Location'], StripeProcessor().error_url)
+
+        log_capture.check(
+            (
+                logger_name,
+                'ERROR',
+                'Attempts to handle payment for basket [%d] failed.' % self.basket.id
+            )
+        )
+
+    def test_order_placement_failure(self):
+        self._login_user()
+        handle_payment_response = self.payment_source, self.payment_event
+
+        # Need to patch both phases of payment handling
+        with mock.patch.object(
+            StripeProcessor, 'handle_processor_response', return_value=handle_payment_response
+        ), mock.patch.object(
+            StripeCheckoutView, 'handle_order_placement', side_effect=UnableToPlaceOrder
+        ):
+            logger_name = 'ecommerce.extensions.payment.views'
+            with LogCapture(logger_name) as log_capture:
+                with self.assertRaises(UnableToPlaceOrder):
+                    self.client.post(self.url, data={"stripeToken": self.stripe_cc_token})
+
+        log_capture.check(
+            (
+                logger_name,
+                'ERROR',
+                'Payment was executed, but an order was not created for basket [%d].' % self.basket.id
+            )
+        )

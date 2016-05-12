@@ -5,6 +5,7 @@ from urlparse import urljoin
 
 from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
+from django.utils.translation import ugettext as _
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 import paypalrestsdk
@@ -37,6 +38,11 @@ class Paypal(BasePaymentProcessor):
     NAME = u'paypal'
     DEFAULT_PROFILE_NAME = 'default'
 
+    @property
+    def payment_label(self):
+        # Translators: Do NOT translate the name PayPal.
+        return _("Checkout with PayPal")
+
     def __init__(self):
         """
         Constructs a new instance of the PayPal processor.
@@ -58,18 +64,6 @@ class Paypal(BasePaymentProcessor):
             'client_id': self.configuration['client_id'],
             'client_secret': self.configuration['client_secret']
         })
-
-    @property
-    def receipt_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
-
-    @property
-    def cancel_url(self):
-        return get_lms_url(self.configuration['cancel_path'])
-
-    @property
-    def error_url(self):
-        return get_lms_url(self.configuration['error_path'])
 
     def get_transaction_parameters(self, basket, request=None):
         """

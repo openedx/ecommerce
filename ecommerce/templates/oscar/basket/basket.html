@@ -10,7 +10,6 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
-
 {% block javascript %}
     <script src="{% static 'js/apps/basket_app.js' %}"></script>
 {% endblock %}
@@ -38,3 +37,14 @@
         {% endautoescape %}
     {% endif %}
 {% endblock footer %}
+
+{% block uncompressedjs %}
+     {% comment %} This is intentionally outside compressed blocks, the payment processor scripts
+       are included contitionally so compressing them in offline compression would
+       be messy and error-prone {% endcomment %}
+    {% for processor_script in payment_processor_scripts %}
+        {% if processor_script %}
+            {{ processor_script|safe }}
+        {% endif %}
+    {% endfor %}
+{% endblock uncompressedjs %}'

@@ -7,6 +7,7 @@ import uuid
 from decimal import Decimal
 
 from django.conf import settings
+from django.utils.translation import ugettext as _
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 from suds.client import Client
@@ -14,7 +15,6 @@ from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
@@ -64,12 +64,8 @@ class Cybersource(BasePaymentProcessor):
         self.language_code = settings.LANGUAGE_CODE
 
     @property
-    def receipt_page_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
-
-    @property
-    def cancel_page_url(self):
-        return get_lms_url(self.configuration['cancel_path'])
+    def payment_label(self):
+        return _("Checkout")
 
     def get_transaction_parameters(self, basket, request=None):
         """
@@ -98,8 +94,8 @@ class Cybersource(BasePaymentProcessor):
             'amount': str(basket.total_incl_tax),
             'currency': basket.currency,
             'consumer_id': basket.owner.username,
-            'override_custom_receipt_page': '{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
-            'override_custom_cancel_page': self.cancel_page_url,
+            'override_custom_receipt_page': '{}?orderNum={}'.format(self.receipt_url, basket.order_number),
+            'override_custom_cancel_page': self.cancel_url,
         }
 
         # XCOM-274: when internal reporting across all processors is

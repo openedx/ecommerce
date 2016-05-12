@@ -23,11 +23,25 @@ MAX_COMPLETION_RETRIES = int(os.environ.get('MAX_COMPLETION_RETRIES', 3))
 PAYPAL_EMAIL = os.environ.get('PAYPAL_EMAIL')
 PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
 ENABLE_CYBERSOURCE_TESTS = str2bool(os.environ.get('ENABLE_CYBERSOURCE_TESTS', True))
+ENABLE_PAYPAL_TESTS = str2bool(os.environ.get('ENABLE_PAYPAL_TESTS', True))
+ENABLE_STRIPE_TESTS = str2bool(os.environ.get('ENABLE_STRIPE_TESTS', False))
+# END OTTO CONFIGURATION
 
-try:
-    MARKETING_URL_ROOT = os.environ.get('MARKETING_URL_ROOT').strip('/')
-except AttributeError:
-    MARKETING_URL_ROOT = None
+# MARKETING CONFIGURATION
+ENABLE_MARKETING_SITE = str2bool(os.environ.get('ENABLE_MARKETING_SITE', False))
+
+MARKETING_URL_ROOT = os.environ.get('MARKETING_URL_ROOT').strip('/') if ENABLE_MARKETING_SITE else None
+
+# These must correspond to the course IDs provided for each enrollment mode.
+VERIFIED_COURSE_SLUG = os.environ.get(
+    'VERIFIED_COURSE_SLUG',
+    'dracula-stoker-berkeleyx-book-club-uc-berkeleyx-colwri3-6x'
+)
+PROFESSIONAL_COURSE_SLUG = os.environ.get(
+    'PROFESSIONAL_COURSE_SLUG',
+    'marketing-non-marketers-ubcx-marketing5501x'
+)
+# END MARKETING CONFIGURATION
 
 try:
     LMS_URL_ROOT = os.environ.get('LMS_URL_ROOT').strip('/')

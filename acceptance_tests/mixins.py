@@ -1,5 +1,6 @@
 import logging
 import uuid
+import time
 
 import requests
 from edx_rest_api_client.client import EdxRestApiClient
@@ -232,6 +233,65 @@ class PaymentMixin(object):
         wait.until(spinner_invisibility)
 
         confirmation_button.click()
+
+    def fill_stripe_cc_details(self, card_no, expiry, ccv):
+        WebDriverWait(self.browser, 10).until(
+            EC.frame_to_be_available_and_switch_to_it((
+                By.CSS_SELECTOR, 'iframe.stripe_checkout_app')))
+
+        WebDriverWait(self.browser, 10).until(
+            EC.element_to_be_clickable((
+                By.CSS_SELECTOR, 'input#card_number')))
+
+        card_input = self.browser.find_element_by_css_selector('input#card_number')
+        expiry_input = self.browser.find_element_by_css_selector('input#cc-exp')
+        ccv_input = self.browser.find_element_by_css_selector('input#cc-csc')
+
+        def send_keys_to_stripe(message, input_element):
+            for key in message:
+                input_element.send_keys(key)
+                # Note: this is to allow stripe JS to kick in.
+                # Wait value established empirically.
+                time.sleep(0.05)
+
+        send_keys_to_stripe(card_no, card_input)
+        send_keys_to_stripe(expiry, expiry_input)
+        send_keys_to_stripe(ccv, ccv_input)
+
+        submit_button = self.browser.find_element_by_css_selector("button#submitButton")
+
+        def submit_and_switch_back(switch_back=True):
+            submit_button.click()
+            if switch_back:
+                self.browser.switch_to_default_content()
+
+        return submit_and_switch_back
+
+    def checkout_with_stripe(
+            self,
+            card_no="4242424242424242",
+            expiry="1234",
+            ccv="1234"):
+        """
+        Performs a successful checkout with stripe. This function does not
+        assert if payment is successful, if you need check if browser
+        got redirected to receipt page.
+
+        Args:
+            card_no: Card number, string no spaces.
+            expiry: Expiry date in MMYY format, should be later than today,
+                    String no spaces.
+            ccv: CCV code to use. Stripe in test mode any 3 or 4
+                 digit code will do. String no spaces.
+
+        Returns: None
+
+        """
+        self.browser.find_element_by_css_selector('#stripe').click()
+
+        submitter = self.fill_stripe_cc_details(card_no, expiry, ccv)
+
+        submitter()
 
     def checkout_with_cybersource(self, address):
         """ Completes the checkout process via CyberSource. """

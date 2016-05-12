@@ -3,10 +3,11 @@ from cStringIO import StringIO
 import logging
 import os
 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.management import call_command
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -19,7 +20,7 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-
+from ecommerce.extensions.payment.processors.stripe import StripeProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +32,40 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+UnableToPlaceOrder = get_class('order.exceptions', 'UnableToPlaceOrder')
 
 
-class CybersourceNotifyView(EdxOrderPlacementMixin, View):
+class BasketRetrievalMixin(object):
+    def get_basket(self, request, basket_id):
+        """
+
+        Args:
+            request:
+                HTTPRequest initiated by the paying user, used to apply offers
+            basket_id:
+                Id of basket
+
+        Returns:
+            Basket or none
+
+        """
+
+        try:
+            basket_id = int(basket_id)
+        except (ValueError, TypeError):
+            return None
+
+        try:
+            basket = Basket.objects.get(id=basket_id)
+        except ObjectDoesNotExist:
+            return None
+
+        basket.strategy = strategy.Default()
+        Applicator().apply(basket, basket.owner, request)
+        return basket
+
+
+class CybersourceNotifyView(BasketRetrievalMixin, EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
     @property
     def payment_processor(self):
@@ -65,19 +97,6 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             country=Country.objects.get(
                 iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 
-    def _get_basket(self, basket_id):
-        if not basket_id:
-            return None
-
-        try:
-            basket_id = int(basket_id)
-            basket = Basket.objects.get(id=basket_id)
-            basket.strategy = strategy.Default()
-            Applicator().apply(basket, basket.owner, self.request)
-            return basket
-        except (ValueError, ObjectDoesNotExist):
-            return None
-
     def post(self, request):
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
 
@@ -99,11 +118,11 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                 basket_id
             )
 
-            basket = self._get_basket(basket_id)
+            basket = self.get_basket(self.request, basket_id)
 
             if not basket:
                 logger.error('Received payment for non-existent basket [%s].', basket_id)
-                return HttpResponse(status=400)
+                return HttpResponseBadRequest()
         finally:
             # Store the response in the database regardless of its authenticity.
             ppr = self.payment_processor.record_processor_response(cybersource_response, transaction_id=transaction_id,
@@ -185,7 +204,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(PaypalPaymentExecutionView, self).dispatch(request, *args, **kwargs)
 
-    def _get_basket(self, payment_id):
+    def _get_basket_by_payment_id(self, payment_id):
         """
         Retrieve a basket using a payment ID.
 
@@ -219,7 +238,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         logger.info(u"Payment [%s] approved by payer [%s]", payment_id, payer_id)
 
         paypal_response = request.GET.dict()
-        basket = self._get_basket(payment_id)
+        basket = self._get_basket_by_payment_id(payment_id)
 
         if not basket:
             return redirect(self.payment_processor.error_url)
@@ -265,7 +284,6 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
 
 class PaypalProfileAdminView(View):
-
     ACTIONS = ('list', 'create', 'show', 'update', 'delete', 'enable', 'disable')
 
     def dispatch(self, request, *args, **kwargs):
@@ -317,3 +335,91 @@ class PaypalProfileAdminView(View):
         logger.removeHandler(log_handler)
 
         return HttpResponse(output, content_type='text/plain', status=200 if success else 500)
+
+
+class CheckoutViewMixin(EdxOrderPlacementMixin, BasketRetrievalMixin):
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(CheckoutViewMixin, self).dispatch(request, *args, **kwargs)
+
+    def get_payment_data(self):
+        """
+        Returns: Returns payment that will be passed to payment processor.
+        """
+        raise NotImplementedError
+
+    def locate_basket(self):
+        """
+        Returns: Basket or None, basket should be located using either HTTP request or url.
+                 If basket can't be located returns None.
+        """
+        raise NotImplementedError
+
+    def post(self, request, *args, **kwargs):  # pylint:disable=unused-argument
+        payment_data = self.get_payment_data()
+
+        basket = self.locate_basket()
+
+        if basket is None:
+            return HttpResponseRedirect(self.payment_processor.error_url)
+
+        try:
+            with transaction.atomic():
+                try:
+                    self.handle_payment(payment_data, basket)
+                except PaymentError:
+                    # This can happen (e.g. when card is refused) log the exception details,
+                    # but this is "normal"
+                    logger.info('Payment error for basket [%d] failed.', basket.id, exc_info=True)
+                    return HttpResponseRedirect(self.payment_processor.error_url)
+        except Exception:  # pylint: disable=broad-except
+            # This is an error that should be investigated
+            logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
+            return HttpResponseRedirect(self.payment_processor.error_url)
+
+        # Create the order in our system
+        try:
+            with transaction.atomic():
+                shipping_method = NoShippingRequired()
+                shipping_charge = shipping_method.calculate(basket)
+                order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+                self.handle_order_placement(
+                    order_number=basket.order_number,
+                    user=basket.owner,
+                    basket=basket,
+                    shipping_address=None,
+                    shipping_method=shipping_method,
+                    shipping_charge=shipping_charge,
+                    billing_address=None,
+                    order_total=order_total
+                )
+
+        except:  # pylint: disable=bare-except
+            # This is clearly an error: client got charged but didn't get what he paid for
+            logger.exception('Payment was executed, but an order was not created for basket [%d].', basket.id)
+            # Raise the error to give clear 500, in future (maybe?) introduce better way of notifying
+            # admins with clear message.
+            raise
+
+        receipt_url = u'{}?basket_id={}'.format(self.payment_processor.receipt_url, basket.id)
+        return redirect(receipt_url)
+
+
+class StripeCheckoutView(CheckoutViewMixin, View):
+    pk_url_kwarg = 'basket'
+
+    @property
+    def payment_processor(self):
+        return StripeProcessor()
+
+    def locate_basket(self):
+
+        basket_id = self.kwargs[self.pk_url_kwarg]
+        basket = self.get_basket(self.request, basket_id)
+
+        return basket
+
+    def get_payment_data(self):
+        return self.request.POST['stripeToken']

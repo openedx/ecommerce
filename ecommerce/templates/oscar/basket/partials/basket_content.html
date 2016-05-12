@@ -121,18 +121,17 @@
                             data-track-category="checkout"
                             data-processor-name="{{ processor.NAME }}"
                             data-course-id="{{ course.id }}"
-                            class="btn payment-button"
+		        {% if processor.default_checkout_handler %}
+			    data-default-handler="true"
+		        {% endif %}
+                            class="btn btn-success payment-button"
                             value="{{ processor.NAME|lower }}"
                             id="{{ processor.NAME|lower }}">
-                        {% if processor.NAME == 'cybersource' %}
-                            {% trans "Checkout" %}
-                        {% elif processor.NAME == 'paypal' %}
-                            {# Translators: Do NOT translate the name PayPal. #}
-                            {% trans "Checkout with PayPal" %}
-                        {% endif %}
+                            {{ processor.payment_label }}
                     </button>
                 {% endfor %}
                 {% endif %}
+                </div>
             </div>
         </div>
 
