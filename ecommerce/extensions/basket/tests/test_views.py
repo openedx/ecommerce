@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import json
 
 import ddt
 from django.conf import settings
@@ -16,6 +17,7 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.core.models import SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
@@ -39,6 +41,7 @@ StockRecord = get_model('partner', 'StockRecord')
 COUPON_CODE = 'COUPONTEST'
 
 
+@ddt.ddt
 class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
@@ -54,6 +57,29 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.stock_record = StockRecordFactory(product=product, partner=self.partner)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
+
+    def mock_enrollment_api_success(self, course_id, mode='audit'):
+        """ Returns a successful response indicating self.user is enrolled in the specified course mode. """
+        self.assertTrue(httpretty.is_enabled())
+        url = '{host}/{username},{course_id}'.format(
+            host=get_lms_enrollment_api_url(),
+            username=self.user.username,
+            course_id=course_id
+        )
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps({'mode': mode}), content_type='application/json')
+
+    def mock_enrollment_api_error(self, error):
+        """ Mock Enrollment api call which raises error when called """
+        self.assertTrue(httpretty.is_enabled())
+
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+        url = '{host}/{username},{course_id}'.format(
+            host=get_lms_enrollment_api_url(),
+            username=self.user.username,
+            course_id=self.course.id
+        )
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
 
     def test_login_required(self):
         """ The view should redirect to login page if the user is not logged in. """
@@ -78,8 +104,10 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, expected_content)
 
+    @httpretty.activate
     def test_unavailable_product(self):
         """ The view should return HTTP 400 if the product is not available for purchase. """
+        self.mock_enrollment_api_success(self.course.id)
         product = self.stock_record.product
         product.expires = pytz.utc.localize(datetime.datetime.min)
         product.save()
@@ -96,6 +124,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         """
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
+        self.mock_enrollment_api_success(self.course.id)
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_course_api_response(course=self.course)
@@ -110,6 +139,37 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.assertEqual(basket.lines.count(), 1)
         self.assertTrue(basket.contains_a_voucher)
         self.assertEqual(basket.lines.first().product, self.stock_record.product)
+
+    @httpretty.activate
+    @ddt.data(('verified', False), ('professional', True), ('no-id-professional', False))
+    @ddt.unpack
+    def test_already_verified_student(self, mode, id_verification):
+        """
+        Verify the view return HTTP 400 if the student is already enrolled as verified student in the course
+        """
+        course = CourseFactory()
+        self.mock_enrollment_api_success(course.id, mode=mode)
+        product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
+        stock_record = StockRecordFactory(product=product, partner=self.partner)
+        catalog = Catalog.objects.create(partner=self.partner)
+        catalog.stock_records.add(stock_record)
+
+        url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
+        expected_content = 'You are already enrolled in {product}.'.format(product=product.course.name)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, expected_content)
+
+    @httpretty.activate
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    def test_enrollment_api_failure(self, error):
+        """
+        Verify the view returns HTTP status 400 if the Enrollment API is not available.
+        """
+        self.mock_enrollment_api_error(error)
+        url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
 
 
 @httpretty.activate
