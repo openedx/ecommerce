@@ -14,7 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='siteconfiguration',
             name='from_email',
-            field=models.CharField(default='oscar@example.com', help_text='Address from which emails are sent.', max_length=255, verbose_name='From email'),
-            preserve_default=False,
+            field=models.CharField(help_text='Address from which emails are sent.', max_length=255, null=True, verbose_name='From email', blank=True),
         ),
     ]

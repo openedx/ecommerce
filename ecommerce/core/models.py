@@ -64,8 +64,8 @@ class SiteConfiguration(models.Model):
         verbose_name=_('From email'),
         help_text=_('Address from which emails are sent.'),
         max_length=255,
-        null=False,
-        blank=False
+        null=True,
+        blank=True
     )
 
     class Meta(object):
