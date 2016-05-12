@@ -406,7 +406,7 @@ SEGMENT_KEY = None
 # DJANGO REST FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'ecommerce.extensions.api.authentication.JwtAuthentication',
+        'edx_rest_framework_extensions.authentication.JwtAuthentication',
         'ecommerce.extensions.api.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
@@ -516,3 +516,7 @@ DEFAULT_SITE_THEME = None
 THEME_CACHE_TIMEOUT = 30 * 60
 
 # End Theme settings
+
+EDX_DRF_EXTENSIONS = {
+    'JWT_PAYLOAD_USER_ATTRIBUTES': ('full_name', 'email', 'tracking_context',),
+}

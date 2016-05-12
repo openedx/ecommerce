@@ -1,39 +1,18 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
 import json
-from logging import Logger
 
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse
-from django.conf.urls import url
-from django.test import override_settings, RequestFactory
 import httpretty
 import mock
+from django.contrib.auth import get_user_model
+from django.test import RequestFactory
 from oscar.test import factories
-from rest_framework import permissions
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.views import APIView
-from rest_framework_jwt import utils
 
 from ecommerce.core.url_utils import get_oauth2_provider_url
-from ecommerce.extensions.api.authentication import BearerAuthentication, JwtAuthentication
-from ecommerce.tests.mixins import JwtMixin
+from ecommerce.extensions.api.authentication import BearerAuthentication
 from ecommerce.tests.testcases import TestCase
 
 User = get_user_model()
-
-
-class MockView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request):  # pylint: disable=unused-variable, unused-argument
-        return HttpResponse()
-
-
-urlpatterns = [
-    url(r'^jwt/$', MockView.as_view(authentication_classes=[JwtAuthentication]))
-]
 
 
 class AccessTokenMixin(object):
@@ -118,72 +97,3 @@ class BearerAuthenticationTests(AccessTokenMixin, TestCase):
 
         request = self._create_request()
         self.assertEqual(self.auth.authenticate(request), (user, self.DEFAULT_TOKEN))
-
-
-@override_settings(
-    ROOT_URLCONF='ecommerce.extensions.api.tests.test_authentication',
-)
-class JwtAuthenticationTests(JwtMixin, TestCase):
-    def assert_jwt_status(self, issuer=None, expires=None, status_code=200):
-        """Assert that the payload has a valid issuer and has not expired."""
-        staff_user = self.create_user(is_staff=True)
-        issuer = issuer or settings.JWT_AUTH['JWT_ISSUERS'][0]
-
-        payload = {
-            'iss': issuer,
-            'username': staff_user.username,
-            'email': staff_user.email,
-            'full_name': staff_user.full_name
-        }
-
-        if expires:
-            payload['exp'] = expires
-
-        token = utils.jwt_encode_handler(payload)
-
-        auth = 'JWT {0}'.format(token)
-        response = self.client.get('/jwt/', HTTP_AUTHORIZATION=auth)
-
-        self.assertEqual(response.status_code, status_code)
-
-    def test_valid_issuer(self):
-        """ Verify payloads with valid issuers are validated. """
-        self.assert_jwt_status()
-
-    def test_invalid_issuer(self):
-        """ Verify payloads with invalid issuers are NOT validated. """
-        self.assert_jwt_status(issuer='some-invalid-issuer', status_code=401)
-
-    def test_valid_expiration(self):
-        """ Verify payloads with valid expiration dates are validated. """
-        valid_timestamp = int(datetime.max.strftime('%s'))
-        self.assert_jwt_status(expires=valid_timestamp)
-
-    def test_invalid_expiration(self):
-        """ Verify payloads with invalid expiration dates are NOT validated. """
-        self.assert_jwt_status(expires=1, status_code=401)
-
-    def test_authenticate_credentials_user_creation(self):
-        """ Test whether the user model is being assigned fields from the payload. """
-
-        full_name = 'Ｇｅｏｒｇｅ Ｃｏｓｔａｎｚａ'
-        email = 'gcostanza@gmail.com'
-        username = 'gcostanza'
-
-        payload = {'username': username, 'email': email, 'full_name': full_name}
-        user = JwtAuthentication().authenticate_credentials(payload)
-        self.assertEquals(user.username, username)
-        self.assertEquals(user.email, email)
-        self.assertEquals(user.full_name, full_name)
-
-    def test_user_retrieval_failed(self):
-        """ Verify exceptions raised during user retrieval are properly logged. """
-
-        with mock.patch.object(User.objects, 'get_or_create', side_effect=ValueError):
-            with mock.patch.object(Logger, 'exception') as logger:
-                msg = 'User retrieval failed.'
-                with self.assertRaisesRegexp(AuthenticationFailed, msg):
-                    payload = {'username': 'test', 'email': 'test@example.com', 'full_name': 'Testy'}
-                    JwtAuthentication().authenticate_credentials(payload)
-
-                logger.assert_called_with(msg)
