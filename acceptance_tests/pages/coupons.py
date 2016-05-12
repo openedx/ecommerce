@@ -22,13 +22,6 @@ def _get_coupon_name(is_discount):
     return prefix + suffix
 
 
-class BasketPage(EcommerceAppPage):
-    path = 'basket'
-
-    def is_browser_on_page(self):
-        return self.browser.title.startswith('Basket')
-
-
 class CouponsCreatePage(EcommerceAppPage):
     path = 'coupons/new'
 

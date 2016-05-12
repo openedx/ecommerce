@@ -8,6 +8,10 @@ COURSE_ID_REGEX = r'[^/+]+(/|\+)[^/+]+(/|\+)[^/]+'
 COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
 
 
+# Seat constants
+SEAT_PRODUCT_CLASS_NAME = "Seat"
+
+
 # Enrollment Code constants
 ENROLLMENT_CODE_PRODUCT_CLASS_NAME = 'Enrollment Code'
 ENROLLMENT_CODE_SWITCH = 'create_enrollment_codes'
