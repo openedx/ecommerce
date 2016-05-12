@@ -15,7 +15,7 @@ djangorestframework-jwt==1.8.0
 drf-extensions==0.2.8
 edx-auth-backends==0.2.3
 edx-django-sites-extensions==1.0.0
-edx-drf-extensions==0.4.1
+edx-drf-extensions==0.5.1
 edx-ecommerce-worker==0.3.3
 edx-opaque-keys==0.3.1
 edx-rest-api-client==1.5.0
