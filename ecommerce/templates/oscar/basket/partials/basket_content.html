@@ -14,9 +14,8 @@
                 {{ formset.management_form }}
 
                 {% for form, line_data in formset_lines_data %}
-                {% with line=form.instance product=form.instance.product %}
-                    {% purchase_info_for_line request line as session %}
-                <div class="basket-items">
+                    {% purchase_info_for_line request line_data.line as session %}
+                    <div class="basket-items">
                         {% if line_data.seat_type %}
                         <p class="certificate_type">
                             {% trans "Earn a valuable certificate to showcase the skills you learn in" %}
@@ -42,7 +41,7 @@
                             </div>
                             {% endif %}
                             <div class="col-sm-{% if line_data.enrollment_code %}3{% else %}5{% endif %} course_prices">
-                            {% if line.has_discount %}
+                            {% if line_data.line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
                                         {% blocktrans with benefit_value=line_data.benefit_value %}
@@ -50,18 +49,17 @@
                                         {% endblocktrans %}
                                     </div>
                                     <div class="old-price">
-                                        {{ line.line_price_incl_tax|currency:line.price_currency }}
+                                        {{ line_data.line.line_price_incl_tax|currency:line_data.line.price_currency }}
                                     </div>
                                 </div>
                             {% endif %}
-                                <div class="price {% if line.has_discount %}discounted{% endif %}">
-                                    {{ line.line_price_incl_tax_incl_discounts|currency:line.price_currency }}
+                                <div class="price {% if line_data.line.has_discount %}discounted{% endif %}">
+                                    {{ line_data.line.line_price_incl_tax_incl_discounts|currency:line_data.line.price_currency }}
                                 </div>
                             </div>
                         </div>
-                        {% endwith %}
-                    {% endfor %}
-                </div>
+                    </div>
+                {% endfor %}
             </form>
         {% endblock %}
 
@@ -153,13 +151,11 @@
         <div class="row verification-note">
             <span><i class="fa fa-exclamation-circle"></i></span>
             {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
-            {% for line in lines %}
-                {% if line.product.attr.id_verification_required %}
-                    {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
-                {% else %}
-                    {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
-                {% endif %}
-            {% endfor %}
+            {% if is_verification_required %}
+                {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
+            {% else %}
+                {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
+            {% endif %}
         </div>
         <div class="row help">
             <p><b>{% trans "Have questions?" %}</b></p>

@@ -80,6 +80,7 @@ class BasketSummaryView(BasketView):
         lines = context.get('line_list', [])
         lines_data = []
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
+        is_verification_required = False
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
             cache_key = 'courses_api_detail_{}'.format(course_key)
@@ -112,6 +113,7 @@ class BasketSummaryView(BasketView):
                 'course_short_description': short_description,
                 'benefit_value': benefit_value,
                 'enrollment_code': line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+                'line': line,
             })
 
             context.update({
@@ -122,10 +124,17 @@ class BasketSummaryView(BasketView):
                 ),
             })
 
+            # Check product attributes to determine if ID verification is required for this basket
+            try:
+                is_verification_required = is_verification_required or line.product.attr.id_verification_required
+            except AttributeError:
+                pass
+
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
+            'is_verification_required': is_verification_required,
         })
         return context
