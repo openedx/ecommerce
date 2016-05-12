@@ -1,8 +1,11 @@
 """Handler overrides for JWT authentication."""
-import jwt
+import logging
 
+import jwt
 from django.conf import settings
 from rest_framework_jwt.settings import api_settings
+
+logger = logging.getLogger(__name__)
 
 
 def jwt_decode_handler(token):
@@ -39,5 +42,8 @@ def jwt_decode_handler(token):
             )
         except jwt.InvalidIssuerError:
             pass
+        except jwt.InvalidTokenError:
+            logger.exception('JWT decode failed!')
+            raise
 
     raise jwt.InvalidIssuerError
