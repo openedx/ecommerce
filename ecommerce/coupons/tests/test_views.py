@@ -168,7 +168,6 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
     def setUp(self):
         super(CouponOfferViewTests, self).setUp()
-        self.mock_footer_api_response()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 

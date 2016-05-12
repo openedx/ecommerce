@@ -20,7 +20,6 @@ from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.constants import APIConstants as AC
-from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -118,7 +117,6 @@ class CouponOfferView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CouponOfferView, self).get_context_data(**kwargs)
-        footer = get_lms_footer()
         code = self.request.GET.get('code', None)
         if code is not None:
             try:
@@ -126,12 +124,10 @@ class CouponOfferView(TemplateView):
             except Voucher.DoesNotExist:
                 return {
                     'error': _('Coupon does not exist'),
-                    'footer': footer,
                 }
             except exceptions.ProductNotFoundError:
                 return {
                     'error': _('The voucher is not applicable to your current basket.'),
-                    'footer': footer,
                 }
             valid_voucher, msg = voucher_is_valid(voucher, product, self.request)
             if valid_voucher:
@@ -144,7 +140,6 @@ class CouponOfferView(TemplateView):
                     logger.exception('Could not get course information. [%s]', e)
                     return {
                         'error': _('Could not get course information. [{error}]'.format(error=e)),
-                        'footer': footer
                     }
                 course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
                 benefit = voucher.offers.first().benefit
@@ -174,16 +169,13 @@ class CouponOfferView(TemplateView):
                     'new_price': "%.2f" % new_price,
                     'verified': (product.attr.certificate_type == 'verified'),
                     'verification_deadline': product.course.verification_deadline,
-                    'footer': footer
                 })
                 return context
             return {
                 'error': msg,
-                'footer': footer
             }
         return {
             'error': _('This coupon code is invalid.'),
-            'footer': footer
         }
 
     def get(self, request, *args, **kwargs):

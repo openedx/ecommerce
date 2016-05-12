@@ -64,16 +64,6 @@
     <div id="app" class="container"></div>
 {% endblock %}
 
-{% block footer %}
-    {% if footer %}
-    <footer class="footer">
-        <div class="container">
-            {{ footer }}
-        </div>
-    </footer>
-    {% endif %}
-{% endblock footer %}
-
 {% block javascript %}
     <script src="{% static 'js/apps/coupon_admin_app.js' %}"></script>
 {% endblock %}

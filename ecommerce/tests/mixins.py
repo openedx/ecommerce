@@ -298,15 +298,6 @@ class LmsApiMockMixin(object):
         course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
 
-    def mock_footer_api_response(self):
-        """ Helper function to register an API endpoint for the footer information. """
-        footer_url = get_lms_url('api/branding/v1/footer')
-        footer_content = {
-            'footer': 'edX Footer'
-        }
-        content_json = json.dumps(footer_content)
-        httpretty.register_uri(httpretty.GET, footer_url, body=content_json, content_type='application/json')
-
 
 class CouponMixin(object):
     """ Mixin for preparing data for coupons and creating coupons. """

@@ -18,7 +18,6 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PR
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.views import get_voucher_from_code
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
-from ecommerce.extensions.api.data import get_lms_footer
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -127,7 +126,6 @@ class BasketSummaryView(BasketView):
             'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
             'homepage_url': get_lms_url(''),
-            'footer': get_lms_footer(),
             'formset_lines_data': zip(formset, lines_data),
         })
         return context
