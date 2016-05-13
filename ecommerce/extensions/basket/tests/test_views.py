@@ -27,7 +27,7 @@ from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import StockRecordFactory
-from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
+from ecommerce.tests.mixins import ApiMockMixin, CouponMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -175,7 +175,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
 @httpretty.activate
 @ddt.ddt
 @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
-class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -199,12 +199,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
 
-    def mock_course_api_error(self, error):
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
-            raise error
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
-        httpretty.register_uri(httpretty.GET, course_url, body=callback, content_type='application/json')
-
     def create_basket_and_add_product(self, product):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(product, 1)
@@ -227,7 +221,10 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(basket.lines.count(), 1)
 
         logger_name = 'ecommerce.extensions.basket.views'
-        self.mock_course_api_error(error)
+        self.mock_api_error(
+            error=error,
+            url=get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
+        )
 
         with LogCapture(logger_name) as l:
             response = self.client.get(self.path)

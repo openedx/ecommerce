@@ -1,10 +1,20 @@
 import json
+import mock
 
+import ddt
+from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.test import RequestFactory
+from edx_rest_api_client.client import EdxRestApiClient
+import httpretty
+from requests.exceptions import ConnectionError, Timeout
 from oscar.core.loading import get_model
+from slumber.exceptions import SlumberBaseException
 
 from ecommerce.extensions.api.serializers import ProductSerializer
+from ecommerce.extensions.api.v2.views.catalog import CatalogViewSet
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
+from ecommerce.tests.mixins import ApiMockMixin, CatalogPreviewMockMixin
 from ecommerce.tests.testcases import TestCase
 
 
@@ -12,7 +22,9 @@ Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CatalogViewSetTest(CatalogMixin, TestCase):
+@httpretty.activate
+@ddt.ddt
+class CatalogViewSetTest(CatalogMixin, CatalogPreviewMockMixin, ApiMockMixin, TestCase):
     """Test the Catalog and related products APIs."""
 
     catalog_list_path = reverse('api:v2:catalog-list')
@@ -21,6 +33,12 @@ class CatalogViewSetTest(CatalogMixin, TestCase):
         super(CatalogViewSetTest, self).setUp()
 
         self.client.login(username=self.user.username, password=self.password)
+
+    def prepare_request(self, url):
+        factory = RequestFactory()
+        request = factory.get(url)
+        request.site = self.site
+        return request
 
     def test_staff_authorization_required(self):
         """Verify that only users with staff permissions can access the API. """
@@ -82,6 +100,47 @@ class CatalogViewSetTest(CatalogMixin, TestCase):
 
         expected_data = ProductSerializer(self.stock_record.product, context={'request': response.wsgi_request}).data
         self.assertListEqual(response_data['results'], [expected_data])
+
+    @ddt.data(
+        ('/api/v2/coupons/preview/', 400),
+        ('/api/v2/coupons/preview/?query=', 400),
+        ('/api/v2/coupons/preview/?wrong=parameter', 400),
+        ('/api/v2/coupons/preview/?query=id:course*', 200)
+    )
+    @ddt.unpack
+    @mock.patch(
+        'ecommerce.extensions.api.v2.views.catalog.get_course_catalog_api_client',
+        mock.Mock(return_value=EdxRestApiClient(
+            settings.COURSE_CATALOG_API_URL,
+            jwt='auth-token'
+        ))
+    )
+    def test_preview_catalog_query_results(self, url, status_code):
+        """Test catalog query preview."""
+        self.mock_course_runs_contains_api_response()
+
+        request = self.prepare_request(url)
+        response = CatalogViewSet().preview(request)
+
+        self.assertEqual(response.status_code, status_code)
+
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    @mock.patch(
+        'ecommerce.extensions.api.v2.views.catalog.get_course_catalog_api_client',
+        mock.Mock(return_value=EdxRestApiClient(
+            settings.COURSE_CATALOG_API_URL,
+            jwt='auth-token'
+        ))
+    )
+    def test_preview_catalog_course_discovery_service_not_available(self, error):
+        """Test catalog query preview when course discovery is not available."""
+        url = '/api/v2/coupons/preview/?query=id:course*'
+        request = self.prepare_request(url)
+
+        self.mock_api_error(error=error, url='{}course_runs/?q=id:course*'.format(settings.COURSE_CATALOG_API_URL))
+
+        response = CatalogViewSet().preview(request)
+        self.assertEqual(response.status_code, 400)
 
 
 class PartnerCatalogViewSetTest(CatalogMixin, TestCase):
