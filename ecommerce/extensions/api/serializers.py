@@ -66,10 +66,14 @@ class BillingAddressSerializer(serializers.ModelSerializer):
 class ProductAttributeValueSerializer(serializers.ModelSerializer):
     """ Serializer for ProductAttributeValue objects. """
     name = serializers.SerializerMethodField()
+    code = serializers.SerializerMethodField()
     value = serializers.SerializerMethodField()
 
     def get_name(self, instance):
         return instance.attribute.name
+
+    def get_code(self, instance):
+        return instance.attribute.code
 
     def get_value(self, obj):
         if obj.attribute.name == 'Coupon vouchers':
@@ -81,7 +85,7 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = ProductAttributeValue
-        fields = ('name', 'value',)
+        fields = ('name', 'code', 'value',)
 
 
 class StockRecordSerializer(serializers.ModelSerializer):

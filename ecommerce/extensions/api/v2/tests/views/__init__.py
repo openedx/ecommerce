@@ -49,7 +49,13 @@ class OrderDetailViewTestMixin(ThrottlingMixin):
 class ProductSerializerMixin(object):
     def serialize_product(self, product):
         """ Serializes a Product to a Python dict. """
-        attribute_values = [{'name': av.attribute.name, 'value': av.value} for av in product.attribute_values.all()]
+        attribute_values = [
+            {
+                'name': av.attribute.name,
+                'code': av.attribute.code,
+                'value': av.value
+            } for av in product.attribute_values.all()
+        ]
         data = {
             'id': product.id,
             'url': self.get_full_url(reverse('api:v2:product-detail', kwargs={'pk': product.id})),
