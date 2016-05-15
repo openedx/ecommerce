@@ -4,20 +4,31 @@ Fulfillment Modules are designed to allow specific fulfillment logic based on th
 in an Order.
 """
 import abc
+import datetime
 import json
 import logging
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from oscar.core.loading import get_model
 from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
 
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_enrollment_api_url, get_lms_url
+from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.voucher.models import OrderLineVouchers
+from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.notifications.notifications import send_notification
 
-
+Benefit = get_model('offer', 'Benefit')
+Product = get_model('catalogue', 'Product')
+Range = get_model('offer', 'Range')
+Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
@@ -291,7 +302,7 @@ class CouponFulfillmentModule(BaseFulfillmentModule):
         Check whether the product in line is a Coupon
 
         Args:
-            line (Line): Defines the length of randomly generated string
+            line (Line): Line to be considered.
 
         Returns:
             True if the line contains product of product class Coupon.
@@ -338,3 +349,115 @@ class CouponFulfillmentModule(BaseFulfillmentModule):
             True, if the product is revoked; otherwise, False.
         """
         raise NotImplementedError("Revoke method not implemented!")
+
+
+class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
+
+    def supports_line(self, line):
+        """
+        Check whether the product in line is an Enrollment code.
+
+        Args:
+            line (Line): Line to be considered.
+
+        Returns:
+            True if the line contains an Enrollment code.
+            False otherwise.
+        """
+        return line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines containing Enrollment code products that can be fulfilled.
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+        Returns:
+            A supported list of unmodified lines associated with an Enrollment code product.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of an Enrollment code product.
+        For each line creates number of vouchers equal to that line's quantity. Creates a new OrderLineVouchers
+        object to tie the order with the created voucher and adds the vouchers to the coupon's total vouchers.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+        msg = "Attempting to fulfill '{product_class}' product types for order [{order_number}]".format(
+            product_class=ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+            order_number=order.number
+        )
+        logger.info(msg)
+
+        for line in lines:
+            name = 'Enrollment Code Range for {}'.format(line.product.attr.course_key)
+            seat = Product.objects.filter(
+                attributes__name='course_key',
+                attribute_values__value_text=line.product.attr.course_key
+            ).get(
+                attributes__name='certificate_type',
+                attribute_values__value_text=line.product.attr.seat_type
+            )
+            _range, created = Range.objects.get_or_create(name=name)
+            if created:
+                _range.add_product(seat)
+
+            vouchers = create_vouchers(
+                name='Enrollment code voucher [{}]'.format(line.product.title),
+                benefit_type=Benefit.PERCENTAGE,
+                benefit_value=100,
+                catalog=None,
+                coupon=seat,
+                end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
+                quantity=line.quantity,
+                start_datetime=datetime.datetime.now(),
+                voucher_type=Voucher.SINGLE_USE,
+                _range=_range
+            )
+
+            line_vouchers = OrderLineVouchers.objects.create(line=line)
+            for voucher in vouchers:
+                line_vouchers.vouchers.add(voucher)
+
+            line.set_status(LINE.COMPLETE)
+
+        self.send_email(order)
+        logger.info("Finished fulfilling 'Enrollment code' product types for order [%s]", order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        """ Revokes the specified line.
+
+        Args:
+            line (Line): Order Line to be revoked.
+
+        Returns:
+            True, if the product is revoked; otherwise, False.
+        """
+        raise NotImplementedError("Revoke method not implemented!")
+
+    def send_email(self, order):
+        """ Sends an email with enrollment code order information. """
+        # Note (multi-courses): Change from a course_name to a list of course names.
+        product = order.lines.first().product
+        course = Course.objects.get(id=product.attr.course_key)
+        send_notification(
+            order.user,
+            'ORDER_WITH_CSV',
+            context={
+                'contact_url': get_lms_url('/contact'),
+                'course_name': course.name,
+                'download_csv_link': get_ecommerce_url(reverse('coupons:enrollment_code_csv', args=[order.number])),
+                'enrollment_code_title': product.title,
+                'order_number': order.number,
+                'partner_name': order.site.siteconfiguration.partner.name,
+                'lms_url': get_lms_url(),
+                'receipt_page_url': get_lms_url('{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)),
+            },
+            site=order.site
+        )

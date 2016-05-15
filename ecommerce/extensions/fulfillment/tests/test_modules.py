@@ -12,13 +12,19 @@ from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule, EnrollmentFulfillmentModule
+from ecommerce.extensions.fulfillment.modules import (
+    CouponFulfillmentModule, EnrollmentCodeFulfillmentModule, EnrollmentFulfillmentModule
+)
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
+from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
@@ -29,7 +35,8 @@ LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Applicator = get_class('offer.utils', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
-ProductAttribute = get_model("catalogue", "ProductAttribute")
+Product = get_model('catalogue', 'Product')
+ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -427,3 +434,50 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         line = self.order.lines.first()
         with self.assertRaises(NotImplementedError):
             CouponFulfillmentModule().revoke_line(line)
+
+
+class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
+    """ Test Enrollment code fulfillment. """
+    QUANTITY = 5
+
+    def setUp(self):
+        super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course = CourseFactory()
+        course.create_or_update_seat('verified', True, 50, self.partner)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        user = UserFactory()
+        basket = BasketFactory()
+        basket.add_product(enrollment_code, self.QUANTITY)
+        self.order = factories.create_order(number=1, basket=basket, user=user)
+
+    def test_supports_line(self):
+        """Test that support_line returns True for Enrollment code lines."""
+        line = self.order.lines.first()
+        supports_line = EnrollmentCodeFulfillmentModule().supports_line(line)
+        self.assertTrue(supports_line)
+
+        order = factories.create_order()
+        unsupported_line = order.lines.first()
+        supports_line = EnrollmentCodeFulfillmentModule().supports_line(unsupported_line)
+        self.assertFalse(supports_line)
+
+    def test_get_supported_lines(self):
+        """Test that Enrollment code lines where returned."""
+        lines = self.order.lines.all()
+        supported_lines = EnrollmentCodeFulfillmentModule().get_supported_lines(lines)
+        self.assertListEqual(supported_lines, list(lines))
+
+    def test_fulfill_product(self):
+        """Test fulfilling an Enrollment code product."""
+        self.assertEqual(OrderLineVouchers.objects.count(), 0)
+        lines = self.order.lines.all()
+        __, completed_lines = EnrollmentCodeFulfillmentModule().fulfill_product(self.order, lines)
+        self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
+        self.assertEqual(OrderLineVouchers.objects.count(), 1)
+        self.assertEqual(OrderLineVouchers.objects.first().vouchers.count(), self.QUANTITY)
+
+    def test_revoke_line(self):
+        line = self.order.lines.first()
+        with self.assertRaises(NotImplementedError):
+            EnrollmentCodeFulfillmentModule().revoke_line(line)

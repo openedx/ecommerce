@@ -1,0 +1,13 @@
+{% load i18n %}
+{% trans "Order confirmation for: " %}{{order_number}}
+
+{% blocktrans %}Dear {{full_name}},{% endblocktrans %}
+
+{% blocktrans %}Thank you for purchasing access to {{course_name}}. Please go to {{download_csv_link}} to download a CSV file with the enrollment codes for this course. Once you have the codes you can distribute them to your team. {% endblocktrans %}
+
+{% blocktrans %}To explore other courses, please visit {{lms_url}}.{% endblocktrans %}
+
+{% trans "Thank you," %}
+{% blocktrans %}The {{partner_name}} team{% endblocktrans %}
+
+{% blocktrans %}You received this message because you purchased enrollment codes for {{course_name}} on {{lms_url}}. If you have any questions, please visit {{contact_url}}.{% endblocktrans %}
