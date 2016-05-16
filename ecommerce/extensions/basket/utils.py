@@ -1,16 +1,20 @@
 import logging
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.referrals.models import Referral
+
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+
 logger = logging.getLogger(__name__)
 
 
 def prepare_basket(request, product, voucher=None):
     """
-    Create or get the basket, add the product, and apply a voucher.
+    Create or get the basket, add the product, apply a voucher, and record referral data.
 
     Existing baskets are merged. The specified product will
     be added to the remaining open basket. If a voucher is passed, all existing
@@ -34,6 +38,15 @@ def prepare_basket(request, product, voucher=None):
         basket.vouchers.add(voucher)
         Applicator().apply(basket, request.user, request)
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
+
+    affiliate_id = request.COOKIES.get(settings.AFFILIATE_COOKIE_KEY)
+    if affiliate_id:
+        Referral.objects.update_or_create(
+            basket=basket,
+            defaults={'affiliate_id': affiliate_id}
+        )
+    else:
+        Referral.objects.filter(basket=basket).delete()
 
     return basket
 

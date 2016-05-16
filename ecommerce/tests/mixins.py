@@ -391,6 +391,7 @@ class CouponMixin(object):
         request = RequestFactory()
         request.site = self.site
         request.user = factories.UserFactory()
+        request.COOKIES = {}
 
         self.basket = prepare_basket(request, coupon)
 

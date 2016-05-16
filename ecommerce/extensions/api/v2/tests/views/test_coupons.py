@@ -96,6 +96,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         request.user = self.user
         request.data = self.coupon_data
         request.site = self.site
+        request.COOKIES = {}
 
         response = CouponViewSet().create(request)
 

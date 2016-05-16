@@ -8,8 +8,9 @@ Selector = get_class('partner.strategy', 'Selector')
 
 
 class Basket(AbstractBasket):
-    site = models.ForeignKey('sites.Site', verbose_name=_("Site"), null=True, blank=True, default=None,
-                             on_delete=models.SET_NULL)
+    site = models.ForeignKey(
+        'sites.Site', verbose_name=_("Site"), null=True, blank=True, default=None, on_delete=models.SET_NULL
+    )
 
     @property
     def order_number(self):
