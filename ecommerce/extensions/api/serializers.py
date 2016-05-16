@@ -7,6 +7,7 @@ from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model, get_class
 from rest_framework import serializers
 from rest_framework.reverse import reverse
@@ -33,6 +34,7 @@ Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+User = get_user_model()
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
@@ -61,6 +63,13 @@ class BillingAddressSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = BillingAddress
         fields = ('first_name', 'last_name', 'line1', 'line2', 'postcode', 'state', 'country', 'city')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializes user information. """
+    class Meta(object):
+        model = User
+        fields = ('email', 'username')
 
 
 class ProductAttributeValueSerializer(serializers.ModelSerializer):
@@ -154,10 +163,11 @@ class OrderSerializer(serializers.ModelSerializer):
     date_placed = serializers.DateTimeField(format=ISO_8601_FORMAT)
     lines = LineSerializer(many=True)
     billing_address = BillingAddressSerializer(allow_null=True)
+    user = UserSerializer()
 
     class Meta(object):
         model = Order
-        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address')
+        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address', 'user')
 
 
 class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abstract-method
