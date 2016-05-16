@@ -104,6 +104,18 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], unicode(order.number))
 
+    def test_user_information(self):
+        """ Make sure that the correct user information is returned. """
+        admin_user = self.create_user(is_staff=True, is_superuser=True)
+        order = factories.create_order(user=admin_user)
+
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
+        content = json.loads(response.content)
+        self.assertEqual(content['count'], 1)
+        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['user']['email'], admin_user.email)
+        self.assertEqual(content['results'][0]['user']['username'], admin_user.username)
+
 
 @ddt.ddt
 @override_settings(ECOMMERCE_SERVICE_WORKER_USERNAME='test-service-user')
