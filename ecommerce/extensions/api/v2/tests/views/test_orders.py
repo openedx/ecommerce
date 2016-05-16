@@ -114,6 +114,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], unicode(order.number))
         self.assertEqual(content['results'][0]['user']['email'], admin_user.email)
+        self.assertEqual(content['results'][0]['user']['username'], admin_user.username)
 
 
 @ddt.ddt
