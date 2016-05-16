@@ -23,6 +23,7 @@ def jwt_decode_handler(token):
         """
     options = {
         'verify_exp': api_settings.JWT_VERIFY_EXPIRATION,
+        'verify_aud': settings.JWT_AUTH['JWT_VERIFY_AUDIENCE'],
     }
 
     # JWT_ISSUERS is not one of DRF-JWT's default settings, and cannot be accessed
