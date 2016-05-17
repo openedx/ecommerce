@@ -1,5 +1,7 @@
 from urlparse import urljoin
 
+from django.conf import settings
+from edx_rest_api_client.client import EdxRestApiClient
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.exceptions import MissingRequestError
@@ -50,3 +52,27 @@ def get_lms_url(path=''):
 
 def get_oauth2_provider_url():
     return get_lms_url('/oauth2')
+
+
+def get_course_catalog_api_client(site):
+    """
+    Returns an API client to access the Course Catalog service.
+
+    Arguments:
+        site (Site): The site for which to retrieve settings.
+
+    Returns:
+        EdxRestApiClient: The client to access the Course Catalog service.
+    """
+
+    access_token, __ = EdxRestApiClient.get_oauth_access_token(
+        '{root}/access_token'.format(root=get_oauth2_provider_url()),
+        site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
+        site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
+        token_type='jwt'
+    )
+    course_catalog_client = EdxRestApiClient(
+        settings.COURSE_CATALOG_API_URL,
+        jwt=access_token
+    )
+    return course_catalog_client

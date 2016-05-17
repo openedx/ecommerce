@@ -498,6 +498,9 @@ SUPPORT_URL = 'SET-ME-PLEASE'
 # Path to the receipt page
 RECEIPT_PAGE_PATH = '/commerce/checkout/receipt/'
 
+# URL for Course Catalog service
+COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
+
 # Black-listed course modes not allowed to create coupons with
 BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
 

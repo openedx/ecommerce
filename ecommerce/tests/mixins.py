@@ -257,7 +257,11 @@ class SiteMixin(object):
             partner__name='edX',
             site__id=settings.SITE_ID,
             site__domain=domain,
-            segment_key='fake_segment_key'
+            segment_key='fake_segment_key',
+            oauth_settings={
+                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
+                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
+            }
         )
         self.partner = site_configuration.partner
         self.site = site_configuration.site
