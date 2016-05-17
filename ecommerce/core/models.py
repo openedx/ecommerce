@@ -50,7 +50,7 @@ class SiteConfiguration(models.Model):
         verbose_name=_('OAuth settings'),
         help_text=_('JSON string containing OAuth backend settings.'),
         null=False,
-        blank=False,
+        blank=True,
         default={}
     )
     segment_key = models.CharField(
