@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import csv
-from decimal import Decimal
 import logging
 
 from django.contrib.auth.decorators import login_required
@@ -14,19 +13,14 @@ from django.utils.translation import ugettext_lazy as _
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import TemplateView, View
-from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
-from ecommerce.courses.utils import get_course_info_from_lms
 from ecommerce.extensions.api import exceptions
-from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.offer.utils import format_benefit_value
-
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -34,6 +28,7 @@ Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
 OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
 Order = get_model('order', 'Order')
+Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -57,19 +52,20 @@ def get_voucher_from_code(code):
     voucher = Voucher.objects.get(code=code)
 
     products = voucher.offers.all()[0].benefit.range.all_products()
+
     if products:
         return voucher, products
     else:
         raise exceptions.ProductNotFoundError()
 
 
-def voucher_is_valid(voucher, product, request):
+def voucher_is_valid(voucher, products, request):
     """
     Checks if the voucher is valid.
 
     Arguments:
         voucher (Voucher): The Voucher that is checked.
-        product (Product): Product associated with the Voucher.
+        products (list of Products): Products associated with the Voucher.
         request (Request): WSGI request.
 
     Returns:
@@ -94,9 +90,10 @@ def voucher_is_valid(voucher, product, request):
             voucher_msg = msg.replace('voucher', 'coupon')
             return False, voucher_msg
 
-    purchase_info = request.strategy.fetch_for_product(product)
-    if not purchase_info.availability.is_available_to_buy:
-        return False, _('Product [{product}] not available for purchase.'.format(product=product))
+    for product in products:
+        purchase_info = request.strategy.fetch_for_product(product)
+        if not purchase_info.availability.is_available_to_buy:
+            return False, _('Product [{product}] not available for purchase.'.format(product=product))
 
     # If the voucher's number of applications exceeds it's limit.
     offer = voucher.offers.first()
@@ -119,12 +116,10 @@ class CouponOfferView(TemplateView):
     template_name = 'coupons/offer.html'
 
     def get_context_data(self, **kwargs):
-        context = super(CouponOfferView, self).get_context_data(**kwargs)
         code = self.request.GET.get('code', None)
         if code is not None:
             try:
                 voucher, products = get_voucher_from_code(code=code)
-                product = products[0]
             except Voucher.DoesNotExist:
                 return {
                     'error': _('Coupon does not exist'),
@@ -133,49 +128,12 @@ class CouponOfferView(TemplateView):
                 return {
                     'error': _('The voucher is not applicable to your current basket.'),
                 }
-            valid_voucher, msg = voucher_is_valid(voucher, product, self.request)
+            valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
-                try:
-                    course = get_course_info_from_lms(product.course_id)
-                except SlumberHttpBaseException as e:
-                    logger.exception('Could not get course information. [%s]', e)
-                    return {
-                        'error': _('Could not get course information. [{error}]'.format(error=e)),
-                    }
-                course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
-                benefit = voucher.offers.first().benefit
-                # Note (multi-courses): fix this to work for all stock records / courses.
-                if benefit.range.catalog:
-                    stock_record = benefit.range.catalog.stock_records.first()
-                else:
-                    stock_record = StockRecord.objects.get(product=benefit.range.all_products()[0])
-                price = stock_record.price_excl_tax
-                benefit_value = format_benefit_value(benefit)
-                if benefit.type == 'Percentage':
-                    new_price = price - (price * (benefit.value / 100))
-                else:
-                    new_price = price - benefit.value
-                    if new_price < 0:
-                        new_price = Decimal(0)
+                return {
+                    'valid_voucher': valid_voucher,
+                }
 
-                context.update({
-                    'analytics_data': prepare_analytics_data(
-                        self.request.user,
-                        self.request.site.siteconfiguration.segment_key,
-                        product.course_id
-                    ),
-                    'benefit_value': benefit_value,
-                    'course': course,
-                    'code': code,
-                    'is_discount_value_percentage': benefit.type == 'Percentage',
-                    'is_enrollment_code': benefit.type == Benefit.PERCENTAGE and benefit.value == 100.00,
-                    'discount_value': "%.2f" % (price - new_price),
-                    'price': price,
-                    'new_price': "%.2f" % new_price,
-                    'verified': (product.attr.certificate_type == 'verified'),
-                    'verification_deadline': product.course.verification_deadline,
-                })
-                return context
             return {
                 'error': msg,
             }
@@ -189,7 +147,6 @@ class CouponOfferView(TemplateView):
 
 
 class CouponRedeemView(EdxOrderPlacementMixin, View):
-
     @method_decorator(login_required)
     def get(self, request):
         """
@@ -198,20 +155,26 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         enrolls the user in the course.
         """
         template_name = 'coupons/offer.html'
-        code = request.GET.get('code', None)
+        code = request.GET.get('code')
+        sku = request.GET.get('sku')
 
         if not code:
-            return render(request, template_name, {'error': _('Code not provided')})
+            return render(request, template_name, {'error': _('Code not provided.')})
+        if not sku:
+            return render(request, template_name, {'error': _('SKU not provided.')})
+
         try:
-            voucher, products = get_voucher_from_code(code=code)
-            product = products[0]
+            voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
             msg = 'No voucher found with code {code}'.format(code=code)
             return render(request, template_name, {'error': _(msg)})
-        except exceptions.ProductNotFoundError:
-            return render(request, template_name, {'error': _('The voucher is not applicable to your current basket.')})
 
-        valid_voucher, msg = voucher_is_valid(voucher, product, request)
+        try:
+            product = StockRecord.objects.get(partner_sku=sku).product
+        except StockRecord.DoesNotExist:
+            return render(request, template_name, {'error': _('The product does not exist.')})
+
+        valid_voucher, msg = voucher_is_valid(voucher, [product], request)
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
