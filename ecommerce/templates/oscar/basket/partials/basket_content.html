@@ -22,25 +22,25 @@
                         </p>
                         {% endif %}
                         <div class="row">
-                            <div class="col-sm-2 course_image">
+                            <div class="col-lg-2 col-md-2 col-sm-12 course_image">
                                 {{ form.id }}
                                     <img class="thumbnail" src="{{ line_data.image_url }}" alt="{{ line_data.course_name }}"/>
                             </div>
-                            <div class="col-sm-5">
+                            <div class="col-lg-5 col-md-5 col-sm-12">
                                 <p class="course_name">{{ line_data.course_name }} - {{ line_data.course_key.org }} ({{ line_data.course_key.run }})</p>
                                 <p class="course_description">{{ line_data.course_short_description }}</p>
                             </div>
                             {% if line_data.enrollment_code %}
-                            <div class="col-sm-2">
-                                <div class="checkout-quantity">
+                            <div class="col-lg-2 col-md-2 col-sm-6 form-inline">
+                                <div class="checkout-quantity form-group">
                                     <div class="input-group  {% if form.errors %}error{% endif %}">
-                                        {% render_field form.quantity class+="quantity" %}
+                                        {% render_field form.quantity class+="quantity form-control" %}
                                     <button class="btn btn-default" type="submit" data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
                                     </div>
                                 </div>
                             </div>
                             {% endif %}
-                            <div class="col-sm-{% if line_data.enrollment_code %}3{% else %}5{% endif %} course_prices">
+                            <div class="col-lg-3 col-md-3 col-sm-6 course_prices pull-right">
                             {% if line_data.line.has_discount %}
                                 <div class="discount">
                                     <div class="benefit">
