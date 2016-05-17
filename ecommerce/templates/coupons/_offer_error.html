@@ -1,8 +1,19 @@
+{% extends 'edx/base.html' %}
 {% load i18n %}
 
-<div class="container">
-    <div class="depth depth-2 message-error">
-        <h3>{{ error }}</h3>
-        {% trans "If you need assistance, contact edX support." %}
+{% block title %}{% trans "Redeem" %}{% endblock %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+    <div id="offer">
+        <div class="container">
+            <div class="depth depth-2 message-error">
+                <h3>{{ error }}</h3>
+                {% trans "If you need assistance, contact edX support." %}
+            </div>
+        </div>
     </div>
-</div>
+{% endblock %}
