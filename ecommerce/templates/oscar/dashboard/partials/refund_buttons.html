@@ -2,7 +2,10 @@
 
 {% if refund.can_approve %}
 <button type="button" class="btn btn-success" data-refund-id="{{ refund.id }}" data-decision="approve" data-action="process-refund">
-    {% trans "Approve" %}
+    {% trans "Approve Credit and Revoke" %}
+</button>
+<button type="button" class="btn btn-info" data-refund-id="{{ refund.id }}" data-decision="approve_payment_only" data-action="process-refund">
+    {% trans "Approve Credit Only" %}
 </button>
 {% endif %}
 

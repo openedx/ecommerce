@@ -180,7 +180,7 @@ class Refund(StatusMixin, TimeStampedModel):
             logger.error('Unable to revoke fulfillment of all lines of Refund [%d].', self.id)
             self.set_status(REFUND.REVOCATION_ERROR)
 
-    def approve(self):
+    def approve(self, revoke_fulfillment=True):
         if not self.can_approve:
             logger.debug('Refund [%d] cannot be approved.', self.id)
             return False
@@ -193,8 +193,15 @@ class Refund(StatusMixin, TimeStampedModel):
                 self.set_status(REFUND.PAYMENT_REFUND_ERROR)
                 return False
 
-        if self.status in (REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR):
+        if revoke_fulfillment and self.status in (REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR):
             self._revoke_lines()
+
+        if not revoke_fulfillment and self.status == REFUND.PAYMENT_REFUNDED:
+            logger.info("Skipping the revocation step for refund [%d].", self.id)
+            # Mark the status complete as it does not involve the revocation.
+            self.set_status(REFUND.COMPLETE)
+            for refund_line in self.lines.all():
+                refund_line.set_status(REFUND_LINE.COMPLETE)
 
         if self.status == REFUND.COMPLETE:
             post_refund.send_robust(sender=self.__class__, refund=self)
