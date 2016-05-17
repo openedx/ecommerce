@@ -326,13 +326,13 @@ JWT_AUTH = {
     'JWT_SECRET_KEY': None,
     'JWT_ALGORITHM': 'HS256',
     'JWT_VERIFY_EXPIRATION': True,
-    # NOTE (CCB): This is temporarily set to False until we decide what values
-    # are acceptable.
-    'JWT_VERIFY_AUDIENCE': False,
     'JWT_LEEWAY': 1,
     'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
-    # This setting is not one of DRF-JWT's defaults.
+    # These settings are NOT part of DRF-JWT's defaults.
     'JWT_ISSUERS': (),
+    # NOTE (CCB): This is temporarily set to False until we decide what values are acceptable.
+    'JWT_VERIFY_AUDIENCE': False,
+    'JWT_SECRET_KEYS': (),
 }
 
 # Service user for worker processes.
