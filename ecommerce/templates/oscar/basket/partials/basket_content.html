@@ -65,7 +65,7 @@
 
         <div class="total">
             <div class="row">
-            {% if not line_data.enrollment_code %}
+            {% if not formset_lines_data.0.1.enrollment_code %}
                 {% block vouchers %}
                     {% if basket.contains_a_voucher %}
                         <div class="vouchers col-sm-6">
