@@ -113,9 +113,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             for seat in seats:
                 try:
                     if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
-                        raise Exception('Course mode not supported')
+                        return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
                 except AttributeError:
-                    raise Exception('Course mode not supported')
+                    return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
 
             stock_records_string = ' '.join(str(id) for id in stock_record_ids)
 

@@ -516,9 +516,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, Throttlin
         if mode == 'audit':
             seat = ProductFactory()
         self.data.update({'stock_record_ids': [StockRecord.objects.get(product=seat).id], })
-        with self.assertRaises(Exception):
-            response = self.client.post(COUPONS_LINK, data=self.data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CouponCategoriesListViewTests(TestCase):
