@@ -21,7 +21,7 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer, CouponListSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import generate_coupon_slug, generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -74,7 +74,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         with transaction.atomic():
             title = request.data[AC.KEYS.TITLE]
             client_username = request.data[AC.KEYS.CLIENT_USERNAME]
-            stock_record_ids = request.data[AC.KEYS.STOCK_RECORD_IDS]
+            stock_record_ids = request.data.get(AC.KEYS.STOCK_RECORD_IDS, None)
             start_date = dateutil.parser.parse(request.data[AC.KEYS.START_DATE])
             end_date = dateutil.parser.parse(request.data[AC.KEYS.END_DATE])
             code = request.data[AC.KEYS.CODE]
@@ -88,6 +88,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note', None)
             max_uses = request.data.get('max_uses', None)
+            catalog_query = request.data.get(AC.KEYS.CATALOG_QUERY, None)
+            course_seat_types = request.data.get(AC.KEYS.COURSE_SEAT_TYPES, None)
+
+            if course_seat_types:
+                course_seat_types = ','.join(seat_type.lower() for seat_type in course_seat_types)
 
             # Maximum number of uses can be set for each voucher type and disturb
             # the predefined behaviours of the different voucher types. Therefor
@@ -105,21 +110,23 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             # When a black-listed course mode is received raise an exception.
             # Audit modes do not have a certificate type and therefore will raise
             # an AttributeError exception.
-            seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
-            for seat in seats:
-                try:
-                    if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+            if stock_record_ids:
+                seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
+                for seat in seats:
+                    try:
+                        if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                            return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
+                    except AttributeError:
                         return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-                except AttributeError:
-                    return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
 
-            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-
-            coupon_catalog, __ = get_or_create_catalog(
-                name='Catalog for stock records: {}'.format(stock_records_string),
-                partner=partner,
-                stock_record_ids=stock_record_ids
-            )
+                stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+                coupon_catalog, __ = get_or_create_catalog(
+                    name='Catalog for stock records: {}'.format(stock_records_string),
+                    partner=partner,
+                    stock_record_ids=stock_record_ids
+                )
+            else:
+                coupon_catalog = None
 
             data = {
                 'partner': partner,
@@ -135,6 +142,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 'categories': categories,
                 'note': note,
                 'max_uses': max_uses,
+                'catalog_query': catalog_query,
+                'course_seat_types': course_seat_types
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -165,6 +174,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 - categories (list of Category objects)
                 - note (str)
                 - max_uses (int)
+                - catalog_query (str)
+                - course_seat_types (list of strings)
 
         Returns:
             A coupon product object.
@@ -173,14 +184,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             IntegrityError: An error occured when create_vouchers method returns
                             an IntegrityError exception
         """
-        coupon_slug = generate_coupon_slug(title=title, catalog=data['catalog'], partner=data['partner'])
 
         product_class = ProductClass.objects.get(slug='coupon')
-        coupon_product, __ = Product.objects.get_or_create(
-            title=title,
-            product_class=product_class,
-            slug=coupon_slug
-        )
+        coupon_product = Product.objects.create(title=title, product_class=product_class)
 
         self.assign_categories_to_coupon(coupon=coupon_product, categories=data['categories'])
 
@@ -199,7 +205,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 start_datetime=data['start_date'],
                 voucher_type=data['voucher_type'],
                 max_uses=data['max_uses'],
-                coupon_id=coupon_product.id
+                coupon_id=coupon_product.id,
+                catalog_query=data['catalog_query'],
+                course_seat_types=data['course_seat_types']
             )
         except IntegrityError as ex:
             logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
@@ -214,7 +222,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         sku = generate_sku(
             product=coupon_product,
             partner=data['partner'],
-            catalog=data['catalog'],
         )
 
         stock_record, __ = StockRecord.objects.get_or_create(

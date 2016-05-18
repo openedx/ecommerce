@@ -1,5 +1,6 @@
 from django.contrib.sites.models import Site
 import factory
+from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_model
 from oscar.test.factories import ProductFactory, StockRecordFactory as OscarStockRecordFactory
 
@@ -11,6 +12,7 @@ class PartnerFactory(factory.DjangoModelFactory):
         model = get_model('partner', 'Partner')
         django_get_or_create = ('name',)
 
+    name = FuzzyText(prefix='test-partner-')
     short_code = factory.SelfAttribute('name')
 
 

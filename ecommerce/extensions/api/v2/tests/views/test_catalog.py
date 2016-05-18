@@ -117,7 +117,7 @@ class CatalogViewSetTest(CatalogMixin, CatalogPreviewMockMixin, ApiMockMixin, Te
     )
     def test_preview_catalog_query_results(self, url, status_code):
         """Test catalog query preview."""
-        self.mock_course_runs_contains_api_response()
+        self.mock_dynamic_catalog_course_runs_api()
 
         request = self.prepare_request(url)
         response = CatalogViewSet().preview(request)

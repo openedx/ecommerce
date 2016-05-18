@@ -16,6 +16,7 @@ import waffle
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
+from ecommerce.coupons.utils import get_seats_from_query
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -425,6 +426,8 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     note = serializers.SerializerMethodField()
     max_uses = serializers.SerializerMethodField()
     num_uses = serializers.SerializerMethodField()
+    catalog_query = serializers.SerializerMethodField()
+    course_seat_types = serializers.SerializerMethodField()
 
     def retrieve_offer(self, obj):
         """Helper method to retrieve the offer from coupon. """
@@ -442,9 +445,18 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
 
     def get_seats(self, obj):
         offer = self.retrieve_offer(obj)
-        stockrecords = offer.condition.range.catalog.stock_records.all()
-        seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
-        serializer = ProductSerializer(seats, many=True, context={'request': self.context['request']})
+        _range = offer.condition.range
+        request = self.context['request']
+        if _range.catalog:
+            stockrecords = _range.catalog.stock_records.all()
+            seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
+        else:
+            seats = get_seats_from_query(
+                request.site,
+                _range.catalog_query,
+                _range.course_seat_types
+            )
+        serializer = ProductSerializer(seats, many=True, context={'request': request})
         return serializer.data
 
     def get_client(self, obj):
@@ -475,11 +487,20 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         offer = self.retrieve_offer(obj)
         return offer.num_applications
 
+    def get_catalog_query(self, obj):
+        offer = self.retrieve_offer(obj)
+        return offer.condition.range.catalog_query
+
+    def get_course_seat_types(self, obj):
+        offer = self.retrieve_offer(obj)
+        return offer.condition.range.course_seat_types
+
     class Meta(object):
         model = Product
         fields = (
             'id', 'title', 'coupon_type', 'last_edited', 'seats', 'client',
-            'price', 'vouchers', 'categories', 'note', 'max_uses', 'num_uses'
+            'price', 'vouchers', 'categories', 'note', 'max_uses', 'num_uses',
+            'catalog_query', 'course_seat_types'
         )
 
 

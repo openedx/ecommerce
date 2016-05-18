@@ -4,7 +4,9 @@ import logging
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.tests.factories import PartnerFactory
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,33 @@ class CourseCatalogTestMixin(object):
         self.seat_product_class  # pylint: disable=pointless-statement
         self.enrollment_code_product_class  # pylint: disable=pointless-statement
         self.category, _created = Category.objects.get_or_create(name='Seats', defaults={'depth': 1})
+
+    def create_course_and_seat(
+            self, course_id=None, seat_type='verified', id_verification=False, price=10, partner=None
+    ):
+        """
+        Create a course and a seat from that course.
+
+        Arguments:
+            course_name (str): name of the course
+            seat_type (str): the seat type
+            id_verification (bool): if id verification is required
+            price (int): seat price
+            partner(Partner): the site partner
+
+        Returns:
+            The created course and seat.
+        """
+
+        if not partner:
+            partner = PartnerFactory()
+        if not course_id:
+            course = CourseFactory()
+        else:
+            course = CourseFactory(id=course_id)
+
+        seat = course.create_or_update_seat(seat_type, id_verification, price, partner)
+        return course, seat
 
     def _create_product_class(self, class_name, slug, attributes):
         """ Helper method for creating product classes.

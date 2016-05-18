@@ -60,21 +60,36 @@ def _get_voucher_status(voucher, offer):
 
 def _get_info_for_coupon_report(coupon, voucher):
     offer = voucher.offers.all().first()
-    seat_stockrecord = offer.condition.range.catalog.stock_records.first()
-    course_id = seat_stockrecord.product.attr.course_key
+    if offer.condition.range.catalog:
+        coupon_stockrecord = StockRecord.objects.get(product=coupon)
+        invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
+        seat_stockrecord = offer.condition.range.catalog.stock_records.first()
+        course_id = seat_stockrecord.product.attr.course_key
+        course_organization = CourseKey.from_string(course_id).org
+        price = currency(seat_stockrecord.price_excl_tax)
+        discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
+    else:
+        # Note (multi-courses): Need to account for multiple seats.
+        coupon_stockrecord = None
+        invoiced_amount = None
+        seat_stockrecord = None
+        course_id = None
+        course_organization = None
+        price = None
+        discount_data = None
+
     history = coupon.history.first()
 
-    coupon_stockrecord = StockRecord.objects.get(product=coupon)
-    course_organization = CourseKey.from_string(course_id).org
+    if discount_data:
+        coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
+        discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
+        discount_amount = currency(discount_data['discount_value'])
+    else:
+        coupon_type = None
+        discount_percentage = None
+        discount_amount = None
 
-    price = currency(seat_stockrecord.price_excl_tax)
-    invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-    discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
-    coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
     status = _get_voucher_status(voucher, offer)
-
-    discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
-    discount_amount = currency(discount_data['discount_value'])
 
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
     url = get_ecommerce_url(path)
@@ -232,7 +247,7 @@ def _get_or_create_offer(product_range, benefit_type, benefit_value, coupon_id=N
         max_affected_items=1,
     )
 
-    offer_name = "Catalog [{}]-{}-{}".format(product_range.id, offer_benefit.type, offer_benefit.value)
+    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
     if max_uses:
         # Offer needs to be unique for each multi-use coupon.
         offer_name = "{} (Coupon [{}] - max_uses:{})".format(offer_name, coupon_id, max_uses)
@@ -321,7 +336,9 @@ def create_vouchers(
         coupon_id=None,
         code=None,
         max_uses=None,
-        _range=None):
+        _range=None,
+        catalog_query=None,
+        course_seat_types=None):
     """
     Create vouchers.
 
@@ -341,18 +358,21 @@ def create_vouchers(
     Returns:
             List[Voucher]
     """
+    logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
     vouchers = []
 
-    if catalog is None and _range:
-        # We don't use a catalog for enrollment codes.
+    if _range:
+        # Enrollment codes use a custom range.
         logger.info("Creating [%d] enrollment code vouchers", quantity)
         product_range = _range
     else:
-        logger.info("Creating [%d] vouchers catalog [%s]", quantity, catalog.id)
-        range_name = (_('Range for {catalog_name}').format(catalog_name=catalog.name))
+        logger.info("Creating [%d] vouchers for coupon [%s]", quantity, coupon.id)
+        range_name = (_('Range for coupon [{coupon_id}]').format(coupon_id=coupon.id))
         product_range, __ = Range.objects.get_or_create(
             name=range_name,
             catalog=catalog,
+            catalog_query=catalog_query,
+            course_seat_types=course_seat_types
         )
 
     offer = _get_or_create_offer(

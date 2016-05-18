@@ -152,7 +152,7 @@ class CouponOfferView(TemplateView):
                 if benefit.range.catalog:
                     stock_record = benefit.range.catalog.stock_records.first()
                 else:
-                    stock_record = StockRecord.objects.get(product=benefit.range.included_products.first())
+                    stock_record = StockRecord.objects.get(product=benefit.range.all_products()[0])
                 price = stock_record.price_excl_tax
                 benefit_value = format_benefit_value(benefit)
                 if benefit.type == 'Percentage':
