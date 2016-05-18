@@ -46,12 +46,12 @@ class ThemeFilesFinder(BaseFinder):
         for theme in themes:
             theme_storage = self.storage_class(
                 os.path.join(theme.path, self.source_dir),
-                prefix=theme.theme_dir,
+                prefix=theme.theme_dir_name,
             )
 
-            self.storages[theme.theme_dir] = theme_storage
-            if theme.theme_dir not in self.themes:
-                self.themes.append(theme.theme_dir)
+            self.storages[theme.theme_dir_name] = theme_storage
+            if theme.theme_dir_name not in self.themes:
+                self.themes.append(theme.theme_dir_name)
 
         super(ThemeFilesFinder, self).__init__(*args, **kwargs)
 
@@ -71,12 +71,12 @@ class ThemeFilesFinder(BaseFinder):
         matches = []
         theme_dir = path.split("/", 1)[0]
 
-        themes = {t.theme_dir: t for t in get_themes()}
+        themes = {t.theme_dir_name: t for t in get_themes()}
         # if path is prefixed by theme name then search in the corresponding storage other wise search all storages.
         if theme_dir in themes:
             theme = themes[theme_dir]
             path = "/".join(path.split("/")[1:])
-            match = self.find_in_theme(theme.theme_dir, path)
+            match = self.find_in_theme(theme.theme_dir_name, path)
             if match:
                 if not all:
                     return match

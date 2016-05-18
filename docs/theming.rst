@@ -103,14 +103,14 @@ It is up to you where to install the theme on the server, but a good default loc
     All themes must reside in the same physical directory.
 
 In order for Otto to use the installed themes, you must specify the location of the theme directory in
-Django settings by setting COMPREHENSIVE_THEME_DIR in your settings file:
+Django settings by setting COMPREHENSIVE_THEME_DIRS in your settings file:
 
 .. code-block:: python
 
-    COMPREHENSIVE_THEME_DIR = "/edx/app/ecommerce/ecommerce/themes"
+    COMPREHENSIVE_THEME_DIRS = ["/edx/app/ecommerce/ecommerce/themes", ]
 
 Where ``/edx/app/ecommerce/ecommerce/themes`` is the path to where you have installed the
-themes on your server.
+themes on your server. You can list any/all theme directories through this setting.
 
 After installing a theme, it is associated with sites by adding appropriate entries to the following tables
 
@@ -195,9 +195,9 @@ Troubleshooting
 ---------------
 If you have gone through the above procedure and you are not seeing theme overrides, you need to make sure
 
-- ``COMPREHENSIVE_THEME_DIR`` must be path for the directory containing all themes e.g. if your theme is
-  ``/edx/app/ecommerce/ecommerce/themes/my-theme`` then correct value for ``COMPREHENSIVE_THEME_DIR`` is
-  ``/edx/app/ecommerce/ecommerce/themes``.
+- ``COMPREHENSIVE_THEME_DIRS`` must contain path for the directory containing themes e.g. if your theme is
+  ``/edx/app/ecommerce/ecommerce/themes/my-theme`` then correct value for ``COMPREHENSIVE_THEME_DIRS`` is
+  ``['/edx/app/ecommerce/ecommerce/themes']``.
 - ``domain`` name for site is the name users will put in the browser to access the site, it also includes port number
   e.g. if Otto is running on ``localhost:8002`` then domain should be ``localhost:8002``
 - Theme dir name is the name of the directory of you theme, for our ongoing example ``my-theme``

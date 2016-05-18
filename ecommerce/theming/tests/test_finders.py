@@ -3,7 +3,6 @@ Tests for comprehensive theme static files finders.
 """
 from django.conf import settings
 from django.test import TestCase
-from path import Path
 
 from ecommerce.theming.finders import ThemeFilesFinder
 
@@ -21,7 +20,7 @@ class TestThemeFinders(TestCase):
         """
         Verify Theme Finder returns themed assets
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
         asset = "test-theme/images/default-logo.png"
         match = self.finder.find(asset)
 
@@ -31,7 +30,7 @@ class TestThemeFinders(TestCase):
         """
         Verify Theme Finder returns themed assets
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
 
         asset = "test-theme/images/default-logo.png"
         matches = self.finder.find(asset, all=True)
@@ -45,7 +44,7 @@ class TestThemeFinders(TestCase):
         """
         Verify find in theme method of finders returns asset from specified theme
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
 
         asset = "images/default-logo.png"
         match = self.finder.find_in_theme("test-theme", asset)

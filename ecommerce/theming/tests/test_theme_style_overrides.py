@@ -5,10 +5,9 @@ from django.conf import settings
 from django.test import override_settings
 from django.contrib import staticfiles
 from django.core.management import call_command
-from path import Path
 
 from ecommerce.tests.testcases import TestCase
-from ecommerce.theming.test_utils import with_comprehensive_theme
+from ecommerce.theming.test_utils import compile_sass
 
 
 class TestComprehensiveTheme(TestCase):
@@ -37,24 +36,25 @@ class TestComprehensiveTheme(TestCase):
         # compile sass assets for test themes.
         compile_sass()
 
+        # Compress test theme templates
+        call_command("compress")
+
         super(TestComprehensiveTheme, cls).setUpClass()
 
-    @with_comprehensive_theme("test-theme")
     def test_templates(self):
         """
         Test that theme template overrides are applied.
         """
-        with override_settings(COMPRESS_OFFLINE=False, COMPRESS_ENABLED=False):
-            resp = self.client.get('/dashboard/')
-            self.assertEqual(resp.status_code, 200)
-            # This string comes from header.html of test-theme
-            self.assertContains(resp, "This is a Test Theme.")
+        resp = self.client.get('/dashboard/')
+        self.assertEqual(resp.status_code, 200)
+        # This string comes from header.html of test-theme
+        self.assertContains(resp, "This is a Test Theme.")
 
     def test_logo_image(self):
         """
         Test that theme logo is used instead of default logo.
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
 
         result = staticfiles.finders.find('test-theme/images/default-logo.png')
         self.assertEqual(result, themes_dir / "test-theme" / 'static/images/default-logo.png')
@@ -63,7 +63,7 @@ class TestComprehensiveTheme(TestCase):
         """
         Test that theme sass files are used instead of default sass files.
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
 
         result = staticfiles.finders.find('test-theme/css/base/main.css')
         self.assertEqual(result, themes_dir / "test-theme" / "static/css/base/main.css")
@@ -74,11 +74,12 @@ class TestComprehensiveTheme(TestCase):
 
         self.assertIn("background-color: #00fa00", main_css)
 
-
-def compile_sass():
-    """
-    Call update assets command to compile system and theme sass.
-    """
-    with override_settings(DEBUG=True):
-        # Compile system and theme sass files
-        call_command('update_assets')
+    def test_default_theme(self):
+        """
+        Test that theme template overrides are applied.
+        """
+        with override_settings(DEFAULT_SITE_THEME="test-theme-2"):
+            resp = self.client.get('/dashboard/')
+            self.assertEqual(resp.status_code, 200)
+            # This string comes from header.html of test-theme
+            self.assertContains(resp, "This is second Test Theme.")

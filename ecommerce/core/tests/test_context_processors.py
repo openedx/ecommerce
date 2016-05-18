@@ -18,6 +18,6 @@ class CoreContextProcessorTests(TestCase):
                 'lms_base_url': get_lms_url(),
                 'lms_dashboard_url': get_lms_dashboard_url(),
                 'platform_name': request.site.name,
-                'support_url': SUPPORT_URL
+                'support_url': SUPPORT_URL,
             }
         )
