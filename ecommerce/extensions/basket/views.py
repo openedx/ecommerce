@@ -15,8 +15,9 @@ from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_base_api_url
 from ecommerce.coupons.views import get_voucher_from_code
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -48,12 +49,43 @@ class BasketSingleItemView(View):
 
         try:
             product = StockRecord.objects.get(partner=partner, partner_sku=sku).product
-        except StockRecord.DoesNotExist:
-            return HttpResponseBadRequest(_('SKU [{sku}] does not exist.'.format(sku=sku)))
+            course_key = product.attr.course_key
 
+            api = EdxRestApiClient(
+                get_lms_enrollment_base_api_url(),
+                oauth_access_token=request.user.access_token,
+                append_slash=False
+            )
+            logger.debug(
+                'Getting enrollment information for [%s] in [%s].',
+                request.user.username,
+                course_key
+            )
+            status = api.enrollment(','.join([request.user.username, course_key])).get()
+            username = request.user.username
+            seat_type = mode_for_seat(product)
+            if status and status.get('mode') == seat_type:
+                logger.warning(
+                    'User [%s] attempted to repurchase the [%s] seat of course [%s]',
+                    username,
+                    seat_type,
+                    course_key
+                )
+                return HttpResponseBadRequest(_('You are already enrolled in {course}.').format(
+                    course=product.course.name))
+        except StockRecord.DoesNotExist:
+            return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
+        except (ConnectionError, SlumberBaseException, Timeout) as ex:
+            logger.exception(
+                'Failed to retrieve enrollment details for [%s] in course [%s], Because of [%s]',
+                request.user.username,
+                course_key,
+                ex,
+            )
+            return HttpResponseBadRequest(_('An error occurred while retrieving enrollment details. Please try again.'))
         purchase_info = request.strategy.fetch_for_product(product)
         if not purchase_info.availability.is_available_to_buy:
-            return HttpResponseBadRequest(_('Product [{product}] not available to buy.'.format(product=product.title)))
+            return HttpResponseBadRequest(_('Product [{product}] not available to buy.').format(product=product.title))
 
         prepare_basket(request, product, voucher)
         return HttpResponseRedirect(reverse('basket:summary'), status=303)
