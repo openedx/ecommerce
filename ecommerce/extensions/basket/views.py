@@ -113,6 +113,8 @@ class BasketSummaryView(BasketView):
         lines_data = []
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
         is_verification_required = False
+        is_bulk_purchase = False
+
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
             cache_key = 'courses_api_detail_{}'.format(course_key)
@@ -130,6 +132,10 @@ class BasketSummaryView(BasketView):
                 course_name = course['name']
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
+
+            # Set to true if any course in basket has bulk purchase scenerio
+            if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+                is_bulk_purchase = True
 
             if line.has_discount:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
@@ -169,5 +175,6 @@ class BasketSummaryView(BasketView):
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
             'min_seat_quantity': 1,
+            'is_bulk_purchase': is_bulk_purchase,
         })
         return context
