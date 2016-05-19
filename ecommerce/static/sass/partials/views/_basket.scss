@@ -14,8 +14,7 @@
         }
 
         #basket_totals,
-        .price,
-        .payment-buttons {
+        .price {
             @include float(right);
         }
 
@@ -148,10 +147,6 @@
         }
 
         .payment-buttons {
-            @include margin-right(30px);
-
-            text-align: right;
-
             .payment-button {
                 border-color: #1E8142;
                 padding: spacing-vertical(small) spacing-horizontal(mid-large);

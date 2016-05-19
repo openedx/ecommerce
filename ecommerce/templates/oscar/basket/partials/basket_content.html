@@ -68,7 +68,7 @@
             {% if not line_data.enrollment_code %}
                 {% block vouchers %}
                     {% if basket.contains_a_voucher %}
-                        <div class="vouchers col-sm-6">
+                        <div class="vouchers col-6">
                             {% for voucher in basket.vouchers.all %}
                                 <p class="voucher">
                                 {% blocktrans with voucher_code=voucher.code %}
@@ -84,7 +84,7 @@
                     {% else %}
                         {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                         {% if voucher_form %}
-                            <div class="use-voucher col-sm-6">
+                            <div class="use-voucher col-6">
                                 <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a coupon code" %}</a></p>
                                 <div id="voucher_form_container">
                                     <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
@@ -116,35 +116,37 @@
         </div>
 
         <div class="row">
-            <div class="payment-buttons" data-basket-id="{{ basket.id }}">
-                {% if free_basket %}
-                <a  href="{% url 'checkout:free-checkout' %}"
-                    data-track-type="click"
-                    data-track-event="edx.bi.ecommerce.basket.free_checkout"
-                    data-track-category="checkout"
-                    data-course-id="{{ course.id }}"
-                    class="btn btn-success checkout-button">
-                    {% trans "Place Order" %}
-                </a>
-                {% else %}
-                    {% for processor in payment_processors %}
-                        <button data-track-type="click"
-                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                                data-track-category="checkout"
-                                data-processor-name="{{ processor.NAME }}"
-                                data-course-id="{{ course.id }}"
-                                class="btn payment-button"
-                                value="{{ processor.NAME|lower }}"
-                                id="{{ processor.NAME|lower }}">
-                            {% if processor.NAME == 'cybersource' %}
-                                {% trans "Checkout" %}
-                            {% elif processor.NAME == 'paypal' %}
-                                {# Translators: Do NOT translate the name PayPal. #}
-                                {% trans "Checkout with PayPal" %}
-                            {% endif %}
-                        </button>
-                    {% endfor %}
-                {% endif %}
+            <div class="col-lg-6 col-lg-offset-6 col-md-8 col-md-offset-4 col-sm-10 col-sm-offset-2">
+                <div class="pull-right payment-buttons" data-basket-id="{{ basket.id }}">
+                    {% if free_basket %}
+                    <a  href="{% url 'checkout:free-checkout' %}"
+                        data-track-type="click"
+                        data-track-event="edx.bi.ecommerce.basket.free_checkout"
+                        data-track-category="checkout"
+                        data-course-id="{{ course.id }}"
+                        class="btn btn-success checkout-button">
+                        {% trans "Place Order" %}
+                    </a>
+                    {% else %}
+                        {% for processor in payment_processors %}
+                            <button data-track-type="click"
+                                    data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                    data-track-category="checkout"
+                                    data-processor-name="{{ processor.NAME }}"
+                                    data-course-id="{{ course.id }}"
+                                    class="btn payment-button"
+                                    value="{{ processor.NAME|lower }}"
+                                    id="{{ processor.NAME|lower }}">
+                                {% if processor.NAME == 'cybersource' %}
+                                    {% trans "Checkout" %}
+                                {% elif processor.NAME == 'paypal' %}
+                                    {# Translators: Do NOT translate the name PayPal. #}
+                                    {% trans "Checkout with PayPal" %}
+                                {% endif %}
+                            </button>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
         </div>
 
