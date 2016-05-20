@@ -188,6 +188,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         with patch('ecommerce.extensions.checkout.mixins.fulfill_order.delay') as mock_delay:
             EdxOrderPlacementMixin().handle_successful_order(self.order)
             self.assertTrue(mock_delay.called)
+            mock_delay.assert_called_once_with(self.order.number, site_code='edX')
 
     def test_place_free_order(self, __):
         """ Verify an order is placed and the basket is submitted. """
