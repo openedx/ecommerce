@@ -179,3 +179,14 @@
         color: green;
     }
 }
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: $screen-sm-min) {
+    .checkout-quantity {
+        .input-group {
+            button {
+                padding: 6px 0px;
+            }
+        }
+    }
+}
