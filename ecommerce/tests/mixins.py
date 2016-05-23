@@ -279,6 +279,18 @@ class TestServerUrlMixin(object):
         return 'http://{domain}{path}'.format(domain=site.domain, path=path)
 
 
+class ApiMockMixin(object):
+    """ Common Mocks for the API responses. """
+
+    def setUp(self):
+        super(ApiMockMixin, self).setUp()
+
+    def mock_api_error(self, error, url):
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+
+
 class LmsApiMockMixin(object):
     """ Mocks for the LMS API reponses. """
 
@@ -301,6 +313,36 @@ class LmsApiMockMixin(object):
         course_id = course.id if course else 'course-v1:test+test+test'
         course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+
+
+class CatalogPreviewMockMixin(object):
+    """ Mocks for the Course Discovery responses. """
+
+    def setUp(self):
+        super(CatalogPreviewMockMixin, self).setUp()
+
+    def mock_course_runs_contains_api_response(self, course_run=None, query=None):
+        """ Helper function to register an API endpoint for the course run information. """
+        course_run_info = {
+            'count': 1,
+            'results': [{
+                'key': course_run.id,
+                'title': course_run.name,
+            }] if course_run else [{
+                'key': 'course-v1:test+test+test',
+                'title': 'Test course',
+            }],
+        }
+        course_run_info_json = json.dumps(course_run_info)
+        course_run_url = '{}course_runs/?query={}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            query if query else 'id:course*'
+        )
+        httpretty.register_uri(
+            httpretty.GET, course_run_url,
+            body=course_run_info_json,
+            content_type='application/json'
+        )
 
 
 class CouponMixin(object):

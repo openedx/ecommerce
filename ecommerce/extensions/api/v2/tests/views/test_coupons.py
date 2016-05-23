@@ -8,6 +8,7 @@ import ddt
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
+import httpretty
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -39,6 +40,7 @@ Voucher = get_model('voucher', 'Voucher')
 COUPONS_LINK = reverse('api:v2:coupons-list')
 
 
+@httpretty.activate
 @ddt.ddt
 class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     """Unit tests for creating coupon order."""

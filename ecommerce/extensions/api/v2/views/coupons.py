@@ -41,11 +41,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
-    """Endpoint for creating coupons.
-
-    Creates a new coupon product, adds it to a basket and creates a
-    new order from that basket.
-    """
+    """ Coupon resource. """
     queryset = Product.objects.filter(product_class__name='Coupon')
     permission_classes = (IsAuthenticated, IsAdminUser)
     filter_backends = (filters.DjangoFilterBackend, )
