@@ -168,5 +168,6 @@ class BasketSummaryView(BasketView):
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
+            'min_seat_quantity': 1,
         })
         return context

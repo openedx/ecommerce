@@ -34,7 +34,7 @@
                             <div class="col-lg-2 col-md-2 col-sm-6 form-inline">
                                 <div class="checkout-quantity form-group">
                                     <div class="input-group  {% if form.errors %}error{% endif %}">
-                                        {% render_field form.quantity class+="quantity form-control" %}
+                                        {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
                                     <button class="btn btn-default" type="submit" data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
                                     </div>
                                 </div>
