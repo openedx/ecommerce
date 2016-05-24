@@ -190,3 +190,15 @@
         }
     }
 }
+
+/* extra Small devices (phones, 768px and lower) */
+@media (max-width: $screen-xs-max) {
+    .basket .container {
+        .payment-buttons {
+            .payment-button {
+                width: 100%;
+                margin-bottom: 2px;
+            }
+        }
+    }
+}
