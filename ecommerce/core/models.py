@@ -3,6 +3,7 @@ import logging
 from analytics import Client as SegmentClient
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
@@ -146,6 +147,11 @@ class SiteConfiguration(models.Model):
     @cached_property
     def segment_client(self):
         return SegmentClient(self.segment_key, debug=settings.DEBUG)
+
+    def save(self, *args, **kwargs):
+        # Clear Site cache upon SiteConfiguration changed
+        Site.objects.clear_cache()
+        super(SiteConfiguration, self).save(*args, **kwargs)
 
 
 class User(AbstractUser):
