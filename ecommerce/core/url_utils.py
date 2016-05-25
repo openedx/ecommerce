@@ -59,6 +59,14 @@ def get_oauth2_provider_url():
     return get_lms_url('/oauth2')
 
 
+def get_site_setting(site, name):
+    setting = site.siteconfiguration.oauth_settings.get(name)
+    if not setting:
+        # Then check Django settings for the setting
+        setting = getattr(settings, name)
+    return setting
+
+
 def get_course_catalog_api_client(site):
     """
     Returns an API client to access the Course Catalog service.
@@ -72,8 +80,8 @@ def get_course_catalog_api_client(site):
 
     access_token, __ = EdxRestApiClient.get_oauth_access_token(
         '{root}/access_token'.format(root=get_oauth2_provider_url()),
-        site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
-        site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
+        get_site_setting(site, 'SOCIAL_AUTH_EDX_OIDC_KEY'),
+        get_site_setting(site, 'SOCIAL_AUTH_EDX_OIDC_SECRET'),
         token_type='jwt'
     )
     course_catalog_client = EdxRestApiClient(

@@ -7,7 +7,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from ecommerce.core.exceptions import MissingRequestError
 from ecommerce.core.url_utils import(get_course_catalog_api_client,
                                      get_ecommerce_url, get_lms_url,
-                                     get_oauth2_provider_url)
+                                     get_oauth2_provider_url, get_site_setting)
 from ecommerce.tests.testcases import TestCase
 
 
@@ -28,8 +28,8 @@ class UrlUtilityTests(TestCase):
         api = get_course_catalog_api_client(self.site)
 
         mock_method.assert_called_with('{root}/access_token'.format(root=get_oauth2_provider_url()),
-                                       self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
-                                       self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
+                                       get_site_setting(self.site, 'SOCIAL_AUTH_EDX_OIDC_KEY'),
+                                       get_site_setting(self.site, 'SOCIAL_AUTH_EDX_OIDC_SECRET'),
                                        token_type='jwt')
         api_session = api._store['session']  # pylint: disable=protected-access
         self.assertEqual('auth-token', api_session.auth.token)
