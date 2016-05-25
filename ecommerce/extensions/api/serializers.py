@@ -153,7 +153,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Order
-        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address')
+        fields = ('number', 'date_placed', 'status', 'currency', 'total_excl_tax', 'lines', 'billing_address',
+                  'basket')
 
 
 class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abstract-method
