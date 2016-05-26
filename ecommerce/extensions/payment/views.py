@@ -49,7 +49,7 @@ class AdyenNotificationView(EdxOrderPlacementMixin, View):
         return super(AdyenNotificationView, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
-        logger.debug(request.body)
+        return HttpResponse('[accepted]')
 
 
 class AdyenPaymentView(EdxOrderPlacementMixin, View):
