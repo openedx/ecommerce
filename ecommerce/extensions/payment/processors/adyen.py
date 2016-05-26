@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from urlparse import urljoin
 
-from oscar.apps.payment.exceptions import TransactionDeclined
+from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 import requests
 
@@ -129,19 +129,52 @@ class Adyen(BasePaymentProcessor):
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
         currency = basket.currency
         total = basket.total_incl_tax
-        transaction_id = response['pspReference']
+        psp_reference = response['pspReference']
 
         source = Source(source_type=source_type,
                         currency=currency,
                         amount_allocated=total,
                         amount_debited=total,
-                        reference=transaction_id)
+                        reference=psp_reference)
 
         # Create PaymentEvent to track
         event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
-        event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id, processor_name=self.NAME)
+        event = PaymentEvent(event_type=event_type, amount=total, reference=psp_reference, processor_name=self.NAME)
 
         return source, event
 
     def issue_credit(self, source, amount, currency):
-        pass
+        order = source.order
+
+        response = requests.post(
+            urljoin(self.payment_api_url, 'cancelOrRefund'),
+            auth=(self.web_service_username, self.web_service_password),
+            headers={
+                'Content-Type': 'application/json'
+            },
+            json={
+                'merchantAccount': self.merchant_account_code,
+                'originalReference': source.reference,
+                'reference': order.number
+            }
+        )
+
+        adyen_response = response.json()
+        error = False
+        if response.status_code == requests.codes.ok:
+            self.record_processor_response(
+                response.json(),
+                transaction_id=adyen_response['pspReference'],
+                basket=order.basket
+            )
+            if adyen_response['response'] != 'cancelOrRefund-received':
+                error = True
+        else:
+            error = True
+
+        if error:
+            msg = 'An error occurred while attempting to issue a credit (via Adyen) for order [{}].'.format(
+                order.number
+            )
+            logger.exception(msg)
+            raise GatewayError(msg)

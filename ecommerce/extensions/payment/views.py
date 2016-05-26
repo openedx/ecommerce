@@ -34,6 +34,24 @@ OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
+class AdyenNotificationView(EdxOrderPlacementMixin, View):
+    @property
+    def payment_processor(self):
+        return Adyen()
+
+    # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
+    # until the request had concluded; Django will refuse to commit when an atomic() block
+    # is active, since that would break atomicity. Without an order present in the database
+    # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
+    @method_decorator(transaction.non_atomic_requests)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(AdyenNotificationView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request):
+        logger.debug(request.body)
+
+
 class AdyenPaymentView(EdxOrderPlacementMixin, View):
     @property
     def payment_processor(self):
