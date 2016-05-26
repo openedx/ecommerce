@@ -140,10 +140,10 @@ class SiteConfiguration(models.Model):
                 'Unknown payment processors [%s] are configured for site %s', processor_config_repr, self.site.id
             )
 
-        return [
-            processor for processor in all_processors
+        return {
+            processor.NAME: processor for processor in all_processors
             if processor.NAME in self.payment_processors_set and processor.is_enabled()
-        ]
+        }
 
     def get_from_email(self):
         """

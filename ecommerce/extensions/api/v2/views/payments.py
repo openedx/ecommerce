@@ -26,4 +26,4 @@ class PaymentProcessorListView(generics.ListAPIView):
 
     def get_queryset(self):
         """Fetch the list of payment processor classes based on Django settings."""
-        return self.request.site.siteconfiguration.get_payment_processors()
+        return [processor for name, processor in self.request.site.siteconfiguration.get_payment_processors().items()]

@@ -95,11 +95,16 @@ AUTHENTICATION_BACKENDS = (
 )
 
 OSCAR_DEFAULT_CURRENCY = 'USD'
+
+CURRENCY_CODES = {
+    'USD': {'display_name': 'US Dollars', 'exponent': 2}
+}
 # END ORDER PROCESSING
 
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
+    'ecommerce.extensions.payment.processors.adyen.Adyen',
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
 )
