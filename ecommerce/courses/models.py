@@ -107,7 +107,7 @@ class Course(models.Model):
         """ Returns a queryset of course seat Products related to this course. """
         return self.parent_seat_product.children.all().prefetch_related('stockrecords')
 
-    def _get_course_seat_name(self, certificate_type, id_verification_required):
+    def get_course_seat_name(self, certificate_type, id_verification_required):
         """ Returns the name for a course seat. """
         name = u'Seat in {}'.format(self.name)
 
@@ -180,7 +180,7 @@ class Course(models.Model):
         seat.structure = Product.CHILD
         seat.parent = self.parent_seat_product
         seat.is_discountable = True
-        seat.title = self._get_course_seat_name(certificate_type, id_verification_required)
+        seat.title = self.get_course_seat_name(certificate_type, id_verification_required)
         seat.expires = expires
 
         # If a ProductAttribute is saved with a value of None or the empty string, the ProductAttribute is deleted.
