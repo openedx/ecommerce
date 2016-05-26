@@ -1,3 +1,6 @@
+from math import pow
+
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -37,3 +40,23 @@ def middle_truncate(string, chars):
     truncated = u'{start}{indicator}{end}'.format(start=start, indicator=indicator, end=end)
 
     return truncated
+
+
+def minor_units(price, currency_code):
+    """
+    Calculates the number of minor units given the major unit price for the given currency code.
+
+    Some currencies do not have decimal points, such as JPY, and some have 3 decimal points, such as BHD.
+    For example, 10 GBP is submitted as 1000, whereas 10 JPY is submitted as 10.
+
+    Arguments:
+        price (Decimal): The major unit price to be converted.
+        currency_code (str): The currency code.
+
+    Returns:
+        int: The number of minor units.
+
+    Raises:
+        KeyError: If the given currency code has not been configured in application settings,
+    """
+    return int(round(float(price) * pow(10, settings.CURRENCY_CODES[currency_code]['exponent'])))
