@@ -5,10 +5,11 @@ import httpretty
 import mock
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
-from django.test import override_settings
+from django.test import override_settings, RequestFactory
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
@@ -115,6 +116,39 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assertEqual(content['results'][0]['number'], unicode(order.number))
         self.assertEqual(content['results'][0]['user']['email'], admin_user.email)
         self.assertEqual(content['results'][0]['user']['username'], admin_user.username)
+
+    def test_username_filter_with_staff(self):
+        """ Verify the staff user can filter data by username."""
+
+        # create two orders for different users
+        order = factories.create_order(user=self.user)
+        other_user = self.create_user()
+        other_order = factories.create_order(user=other_user)
+
+        requester = self.create_user(is_staff=True)
+        self.client.login(email=requester.email, password=self.password)
+
+        self.assert_list_with_username_filter(self.user, order)
+        self.assert_list_with_username_filter(other_user, other_order)
+
+    def test_username_filter_with_non_staff(self):
+        """Non staff users are not allowed to filter on any other username."""
+        requester = self.create_user(is_staff=False)
+        self.client.login(username=requester.username, password=self.password)
+
+        response = self.client.get(self.path, {'username': self.user.username})
+        self.assertEqual(response.status_code, 403)
+
+    def assert_list_with_username_filter(self, user, order):
+        """ Helper method for making assertions. """
+
+        response = self.client.get(self.path, {'username': user.username})
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            response.data['results'][0],
+            OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')}).data
+        )
 
 
 @ddt.ddt

@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from oscar.core.loading import get_model
 
+Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 
 
@@ -18,3 +19,13 @@ class ProductFilter(django_filters.FilterSet):
     class Meta(object):
         model = Product
         fields = ('product_class', 'structure', 'title',)
+
+
+class OrderFilter(django_filters.FilterSet):
+    """ Filter orders via query string parameter."""
+
+    username = django_filters.CharFilter(name='user__username')
+
+    class Meta(object):
+        model = Order
+        fields = ('username',)

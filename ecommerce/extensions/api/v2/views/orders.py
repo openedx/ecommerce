@@ -2,15 +2,18 @@
 import logging
 
 from oscar.core.loading import get_model, get_class
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import detail_route
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.filters import OrderFilter
 from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +26,20 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Order.objects.all()
     serializer_class = serializers.OrderSerializer
     throttle_classes = (ServiceUserThrottle,)
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = OrderFilter
 
     def filter_queryset(self, queryset):
         queryset = super(OrderViewSet, self).filter_queryset(queryset)
+
+        username = self.request.query_params.get('username')
         user = self.request.user
 
         # Non-staff users should only see their own orders
         if not user.is_staff:
+            if username and user.username != username:
+                raise PermissionDenied
+
             queryset = queryset.filter(user=user)
 
         return queryset
