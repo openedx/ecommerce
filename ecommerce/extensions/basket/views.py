@@ -64,7 +64,7 @@ class BasketSingleItemView(View):
             status = api.enrollment(','.join([request.user.username, course_key])).get()
             username = request.user.username
             seat_type = mode_for_seat(product)
-            if status and status.get('mode') == seat_type:
+            if status and status.get('mode') == seat_type and status.get('is_active'):
                 logger.warning(
                     'User [%s] attempted to repurchase the [%s] seat of course [%s]',
                     username,
