@@ -112,7 +112,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             # There's potential for a race condition here if the task starts executing before the active
             # transaction has been committed; the necessary order doesn't exist in the database yet.
             # See http://celery.readthedocs.org/en/latest/userguide/tasks.html#database-transactions.
-            fulfill_order.delay(order.number)
+            fulfill_order.delay(order.number, site_code=order.site.siteconfiguration.partner.short_code)
         else:
             post_checkout.send(sender=self, order=order)
 
