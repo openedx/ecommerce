@@ -351,6 +351,31 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
             self.assertEqual(row['Client'], self.basket.owner.username)
             self.assertEqual(row['Category'], '')
 
+    @httpretty.activate
+    def test_generate_coupon_report_for_query_coupons(self):
+        """ Verify empty report fields for query coupons. """
+        query_coupon = self.create_coupon(
+            title='Query coupon',
+            quantity=1,
+            catalog_query='course:*',
+            course_seat_types={'verified': 1}
+        )
+        query_coupon.history.all().update(history_user=self.user)
+        self.mock_course_api_response(course=self.course)
+        __, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
+
+        empty_fields = (
+            'Invoiced Amount',
+            'Course ID',
+            'Organization',
+            'Price',
+            'Coupon Type',
+            'Discount Percentage',
+            'Discount Amount'
+        )
+        for field in empty_fields:
+            self.assertIsNone(rows[0][field])
+
     def test_get_voucher_discount_info(self):
         """ Verify that get_voucher_discount_info() returns correct info. """
         benefits = self.create_benefits()

@@ -321,21 +321,41 @@ class CatalogPreviewMockMixin(object):
     def setUp(self):
         super(CatalogPreviewMockMixin, self).setUp()
 
-    def mock_course_runs_contains_api_response(self, course_run=None, query=None):
-        """ Helper function to register an API endpoint for the course run information. """
+    def mock_dynamic_catalog_course_runs_api(self, course_run=None, query=None):
+        """ Helper function to register a dynamic course catalog API endpoint for the course run information. """
         course_run_info = {
             'count': 1,
             'results': [{
                 'key': course_run.id,
                 'title': course_run.name,
             }] if course_run else [{
-                'key': 'course-v1:test+test+test',
+                'key': 'test',
                 'title': 'Test course',
             }],
         }
         course_run_info_json = json.dumps(course_run_info)
-        course_run_url = '{}course_runs/?query={}'.format(
+        course_run_url = '{}course_runs/?q={}'.format(
             settings.COURSE_CATALOG_API_URL,
+            query if query else 'id:course*'
+        )
+        httpretty.register_uri(
+            httpretty.GET, course_run_url,
+            body=course_run_info_json,
+            content_type='application/json'
+        )
+
+    def mock_dynamic_catalog_contains_api(self, course_run_ids, query):
+        """ Helper function to register a dynamic course catalog API endpoint for the contains information. """
+        course_contains_info = {
+            'course_runs': {}
+        }
+        for course_run_id in course_run_ids:
+            course_contains_info['course_runs'][course_run_id] = True
+
+        course_run_info_json = json.dumps(course_contains_info)
+        course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            (course_run_id for course_run_id in course_run_ids),
             query if query else 'id:course*'
         )
         httpretty.register_uri(
@@ -389,7 +409,9 @@ class CouponMixin(object):
             benefit_value=100,
             note=None,
             max_uses=None,
-            quantity=5
+            quantity=5,
+            catalog_query=None,
+            course_seat_types=None
     ):
         """Helper method for creating a coupon.
 
@@ -400,6 +422,8 @@ class CouponMixin(object):
             catalog(Catalog): Catalog of courses for which the coupon applies
             code(str): Custom coupon code
             benefit_value(int): The voucher benefit value
+            catalog_query(str): course query string
+            course_seat_types(JSONField): List of seat types
 
         Returns:
             coupon (Coupon)
@@ -409,7 +433,7 @@ class CouponMixin(object):
             partner = PartnerFactory(name='Tester')
         if client is None:
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None:
+        if catalog is None and not (catalog_query and course_seat_types):
             catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
@@ -426,6 +450,8 @@ class CouponMixin(object):
             'categories': [self.category],
             'note': note,
             'max_uses': max_uses,
+            'catalog_query': catalog_query,
+            'course_seat_types': course_seat_types,
         }
 
         coupon = CouponViewSet().create_coupon_product(

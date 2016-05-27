@@ -10,7 +10,7 @@ Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-def generate_sku(product, partner, **kwargs):
+def generate_sku(product, partner):
     """
     Generates a SKU for the given partner and and product combination.
 
@@ -22,10 +22,8 @@ def generate_sku(product, partner, **kwargs):
         raise AttributeError('Product has no product class')
 
     if product_class.name == 'Coupon':
-        catalog = kwargs.get('catalog', '')
         _hash = ' '.join((
             unicode(product.id),
-            unicode(catalog.id),
             str(partner.id)
         ))
     elif product_class.name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
@@ -68,19 +66,3 @@ def get_or_create_catalog(name, partner, stock_record_ids):
     for stock_record in stock_records:
         catalog.stock_records.add(stock_record)
     return catalog, True
-
-
-def generate_coupon_slug(partner, title, catalog):
-    """
-    Generates a unique slug value for a coupon from the
-    partner, title and catalog. Used to differentiate products.
-    """
-    _hash = ' '.join((
-        unicode(title),
-        unicode(catalog.id),
-        str(partner.id)
-    ))
-    md5_hash = md5(_hash.lower())
-    digest = md5_hash.hexdigest()[-10:]
-
-    return digest.upper()
