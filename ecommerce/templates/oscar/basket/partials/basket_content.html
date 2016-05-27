@@ -129,7 +129,16 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-6 col-lg-offset-6 col-md-8 col-md-offset-4 col-sm-10 col-sm-offset-2">
+            <div class="col-sm-12">
+                {# Switch Basket view in between single and bulk purchase items #}
+                {% if partner_sku %}
+                    <div class="pull-left basket-switch-link">
+                        <a href="/basket/single-item/?sku={{ partner_sku }}" class="btn btn-link">
+                            {{ switch_link_text }}
+                        </a>
+                    </div>
+                {% endif %}
+
                 <div class="pull-right payment-buttons" data-basket-id="{{ basket.id }}">
                     {% if free_basket %}
                     <a  href="{% url 'checkout:free-checkout' %}"

@@ -19,7 +19,7 @@ from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_base_api_ur
 from ecommerce.coupons.views import get_voucher_from_code
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
-from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
+from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
@@ -112,8 +112,8 @@ class BasketSummaryView(BasketView):
         lines = context.get('line_list', [])
         lines_data = []
         api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
-        is_verification_required = False
-        is_bulk_purchase = False
+        is_verification_required = is_bulk_purchase = False
+        switch_link_text = partner_sku = ''
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
@@ -136,6 +136,9 @@ class BasketSummaryView(BasketView):
             # Set to true if any course in basket has bulk purchase scenerio
             if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
                 is_bulk_purchase = True
+
+            # Get variables for alternative basket view
+            switch_link_text, partner_sku = get_basket_switch_data(line.product)
 
             if line.has_discount:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
@@ -176,5 +179,8 @@ class BasketSummaryView(BasketView):
             'is_verification_required': is_verification_required,
             'min_seat_quantity': 1,
             'is_bulk_purchase': is_bulk_purchase,
+            'switch_link_text': switch_link_text,
+            'partner_sku': partner_sku,
         })
+
         return context

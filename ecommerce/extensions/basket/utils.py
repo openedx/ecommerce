@@ -4,10 +4,12 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+StockRecord = get_model('partner', 'StockRecord')
 
 logger = logging.getLogger(__name__)
 
@@ -63,3 +65,23 @@ def get_certificate_type_display_value(certificate_type):
         raise ValueError('Certificate Type [%s] not found.', certificate_type)
 
     return display_values[certificate_type]
+
+
+def get_basket_switch_data(product):
+    product_class_name = product.get_product_class().name
+
+    if product_class_name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        switch_link_text = _('Click here to just purchase an enrollment for yourself')
+        structure = 'child'
+    elif product_class_name == SEAT_PRODUCT_CLASS_NAME:
+        switch_link_text = _('Click here to purchase multiple seats in this course')
+        structure = 'standalone'
+
+    try:
+        partner_sku = StockRecord.objects.get(
+            product__course_id=product.course_id,
+            product__structure=structure).partner_sku
+    except StockRecord.DoesNotExist:
+        partner_sku = None
+
+    return switch_link_text, partner_sku
