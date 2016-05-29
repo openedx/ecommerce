@@ -3,31 +3,32 @@ import hashlib
 import json
 
 import ddt
+import httpretty
+import pytz
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _
-import httpretty
 from oscar.core.loading import get_class, get_model
 from oscar.test import newfactories as factories
-import pytz
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.core.models import SiteConfiguration
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import StockRecordFactory
-from ecommerce.tests.mixins import ApiMockMixin, CouponMixin, LmsApiMockMixin
+from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -90,6 +91,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
 
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
+
         url = '{host}/{username},{course_id}'.format(
             host=get_lms_enrollment_api_url(),
             username=self.user.username,

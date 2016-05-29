@@ -1,16 +1,14 @@
+import httpretty
 import mock
-
 from django.conf import settings
 from django.test import RequestFactory
 from edx_rest_api_client.client import EdxRestApiClient
-import httpretty
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import CouponMixin, CatalogPreviewMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Catalog = get_model('catalogue', 'Catalog')
 

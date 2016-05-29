@@ -1,15 +1,18 @@
 from __future__ import unicode_literals
+
 import datetime
 import json
 
-from django.core.urlresolvers import reverse
-from oscar.core.loading import get_model
 import pytz
+from django.core.urlresolvers import reverse
+from django.test import RequestFactory
+from oscar.core.loading import get_model
 
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.models import Course
+from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -20,7 +23,6 @@ Voucher = get_model('voucher', 'Voucher')
 
 
 class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
-
     def setUp(self):
         super(ProductViewSetBase, self).setUp()
         self.user = self.create_user(is_staff=True)
@@ -33,7 +35,6 @@ class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
 
 
 class ProductViewSetTests(ProductViewSetBase):
-
     def test_list(self):
         """ Verify a list of products is returned. """
         path = reverse('api:v2:product-list')
@@ -129,7 +130,6 @@ class ProductViewSetTests(ProductViewSetBase):
 
 
 class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
-
     def test_coupon_product_details(self):
         """Verify the endpoint returns all coupon information."""
         coupon = self.create_coupon()
@@ -137,12 +137,11 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
-        self.assertEqual(response_data['id'], 3)
-        self.assertEqual(response_data['title'], 'Test coupon')
-        self.assertEqual(response_data['price'], '100.00')
-        self.assertEqual(response_data['attribute_values'][0]['name'], 'Coupon vouchers')
-        self.assertEqual(len(response_data['attribute_values'][0]['value']), 5)
+        request = RequestFactory(SERVER_NAME=self.site.domain).get('/')
+        request.user = self.user
+        request.site = self.site
+        expected = ProductSerializer(coupon, context={'request': request}).data
+        self.assertDictEqual(response.data, expected)
 
     def test_coupon_voucher_serializer(self):
         """Verify that the vouchers of a coupon are properly serialized."""

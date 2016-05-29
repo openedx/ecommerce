@@ -34,9 +34,9 @@ class CheckoutViewTests(TestCase):
         super(CheckoutViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        Basket.objects.create(owner=self.user)
+        self.basket = Basket.objects.create(owner=self.user)
         self.data = {
-            'basket_id': 1,
+            'basket_id': self.basket.id,
             'payment_processor': DummyProcessorWithUrl.NAME
         }
 
@@ -70,7 +70,7 @@ class CheckoutViewTests(TestCase):
         response = self.client.post(self.path, data=self.data)
         self.assertEqual(response.status_code, 200)
 
-        basket = Basket.objects.get(id=1)
+        basket = Basket.objects.get(id=self.basket.id)
         self.assertEqual(basket.status, Basket.FROZEN)
         response_data = json.loads(response.content)
         self.assertEqual(response_data['payment_form_data']['transaction_param'], 'test_trans_param')

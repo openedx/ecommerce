@@ -1,12 +1,11 @@
+import httpretty
 import mock
-
 from django.conf import settings
 from edx_rest_api_client.client import EdxRestApiClient
-import httpretty
 
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.coupons.utils import get_seats_from_query
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import CouponMixin, CatalogPreviewMockMixin
 from ecommerce.tests.testcases import TestCase
 
 
@@ -19,7 +18,6 @@ from ecommerce.tests.testcases import TestCase
     ))
 )
 class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
-
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
         self.query = 'key:*'
