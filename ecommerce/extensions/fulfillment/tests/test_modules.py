@@ -1,10 +1,10 @@
 """Tests of the Fulfillment API's fulfillment modules."""
 import datetime
 import json
+
 import ddt
 import httpretty
 import mock
-
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -15,9 +15,10 @@ from testfixtures import LogCapture
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.models import Course
-from ecommerce.courses.utils import mode_for_seat
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import (
     CouponFulfillmentModule, EnrollmentCodeFulfillmentModule, EnrollmentFulfillmentModule
@@ -26,7 +27,6 @@ from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
-from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'

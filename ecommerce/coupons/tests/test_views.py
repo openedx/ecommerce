@@ -1,25 +1,26 @@
 import datetime
 
 import ddt
+import httpretty
+import pytz
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-import httpretty
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import (
     ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 )
 from oscar.test.utils import RequestFactory
-import pytz
 
 from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_api_url
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
-from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
+from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -64,7 +65,6 @@ class CouponAppViewTests(TestCase):
 
 
 class GetVoucherTests(TestCase):
-
     def test_get_voucher_from_code(self):
         """ Verify that get_voucher_from_code() returns product and voucher. """
         original_voucher, original_product = prepare_voucher(code=COUPON_CODE)

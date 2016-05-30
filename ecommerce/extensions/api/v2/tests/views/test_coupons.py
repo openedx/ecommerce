@@ -3,20 +3,21 @@ from __future__ import unicode_literals
 
 import json
 from decimal import Decimal
-import mock
 
 import ddt
+import httpretty
+import mock
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
 from edx_rest_api_client.client import EdxRestApiClient
-import httpretty
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
 
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -24,7 +25,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, SiteFactory
-from ecommerce.tests.mixins import CouponMixin, CatalogPreviewMockMixin, ThrottlingMixin
+from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -46,18 +47,15 @@ COUPONS_LINK = reverse('api:v2:coupons-list')
 @httpretty.activate
 @ddt.ddt
 class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
-    """Unit tests for creating coupon order."""
-
     def setUp(self):
         super(CouponViewSetTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
         course = CourseFactory(id='edx/Demo_Course/DemoX')
-        course.create_or_update_seat('verified', True, 50, self.partner)
+        self.seat = course.create_or_update_seat('verified', True, 50, self.partner)
 
         self.catalog = Catalog.objects.create(partner=self.partner)
-        self.product_class, __ = ProductClass.objects.get_or_create(name='Coupon')
         self.coupon_data = {
             'title': 'Test Coupon',
             'partner': self.partner,
@@ -90,10 +88,11 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_create(self, voucher_type, max_uses, expected_max_uses):
         """Test the create method."""
         title = 'Test coupon'
+        stock_record = self.seat.stockrecords.first()
         self.coupon_data.update({
             'title': title,
             'client_username': 'Client',
-            'stock_record_ids': [1],
+            'stock_record_ids': [stock_record.id],
             'voucher_type': voucher_type,
             'price': 100,
             'category_ids': [self.category.id],
@@ -122,7 +121,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_create_coupon_product(self):
         """Test the created coupon data."""
         coupon = self.create_coupon()
-        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
+        self.assertEqual(Product.objects.filter(product_class=self.coupon_product_class).count(), 1)
         self.assertIsInstance(coupon, Product)
         self.assertEqual(coupon.title, 'Test coupon')
 
@@ -239,7 +238,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_delete_coupon(self):
         """Test the coupon deletion."""
         coupon = self.create_coupon(partner=self.partner)
-        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 1)
+        self.assertEqual(Product.objects.filter(product_class=self.coupon_product_class).count(), 1)
         self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 1)
         coupon_voucher_qs = CouponVouchers.objects.filter(coupon=coupon)
         self.assertEqual(coupon_voucher_qs.count(), 1)
@@ -249,7 +248,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         request.site = self.setup_site_configuration()
         response = CouponViewSet().destroy(request, coupon.id)
 
-        self.assertEqual(Product.objects.filter(product_class=self.product_class).count(), 0)
+        self.assertEqual(Product.objects.filter(product_class=self.coupon_product_class).count(), 0)
         self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 0)
         coupon_voucher_qs = CouponVouchers.objects.filter(coupon=coupon)
         self.assertEqual(coupon_voucher_qs.count(), 0)
@@ -261,13 +260,8 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-class CouponViewSetFunctionalTest(
-        CouponMixin,
-        CourseCatalogTestMixin,
-        CatalogPreviewMockMixin,
-        ThrottlingMixin,
-        TestCase
-):
+class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, ThrottlingMixin,
+                                  TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
@@ -509,7 +503,7 @@ class CouponViewSetFunctionalTest(
         # Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
         if mode == 'audit':
             seat = ProductFactory()
-        self.data.update({'stock_record_ids': [StockRecord.objects.get(product=seat).id], })
+        self.data.update({'stock_record_ids': [StockRecord.objects.get(product=seat).id]})
         response = self.client.post(COUPONS_LINK, data=self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

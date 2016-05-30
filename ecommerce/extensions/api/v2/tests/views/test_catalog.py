@@ -1,22 +1,22 @@
 import json
-import mock
 
 import ddt
+import httpretty
+import mock
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
 from edx_rest_api_client.client import EdxRestApiClient
-import httpretty
-from requests.exceptions import ConnectionError, Timeout
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
-from ecommerce.extensions.api.v2.views.catalog import CatalogViewSet
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
-from ecommerce.tests.mixins import ApiMockMixin, CatalogPreviewMockMixin
+from ecommerce.extensions.api.v2.views.catalog import CatalogViewSet
+from ecommerce.tests.mixins import ApiMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
@@ -144,7 +144,6 @@ class CatalogViewSetTest(CatalogMixin, CatalogPreviewMockMixin, ApiMockMixin, Te
 
 
 class PartnerCatalogViewSetTest(CatalogMixin, TestCase):
-
     def setUp(self):
         super(PartnerCatalogViewSetTest, self).setUp()
 

@@ -1,11 +1,12 @@
+import httpretty
 from django.db import IntegrityError
 from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _
-import httpretty
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
@@ -13,9 +14,8 @@ from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.utils import (
     create_vouchers, generate_coupon_report, get_voucher_discount_info, update_voucher_offer
 )
-from ecommerce.tests.mixins import CouponMixin, LmsApiMockMixin
+from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
@@ -33,7 +33,6 @@ VOUCHER_CODE_LENGTH = 1
 
 
 class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
-
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
@@ -382,10 +381,8 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
         for benefit in benefits:
             discount_info = get_voucher_discount_info(benefit, self.seat_price)
-            if (
-                    benefit.type == "Percentage" and benefit.value == 100.00 or
-                    benefit.type == "Absolute" and benefit.value == self.seat_price
-            ):
+            if (benefit.type == "Percentage" and benefit.value == 100.00) or \
+               (benefit.type == "Absolute" and benefit.value == self.seat_price):
                 self.assertEqual(discount_info['discount_percentage'], 100.00)
                 self.assertEqual(discount_info['discount_value'], 100.00)
                 self.assertFalse(discount_info['is_discounted'])

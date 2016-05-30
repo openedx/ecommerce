@@ -4,7 +4,6 @@ import logging
 from decimal import Decimal
 
 import dateutil.parser
-
 from django.conf import settings
 from django.db import transaction
 from django.db.utils import IntegrityError
@@ -209,9 +208,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 catalog_query=data['catalog_query'],
                 course_seat_types=data['course_seat_types']
             )
-        except IntegrityError as ex:
+        except IntegrityError:
             logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-            raise IntegrityError(ex)  # pylint: disable=nonstandard-exception
+            raise
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 
@@ -219,28 +218,26 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         coupon_product.attr.note = data['note']
         coupon_product.save()
 
-        sku = generate_sku(
+        sku = generate_sku(product=coupon_product, partner=data['partner'])
+        StockRecord.objects.update_or_create(
             product=coupon_product,
             partner=data['partner'],
+            partner_sku=sku,
+            defaults={
+                'price_currency': 'USD',
+                'price_excl_tax': price
+            }
         )
-
-        stock_record, __ = StockRecord.objects.get_or_create(
-            product=coupon_product,
-            partner=data['partner'],
-            partner_sku=sku
-        )
-        stock_record.price_currency = 'USD'
-        stock_record.price_excl_tax = price
-        stock_record.save()
 
         return coupon_product
 
     def assign_categories_to_coupon(self, coupon, categories):
         """
-        Assign categories to a coupon. If a category is already assigned, it will be fetch instead.
+        Assigns categories to a coupon.
+
         Arguments:
             coupon (Product): Coupon product
-            categories (List): List of categories to be assigned to a coupon
+            categories (list): List of Category instances
         """
         for category in categories:
             ProductCategory.objects.get_or_create(product=coupon, category=category)

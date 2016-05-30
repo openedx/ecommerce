@@ -4,10 +4,10 @@ from hashlib import md5
 
 from oscar.core.loading import get_model
 
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
 from ecommerce.tests.factories import ProductFactory
-from ecommerce.tests.mixins import CouponMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -26,7 +26,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(UtilsTests, self).setUp()
         self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
-        self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
     def test_generate_sku_with_missing_product_class(self):
@@ -56,14 +56,15 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
     def test_get_or_create_catalog(self):
         """Verify that the proper catalog is fetched."""
-        self.catalog.stock_records.add(StockRecord.objects.first())
+        stock_record = self.seat.stockrecords.first()
+        self.catalog.stock_records.add(stock_record)
 
         self.assertEqual(self.catalog.id, 1)
 
         existing_catalog, created = get_or_create_catalog(
             name='Test',
             partner=self.partner,
-            stock_record_ids=[1]
+            stock_record_ids=[stock_record.id]
         )
         self.assertFalse(created)
         self.assertEqual(self.catalog, existing_catalog)
@@ -71,12 +72,13 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
         course_id = 'sku/test2/course'
         course = Course.objects.create(id=course_id, name='Test Course 2')
-        course.create_or_update_seat('verified', False, 0, self.partner)
+        seat_2 = course.create_or_update_seat('verified', False, 0, self.partner)
+        stock_record_2 = seat_2.stockrecords.first()
 
         new_catalog, created = get_or_create_catalog(
             name='Test',
             partner=self.partner,
-            stock_record_ids=[1, 2]
+            stock_record_ids=[stock_record.id, stock_record_2.id]
         )
         self.assertTrue(created)
         self.assertNotEqual(self.catalog, new_catalog)
@@ -84,7 +86,6 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
 
 class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
-
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
         self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
