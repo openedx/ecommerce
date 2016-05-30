@@ -29,7 +29,7 @@
             exclude: ['js/common']
         },
         {
-            name: 'js/apps/credit_checkout_app',
+            name: 'js/apps/credit_checkout',
             exclude: ['js/common']
         },
         {
