@@ -12,7 +12,7 @@ from ecommerce.settings.logger import get_logger_config
 TIME_ZONE = 'Europe/Paris'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
-LANGUAGE_CODE = 'fr'
+LANGUAGE_CODE = 'fr-fr'
 
 
 # DEBUG CONFIGURATION
@@ -78,7 +78,8 @@ OSCAR_DEFAULT_CURRENCY = 'EUR'
 
 # production email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'infrasmtp02.cines.openfun.fr'
+EMAIL_HOST = 'smtpmooc.cines.openfun.fr'  # bulk           'infrasmtp02.cines.openfun.fr'  # transactionnal
+SERVER_EMAIL = 'piggy@fun-mooc.fr'
 
 # CELERY
 BROKER_URL = 'amqp://'
