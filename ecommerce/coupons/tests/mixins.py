@@ -108,8 +108,8 @@ class CouponMixin(object):
             catalog(Catalog): Catalog of courses for which the coupon applies
             code(str): Custom coupon code
             benefit_value(int): The voucher benefit value
-            catalog_query(str): course query string
-            course_seat_types(JSONField): List of seat types
+            catalog_query(str): Course query string
+            course_seat_types(str): A string of comma-separated list of seat types
 
         Returns:
             coupon (Coupon)

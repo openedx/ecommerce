@@ -357,7 +357,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
             title='Query coupon',
             quantity=1,
             catalog_query='course:*',
-            course_seat_types={'verified': 1}
+            course_seat_types='verified'
         )
         query_coupon.history.all().update(history_user=self.user)
         self.mock_course_api_response(course=self.course)
