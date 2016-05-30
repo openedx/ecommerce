@@ -174,7 +174,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 - note (str)
                 - max_uses (int)
                 - catalog_query (str)
-                - course_seat_types (list of strings)
+                - course_seat_types (str)
 
         Returns:
             A coupon product object.

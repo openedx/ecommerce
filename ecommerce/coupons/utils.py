@@ -13,7 +13,7 @@ def get_seats_from_query(site, query, seat_types):
     Arguments:
         site (Site): current site
         query (str): course catalog query
-        seat_types (JSON): JSON object of accepted seat types
+        seat_types (str): a string with comma-separated accepted seat type names
 
     Returns:
         List of seat products retrieved from the course catalog query.
