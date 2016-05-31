@@ -320,3 +320,5 @@ class Paypal(BasePaymentProcessor):
                   "PayPal's response was recorded in entry [{response_id}].".format(sale_id=sale.id,
                                                                                     response_id=entry.id)
             raise GatewayError(msg)
+
+        return True

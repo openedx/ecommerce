@@ -1,5 +1,6 @@
 """ Views for interacting with the payment processor. """
 from cStringIO import StringIO
+import json
 import logging
 import os
 
@@ -32,6 +33,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Source = get_model('payment', 'Source')
 
 
 class AdyenNotificationView(EdxOrderPlacementMixin, View):
@@ -49,6 +51,27 @@ class AdyenNotificationView(EdxOrderPlacementMixin, View):
         return super(AdyenNotificationView, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
+        notification = json.loads(request.body)
+        psp_reference = notification['pspReference']
+        basket = None
+
+        try:
+            source = Source.objects.get(psp_reference)
+            basket = source.order.basket
+        except Source.DoesNotExist:
+            return HttpResponse(status=500)
+        except MultipleObjectsReturned:
+            return HttpResponse(status=500)
+        finally:
+            self.payment_processor.record_processor_response(
+                notification,
+                transaction_id=psp_reference,
+                basket=basket
+            )
+
+        self.payment_processor.handle_processor_response(notification, basket)
+
+        # Adyen expects this response
         return HttpResponse('[accepted]')
 
 
@@ -83,8 +106,11 @@ class AdyenPaymentView(EdxOrderPlacementMixin, View):
             )
         finally:
             # Store the response in the database regardless of its authenticity.
-            ppr = self.payment_processor.record_processor_response(adyen_response, transaction_id=transaction_id,
-                                                                   basket=basket)
+            ppr = self.payment_processor.record_processor_response(
+                adyen_response,
+                transaction_id=transaction_id,
+                basket=basket
+            )
 
         try:
             # Explicitly delimit operations which will be rolled back if an exception occurs.
@@ -97,7 +123,7 @@ class AdyenPaymentView(EdxOrderPlacementMixin, View):
                         ppr.id
                     )
                     return HttpResponse(status=400)
-                except (UserCancelled, TransactionDeclined) as exception:
+                except TransactionDeclined as exception:
                     logger.info(
                         'Adyen payment did not complete for basket [%d] because [%s]. '
                         'The payment response was recorded in entry [%d].',

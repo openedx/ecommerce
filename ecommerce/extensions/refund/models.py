@@ -151,13 +151,20 @@ class Refund(StatusMixin, TimeStampedModel):
         """Returns a boolean indicating if this Refund can be denied."""
         return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
-    def _issue_credit(self):
+    def _issue_credit(self, revoke_fulfillment):
         """Issue a credit to the purchaser via the payment processor used for the original order."""
         try:
             # TODO Update this if we ever support multiple payment sources for a single order.
             source = self.order.sources.first()
             processor = get_processor_class_by_name(source.source_type.name)()
-            processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+            is_complete = processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+
+            if is_complete:
+                self.set_status(REFUND.PAYMENT_REFUNDED)
+            elif revoke_fulfillment:
+                self.set_status(REFUND.PENDING_WITH_REVOCATION)
+            else:
+                self.set_status(REFUND.PENDING_WITHOUT_REVOCATION)
 
             audit_log(
                 'credit_issued',
@@ -186,13 +193,15 @@ class Refund(StatusMixin, TimeStampedModel):
             return False
         elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
             try:
-                self._issue_credit()
-                self.set_status(REFUND.PAYMENT_REFUNDED)
+                self._issue_credit(revoke_fulfillment)
             except PaymentError:
                 logger.exception('Failed to issue credit for refund [%d].', self.id)
                 self.set_status(REFUND.PAYMENT_REFUND_ERROR)
                 return False
 
+        return self.complete(revoke_fulfillment)
+
+    def complete(self, revoke_fulfillment=True):
         if revoke_fulfillment and self.status in (REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR):
             self._revoke_lines()
 
@@ -206,8 +215,6 @@ class Refund(StatusMixin, TimeStampedModel):
         if self.status == REFUND.COMPLETE:
             post_refund.send_robust(sender=self.__class__, refund=self)
             return True
-
-        return False
 
     def deny(self):
         if not self.can_deny:
