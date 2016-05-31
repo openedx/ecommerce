@@ -12,9 +12,14 @@ import requests
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.exceptions import InvalidAdyenDecision
+from ecommerce.extensions.payment.exceptions import (
+    InvalidAdyenDecision,
+    MissingAdyenEventCodeException,
+    UnsupportedAdyenEventException
+)
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.utils import minor_units
+from ecommerce.extensions.refund.status import REFUND
 
 logger = logging.getLogger(__name__)
 
@@ -90,9 +95,42 @@ class Adyen(BasePaymentProcessor):
             }
         )
 
+        adyen_response = response.json()
+        adyen_response['eventCode'] = 'AUTHORISATION'
+
         return response.status_code, response.json()
 
     def handle_processor_response(self, response, basket=None):
+        """
+        Handle notification/response from Adyen.
+
+        This method does the following:
+            1. Create PaymentEvents and Sources for successful payments.
+
+        Arguments:
+            response (dict): Dictionary of parameters received from the payment processor.
+
+        Keyword Arguments:
+            basket (Basket): Basket being purchased via the payment processor.
+
+        Raises:
+            UserCancelled: Indicates the user cancelled payment.
+            TransactionDeclined: Indicates the payment was declined by the processor.
+            GatewayError: Indicates a general error on the part of the processor.
+            InvalidCyberSourceDecision: Indicates an unknown decision value.
+                Known values are ACCEPT, CANCEL, DECLINE, ERROR.
+            PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
+        """
+        try:
+            event_code = response['eventCode']
+            psp_reference = response['pspReference']
+            return getattr(self, '_handle_{event}'.format(event_code.lower()))(psp_reference, response, basket)
+        except KeyError:
+            raise MissingAdyenEventCodeException
+        except AttributeError:
+            raise UnsupportedAdyenEventException
+
+    def _handle_authorisation(self, psp_reference, response, basket):
         """
         Handle an authorise response from Adyen.
 
@@ -129,7 +167,6 @@ class Adyen(BasePaymentProcessor):
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
         currency = basket.currency
         total = basket.total_incl_tax
-        psp_reference = response['pspReference']
 
         source = Source(source_type=source_type,
                         currency=currency,
@@ -142,6 +179,32 @@ class Adyen(BasePaymentProcessor):
         event = PaymentEvent(event_type=event_type, amount=total, reference=psp_reference, processor_name=self.NAME)
 
         return source, event
+
+    def _handle_cancel_or_refund(self, psp_reference, response, basket):
+        order = basket.order
+        # TODO Update this if we ever support multiple payment sources for a single order.
+        source = order.sources.first()
+        refund = order.refunds.get(status__in=[REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION])
+        amount = refund.total_credit_excl_tax
+        if response.get('success'):
+            source.refund(amount, reference=psp_reference)
+            revoke_fulfillment = refund.status == REFUND.PENDING_WITH_REVOCATION
+            refund.set_status(REFUND.PAYMENT_REFUNDED)
+            refund.complete(revoke_fulfillment)
+            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
+            PaymentEvent.objects.create(
+                event_type=event_type,
+                order=order,
+                amount=amount,
+                reference=psp_reference,
+                processor_name=self.NAME
+            )
+        else:
+            raise GatewayError(
+                'Failed to issue Adyen credit for order [{order_number}].'.format(
+                    order_number=order.number
+                )
+            )
 
     def issue_credit(self, source, amount, currency):
         order = source.order
@@ -160,21 +223,23 @@ class Adyen(BasePaymentProcessor):
         )
 
         adyen_response = response.json()
-        error = False
-        if response.status_code == requests.codes.ok:
-            self.record_processor_response(
-                response.json(),
-                transaction_id=adyen_response['pspReference'],
-                basket=order.basket
-            )
-            if adyen_response['response'] != 'cancelOrRefund-received':
-                error = True
-        else:
-            error = True
 
-        if error:
+        try:
+            if response.status_code == requests.codes.ok:
+                self.record_processor_response(
+                    response.json(),
+                    transaction_id=adyen_response['pspReference'],
+                    basket=order.basket
+                )
+                if adyen_response['response'] != 'cancelOrRefund-received':
+                    raise GatewayError
+            else:
+                raise GatewayError
+        except GatewayError:
             msg = 'An error occurred while attempting to issue a credit (via Adyen) for order [{}].'.format(
                 order.number
             )
             logger.exception(msg)
             raise GatewayError(msg)
+
+        return False
