@@ -26,12 +26,14 @@
               <span class="sr-only">{% trans "Dashboard for:" %}</span>
               {{ user.username }}
             </button>
-            <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
-                    data-toggle="dropdown"
-                    aria-haspopup="true">
-              <span class="caret"></span>
-              <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
-            </button>
+            {% block logout_dropdown %}
+                <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true">
+                  <span class="caret"></span>
+                  <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
+                </button>
+            {% endblock logout_dropdown %}
             <ul class="dropdown-menu" aria-expanded="false">
               {% block dropdown_menu %}{% endblock dropdown_menu %}
             </ul>
