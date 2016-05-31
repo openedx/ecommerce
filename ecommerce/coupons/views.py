@@ -14,12 +14,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import TemplateView, View
-from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
+from ecommerce.courses.utils import get_course_info_from_lms
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -136,11 +136,8 @@ class CouponOfferView(TemplateView):
                 }
             valid_voucher, msg = voucher_is_valid(voucher, product, self.request)
             if valid_voucher:
-                api = EdxRestApiClient(
-                    get_lms_url('api/courses/v1/'),
-                )
                 try:
-                    course = api.courses(product.course_id).get()
+                    course = get_course_info_from_lms(product.course_id)
                 except SlumberHttpBaseException as e:
                     logger.exception('Could not get course information. [%s]', e)
                     return {

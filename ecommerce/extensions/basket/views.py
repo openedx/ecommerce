@@ -1,11 +1,8 @@
 from __future__ import unicode_literals
 
-import hashlib
 import logging
 
-from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from requests.exceptions import ConnectionError, Timeout
@@ -17,7 +14,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_base_api_url
 from ecommerce.coupons.views import get_voucher_from_code
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import get_course_info_from_lms, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -111,22 +108,16 @@ class BasketSummaryView(BasketView):
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
         lines_data = []
-        api = EdxRestApiClient(get_lms_url('api/courses/v1/'))
         is_verification_required = is_bulk_purchase = False
         switch_link_text = partner_sku = ''
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
-            cache_key = 'courses_api_detail_{}'.format(course_key)
-            cache_hash = hashlib.md5(cache_key).hexdigest()
             course_name = None
             image_url = None
             short_description = None
             try:
-                course = cache.get(cache_hash)
-                if not course:
-                    course = api.courses(course_key).get()
-                    cache.set(cache_hash, course, settings.COURSES_API_CACHE_TIMEOUT)
+                course = get_course_info_from_lms(course_key)
                 image_url = get_lms_url(course['media']['course_image']['uri'])
                 short_description = course['short_description']
                 course_name = course['name']
