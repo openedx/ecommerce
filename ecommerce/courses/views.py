@@ -119,12 +119,12 @@ class CourseMigrationView(View):
             err.close()
 
 
-class CourseConvertHonorToAuditView(View):
+class ConvertCourseView(View):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser:
             raise Http404
 
-        return super(CourseConvertHonorToAuditView, self).dispatch(request, *args, **kwargs)
+        return super(ConvertCourseView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *_args, **_kwargs):
         # TODO If this is not immediately deleted after we convert courses, make sure this is updated to support
@@ -132,6 +132,8 @@ class CourseConvertHonorToAuditView(View):
         course_ids = request.GET.get('course_ids')
         commit = request.GET.get('commit', False)
         commit = commit in ('1', 'true')
+        direction = request.GET.get('direction', 'honor_to_audit')
+        partner = request.GET.get('partner')
 
         # Capture all output and logging
         out = StringIO()
@@ -160,8 +162,10 @@ class CourseConvertHonorToAuditView(View):
 
             course_ids = course_ids.split(',')
 
-            call_command('convert_honor_to_audit', *course_ids, access_token=user.access_token, commit=commit,
-                         settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err)
+            call_command(
+                'convert_course', *course_ids, access_token=user.access_token, commit=commit, partner=partner,
+                settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err, direction=direction
+            )
 
             # Format the output for display
             output = u'STDOUT\n{out}\n\nSTDERR\n{err}\n\nLOG\n{log}'.format(out=out.getvalue(), err=err.getvalue(),
