@@ -93,6 +93,30 @@ define([
                 checkoutPayment(data);
             });
 
+            // Increment the quantity field until max
+            $('.spinner .btn:first-of-type').on('click', function() {
+                var btn = $(this);
+                var input = btn.closest('.spinner').find('input');
+                // Stop if max attribute is defined and value is reached to given max value
+                if (input.attr('max') === undefined || parseInt(input.val()) < parseInt(input.attr('max'))) {
+                    input.val(parseInt(input.val()) + 1);
+                } else {
+                    btn.next('disabled', true);
+                }
+            });
+
+            // Decrement the quantity field until min
+            $('.spinner .btn:last-of-type').on('click', function() {
+                var btn = $(this);
+                var input = btn.closest('.spinner').find('input');
+                // Stop if min attribute is defined and value is reached to given min value
+                if (input.attr('min') === undefined || parseInt(input.val()) > parseInt(input.attr('min'))) {
+                    input.val(parseInt(input.val()) - 1);
+                } else {
+                    btn.prev('disabled', true);
+                }
+            });
+
             AnalyticsUtils.analyticsSetUp();
         },
         showVoucherForm = function() {

@@ -24,7 +24,15 @@ define([
                 form;
 
             beforeEach(function () {
-                $('<div id="voucher_form_container"><input id="id_code">' +
+                $('<div class="spinner">' +
+                    '<input class="quantity" id="id_form-0-quantity" min="1" max="10"' +
+                    'name="form-0-quantity" type="number" value="1">' +
+                    '<div class="input-group-btn-vertical">' +
+                    '<button class="btn btn-primary" type="button">' +
+                    '<i class="fa fa-caret-up"></i></button>' +
+                    '<button class="btn btn-primary" type="button">' +
+                    '<i class="fa fa-caret-down"></i></button></div></div>' +
+                    '<div id="voucher_form_container"><input id="id_code">' +
                     '<a id="voucher_form_cancel"></a></button></div>' +
                     '<div id="voucher_form_link"><a href=""></a></div>' +
                     '<button type="submit" class="apply_voucher"' +
@@ -103,6 +111,40 @@ define([
                     $('button.payment-button').trigger('click');
                     expect(Utils.disableElementWhileRunning).toHaveBeenCalled();
                     expect($('button#cybersource').hasClass('is-disabled')).toBeTruthy();
+                });
+
+                it('should increment basket quantity on clicking up arrow', function () {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val(5);
+                    $('.spinner button.btn:first-of-type').trigger('click');
+
+                    expect($('input.quantity').first().val()).toEqual('6');
+                });
+
+                it('should not increment quantity once reached to max value', function () {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val(10);
+                    $('.spinner button.btn:first-of-type').trigger('click');
+                    expect($('input.quantity').first().val()).toEqual('10');
+                });
+
+                it('should decrement basket quantity on clicking down arrow', function () {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val(5);
+                    $('.spinner button.btn:last-of-type').trigger('click');
+
+                    expect($('input.quantity').first().val()).toEqual('4');
+                });
+
+                it('should not decrement quantity once reached to min value', function () {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val(1);
+                    $('.spinner button.btn:last-of-type').trigger('click');
+                    expect($('input.quantity').first().val()).toEqual('1');
                 });
             });
 
