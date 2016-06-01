@@ -68,6 +68,13 @@ class SiteConfiguration(models.Model):
         null=True,
         blank=True
     )
+    order_attribution_period = models.PositiveIntegerField(
+        verbose_name=_('Order Attribution Period'),
+        help_text=_('Number of days after an order is placed before it can be attributed to an affiliate.'),
+        null=False,
+        blank=False,
+        default=60
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
