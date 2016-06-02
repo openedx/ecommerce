@@ -133,9 +133,11 @@ class BasketSummaryView(BasketView):
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
 
-            # Set to true if any course in basket has bulk purchase scenerio
+            # Set to true if any course in basket has bulk purchase scenario
             if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
                 is_bulk_purchase = True
+                # Iterate on message storage so all messages are marked as read
+                list(messages.get_messages(self.request))
 
             # Get variables for alternative basket view
             switch_link_text, partner_sku = get_basket_switch_data(line.product)
