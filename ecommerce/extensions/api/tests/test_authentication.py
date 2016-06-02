@@ -6,13 +6,13 @@ import httpretty
 import mock
 from django.test import RequestFactory
 
-from ecommerce.core.url_utils import get_oauth2_provider_url
 from ecommerce.extensions.api.authentication import BearerAuthentication
 from ecommerce.tests.testcases import TestCase
 
 
 class AccessTokenMixin(object):
     DEFAULT_TOKEN = 'abc123'
+    JSON = 'application/json'
 
     def mock_user_info_response(self, status=200, username='fake-user'):
         data = {
@@ -21,12 +21,8 @@ class AccessTokenMixin(object):
             'family_name': 'Doe',
             'given_name': 'Jane',
         }
-        httpretty.register_uri(
-            httpretty.GET, '{}/user_info/'.format(get_oauth2_provider_url()),
-            body=json.dumps(data),
-            content_type="application/json",
-            status=status
-        )
+        url = '{}/user_info/'.format(self.site.siteconfiguration.oauth2_provider_url)
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps(data), content_type=self.JSON, status=status)
 
 
 class BearerAuthenticationTests(TestCase):

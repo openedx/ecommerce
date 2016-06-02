@@ -1,15 +1,21 @@
+import json
+
 import ddt
+import httpretty
 import mock
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test import override_settings
+from edx_rest_api_client.auth import SuppliedJwtAuth
 
 from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
+
+COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
 
 
 def _make_site_config(payment_processors_str, site_id=1):
@@ -61,7 +67,6 @@ class UserTests(TestCase):
 
 
 class BusinessClientTests(TestCase):
-
     def test_str(self):
         client = BusinessClient.objects.create(name='TestClient')
         self.assertEquals(str(client), 'TestClient')
@@ -69,6 +74,18 @@ class BusinessClientTests(TestCase):
 
 @ddt.ddt
 class SiteConfigurationTests(TestCase):
+    def mock_access_token_response(self, status=200):
+        """ Mock the response from the OAuth provider's access token endpoint. """
+        url = '{root}/access_token'.format(root=self.site.siteconfiguration.oauth2_provider_url)
+        token = 'abc123'
+        body = json.dumps({
+            'access_token': token,
+            'expires_in': 3600,
+        })
+        httpretty.register_uri(httpretty.POST, url, body=body, content_type='application/json', status=status)
+
+        return token
+
     @ddt.data(
         ("paypal", {"paypal"}),
         ("paypal ", {"paypal"}),
@@ -199,9 +216,34 @@ class SiteConfigurationTests(TestCase):
         site_config = SiteConfigurationFactory(from_email=expected_from_email, partner__name='TestX')
         self.assertEqual(site_config.get_from_email(), expected_from_email)
 
+    @httpretty.activate
+    def test_access_token(self):
+        """ Verify the property retrieves, and caches, an access token from the OAuth 2.0 provider. """
+        token = self.mock_access_token_response()
+        self.assertEqual(self.site.siteconfiguration.access_token, token)
+        self.assertTrue(httpretty.has_request())
+
+        # Verify the value is cached
+        httpretty.disable()
+        self.assertEqual(self.site.siteconfiguration.access_token, token)
+
+    @httpretty.activate
+    @override_settings(COURSE_CATALOG_API_URL=COURSE_CATALOG_API_URL)
+    def test_course_catalog_api_client(self):
+        """ Verify the property returns a Course Catalog API client. """
+        token = self.mock_access_token_response()
+        client = self.site.siteconfiguration.course_catalog_api_client
+        client_store = client._store  # pylint: disable=protected-access
+        client_auth = client_store['session'].auth
+
+        self.assertEqual(client_store['base_url'], COURSE_CATALOG_API_URL)
+        self.assertIsInstance(client_auth, SuppliedJwtAuth)
+        self.assertEqual(client_auth.token, token)
+
 
 class HelperMethodTests(TestCase):
     """ Tests helper methods in models.py """
+
     def setUp(self):
         """ setUp test """
         self.site_config_objects = mock.Mock()
