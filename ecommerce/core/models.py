@@ -1,18 +1,21 @@
+import datetime
 import logging
+from urlparse import urljoin
 
 from analytics import Client as SegmentClient
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
-
 
 log = logging.getLogger(__name__)
 
@@ -79,10 +82,7 @@ class SiteConfiguration(models.Model):
         Returns:
             set[string]: Returns a set of enabled payment processor keys
         """
-        return {
-            raw_processor_value.strip()
-            for raw_processor_value in self.payment_processors.split(',')
-        }
+        return {raw_processor_value.strip() for raw_processor_value in self.payment_processors.split(',')}
 
     def _clean_payment_processors(self):
         """
@@ -152,6 +152,91 @@ class SiteConfiguration(models.Model):
         # Clear Site cache upon SiteConfiguration changed
         Site.objects.clear_cache()
         super(SiteConfiguration, self).save(*args, **kwargs)
+
+    def build_ecommerce_url(self, path=''):
+        """
+        Returns path joined with the appropriate ecommerce URL root for the current site.
+
+        Returns:
+            str
+        """
+        scheme = 'http' if settings.DEBUG else 'https'
+        ecommerce_url_root = "{scheme}://{domain}".format(scheme=scheme, domain=self.site.domain)
+        return urljoin(ecommerce_url_root, path)
+
+    def build_lms_url(self, path=''):
+        """
+        Returns path joined with the appropriate LMS URL root for the current site.
+
+        Returns:
+            str
+        """
+        return urljoin(self.lms_url_root, path)
+
+    @property
+    def commerce_api_url(self):
+        """ Returns the URL for the root of the Commerce API (hosted by LMS). """
+        return self.build_lms_url('/api/commerce/v1/')
+
+    @property
+    def student_dashboard_url(self):
+        """ Returns a URL to the student dashboard (hosted by LMS). """
+        return self.build_lms_url('/dashboard')
+
+    @property
+    def enrollment_api_url(self):
+        """ Returns the URL for the root of the Enrollment API. """
+        return self.build_lms_url('/api/enrollment/v1/')
+
+    @property
+    def lms_heartbeat_url(self):
+        """ Returns the URL for the LMS heartbeat page. """
+        return self.build_lms_url('/heartbeat')
+
+    @property
+    def oauth2_provider_url(self):
+        """ Returns the URL for the OAuth 2.0 provider. """
+        return self.build_lms_url('/oauth2')
+
+    @property
+    def access_token(self):
+        """ Returns an access token for this site's service user.
+
+        The access token is retrieved using the current site's OAuth credentials and the client credentials grant.
+        The token is cached for the lifetime of the token, as specified by the OAuth provider's response. The token
+        type is JWT.
+
+        Returns:
+            str: JWT access token
+        """
+        key = 'siteconfiguration_access_token_{}'.format(self.id)
+        access_token = cache.get(key)
+
+        # pylint: disable=unsubscriptable-object
+        if not access_token:
+            url = '{root}/access_token'.format(root=self.oauth2_provider_url)
+            access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
+                url,
+                self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
+                self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
+                token_type='jwt'
+            )
+
+            expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
+            cache.set(key, access_token, expires)
+
+        return access_token
+
+    @cached_property
+    def course_catalog_api_client(self):
+        """
+        Returns an API client to access the Course Catalog service.
+
+        Returns:
+            EdxRestApiClient: The client to access the Course Catalog service.
+        """
+
+        return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 
 
 class User(AbstractUser):
