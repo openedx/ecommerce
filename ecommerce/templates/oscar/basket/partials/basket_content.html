@@ -4,7 +4,9 @@
 {% load purchase_info_tags %}
 {% load widget_tweaks %}
 
-{% include 'partials/alert_messages.html' %}
+{% if not is_bulk_purchase %}
+    {% include 'partials/alert_messages.html' %}
+{% endif %}
 
 {% if not basket.is_empty %}
     <div id="content-inner">
