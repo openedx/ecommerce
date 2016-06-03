@@ -1,12 +1,21 @@
 .coupon-create-edit-view {
-    .benefit-type label {
+    .benefit-type label,
+    .invoice-type label,
+    .invoice-discount-type label,
+    .tax_deducted_source label {
         font-weight: normal;
     }
-    .benefit-addon {
-        width: 40px;
+
+    .benefit-addon,
+    .invoice-discount-addon {
+        width: $input-addon-width;
     }
-    input[name="benefit_value"] {
-        width: 174px;
+    input[name=benefit_value],
+    input[name=invoice_discount_value] {
+        width: $small-input-width;
+    }
+    .tax_deduction_percentage {
+        width: $small-input-width + $input-addon-width;
     }
 
     .help-block {
