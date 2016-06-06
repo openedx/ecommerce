@@ -1,11 +1,10 @@
 import httpretty
 import mock
-from django.conf import settings
 from django.test import RequestFactory
-from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -65,13 +64,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, T
             self.range.run_catalog_query(self.product)
 
     @httpretty.activate
-    @mock.patch(
-        'ecommerce.extensions.offer.models.get_course_catalog_api_client',
-        mock.Mock(return_value=EdxRestApiClient(
-            settings.COURSE_CATALOG_API_URL,
-            jwt='auth-token'
-        ))
-    )
+    @mock_course_catalog_api_client
     def test_run_catalog_query(self):
         """
         run_course_query() should return True for included course run ID's.
@@ -86,13 +79,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, T
             self.assertTrue(response['course_runs'][course.id])
 
     @httpretty.activate
-    @mock.patch(
-        'ecommerce.extensions.offer.models.get_course_catalog_api_client',
-        mock.Mock(return_value=EdxRestApiClient(
-            settings.COURSE_CATALOG_API_URL,
-            jwt='auth-token'
-        ))
-    )
+    @mock_course_catalog_api_client
     def test_query_range_contains_product(self):
         """
         contains_product() should return the correct boolean if a product is in it's range.
@@ -108,13 +95,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, T
         self.assertTrue(response)
 
     @httpretty.activate
-    @mock.patch(
-        'ecommerce.coupons.utils.get_course_catalog_api_client',
-        mock.Mock(return_value=EdxRestApiClient(
-            settings.COURSE_CATALOG_API_URL,
-            jwt='auth-token'
-        ))
-    )
+    @mock_course_catalog_api_client
     def test_query_range_all_products(self):
         """
         all_products() should return seats from the query.
