@@ -221,7 +221,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         else:
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        return HttpResponseRedirect(get_lms_url(''))
+        return HttpResponseRedirect(request.site.siteconfiguration.student_dashboard_url)
 
 
 class EnrollmentCodeCsvView(View):

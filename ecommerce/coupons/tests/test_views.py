@@ -13,7 +13,7 @@ from oscar.test.factories import (
 )
 from oscar.test.utils import RequestFactory
 
-from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_api_url
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
@@ -265,6 +265,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
+        self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
 
     def create_and_test_coupon(self):
         """ Creates enrollment code coupon. """
@@ -317,8 +318,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to LMS when an enrollment code is provided. """
         self.create_and_test_coupon()
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200)
-        self.assert_redemption_page_redirects(get_lms_url())
+        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=301)
+        self.assert_redemption_page_redirects(self.student_dashboard_url, target=301)
 
     @httpretty.activate
     def test_multiple_vouchers(self):
@@ -326,8 +327,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.create_and_test_coupon()
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=COUPON_CODE))
-        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200)
-        self.assert_redemption_page_redirects(get_lms_url())
+        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=301)
+        self.assert_redemption_page_redirects(self.student_dashboard_url, target=301)
 
 
 class EnrollmentCodeCsvViewTests(TestCase):
