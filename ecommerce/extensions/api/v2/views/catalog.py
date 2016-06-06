@@ -11,7 +11,6 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.extensions.api import serializers
-from ecommerce.core.url_utils import get_course_catalog_api_client
 
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -40,8 +39,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         query = request.GET.get('query', '')
         if query:
             try:
-                api = get_course_catalog_api_client(request.site)
-                response = api.course_runs.get(q=query)
+                response = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(q=query)
                 return Response(response)
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.error('Unable to connect to Course Catalog service.')

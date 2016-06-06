@@ -1,8 +1,6 @@
 """ Coupon related utility functions. """
 from oscar.core.loading import get_model
 
-from ecommerce.core.url_utils import get_course_catalog_api_client
-
 Product = get_model('catalogue', 'Product')
 
 
@@ -18,7 +16,7 @@ def get_seats_from_query(site, query, seat_types):
     Returns:
         List of seat products retrieved from the course catalog query.
     """
-    response = get_course_catalog_api_client(site).course_runs.get(q=query)
+    response = site.siteconfiguration.course_catalog_api_client.course_runs.get(q=query)
     query_products = []
     for result in response['results']:
         try:

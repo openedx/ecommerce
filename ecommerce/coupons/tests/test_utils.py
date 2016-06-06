@@ -1,8 +1,6 @@
 import httpretty
-import mock
-from django.conf import settings
-from edx_rest_api_client.client import EdxRestApiClient
 
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.coupons.utils import get_seats_from_query
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -10,13 +8,7 @@ from ecommerce.tests.testcases import TestCase
 
 
 @httpretty.activate
-@mock.patch(
-    'ecommerce.coupons.utils.get_course_catalog_api_client',
-    mock.Mock(return_value=EdxRestApiClient(
-        settings.COURSE_CATALOG_API_URL,
-        jwt='auth-token'
-    ))
-)
+@mock_course_catalog_api_client
 class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
     def setUp(self):
         super(CouponUtilsTests, self).setUp()

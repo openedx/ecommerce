@@ -6,17 +6,15 @@ from decimal import Decimal
 
 import ddt
 import httpretty
-import mock
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
-from edx_rest_api_client.client import EdxRestApiClient
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
 
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -508,13 +506,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @httpretty.activate
-    @mock.patch(
-        'ecommerce.coupons.utils.get_course_catalog_api_client',
-        mock.Mock(return_value=EdxRestApiClient(
-            settings.COURSE_CATALOG_API_URL,
-            jwt='auth-token'
-        ))
-    )
+    @mock_course_catalog_api_client
     def test_dynamic_catalog_coupon(self):
         """ Verify dynamic range values are returned. """
         catalog_query = 'key:*'

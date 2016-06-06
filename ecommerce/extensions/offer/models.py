@@ -3,7 +3,6 @@ from django.db import models
 from oscar.apps.offer.abstract_models import AbstractRange
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.core.url_utils import get_course_catalog_api_client
 from ecommerce.coupons.utils import get_seats_from_query
 
 
@@ -18,7 +17,7 @@ class Range(AbstractRange):
         """
         request = get_current_request()
         try:
-            response = get_course_catalog_api_client(request.site).course_runs.contains.get(
+            response = request.site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
                 query=self.catalog_query,
                 course_run_ids=product.course_id
             )

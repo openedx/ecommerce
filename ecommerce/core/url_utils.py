@@ -75,21 +75,3 @@ def get_lms_url(path=''):
 def get_oauth2_provider_url():
     site_configuration = _get_site_configuration()
     return site_configuration.oauth2_provider_url
-
-
-def get_course_catalog_api_client(site):
-    """
-    Returns an API client to access the Course Catalog service.
-
-    This function is deprecated. Use site.siteconfiguration.course_catalog_api_client.
-
-    Arguments:
-        site (Site): The site for which to retrieve settings.
-
-    Returns:
-        EdxRestApiClient: The client to access the Course Catalog service.
-    """
-    warnings.warn('Usage of get_course_catalog_api_client is deprecated. '
-                  'Use SiteConfiguration.course_catalog_api_client.', DeprecationWarning)
-
-    return site.siteconfiguration.course_catalog_api_client
