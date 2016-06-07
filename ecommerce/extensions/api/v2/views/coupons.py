@@ -100,6 +100,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             catalog_query = request.data.get(CATALOG_QUERY)
             course_seat_types = request.data.get(COURSE_SEAT_TYPES)
 
+            invoice_data = {
+                'invoice_type': request.data.get('invoice_type'),
+                'invoice_number': request.data.get('invoice_number'),
+                'invoiced_amount': request.data.get('invoiced_amount'),
+                'invoice_payment_date': request.data.get('invoice_payment_date'),
+                'tax_deducted_source': request.data.get('tax_deducted_source'),
+                'invoice_discount_type': request.data.get('invoice_discount_type'),
+                'invoice_discount_value': request.data.get('invoice_discount_value')
+            }
+
             if course_seat_types:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
 
@@ -156,7 +166,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             basket = prepare_basket(request, coupon_product)
 
             # Create an order now since payment is handled out of band via an invoice.
-            response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id, client=client)
+            response_data = self.create_order_for_invoice(
+                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
+            )
 
             return Response(response_data, status=status.HTTP_200_OK)
 
@@ -248,7 +260,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         for category in categories:
             ProductCategory.objects.get_or_create(product=coupon, category=category)
 
-    def create_order_for_invoice(self, basket, coupon_id, client):
+    def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
 
@@ -273,7 +285,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Invoice payment processor invocation.
         payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(response={}, order=order, business_client=client)
+        payment_processor().handle_processor_response(
+            response={}, order=order, business_client=client, invoice_data=invoice_data
+        )
         response_data[AC.KEYS.PAYMENT_DATA] = {
             AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
         }

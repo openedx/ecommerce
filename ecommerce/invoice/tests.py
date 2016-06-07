@@ -11,7 +11,7 @@ class InvoiceTests(TestCase):
         self.basket.owner = factories.UserFactory()
         self.basket.order = factories.OrderFactory()
         self.basket.save()
-        self.invoice = Invoice.objects.create(order=self.basket.order, state='Paid')
+        self.invoice = Invoice.objects.create(order=self.basket.order, state=Invoice.PAID)
 
     def test_order(self):
         """Test to check invoice order"""
