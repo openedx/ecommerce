@@ -34,7 +34,7 @@ try:
 except AttributeError:
     raise RuntimeError('A valid LMS URL root is required.')
 
-ENABLE_OAUTH2_TESTS = str2bool(os.environ.get('ENABLE_OAUTH2_TESTS', True))
+ENABLE_SSO_TESTS = str2bool(os.environ.get('ENABLE_SSO_TESTS', True))
 LMS_USERNAME = os.environ.get('LMS_USERNAME')
 LMS_EMAIL = os.environ.get('LMS_EMAIL')
 LMS_PASSWORD = os.environ.get('LMS_PASSWORD')
@@ -44,8 +44,8 @@ ENROLLMENT_API_URL = os.environ.get('ENROLLMENT_API_URL', LMS_URL_ROOT + '/api/e
 BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
 BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
 
-if ENABLE_OAUTH2_TESTS and not all([LMS_URL_ROOT, LMS_USERNAME, LMS_PASSWORD]):
-    raise RuntimeError('LMS settings are required to run OAuth2 tests.')
+if ENABLE_SSO_TESTS and not all([LMS_URL_ROOT, LMS_USERNAME, LMS_PASSWORD]):
+    raise RuntimeError('LMS settings are required to run single sign-on tests.')
 
 ENABLE_COUPON_ADMIN_TESTS = str2bool(os.environ.get('ENABLE_COUPON_ADMIN_TESTS', False))
 

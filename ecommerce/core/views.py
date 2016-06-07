@@ -3,6 +3,7 @@ import logging
 import uuid
 
 import requests
+from auth_backends.views import LogoutRedirectBaseView
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -110,3 +111,10 @@ class StaffOnlyMixin(object):
             raise Http404
 
         return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
+
+
+class LogoutView(LogoutRedirectBaseView):
+    """ Logout view that redirects the user to the LMS logout page. """
+
+    def get_redirect_url(self, *args, **kwargs):
+        return self.request.site.siteconfiguration.build_lms_url('logout')

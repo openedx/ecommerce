@@ -1,12 +1,13 @@
 """Tests of the service health endpoint."""
 import json
 
-from django.db import DatabaseError
-from django.conf import settings
-from django.test.utils import override_settings
-from django.core.urlresolvers import reverse
-from django.contrib.auth import get_user_model
 import mock
+from auth_backends.tests.mixins import LogoutViewTestMixin
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
+from django.db import DatabaseError
+from django.test.utils import override_settings
 from requests import Response
 from requests.exceptions import RequestException
 from rest_framework import status
@@ -123,3 +124,8 @@ class AutoAuthTests(TestCase):
 
         # Verify that the user has superuser permissions
         self.assertTrue(user.is_superuser)
+
+
+class LogoutViewTests(LogoutViewTestMixin, TestCase):
+    def get_redirect_url(self):
+        return self.site.siteconfiguration.build_lms_url('logout')

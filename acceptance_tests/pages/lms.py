@@ -6,7 +6,7 @@ from bok_choy.promise import EmptyPromise
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 
-from acceptance_tests.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD
+from acceptance_tests.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, MARKETING_URL_ROOT
 
 
 class LMSPage(PageObject):  # pylint: disable=abstract-method
@@ -99,3 +99,14 @@ class LMSDashboardPage(LMSPage):
 
     def is_browser_on_page(self):
         return self.browser.title.startswith('Dashboard')
+
+
+class LMSLogoutPage(LMSPage):
+    @property
+    def url(self):
+        return self._build_url('logout')
+
+    def is_browser_on_page(self):
+        # This page redirects to the marketing site (if available) or the LMS homepage.
+        # Check if we are on one of those pages.
+        return self.browser.current_url.strip('/') in [MARKETING_URL_ROOT, LMS_URL_ROOT]
