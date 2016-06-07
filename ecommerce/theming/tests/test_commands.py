@@ -56,7 +56,7 @@ class TestUpdateAssets(TestCase):
 
         # make sure update_assets picks only specified themes
         parsed_args = Command.parse_arguments(themes=["test-theme"])
-        self.assertEqual(parsed_args[0], [theme for theme in get_themes() if theme.theme_dir == "test-theme"])
+        self.assertEqual(parsed_args[0], [theme for theme in get_themes() if theme.theme_dir_name == "test-theme"])
 
     def test_skip_theme_sass_when_theming_is_disabled(self):
         """
@@ -75,7 +75,7 @@ class TestUpdateAssets(TestCase):
         """
         Test that proper sass dirs are returned by get_sass_directories
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dirs = settings.COMPREHENSIVE_THEME_DIRS
 
         expected_directories = [
             {
@@ -85,19 +85,24 @@ class TestUpdateAssets(TestCase):
             },
             {
                 "sass_source_dir": Path("ecommerce/static/sass/base"),
-                "css_destination_dir": themes_dir / "test-theme" / "static" / "css" / "base",
-                "lookup_paths": [themes_dir / "test-theme" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
+                "css_destination_dir": themes_dirs[0] / "test-theme" / "static" / "css" / "base",
+                "lookup_paths": [themes_dirs[0] / "test-theme" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
             },
             {
                 "sass_source_dir": Path("ecommerce/static/sass/base"),
-                "css_destination_dir": themes_dir / "test-theme-2" / "static" / "css" / "base",
-                "lookup_paths": [themes_dir / "test-theme-2" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
+                "css_destination_dir": themes_dirs[0] / "test-theme-2" / "static" / "css" / "base",
+                "lookup_paths": [themes_dirs[0] / "test-theme-2" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
             },
             {
-                "sass_source_dir": themes_dir / "test-theme-2" / "static" / "sass" / "base",
-                "css_destination_dir": themes_dir / "test-theme-2" / "static" / "css" / "base",
-                "lookup_paths": [themes_dir / "test-theme-2" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
-            }
+                "sass_source_dir": themes_dirs[0] / "test-theme-2" / "static" / "sass" / "base",
+                "css_destination_dir": themes_dirs[0] / "test-theme-2" / "static" / "css" / "base",
+                "lookup_paths": [themes_dirs[0] / "test-theme-2" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
+            },
+            {
+                "sass_source_dir": Path("ecommerce/static/sass/base"),
+                "css_destination_dir": themes_dirs[1] / "test-theme-3" / "static" / "css" / "base",
+                "lookup_paths": [themes_dirs[1] / "test-theme-3" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
+            },
         ]
 
         returned_dirs = get_sass_directories(themes=self.themes, system=True)
@@ -123,7 +128,7 @@ class TestUpdateAssets(TestCase):
         """
         Test ValueError is raised if sass directory provided to the compile_sass method does not exist.
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
 
         with self.assertRaises(ValueError):
             compile_sass(

@@ -2,6 +2,7 @@
 Comprehensive Theming tests for core functionality.
 """
 from django.conf import settings
+from django.test import override_settings
 from path import Path
 
 from ecommerce.tests.testcases import TestCase
@@ -17,14 +18,15 @@ class TestCore(TestCase):
         """
         Tests for enable_theming method.
         """
-        themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        themes_dirs = settings.COMPREHENSIVE_THEME_DIRS
 
         expected_locale_paths = (
-            themes_dir / "test-theme" / "conf" / "locale",
-            themes_dir / "test-theme-2" / "conf" / "locale",
+            themes_dirs[0] / "test-theme" / "conf" / "locale",
+            themes_dirs[0] / "test-theme-2" / "conf" / "locale",
+            themes_dirs[1] / "test-theme-3" / "conf" / "locale",
         ) + settings.LOCALE_PATHS
 
-        enable_theming(settings.COMPREHENSIVE_THEME_DIR)
+        enable_theming()
 
         self.assertItemsEqual(expected_locale_paths, settings.LOCALE_PATHS)
 
@@ -37,7 +39,8 @@ class TestCore(TestCase):
 
         # Note: red-theme does not contain translations dir
         red_theme = Path(themes_dir + "/red-theme")
-        enable_theming(red_theme.dirname())
+        with override_settings(COMPREHENSIVE_THEME_DIRS=[red_theme.dirname()]):
+            enable_theming()
 
-        # Test that locale path is added only if it exists
-        self.assertNotIn(red_theme / "conf" / "locale", settings.LOCALE_PATHS)
+            # Test that locale path is added only if it exists
+            self.assertNotIn(red_theme / "conf" / "locale", settings.LOCALE_PATHS)

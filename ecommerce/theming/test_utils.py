@@ -5,6 +5,7 @@ import re
 from functools import wraps
 from mock import patch
 
+from django.core.management import call_command
 from django.contrib.sites.models import Site
 
 from .models import SiteTheme
@@ -23,10 +24,17 @@ def with_comprehensive_theme(theme_dir_name):
             # make a domain name out of directory name
             domain = "{theme_dir_name}.org".format(theme_dir_name=re.sub(r"\.org$", "", theme_dir_name))
             site, __ = Site.objects.get_or_create(domain=domain, name=domain)
-            SiteTheme.objects.get_or_create(site=site, theme_dir_name=theme_dir_name)
-            with patch('ecommerce.theming.helpers.get_current_site_theme_dir',
-                       return_value=theme_dir_name):
-                with patch('ecommerce.theming.helpers.get_current_site', return_value=site):
-                    return func(*args, **kwargs)
+            site_theme, __ = SiteTheme.objects.get_or_create(site=site, theme_dir_name=theme_dir_name)
+            with patch('ecommerce.theming.helpers.get_current_site_theme',
+                       return_value=site_theme):
+                return func(*args, **kwargs)
         return _decorated
     return _decorator
+
+
+def compile_sass():
+    """
+    Call update assets command to compile system and theme sass.
+    """
+    # Compile system and theme sass files
+    call_command('update_assets', '--skip-collect')

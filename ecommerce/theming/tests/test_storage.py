@@ -5,10 +5,10 @@ from mock import patch
 
 from django.test import override_settings
 from django.conf import settings
-from path import Path
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.storage import ThemeStorage
+from ecommerce.theming.helpers import Theme, get_theme_base_dir
 
 
 @override_settings(DEBUG=True)
@@ -19,7 +19,7 @@ class TestThemeStorage(TestCase):
 
     def setUp(self):
         super(TestThemeStorage, self).setUp()
-        self.themes_dir = Path(settings.COMPREHENSIVE_THEME_DIR)
+        self.themes_dir = settings.COMPREHENSIVE_THEME_DIRS[0]
         self.enabled_theme = "test-theme"
         self.storage = ThemeStorage(location=self.themes_dir / self.enabled_theme / 'static')
 
@@ -60,8 +60,8 @@ class TestThemeStorage(TestCase):
         """
         asset = "images/default-logo.png"
         with patch(
-            "ecommerce.theming.storage.get_current_site_theme_dir",
-            return_value=self.enabled_theme,
+            "ecommerce.theming.storage.get_current_theme",
+            return_value=Theme(self.enabled_theme, self.enabled_theme, get_theme_base_dir(self.enabled_theme)),
         ):
             asset_url = self.storage.url(asset)
             # remove hash key from file url
@@ -75,8 +75,8 @@ class TestThemeStorage(TestCase):
         """
         asset = "images/default-logo.png"
         with patch(
-            "ecommerce.theming.storage.get_current_site_theme_dir",
-            return_value=self.enabled_theme,
+            "ecommerce.theming.storage.get_current_theme",
+            return_value=Theme(self.enabled_theme, self.enabled_theme, get_theme_base_dir(self.enabled_theme)),
         ):
             returned_path = self.storage.path(asset)
             expected_path = self.themes_dir / self.enabled_theme / "static" / asset

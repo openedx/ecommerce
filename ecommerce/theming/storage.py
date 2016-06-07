@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils._os import safe_join
 from django.contrib.staticfiles.storage import StaticFilesStorage
 
-from ecommerce.theming.helpers import get_current_site_theme_dir, get_base_themes_dir, is_comprehensive_theming_enabled
+from ecommerce.theming.helpers import get_current_theme, get_theme_base_dir, is_comprehensive_theming_enabled
 
 
 class ThemeStorage(StaticFilesStorage):
@@ -45,11 +45,11 @@ class ThemeStorage(StaticFilesStorage):
             is provided by red-theme otherwise '/static/images/logo.png'
         """
         prefix = ''
-        theme_dir = get_current_site_theme_dir()
+        theme = get_current_theme()
 
         # get theme prefix from site address if if asset is accessed via a url
-        if theme_dir:
-            prefix = theme_dir
+        if theme:
+            prefix = theme.theme_dir_name
 
         # get theme prefix from storage class, if asset is accessed during collectstatic run
         elif self.prefix:
@@ -76,7 +76,7 @@ class ThemeStorage(StaticFilesStorage):
 
         # in debug mode check static asset from within the project directory
         if settings.DEBUG:
-            themes_location = get_base_themes_dir()
+            themes_location = get_theme_base_dir(theme, suppress_error=True)
             # Nothing can be themed if we don't have a theme location or required params.
             if not all((themes_location, theme, name)):
                 return False

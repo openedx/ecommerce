@@ -10,10 +10,12 @@ def offline_context():
     offline context for compress management command, offline_context function iterates
     through all applied themes and returns a separate context for each theme.
     """
+    main_css_path = "css/base/main.css"
+    swagger_css_path = "css/base/edx-swagger.css"
 
     for theme in get_themes():
-        main_css = ThemeStorage(prefix=theme.theme_dir).url("css/base/main.css")
-        swagger_css = ThemeStorage(prefix=theme.theme_dir).url("css/base/edx-swagger.css")
+        main_css = ThemeStorage(prefix=theme.theme_dir_name).url(main_css_path)
+        swagger_css = ThemeStorage(prefix=theme.theme_dir_name).url(swagger_css_path)
 
         yield {
             'main_css': main_css,
@@ -21,6 +23,6 @@ def offline_context():
         }
 
     yield {
-        'main_css': ThemeStorage().url("css/base/main.css"),
-        'swagger_css': ThemeStorage().url("css/base/edx-swagger.css"),
+        'main_css': ThemeStorage().url(main_css_path),
+        'swagger_css': ThemeStorage().url(swagger_css_path),
     }

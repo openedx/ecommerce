@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from path import Path
+
 from ecommerce.settings.base import *
 from ecommerce.settings.logger import get_logger_config
 
@@ -128,5 +130,9 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 
 # Comprehensive theme settings for testing environment
-COMPREHENSIVE_THEME_DIR = DJANGO_ROOT + "/tests/themes"
+COMPREHENSIVE_THEME_DIRS = [
+    Path(DJANGO_ROOT + "/tests/themes"),
+    Path(DJANGO_ROOT + "/tests/themes-dir-2"),
+]
+
 DEFAULT_SITE_THEME = "test-theme"

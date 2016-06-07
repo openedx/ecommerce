@@ -13,7 +13,7 @@ from django.core.management import call_command
 import sass
 from path import Path
 
-from ecommerce.theming.helpers import get_themes, get_base_themes_dir, is_comprehensive_theming_enabled
+from ecommerce.theming.helpers import get_themes, get_theme_base_dirs, is_comprehensive_theming_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ class Command(BaseCommand):
         source_comments = options.get("source_comments", False)
         collect = options.get("collect", True)
 
-        available_themes = {t.theme_dir: t for t in get_themes()}
+        available_themes = {t.theme_dir_name: t for t in get_themes()}
 
         if 'no' in given_themes or 'all' in given_themes:
             # Raise error if 'all' or 'no' is present and theme names are also given.
@@ -119,7 +119,7 @@ class Command(BaseCommand):
             raise CommandError(
                 "Given themes '{invalid_themes}' do not exist inside themes directory '{themes_dir}'".format(
                     invalid_themes=", ".join(set(given_themes) - set(available_themes.keys())),
-                    themes_dir=get_base_themes_dir(),
+                    themes_dir=get_theme_base_dirs(),
                 ),
             )
 

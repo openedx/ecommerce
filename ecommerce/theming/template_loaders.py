@@ -7,7 +7,7 @@ from django.template.loaders.filesystem import Loader as FilesystemLoader
 
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.theming.helpers import get_current_theme_template_dirs, get_all_theme_template_dirs
+from ecommerce.theming.helpers import get_current_theme, get_all_theme_template_dirs
 
 
 class ThemeTemplateLoader(FilesystemLoader):
@@ -45,10 +45,11 @@ class ThemeTemplateLoader(FilesystemLoader):
         Return template sources for the given theme and if request object is None (this would be the case for
         management commands) return template sources for all themes.
         """
-        if not get_current_request():
+        if get_current_request():
+            # template is being accessed by a view, so return templates sources for current theme
+            theme = get_current_theme()
+            return theme and theme.template_dirs
+        else:
             # if request object is not present, then this method is being called inside a management
             # command and return all theme template sources for compression
             return get_all_theme_template_dirs()
-        else:
-            # template is being accessed by a view, so return templates sources for current theme
-            return get_current_theme_template_dirs()

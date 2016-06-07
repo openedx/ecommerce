@@ -4,7 +4,7 @@ Module for code that should run during application startup
 from django.apps import AppConfig
 
 from ecommerce.theming.core import enable_theming
-from ecommerce.theming.helpers import get_base_themes_dir, is_comprehensive_theming_enabled
+from ecommerce.theming.helpers import is_comprehensive_theming_enabled
 
 
 class ThemeAppConfig(AppConfig):
@@ -22,6 +22,4 @@ class ThemeAppConfig(AppConfig):
         if is_comprehensive_theming_enabled():
             # proceed only if comprehensive theming in enabled
 
-            enable_theming(
-                themes_dir=get_base_themes_dir(),
-            )
+            enable_theming()

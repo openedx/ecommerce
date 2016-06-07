@@ -219,6 +219,7 @@ MIDDLEWARE_CLASSES = (
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'threadlocals.middleware.ThreadLocalMiddleware',
+    'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
@@ -513,7 +514,9 @@ ENABLE_COMPREHENSIVE_THEMING = True
 DISABLE_THEMING_ON_RUNTIME_SWITCH = "disable_theming_on_runtime"
 
 # Directory that contains all themes
-COMPREHENSIVE_THEME_DIR = DJANGO_ROOT + "/themes"
+COMPREHENSIVE_THEME_DIRS = [
+    DJANGO_ROOT + "/themes",
+]
 
 # Theme to use when no site or site theme is defined,
 # set to None if you want to use openedx theme
