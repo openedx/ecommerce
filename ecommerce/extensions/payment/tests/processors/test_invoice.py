@@ -44,9 +44,10 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
         invoice_data = {
             'invoice_type': Invoice.PREPAID,
             'invoice_number': 'EDX-0001',
-            'invoice_amount': 100,
+            'invoiced_amount': 100,
             'invoice_payment_date': pytz.utc.localize(datetime.datetime(2020, 01, 01)),
             'tax_deducted_source': False,
+            'tax_deducted_source_value': False,
             'invoice_discount_type': None,
             'invoice_discount_value': None
         }
@@ -58,9 +59,10 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(invoice.business_client, business_client)
         self.assertEqual(invoice.invoice_type, invoice_data['invoice_type'])
         self.assertEqual(invoice.number, invoice_data['invoice_number'])
-        self.assertEqual(invoice.invoice_amount, invoice_data['invoice_amount'])
-        self.assertEqual(invoice.payment_date, invoice_data['invoice_payment_date'])
+        self.assertEqual(invoice.invoiced_amount, invoice_data['invoiced_amount'])
+        self.assertEqual(invoice.invoice_payment_date, invoice_data['invoice_payment_date'])
         self.assertEqual(invoice.tax_deducted_source, invoice_data['tax_deducted_source'])
+        self.assertEqual(invoice.tax_deducted_source_value, invoice_data['tax_deducted_source_value'])
         self.assertEqual(invoice.invoice_discount_type, invoice_data['invoice_discount_type'])
         self.assertEqual(invoice.invoice_discount_value, invoice_data['invoice_discount_value'])
 

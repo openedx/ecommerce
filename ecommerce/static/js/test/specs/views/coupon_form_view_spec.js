@@ -197,7 +197,7 @@ define([
             describe('Invoice fields', function() {
                 var prepaid_fields = [
                     '[name=invoice_number]',
-                    '[name=invoice_amount]',
+                    '[name=invoiced_amount]',
                     '[name=invoice_payment_date]'
                 ];
 
@@ -231,9 +231,9 @@ define([
                 });
                 it('should display tax deducted source field when TDS is selected.', function() {
                     view.$el.find('#tax_deducted').prop('checked', true).trigger('change');
-                    expect(visible('[name=tax_deduction_percentage]')).toBe(true);
+                    expect(visible('[name=tax_deducted_source_value]')).toBe(true);
                     view.$el.find('#non_tax_deducted').prop('checked', true).trigger('change');
-                    expect(visible('[name=tax_deduction_percentage]')).toBe(false);
+                    expect(visible('[name=tax_deducted_source_value]')).toBe(false);
                 });
             });
         });

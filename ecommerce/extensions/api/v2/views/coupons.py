@@ -71,7 +71,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         Arguments:
             request (HttpRequest): With parameters title, client_username,
             stock_record_ids, start_date, end_date, code, benefit_type, benefit_value,
-            voucher_type, quantity, price, category and note in the body.
+            voucher_type, quantity, price, category, note and invoice data in the body.
 
         Returns:
             200 if the order was created successfully; the basket ID is included in the response
@@ -100,14 +100,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             catalog_query = request.data.get(CATALOG_QUERY)
             course_seat_types = request.data.get(COURSE_SEAT_TYPES)
 
+            tds = request.data.get('tax_deducted_source')
+
             invoice_data = {
                 'invoice_type': request.data.get('invoice_type'),
                 'invoice_number': request.data.get('invoice_number'),
                 'invoiced_amount': request.data.get('invoiced_amount'),
                 'invoice_payment_date': request.data.get('invoice_payment_date'),
-                'tax_deducted_source': request.data.get('tax_deducted_source'),
                 'invoice_discount_type': request.data.get('invoice_discount_type'),
-                'invoice_discount_value': request.data.get('invoice_discount_value')
+                'invoice_discount_value': request.data.get('invoice_discount_value'),
+                'tax_deducted_source': True if tds and (tds == 'Yes') else False,
+                'tax_deducted_source_value': request.data.get('tax_deducted_source_value')
             }
 
             if course_seat_types:

@@ -18,7 +18,9 @@ define([
             var view,
                 model,
                 enrollment_code_data = Mock_Coupons.enrollmentCodeCouponData,
-                discount_code_data = Mock_Coupons.discountCodeCouponData;
+                discount_code_data = Mock_Coupons.discountCodeCouponData,
+                invoice_coupon_data = Mock_Coupons.couponWithInvoiceData;
+
 
             describe('edit enrollment code', function () {
                 beforeEach(function () {
@@ -73,6 +75,30 @@ define([
                 });
             });
 
+            describe('Coupon with invoice data', function() {
+                beforeEach(function() {
+                    model = Coupon.findOrCreate(invoice_coupon_data, {parse: true});
+                    model.updatePaymentInformation();
+                    view = new CouponCreateEditView({model: model, editing: true}).render();
+                });
+
+                it('should contain invoice attributes.', function() {
+                    var tds, payment_date = Utils.stripTimezone(model.get('invoice_payment_date'));
+                    if (model.get('tax_deducted_source')) {
+                        tds = 'Yes';
+                    } else {
+                        tds = 'No';
+                    }
+                    expect(view.$el.find('[name=invoice_type]').val()).toEqual(model.get('invoice_type'));
+                    expect(view.$el.find('[name=invoice_number]').val()).toEqual(model.get('invoice_number'));
+                    expect(view.$el.find('[name=invoice_discount_value]').val()).toEqual('');
+                    expect(view.$el.find('[name=invoiced_amount]').val()).toEqual(model.get('invoiced_amount'));
+                    expect(view.$el.find('[name=invoice_payment_date]').val()).toEqual(payment_date);
+                    expect(view.$el.find('[name=tax_deducted_source]:checked').val()).toEqual(tds);
+                    expect(view.$el.find('[name=tax_deducted_source_value]').val())
+                        .toEqual(model.get('tax_deducted_source_value'));
+                });
+            });
         });
     }
 );

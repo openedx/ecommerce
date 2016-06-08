@@ -119,6 +119,7 @@ define([
             initialize: function () {
                 this.on('change:voucher_type', this.changeVoucherType, this);
                 this.on('change:vouchers', this.updateVoucherData);
+                this.on('change:payment_information', this.updatePaymentInformation);
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
             },
@@ -184,6 +185,21 @@ define([
 
                 if (code_count > 1 || _.size(vouchers) === 1) {
                     this.set('code', voucher.code);
+                }
+            },
+
+            updatePaymentInformation: function() {
+                var payment_information = this.get('payment_information'),
+                    invoice = payment_information.Invoice;
+                this.set('invoice_type', invoice.invoice_type);
+                this.set('invoice_discount_type', invoice.invoice_discount_type);
+                this.set('invoice_discount_value', invoice.invoice_discount_value);
+                this.set('invoice_number', invoice.number);
+                this.set('invoiced_amount', invoice.invoiced_amount);
+                this.set('invoice_payment_date', invoice.invoice_payment_date);
+                if (invoice.tax_deducted_source_value) {
+                    this.set('tax_deducted_source', 'Yes');
+                    this.set('tax_deducted_source_value', invoice.tax_deducted_source_value);
                 }
             },
 

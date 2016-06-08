@@ -105,10 +105,10 @@
         </div>
 
         <div class="form-group">
-            <label for="invoice_amount"><%= gettext('Invoice Amount') %></label>
+            <label for="invoiced_amount"><%= gettext('Invoice Amount') %></label>
             <div class="input-group">
                 <div class="input-group-addon">$</div>
-                <input id="invoice_amount" class="form-control" type="number" step="0.01" name="invoice_amount">
+                <input id="invoiced_amount" class="form-control" type="number" step="0.01" name="invoiced_amount">
             </div>
             <p class="help-block"></p>
         </div>
@@ -148,8 +148,8 @@
         </div>
 
         <div class="form-group hidden">
-            <div class="input-group tax_deduction_percentage">
-                <input id="tax_deduction_percentage" type="number" step="1" min="1" max="100" class="form-control" name="tax_deduction_percentage">
+            <div class="input-group tax_deducted_source_value">
+                <input id="tax_deducted_source_value" type="number" step="1" min="1" max="100" class="form-control" name="tax_deducted_source_value">
                 <div class="input-group-addon">%</div>
                 <p class="help-block"></p>
             </div>

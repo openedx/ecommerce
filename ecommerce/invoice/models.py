@@ -1,4 +1,5 @@
 from django_extensions.db.models import TimeStampedModel
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from simple_history.models import HistoricalRecords
@@ -24,11 +25,16 @@ class Invoice(TimeStampedModel):
 
     invoice_type = models.CharField(max_length=255, default=PREPAID, choices=type_choices, blank=True, null=True)
     number = models.CharField(max_length=255, blank=True, null=True)
-    invoice_amount = models.PositiveIntegerField(blank=True, null=True)
-    payment_date = models.DateTimeField(blank=True, null=True)
+    invoiced_amount = models.PositiveIntegerField(blank=True, null=True)
+    invoice_payment_date = models.DateTimeField(blank=True, null=True)
     tax_deducted_source = models.BooleanField(default=False)
     invoice_discount_type = models.CharField(max_length=255, blank=True, null=True)
     invoice_discount_value = models.PositiveIntegerField(blank=True, null=True)
+    tax_deducted_source = models.BooleanField(default=False)
+    tax_deducted_source_value = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        blank=True, null=True
+    )
 
     @property
     def total(self):

@@ -175,11 +175,8 @@ define([
                 'input[name=invoice_number]': {
                     observe: 'invoice_number'
                 },
-                'input[name=tax_deduction_percentage]': {
-                    observe: 'tax_deduction_percentage'
-                },
-                'input[name=invoice_amount]': {
-                    observe: 'invoice_amount'
+                'input[name=invoiced_amount]': {
+                    observe: 'invoiced_amount'
                 },
                 'input[name=invoice_payment_date]': {
                     observe: 'invoice_payment_date',
@@ -187,8 +184,11 @@ define([
                         return Utils.stripTimezone(val);
                     }
                 },
-                'input[name=tax_deducted_percentage]': {
-                    observe: 'tax_deducted_percentage'
+                'input[name=tax_deducted_source_value]': {
+                    observe: 'tax_deducted_source_value'
+                },
+                'input[name=tax_deducted_source]': {
+                    observe: 'tax_deducted_source'
                 }
             },
 
@@ -322,10 +322,9 @@ define([
 
             toggleInvoiceFields: function () {
                 var invoice_type = this.$el.find('[name=invoice_type]:checked').val();
-                console.log(invoice_type);
                 var prepaid_fields = [
                     this.formGroup('[name=invoice_number]'),
-                    this.formGroup('[name=invoice_amount]'),
+                    this.formGroup('[name=invoiced_amount]'),
                     this.formGroup('[name=invoice_payment_date]')
                 ];
                 var self = this;
@@ -345,9 +344,9 @@ define([
             toggleTaxDeductedSourceField: function() {
                 var tax_deducted_source = this.$el.find('[name=tax_deducted_source]:checked').val();
                 if (tax_deducted_source === 'Yes') {
-                    this.formGroup('[name=tax_deduction_percentage]').removeClass(this.hiddenClass);
+                    this.formGroup('[name=tax_deducted_source_value]').removeClass(this.hiddenClass);
                 } else if (tax_deducted_source === 'No') {
-                    this.formGroup('[name=tax_deduction_percentage]').addClass(this.hiddenClass);
+                    this.formGroup('[name=tax_deducted_source_value]').addClass(this.hiddenClass);
                 }
             },
 
@@ -493,6 +492,8 @@ define([
                     this.toggleQuantityField();
                     this.$el.find('.catalog-query').addClass('editing');
                     this.$el.find('button[type=submit]').html(gettext('Save Changes'));
+                    this.$el.find('[name=invoice_type]').trigger('change');
+                    this.$el.find('[name=tax_deducted_source]').trigger('change');
                     this.fillFromCourse();
                 } else {
                     var firstEntry = function(obj, i){ return i === 0 ? obj : null; },
@@ -504,6 +505,7 @@ define([
                     this.model.set('catalog_type', 'Single course');
                     this.model.set('invoice_discount_type', 'Percentage');
                     this.model.set('invoice_type', 'Prepaid');
+                    this.model.set('tax_deducted_source', 'No');
                     this.$el.find('[name=benefit_value]').attr('max', 100);
                     this.$el.find('[name=invoice_discount_value]').attr('max', 100);
                     this.$el.find('button[type=submit]').html(gettext('Create Coupon'));
