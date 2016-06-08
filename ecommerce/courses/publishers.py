@@ -9,6 +9,7 @@ from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
 import requests
 
+from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
 from ecommerce.core.url_utils import get_lms_url, get_lms_commerce_api_url
 from ecommerce.courses.utils import mode_for_seat
 
@@ -32,11 +33,13 @@ class LMSPublisher(object):
     def serialize_seat_for_commerce_api(self, seat):
         """ Serializes a course seat product to a dict that can be further serialized to JSON. """
         stock_record = seat.stockrecords.first()
-        try:
-            enrollment_code = seat.course.enrollment_code_product
-            bulk_sku = enrollment_code.stockrecords.first().partner_sku
-        except Product.DoesNotExist:
-            bulk_sku = None
+        bulk_sku = None
+        if seat.attr.certificate_type in ENROLLMENT_CODE_SEAT_TYPES:
+            try:
+                enrollment_code = seat.course.enrollment_code_product
+                bulk_sku = enrollment_code.stockrecords.first().partner_sku
+            except Product.DoesNotExist:
+                pass
         return {
             'name': mode_for_seat(seat),
             'currency': stock_record.price_currency,
