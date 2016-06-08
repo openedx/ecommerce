@@ -3,6 +3,8 @@ from oscar.apps.basket.admin import *  # noqa pylint: disable=wildcard-import,un
 Basket = get_model('basket', 'basket')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
+admin.site.unregister((Basket, Line,))
+
 
 class PaymentProcessorResponseInline(admin.TabularInline):
     model = PaymentProcessorResponse
@@ -15,9 +17,12 @@ class PaymentProcessorResponseInline(admin.TabularInline):
         return False
 
 
+@admin.register(Basket)
 class BasketAdminExtended(BasketAdmin):
     inlines = (LineInline, PaymentProcessorResponseInline,)
+    show_full_result_count = False
 
 
-admin.site.unregister(Basket)
-admin.site.register(Basket, BasketAdminExtended)
+@admin.register(Line)
+class LineAdminExtended(LineAdmin):
+    show_full_result_count = False

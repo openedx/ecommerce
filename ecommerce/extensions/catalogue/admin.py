@@ -1,21 +1,19 @@
 from oscar.apps.catalogue.admin import *  # pylint: disable=unused-import,wildcard-import,unused-wildcard-import
 from simple_history.admin import SimpleHistoryAdmin
 
+admin.site.unregister((Product, ProductAttributeValue,))
 
+
+@admin.register(Product)
 class ProductAdminExtended(SimpleHistoryAdmin):
     list_display = ('get_title', 'upc', 'get_product_class', 'structure', 'attribute_summary', 'date_created', 'course',
                     'expires',)
     prepopulated_fields = {"slug": ("title",)}
     inlines = [AttributeInline, CategoryInline, ProductRecommendationInline]
+    show_full_result_count = False
 
 
-admin.site.unregister(Product)
-admin.site.register(Product, ProductAdminExtended)
-
-
+@admin.register(ProductAttributeValue)
 class ProductAttributeValueAdminExtended(SimpleHistoryAdmin):
     list_display = ('product', 'attribute', 'value')
-
-
-admin.site.unregister(ProductAttributeValue)
-admin.site.register(ProductAttributeValue, ProductAttributeValueAdminExtended)
+    show_full_result_count = False
