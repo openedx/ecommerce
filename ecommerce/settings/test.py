@@ -89,7 +89,14 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
-        'invoice': {}
+        'invoice': {},
+        'adyen': {
+            'web_service_username': 'fake-client-id',
+            'web_service_password': 'fake-client-secret',
+            'merchant_account_code': 'fake-merchant-id',
+            'cse_js_url': 'https://replace-me/',
+            'payment_api_url': 'https://replace-me/',
+        },
     },
     'other': {
         'cybersource': {
@@ -112,7 +119,14 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
-        'invoice': {}
+        'invoice': {},
+        'adyen': {
+            'web_service_username': 'fake-client-id',
+            'web_service_password': 'fake-client-secret',
+            'merchant_account_code': 'fake-merchant-id',
+            'cse_js_url': 'https://replace-me/',
+            'payment_api_url': 'https://replace-me/',
+        },
     }
 }
 

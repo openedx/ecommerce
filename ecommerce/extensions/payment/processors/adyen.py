@@ -117,7 +117,7 @@ class Adyen(BasePaymentProcessor):
             UserCancelled: Indicates the user cancelled payment.
             TransactionDeclined: Indicates the payment was declined by the processor.
             GatewayError: Indicates a general error on the part of the processor.
-            InvalidCyberSourceDecision: Indicates an unknown decision value.
+            InvalidAdyenDecision: Indicates an unknown decision value.
                 Known values are ACCEPT, CANCEL, DECLINE, ERROR.
             PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
         """
@@ -147,7 +147,7 @@ class Adyen(BasePaymentProcessor):
             UserCancelled: Indicates the user cancelled payment.
             TransactionDeclined: Indicates the payment was declined by the processor.
             GatewayError: Indicates a general error on the part of the processor.
-            InvalidCyberSourceDecision: Indicates an unknown decision value.
+            InvalidAdyenDecision: Indicates an unknown decision value.
                 Known values are ACCEPT, CANCEL, DECLINE, ERROR.
             PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
         """

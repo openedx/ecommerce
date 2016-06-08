@@ -184,9 +184,11 @@ class SiteConfigurationTests(TestCase):
         'ecommerce.extensions.payment.tests.processors.AnotherDummyProcessor',
     ])
     @ddt.data(
-        ([], []),
-        ([DummyProcessor], [DummyProcessor]),
-        ([DummyProcessor, AnotherDummyProcessor], [DummyProcessor, AnotherDummyProcessor]),
+        ([], {}),
+        ([DummyProcessor], {DummyProcessor.Name: DummyProcessor}),
+        ([DummyProcessor, AnotherDummyProcessor], {
+            DummyProcessor.Name: DummyProcessor, AnotherDummyProcessor.Name: AnotherDummyProcessor
+        }),
     )
     @ddt.unpack
     def test_get_payment_processors(self, processors, expected_result):
@@ -222,7 +224,7 @@ class SiteConfigurationTests(TestCase):
     )
     def test_get_payment_processors_switch_disabled(self, processors):
         """ Tests that get_payment_processors respects waffle switches """
-        expected_result = []
+        expected_result = {}
         site_config = _make_site_config(",".join(proc.NAME for proc in processors))
 
         result = site_config.get_payment_processors()
