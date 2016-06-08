@@ -5,11 +5,13 @@ from django.utils.translation import ugettext_lazy as _
 from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 
 
+@admin.register(SiteConfiguration)
 class SiteConfigurationAdmin(admin.ModelAdmin):
     list_display = ('site', 'partner', 'lms_url_root', 'theme_scss_path', 'payment_processors')
     search_fields = ['site__name']
 
 
+@admin.register(User)
 class EcommerceUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'full_name', 'first_name', 'last_name', 'is_staff')
     fieldsets = (
@@ -19,11 +21,9 @@ class EcommerceUserAdmin(UserAdmin):
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
+    show_full_result_count = False
 
 
 @admin.register(BusinessClient)
 class BusinessClientAdmin(admin.ModelAdmin):
     pass
-
-admin.site.register(SiteConfiguration, SiteConfigurationAdmin)
-admin.site.register(User, EcommerceUserAdmin)
