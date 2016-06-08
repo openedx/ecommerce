@@ -102,6 +102,15 @@
 
     <div class="fields col-md-6">
         <div class="form-group">
+            <div class="form-inline catalog-type">
+                <input id="single_course" type="radio" name="catalog_type" value="Single course">
+                <label for="single_course"><%= gettext('Single course') %></label>
+                <input id="multiple_courses" type="radio" name="catalog_type" value="Multiple courses">
+                <label for="multiple_courses"><%= gettext('Multiple courses') %></label>
+            </div>
+            <p class="help-block"></p>
+        </div>
+        <div class="form-group">
             <label for="course_id"><%= gettext('Course ID') %> *</label>
             <input type="text" class="form-control" name="course_id">
             <p class="help-block"></p>
@@ -110,6 +119,22 @@
             <label for="seat_type"><%= gettext('Seat Type') %> *</label>
             <select class="form-control" name="seat_type"></select>
             <p class="help-block"></p>
+        </div>
+        <div class="form-group catalog-query">
+            <label for="catalog_query"><%= gettext('Valid for:') %> *</label>
+            <textarea class="form-control" name="catalog_query" rows="10"></textarea>
+            <p class="help-block"></p>
+        </div>
+        <div class="form-group course-seat-types">
+            <label for="course_seat_types"><%= gettext('Seat Types:') %></label>
+            <div class="checkboxes">
+                <input id="verified" type="checkbox" name="course_seat_types" value="verified">
+                <label for="verified"><%= gettext('Verified') %></label>
+                <input id="professional" type="checkbox" name="course_seat_types" value="professional">
+                <label for="professional"><%= gettext('Professional') %></label>
+                <p class="help-block"></p>
+            </div>
+            <div class="catalog_buttons"></div>
         </div>
         <div class="form-group">
             <label for="note"><%= gettext('Note') %></label>

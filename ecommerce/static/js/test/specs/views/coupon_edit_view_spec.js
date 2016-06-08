@@ -36,7 +36,7 @@ define([
                     expect(view.$el.find('[name=code_type]').val()).toEqual('Enrollment code');
                     expect(view.$el.find('[name=start_date]').val()).toEqual(startDate);
                     expect(view.$el.find('[name=end_date]').val()).toEqual(endDate);
-                    expect(voucherType.children().length).toBe(2);
+                    expect(voucherType.children().length).toBe(3);
                     expect(voucherType.val()).toEqual(model.get('voucher_type'));
                     expect(view.$el.find('[name=quantity]').val()).toEqual(model.get('quantity').toString());
                     expect(view.$el.find('[name=client]').val()).toEqual(model.get('client'));
@@ -61,7 +61,7 @@ define([
                     expect(view.$el.find('[name=code_type]').val()).toEqual('Discount code');
                     expect(view.$el.find('[name=start_date]').val()).toEqual(startDate);
                     expect(view.$el.find('[name=end_date]').val()).toEqual(endDate);
-                    expect(voucherType.children().length).toBe(2);
+                    expect(voucherType.children().length).toBe(3);
                     expect(voucherType.val()).toEqual(model.get('voucher_type'));
                     expect(view.$el.find('[name=quantity]').val()).toEqual(model.get('quantity').toString());
                     expect(view.$el.find('[name=client]').val()).toEqual(model.get('client'));

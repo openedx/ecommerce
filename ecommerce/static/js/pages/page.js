@@ -63,6 +63,11 @@ define(['backbone',
                 this.renderTitle();
                 this.renderNestedView();
                 return this;
+            },
+
+            refresh: function () {
+                this.view.remove();
+                this.render();
             }
         });
 

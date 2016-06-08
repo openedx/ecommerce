@@ -444,7 +444,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         CouponViewSet().update_coupon_benefit_value(
             benefit_value=Decimal(54),
-            vouchers=vouchers
+            vouchers=vouchers,
+            coupon=coupon
         )
 
         for voucher in vouchers:
@@ -484,15 +485,6 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         baskets = Basket.objects.filter(lines__product_id=coupon.id)
         self.assertEqual(baskets.first().owner.username, 'Test Client Username')
 
-    def test_exception_for_multi_use_voucher_type(self):
-        """Test that an exception is raised for multi-use voucher types."""
-        self.data.update({
-            'voucher_type': Voucher.MULTI_USE,
-        })
-
-        with self.assertRaises(NotImplementedError):
-            self.client.post(COUPONS_LINK, data=self.data, format='json')
-
     @ddt.data('audit', 'honor')
     def test_restricted_course_mode(self, mode):
         """Test that an exception is raised when a black-listed course mode is used."""
@@ -525,7 +517,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         details_response = self.client.get(reverse('api:v2:coupons-detail', args=[coupon_id]))
         detail = json.loads(details_response.content)
         self.assertEqual(detail['catalog_query'], catalog_query)
-        self.assertEqual(detail['course_seat_types'], course_seat_types[0])
+        self.assertEqual(detail['course_seat_types'], course_seat_types)
         self.assertEqual(detail['seats'][0]['id'], seat.id)
 
 

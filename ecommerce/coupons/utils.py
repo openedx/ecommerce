@@ -29,3 +29,16 @@ def get_seats_from_query(site, query, seat_types):
         except Product.DoesNotExist:
             pass
     return query_products
+
+
+def prepare_course_seat_types(course_seat_types):
+    """
+    Convert list of course seat types into comma-separated string.
+
+    Arguments:
+        course_seat_types (list): List of course seat types
+
+    Returns:
+        str: Comma-separated list of course seat types if course_seat_types is not empty
+    """
+    return ','.join(seat_type.lower() for seat_type in course_seat_types)

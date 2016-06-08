@@ -449,7 +449,7 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(voucher_offer.benefit.value, 100.00)
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
 
-        new_offer = update_voucher_offer(voucher_offer, 50.00, Benefit.PERCENTAGE)
+        new_offer = update_voucher_offer(voucher_offer, 50.00, Benefit.PERCENTAGE, self.coupon)
         self.assertEqual(new_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(new_offer.benefit.value, 50.00)
         self.assertEqual(new_offer.benefit.range.catalog, self.catalog)
