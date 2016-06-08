@@ -1,23 +1,11 @@
 """Devstack settings"""
-from os import environ
 
-import yaml
-
-from ecommerce.settings.base import *
-from ecommerce.settings.logger import get_logger_config
+from ecommerce.settings.production import *
 
 LOGGING = get_logger_config(debug=True, dev_env=True, local_loglevel='DEBUG')
 
-# Pull in base setting overrides from configuration file.
-CONFIG_FILE = environ.get('ECOMMERCE_CFG')
-if CONFIG_FILE is not None:
-    with open(CONFIG_FILE) as f:
-        overrides = yaml.load(f)
-        vars().update(overrides)
-
 DEBUG = True
 ENABLE_AUTO_AUTH = True
-
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
