@@ -64,7 +64,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'insecure-secret-key',
     'JWT_ISSUERS': (
-        '127.0.0.1:8000/oauth2',
+        'http://127.0.0.1:8000/oauth2',
         # Must match the value of JWT_ISSUER configured for the ecommerce worker.
         'ecommerce_worker',
     ),
