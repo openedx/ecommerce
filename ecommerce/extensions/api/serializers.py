@@ -362,7 +362,6 @@ class PartnerSerializer(serializers.ModelSerializer):
 
 class CatalogSerializer(serializers.ModelSerializer):
     """ Serializer for Catalogs. """
-
     products = serializers.SerializerMethodField()
 
     class Meta(object):
@@ -377,6 +376,15 @@ class CatalogSerializer(serializers.ModelSerializer):
         )
 
 
+class BenefitSerializer(serializers.ModelSerializer):
+    type = serializers.CharField()
+    value = serializers.IntegerField()
+
+    class Meta(object):
+        model = Benefit
+        fields = ('type', 'value')
+
+
 class VoucherSerializer(serializers.ModelSerializer):
     is_available_to_user = serializers.SerializerMethodField()
     benefit = serializers.SerializerMethodField()
@@ -387,7 +395,8 @@ class VoucherSerializer(serializers.ModelSerializer):
         return obj.is_available_to_user(user=request.user)
 
     def get_benefit(self, obj):
-        return (obj.offers.first().benefit.type, obj.offers.first().benefit.value)
+        benefit = obj.offers.first().benefit
+        return BenefitSerializer(benefit).data
 
     def get_redeem_url(self, obj):
         url = get_ecommerce_url('/coupons/offer/')

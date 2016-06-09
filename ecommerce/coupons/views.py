@@ -56,13 +56,11 @@ def get_voucher_from_code(code):
     """
     voucher = Voucher.objects.get(code=code)
 
-    # Just get the first product.
     products = voucher.offers.all()[0].benefit.range.all_products()
     if products:
-        product = products[0]
+        return voucher, products
     else:
         raise exceptions.ProductNotFoundError()
-    return voucher, product
 
 
 def voucher_is_valid(voucher, product, request):
