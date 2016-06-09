@@ -104,7 +104,8 @@ class CatalogViewSetTest(CatalogMixin, CatalogPreviewMockMixin, ApiMockMixin, Te
         ('/api/v2/coupons/preview/', 400),
         ('/api/v2/coupons/preview/?query=', 400),
         ('/api/v2/coupons/preview/?wrong=parameter', 400),
-        ('/api/v2/coupons/preview/?query=id:course*', 200)
+        ('/api/v2/coupons/preview/?query=id:course*', 400),
+        ('/api/v2/coupons/preview/?query=id:course*&seat_types=verified', 200),
     )
     @ddt.unpack
     @mock_course_catalog_api_client

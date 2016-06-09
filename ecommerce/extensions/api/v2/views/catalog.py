@@ -10,6 +10,7 @@ from rest_framework_extensions.decorators import action
 from rest_framework_extensions.mixins import NestedViewSetMixin
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.api import serializers
 
 
@@ -36,11 +37,19 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
               paramType: query
               multiple: false
         """
-        query = request.GET.get('query', '')
-        if query:
+        query = request.GET.get('query')
+        seat_types = request.GET.get('seat_types')
+        if query and seat_types:
+            seat_types = seat_types.split(',')
             try:
-                response = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(q=query)
-                return Response(response)
+                results = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(q=query)['results']
+                course_ids = [result['key'] for result in results]
+                courses = serializers.CourseSerializer(
+                    Course.objects.filter(id__in=course_ids),
+                    many=True,
+                    context={'request': request}
+                ).data
+                return Response(data=[course for course in courses if course['type'] in seat_types])
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.error('Unable to connect to Course Catalog service.')
                 return Response(status=status.HTTP_400_BAD_REQUEST)

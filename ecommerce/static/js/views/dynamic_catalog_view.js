@@ -21,45 +21,33 @@ define(['jquery',
             initialize: function (options) {
                 this.query = options.query;
                 this.seat_types = options.seat_types;
-
-                this.courses = new Courses();
-
                 this._super();
             },
 
             getRowData: function (course) {
                 return {
-                    id: course.get('id'),
-                    name: course.get('name'),
-                    type: _s(course.get('type')).capitalize().value()
+                    id: course.id,
+                    name: course.name,
+                    type: _s(course.type).capitalize().value()
                 };
             },
 
             previewCatalog: function (event) {
                 event.preventDefault();
-                this.courses.fetch();
 
                 Backbone.ajax({
                     context: this,
                     type: 'GET',
                     url: window.location.origin + '/api/v2/catalogs/preview/',
                     data: {
-                        query : this.query
+                        query : this.query,
+                        seat_types: this.seat_types.join()
                     },
                     success: this.onSuccess
                 });
             },
 
-            filterCourses: function (course_keys, seat_types) {
-                return _.filter(this.courses.models, function(course) {
-                    return (_.contains(course_keys, course.get('id')) && _.contains(seat_types, course.get('type')));
-                });
-            },
-
             onSuccess: function(data) {
-                var course_keys = _.pluck(data.results, 'key'),
-                    course_data = this.filterCourses(course_keys, this.seat_types);
-
                 this.$el.find('#coursesTable').DataTable({
                     autoWidth: false,
                     destroy: true,
@@ -81,7 +69,7 @@ define(['jquery',
                             data: 'type'
                         }
                     ],
-                    data: course_data.map(this.getRowData, this)
+                    data: data.map(this.getRowData, this)
                 }, this);
             },
 
