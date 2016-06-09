@@ -6,7 +6,7 @@ define([
         'backbone.super',
         'backbone.validation',
         'jquery',
-        'jquery-cookie',
+        'js-cookie',
         'moment',
         'underscore',
         'collections/product_collection',
@@ -20,7 +20,7 @@ define([
               BackboneSuper,
               BackboneValidation,
               $,
-              $cookie,
+              Cookies,
               moment,
               _,
               ProductCollection,
@@ -346,7 +346,7 @@ define([
                     url: '/api/v2/publication/',
 
                     // The API requires a CSRF token for all POST requests using session authentication.
-                    headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')},
+                    headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
 
                     // JSON or bust!
                     contentType: 'application/json'

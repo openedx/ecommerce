@@ -8,12 +8,15 @@ define([
         'underscore.string',
         'utils/utils',
         'utils/analytics_utils',
+        'js-cookie'
     ],
     function ($,
               _,
               _s,
               Utils,
-              AnalyticsUtils) {
+              AnalyticsUtils,
+              Cookies
+    ) {
         'use strict';
 
         var appendToForm = function (value, key, form) {
@@ -30,12 +33,13 @@ define([
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 headers: {
-                    'X-CSRFToken': $.cookie('ecommerce_csrftoken')
+                    'X-CSRFToken': Cookies.get('ecommerce_csrftoken')
                 },
                 data: JSON.stringify(data),
                 success: onSuccess,
                 error: onFail
             });
+
         },
         hideVoucherForm = function() {
             $('#voucher_form_container').hide();

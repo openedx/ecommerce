@@ -16,7 +16,7 @@ $(document).ready(function () {
             url: '/api/v2/refunds/' + refund_id + '/process/',
             data: { action: decision },
             method: 'PUT',
-            headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')}
+            headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')}
         }).success(function (data) {
             $('tr[data-refund-id=' + refund_id + '] .refund-status').text(data.status);
 

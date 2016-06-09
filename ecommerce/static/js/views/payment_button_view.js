@@ -2,11 +2,13 @@ define([
         'jquery',
         'underscore',
         'backbone',
-        'jquery-cookie'
+        'js-cookie'
     ],
     function ($,
               _,
-              Backbone) {
+              Backbone,
+              Cookies
+    ) {
         'use strict';
 
         return Backbone.View.extend({
@@ -36,7 +38,7 @@ define([
                     method: 'post',
                     contentType: 'application/json',
                     data: postData,
-                    headers: {'X-CSRFToken': $.cookie('ecommerce_csrftoken')},
+                    headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
                     context: this,
                     success: this.handleCreateOrderResponse,
                     error: this.handleCreateOrderError
