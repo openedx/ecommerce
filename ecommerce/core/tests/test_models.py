@@ -185,9 +185,9 @@ class SiteConfigurationTests(TestCase):
     ])
     @ddt.data(
         ([], {}),
-        ([DummyProcessor], {DummyProcessor.Name: DummyProcessor}),
+        ([DummyProcessor], {DummyProcessor.NAME: DummyProcessor}),
         ([DummyProcessor, AnotherDummyProcessor], {
-            DummyProcessor.Name: DummyProcessor, AnotherDummyProcessor.Name: AnotherDummyProcessor
+            DummyProcessor.NAME: DummyProcessor, AnotherDummyProcessor.NAME: AnotherDummyProcessor
         }),
     )
     @ddt.unpack
