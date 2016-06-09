@@ -17,6 +17,14 @@ class CanActForUser(permissions.BasePermission):
         return user and (user.is_superuser or user.username == username)
 
 
+class IsOffersOrIsAuthenticatedAndStaff(permissions.BasePermission):
+    """ Permission that allows access to anonymous users to get course offers. """
+
+    def has_permission(self, request, view):
+        user = request.user
+        return (user.is_authenticated() and user.is_staff) or view.action == 'offers'
+
+
 class IsStaffOrOwner(permissions.BasePermission):
     """
     Permission that allows access to admin users or the owner of an object.

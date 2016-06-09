@@ -15,7 +15,7 @@ from oscar.test.utils import RequestFactory
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.coupons.views import get_voucher_from_code, voucher_is_valid
+from ecommerce.coupons.views import get_voucher_and_products_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -65,16 +65,16 @@ class CouponAppViewTests(TestCase):
 
 
 class GetVoucherTests(TestCase):
-    def test_get_voucher_from_code(self):
-        """ Verify that get_voucher_from_code() returns product and voucher. """
+    def test_get_voucher_and_products_from_code(self):
+        """ Verify that get_voucher_and_products_from_code() returns products and voucher. """
         original_voucher, original_product = prepare_voucher(code=COUPON_CODE)
-        voucher, product = get_voucher_from_code(code=COUPON_CODE)
+        voucher, products = get_voucher_and_products_from_code(code=COUPON_CODE)
 
         self.assertIsNotNone(voucher)
         self.assertEqual(voucher, original_voucher)
         self.assertEqual(voucher.code, COUPON_CODE)
-        self.assertIsNotNone(product)
-        self.assertEqual(product, original_product)
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0], original_product)
 
     def test_no_product(self):
         """ Verify that an exception is raised if there is no product. """
@@ -83,12 +83,12 @@ class GetVoucherTests(TestCase):
         voucher.offers.add(offer)
 
         with self.assertRaises(exceptions.ProductNotFoundError):
-            get_voucher_from_code(code='NOPRODUCT')
+            get_voucher_and_products_from_code(code='NOPRODUCT')
 
     def test_get_non_existing_voucher(self):
-        """ Verify that get_voucher_from_code() raises exception for a non-existing voucher. """
+        """ Verify that get_voucher_and_products_from_code() raises exception for a non-existing voucher. """
         with self.assertRaises(Voucher.DoesNotExist):
-            get_voucher_from_code(code='INVALID')
+            get_voucher_and_products_from_code(code='INVALID')
 
     def test_valid_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is valid. """
