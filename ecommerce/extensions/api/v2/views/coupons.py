@@ -440,16 +440,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                          and used for the updated.
         """
         invoice = Invoice.objects.filter(order__basket__lines__product=coupon)
-        tds = data['tax_deducted_source']
+        tds = data.get('tax_deducted_source')
         update_data = {
-            'invoice_type': data['invoice_type'],
-            'number': data['invoice_number'],
-            'invoiced_amount': data['invoiced_amount'],
-            'invoice_payment_date': data['invoice_payment_date'],
-            'invoice_discount_type': data['invoice_discount_type'],
-            'invoice_discount_value': data['invoice_discount_value'],
+            'invoice_type': data.get('invoice_type'),
+            'number': data.get('invoice_number'),
+            'invoiced_amount': data.get('invoiced_amount'),
+            'invoice_payment_date': data.get('invoice_payment_date'),
+            'invoice_discount_type': data.get('invoice_discount_type'),
+            'invoice_discount_value': data.get('invoice_discount_value'),
             'tax_deducted_source': True if tds and (tds == 'Yes') else False,
-            'tax_deducted_source_value': data['tax_deducted_source_value'],
+            'tax_deducted_source_value': data.get('tax_deducted_source_value'),
         }
         invoice.update(**update_data)
 
