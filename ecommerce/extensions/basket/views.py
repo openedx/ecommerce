@@ -14,7 +14,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url, get_lms_enrollment_base_api_url
 from ecommerce.coupons.views import get_voucher_from_code
-from ecommerce.courses.utils import get_course_info_from_lms, mode_for_seat
+from ecommerce.courses.utils import get_course_info_from_course_catalog, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -117,10 +117,10 @@ class BasketSummaryView(BasketView):
             image_url = None
             short_description = None
             try:
-                course = get_course_info_from_lms(course_key)
-                image_url = get_lms_url(course['media']['course_image']['uri'])
+                course = get_course_info_from_course_catalog(self.request.site, course_key)
+                image_url = get_lms_url(course['image']['src'])
                 short_description = course['short_description']
-                course_name = course['name']
+                course_name = course['title']
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
 

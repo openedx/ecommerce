@@ -19,7 +19,7 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
-from ecommerce.courses.utils import get_course_info_from_lms
+from ecommerce.courses.utils import get_course_info_from_course_catalog
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -137,13 +137,13 @@ class CouponOfferView(TemplateView):
             valid_voucher, msg = voucher_is_valid(voucher, product, self.request)
             if valid_voucher:
                 try:
-                    course = get_course_info_from_lms(product.course_id)
+                    course = get_course_info_from_course_catalog(self.request.site, product.course_id)
                 except SlumberHttpBaseException as e:
                     logger.exception('Could not get course information. [%s]', e)
                     return {
                         'error': _('Could not get course information. [{error}]'.format(error=e)),
                     }
-                course['image_url'] = get_lms_url(course['media']['course_image']['uri'])
+                course['image_url'] = get_lms_url(course['image']['src'])
                 benefit = voucher.offers.first().benefit
                 # Note (multi-courses): fix this to work for all stock records / courses.
                 if benefit.range.catalog:
