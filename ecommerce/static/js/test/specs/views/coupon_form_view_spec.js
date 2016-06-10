@@ -193,6 +193,49 @@ define([
                     expect(view.dynamic_catalog_view.seat_types).toEqual(model.get('course_seat_types'));
                 });
             });
+
+            describe('Invoice fields', function() {
+                var prepaid_fields = [
+                    '[name=invoice_number]',
+                    '[name=invoiced_amount]',
+                    '[name=invoice_payment_date]'
+                ];
+
+                it('should show prepaid invoice fields when "Already invoiced" is selected.', function() {
+                    view.$el.find('#already_invoiced').prop('checked', true).trigger('change');
+                    _.each(prepaid_fields, function(field) {
+                        expect(visible(field)).toBe(true);
+                    });
+                    expect(visible('[name=invoice_discount_value]')).toBe(false);
+                });
+                it('should show postpaid invoice fields when "Invoiced after redemption" is selected.', function() {
+                    view.$el.find('#invoice_after_redemption').prop('checked', true).trigger('change');
+                    _.each(prepaid_fields, function(field) {
+                        expect(visible(field)).toBe(false);
+                    });
+                    expect(visible('[name=invoice_discount_value]')).toBe(true);
+                });
+                it('should constrain discount value input to 100 for percentage.', function() {
+                    view.$el.find('#invoice_after_redemption').prop('checked', true).trigger('change');
+                    view.$el.find('#invoice_discount_percent').prop('checked', true).trigger('change');
+                    expect(view.$el.find('[name=invoice_discount_value]').attr('max')).toBe('100');
+                    view.$el.find('#invoice_discount_fixed').prop('checked', true).trigger('change');
+                    expect(view.$el.find('[name=invoice_discount_value]').attr('max')).toBe('');
+                });
+                it('should display the appropriate icon for the discount value field.', function() {
+                    view.$el.find('#invoice_after_redemption').prop('checked', true).trigger('change');
+                    view.$el.find('#invoice_discount_percent').prop('checked', true).trigger('change');
+                    expect(view.$el.find('.invoice-discount-addon').html()).toBe('%');
+                    view.$el.find('#invoice_discount_fixed').prop('checked', true).trigger('change');
+                    expect(view.$el.find('.invoice-discount-addon').html()).toBe('$');
+                });
+                it('should display tax deducted source field when TDS is selected.', function() {
+                    view.$el.find('#tax_deducted').prop('checked', true).trigger('change');
+                    expect(visible('[name=tax_deducted_source_value]')).toBe(true);
+                    view.$el.find('#non_tax_deducted').prop('checked', true).trigger('change');
+                    expect(visible('[name=tax_deducted_source_value]')).toBe(false);
+                });
+            });
         });
     }
 );

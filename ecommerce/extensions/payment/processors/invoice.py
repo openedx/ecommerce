@@ -18,12 +18,12 @@ class InvoicePayment(BasePaymentProcessor):
 
     NAME = u'invoice'
 
-    def handle_processor_response(self, response, order=None, business_client=None):  # pylint: disable=arguments-differ
+    def handle_processor_response(
+            self, response, order=None, business_client=None, invoice_data=None
+    ):  # pylint: disable=arguments-differ
         """
-        Since this is an Invoice just record the transaction.
-
+        Record the transaction and store the invoice information in a new Invoice object.
         """
-
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
 
         source = Source(source_type=source_type, label='Invoice')
@@ -33,8 +33,21 @@ class InvoicePayment(BasePaymentProcessor):
             name=PaymentEventTypeName.PAID)
         event = PaymentEvent(event_type=event_type, processor_name=self.NAME)
 
-        # Create an Invoice.
-        Invoice.objects.create(order=order, business_client=business_client)
+        invoice = Invoice.objects.create(order=order, business_client=business_client)
+        if invoice_data:
+            invoice_type = invoice_data.get('invoice_type')
+            invoice.invoice_type = invoice_type
+            if invoice_type == 'Prepaid':
+                invoice.state = Invoice.PAID
+            invoice.number = invoice_data.get('invoice_number')
+            invoice.invoiced_amount = invoice_data.get('invoiced_amount')
+            invoice.invoice_payment_date = invoice_data.get('invoice_payment_date')
+            invoice.tax_deducted_source = True if invoice_data.get('tax_deducted_source') else False
+            invoice.invoice_discount_type = invoice_data.get('invoice_discount_type')
+            invoice.invoice_discount_value = invoice_data.get('invoice_discount_value')
+            invoice.tax_deducted_source = invoice_data.get('tax_deducted_source')
+            invoice.tax_deducted_source_value = invoice_data.get('tax_deducted_source_value')
+            invoice.save()
 
         return source, event
 

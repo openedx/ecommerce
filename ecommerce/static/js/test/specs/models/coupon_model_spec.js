@@ -15,6 +15,7 @@ define([
         var discountCodeData = Mock_Coupons.discountCodeCouponModelData,
             enrollmentCodeData = Mock_Coupons.enrollmentCodeCouponModelData;
 
+
         describe('Coupon model', function () {
             describe('validation', function () {
                 var model;
@@ -122,6 +123,5 @@ define([
                     expect(ajaxData.quantity).toEqual(1);
                 });
             });
-
         });
 });

@@ -108,6 +108,17 @@ define([
                     _s.sprintf('$%s', model.get('price'))
                 );
                 expect(view.renderVoucherTable).toHaveBeenCalled();
+                expect(view.$el.find('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
+                expect(view.$el.find('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
+                expect(view.$el.find('.invoiced-amount > .value').text()).toEqual(
+                    model.get('invoiced_amount').toString()
+                );
+                expect(view.$el.find('.invoice-payment-date > .value').text()).toEqual(
+                    view.formatDateTime(model.get('invoice_payment_date'))
+                );
+                expect(view.$el.find('.tax-deducted-source-value > .value').text()).toEqual(
+                    view.taxDeductedSource(model.get('tax_deducted_source_value'))
+                );
             });
 
             it('should render course data', function () {

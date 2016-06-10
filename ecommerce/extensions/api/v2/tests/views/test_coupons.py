@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+import datetime
 from decimal import Decimal
 
 import ddt
@@ -12,6 +13,7 @@ from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
+import pytz
 from rest_framework import status
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
@@ -324,24 +326,38 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         coupon_data = json.loads(response.content)['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
 
+    def get_response_json(self, method, path, data=None):
+        if method == 'GET':
+            response = self.client.get(path)
+        elif method == 'POST':
+            response = self.client.post(path, json.dumps(data), 'application/json')
+        elif method == 'PUT':
+            response = self.client.put(path, json.dumps(data), 'application/json')
+        return json.loads(response.content)
+
     def test_update(self):
         """Test updating a coupon."""
         coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        response = self.client.put(path, json.dumps({'title': 'New title'}), 'application/json')
-        response_data = json.loads(response.content)
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data={'title': 'New title'}
+        )
         self.assertEqual(response_data['id'], coupon.id)
         self.assertEqual(response_data['title'], 'New title')
 
     def test_update_title(self):
+        """Test updating a coupon's title."""
         coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
         data = {
             'id': coupon.id,
             AC.KEYS.TITLE: 'New title'
         }
-        response = self.client.put(path, json.dumps(data), 'application/json')
-        response_data = json.loads(response.content)
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data=data
+        )
         self.assertEqual(response_data['id'], coupon.id)
 
         new_coupon = Product.objects.get(id=coupon.id)
@@ -352,14 +368,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
     def test_update_datetimes(self):
         """Test that updating a coupons date updates all of it's voucher dates."""
         coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
         data = {
             'id': coupon.id,
             AC.KEYS.START_DATE: '2030-01-01',
             AC.KEYS.END_DATE: '2035-01-01'
         }
-        response = self.client.put(path, json.dumps(data), 'application/json')
-        response_data = json.loads(response.content)
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data=data
+        )
         self.assertEqual(response_data['id'], coupon.id)
 
         new_coupon = Product.objects.get(id=coupon.id)
@@ -519,6 +537,50 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(detail['catalog_query'], catalog_query)
         self.assertEqual(detail['course_seat_types'], course_seat_types)
         self.assertEqual(detail['seats'][0]['id'], seat.id)
+
+    def update_invoice_data(self):
+        """ Update the 'data' class variable with invoice information. """
+        invoice_data = {
+            'invoice_type': 'Prepaid',
+            'invoice_number': 'INV-00001',
+            'invoiced_amount': 1000,
+            'invoice_payment_date': datetime.datetime(2015, 1, 1, tzinfo=pytz.UTC).isoformat(),
+        }
+        self.data.update(invoice_data)
+
+    def assert_invoice_data(self, coupon_id):
+        """ Assert that the coupon details show the invoice data. """
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon_id]))
+        invoice_details = details['payment_information']['Invoice']
+        self.assertEqual(invoice_details['invoice_type'], self.data['invoice_type'])
+        self.assertEqual(invoice_details['number'], self.data['invoice_number'])
+        self.assertEqual(invoice_details['invoiced_amount'], self.data['invoiced_amount'])
+
+    def test_coupon_with_invoice_data(self):
+        """ Verify an invoice is created with the proper data. """
+        self.update_invoice_data()
+        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
+        self.assertEqual(invoice.invoice_type, self.data['invoice_type'])
+        self.assertEqual(invoice.number, self.data['invoice_number'])
+        self.assertEqual(invoice.invoiced_amount, self.data['invoiced_amount'])
+        self.assertEqual(invoice.invoice_payment_date.isoformat(), self.data['invoice_payment_date'])
+        self.assert_invoice_data(response['coupon_id'])
+
+    def test_coupon_invoice_update(self):
+        """ Verify a coupon is updated with new invoice data. """
+        self.update_invoice_data()
+        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        self.assert_invoice_data(response['coupon_id'])
+
+        new_invoice_data = {
+            'invoice_type': 'Postpaid',
+            'invoice_discount_type': 'Percentage',
+            'invoice_discount_value': 1500,
+        }
+        self.data.update(new_invoice_data)
+        updated_coupon = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        self.assert_invoice_data(updated_coupon['coupon_id'])
 
 
 class CouponCategoriesListViewTests(TestCase):

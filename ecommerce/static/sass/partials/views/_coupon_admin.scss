@@ -1,12 +1,21 @@
 .coupon-create-edit-view {
-    .benefit-type label {
+    .benefit-type label,
+    .invoice-type label,
+    .invoice-discount-type label,
+    .tax_deducted_source label {
         font-weight: normal;
     }
-    .benefit-addon {
-        width: 40px;
+
+    .benefit-addon,
+    .invoice-discount-addon {
+        width: $input-addon-width;
     }
-    input[name="benefit_value"] {
-        width: 174px;
+    input[name=benefit_value],
+    input[name=invoice_discount_value] {
+        width: $small-input-width;
+    }
+    .tax_deducted_source_value {
+        width: $small-input-width + $input-addon-width;
     }
 
     .help-block {
@@ -72,7 +81,6 @@
         .info-item {
             .heading {
                 border-bottom: 1px solid #eeeeee;
-
                 padding-bottom: 5px;
             }
 
@@ -87,7 +95,6 @@
 
             span {
                 color: gray;
-
                 font-weight: normal;
             }
         }
@@ -109,10 +116,17 @@
         .client-info,
         .total-paid,
         .catalog-query,
-        .seat-types {
+        .seat-types,
+        .invoice-type,
+        .invoice-number,
+        .invoiced-amount,
+        .invoice-discount-type,
+        .invoice-discount-value,
+        .invoice-payment-date,
+        .tax-deducted-source-value {
             @include float(left);
-
             @include margin-right(2%);
+
             margin-bottom: 50px;
             width: 48%;
             height: 75px;
@@ -158,7 +172,6 @@
 #catalogModal {
     .modal-dialog {
         margin-top: 100px;
-
         width: 75%;
     }
 

@@ -48,7 +48,10 @@ define([
             },
 
             formatDateTime: function(dateTime) {
-                return moment.utc(dateTime).format('MM/DD/YYYY h:mm A');
+                if (dateTime) {
+                    return moment.utc(dateTime).format('MM/DD/YYYY h:mm A');
+                }
+                return null;
             },
 
             formatLastEditedData: function(last_edited) {
@@ -66,11 +69,38 @@ define([
                 return '';
             },
 
+            taxDeductedSource: function(value) {
+                if (value) {
+                    return _s.sprintf('%u%%', parseInt(value));
+                } else {
+                    return null;
+                }
+            },
+
+            invoiceDiscountValue: function(type, value) {
+                var stringFormat = (type === 'Percentage') ? '%u%%' : '$%u';
+                return _s.sprintf(stringFormat, parseInt(value));
+            },
+
             render: function () {
                 var html,
                     voucher = this.model.get('vouchers')[0],
                     category = this.model.get('categories')[0].name,
-                    note = this.model.get('note');
+                    note = this.model.get('note'),
+                    invoice_type = this.model.get('invoice_type'),
+                    invoice_number = this.model.get('invoice_number'),
+                    invoice_payment_date = this.model.get('invoice_payment_date'),
+                    invoice_discount_type = this.model.get('invoice_discount_type'),
+                    invoice_discount_value = this.model.get('invoice_discount_value'),
+                    invoiced_amount = this.model.get('invoiced_amount'),
+                    tax_deducted_source_value = this.model.get('tax_deducted_source_value');
+
+                if (invoice_discount_value === null) {
+                    invoice_discount_type = null;
+                } else  {
+                    invoice_discount_value = this.invoiceDiscountValue(invoice_discount_type, invoice_discount_value);
+                }
+                tax_deducted_source_value = this.taxDeductedSource(tax_deducted_source_value);
 
                 html = this.template({
                     coupon: this.model.toJSON(),
@@ -84,6 +114,13 @@ define([
                     usage: this.usageLimitation(voucher),
                     category: category,
                     note: note,
+                    invoice_type: invoice_type,
+                    invoice_number: invoice_number,
+                    invoice_payment_date: this.formatDateTime(invoice_payment_date),
+                    invoice_discount_type: invoice_discount_type,
+                    invoice_discount_value: invoice_discount_value,
+                    invoiced_amount: invoiced_amount,
+                    tax_deducted_source_value: tax_deducted_source_value
                 });
 
                 this.$el.html(html);

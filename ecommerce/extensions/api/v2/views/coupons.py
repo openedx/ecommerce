@@ -71,7 +71,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         Arguments:
             request (HttpRequest): With parameters title, client_username,
             stock_record_ids, start_date, end_date, code, benefit_type, benefit_value,
-            voucher_type, quantity, price, category and note in the body.
+            voucher_type, quantity, price, category, note and invoice data in the body.
 
         Returns:
             200 if the order was created successfully; the basket ID is included in the response
@@ -99,6 +99,19 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             max_uses = request.data.get('max_uses')
             catalog_query = request.data.get(CATALOG_QUERY)
             course_seat_types = request.data.get(COURSE_SEAT_TYPES)
+
+            tds = request.data.get('tax_deducted_source')
+
+            invoice_data = {
+                'invoice_type': request.data.get('invoice_type'),
+                'invoice_number': request.data.get('invoice_number'),
+                'invoiced_amount': request.data.get('invoiced_amount'),
+                'invoice_payment_date': request.data.get('invoice_payment_date'),
+                'invoice_discount_type': request.data.get('invoice_discount_type'),
+                'invoice_discount_value': request.data.get('invoice_discount_value'),
+                'tax_deducted_source': True if tds and (tds == 'Yes') else False,
+                'tax_deducted_source_value': request.data.get('tax_deducted_source_value')
+            }
 
             if course_seat_types:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
@@ -156,7 +169,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             basket = prepare_basket(request, coupon_product)
 
             # Create an order now since payment is handled out of band via an invoice.
-            response_data = self.create_order_for_invoice(basket, coupon_id=coupon_product.id, client=client)
+            response_data = self.create_order_for_invoice(
+                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
+            )
 
             return Response(response_data, status=status.HTTP_200_OK)
 
@@ -248,7 +263,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         for category in categories:
             ProductCategory.objects.get_or_create(product=coupon, category=category)
 
-    def create_order_for_invoice(self, basket, coupon_id, client):
+    def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
 
@@ -273,7 +288,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Invoice payment processor invocation.
         payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(response={}, order=order, business_client=client)
+        payment_processor().handle_processor_response(
+            response={}, order=order, business_client=client, invoice_data=invoice_data
+        )
         response_data[AC.KEYS.PAYMENT_DATA] = {
             AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
         }
@@ -308,7 +325,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             vouchers.all().update(**data)
 
         range_data = {}
-
         for field in UPDATABLE_RANGE_FIELDS:
             self.create_update_data_dict(
                 request_data=request.data,
@@ -341,6 +357,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if note is not None:
             coupon.attr.note = note
             coupon.save()
+
+        self.update_invoice_data(coupon, request.data)
 
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
@@ -411,6 +429,29 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         except Http404:
             user, __ = User.objects.get_or_create(username=client_username)
             baskets.update(owner=user)
+
+    def update_invoice_data(self, coupon, data):
+        """
+        Update the invoice data.
+
+        Arguments:
+            coupon (Product): The coupon product with which the invoice is retrieved.
+            data (dict): The request's data from which the invoice data is retrieved
+                         and used for the updated.
+        """
+        invoice = Invoice.objects.filter(order__basket__lines__product=coupon)
+        tds = data.get('tax_deducted_source')
+        update_data = {
+            'invoice_type': data.get('invoice_type'),
+            'number': data.get('invoice_number'),
+            'invoiced_amount': data.get('invoiced_amount'),
+            'invoice_payment_date': data.get('invoice_payment_date'),
+            'invoice_discount_type': data.get('invoice_discount_type'),
+            'invoice_discount_value': data.get('invoice_discount_value'),
+            'tax_deducted_source': True if tds and (tds == 'Yes') else False,
+            'tax_deducted_source_value': data.get('tax_deducted_source_value'),
+        }
+        invoice.update(**update_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:
