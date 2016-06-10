@@ -4,13 +4,13 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth.views import logout
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic import RedirectView, TemplateView
 
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
+from ecommerce.core.views import LogoutView
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
 
@@ -44,7 +44,7 @@ login = RedirectView.as_view(url=reverse_lazy('social:begin', args=['edx-oidc'])
 # Use the same auth views for all logins, including those originating from the browseable API.
 AUTH_URLS = [
     url(r'^login/$', login, name='login'),
-    url(r'^logout/$', logout, name='logout'),
+    url(r'^logout/$', LogoutView.as_view(), name='logout'),
 ]
 
 urlpatterns = [

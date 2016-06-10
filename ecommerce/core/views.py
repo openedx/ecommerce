@@ -3,21 +3,18 @@ import logging
 import uuid
 
 import requests
-from requests.exceptions import RequestException
-from rest_framework import status
-from django.db import transaction, connection, DatabaseError
-from django.http import JsonResponse
+from auth_backends.views import LogoutRedirectBaseView
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, authenticate
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.db import transaction, connection, DatabaseError
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
-from django.views.generic import View
 from django.utils.decorators import method_decorator
+from django.views.generic import View
 
 from ecommerce.core.constants import Status, UnavailabilityMessage
 from ecommerce.core.url_utils import get_lms_heartbeat_url
-
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -57,12 +54,12 @@ def health(_):
     try:
         response = requests.get(get_lms_heartbeat_url(), timeout=1)
 
-        if response.status_code == status.HTTP_200_OK:
+        if response.status_code == 200:
             lms_status = Status.OK
         else:
             logger.critical(UnavailabilityMessage.LMS)
             lms_status = Status.UNAVAILABLE
-    except RequestException:
+    except requests.exceptions.RequestException:
         logger.critical(UnavailabilityMessage.LMS)
         lms_status = Status.UNAVAILABLE
 
@@ -79,7 +76,7 @@ def health(_):
     if overall_status == Status.OK:
         return JsonResponse(data)
     else:
-        return JsonResponse(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return JsonResponse(data, status=503)
 
 
 class AutoAuth(View):
@@ -107,9 +104,17 @@ class AutoAuth(View):
 
 class StaffOnlyMixin(object):
     """ Makes sure only staff users can access the view. """
+
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
             raise Http404
 
         return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
+
+
+class LogoutView(LogoutRedirectBaseView):
+    """ Logout view that redirects the user to the LMS logout page. """
+
+    def get_redirect_url(self, *args, **kwargs):
+        return self.request.site.siteconfiguration.build_lms_url('logout')

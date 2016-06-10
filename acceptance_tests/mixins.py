@@ -27,7 +27,7 @@ from acceptance_tests.config import (
     LMS_HTTPS
 )
 from acceptance_tests.expected_conditions import input_provided
-from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage
+from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage, LMSLogoutPage
 
 log = logging.getLogger(__name__)
 
@@ -94,8 +94,20 @@ class LogistrationMixin(LmsUserMixin):
         return username, email, password
 
 
+class LMSLogoutMixin(object):
+    def setUp(self):
+        super(LMSLogoutMixin, self).setUp()
+        self.lms_logout_page = LMSLogoutPage(self.browser)
+
+    def assert_on_lms_logout_page(self):
+        self.assertTrue(self.lms_logout_page.is_browser_on_page())
+
+    def logout_via_lms(self):
+        self.lms_logout_page.visit()
+
+
 class LogoutMixin(object):
-    def logout(self):
+    def logout_via_otto(self):
         url = '{}/accounts/logout/'.format(ECOMMERCE_URL_ROOT)
         self.browser.get(url)
 
