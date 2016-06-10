@@ -84,16 +84,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             q=benefit.range.catalog_query
         )['results']
 
-        logger.info('Query results: %s', query_results)
-        logger.info('Products: %s', products)
-
         for product in products:
             course_catalog_data = next((result for result in query_results if result['key'] == product.course_id), None)
-            logger.info('Course Catalog Data: %s', course_catalog_data)
 
             try:
                 course = Course.objects.get(id=product.course_id)
-                logger.info('Course: %s', course)
             except Course.DoesNotExist:
                 logger.error('Course %s not found.', product.course_id)
 
