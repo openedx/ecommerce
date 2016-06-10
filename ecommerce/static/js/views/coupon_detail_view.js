@@ -69,6 +69,19 @@ define([
                 return '';
             },
 
+            taxDeductedSource: function(value) {
+                if (value) {
+                    return _s.sprintf('%u%%', value);
+                } else {
+                    return null;
+                }
+            },
+
+            invoiceDiscountValue: function(type, value) {
+                var stringFormat = (type === 'Percentage') ? '%u%%' : '$%u';
+                return _s.sprintf(stringFormat, value);
+            },
+
             render: function () {
                 var html,
                     voucher = this.model.get('vouchers')[0],
@@ -85,14 +98,9 @@ define([
                 if (invoice_discount_value === null) {
                     invoice_discount_type = null;
                 } else  {
-                    var stringFormat = (invoice_discount_type === 'Percentage') ? '%u%%' : '$%u';
-                    invoice_discount_value = _s.sprintf(stringFormat, invoice_discount_value);
+                    invoice_discount_value = this.invoiceDiscountValue(invoice_discount_type, invoice_discount_value);
                 }
-                if (tax_deducted_source_value) {
-                    tax_deducted_source_value = _s.sprintf('%u%%', tax_deducted_source_value);
-                } else {
-                    tax_deducted_source_value = null;
-                }
+                tax_deducted_source_value = this.taxDeductedSource(tax_deducted_source_value);
 
                 html = this.template({
                     coupon: this.model.toJSON(),
