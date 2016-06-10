@@ -204,6 +204,8 @@ class Command(BaseCommand):
 
             if options['paybox']:
                 paybox = self.get_paybox_transaction(paybox_ref)
+                if 'STATUS' not in paybox:
+                    paybox = {'STATUS': 'inconnu', 'REMISE': '', 'COMMENTAIRE': u"La transaction n'éxiste pas"}
             else:
                 paybox = {'STATUS': '', 'REMISE': '', 'COMMENTAIRE': '',}
 
