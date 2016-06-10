@@ -20,10 +20,10 @@ define([], function(){
             true,
             ''
         ],
-        'benefit': [
-            'Percentage',
-            100.0
-        ]
+        'benefit': {
+            'type': 'Percentage',
+            'value': 100.0
+        }
     },
     lastEditData = [
         'user',
@@ -48,10 +48,10 @@ define([], function(){
             true,
             ''
         ],
-        'benefit': [
-            'Percentage',
-            50.0
-        ]
+        'benefit': {
+            'type': 'Percentage',
+            'value': 50.0
+        }
     },
     valueDiscountCodeVoucher = {
         'id': 1,
@@ -72,10 +72,10 @@ define([], function(){
             true,
             ''
         ],
-        'benefit': [
-            'Absolute',
-            12.0
-        ]
+        'benefit': {
+            'type': 'Absolute',
+            'value': 12.0
+        }
     },
     verifiedSeat = {
         id: 9,

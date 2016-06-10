@@ -178,8 +178,8 @@ define([
                 this.set('quantity', _.size(vouchers));
                 this.updateTotalValue(this.getSeatPrice());
                 if (this.get('coupon_type') === 'Discount code') {
-                    this.set('benefit_type', voucher.benefit[0]);
-                    this.set('benefit_value', voucher.benefit[1]);
+                    this.set('benefit_type', voucher.benefit.type);
+                    this.set('benefit_value', voucher.benefit.value);
                 }
 
                 if (code_count > 1 || _.size(vouchers) === 1) {
