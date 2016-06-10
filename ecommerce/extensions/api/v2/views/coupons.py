@@ -105,9 +105,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             # Maximum number of uses can be set for each voucher type and disturb
             # the predefined behaviours of the different voucher types. Therefor
-            # here we enforce that the max_uses variable is used only for
-            # ONCE_PER_CUSTOMER types
-            if max_uses and voucher_type == Voucher.ONCE_PER_CUSTOMER:
+            # here we enforce that the max_uses variable can't be used for SINGLE_USE
+            # voucher types.
+            if max_uses and voucher_type != Voucher.SINGLE_USE:
                 max_uses = int(max_uses)
             else:
                 max_uses = None
