@@ -145,6 +145,12 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, seat_type)
 
+        # Second time should skip over the enrollment code creation logic but result in the same data
+        course.create_or_update_seat(seat_type, True, price, self.partner)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        self.assertEqual(enrollment_code.attr.course_key, course.id)
+        self.assertEqual(enrollment_code.attr.seat_type, seat_type)
+
         stock_record = StockRecord.objects.get(product=enrollment_code)
         self.assertEqual(stock_record.price_excl_tax, price)
         self.assertEqual(stock_record.price_currency, settings.OSCAR_DEFAULT_CURRENCY)

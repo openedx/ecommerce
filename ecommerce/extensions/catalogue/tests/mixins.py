@@ -94,7 +94,8 @@ class CourseCatalogTestMixin(object):
     def enrollment_code_product_class(self):
         attributes = (
             ('seat_type', 'text'),
-            ('course_key', 'text')
+            ('course_key', 'text'),
+            ('id_verification_required', 'boolean')
         )
         product_class = self._create_product_class(ENROLLMENT_CODE_PRODUCT_CLASS_NAME, 'enrollment_code', attributes)
         return product_class

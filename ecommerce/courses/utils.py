@@ -7,16 +7,19 @@ from edx_rest_api_client.client import EdxRestApiClient
 from ecommerce.core.url_utils import get_lms_url
 
 
-def mode_for_seat(seat):
-    """ Returns the Enrollment mode for a given seat product. """
-    certificate_type = getattr(seat.attr, 'certificate_type', '')
-
-    if certificate_type == 'professional' and not seat.attr.id_verification_required:
-        return 'no-id-professional'
-    elif certificate_type == '':
+def mode_for_seat(product):
+    """
+    Returns the enrollment mode (aka course mode) for the specified product.
+    If the specified product does not include a 'certificate_type' attribute it is likely the
+    bulk purchase "enrollment code" product variant of the single-seat product, so we attempt
+    to locate the 'seat_type' attribute in its place.
+    """
+    mode = getattr(product.attr, 'certificate_type', getattr(product.attr, 'seat_type', None))
+    if not mode:
         return 'audit'
-
-    return certificate_type
+    if mode == 'professional' and not product.attr.id_verification_required:
+        return 'no-id-professional'
+    return mode
 
 
 def get_course_info_from_lms(course_key):
