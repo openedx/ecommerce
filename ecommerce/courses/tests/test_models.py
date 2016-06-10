@@ -38,9 +38,10 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(len(course.seat_products), 0)
 
         # Create the seat products
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seats = [course.create_or_update_seat('honor', False, 0, self.partner),
                  course.create_or_update_seat('verified', True, 50, self.partner)]
-        self.assertEqual(course.products.count(), 3)
+        self.assertEqual(course.products.count(), 4)
 
         # The property should return only the child seats.
         self.assertEqual(set(course.seat_products), set(seats))

@@ -33,11 +33,13 @@ class LMSPublisher(object):
     def serialize_seat_for_commerce_api(self, seat):
         """ Serializes a course seat product to a dict that can be further serialized to JSON. """
         stock_record = seat.stockrecords.first()
+
         bulk_sku = None
-        if seat.attr.certificate_type in ENROLLMENT_CODE_SEAT_TYPES:
+        if getattr(seat.attr, 'certificate_type', '') in ENROLLMENT_CODE_SEAT_TYPES:
             enrollment_code = seat.course.enrollment_code_product
             if enrollment_code:
                 bulk_sku = enrollment_code.stockrecords.first().partner_sku
+
         return {
             'name': mode_for_seat(seat),
             'currency': stock_record.price_currency,
