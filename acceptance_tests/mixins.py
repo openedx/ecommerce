@@ -108,7 +108,7 @@ class LMSLogoutMixin(object):
 
 class LogoutMixin(object):
     def logout_via_otto(self):
-        url = '{}/accounts/logout/'.format(ECOMMERCE_URL_ROOT)
+        url = '{}/logout/'.format(ECOMMERCE_URL_ROOT)
         self.browser.get(url)
 
 
