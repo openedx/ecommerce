@@ -103,9 +103,9 @@ class VoucherViewSetTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMoc
                 'type': benefit.type,
                 'value': benefit.value
             },
-            'course_start_date': self.COURSE_START_DATE,
+            'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
-            'image_url': self.COURSE_IMAGE_SRC,
+            'image_url': 'path/to/the/course/image',
             'organization': CourseKey.from_string(course.id).org,
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,

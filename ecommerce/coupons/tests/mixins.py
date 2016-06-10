@@ -15,8 +15,6 @@ from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Appl
 
 class CatalogPreviewMockMixin(object):
     """ Mocks for the Course Discovery responses. """
-    COURSE_START_DATE = '2016-05-01T00:00:00Z'
-    COURSE_IMAGE_SRC = 'path/to/the/course/image'
 
     def setUp(self):
         super(CatalogPreviewMockMixin, self).setUp()
@@ -28,9 +26,9 @@ class CatalogPreviewMockMixin(object):
             'results': [{
                 'key': course_run.id,
                 'title': course_run.name,
-                'start': self.COURSE_START_DATE,
+                'start': '2016-05-01T00:00:00Z',
                 'image': {
-                    'src': self.COURSE_IMAGE_SRC
+                    'src': 'path/to/the/course/image'
                 }
             }] if course_run else [{
                 'key': 'test',
