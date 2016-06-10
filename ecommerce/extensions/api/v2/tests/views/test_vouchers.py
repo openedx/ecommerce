@@ -25,6 +25,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
+@httpretty.activate
 class VoucherViewSetTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
     """ Tests for the VoucherViewSet view set. """
     coupon_code = 'COUPONCODE'
@@ -71,7 +72,6 @@ class VoucherViewSetTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMoc
 
         self.assertEqual(response.status_code, 400)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
     def test_voucher_offers_listing_product_found(self):
         """ Verify the endpoint returns offers data. """
@@ -84,7 +84,6 @@ class VoucherViewSetTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMoc
 
         self.assertEqual(response.status_code, 200)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
     def test_get_offers(self):
         """ Verify that the course offers data is returned. """
