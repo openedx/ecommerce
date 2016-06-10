@@ -27,7 +27,6 @@ class Invoice(TimeStampedModel):
     number = models.CharField(max_length=255, blank=True, null=True)
     invoiced_amount = models.PositiveIntegerField(blank=True, null=True)
     invoice_payment_date = models.DateTimeField(blank=True, null=True)
-    tax_deducted_source = models.BooleanField(default=False)
     invoice_discount_type = models.CharField(max_length=255, blank=True, null=True)
     invoice_discount_value = models.PositiveIntegerField(blank=True, null=True)
     tax_deducted_source = models.BooleanField(default=False)
