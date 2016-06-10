@@ -325,7 +325,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             vouchers.all().update(**data)
 
         range_data = {}
-
         for field in UPDATABLE_RANGE_FIELDS:
             self.create_update_data_dict(
                 request_data=request.data,
@@ -358,6 +357,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if note is not None:
             coupon.attr.note = note
             coupon.save()
+
+        self.update_invoice_data(coupon, request.data)
 
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
@@ -428,6 +429,29 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         except Http404:
             user, __ = User.objects.get_or_create(username=client_username)
             baskets.update(owner=user)
+
+    def update_invoice_data(self, coupon, data):
+        """
+        Update the invoice data.
+
+        Arguments:
+            coupon (Product): The coupon product with which the invoice is retrieved.
+            data (dict): The request's data from which the invoice data is retrieved
+                         and used for the updated.
+        """
+        invoice = Invoice.objects.filter(order__basket__lines__product=coupon)
+        tds = data['tax_deducted_source']
+        update_data = {
+            'invoice_type': data['invoice_type'],
+            'number': data['invoice_number'],
+            'invoiced_amount': data['invoiced_amount'],
+            'invoice_payment_date': data['invoice_payment_date'],
+            'invoice_discount_type': data['invoice_discount_type'],
+            'invoice_discount_value': data['invoice_discount_value'],
+            'tax_deducted_source': True if tds and (tds == 'Yes') else False,
+            'tax_deducted_source_value': data['tax_deducted_source_value'],
+        }
+        invoice.update(**update_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:

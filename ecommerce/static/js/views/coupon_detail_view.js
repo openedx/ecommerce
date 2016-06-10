@@ -71,7 +71,7 @@ define([
 
             taxDeductedSource: function(value) {
                 if (value) {
-                    return _s.sprintf('%u%%', value);
+                    return _s.sprintf('%u%%', parseInt(value));
                 } else {
                     return null;
                 }
@@ -79,7 +79,7 @@ define([
 
             invoiceDiscountValue: function(type, value) {
                 var stringFormat = (type === 'Percentage') ? '%u%%' : '$%u';
-                return _s.sprintf(stringFormat, value);
+                return _s.sprintf(stringFormat, parseInt(value));
             },
 
             render: function () {

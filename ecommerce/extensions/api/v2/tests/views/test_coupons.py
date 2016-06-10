@@ -538,7 +538,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(detail['course_seat_types'], course_seat_types)
         self.assertEqual(detail['seats'][0]['id'], seat.id)
 
-    def test_coupon_with_invoice_data(self):
+    def update_invoice_data(self):
+        """ Update the 'data' class variable with invoice information. """
         invoice_data = {
             'invoice_type': 'Prepaid',
             'invoice_number': 'INV-00001',
@@ -546,19 +547,40 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
             'invoice_payment_date': datetime.datetime(2015, 1, 1, tzinfo=pytz.UTC).isoformat(),
         }
         self.data.update(invoice_data)
-        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
 
-        invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
-        self.assertEqual(invoice.invoice_type, invoice_data['invoice_type'])
-        self.assertEqual(invoice.number, invoice_data['invoice_number'])
-        self.assertEqual(invoice.invoiced_amount, invoice_data['invoiced_amount'])
-        self.assertEqual(invoice.invoice_payment_date.isoformat(), invoice_data['invoice_payment_date'])
-
-        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[response['coupon_id']]))
+    def assert_invoice_data(self, coupon_id):
+        """ Assert that the coupon details show the invoice data. """
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon_id]))
         invoice_details = details['payment_information']['Invoice']
-        self.assertEqual(invoice_details['invoice_type'], invoice_data['invoice_type'])
-        self.assertEqual(invoice_details['number'], invoice_data['invoice_number'])
-        self.assertEqual(invoice_details['invoiced_amount'], invoice_data['invoiced_amount'])
+        self.assertEqual(invoice_details['invoice_type'], self.data['invoice_type'])
+        self.assertEqual(invoice_details['number'], self.data['invoice_number'])
+        self.assertEqual(invoice_details['invoiced_amount'], self.data['invoiced_amount'])
+
+    def test_coupon_with_invoice_data(self):
+        """ Verify an invoice is created with the proper data. """
+        self.update_invoice_data()
+        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
+        self.assertEqual(invoice.invoice_type, self.data['invoice_type'])
+        self.assertEqual(invoice.number, self.data['invoice_number'])
+        self.assertEqual(invoice.invoiced_amount, self.data['invoiced_amount'])
+        self.assertEqual(invoice.invoice_payment_date.isoformat(), self.data['invoice_payment_date'])
+        self.assert_invoice_data(response['coupon_id'])
+
+    def test_coupon_invoice_update(self):
+        """ Verify a coupon is updated with new invoice data. """
+        self.update_invoice_data()
+        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        self.assert_invoice_data(response['coupon_id'])
+
+        new_invoice_data = {
+            'invoice_type': 'Postpaid',
+            'invoice_discount_type': 'Percentage',
+            'invoice_discount_value': 1500,
+        }
+        self.data.update(new_invoice_data)
+        updated_coupon = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        self.assert_invoice_data(updated_coupon['coupon_id'])
 
 
 class CouponCategoriesListViewTests(TestCase):
