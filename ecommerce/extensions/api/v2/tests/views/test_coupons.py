@@ -520,6 +520,23 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(detail['course_seat_types'], course_seat_types)
         self.assertEqual(detail['seats'][0]['id'], seat.id)
 
+    @ddt.data(
+        (Voucher.SINGLE_USE, None),
+        (Voucher.ONCE_PER_CUSTOMER, 2),
+        (Voucher.MULTI_USE, 2)
+    )
+    @ddt.unpack
+    def test_multi_use_single_use_coupon(self, voucher_type, max_uses):
+        """Test that a SINGLE_USE coupon has the default max_uses value and other the set one. """
+        self.data.update({
+            'max_uses': max_uses,
+            'voucher_type': voucher_type,
+        })
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        coupon = Product.objects.get(id=json.loads(response.content)['coupon_id'])
+        voucher = coupon.attr.coupon_vouchers.vouchers.first()
+        self.assertEquals(voucher.offers.first().max_global_applications, max_uses)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """
