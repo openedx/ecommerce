@@ -175,17 +175,21 @@
         </div>
 
         <div class="row verification-note">
-            <span><i class="fa fa-exclamation-circle"></i></span>
-            {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
-            {% if is_verification_required %}
-                {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
-            {% else %}
-                {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
-            {% endif %}
+            <div class="col-sm-12">
+                <span><i class="fa fa-exclamation-circle"></i></span>
+                {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
+                {% if is_verification_required %}
+                    {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
+                {% else %}
+                    {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
+                {% endif %}
+            </div>
         </div>
         <div class="row help">
-            <p><b>{% trans "Have questions?" %}</b></p>
-            <a href="{{ support_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
+            <div class="col-sm-12">
+                <p><b>{% trans "Have questions?" %}</b></p>
+                <a href="{{ support_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
+            </div>
         </div>
     </div>
 {% else %}

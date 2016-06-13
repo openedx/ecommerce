@@ -6,13 +6,6 @@
             display: none;
         }
 
-        .basket-items,
-        .total,
-        .verification-note,
-        .help {
-            margin: 0 20px;
-        }
-
         #basket_totals,
         .price {
             @include float(right);
@@ -143,36 +136,41 @@
             .course-price-label {
                 font-weight: normal;
                 font-size: 0.84rem;
+                + span {
+                    display: inline-block;
+                    margin-top: 8px;
+                }
             }
         }
 
         .total {
             padding-top: 20px;
+            margin-bottom: 1.25rem;
 
             p.voucher {
                 @include float(left);
 
                 margin: 0 20px;
-
                 color: gray;
             }
 
             .remove-voucher {
                 border: none;
-
                 background: none;
                 padding: 0;
-
                 color: red;
             }
 
             .use-voucher {
                 @include float(left);
 
+                p {
+                    margin-bottom: 0;
+                }
+
                 #id_code {
                     border: 1px solid #c8c8c8;
                     border-radius: 4px;
-
                     padding: 4.5px 12px;
                 }
             }
@@ -218,8 +216,6 @@
 
         .verification-note {
             margin-top: 20px;
-
-            padding: 20px;
         }
 
         .help {
