@@ -68,11 +68,8 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-us'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#site-id
-# This needs to be set to None in order to support multitenancy
-SITE_ID = None
-
 # See: https://github.com/edx/edx-django-sites-extensions
-DEFAULT_SITE_ID = 1
+SITE_ID = 1
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#use-i18n
 USE_I18N = True
@@ -209,7 +206,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django_sites_extensions.middleware.CurrentSiteWithDefaultMiddleware',
+    'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
@@ -257,6 +254,9 @@ DJANGO_APPS = [
     'waffle',
     'django_filters',
     'rest_framework_swagger',
+
+    # Enables default site
+    'django_sites_extensions',
 ]
 
 # Apps specific to this project go here.

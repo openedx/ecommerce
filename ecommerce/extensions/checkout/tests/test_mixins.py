@@ -212,6 +212,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
         Verify the send confirmation message override functions as expected
         """
         request = RequestFactory()
+        request.get_host = lambda: None
         user = self.create_user()
         user.email = 'test_user@example.com'
         request.user = user
