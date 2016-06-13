@@ -7,7 +7,7 @@ define([
         'models/course_seats/professional_seat',
         'models/course_seats/audit_seat',
         'models/course_seats/honor_seat',
-        'jquery-cookie'
+        'js-cookie'
     ],
     function ($,
               moment,
@@ -16,7 +16,9 @@ define([
               Course,
               ProfessionalSeat,
               AuditSeat,
-              HonorSeat) {
+              HonorSeat,
+              Cookies
+    ) {
         'use strict';
 
         var model,
@@ -264,7 +266,7 @@ define([
                         cookie = 'save-test';
 
                     spyOn($, 'ajax');
-                    $.cookie('ecommerce_csrftoken', cookie);
+                    Cookies.set('ecommerce_csrftoken', cookie);
 
                     expect(model.validate()).toBeFalsy();
                     model.save();

@@ -17,7 +17,7 @@
     <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
     {% compress js %}
-    <script src="{% static "bower_components/jquery-cookie/jquery.cookie.js" %}" type="text/javascript"></script>
+    <script src="{% static 'bower_components/js-cookie/src/js.cookie.js' %}" type="text/javascript"></script>
     <script src="{% static 'vendor-extensions/oscar/js/add_message.js' %}" type="text/javascript"></script>
     <script src="{% static 'vendor-extensions/oscar/js/refund_list.js' %}" type="text/javascript"></script>
     {% endcompress %}

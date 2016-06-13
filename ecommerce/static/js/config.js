@@ -14,7 +14,7 @@ require.config({
         'dataTablesBootstrap': 'bower_components/datatables/media/js/dataTables.bootstrap',
         'ecommerce': 'js/shims/ecommerce',
         'jquery': 'bower_components/jquery/dist/jquery',
-        'jquery-cookie': 'bower_components/jquery-cookie/jquery.cookie',
+        'js-cookie': 'bower_components/js-cookie/src/js.cookie',
         'models': 'js/models',
         'moment': 'bower_components/moment/moment',
         'pages': 'js/pages',
@@ -41,9 +41,6 @@ require.config({
         },
         dataTablesBootstrap: {
             deps: ['jquery', 'datatables.net']
-        },
-        'jquery-cookie': {
-            deps: ['jquery']
         },
         'pikaday': {
             deps: ['moment']
