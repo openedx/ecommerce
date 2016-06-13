@@ -13,7 +13,7 @@ django-waffle==0.11.1
 djangorestframework==3.2.3
 djangorestframework-jwt==1.8.0
 drf-extensions==0.2.8
-edx-auth-backends==0.3.1
+edx-auth-backends==0.4.0
 edx-django-sites-extensions==1.0.0
 edx-drf-extensions==0.5.1
 edx-ecommerce-worker==0.4.0

@@ -1,12 +1,12 @@
 import os
 
+from auth_backends.urls import auth_urlpatterns
 from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
-from django.views.generic import RedirectView, TemplateView
+from django.views.generic import TemplateView
 
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
@@ -38,17 +38,13 @@ js_info_dict = {
     'packages': ('courses',),
 }
 
-# Always login via edX OpenID Connect
-login = RedirectView.as_view(url=reverse_lazy('social:begin', args=['edx-oidc']), permanent=False, query_string=True)
-
 # Use the same auth views for all logins, including those originating from the browseable API.
-AUTH_URLS = [
-    url(r'^login/$', login, name='login'),
+AUTH_URLS = auth_urlpatterns + [
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
 ]
 
 urlpatterns = [
-    url(r'^accounts/', include(AUTH_URLS)),
+    url('', include(AUTH_URLS)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
@@ -59,7 +55,6 @@ urlpatterns = [
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
-    url('', include('social.apps.django_app.urls', namespace='social')),
 ]
 
 # Install Oscar extension URLs
