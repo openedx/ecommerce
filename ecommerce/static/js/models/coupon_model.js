@@ -188,34 +188,22 @@ define([
             },
 
             save: function (options) {
-                var data;
-
                 _.defaults(options || (options = {}), {
                     // The API requires a CSRF token for all POST requests using session authentication.
                     headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
                     contentType: 'application/json'
                 });
 
-                data = this.toJSON();
-                data.client_username = this.get('client');
-                data.start_date = moment.utc(this.get('start_date'));
-                data.end_date = moment.utc(this.get('end_date'));
-                data.category_ids = [ this.get('category') ];
+                this.set('start_date', moment.utc(this.get('start_date')));
+                this.set('end_date', moment.utc(this.get('end_date')));
+                this.set('category_ids', [this.get('category')]);
 
-                // Enrollment code always gives 100% discount
-                switch (this.get('coupon_type')) {
-                    case 'Enrollment code':
-                        // this is the price paid for the code(s)
-                        data.benefit_type = 'Percentage';
-                        data.benefit_value = 100;
-                        break;
-                    case 'Discount code':
-                        data.benefit_type = this.get('benefit_type');
-                        data.benefit_value = this.get('benefit_value');
-                        break;
+                if (this.get('coupon_type') === 'Enrollment code') {
+                    this.set('benefit_type', 'Percentage');
+                    this.set('benefit_value', 100);
                 }
 
-                options.data = JSON.stringify(data);
+                options.data = JSON.stringify(this.toJSON());
                 return this._super(null, options);
             }
         });

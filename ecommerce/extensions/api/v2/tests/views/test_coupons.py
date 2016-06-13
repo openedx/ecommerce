@@ -89,7 +89,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         stock_record = self.seat.stockrecords.first()
         self.coupon_data.update({
             'title': title,
-            'client_username': 'Client',
+            'client': 'Client',
             'stock_record_ids': [stock_record.id],
             'voucher_type': voucher_type,
             'price': 100,
@@ -270,7 +270,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.create_course_and_seat(course_id='edx/Demo_Course2/DemoX', price=100)
         self.data = {
             'title': 'Test coupon',
-            'client_username': 'TestX',
+            'client': 'TestX',
             'stock_record_ids': [1, 2],
             'start_date': '2015-01-01',
             'end_date': '2020-01-01',
@@ -403,7 +403,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
         data = {
             'id': coupon.id,
-            AC.KEYS.CLIENT_USERNAME: 'Client 123'
+            AC.KEYS.CLIENT: 'Client 123'
         }
         self.client.put(path, json.dumps(data), 'application/json')
 

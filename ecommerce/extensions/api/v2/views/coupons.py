@@ -41,6 +41,7 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 CATALOG_QUERY = 'catalog_query'
+CLIENT = 'client'
 COURSE_SEAT_TYPES = 'course_seat_types'
 
 UPDATABLE_RANGE_FIELDS = [
@@ -69,7 +70,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         basket and create an order from it.
 
         Arguments:
-            request (HttpRequest): With parameters title, client_username,
+            request (HttpRequest): With parameters title, client,
             stock_record_ids, start_date, end_date, code, benefit_type, benefit_value,
             voucher_type, quantity, price, category and note in the body.
 
@@ -82,7 +83,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """
         with transaction.atomic():
             title = request.data[AC.KEYS.TITLE]
-            client_username = request.data[AC.KEYS.CLIENT_USERNAME]
+            client_username = request.data[CLIENT]
             stock_record_ids = request.data.get(AC.KEYS.STOCK_RECORD_IDS)
             start_date = dateutil.parser.parse(request.data[AC.KEYS.START_DATE])
             end_date = dateutil.parser.parse(request.data[AC.KEYS.END_DATE])
@@ -329,7 +330,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if category_ids:
             self.update_coupon_category(category_ids=category_ids, coupon=coupon)
 
-        client_username = request.data.get(AC.KEYS.CLIENT_USERNAME, '')
+        client_username = request.data.get(AC.KEYS.CLIENT, '')
         if client_username:
             self.update_coupon_client(baskets=baskets, client_username=client_username)
 
@@ -359,11 +360,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             update_dict[update_dict_key] = prepare_course_seat_types(value) \
                 if update_dict_key == COURSE_SEAT_TYPES else value
 
-    def update_coupon_benefit_value(self, benefit_value, vouchers, coupon):
+    def update_coupon_benefit_value(self, benefit_value, coupon, vouchers):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
             benefit_value (Decimal): Benefit value associated with a new offer
+            coupon (Product): Coupon product associated with vouchers
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
             coupon (Product): Coupon product associated with vouchers
         """

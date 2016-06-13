@@ -8,7 +8,7 @@ class APIDictionaryKeys(object):
     BENEFIT_VALUE = u'benefit_value'
     CATEGORY_IDS = u'category_ids'
     CHECKOUT = u'checkout'
-    CLIENT_USERNAME = u'client_username'
+    CLIENT = u'client'
     CODE = u'code'
     COUPON_ID = u'coupon_id'
     END_DATE = u'end_date'
