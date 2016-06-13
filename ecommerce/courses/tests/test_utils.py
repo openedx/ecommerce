@@ -5,6 +5,8 @@ import httpretty
 
 from django.core.cache import cache
 
+from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
@@ -30,8 +32,12 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
     def test_mode_for_seat(self, certificate_type, id_verification_required, mode):
         """ Verify the correct enrollment mode is returned for a given seat. """
         course = Course.objects.create(id='edx/Demo_Course/DemoX')
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00, self.partner)
         self.assertEqual(mode_for_seat(seat), mode)
+        enrollment_code = course.enrollment_code_product
+        if enrollment_code:  # We should only have enrollment codes for allowed types
+            self.assertEqual(mode_for_seat(enrollment_code), mode)
 
     def test_get_course_info_from_lms(self):
         """ Check to see if course info gets cached """

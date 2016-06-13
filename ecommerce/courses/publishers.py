@@ -35,11 +35,9 @@ class LMSPublisher(object):
         stock_record = seat.stockrecords.first()
         bulk_sku = None
         if seat.attr.certificate_type in ENROLLMENT_CODE_SEAT_TYPES:
-            try:
-                enrollment_code = seat.course.enrollment_code_product
+            enrollment_code = seat.course.enrollment_code_product
+            if enrollment_code:
                 bulk_sku = enrollment_code.stockrecords.first().partner_sku
-            except Product.DoesNotExist:
-                pass
         return {
             'name': mode_for_seat(seat),
             'currency': stock_record.price_currency,

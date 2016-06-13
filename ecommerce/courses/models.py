@@ -190,7 +190,7 @@ class Course(models.Model):
         seat.attr.id_verification_required = id_verification_required
 
         if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and certificate_type in ENROLLMENT_CODE_SEAT_TYPES:
-            self._create_or_update_enrollment_code(certificate_type, partner, price)
+            self._create_or_update_enrollment_code(certificate_type, id_verification_required, partner, price)
 
         if credit_provider:
             seat.attr.credit_provider = credit_provider
@@ -239,12 +239,16 @@ class Course(models.Model):
     @property
     def enrollment_code_product(self):
         """ Returns an enrollment code Product related to this course. """
-        return Product.objects.get(
-            product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-            course=self
-        )
+        try:
+            # Current use cases dictate that only one enrollment code product exists for a given course
+            return Product.objects.get(
+                product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+                course=self
+            )
+        except Product.DoesNotExist:
+            return None
 
-    def _create_or_update_enrollment_code(self, seat_type, partner, price):
+    def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price):
         """
         Creates an enrollment code product and corresponding stock record for the specified seat.
         Includes course ID and seat type as product attributes.
@@ -259,9 +263,8 @@ class Course(models.Model):
         """
 
         enrollment_code_product_class = ProductClass.objects.get(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        try:
-            enrollment_code = self.enrollment_code_product
-        except Product.DoesNotExist:
+        enrollment_code = self.enrollment_code_product
+        if not enrollment_code:
             title = 'Enrollment code for {seat_type} seat in {course_name}'.format(
                 seat_type=seat_type,
                 course_name=self.name
@@ -273,6 +276,7 @@ class Course(models.Model):
             )
         enrollment_code.attr.course_key = self.id
         enrollment_code.attr.seat_type = seat_type
+        enrollment_code.attr.id_verification_required = id_verification_required
         enrollment_code.save()
 
         try:
