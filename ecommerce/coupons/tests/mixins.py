@@ -1,4 +1,5 @@
 import datetime
+import logging
 import json
 
 import httpretty
@@ -12,6 +13,7 @@ from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Applicator
 
+log = logging.getLogger(__name__)
 
 class CatalogPreviewMockMixin(object):
     """ Mocks for the Course Discovery responses. """
@@ -32,10 +34,12 @@ class CatalogPreviewMockMixin(object):
             }],
         }
         course_run_info_json = json.dumps(course_run_info)
-        course_run_url = '{}course_runs/?q={}'.format(
+        course_run_url = '{}course_runs/{}'.format(
             settings.COURSE_CATALOG_API_URL,
-            query if query else 'id:course*'
+            # query if query else 'id:course*'
+            course_run.id
         )
+        log.debug("URL %s JSON %s", course_run_url, course_run_info_json)
         httpretty.register_uri(
             httpretty.GET, course_run_url,
             body=course_run_info_json,
