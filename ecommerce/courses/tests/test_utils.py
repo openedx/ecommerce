@@ -42,26 +42,41 @@ class UtilsTests(CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
         seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00, self.partner)
         self.assertEqual(mode_for_seat(seat), mode)
 
-    # @httpretty.activate
+    @httpretty.activate
     @override_settings(COURSE_CATALOG_API_URL=COURSE_CATALOG_API_URL)
-    # @mock_course_catalog_api_client
+    @mock_course_catalog_api_client
     def test_get_course_info(self):
         """ Check to see if course info gets cached """
-        with mock.patch('ecommerce.core.models.SiteConfiguration.course_catalog_api_client', mock.PropertyMock(return_value=EdxRestApiClient(
-                    settings.COURSE_CATALOG_API_URL,
-                    jwt='auth-token'))) as mock_client:
-            course = CourseFactory()
-            query = 'key={}'.format(course.id)
-            log.debug(mock_client.__dict__)
-            self.mock_dynamic_catalog_course_runs_api(course_run=course)
+        course = CourseFactory()
+        query = 'key={}'.format(course.id)
+        #self.mock_dynamic_catalog_course_runs_api(course_run=course)
 
-            cache_key = 'courses_api_detail_{}'.format(course.id)
-            cache_hash = hashlib.md5(cache_key).hexdigest()
-            cached_course = cache.get(cache_hash)
-            self.assertIsNone(cached_course)
+        course_run_url = '{}course_runs/{}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            # query if query else 'id:course*'
+            course.id
+        )
+        log.debug("URL %s JSON %s", course_run_url, '{"foo": "bar"}')
+        httpretty.register_uri(
+            httpretty.GET, course_run_url,
+            body=course.name,
+            content_type='application/json',
+            status=200
+        )
 
-            response = get_course_info(self.site, course.id)
-            self.assertEqual(response, course.name)
+        cache_key = 'courses_api_detail_{}'.format(course.id)
+        cache_hash = hashlib.md5(cache_key).hexdigest()
+        cached_course = cache.get(cache_hash)
+        self.assertIsNone(cached_course)
 
-            cached_course = cache.get(cache_hash)
-            self.assertEqual(cached_course, response)
+        client_get_url = 'https://catalog.example.com/api/v1/course_runs/{}'.format(course.id)
+        log.debug('Trying to hit this URL {}'.format(client_get_url))
+        self.assertEqual(client_get_url, course_run_url)
+
+        response = get_course_info(self.site, course.id)
+        # response = self.site.siteconfiguration.course_catalog_api_client.course_runs(course.id)._store['base_url']
+        self.assertEqual(response, course.name)
+        #response = self.client.get(client_get_url)
+
+        cached_course = cache.get(cache_hash)
+        self.assertEqual(cached_course, response)
