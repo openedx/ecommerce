@@ -2,12 +2,12 @@ import datetime
 import logging
 import json
 
-import httpretty
 from django.conf import settings
 from django.test import RequestFactory
 from oscar.test import factories
 
 from ecommerce.core.models import BusinessClient
+from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.tests.factories import PartnerFactory
