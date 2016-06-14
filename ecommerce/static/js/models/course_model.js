@@ -134,7 +134,7 @@ define([
 
             initialize: function () {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
-                this.on('sync', this.removeParentProducts, this);
+                this.on('sync', this.prepareProducts, this);
                 this.on('sync', this.honorModeInit, this);
             },
 
@@ -184,15 +184,19 @@ define([
             },
 
             /**
-             * Removes the parent products from the Product collection.
-             *
-             * This product is never exposed to the user, and should be ignored for all data operations.
+             * Returns the subset of pertinent child seat products from the Product collection.
              */
-            removeParentProducts: function () {
-                var products = this.get('products'),
-                    parents = products.where({structure: 'parent'});
+            prepareProducts: function () {
+                // Create a reference to the current product collection
+                var products = this.get('products');
 
+                // Ignore any parent product models
+                var parents = products.where({structure: 'parent'});
                 products.remove(parents);
+
+                // Ignore any non-Seat models (such as an Enrollment Code)
+                var seats = products.where({product_class: 'Seat'});
+                products.reset(seats);
             },
 
             /**
@@ -203,7 +207,9 @@ define([
             seats: function () {
                 return this.get('products').filter(function (product) {
                     // Filter out parent products since there is no need to display or modify.
-                    return (product instanceof CourseSeat) && product.get('structure') !== 'parent';
+                    return (product instanceof CourseSeat) &&
+                        product.get('structure') !== 'parent' &&
+                        product.get('product_class') === 'Seat';
                 });
             },
 
