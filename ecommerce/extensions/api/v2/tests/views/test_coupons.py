@@ -2,10 +2,12 @@
 from __future__ import unicode_literals
 
 import json
+import datetime
 from decimal import Decimal
 
 import ddt
 import httpretty
+import pytz
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
@@ -284,6 +286,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 
+    def get_response_json(self, method, path, data=None):
+        """Helper method for sending requests and returning JSON response content."""
+        if method == 'GET':
+            response = self.client.get(path)
+        elif method == 'POST':
+            response = self.client.post(path, json.dumps(data), 'application/json')
+        elif method == 'PUT':
+            response = self.client.put(path, json.dumps(data), 'application/json')
+        return json.loads(response.content)
+
     def test_response(self):
         """Test the response data given after the order was created."""
         self.assertEqual(self.response.status_code, 200)
@@ -327,21 +339,26 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
     def test_update(self):
         """Test updating a coupon."""
         coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        response = self.client.put(path, json.dumps({'title': 'New title'}), 'application/json')
-        response_data = json.loads(response.content)
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data={'title': 'New title'}
+        )
         self.assertEqual(response_data['id'], coupon.id)
         self.assertEqual(response_data['title'], 'New title')
 
     def test_update_title(self):
+        """Test updating a coupon's title."""
         coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
         data = {
             'id': coupon.id,
             AC.KEYS.TITLE: 'New title'
         }
-        response = self.client.put(path, json.dumps(data), 'application/json')
-        response_data = json.loads(response.content)
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data=data
+        )
         self.assertEqual(response_data['id'], coupon.id)
 
         new_coupon = Product.objects.get(id=coupon.id)
@@ -352,14 +369,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
     def test_update_datetimes(self):
         """Test that updating a coupons date updates all of it's voucher dates."""
         coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
         data = {
             'id': coupon.id,
             AC.KEYS.START_DATE: '2030-01-01',
             AC.KEYS.END_DATE: '2035-01-01'
         }
-        response = self.client.put(path, json.dumps(data), 'application/json')
-        response_data = json.loads(response.content)
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data=data
+        )
         self.assertEqual(response_data['id'], coupon.id)
 
         new_coupon = Product.objects.get(id=coupon.id)
@@ -536,6 +555,58 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         coupon = Product.objects.get(id=json.loads(response.content)['coupon_id'])
         voucher = coupon.attr.coupon_vouchers.vouchers.first()
         self.assertEquals(voucher.offers.first().max_global_applications, max_uses)
+
+    def update_prepaid_invoice_data(self):
+        """ Update the 'data' class variable with invoice information. """
+        invoice_data = {
+            'invoice_type': Invoice.PREPAID,
+            'invoice_number': 'INV-00001',
+            'invoice_payment_date': datetime.datetime(2015, 1, 1, tzinfo=pytz.UTC).isoformat(),
+            'invoice_discount_type': None,
+            'invoice_discount_value': 77
+        }
+        self.data.update(invoice_data)
+
+    def assert_invoice_serialized_data(self, coupon_data):
+        """ Assert that the coupon details show the invoice data. """
+        invoice_details = coupon_data['payment_information']['Invoice']
+        self.assertEqual(invoice_details['type'], self.data['invoice_type'])
+        self.assertEqual(invoice_details['number'], self.data['invoice_number'])
+        self.assertEqual(invoice_details['discount_type'], self.data['invoice_discount_type'])
+        self.assertEqual(invoice_details['discount_value'], self.data['invoice_discount_value'])
+
+    def test_coupon_with_invoice_data(self):
+        """ Verify an invoice is created with the proper data. """
+        self.update_prepaid_invoice_data()
+        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
+        self.assertEqual(invoice.type, self.data['invoice_type'])
+        self.assertEqual(invoice.number, self.data['invoice_number'])
+        self.assertEqual(invoice.payment_date.isoformat(), self.data['invoice_payment_date'])
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[response['coupon_id']]))
+        self.assert_invoice_serialized_data(details)
+
+    def test_coupon_invoice_update(self):
+        """ Verify a coupon is updated with new invoice data. """
+        self.update_prepaid_invoice_data()
+        response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[response['coupon_id']]))
+        self.assert_invoice_serialized_data(details)
+
+        invoice_postpaid_data = {
+            'invoice_type': Invoice.POSTPAID,
+            'invoice_number': None,
+            'invoice_payment_date': None,
+            'invoice_discount_type': Invoice.PERCENTAGE,
+            'invoice_discount_value': 33,
+        }
+        self.data.update(invoice_postpaid_data)
+        updated_coupon = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': response['coupon_id']}),
+            data=self.data
+        )
+        self.assert_invoice_serialized_data(updated_coupon)
 
 
 class CouponCategoriesListViewTests(TestCase):
