@@ -17,7 +17,7 @@ def mode_for_seat(product):
     mode = getattr(product.attr, 'certificate_type', getattr(product.attr, 'seat_type', None))
     if not mode:
         return 'audit'
-    if mode == 'professional' and not product.attr.id_verification_required:
+    if mode == 'professional' and not getattr(product.attr, 'id_verification_required', False):
         return 'no-id-professional'
     return mode
 
