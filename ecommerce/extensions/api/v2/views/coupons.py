@@ -211,7 +211,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 start_datetime=data['start_date'],
                 voucher_type=data['voucher_type'],
                 max_uses=data['max_uses'],
-                coupon_id=coupon_product.id,
                 catalog_query=data['catalog_query'],
                 course_seat_types=data['course_seat_types']
             )
