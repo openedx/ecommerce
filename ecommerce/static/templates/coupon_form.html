@@ -4,17 +4,17 @@
     <div class="fields col-md-6">
         <div class="form-group">
             <label for="title"><%= gettext('Coupon Name') %> *</label>
-            <input type="text" class="form-control" name="title" maxlength="30">
+            <input id="title" type="text" class="form-control" name="title" maxlength="30">
             <p class="help-block"></p>
         </div>
         <div class="form-group">
             <label for="code_type"><%= gettext('Code Type') %></label>
-            <select class="form-control" name="code_type"></select>
+            <select id="code_type" class="form-control" name="code_type"></select>
             <p class="help-block"></p>
         </div>
       <div class="form-group">
         <label for="category"><%= gettext('Category') %> *</label>
-        <select class="form-control" name="category"></select>
+        <select id="category" class="form-control" name="category"></select>
         <p class="help-block"></p>
       </div>
 
@@ -23,7 +23,7 @@
                 <label for="start_date"><%= gettext('Valid from') %> *</label>
                 <div class="input-group">
                     <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
-                    <input placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="start_date">
+                    <input id="start_date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="start_date">
                 </div>
                 <p class="help-block"></p>
             </div>
@@ -31,7 +31,7 @@
                 <label for="end_date"><%= gettext('Valid until') %> *</label>
                 <div class="input-group">
                     <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
-                    <input placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="end_date">
+                    <input id="end_date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="end_date">
                 </div>
                 <p class="help-block"></p>
             </div>
@@ -39,25 +39,25 @@
 
         <div class="form-group">
             <label for="voucher_type"><%= gettext('Usage Limitations') %></label>
-            <select class="form-control" name="voucher_type"></select>
+            <select id="voucher_type" class="form-control" name="voucher_type"></select>
             <p class="help-block"></p>
         </div>
 
         <div class="form-group">
             <label for="code"><%= gettext('Code') %></label>
-            <input type="text" class="form-control" name="code" placeholder="<%= gettext('optional') %>">
+            <input id="code" type="text" class="form-control" name="code" placeholder="<%= gettext('optional') %>">
             <p class="help-block"></p>
         </div>
 
         <div class="form-group">
             <label for="quantity"><%= gettext('Number of Codes') %></label>
-            <input type="number" step="1" class="form-control" name="quantity" value="1" min="1">
+            <input id="quantity" type="number" step="1" class="form-control" name="quantity" value="1" min="1">
             <p class="help-block"></p>
         </div>
 
         <div class="form-group">
             <label for="max_uses"><%= gettext('Maximum Number of Uses') %></label>
-            <input type="number" step="1" class="form-control" name="max_uses" value="1" min="1">
+            <input id="max_uses" type="number" step="1" class="form-control" name="max_uses" value="1" min="1">
             <p class="help-block"></p>
         </div>
 
@@ -65,7 +65,7 @@
             <label for="benefit_value"><%= gettext('Discount Value') %> *</label>
             <div class="input-group">
                 <div class="benefit-addon input-group-addon"></div>
-                <input type="number" step="0.01" min="0" class="form-control benefit_value" name="benefit_value">
+                <input id="benefit_value" type="number" step="0.01" min="0" class="form-control benefit_value" name="benefit_value">
             </div>
             <div class="form-inline benefit-type">
                 <input id="benefit_percent" type="radio" name="benefit_type" value="Percentage">
@@ -78,7 +78,7 @@
 
         <div class="form-group">
             <label for="client"><%= gettext('Client') %> *</label>
-            <input type="text" class="form-control" name="client" maxlength="50">
+            <input id="client" type="text" class="form-control" name="client" maxlength="50">
             <p class="help-block"></p>
         </div>
 
@@ -86,7 +86,7 @@
             <label for="price"><%= gettext('Total to Invoice to Client') %></label>
             <div class="input-group">
                 <div class="input-group-addon">$</div>
-                <input type="number" step="0.01" min="0" class="form-control" name="price">
+                <input id="price" type="number" step="0.01" min="0" class="form-control" name="price">
             </div>
             <p class="help-block"></p>
         </div>
@@ -94,7 +94,7 @@
             <label for="total_value"><%= gettext('Total Value of Coupon') %></label>
             <div class="input-group">
                 <div class="input-group-addon">$</div>
-                <input type="number" step="0.01" min="0" class="form-control" name="total_value" disabled>
+                <input id="total_value" type="number" step="0.01" min="0" class="form-control" name="total_value" disabled>
             </div>
             <p class="help-block"><%= gettext('Number of coupon codes X unit price per seat') %></p>
         </div>
@@ -112,17 +112,17 @@
         </div>
         <div class="form-group">
             <label for="course_id"><%= gettext('Course ID') %> *</label>
-            <input type="text" class="form-control" name="course_id">
+            <input id="course_id" type="text" class="form-control" name="course_id">
             <p class="help-block"></p>
         </div>
         <div class="form-group">
             <label for="seat_type"><%= gettext('Seat Type') %> *</label>
-            <select class="form-control" name="seat_type"></select>
+            <select id="seat_type" class="form-control" name="seat_type"></select>
             <p class="help-block"></p>
         </div>
         <div class="form-group catalog-query">
             <label for="catalog_query"><%= gettext('Valid for:') %> *</label>
-            <textarea class="form-control" name="catalog_query" rows="10"></textarea>
+            <textarea id="catalog_query" class="form-control" name="catalog_query" rows="10"></textarea>
             <p class="help-block"></p>
         </div>
         <div class="form-group course-seat-types">
@@ -138,7 +138,7 @@
         </div>
         <div class="form-group">
             <label for="note"><%= gettext('Note') %></label>
-            <input type="text" class="form-control" name="note" maxlength="100">
+            <input id="note" type="text" class="form-control" name="note" maxlength="100">
             <p class="help-block"></p>
         </div>
     </div>

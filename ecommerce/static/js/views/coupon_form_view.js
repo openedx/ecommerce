@@ -101,15 +101,7 @@ define([
                     }
                 },
                 'input[name=benefit_type]': {
-                    observe: 'benefit_type',
-                    onGet: function (val) {
-                        if (val === 'Percentage') {
-                            return val;
-                        } else if (val === 'Absolute') {
-                            return 'Absolute';
-                        }
-                        return '';
-                    }
+                    observe: 'benefit_type'
                 },
                 '.benefit-addon': {
                     observe: 'benefit_type',
@@ -204,7 +196,7 @@ define([
             },
 
             changeUpperLimitForBenefitValue: function () {
-                var is_benefit_percentage = this.$el.find('[name=code_type]').val() === 'Percentage',
+                var is_benefit_percentage = this.$el.find('[name=benefit_type]:checked').val() === 'Percentage',
                     max_value = is_benefit_percentage ? '100' : '';
 
                 this.$el.find('[name=benefit_value]').attr('max', max_value);
@@ -255,19 +247,27 @@ define([
                 }
             },
 
+            // Hiding a field should change the field's value to a default one.
+            hideField: function(field_name, value) {
+                var field = this.$el.find(field_name);
+                this.formGroup(field_name).addClass(this.hiddenClass);
+                field.val(value);
+                field.trigger('change');
+            },
+
             toggleVoucherTypeField: function () {
                 var voucherType = this.model.get('voucher_type');
                 if (!this.editing) {
                     this.emptyCodeField();
                 }
-                // When creating a Once by multiple customers code show the usage number field.
+                // When creating a ONCE_PER_CUSTOMER or MULTI_USE code show the usage number field.
                 if (voucherType !== 'Single use') {
                     if (this.model.get('coupon_type') === 'Discount code') {
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);
                     }
                     this.formGroup('[name=max_uses]').removeClass(this.hiddenClass);
                 } else {
-                    this.formGroup('[name=max_uses]').addClass(this.hiddenClass);
+                    this.hideField('[name=max_uses]', 1);
                 }
 
                 // The only time we allow for a generation of multiple codes is
@@ -275,7 +275,7 @@ define([
                 if (voucherType === 'Single use') {
                     this.formGroup('[name=quantity]').removeClass(this.hiddenClass);
                 } else {
-                    this.formGroup('[name=quantity]').addClass(this.hiddenClass);
+                    this.hideField('[name=quantity]', 1);
                 }
             },
 
