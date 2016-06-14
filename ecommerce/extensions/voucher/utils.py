@@ -333,7 +333,6 @@ def create_vouchers(
         quantity,
         start_datetime,
         voucher_type,
-        coupon_id=None,
         code=None,
         max_uses=None,
         _range=None,
@@ -380,7 +379,7 @@ def create_vouchers(
         benefit_type=benefit_type,
         benefit_value=benefit_value,
         max_uses=max_uses,
-        coupon_id=coupon_id
+        coupon_id=coupon.id
     )
     for __ in range(quantity):
         voucher = _create_new_voucher(
