@@ -27,7 +27,9 @@ from acceptance_tests.config import (
     LMS_HTTPS
 )
 from acceptance_tests.expected_conditions import input_provided
-from acceptance_tests.pages import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage, LMSLogoutPage
+from acceptance_tests.pages import submit_lms_login_form
+from acceptance_tests.pages.ecommerce import EcommerceLoginPage
+from acceptance_tests.pages.lms import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage, LMSLogoutPage
 
 log = logging.getLogger(__name__)
 
@@ -72,9 +74,6 @@ class LogistrationMixin(LmsUserMixin):
         self.lms_login_page = LMSLoginPage(self.browser)
         self.lms_registration_page = LMSRegistrationPage(self.browser)
 
-    def login(self):
-        self.login_with_lms()
-
     def login_with_lms(self, email=None, password=None, course_id=None):
         """ Visit LMS and login. """
         email = email or LMS_EMAIL
@@ -106,7 +105,29 @@ class LMSLogoutMixin(object):
         self.lms_logout_page.visit()
 
 
-class LogoutMixin(object):
+def login_with_lms(self, email=None, password=None, course_id=None):
+    """ Visit LMS and login. """
+    email = email or LMS_EMAIL
+    password = password or LMS_PASSWORD
+
+    # Note: We use Selenium directly here (as opposed to bok-choy) to avoid issues with promises being broken.
+    self.lms_login_page.browser.get(self.lms_login_page.url(course_id))  # pylint: disable=not-callable
+    self.lms_login_page.login(email, password)
+
+
+class OttoAuthenticationMixin(object):
+    def setUp(self):
+        super(OttoAuthenticationMixin, self).setUp()
+        self.otto_login_page = EcommerceLoginPage(self.browser)
+
+    def login_via_otto(self, email=None, password=None):
+        """ Start the login process via Otto's login page (which should redirect to LMS.) """
+        email = email or LMS_EMAIL
+        password = password or LMS_PASSWORD
+
+        self.otto_login_page.visit()
+        submit_lms_login_form(self.otto_login_page, email, password)
+
     def logout_via_otto(self):
         url = '{}/logout/'.format(ECOMMERCE_URL_ROOT)
         self.browser.get(url)

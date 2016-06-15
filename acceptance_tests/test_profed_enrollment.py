@@ -7,7 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from acceptance_tests.config import PROFESSIONAL_COURSE_ID, MARKETING_URL_ROOT
 from acceptance_tests.mixins import LogistrationMixin, EnrollmentApiMixin
-from acceptance_tests.pages import LMSCourseModePage, MarketingCourseAboutPage
+from acceptance_tests.pages.lms import LMSCourseModePage
+from acceptance_tests.pages.marketing import MarketingCourseAboutPage
 
 
 @skipUnless(PROFESSIONAL_COURSE_ID, 'Professional education tests are not enabled.')

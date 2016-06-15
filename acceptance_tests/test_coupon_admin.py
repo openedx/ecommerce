@@ -6,7 +6,7 @@ from bok_choy.web_app_test import WebAppTest
 from acceptance_tests.config import ENABLE_COUPON_ADMIN_TESTS
 from acceptance_tests.constants import DEFAULT_END_DATE, DEFAULT_START_DATE
 from acceptance_tests.mixins import CouponMixin, LogistrationMixin
-from acceptance_tests.pages import CouponsCreatePage, CouponsDetailsPage, CouponsListPage
+from acceptance_tests.pages.coupons import CouponsCreatePage, CouponsDetailsPage, CouponsListPage
 
 
 @skipUnless(ENABLE_COUPON_ADMIN_TESTS, 'Coupon admin tests are disabled.')

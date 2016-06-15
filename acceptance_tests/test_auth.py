@@ -1,18 +1,19 @@
 from unittest import skipUnless
 
+from bok_choy.promise import EmptyPromise
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import ENABLE_SSO_TESTS, MARKETING_URL_ROOT, LMS_URL_ROOT
-from acceptance_tests.mixins import LogistrationMixin, LogoutMixin, LMSLogoutMixin
-from acceptance_tests.pages import DashboardHomePage
+from acceptance_tests.mixins import LogistrationMixin, OttoAuthenticationMixin, LMSLogoutMixin
+from acceptance_tests.pages.ecommerce import EcommerceDashboardHomePage
 
 
 @skipUnless(ENABLE_SSO_TESTS, 'Single sign-on tests are not enabled.')
-class SingleSignOnTests(LogistrationMixin, LogoutMixin, LMSLogoutMixin, WebAppTest):
+class SingleSignOnTests(LogistrationMixin, OttoAuthenticationMixin, LMSLogoutMixin, WebAppTest):
     def setUp(self):
         """ Instantiate the page objects. """
         super(SingleSignOnTests, self).setUp()
-        self.otto_dashboard_page = DashboardHomePage(self.browser)
+        self.otto_dashboard_page = EcommerceDashboardHomePage(self.browser)
 
     def test_login_and_logout(self):
         """
@@ -42,3 +43,9 @@ class SingleSignOnTests(LogistrationMixin, LogoutMixin, LMSLogoutMixin, WebAppTe
         # to avoid this issue.
         self.browser.get(self.otto_dashboard_page.url)
         self.assertTrue(self.lms_login_page.is_browser_on_page())
+
+    def test_login_redirection(self):
+        """ Verify the user is redirected to the Otto dashboard after logging in. """
+        self.login_via_otto()
+        promise_description = "Ensure redirect to Otto dashboard after login."
+        EmptyPromise(self.otto_dashboard_page.is_browser_on_page, promise_description).fulfill()
