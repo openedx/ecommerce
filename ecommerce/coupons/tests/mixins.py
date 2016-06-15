@@ -2,12 +2,12 @@ import datetime
 import logging
 import json
 
+import httpretty
 from django.conf import settings
 from django.test import RequestFactory
 from oscar.test import factories
 
 from ecommerce.core.models import BusinessClient
-from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.tests.factories import PartnerFactory
@@ -34,12 +34,10 @@ class CatalogPreviewMockMixin(object):
             }],
         }
         course_run_info_json = json.dumps(course_run_info)
-        course_run_url = '{}course_runs/{}'.format(
+        course_run_url = '{}course_runs/?q={}'.format(
             settings.COURSE_CATALOG_API_URL,
-            # query if query else 'id:course*'
-            course_run.id
+            query if query else 'id:course*'
         )
-        log.debug("URL %s JSON %s", course_run_url, course_run_info_json)
         httpretty.register_uri(
             httpretty.GET, course_run_url,
             body=course_run_info_json,

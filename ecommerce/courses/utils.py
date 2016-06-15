@@ -29,6 +29,10 @@ def get_course_info(site, course_key):
     course = cache.get(cache_hash)
     if not course:  # pragma: no cover
         log.debug('Hitting URL: %s', api.course_runs(course_key)._store['base_url'])
-        course = api.course_runs(course_key).get()
-        cache.set(cache_hash, course, settings.COURSES_API_CACHE_TIMEOUT)
+        response = api.course_runs.get(q='key={}'.format(course_key))
+        try:
+            course = response['results'][0]
+            cache.set(cache_hash, course, settings.COURSES_API_CACHE_TIMEOUT)
+        except (AttributeError, IndexError):
+            pass
     return course
