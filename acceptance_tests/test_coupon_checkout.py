@@ -4,12 +4,12 @@ import ddt
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
+from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
                                      LogistrationMixin, UnenrollmentMixin, PaymentMixin)
-from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
-from acceptance_tests.pages import (CouponsCreatePage, CouponsDetailsPage, CouponsListPage,
-                                    DashboardHomePage, RedeemVoucherPage)
 from acceptance_tests.pages.basket import BasketPage
+from acceptance_tests.pages.coupons import CouponsCreatePage, CouponsDetailsPage, CouponsListPage, RedeemVoucherPage
+from acceptance_tests.pages.ecommerce import EcommerceDashboardHomePage
 
 
 @ddt.ddt
@@ -19,7 +19,7 @@ class CouponCheckoutTests(CouponMixin, UnenrollmentMixin, EcommerceApiMixin, Enr
         """ Instantiate the page objects. """
         super(CouponCheckoutTests, self).setUp()
 
-        self.app_login_page = DashboardHomePage(self.browser)
+        self.app_login_page = EcommerceDashboardHomePage(self.browser)
         self.basket_page = BasketPage(self.browser)
         self.coupons_create_edit_page = CouponsCreatePage(self.browser)
         self.coupons_list_page = CouponsListPage(self.browser)

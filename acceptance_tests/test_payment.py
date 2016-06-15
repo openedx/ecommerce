@@ -1,7 +1,7 @@
 from unittest import skipUnless
 
-from bok_choy.web_app_test import WebAppTest
 import ddt
+from bok_choy.web_app_test import WebAppTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,7 +11,8 @@ from acceptance_tests.config import (VERIFIED_COURSE_ID, MARKETING_URL_ROOT,
 from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
                                      PaymentMixin, UnenrollmentMixin)
-from acceptance_tests.pages import LMSCourseModePage, MarketingCourseAboutPage
+from acceptance_tests.pages.lms import LMSCourseModePage
+from acceptance_tests.pages.marketing import MarketingCourseAboutPage
 
 
 @ddt.ddt

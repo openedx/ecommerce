@@ -7,6 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.select import Select
 
 from acceptance_tests.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, MARKETING_URL_ROOT
+from acceptance_tests.pages import submit_lms_login_form
 
 
 class LMSPage(PageObject):  # pylint: disable=abstract-method
@@ -37,10 +38,8 @@ class LMSLoginPage(LMSPage):
     def is_browser_on_page(self):
         return self.q(css='form#login').visible
 
-    def login(self, username, password):
-        self.q(css='input#login-email').fill(username)
-        self.q(css='input#login-password').fill(password)
-        self.q(css='button.login-button').click()
+    def login(self, email, password):
+        submit_lms_login_form(self, email, password)
 
         # Wait for LMS to redirect to the dashboard
         EmptyPromise(self._is_browser_on_lms_dashboard, "LMS login redirected to dashboard").fulfill()
