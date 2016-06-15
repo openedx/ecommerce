@@ -84,14 +84,6 @@ define([
                     expect(view.updateTotalValue).toHaveBeenCalled();
                     expect(view.getSeatData).toHaveBeenCalled();
                 });
-
-                it('updateTotalValue should calculate the price and update model and form fields', function () {
-                    view.$el.find('[name=quantity]').val(5).trigger('input');
-                    view.updateTotalValue({price: 100});
-                    expect(view.$el.find('input[name=price]').val()).toEqual('500');
-                    expect(view.$el.find('input[name=total_value]').val()).toEqual('500');
-                    expect(model.get('total_value')).toEqual(500);
-                });
             });
 
 
@@ -120,6 +112,12 @@ define([
             });
 
             describe('discount code', function () {
+                var prepaid_invoice_fields = [
+                    '[name=invoice_number]',
+                    '[name=price]',
+                    '[name=invoice_payment_date]'
+                ];
+
                 beforeEach(function () {
                     view.$el.find('[name=code_type]').val('Discount code').trigger('change');
                 });
@@ -140,6 +138,13 @@ define([
                     expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('100');
                     view.$el.find('[name=benefit_type]').val('Absolute').trigger('change');
                     expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('');
+                });
+
+                it('should toggle upper limit on the invoice discount value input', function () {
+                    view.$el.find('#invoice-discount-percent').prop('checked', true).trigger('change');
+                    expect(view.$el.find('[name="invoice_discount_value"]').attr('max')).toBe('100');
+                    view.$el.find('#invoice-discount-fixed').prop('checked', true).trigger('change');
+                    expect(view.$el.find('[name="invoice_discount_value"]').attr('max')).toBe('');
                 });
 
                 it('should show the code field for once-per-customer and singe-use vouchers', function () {
@@ -177,6 +182,37 @@ define([
                     view.$el.find('[name=quantity]').val(111).trigger('change');
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(visible('[name=code]')).toBe(true);
+                });
+
+                it('should show prepaid invoice fields when changing to Prepaid invoice type.', function() {
+                    view.$el.find('#already-invoiced').prop('checked', true).trigger('change');
+                    _.each(prepaid_invoice_fields, function(field) {
+                        expect(visible(field)).toBe(true);
+                    });
+                    expect(visible('[name=invoice_discount_value]')).toBe(false);
+                });
+
+                it('should show postpaid invoice fields when changing to Postpaid invoice type.', function() {
+                    view.$el.find('#invoice-after-redemption').prop('checked', true).trigger('change');
+                    _.each(prepaid_invoice_fields, function(field) {
+                        expect(visible(field)).toBe(false);
+                    });
+                    expect(visible('[name=invoice_discount_value]')).toBe(true);
+                });
+
+                it('should hide all invoice fields when changing to Not applicable invoice type.', function() {
+                    view.$el.find('#not-applicable').prop('checked', true).trigger('change');
+                    _.each(prepaid_invoice_fields, function(field) {
+                        expect(visible(field)).toBe(false);
+                    });
+                    expect(visible('[name=invoice_discount_value]')).toBe(false);
+                });
+
+                it('should show tax deduction source field when TSD is selected.', function() {
+                    view.$el.find('#tax-deducted').prop('checked', true).trigger('change');
+                    expect(visible('[name=tax_deducted_source_value]')).toBe(true);
+                    view.$el.find('#non-tax-deducted').prop('checked', true).trigger('change');
+                    expect(visible('[name=tax_deducted_source_value]')).toBe(false);
                 });
             });
 

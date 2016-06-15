@@ -78,6 +78,11 @@ define([
                 expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe('');
             });
 
+            it('should format tax deducted source value.', function() {
+                expect(view.taxDeductedSource(50)).toBe('50%');
+                expect(view.taxDeductedSource()).toBe(null);
+            });
+
             it('should display correct data upon rendering', function () {
                 var voucher = model.get('vouchers')[0],
                     category = model.get('categories')[0].name;
@@ -104,10 +109,34 @@ define([
                 );
                 expect(view.$el.find('.usage-limitations > .value').text()).toEqual(view.usageLimitation(voucher));
                 expect(view.$el.find('.client-info > .value').text()).toEqual(model.get('client'));
-                expect(view.$el.find('.total-paid > .value').text()).toEqual(
+                expect(view.$el.find('.invoiced-amount > .value').text()).toEqual(
                     _s.sprintf('$%s', model.get('price'))
                 );
                 expect(view.renderVoucherTable).toHaveBeenCalled();
+                expect(view.$el.find('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
+                expect(view.$el.find('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
+                expect(view.$el.find('.invoice-payment-date > .value').text()).toEqual(
+                    view.formatDateTime(model.get('invoice_payment_date'))
+                );
+                expect(view.$el.find('.invoice-discount-value > .value').text()).toEqual(
+                    view.invoiceDiscountValue(
+                        model.get('invoice_discount_type'),
+                        model.get('invoice_discount_value')
+                    )
+                );
+                expect(view.$el.find('.tax-deducted-source-value > .value').text()).toEqual(
+                    view.taxDeductedSource(model.get('tax_deducted_source'))
+                );
+            });
+
+            it('should not display invoice discount type on render.', function() {
+                data = Mock_Coupons.enrollmentCodeCouponData;
+                data.invoice_discount_value = null;
+                model = Coupon.findOrCreate(data, {parse: true});
+                view = new CouponDetailView({model: model});
+                view.render();
+                expect(view.$el.find('.invoice-discount-value > .value').text()).toEqual('');
+                expect(view.$el.find('.invoice-discount-type > .value').text()).toEqual('');
             });
 
             it('should render course data', function () {

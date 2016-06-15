@@ -1,12 +1,19 @@
 .coupon-create-edit-view {
-    .benefit-type label {
+    .normal-font-weight {
         font-weight: normal;
     }
+
     .benefit-addon {
-        width: 40px;
+        width: $input-addon-width;
     }
-    input[name="benefit_value"] {
-        width: 174px;
+
+    .invoice-discount-value,
+    .benefit-value {
+        width: $small-input-width;
+    }
+
+    .tax-deducted-source-value {
+        width: $input-addon-width + $small-input-width;
     }
 
     .help-block {
@@ -62,6 +69,12 @@
     }
 }
 
+@media(max-width: $screen-md-max) {
+    .invoice-type > div {
+        width: 100%;
+    }
+}
+
 .coupon-detail-view {
     .coupon-information {
         .heading {
@@ -100,16 +113,7 @@
             @include padding-left(10px);
         }
 
-        .category,
-        .note,
-        .discount-value,
-        .course-info,
-        .date-info,
-        .usage-limitations,
-        .client-info,
-        .total-paid,
-        .catalog-query,
-        .seat-types {
+        .grid-item {
             @include float(left);
 
             @include margin-right(2%);

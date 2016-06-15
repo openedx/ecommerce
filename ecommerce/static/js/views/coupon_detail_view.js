@@ -65,14 +65,57 @@ define([
                 }
                 return '';
             },
+ 
+            taxDeductedSource: function(value) {
+                if (value) {
+                    return _s.sprintf('%u%%', parseInt(value));
+                } else {
+                    return null;
+                }
+            },
+
+            invoiceDiscountValue: function(type, value) {
+                var stringFormat = (type === 'Percentage') ? '%u%%' : '$%u';
+                return _s.sprintf(stringFormat, parseInt(value));
+            },
+
+            formatInvoiceData: function() {
+                var invoice_payment_date = this.model.get('invoice_payment_date'),
+                    invoice_discount_type = this.model.get('invoice_discount_type'),
+                    invoice_discount_value = this.model.get('invoice_discount_value'),
+                    tax_deducted_source = this.model.get('tax_deducted_source');
+                
+                if (invoice_discount_value === null) {
+                    invoice_discount_type = null;
+                } else  {
+                    invoice_discount_value = this.invoiceDiscountValue(invoice_discount_type, invoice_discount_value);
+                }
+                tax_deducted_source = this.taxDeductedSource(tax_deducted_source);
+
+                if (invoice_payment_date) {
+                    invoice_payment_date = this.formatDateTime(invoice_payment_date);
+                }
+
+                return {
+                    'invoice_type': this.model.get('invoice_type'),
+                    'invoice_number': this.model.get('invoice_number'),
+                    'invoice_payment_date': invoice_payment_date,
+                    'invoice_discount_type': invoice_discount_type,
+                    'invoice_discount_value': invoice_discount_value,
+                    'invoiced_amount': this.model.get('invoiced_amount'),
+                    'tax_deducted_source_value': tax_deducted_source,
+                };
+            },
 
             render: function () {
                 var html,
                     voucher = this.model.get('vouchers')[0],
                     category = this.model.get('categories')[0].name,
-                    note = this.model.get('note');
+                    note = this.model.get('note'),
+                    invoice_data = this.formatInvoiceData(),
+                    template_data;
 
-                html = this.template({
+                template_data = {
                     coupon: this.model.toJSON(),
                     couponType: this.couponType(voucher),
                     codeStatus: this.codeStatus(voucher),
@@ -83,8 +126,11 @@ define([
                     startDateTime: this.formatDateTime(voucher.start_datetime),
                     usage: this.usageLimitation(voucher),
                     category: category,
-                    note: note,
-                });
+                    note: note
+                };
+
+                $.extend(template_data, invoice_data);
+                html = this.template(template_data);
 
                 this.$el.html(html);
                 this.renderVoucherTable();
@@ -103,7 +149,7 @@ define([
             },
 
             renderVoucherTable: function () {
-                this.$el.find('#vouchersTable').DataTable({
+                this.$('#vouchersTable').DataTable({
                     autoWidth: false,
                     info: true,
                     paging: false,
@@ -126,20 +172,20 @@ define([
 
             renderCourseData: function () {
                 if (this.model.get('catalog_type') === 'Single course') {
-                    this.$el.find('.course-info').append(
+                    this.$('.course-info').append(
                         _s.sprintf(
                             '<div class="value">%s<span class="pull-right">%s</span></div>',
                             this.model.get('course_id'),
                             this.model.get('seat_type'))
                     );
 
-                    this.$el.find('.catalog-query').addClass('hidden');
-                    this.$el.find('.seat-types').addClass('hidden');
-                    this.$el.find('.course-info').removeClass('hidden');
+                    this.$('.catalog-query').addClass('hidden');
+                    this.$('.seat-types').addClass('hidden');
+                    this.$('.course-info').removeClass('hidden');
                 } else if (this.model.get('catalog_type') === 'Multiple courses') {
-                    this.$el.find('.course-info').addClass('hidden');
-                    this.$el.find('.catalog-query').removeClass('hidden');
-                    this.$el.find('.seat-types').removeClass('hidden');
+                    this.$('.course-info').addClass('hidden');
+                    this.$('.catalog-query').removeClass('hidden');
+                    this.$('.seat-types').removeClass('hidden');
                 }
                 return this;
             },
