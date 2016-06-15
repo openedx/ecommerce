@@ -1,6 +1,7 @@
-import ddt
 import hashlib
+import ddt
 
+from django.conf import settings
 from django.core.cache import cache
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
@@ -39,11 +40,36 @@ class UtilsTests(CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
 
     @httpretty.activate
     @mock_course_catalog_api_client
+    def test_request_nonexistent_course(self):
+        """Check that API request does not return results for a course that does not exist yet"""
+        course_id = 'course-v1:test+test+test'
+        fake_course_url = '{}course_runs/?q={}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            'key:"{}"'.format(course_id)
+        )
+        httpretty.register_uri(
+            httpretty.GET, fake_course_url,
+            body='{"results": []}',
+            content_type='application/json'
+        )
+        cache.clear()
+        nonexistent_course_info = get_course_info(self.site, course_id)
+        self.assertIsNone(nonexistent_course_info)
+
+        course, _ = self.create_course_and_seat(course_id=course_id)
+        query = 'key:"{}"'.format(course.id)
+        self.mock_dynamic_catalog_course_runs_api(course_run=course, query=query)
+
+        course_info = get_course_info(self.site, course.id)
+        self.assertEqual(course_info['key'], course_id)
+
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_get_course_info(self):
         """ Check to see if course info gets cached """
         course_id = 'course-v1:test+test+test'
-        course, seat = self.create_course_and_seat(course_id=course_id)
-        query = 'key={}'.format(course.id)
+        course, _ = self.create_course_and_seat(course_id=course_id)
+        query = 'key:"{}"'.format(course.id)
         self.mock_dynamic_catalog_course_runs_api(course_run=course, query=query)
 
         cache_key = 'courses_api_detail_{}'.format(course.id)

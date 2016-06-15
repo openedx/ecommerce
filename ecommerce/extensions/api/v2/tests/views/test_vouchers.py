@@ -138,7 +138,7 @@ class VoucherViewOffersEndpointTests(CatalogPreviewMockMixin, CouponMixin, Cours
             'contains_verified': True,
             'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
-            'image_url': 'path/to/the/course/image',
+            'image_url': 'http://127.0.0.1:8000/asset-v1:edX+DemoX+Demo_Course+type@asset+block@_course_image.jpg',
             'organization': CourseKey.from_string(course.id).org,
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,

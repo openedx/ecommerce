@@ -17,7 +17,7 @@ from django.views.generic import TemplateView, View
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.courses.utils import get_course_info
 from ecommerce.extensions.api import exceptions
