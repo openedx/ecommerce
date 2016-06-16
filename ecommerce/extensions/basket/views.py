@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import datetime
 import logging
 
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
@@ -156,7 +157,7 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
+            'payment_processors': self.request.site.siteconfiguration.get_payment_processors().values(),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
@@ -164,6 +165,7 @@ class BasketSummaryView(BasketView):
             'is_bulk_purchase': is_bulk_purchase,
             'switch_link_text': switch_link_text,
             'partner_sku': partner_sku,
+            'generation_time': datetime.datetime.utcnow().isoformat(),
         })
 
         return context

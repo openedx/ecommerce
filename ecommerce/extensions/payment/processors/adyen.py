@@ -68,9 +68,23 @@ class Adyen(BasePaymentProcessor):
 
     def get_transaction_parameters(self, basket, request=None):
         """
-        Not implemented
+        Generate a dictionary of parameters Adyen requires to complete a transaction.
+
+        Arguments:
+            basket (Basket): The basket of products being purchase.; not used by this method.
+
+        Keyword Arguments:
+            request (Request): A Request object which could be used to construct an absolute URL; not
+                used by this method.
+
+        Returns:
+            dict: Adyen-specific parameters required to complete a transaction.
         """
-        pass
+        parameters = {
+            u'payment_page_url': '',
+        }
+
+        return parameters
 
     def authorise(self, basket, encryptedCardJSON):
         """
