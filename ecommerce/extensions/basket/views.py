@@ -46,19 +46,45 @@ class BasketSingleItemView(View):
 
         try:
             product = StockRecord.objects.get(partner=partner, partner_sku=sku).product
+        except StockRecord.DoesNotExist:
+            return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
+
+        # If the product isn't available then there's no reason to continue with the basket addition
+        purchase_info = request.strategy.fetch_for_product(product)
+        if not purchase_info.availability.is_available_to_buy:
+            msg = _('Product [{product}] not available to buy.').format(product=product.title)
+            return HttpResponseBadRequest(msg)
+
+        # If the product is not an Enrollment Code, we check to see if the user is already
+        # enrolled to prevent double-enrollment and/or accidental coupon usage
+        if product.get_product_class().name != ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+
             course_key = product.attr.course_key
 
-            api = EdxRestApiClient(
-                get_lms_enrollment_base_api_url(),
-                oauth_access_token=request.user.access_token,
-                append_slash=False
-            )
-            logger.debug(
-                'Getting enrollment information for [%s] in [%s].',
-                request.user.username,
-                course_key
-            )
-            status = api.enrollment(','.join([request.user.username, course_key])).get()
+            # Submit a query to the LMS Enrollment API
+            try:
+                api = EdxRestApiClient(
+                    get_lms_enrollment_base_api_url(),
+                    oauth_access_token=request.user.access_token,
+                    append_slash=False
+                )
+                logger.debug(
+                    'Getting enrollment information for [%s] in [%s].',
+                    request.user.username,
+                    course_key
+                )
+                status = api.enrollment(','.join([request.user.username, course_key])).get()
+            except (ConnectionError, SlumberBaseException, Timeout) as ex:
+                logger.exception(
+                    'Failed to retrieve enrollment details for [%s] in course [%s], Because of [%s]',
+                    request.user.username,
+                    course_key,
+                    ex,
+                )
+                msg = _('An error occurred while retrieving enrollment details. Please try again.')
+                return HttpResponseBadRequest(msg)
+
+            # Enrollment API response received, now perform the actual enrollment check
             username = request.user.username
             seat_type = mode_for_seat(product)
             if status and status.get('mode') == seat_type and status.get('is_active'):
@@ -68,22 +94,11 @@ class BasketSingleItemView(View):
                     seat_type,
                     course_key
                 )
-                return HttpResponseBadRequest(_('You are already enrolled in {course}.').format(
-                    course=product.course.name))
-        except StockRecord.DoesNotExist:
-            return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
-        except (ConnectionError, SlumberBaseException, Timeout) as ex:
-            logger.exception(
-                'Failed to retrieve enrollment details for [%s] in course [%s], Because of [%s]',
-                request.user.username,
-                course_key,
-                ex,
-            )
-            return HttpResponseBadRequest(_('An error occurred while retrieving enrollment details. Please try again.'))
-        purchase_info = request.strategy.fetch_for_product(product)
-        if not purchase_info.availability.is_available_to_buy:
-            return HttpResponseBadRequest(_('Product [{product}] not available to buy.').format(product=product.title))
+                msg = _('You are already enrolled in {course}.').format(course=product.course.name)
+                return HttpResponseBadRequest(msg)
 
+        # At this point we're either adding an Enrollment Code product to the basket,
+        # or the user is adding a Seat product for which they are not already enrolled
         prepare_basket(request, product, voucher)
         return HttpResponseRedirect(reverse('basket:summary'), status=303)
 
