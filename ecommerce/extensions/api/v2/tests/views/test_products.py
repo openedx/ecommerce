@@ -154,8 +154,8 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         voucher = response_data['attribute_values'][0]['value'][0]
         self.assertEqual(voucher['name'], 'Test coupon')
         self.assertEqual(voucher['usage'], Voucher.SINGLE_USE)
-        self.assertEqual(voucher['benefit'][0], Benefit.PERCENTAGE)
-        self.assertEqual(voucher['benefit'][1], 100.0)
+        self.assertEqual(voucher['benefit']['type'], Benefit.PERCENTAGE)
+        self.assertEqual(voucher['benefit']['value'], 100.0)
 
     def test_product_filtering(self):
         """Verify products are filtered."""

@@ -25,3 +25,11 @@ class IsStaffOrOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user and (request.user.is_staff or obj.user == request.user)
+
+
+class IsOffersOrIsAuthenticatedAndStaff(permissions.BasePermission):
+    """ Permission that allows access to anonymous users to get course offers. """
+
+    def has_permission(self, request, view):
+        user = request.user
+        return user.is_authenticated() and user.is_staff or view.action == 'offers'
