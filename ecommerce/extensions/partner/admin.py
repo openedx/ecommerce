@@ -3,18 +3,20 @@ from oscar.apps.partner.admin import *  # noqa pylint: disable=wildcard-import,u
 from oscar.core.loading import get_class
 from simple_history.admin import SimpleHistoryAdmin
 
-
 Catalog = get_class('ecommerce.extensions.catalogue.models', 'Catalog')
 
+admin.site.unregister((StockRecord, Partner,))
 
+
+@admin.register(StockRecord)
 class StockRecordAdminExtended(SimpleHistoryAdmin):
     list_display = ('product', 'partner', 'partner_sku', 'price_excl_tax', 'cost_price', 'num_in_stock')
     list_filter = ('partner',)
     raw_id_fields = ('product',)
 
 
+@admin.register(Catalog)
 class CatalogAdmin(admin.ModelAdmin):
-
     list_display = ('name', 'partner')
     search_fields = ('name', 'partner__name')
     list_filter = ('partner',)
@@ -50,6 +52,8 @@ class CatalogAdmin(admin.ModelAdmin):
             return model.objects.get(pk=object_id)
 
 
-admin.site.unregister(StockRecord)
-admin.site.register(StockRecord, StockRecordAdminExtended)
-admin.site.register(Catalog, CatalogAdmin)
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    # NOTE: Do not include the users field. The users table will grow so large
+    # as to make the page timeout. Additionally, we don't actually make use of the field.
+    fields = ('name', 'short_code',)

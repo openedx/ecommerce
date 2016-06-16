@@ -11,6 +11,7 @@ class ProductAdminExtended(SimpleHistoryAdmin):
     prepopulated_fields = {"slug": ("title",)}
     inlines = [AttributeInline, CategoryInline, ProductRecommendationInline]
     show_full_result_count = False
+    raw_id_fields = ('course',)
 
 
 @admin.register(ProductAttributeValue)
