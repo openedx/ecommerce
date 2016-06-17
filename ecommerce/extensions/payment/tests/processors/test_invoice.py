@@ -2,11 +2,17 @@
 """Unit tests of Invoice payment processor implementation."""
 from __future__ import unicode_literals
 
-from oscar.test import factories
+import datetime
 
+from oscar.test import factories
+import pytz
+
+from ecommerce.core.models import BusinessClient
+from ecommerce.extensions.api.serializers import InvoiceSerializer
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 
@@ -23,14 +29,15 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
         self.skipTest('Invoice processor does not currently require configuration.')
 
     def test_handle_processor_response(self):
-        """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
+        """ Verify the processor creates the appropriate PaymentEvent, Source and Invoice objects. """
 
         order = factories.OrderFactory()
-
-        source, payment_event = self.processor_class().handle_processor_response({}, order)
+        business_client = BusinessClient.objects.create(name='Test client')
+        source, payment_event = self.processor_class().handle_processor_response({}, order, business_client)
 
         # Validate PaymentEvent
         self.assertEqual(payment_event.event_type.name, PaymentEventTypeName.PAID)
+        self.assertTrue(Invoice.objects.get(order=order, business_client=business_client))
 
         # Validate PaymentSource
         self.assertEqual(source.source_type.name, self.processor.NAME)
@@ -49,3 +56,25 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
     def test_issue_credit_error(self):
         """ Tests that Invoice payment processor does not support issuing credit """
         self.skipTest('Invoice processor does not yet support issuing credit.')
+
+    def test_invoice_creation(self):
+        """ Verify the invoice object is created properly. """
+        order = factories.OrderFactory()
+        business_client = BusinessClient.objects.create(name='Test client')
+        invoice_data = {
+            'number': 'INV-001',
+            'type': Invoice.PREPAID,
+            'payment_date': datetime.datetime(2016, 1, 1, tzinfo=pytz.UTC).isoformat(),
+            'tax_deducted_source': 25,
+        }
+
+        self.processor_class().handle_processor_response({}, order, business_client, invoice_data)
+        invoice = Invoice.objects.latest()
+        self.assertEqual(invoice.order, order)
+        self.assertEqual(invoice.business_client, business_client)
+        serialized_invoice = InvoiceSerializer(invoice).data
+        for data in invoice_data:
+            if data is 'payment_date':
+                self.assertEqual(invoice.payment_date.isoformat(), invoice_data[data])
+            else:
+                self.assertEqual(serialized_invoice[data], invoice_data[data])

@@ -436,6 +436,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     num_uses = serializers.SerializerMethodField()
     catalog_query = serializers.SerializerMethodField()
     course_seat_types = serializers.SerializerMethodField()
+    payment_information = serializers.SerializerMethodField()
 
     def retrieve_offer(self, obj):
         """Helper method to retrieve the offer from coupon. """
@@ -504,12 +505,22 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         course_seat_types = offer.condition.range.course_seat_types
         return course_seat_types.split(',') if course_seat_types else course_seat_types
 
+    def get_payment_information(self, obj):
+        """
+        Retrieve the payment information.
+        Currently only invoices are supported, in the event of adding another
+        payment processor append it to the response dictionary.
+        """
+        invoice = Invoice.objects.filter(order__basket__lines__product=obj).first()
+        response = {'Invoice': InvoiceSerializer(invoice).data}
+        return response
+
     class Meta(object):
         model = Product
         fields = (
             'id', 'title', 'coupon_type', 'last_edited', 'seats', 'client',
             'price', 'vouchers', 'categories', 'note', 'max_uses', 'num_uses',
-            'catalog_query', 'course_seat_types'
+            'catalog_query', 'course_seat_types', 'payment_information'
         )
 
 
@@ -520,3 +531,8 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 
     def get_payment_form_data(self, obj):
         return obj['payment_form_data']
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Invoice

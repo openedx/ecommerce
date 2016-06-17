@@ -18,24 +18,29 @@ class InvoicePayment(BasePaymentProcessor):
 
     NAME = u'invoice'
 
-    def handle_processor_response(self, response, order=None, business_client=None):  # pylint: disable=arguments-differ
+    def handle_processor_response(
+            self, response, order=None, business_client=None, invoice_data=None
+    ):  # pylint: disable=arguments-differ
         """
-        Since this is an Invoice just record the transaction.
-
+        Create a new invoice record and return the source and event.
         """
 
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
-
         source = Source(source_type=source_type, label='Invoice')
 
-        # Create PaymentEvent to track
         event_type, __ = PaymentEventType.objects.get_or_create(
             name=PaymentEventTypeName.PAID)
         event = PaymentEvent(event_type=event_type, processor_name=self.NAME)
 
-        # Create an Invoice.
-        Invoice.objects.create(order=order, business_client=business_client)
-
+        invoice = Invoice.objects.create(order=order, business_client=business_client)
+        if invoice_data:
+            invoice.number = invoice_data.get('number')
+            invoice.type = invoice_data.get('type')
+            invoice.payment_date = invoice_data.get('payment_date')
+            invoice.discount_type = invoice_data.get('discount_type')
+            invoice.discount_value = invoice_data.get('discount_value')
+            invoice.tax_deducted_source = invoice_data.get('tax_deducted_source')
+            invoice.save()
         return source, event
 
     def get_transaction_parameters(self, basket, request=None):
