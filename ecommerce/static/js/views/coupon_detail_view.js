@@ -33,16 +33,16 @@ define([
             },
 
             couponType: function (voucher) {
-                var benefitType = voucher.benefit[0],
-                    benefitValue = voucher.benefit[1];
+                var benefitType = voucher.benefit.type,
+                    benefitValue = voucher.benefit.value;
                 return gettext(
                     (benefitType === 'Percentage' && benefitValue === 100) ? 'Enrollment Code' : 'Discount Code'
                 );
             },
 
             discountValue: function(voucher) {
-                var benefitType = voucher.benefit[0],
-                    benefitValue = voucher.benefit[1],
+                var benefitType = voucher.benefit.type,
+                    benefitValue = voucher.benefit.value,
                     stringFormat = (benefitType === 'Percentage') ? '%u%%' : '$%u';
                 return _s.sprintf(stringFormat, benefitValue);
             },

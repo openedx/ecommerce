@@ -39,7 +39,7 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 
-def get_voucher_from_code(code):
+def get_voucher_and_products_from_code(code):
     """
     Returns a voucher and product for a given code.
 
@@ -48,7 +48,7 @@ def get_voucher_from_code(code):
 
     Returns:
         voucher (Voucher): The Voucher for the passed code.
-        product (Product): The Product associated with the Voucher.
+        products (list): List of Products associated with the Voucher.
 
     Raises:
         Voucher.DoesNotExist: When no vouchers with provided code exist.
@@ -56,13 +56,11 @@ def get_voucher_from_code(code):
     """
     voucher = Voucher.objects.get(code=code)
 
-    # Just get the first product.
     products = voucher.offers.all()[0].benefit.range.all_products()
     if products:
-        product = products[0]
+        return voucher, products
     else:
         raise exceptions.ProductNotFoundError()
-    return voucher, product
 
 
 def voucher_is_valid(voucher, product, request):
@@ -125,7 +123,8 @@ class CouponOfferView(TemplateView):
         code = self.request.GET.get('code', None)
         if code is not None:
             try:
-                voucher, product = get_voucher_from_code(code=code)
+                voucher, products = get_voucher_and_products_from_code(code=code)
+                product = products[0]
             except Voucher.DoesNotExist:
                 return {
                     'error': _('Coupon does not exist'),
@@ -204,7 +203,8 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not code:
             return render(request, template_name, {'error': _('Code not provided')})
         try:
-            voucher, product = get_voucher_from_code(code=code)
+            voucher, products = get_voucher_and_products_from_code(code=code)
+            product = products[0]
         except Voucher.DoesNotExist:
             msg = 'No voucher found with code {code}'.format(code=code)
             return render(request, template_name, {'error': _(msg)})
