@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
+from dateutil.parser import parse
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
@@ -94,6 +95,17 @@ class LMSPublisher(object):
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
         modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
+
+        if verification_deadline:
+            is_verification_deadline_invalid = any(
+                parse(mode['expires']) > parse(verification_deadline) if mode['expires'] else False for mode in modes
+            )
+            if is_verification_deadline_invalid:
+                logger.error(
+                    u'Failed to publish commerce data for [%s] to LMS. The verification deadline must occur '
+                    u'after the upgrade deadline.', course_id
+                )
+                return _(u'The verification deadline must occur after the upgrade deadline.')
 
         has_credit = 'credit' in [mode['name'] for mode in modes]
         if has_credit:
