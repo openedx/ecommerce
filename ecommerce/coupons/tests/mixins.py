@@ -21,18 +21,23 @@ class CatalogPreviewMockMixin(object):
 
     def mock_dynamic_catalog_course_runs_api(self, course_run=None, query=None):
         """ Helper function to register a dynamic course catalog API endpoint for the course run information. """
+        dummy_image = {
+            'src': 'http://127.0.0.1:8000/asset-v1:edX+DemoX+Demo_Course+type@asset+block@_course_image.jpg',
+            'description': None,
+        }
         course_run_info = {
             'count': 1,
             'results': [{
                 'key': course_run.id,
                 'title': course_run.name,
                 'start': '2016-05-01T00:00:00Z',
-                'image': {
-                    'src': 'path/to/the/course/image'
-                }
+                'image': dummy_image,
+                'short_description': None
             }] if course_run else [{
                 'key': 'test',
                 'title': 'Test course',
+                'image': dummy_image,
+                'short_description': None
             }],
         }
         course_run_info_json = json.dumps(course_run_info)

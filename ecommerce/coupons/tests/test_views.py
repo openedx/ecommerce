@@ -13,9 +13,10 @@ from oscar.test.factories import (
 )
 from oscar.test.utils import RequestFactory
 
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.coupons.views import get_voucher_and_products_from_code, voucher_is_valid
+from ecommerce.coupons.tests.mixins import CouponMixin, CatalogPreviewMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -166,7 +167,7 @@ class GetVoucherTests(TestCase):
 
 @httpretty.activate
 @ddt.ddt
-class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponOfferViewTests(CourseCatalogTestMixin, CatalogPreviewMockMixin, LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
     path_with_code = '{path}?code={code}'.format(path=path, code=COUPON_CODE)
 
@@ -183,7 +184,8 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         catalog = Catalog.objects.create(name='Test catalog', partner=self.partner)
         catalog.stock_records.add(stock_record)
         _range = RangeFactory(catalog=catalog)
-        self.mock_course_api_response(course=course)
+        query = 'key:{}'.format(course.id)
+        self.mock_dynamic_catalog_course_runs_api(course_run=course, query=query)
         return _range
 
     def test_no_code(self):
@@ -215,29 +217,33 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
 
+    @mock_course_catalog_api_client
     def test_course_information_error(self):
         """ Verify a response is returned when course information is not accessable. """
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 50, self.partner)
+        course_id = 'course-v1:test+test+test'
+        course, seat = self.create_course_and_seat(course_id=course_id)
+        query = 'key:"{}"'.format(course.id)
+
         _range = RangeFactory(products=[seat, ])
         prepare_voucher(code=COUPON_CODE, _range=_range)
 
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course.id))
+        course_url = '{}course_runs/?q={}'.format(settings.COURSE_CATALOG_API_URL, query)
         httpretty.register_uri(httpretty.GET, course_url, status=404, content_type=CONTENT_TYPE)
 
         response = self.client.get(self.path_with_code)
         response_text = (
             'Could not get course information. '
-            '[Client Error 404: http://lms.testserver.fake/api/courses/v1/courses/{}/]'
-        ).format(course.id)
+            '[Client Error 404: http://localhost:8008/api/v1/course_runs/]'
+        )
         self.assertEqual(response.context['error'], _(response_text))
 
+    @mock_course_catalog_api_client
     def test_proper_code(self):
         """ Verify that proper information is returned when a valid code is provided. """
         _range = self.prepare_course_information()
         prepare_voucher(code=COUPON_CODE, _range=_range)
         response = self.client.get(self.path_with_code)
-        self.assertEqual(response.context['course']['name'], _('Test course'))
+        self.assertEqual(response.context['course']['title'], _('Test course'))
         self.assertEqual(response.context['code'], COUPON_CODE)
 
     @ddt.data(
@@ -245,8 +251,10 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         (100000, '0.00'),
     )
     @ddt.unpack
+    @mock_course_catalog_api_client
     def test_fixed_amount(self, benefit_value, new_price):
         """ Verify a new price is calculated properly with fixed price type benefit. """
+
         _range = self.prepare_course_information()
         prepare_voucher(code=COUPON_CODE, _range=_range, benefit_value=benefit_value, benefit_type=Benefit.FIXED)
         response = self.client.get(self.path_with_code)
