@@ -350,6 +350,8 @@ def create_vouchers(
             start_datetime (datetime): Start date for voucher offer.
             voucher_type (str): Type of voucher.
             code (str): Code associated with vouchers. Defaults to None.
+            catalog_query (str): Dynamic course catalog search query.
+            course_seat_types (str): Comma-separated accepted course modes.
 
     Returns:
             List[Voucher]
