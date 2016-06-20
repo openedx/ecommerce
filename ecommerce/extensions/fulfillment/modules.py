@@ -411,7 +411,6 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 name='Enrollment code voucher [{}]'.format(line.product.title),
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
-                catalog=None,
                 coupon=seat,
                 end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
                 quantity=line.quantity,

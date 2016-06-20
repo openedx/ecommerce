@@ -14,8 +14,9 @@ from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
-from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
@@ -44,7 +45,8 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+class EnrollmentFulfillmentModuleTests(CouponMixin, CatalogPreviewMockMixin, CourseCatalogTestMixin,
+                                       FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
 
     course_id = 'edX/DemoX/Demo_Course'
@@ -368,34 +370,20 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), '123.123')
             self.assertEqual(exp.request.headers.get('x-forwarded-for'), '11.22.33.44')
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_voucher_usage(self):
         """
-        Test that using a voucher applies offer discount to reduce order price
+        Test that using a voucher applies offer discount to reduce order price.
         """
-        catalog = Catalog.objects.create(partner=self.partner)
+        catalog_query = 'key:*'
+        seat_type = 'verified'
+        self.create_seat_and_order(certificate_type=seat_type)
+        coupon = self.create_coupon(catalog_query=catalog_query, course_seat_types=seat_type)
+        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=self.course)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
-        coupon_product_class, _ = ProductClass.objects.get_or_create(name='coupon')
-        coupon = factories.create_product(
-            product_class=coupon_product_class,
-            title='Test product'
-        )
-
-        stock_record = StockRecord.objects.filter(product=self.seat).first()
-        catalog.stock_records.add(stock_record)
-
-        vouchers = create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=100.00,
-            catalog=catalog,
-            coupon=coupon,
-            end_datetime=datetime.datetime.now(),
-            name="Test Voucher",
-            quantity=10,
-            start_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
-            voucher_type=Voucher.SINGLE_USE
-        )
-        voucher = vouchers[0]
-
+        voucher = coupon.attr.coupon_vouchers.vouchers.first()
         seat_basket = self.order.basket
         Applicator().apply_offers(seat_basket, voucher.offers.all())
         self.assertEqual(seat_basket.total_excl_tax, 0.00)
