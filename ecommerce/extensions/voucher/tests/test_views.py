@@ -29,17 +29,16 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, LmsApiMockMix
         self.verified_seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
 
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
+        self.quantity = 3
+        self.coupon1 = self.prepare_coupon('Tester1')
+        self.coupon2 = self.prepare_coupon('Tester2')
 
-        partner1 = PartnerFactory(name='Tester1')
-        catalog1 = Catalog.objects.create(name="Test catalog 1", partner=partner1)
-        catalog1.stock_records.add(self.stock_record)
-        self.coupon1 = self.create_coupon(partner=partner1, catalog=catalog1)
-        self.coupon1.history.all().update(history_user=self.user)
-        partner2 = PartnerFactory(name='Tester2')
-        catalog2 = Catalog.objects.create(name="Test catalog 2", partner=partner2)
-        catalog2.stock_records.add(self.stock_record)
-        self.coupon2 = self.create_coupon(partner=partner2, catalog=catalog2)
-        self.coupon2.history.all().update(history_user=self.user)
+    def prepare_coupon(self, partner_name):
+        """ Helper function that prepares a coupon for the CSV report. """
+        partner = PartnerFactory(name=partner_name)
+        coupon = self.create_coupon(partner=partner, quantity=self.quantity)
+        coupon.history.all().update(history_user=self.user)
+        return coupon
 
     def request_specific_voucher_report(self, coupon):
         client = factories.UserFactory()
@@ -50,7 +49,8 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, LmsApiMockMix
         response = CouponReportCSVView().get(request, coupon_id=coupon.id)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.content.splitlines()), 6)
+        # Report should contain lines equal to number of vouchers plus one header line.
+        self.assertEqual(len(response.content.splitlines()), self.quantity + 1)
 
     @httpretty.activate
     def test_get_csv_report_for_specific_coupon(self):

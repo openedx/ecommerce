@@ -127,7 +127,7 @@ CELERY_ALWAYS_EAGER = True
 
 # Use production settings for asset compression so that asset compilation can be tested on the CI server.
 COMPRESS_ENABLED = True
-COMPRESS_OFFLINE = False
+COMPRESS_OFFLINE = True
 
 # Comprehensive theme settings for testing environment
 COMPREHENSIVE_THEME_DIRS = [
