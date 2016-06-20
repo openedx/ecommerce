@@ -21,7 +21,7 @@ from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer, CouponListSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import generate_sku
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -29,7 +29,6 @@ from ecommerce.extensions.voucher.utils import create_vouchers, update_voucher_o
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
-Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
@@ -81,9 +80,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         basket and create an order from it.
 
         Arguments:
-            request (HttpRequest): With parameters title, client,
-            stock_record_ids, start_date, end_date, code, benefit_type, benefit_value,
-            voucher_type, quantity, price, category, note and invoice data in the body.
+            request (HttpRequest): With parameters title, client, start_date,
+            end_date, code, benefit_type, benefit_value,  voucher_type, quantity,
+            price, category, note and invoice data in the body.
 
         Returns:
             200 if the order was created successfully; the basket ID is included in the response
@@ -95,7 +94,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         with transaction.atomic():
             title = request.data[AC.KEYS.TITLE]
             client_username = request.data[CLIENT]
-            stock_record_ids = request.data.get(AC.KEYS.STOCK_RECORD_IDS)
             start_date = dateutil.parser.parse(request.data[AC.KEYS.START_DATE])
             end_date = dateutil.parser.parse(request.data[AC.KEYS.END_DATE])
             code = request.data[AC.KEYS.CODE]
@@ -129,30 +127,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             # When a black-listed course mode is received raise an exception.
             # Audit modes do not have a certificate type and therefore will raise
             # an AttributeError exception.
-            if stock_record_ids:
-                seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
-                for seat in seats:
-                    try:
-                        if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
-                            return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-                    except AttributeError:
-                        return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-
-                stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-                coupon_catalog, __ = get_or_create_catalog(
-                    name='Catalog for stock records: {}'.format(stock_records_string),
-                    partner=partner,
-                    stock_record_ids=stock_record_ids
-                )
-            else:
-                coupon_catalog = None
+            if any(
+                unsupported_seat in course_seat_types for
+                unsupported_seat in settings.BLACK_LIST_COUPON_COURSE_MODES
+            ):
+                return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
 
             data = {
                 'partner': partner,
                 'title': title,
                 'benefit_type': benefit_type,
                 'benefit_value': benefit_value,
-                'catalog': coupon_catalog,
                 'end_date': end_date,
                 'code': code,
                 'quantity': quantity,
@@ -186,7 +171,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 - partner (User)
                 - benefit_type (str)
                 - benefit_value (int)
-                - catalog (Catalog)
                 - end_date (Datetime)
                 - code (str)
                 - quantity (int)
@@ -218,7 +202,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 name=title,
                 benefit_type=data['benefit_type'],
                 benefit_value=Decimal(data['benefit_value']),
-                catalog=data['catalog'],
                 coupon=coupon_product,
                 end_datetime=data['end_date'],
                 code=data['code'] or None,
@@ -245,7 +228,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             partner=data['partner'],
             partner_sku=sku,
             defaults={
-                'price_currency': 'USD',
+                'price_currency': settings.OSCAR_DEFAULT_CURRENCY,
                 'price_excl_tax': price
             }
         )
@@ -338,23 +321,23 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             voucher_range = vouchers.first().offers.first().benefit.range
             Range.objects.filter(id=voucher_range.id).update(**range_data)
 
-        benefit_value = request.data.get(AC.KEYS.BENEFIT_VALUE, '')
+        benefit_value = request.data.get(AC.KEYS.BENEFIT_VALUE)
         if benefit_value:
             self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
 
-        category_ids = request.data.get(AC.KEYS.CATEGORY_IDS, '')
+        category_ids = request.data.get(AC.KEYS.CATEGORY_IDS)
         if category_ids:
             self.update_coupon_category(category_ids=category_ids, coupon=coupon)
 
-        client_username = request.data.get(AC.KEYS.CLIENT, '')
+        client_username = request.data.get(AC.KEYS.CLIENT)
         if client_username:
             self.update_coupon_client(baskets=baskets, client_username=client_username)
 
-        coupon_price = request.data.get(AC.KEYS.PRICE, '')
+        coupon_price = request.data.get(AC.KEYS.PRICE)
         if coupon_price:
             StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
 
-        note = request.data.get(AC.KEYS.NOTE, None)
+        note = request.data.get(AC.KEYS.NOTE)
         if note is not None:
             coupon.attr.note = note
             coupon.save()
@@ -373,7 +356,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             update_dict (dict): Dictionary containing the coupon update data
             update_dict_key (str): Update data dictionary key
         """
-        value = request_data.get(request_data_key, '')
+        value = request_data.get(request_data_key)
         if value:
             update_dict[update_dict_key] = prepare_course_seat_types(value) \
                 if update_dict_key == COURSE_SEAT_TYPES else value
@@ -408,9 +391,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon (Product): Coupon product to be updated
         """
         new_categories = Category.objects.filter(id__in=category_ids)
-
         ProductCategory.objects.filter(product=coupon).exclude(category__in=new_categories).delete()
-
         self.assign_categories_to_coupon(coupon=coupon, categories=new_categories)
 
     def update_coupon_client(self, baskets, client_username):
@@ -454,6 +435,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         return Response(status=204)
 
     def perform_destroy(self, coupon):
+        """
+        Removes all vouchers associated with the coupon, removes the coupon stock record,
+        and finally removes the coupon product.
+
+        Arguments:
+            coupon (Product): The coupon which is going to be deleted.
+        """
         Voucher.objects.filter(coupon_vouchers__coupon=coupon).delete()
         StockRecord.objects.filter(product=coupon).delete()
         coupon.delete()

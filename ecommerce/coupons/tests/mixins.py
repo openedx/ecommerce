@@ -100,7 +100,7 @@ class CouponMixin(object):
 
         return pc
 
-    def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
+    def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, code='',
                       benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
                       course_seat_types=None):
         """Helper method for creating a coupon.
@@ -108,8 +108,7 @@ class CouponMixin(object):
         Arguments:
             title(str): Title of the coupon
             price(int): Price of the coupon
-            partner(Partner): Partner used for creating a catalog
-            catalog(Catalog): Catalog of courses for which the coupon applies
+            partner(Partner): Partner used for creating a coupon stock record
             code(str): Custom coupon code
             benefit_value(int): The voucher benefit value
             catalog_query(str): Course query string
@@ -123,15 +122,12 @@ class CouponMixin(object):
             partner = PartnerFactory(name='Tester')
         if client is None:
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None and not (catalog_query and course_seat_types):
-            catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
         data = {
             'partner': partner,
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': benefit_value,
-            'catalog': catalog,
             'end_date': datetime.date(2020, 1, 1),
             'code': code,
             'quantity': quantity,

@@ -8,11 +8,12 @@ from decimal import Decimal
 import ddt
 import httpretty
 import pytz
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.utils import IntegrityError
 from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
 
@@ -24,20 +25,16 @@ from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
-from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, SiteFactory
-from ecommerce.tests.mixins import ThrottlingMixin
+from ecommerce.tests.factories import SiteConfigurationFactory, SiteFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
-Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 Course = get_model('courses', 'Course')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
-ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -55,13 +52,11 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         course = CourseFactory(id='edx/Demo_Course/DemoX')
         self.seat = course.create_or_update_seat('verified', True, 50, self.partner)
 
-        self.catalog = Catalog.objects.create(partner=self.partner)
         self.coupon_data = {
             'title': 'Test Coupon',
             'partner': self.partner,
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100,
-            'catalog': self.catalog,
             'end_date': '2020-1-1',
             'code': '',
             'quantity': 2,
@@ -71,10 +66,11 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'note': None,
             'max_uses': None,
             'catalog_query': None,
-            'course_seat_types': None,
+            'course_seat_types': ['verified'],
         }
 
     def setup_site_configuration(self):
+        """ Helper method that creates a new Site object and assigns it a site configuration. """
         site_configuration = SiteConfigurationFactory(partner__name='TestX')
         site = SiteFactory()
         site.siteconfiguration = site_configuration
@@ -88,11 +84,9 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_create(self, voucher_type, max_uses, expected_max_uses):
         """Test the create method."""
         title = 'Test coupon'
-        stock_record = self.seat.stockrecords.first()
         self.coupon_data.update({
             'title': title,
             'client': 'Client',
-            'stock_record_ids': [stock_record.id],
             'voucher_type': voucher_type,
             'price': 100,
             'category_ids': [self.category.id],
@@ -120,25 +114,30 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_create_coupon_product(self):
         """Test the created coupon data."""
-        coupon = self.create_coupon()
+        coupon_price = 100
+        quantity = 5
+        title = 'Test coupon'
+        coupon = self.create_coupon(price=coupon_price, quantity=quantity)
+
         self.assertEqual(Product.objects.filter(product_class=self.coupon_product_class).count(), 1)
         self.assertIsInstance(coupon, Product)
-        self.assertEqual(coupon.title, 'Test coupon')
+        self.assertEqual(coupon.title, title)
 
         self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 1)
         stock_record = StockRecord.objects.get(product=coupon)
-        self.assertEqual(stock_record.price_currency, 'USD')
-        self.assertEqual(stock_record.price_excl_tax, 100)
+        self.assertEqual(stock_record.price_currency, settings.OSCAR_DEFAULT_CURRENCY)
+        self.assertEqual(stock_record.price_excl_tax, coupon_price)
 
-        self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), 5)
+        self.assertEqual(coupon.attr.coupon_vouchers.vouchers.count(), quantity)
         category = ProductCategory.objects.get(product=coupon).category
         self.assertEqual(category, self.category)
 
     def test_custom_code_string(self):
         """Test creating a coupon with custom voucher code."""
+        custom_code = 'CUSTOMCODE'
         self.coupon_data.update({
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
-            'code': 'CUSTOMCODE',
+            'code': custom_code,
             'quantity': 1,
         })
         custom_coupon = CouponViewSet().create_coupon_product(
@@ -146,8 +145,8 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             price=100,
             data=self.coupon_data
         )
-        self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.count(), 1)
-        self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.first().code, 'CUSTOMCODE')
+        self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.count(), self.coupon_data['quantity'])
+        self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.first().code, custom_code)
 
     def test_custom_code_integrity_error(self):
         """Test custom coupon code duplication."""
@@ -170,16 +169,18 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_coupon_note(self):
         """Test creating a coupon with a note."""
+        note = '𝑵𝑶𝑻𝑬'
+        title = 'Coupon with note'
         self.coupon_data.update({
-            'note': '𝑵𝑶𝑻𝑬',
+            'note': note,
         })
         note_coupon = CouponViewSet().create_coupon_product(
-            title='Coupon',
+            title=title,
             price=100,
             data=self.coupon_data
         )
-        self.assertEqual(note_coupon.attr.note, '𝑵𝑶𝑻𝑬')
-        self.assertEqual(note_coupon.title, 'Coupon')
+        self.assertEqual(note_coupon.attr.note, note)
+        self.assertEqual(note_coupon.title, title)
 
     def test_multi_use_coupon_creation(self):
         """Test that the endpoint supports the creation of multi-usage coupons."""
@@ -197,16 +198,18 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_add_product_to_basket(self):
         """Test adding a coupon product to a basket."""
-        self.create_coupon(partner=self.partner)
+        price = 99
+        self.create_coupon(price=price, partner=self.partner)
 
         self.assertIsInstance(self.basket, Basket)
         self.assertEqual(Basket.objects.count(), 1)
         self.assertEqual(self.basket.lines.count(), 1)
-        self.assertEqual(self.basket.lines.first().price_excl_tax, 100)
+        self.assertEqual(self.basket.lines.first().price_excl_tax, price)
 
     def test_create_order(self):
         """Test the order creation."""
-        self.create_coupon(partner=self.partner)
+        price = 76
+        self.create_coupon(price=price, partner=self.partner)
 
         self.assertEqual(self.response_data[AC.KEYS.BASKET_ID], 1)
         self.assertEqual(self.response_data[AC.KEYS.ORDER], 1)
@@ -214,7 +217,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(Order.objects.first().status, 'Complete')
-        self.assertEqual(Order.objects.first().total_incl_tax, 100)
+        self.assertEqual(Order.objects.first().total_incl_tax, price)
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
     def test_create_update_data_dict(self):
@@ -237,12 +240,13 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_delete_coupon(self):
         """Test the coupon deletion."""
-        coupon = self.create_coupon(partner=self.partner)
+        quantity = 5
+        coupon = self.create_coupon(quantity=quantity, partner=self.partner)
         self.assertEqual(Product.objects.filter(product_class=self.coupon_product_class).count(), 1)
         self.assertEqual(StockRecord.objects.filter(product=coupon).count(), 1)
         coupon_voucher_qs = CouponVouchers.objects.filter(coupon=coupon)
         self.assertEqual(coupon_voucher_qs.count(), 1)
-        self.assertEqual(coupon_voucher_qs.first().vouchers.count(), 5)
+        self.assertEqual(coupon_voucher_qs.first().vouchers.count(), quantity)
 
         request = RequestFactory()
         request.site = self.setup_site_configuration()
@@ -260,20 +264,17 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, ThrottlingMixin,
-                                  TestCase):
+class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
     """Test the coupon order creation functionality."""
 
     def setUp(self):
         super(CouponViewSetFunctionalTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.create_course_and_seat(course_id='edx/Demo_Course1/DemoX', price=50)
-        self.create_course_and_seat(course_id='edx/Demo_Course2/DemoX', price=100)
+        self.course, __ = self.create_course_and_seat(course_id='edx/Demo_Course1/DemoX', price=50)
         self.data = {
             'title': 'Test coupon',
             'client': 'TestX',
-            'stock_record_ids': [1, 2],
             'start_date': '2015-01-01',
             'end_date': '2020-01-01',
             'code': '',
@@ -283,6 +284,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
             'quantity': 2,
             'price': 100,
             'category_ids': [self.category.id],
+            'catalog_query': None,
+            'course_seat_types': ['verified'],
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
 
@@ -300,17 +303,22 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         """Test the response data given after the order was created."""
         self.assertEqual(self.response.status_code, 200)
         response_data = json.loads(self.response.content)
-        self.assertEqual(response_data[AC.KEYS.COUPON_ID], 5)
-        self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
-        self.assertEqual(response_data[AC.KEYS.ORDER], 1)
+        coupon = Product.objects.latest()
+        basket = Basket.objects.latest()
+        order = Order.objects.latest()
+
+        self.assertEqual(response_data[AC.KEYS.COUPON_ID], coupon.id)
+        self.assertEqual(response_data[AC.KEYS.BASKET_ID], basket.id)
+        self.assertEqual(response_data[AC.KEYS.ORDER], order.id)
         self.assertEqual(response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
 
     def test_order(self):
         """Test the order data after order creation."""
         self.assertEqual(Order.objects.count(), 1)
-        self.assertEqual(Order.objects.first().status, 'Complete')
-        self.assertEqual(Order.objects.first().lines.count(), 1)
-        self.assertEqual(Order.objects.first().lines.first().product.title, 'Test coupon')
+        order = Order.objects.latest()
+        self.assertEqual(order.status, 'Complete')
+        self.assertEqual(order.lines.count(), 1)
+        self.assertEqual(order.lines.first().product.title, self.data['title'])
 
     def test_authentication_required(self):
         """Test that a guest cannot access the view."""
@@ -334,144 +342,136 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, 200)
         coupon_data = json.loads(response.content)['results'][0]
-        self.assertEqual(coupon_data['title'], 'Test coupon')
+        self.assertEqual(coupon_data['title'], self.data['title'])
 
+    def update_coupon(self, update_data):
+        """ Helper method for updating a coupon.
+
+        Arguments:
+            update_data (dict): A dictionary with the fields for update.
+
+        Returns:
+            The coupon product object and the update request response data.
+        """
+        coupon = Product.objects.latest()
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
+            data=update_data
+        )
+        return coupon, response_data
+
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update(self):
         """Test updating a coupon."""
-        coupon = Product.objects.get(title='Test coupon')
-        response_data = self.get_response_json(
-            'PUT',
-            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
-            data={'title': 'New title'}
-        )
-        self.assertEqual(response_data['id'], coupon.id)
-        self.assertEqual(response_data['title'], 'New title')
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
+        new_title = 'New title'
+        coupon, response_data = self.update_coupon({'title': new_title})
 
-    def test_update_title(self):
-        """Test updating a coupon's title."""
-        coupon = Product.objects.get(title='Test coupon')
-        data = {
-            'id': coupon.id,
-            AC.KEYS.TITLE: 'New title'
-        }
-        response_data = self.get_response_json(
-            'PUT',
-            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
-            data=data
-        )
         self.assertEqual(response_data['id'], coupon.id)
+        self.assertEqual(response_data['title'], new_title)
 
-        new_coupon = Product.objects.get(id=coupon.id)
-        vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
-            self.assertEqual(voucher.name, 'New title')
+            self.assertEqual(voucher.name, new_title)
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update_datetimes(self):
         """Test that updating a coupons date updates all of it's voucher dates."""
-        coupon = Product.objects.get(title='Test coupon')
-        data = {
-            'id': coupon.id,
-            AC.KEYS.START_DATE: '2030-01-01',
-            AC.KEYS.END_DATE: '2035-01-01'
-        }
-        response_data = self.get_response_json(
-            'PUT',
-            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
-            data=data
-        )
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
+        start_date = datetime.datetime(2030, 1, 1, tzinfo=pytz.UTC)
+        end_date = datetime.datetime(2035, 1, 1, tzinfo=pytz.UTC)
+        coupon, response_data = self.update_coupon({
+            AC.KEYS.START_DATE: start_date.isoformat(),
+            AC.KEYS.END_DATE: end_date.isoformat()
+        })
         self.assertEqual(response_data['id'], coupon.id)
 
-        new_coupon = Product.objects.get(id=coupon.id)
-        vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
-            self.assertEqual(voucher.start_datetime.year, 2030)
-            self.assertEqual(voucher.end_datetime.year, 2035)
+            self.assertEqual(voucher.start_datetime, start_date)
+            self.assertEqual(voucher.end_datetime, end_date)
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update_benefit_value(self):
         """Test that updating a benefit value updates all of it's voucher offers."""
-        coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        data = {
-            'id': coupon.id,
-            AC.KEYS.BENEFIT_VALUE: 50
-        }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
+        new_benefit_value = 50
+        coupon, __ = self.update_coupon({
+            AC.KEYS.BENEFIT_VALUE: new_benefit_value
+        })
 
-        new_coupon = Product.objects.get(id=coupon.id)
-        vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
-            self.assertEqual(voucher.offers.first().benefit.value, Decimal(50.0))
+            self.assertEqual(voucher.offers.first().benefit.value, Decimal(new_benefit_value))
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update_category(self):
-        coupon = Product.objects.get(title='Test coupon')
+        """Test updating a coupon's category."""
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
         category = factories.CategoryFactory()
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        data = {
-            'id': coupon.id,
+        coupon, __ = self.update_coupon({
             AC.KEYS.CATEGORY_IDS: [category.id]
-        }
-        self.client.put(path, json.dumps(data), 'application/json')
-
-        new_coupon = Product.objects.get(id=coupon.id)
-        coupon_categories = ProductCategory.objects.filter(product=new_coupon).values_list('category', flat=True)
+        })
+        coupon_categories = ProductCategory.objects.filter(product=coupon).values_list('category', flat=True)
         self.assertIn(category.id, coupon_categories)
         self.assertEqual(len(coupon_categories), 1)
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update_client(self):
-        coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        data = {
-            'id': coupon.id,
-            AC.KEYS.CLIENT: 'Client 123'
-        }
-        self.client.put(path, json.dumps(data), 'application/json')
+        """Test updating a coupon's client."""
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
+        new_client_name = 'Client 123'
+        coupon, __ = self.update_coupon({
+            AC.KEYS.CLIENT: new_client_name
+        })
+        invoice = Invoice.objects.get(order__basket__lines__product=coupon)
+        self.assertEqual(invoice.business_client.name, new_client_name)
 
-        new_coupon = Product.objects.get(id=coupon.id)
-        basket = Basket.objects.filter(lines__product_id=new_coupon.id).first()
-        invoice = Invoice.objects.get(order__basket=basket)
-        self.assertEqual(invoice.business_client.name, 'Client 123')
-
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update_coupon_price(self):
-        """Test that updating the price updates all of it's stock record prices."""
-        coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        data = {
-            'id': coupon.id,
-            AC.KEYS.PRICE: 77
-        }
-        self.client.put(path, json.dumps(data), 'application/json')
+        """Test updating a coupon's price."""
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
+        new_price = 77
+        coupon, __ = self.update_coupon({
+            AC.KEYS.PRICE: new_price
+        })
+        self.assertEqual(StockRecord.objects.get(product=coupon).price_excl_tax, new_price)
 
-        new_coupon = Product.objects.get(id=coupon.id)
-        stock_records = StockRecord.objects.filter(product=new_coupon).all()
-        for stock_record in stock_records:
-            self.assertEqual(stock_record.price_excl_tax, 77)
-
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_update_note(self):
-        coupon = Product.objects.get(title='Test coupon')
-        path = reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id})
-        data = {
-            'id': coupon.id,
-            AC.KEYS.NOTE: 'This is the test note.'
-        }
-        self.client.put(path, json.dumps(data), 'application/json')
-
-        new_coupon = Product.objects.get(id=coupon.id)
-        self.assertEqual(new_coupon.attr.note, 'This is the test note.')
+        """Test updating a coupon's note."""
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
+        new_note = 'This is the test note.'
+        coupon, __ = self.update_coupon({
+            AC.KEYS.NOTE: new_note
+        })
+        self.assertEqual(coupon.attr.note, new_note)
 
     def test_update_coupon_benefit_value(self):
-        coupon = Product.objects.get(title='Test coupon')
+        """Test updating the benefit value of the coupon vouchers."""
+        coupon = Product.objects.latest()
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        new_benefit_value = Decimal(54)
+
         CouponViewSet().update_coupon_benefit_value(
-            benefit_value=Decimal(54),
+            benefit_value=new_benefit_value,
             vouchers=vouchers,
             coupon=coupon
         )
-
         for voucher in vouchers:
-            self.assertEqual(voucher.offers.first().benefit.value, Decimal(54))
+            self.assertEqual(voucher.offers.first().benefit.value, new_benefit_value)
 
     def test_update_coupon_category(self):
-        coupon = Product.objects.get(title='Test coupon')
+        """Test updating a coupon's category."""
+        coupon = Product.objects.latest()
         category = factories.CategoryFactory()
         CouponViewSet().update_coupon_category(
             category_ids=[category.id],
@@ -483,37 +483,34 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(len(coupon_categories), 1)
 
     def test_update_coupon_client(self):
-        coupon = Product.objects.get(title='Test coupon')
-        baskets = Basket.objects.filter(lines__product_id=coupon.id)
+        """Test updating a coupon's client."""
+        coupon = Product.objects.latest()
+        new_client_name = 'Test Client Username'
+        baskets = Basket.objects.filter(lines__product=coupon)
         basket = baskets.first()
         CouponViewSet().update_coupon_client(
             baskets=baskets,
-            client_username='Test Client Username'
+            client_username=new_client_name
         )
 
         invoice = Invoice.objects.get(order__basket=basket)
-        self.assertEqual(invoice.business_client.name, 'Test Client Username')
+        self.assertEqual(invoice.business_client.name, new_client_name)
 
-        # To test the old coupon clients, we need to delete all basket orders
+        # To test the old coupon clients, we need to delete all basket orders.
         Order.objects.filter(basket__in=baskets).delete()
         CouponViewSet().update_coupon_client(
             baskets=baskets,
-            client_username='Test Client Username'
+            client_username=new_client_name
         )
 
         baskets = Basket.objects.filter(lines__product_id=coupon.id)
-        self.assertEqual(baskets.first().owner.username, 'Test Client Username')
+        self.assertEqual(baskets.first().owner.username, new_client_name)
 
     @ddt.data('audit', 'honor')
     def test_restricted_course_mode(self, mode):
         """Test that an exception is raised when a black-listed course mode is used."""
-        course = CourseFactory(id='black/list/mode')
-        seat = course.create_or_update_seat(mode, False, 0, self.partner)
-        # Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
-        if mode == 'audit':
-            seat = ProductFactory()
-        self.data.update({'stock_record_ids': [StockRecord.objects.get(product=seat).id]})
-        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        self.data.update({'course_seat_types': [mode]})
+        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @httpretty.activate
@@ -527,17 +524,14 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
             'catalog_query': catalog_query,
             'course_seat_types': course_seat_types,
         })
-        self.data.pop('stock_record_ids')
         course, seat = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
         self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=course)
 
-        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        coupon_id = json.loads(response.content)['coupon_id']
-        details_response = self.client.get(reverse('api:v2:coupons-detail', args=[coupon_id]))
-        detail = json.loads(details_response.content)
-        self.assertEqual(detail['catalog_query'], catalog_query)
-        self.assertEqual(detail['course_seat_types'], course_seat_types)
-        self.assertEqual(detail['seats'][0]['id'], seat.id)
+        coupon_id = self.get_response_json('POST', COUPONS_LINK, self.data)['coupon_id']
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon_id]))
+        self.assertEqual(details['catalog_query'], catalog_query)
+        self.assertEqual(details['course_seat_types'], course_seat_types)
+        self.assertEqual(details['seats'][0]['id'], seat.id)
 
     @ddt.data(
         (Voucher.SINGLE_USE, None),
@@ -546,14 +540,15 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
     )
     @ddt.unpack
     def test_multi_use_single_use_coupon(self, voucher_type, max_uses):
-        """Test that a SINGLE_USE coupon has the default max_uses value and other the set one. """
+        """Test that a SINGLE_USE coupon has the default max_uses value and others the set one. """
         self.data.update({
             'max_uses': max_uses,
             'voucher_type': voucher_type,
         })
-        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
-        coupon = Product.objects.get(id=json.loads(response.content)['coupon_id'])
+        self.client.post(COUPONS_LINK, data=self.data, format='json')
+        coupon = Product.objects.latest()
         voucher = coupon.attr.coupon_vouchers.vouchers.first()
+        self.assertEquals(voucher.usage, voucher_type)
         self.assertEquals(voucher.offers.first().max_global_applications, max_uses)
 
     def update_prepaid_invoice_data(self):
@@ -563,7 +558,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
             'invoice_number': 'INV-00001',
             'invoice_payment_date': datetime.datetime(2015, 1, 1, tzinfo=pytz.UTC).isoformat(),
             'invoice_discount_type': None,
-            'invoice_discount_value': 77
+            'invoice_discount_value': None
         }
         self.data.update(invoice_data)
 
@@ -575,8 +570,11 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(invoice_details['discount_type'], self.data['invoice_discount_type'])
         self.assertEqual(invoice_details['discount_value'], self.data['invoice_discount_value'])
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_coupon_with_invoice_data(self):
         """ Verify an invoice is created with the proper data. """
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
         self.update_prepaid_invoice_data()
         response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
         invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
@@ -586,8 +584,11 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[response['coupon_id']]))
         self.assert_invoice_serialized_data(details)
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_coupon_invoice_update(self):
         """ Verify a coupon is updated with new invoice data. """
+        self.mock_dynamic_catalog_course_runs_api(query=self.data['catalog_query'], course_run=self.course)
         self.update_prepaid_invoice_data()
         response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
         details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[response['coupon_id']]))
