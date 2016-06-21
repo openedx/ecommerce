@@ -48,7 +48,8 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
                     response = request.site.siteconfiguration.course_catalog_api_client.\
                         course_runs.get(page=page, q=query)
                     results = response['results']
-                    course_ids.append(result['key'] for result in results)
+                    for result in results:
+                        course_ids.append(result['key'])
                     if response['next']:
                         page += 1
                     else:
