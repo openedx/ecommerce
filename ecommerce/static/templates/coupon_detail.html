@@ -25,26 +25,26 @@
                 <span><%= lastEdited %></span>
             </div>
         </div>
-        <div class="info-item category">
+        <div class="info-item grid-item category">
             <div class="heading"><%= gettext('Category') %></div>
             <div class="value"><%= category %></div><br />
         </div>
-        <div class="info-item note">
+        <div class="info-item grid-item note">
             <div class="heading"><%= gettext('Note') %></div>
             <div class="value"><%= note %></div><br />
         </div>
-        <div class="info-item discount-value">
+        <div class="info-item grid-item discount-value">
             <div class="heading"><%= gettext('Discount value:') %></div>
             <div class="value"><%= discountValue %></div>
         </div>
-        <div class="info-item course-info">
+        <div class="info-item grid-item course-info">
             <div class="heading"><%= gettext('Valid for courses:') %></div>
         </div>
-        <div class="info-item catalog-query">
+        <div class="info-item grid-item catalog-query">
             <div class="heading"><%= gettext('Catalog query:') %></div>
             <div class="value"><%= coupon['catalog_query'] %></div>
         </div>
-        <div class="info-item date-info">
+        <div class="info-item grid-item date-info">
             <div class="start-date-info">
                 <div class="heading"><%= gettext('Valid from:') %></div>
                 <div class="value"><%= startDateTime %></div>
@@ -54,12 +54,12 @@
                 <div class="value"><%= endDateTime %></div>
             </div>
         </div>
-        <div class="info-item seat-types">
+        <div class="info-item grid-item seat-types">
             <div class="heading"><%= gettext('Seat types:') %></div>
             <div class="value"><%= coupon['course_seat_types'] %></div>
             <div class="catalog_buttons"></div>
         </div>
-        <div class="info-item usage-limitations">
+        <div class="info-item grid-item usage-limitations">
             <div class="heading"><%= gettext('Usage Limitations:') %></div>
             <div class="value"><%= usage %></div>
         </div>
@@ -70,13 +70,37 @@
                 <caption class="sr-only"><%= gettext('Current Voucher Codes') %></caption>
             </table>
         </div>
-        <div class="info-item client-info">
+        <div class="info-item grid-item client-info">
             <div class="heading"><%= gettext('Client:') %></div>
             <div class="value"><%= coupon['client'] %></div>
         </div>
-        <div class="info-item total-paid">
-            <div class="heading"><%= gettext('Total to Invoice to Client:') %></div>
+        <div class="info-item grid-item invoice-type">
+            <div class="heading"><%= gettext('Invoice Type:') %></div>
+            <div class="value"><%= invoice_type %></div>
+        </div>
+        <div class="info-item grid-item invoice-number">
+            <div class="heading"><%= gettext('Invoice Number:') %></div>
+            <div class="value"><%= invoice_number %></div>
+        </div>
+        <div class="info-item grid-item invoiced-amount">
+            <div class="heading"><%= gettext('Invoiced Amount:') %></div>
             <div class="value"><%= price %></div>
+        </div>
+        <div class="info-item grid-item invoice-discount-type">
+            <div class="heading"><%= gettext('Invoice Discount Type:') %></div>
+            <div class="value"><%= invoice_discount_type %></div>
+        </div>
+        <div class="info-item grid-item invoice-discount-value">
+            <div class="heading"><%= gettext('Invoice Discount Value:') %></div>
+            <div class="value"><%= invoice_discount_value %></div>
+        </div>
+        <div class="info-item grid-item invoice-payment-date">
+            <div class="heading"><%= gettext('Invoice Payment Date:') %></div>
+            <div class="value"><%= invoice_payment_date %></div>
+        </div>
+        <div class="info-item grid-item tax-deducted-source-value">
+            <div class="heading"><%= gettext('Tax Deducted Source:') %></div>
+            <div class="value"><%= tax_deducted_source_value %></div>
         </div>
     </div>
 </div>

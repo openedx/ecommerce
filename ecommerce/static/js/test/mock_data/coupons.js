@@ -194,7 +194,13 @@ define([], function(){
             }
         ],
         'price': '100.00',
-        'vouchers': [enrollmentCodeVoucher]
+        'vouchers': [enrollmentCodeVoucher],
+        'invoice_type': 'Prepaid',
+        'invoice_discount_type': 'Percentage',
+        'invoice_discount_value': 40,
+        'invoice_number': 'INV-00001',
+        'invoice_payment_date': '2015-01-01T00:00:00Z',
+        'tax_deducted_source': 50,
     },
     enrollmentCodeCouponModelData = {
         title: 'Test Enrollment',
@@ -232,8 +238,43 @@ define([], function(){
                 stockrecords: []
             }
         ]
+    },
+    couponWithInvoiceData = {
+        id: 2,
+        title: 'Test Enrollment',
+        catalog_type: 'Single course',
+        categories: [
+            {
+                id: 4,
+                name: 'TESTCAT'
+            }
+        ],
+        coupon_type: 'Enrollment code',
+        client: 'test_client',
+        last_edited: lastEditData,
+        note: null,
+        start_date: '2015-01-01T00:00:00Z',
+        end_date: '2016-01-01T00:00:00Z',
+        stock_record_ids: [1],
+        voucher_type: 'Single use',
+        price: 100,
+        course_id: 'a/b/c',
+        seats: [verifiedSeat],
+        seat_type: 'verified',
+        course: verifiedSeat,
+        total_value: 100,
+        vouchers: [percentageDiscountCodeVoucher],
+        payment_information: {
+            Invoice: {
+                type: 'Prepaid',
+                discount_type: null,
+                discount_value: null,
+                number: 'INV-00001',
+                payment_date: '2015-01-01T00:00:00Z',
+                tax_deducted_source: '50'
+            }
+        }
     };
-
     return {
         'couponAPIResponseData': couponAPIResponseData,
         'courseData': courseData,
@@ -245,6 +286,7 @@ define([], function(){
         'lastEditData': lastEditData,
         'percentageDiscountCodeVoucher': percentageDiscountCodeVoucher,
         'valueDiscountCodeVoucher': valueDiscountCodeVoucher,
-        'verifiedSeat': verifiedSeat
+        'verifiedSeat': verifiedSeat,
+        'couponWithInvoiceData': couponWithInvoiceData
     };
 });
