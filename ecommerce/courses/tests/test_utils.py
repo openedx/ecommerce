@@ -10,7 +10,9 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.utils import get_course_info_from_lms, mode_for_seat
+from ecommerce.courses.utils import (
+    get_certificate_type_display_value, get_course_info_from_lms, mode_for_seat
+)
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -55,3 +57,18 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
         cached_course = cache.get(cache_hash)
         self.assertEqual(cached_course, response)
+
+    @ddt.data(
+        ('honor', 'Honor'),
+        ('verified', 'Verified'),
+        ('professional', 'Professional'),
+        ('audit', 'Audit')
+    )
+    @ddt.unpack
+    def test_cert_display(self, cert_type, cert_display):
+        """ Verify certificate display types. """
+        self.assertEqual(get_certificate_type_display_value(cert_type), cert_display)
+
+    def test_cert_display_assertion(self):
+        """ Verify assertion for invalid cert type """
+        self.assertRaises(ValueError, lambda: get_certificate_type_display_value('junk'))

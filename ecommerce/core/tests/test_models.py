@@ -11,8 +11,10 @@ from edx_rest_api_client.auth import SuppliedJwtAuth
 
 from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
 from ecommerce.core.tests import toggle_switch
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
 from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
@@ -28,7 +30,8 @@ def _make_site_config(payment_processors_str, site_id=1):
     )
 
 
-class UserTests(TestCase):
+@ddt.ddt
+class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     TEST_CONTEXT = {'foo': 'bar', 'baz': None}
 
     def test_access_token(self):
@@ -64,6 +67,27 @@ class UserTests(TestCase):
 
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
         self.assertEquals(user.get_full_name(), full_name)
+
+    @httpretty.activate
+    @ddt.data(('verified', False), ('professional', True), ('no-id-professional', False))
+    @ddt.unpack
+    def test_is_user_enrolled(self, mode, id_verification):
+        """ Verify check for user enrollment in a course. """
+        user = self.create_user()
+        self.request.user = user
+        course_id1 = 'course-v1:test+test+test'
+        __, enrolled_seat = self.create_course_and_seat(
+            course_id=course_id1, seat_type=mode, id_verification=id_verification
+        )
+        self.mock_enrollment_api(self.request, user, course_id1, mode=mode)
+        self.assertTrue(user.is_user_already_enrolled(self.request, enrolled_seat))
+
+        course_id2 = 'course-v1:not+enrolled+here'
+        __, not_enrolled_seat = self.create_course_and_seat(
+            course_id=course_id2, seat_type=mode, id_verification=id_verification
+        )
+        self.mock_enrollment_api(self.request, user, course_id2, is_active=False, mode=mode)
+        self.assertFalse(user.is_user_already_enrolled(self.request, not_enrolled_seat))
 
 
 class BusinessClientTests(TestCase):

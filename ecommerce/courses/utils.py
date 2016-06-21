@@ -2,6 +2,7 @@ import hashlib
 
 from django.conf import settings
 from django.core.cache import cache
+from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
 
 from ecommerce.core.url_utils import get_lms_url
@@ -32,3 +33,17 @@ def get_course_info_from_lms(course_key):
         course = api.courses(course_key).get()
         cache.set(cache_hash, course, settings.COURSES_API_CACHE_TIMEOUT)
     return course
+
+
+def get_certificate_type_display_value(certificate_type):
+    display_values = {
+        'audit': _('Audit'),
+        'verified': _('Verified'),
+        'professional': _('Professional'),
+        'honor': _('Honor')
+    }
+
+    if certificate_type not in display_values:
+        raise ValueError('Certificate Type [%s] not found.', certificate_type)
+
+    return display_values[certificate_type]

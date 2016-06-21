@@ -262,10 +262,10 @@ class SiteMixin(object):
         self.partner = site_configuration.partner
         self.site = site_configuration.site
 
-        request = RequestFactory().get('')
-        request.session = None
-        request.site = self.site
-        set_thread_variable('request', request)
+        self.request = RequestFactory().get('')
+        self.request.session = None
+        self.request.site = self.site
+        set_thread_variable('request', self.request)
 
 
 class TestServerUrlMixin(object):
@@ -313,3 +313,25 @@ class LmsApiMockMixin(object):
         course_id = course.id if course else 'course-v1:test+test+test'
         course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+
+    def mock_enrollment_api(self, request, user, course_id, is_active=True, mode='audit'):
+        """ Returns a successful response indicating self.user is enrolled in the specified course mode. """
+        url = '{host}/enrollment/{username},{course_id}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
+            username=user.username,
+            course_id=course_id
+        )
+        body = json.dumps({'mode': mode, 'is_active': is_active})
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
+
+    def mock_enrollment_api_error(self, request, user, course_id, error):
+        """ Mock Enrollment api call which raises error when called """
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+
+        url = '{host}/enrollment/{username},{course_id}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
+            username=user.username,
+            course_id=course_id
+        )
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
