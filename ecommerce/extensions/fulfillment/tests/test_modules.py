@@ -1,5 +1,4 @@
 """Tests of the Fulfillment API's fulfillment modules."""
-import datetime
 import json
 
 import ddt
@@ -27,7 +26,6 @@ from ecommerce.extensions.fulfillment.modules import (
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.voucher.models import OrderLineVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'

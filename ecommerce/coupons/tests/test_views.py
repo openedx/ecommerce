@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 from oscar.test.factories import (
     ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 )
@@ -286,7 +286,12 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewM
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
         self.mock_dynamic_catalog_course_runs_api(query=self.catalog_query, course_run=self.course)
         self.mock_dynamic_catalog_contains_api(query=self.catalog_query, course_run_ids=[self.course.id])
-        self.create_coupon(catalog_query=self.catalog_query, course_seat_types='verified', code=COUPON_CODE, benefit_value=5)
+        self.create_coupon(
+            catalog_query=self.catalog_query,
+            course_seat_types='verified',
+            code=COUPON_CODE,
+            benefit_value=5
+        )
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
 

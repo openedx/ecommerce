@@ -128,8 +128,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             # Audit modes do not have a certificate type and therefore will raise
             # an AttributeError exception.
             if any(
-                unsupported_seat in course_seat_types for
-                unsupported_seat in settings.BLACK_LIST_COUPON_COURSE_MODES
+                    unsupported_seat in course_seat_types for
+                    unsupported_seat in settings.BLACK_LIST_COUPON_COURSE_MODES
             ):
                 return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
 

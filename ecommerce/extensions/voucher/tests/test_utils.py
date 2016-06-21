@@ -289,7 +289,6 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, Lm
         create_vouchers(
             benefit_type=Benefit.FIXED,
             benefit_value=100.00,
-            catalog=self.catalog,
             coupon=self.coupon,
             end_datetime=datetime.date(2015, 10, 30),
             name="Inactive code",
@@ -306,8 +305,8 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, Lm
 
     @httpretty.activate
     def test_generate_coupon_report_for_old_coupons(self):
-        self.skipTest('Coupon report is pending restructure.')
         """ Verify that the client info is present for old coupons. """
+        self.skipTest('Coupon report is pending restructure.')
         self.setup_coupons_for_report()
 
         Order.objects.get(basket=self.basket).delete()
@@ -322,8 +321,8 @@ class UtilTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, Lm
 
     @httpretty.activate
     def test_generate_coupon_report_for_query_coupons(self):
-        self.skipTest('Coupon report is pending restructure.')
         """ Verify empty report fields for query coupons. """
+        self.skipTest('Coupon report is pending restructure.')
         query_coupon = self.create_coupon(
             title='Query coupon',
             quantity=1,

@@ -10,7 +10,7 @@ from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Applicator
+from ecommerce.tests.mixins import ProductClass, Benefit, Voucher, Applicator
 
 
 class CatalogPreviewMockMixin(object):
@@ -48,23 +48,13 @@ class CatalogPreviewMockMixin(object):
 
     def mock_dynamic_catalog_contains_api(self, course_run_ids, query):
         """ Helper function to register a dynamic course catalog API endpoint for the contains information. """
-        course_contains_info = {
-            'course_runs': {}
-        }
-        for course_run_id in course_run_ids:
-            course_contains_info['course_runs'][course_run_id] = True
-
-        course_run_info_json = json.dumps(course_contains_info)
-        course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}'.format(
-            settings.COURSE_CATALOG_API_URL,
-            (course_run_id for course_run_id in course_run_ids),
-            query if query else 'id:course*'
+        body = json.dumps({'course_runs': {course_run_id: True for course_run_id in course_run_ids}})
+        url = '{root}course_runs/contains/?course_run_ids={course_run_ids}&query={query}'.format(
+            root=settings.COURSE_CATALOG_API_URL,
+            course_run_ids=','.join(course_run_ids),
+            query=query
         )
-        httpretty.register_uri(
-            httpretty.GET, course_run_url,
-            body=course_run_info_json,
-            content_type='application/json'
-        )
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
 
 
 class CouponMixin(object):

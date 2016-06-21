@@ -21,6 +21,7 @@ from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
+from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -102,10 +103,14 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         response = CouponViewSet().create(request)
 
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(
-            response.data,
-            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 3}
-        )
+        order = Order.objects.latest()
+        expected = {
+            'payment_data': {'payment_processor_name': 'Invoice'},
+            'order': order.id,
+            'id': order.basket.id,
+            'coupon_id': Product.objects.latest().id,
+        }
+        self.assertDictEqual(response.data, expected)
 
         coupon = Product.objects.get(title=title)
         self.assertEqual(
@@ -211,15 +216,20 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         """Test the order creation."""
         price = 76
         self.create_coupon(price=price, partner=self.partner)
-
-        self.assertEqual(self.response_data[AC.KEYS.BASKET_ID], 1)
-        self.assertEqual(self.response_data[AC.KEYS.ORDER], 1)
-        self.assertEqual(self.response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
+        order = Order.objects.latest()
+        expected = {
+            AC.KEYS.BASKET_ID: order.basket.id,
+            AC.KEYS.ORDER: order.id,
+            AC.KEYS.PAYMENT_DATA: {
+                AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
+            }
+        }
+        self.assertDictContainsSubset(expected, self.response_data)
 
         self.assertEqual(Order.objects.count(), 1)
-        self.assertEqual(Order.objects.first().status, 'Complete')
-        self.assertEqual(Order.objects.first().total_incl_tax, price)
-        self.assertEqual(Basket.objects.first().status, 'Submitted')
+        self.assertEqual(order.status, 'Complete')
+        self.assertEqual(order.total_incl_tax, price)
+        self.assertEqual(order.basket.status, 'Submitted')
 
     def test_create_update_data_dict(self):
         """Test the update data dictionary"""
@@ -296,9 +306,9 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         if method == 'GET':
             response = self.client.get(path)
         elif method == 'POST':
-            response = self.client.post(path, json.dumps(data), 'application/json')
+            response = self.client.post(path, json.dumps(data), JSON_CONTENT_TYPE)
         elif method == 'PUT':
-            response = self.client.put(path, json.dumps(data), 'application/json')
+            response = self.client.put(path, json.dumps(data), JSON_CONTENT_TYPE)
         return json.loads(response.content)
 
     def test_response(self):
@@ -306,13 +316,15 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
         self.assertEqual(self.response.status_code, 200)
         response_data = json.loads(self.response.content)
         coupon = Product.objects.latest()
-        basket = Basket.objects.latest()
         order = Order.objects.latest()
 
-        self.assertEqual(response_data[AC.KEYS.COUPON_ID], coupon.id)
-        self.assertEqual(response_data[AC.KEYS.BASKET_ID], basket.id)
-        self.assertEqual(response_data[AC.KEYS.ORDER], order.id)
-        self.assertEqual(response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
+        expected = {
+            'payment_data': {'payment_processor_name': 'Invoice'},
+            'order': order.id,
+            'id': order.basket.id,
+            'coupon_id': coupon.id,
+        }
+        self.assertDictEqual(response_data, expected)
 
     def test_order(self):
         """Test the order data after order creation."""
@@ -512,7 +524,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
     def test_restricted_course_mode(self, mode):
         """Test that an exception is raised when a black-listed course mode is used."""
         self.data.update({'course_seat_types': [mode]})
-        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        response = self.client.post(COUPONS_LINK, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @httpretty.activate
