@@ -2,6 +2,211 @@
     .container {
         padding-top: 60px;
         padding-bottom: spacing-vertical(small);
+
+        .row {
+            .pagination-block {
+                .pagination {
+                    padding: 0 15px;
+                    margin-top: 0;
+
+                    // Taken from bootstrap pagination to work with buttons
+                    .active {
+                        button, button:hover, button:focus {
+                            z-index: 3;
+                            color: $offer-page-white;
+                            background-color: $pagination-blue;
+                            border-color: $pagination-blue;
+                            cursor: default;
+                        }
+                    }
+                    .disabled{
+                        button, button:hover, button:focus {
+                            color: $offer-page-gray;
+                            cursor: not-allowed;
+                            background-color: $offer-page-white;
+                            border-color: $pagination-darker-silver;
+                        }
+                    }
+                    li {
+                        button {
+                            @include float(left);
+                            @include margin-left(-1px);
+                            position: relative;
+                            padding: 6px 12px;
+                            line-height: 1.42857;
+                            text-decoration: none;
+                            color: $pagination-blue;
+                            background-color: $offer-page-white;
+                            border: 1px solid $pagination-darker-silver;
+
+                            &:hover, &:focus {
+                                z-index: 2;
+                                color: $pagination-dark-blue;
+                                background-color: $pagination-silver;
+                                border-color: $pagination-darker-silver;
+                            }
+                        }
+                    }
+                    // END
+                }
+                @media (max-width: $screen-xs-max) {
+                    .pagination-range {
+                        text-align: center;
+                        float: none !important; // !important to override bootstrap pull-right
+                    }
+                }
+            }
+
+            .number-of-products-header {
+                font-weight: bold;
+                @media (max-width: $screen-xs-max) {
+                    text-align: center;
+                }
+            }
+
+            .verified-info {
+                background-color: $silver-background;
+                margin-top: 30px;
+                margin-bottom: -20px;
+                padding-top: 40px;
+
+                @media (min-width: $screen-lg-min) {
+                    .earn-verified-certificate {
+                        font-size: 20px;
+                    }
+                    .verified-certificate-info {
+                        .verified-certificate-info-header{
+                            margin: -5px 0 10px 0;
+                            font-weight: bold;
+                        }
+                        p {
+                            font-size: 13px;
+                            margin: 0 0 10px 0;
+                        }
+                    }
+                }
+
+                @media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+                    .earn-verified-certificate {
+                        font-size: 20px;
+                    }
+                }
+
+                @media (min-width: $screen-lg-min) {
+                    .pull-right-lg {
+                        @include float(right);
+                    }
+                    .pull-left-lg {
+                        @include float(left);
+                    }
+                }
+
+                .verified-certificate-info {
+                    .img-responsive {
+                        margin-bottom: 15px;
+                    }
+                    @media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+                        .pull-right-sm {
+                            @include float(right);
+                        }
+                        .pull-left-sm {
+                            @include float(left);
+                        }
+                    }
+                }
+            }
+
+            @media (min-width: $screen-md-min) and (max-width: $screen-md-max) {
+                .verified-info {
+                    background-color: $offer-page-white;
+                    margin-top: 0;
+                    padding-top: 0;
+                }
+            }
+
+            .pagination {
+                display: block;
+                padding: 0 30px;
+            }
+
+            .discount-multiple-courses {
+                margin-bottom: 15px;
+
+                .box-shadow {
+                    padding: 10px 0 0 0;
+                    box-shadow: 1px 1px 3px $offer-page-gray;
+                }
+                .img-responsive {
+                    @media (min-width: $screen-sm-min) {
+                        height: 150px;
+                        width: 100%;
+                    }
+                    @media (max-width: $screen-xs-max) {
+                        min-height: 150px;
+                        width: 100%;
+                    }
+                }
+                .course-name {
+                    margin: 0 0 5px 0;
+                    max-height: 28px;
+                    overflow: hidden;
+                    font-size: 1.25em;
+                    line-height: 1.35;
+                    font-weight: 600;
+                }
+                .course-org {
+                    font-size: 1em;
+                    line-height: 1.438;
+                    margin: 0;
+                }
+                .voucher-valid-until {
+                    font-size: 12px;
+                    position: absolute;
+                    bottom: 0;
+                    background-color: $gray-transparent;
+                    text-align: center;
+                    width: 100%;
+
+                    p {
+                        margin: 0;
+                        padding: 7px 0;
+                    }
+                }
+                .course-price {
+                    text-align: center;
+
+                    span { text-decoration: line-through; }
+                }
+                .course-new-price {
+                    @include margin-left(5px);
+                    text-align: center;
+                    font-weight: bold;
+                    color: $offer-page-price-blue;
+                }
+                .course-start {
+                    margin-bottom: 40px;
+                    font-size: 1em;
+                    line-height: 1.438;
+                }
+                .discount-percentage {
+                    @include left(0);
+                    height: 35px;
+                    padding: 5px 5px 0;
+                    text-align: center;
+                    background-color: $offer-page-price-blue;
+                    color: $offer-page-white;
+                    position: absolute;
+                    top: 10px;
+                    text-shadow: 0 1px 1px $dark-blue-shadow;
+                    text-transform: uppercase;
+                    font-size: 1.25em;
+                    line-height: 1.2;
+                }
+                .image-container {
+                    position: relative;
+                }
+            }
+        }
     }
 
     .course_name {
@@ -82,27 +287,13 @@
         }
     }
 
-    .verified-certificate-info {
-        padding: 30px 0;
-
-        h3 {
-            border-bottom: 1px solid #c5c5c5;
-            padding-bottom: 10px;
-        }
-
-        ul li {
-            padding-bottom: 20px;
-            font-size: 14px;
-        }
-    }
-
     .total-price {
         color: #065683;
     }
 
     p.voucher {
         margin: 0 20px;
-        color: gray;
+        color: $offer-page-gray;
         @include float(left);
     }
     .note {
