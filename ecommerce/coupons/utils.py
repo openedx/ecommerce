@@ -16,18 +16,25 @@ def get_seats_from_query(site, query, seat_types):
     Returns:
         List of seat products retrieved from the course catalog query.
     """
-    response = site.siteconfiguration.course_catalog_api_client.course_runs.get(q=query)
+    page = 1
     query_products = []
-    for result in response['results']:
-        try:
-            product = Product.objects.get(
-                course_id=result['key'],
-                attributes__name='certificate_type',
-                attribute_values__value_text__in=seat_types.split(',')
-            )
-            query_products.append(product)
-        except Product.DoesNotExist:
-            pass
+    while page:
+        response = site.siteconfiguration.course_catalog_api_client.course_runs.get(page=page, q=query)
+        if response['next']:
+            page += 1
+        else:
+            page = None
+        for result in response['results']:
+            try:
+                product = Product.objects.get(
+                    course_id=result['key'],
+                    attributes__name='certificate_type',
+                    attribute_values__value_text__in=seat_types.split(',')
+                )
+                query_products.append(product)
+            except Product.DoesNotExist:
+                pass
+
     return query_products
 
 
