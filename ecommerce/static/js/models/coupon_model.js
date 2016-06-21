@@ -186,6 +186,10 @@ define([
                 if (code_count > 1 || _.size(vouchers) === 1) {
                     this.set('code', voucher.code);
                 }
+
+                if (voucher.usage === 'Single use') {
+                    this.set('max_uses', 1);
+                }
             },
 
             updatePaymentInformation: function() {

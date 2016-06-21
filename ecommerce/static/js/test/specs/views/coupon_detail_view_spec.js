@@ -112,6 +112,7 @@ define([
                 expect(view.$el.find('.invoiced-amount > .value').text()).toEqual(
                     _s.sprintf('$%s', model.get('price'))
                 );
+                expect(view.$el.find('.max-uses > .value').text()).toEqual(model.get('max_uses'));
                 expect(view.renderVoucherTable).toHaveBeenCalled();
                 expect(view.$el.find('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
                 expect(view.$el.find('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
@@ -143,7 +144,8 @@ define([
                 view.model.set({
                     'catalog_type': 'Single course',
                     'course_id': 'a/b/c',
-                    'seat_type': 'Verified'
+                    'seat_type': 'Verified',
+                    'course_seat_types': ['verified']
                 });
 
                 view.render();
@@ -151,6 +153,7 @@ define([
                 var course_info = view.$el.find('.course-info .value');
                 expect(course_info.length).toEqual(1);
                 expect(course_info.text()).toEqual('a/b/cVerified');
+                expect(view.$el.find('.seat-types .value').text()).toEqual('verified');
 
                 view.model.set({
                     'catalog_type': 'Multiple courses',
@@ -161,7 +164,7 @@ define([
                 view.render();
 
                 expect(view.$el.find('.catalog-query .value').text()).toEqual('id:*');
-                expect(view.$el.find('.seat-types .value').text()).toEqual('verified,professional');
+                expect(view.$el.find('.seat-types .value').text()).toEqual('verified, professional');
             });
 
             it('should display data table', function () {
@@ -181,6 +184,7 @@ define([
                 expect(e.preventDefault).toHaveBeenCalled();
                 expect(window.open).toHaveBeenCalledWith(url, '_blank');
             });
+
         });
     }
 );
