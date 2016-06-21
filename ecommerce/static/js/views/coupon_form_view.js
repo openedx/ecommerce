@@ -374,14 +374,6 @@ define([
                 } else {
                     this.hideField('[name=max_uses]', 1);
                 }
-
-                // The only time we allow for a generation of multiple codes is
-                // when they are of type single use.
-                if (voucherType === 'Single use') {
-                    this.formGroup('[name=quantity]').removeClass(this.hiddenClass);
-                } else {
-                    this.hideField('[name=quantity]', 1);
-                }
             },
 
             /**
