@@ -300,8 +300,12 @@ class LmsApiMockMixin(object):
             'media': {
                 'course_image': {
                     'uri': '/asset-v1:test+test+test+type@asset+block@images_course_image.jpg'
+                },
+                'image': {
+                    'raw': 'path/to/the/course/image'
                 }
             },
+            'start': '2013-02-05T05:00:00Z',
             'name': course.name if course else 'Test course',
             'org': 'test'
         }
