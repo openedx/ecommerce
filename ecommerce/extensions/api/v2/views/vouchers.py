@@ -93,7 +93,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             else:
                 page = None
 
-        print query_results
         course_ids = [product.course_id for product in products]
         courses = Course.objects.filter(id__in=course_ids)
         contains_verified_course = next((False for course in courses if course.type != 'verified'), True)
