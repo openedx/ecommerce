@@ -40,10 +40,20 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         query = request.GET.get('query')
         seat_types = request.GET.get('seat_types')
         if query and seat_types:
+            page = 1
             seat_types = seat_types.split(',')
+            course_ids = []
             try:
-                results = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(q=query)['results']
-                course_ids = [result['key'] for result in results]
+                while page:
+                    response = request.site.siteconfiguration.course_catalog_api_client.\
+                        course_runs.get(page=page, page_size=100, q=query)
+                    results = response['results']
+                    for result in results:
+                        course_ids.append(result['key'])
+                    if response['next']:
+                        page += 1
+                    else:
+                        page = None
                 courses = serializers.CourseSerializer(
                     Course.objects.filter(id__in=course_ids),
                     many=True,

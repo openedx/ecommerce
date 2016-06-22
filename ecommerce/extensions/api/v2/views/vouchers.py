@@ -81,9 +81,17 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         """
         benefit = voucher.offers.first().benefit
         offers = []
-        query_results = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(
-            q=benefit.range.catalog_query
-        )['results']
+        query_results = []
+        page = 1
+        while page:
+            response = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(
+                page=page, page_size=100, q=benefit.range.catalog_query)
+            for body in response['results']:
+                query_results.append(body)
+            if response['next']:
+                page += 1
+            else:
+                page = None
 
         course_ids = [product.course_id for product in products]
         courses = Course.objects.filter(id__in=course_ids)
