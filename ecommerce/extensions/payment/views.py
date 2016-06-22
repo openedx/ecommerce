@@ -224,7 +224,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        receipt_url = u'{}?orderNum={}'.format(self.payment_processor.receipt_url, basket.order_number)
+        receipt_url = u'{}?order_number={}'.format(self.payment_processor.receipt_url, basket.order_number)
 
         try:
             with transaction.atomic():

@@ -1,0 +1,212 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block body_class %}
+    ltr register verification-process step-requirements lang_en
+{% endblock %}
+
+{% block title %}
+    {{ page_title }}
+{% endblock title %}
+
+{% block extra_css %}
+    <link href="/static/css/base/temp.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/base/temp_vendor.css" rel="stylesheet" type="text/css" />
+    <link href="/static/css/base/temp_overrides.css" rel="stylesheet" type="text/css" />
+{% endblock extra_css %}
+
+<script src="{% static 'js/apps/receipt.js' %}"></script>
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+<div class="window-wrap" dir="ltr">
+{% block content %}
+
+<div id="content" class="content-wrapper">
+    <div class="provider-wrapper hidden">
+        <div class="provider-info">
+            {% blocktrans %}
+                You still need to visit the {{ display_name }} website to complete the credit process.
+            {%  endblocktrans %}
+        </div>
+        <div class="provider-more-info">
+            {% blocktrans %} To finalize course credit, {{ display_name }} requires {{ platform_name }} learners
+              to submit a credit request.
+            {%  endblocktrans %}
+        </div>
+    </div>
+
+    <div class="provider-buttons-logos hidden">
+      <div class="provider-logo">
+        <img src='{{ thumbnail_url }}' alt='{{ display_name }}' />"
+      </div>
+      <div class="complete-order">
+        <button data-provider="{{ id }}" data-course-key="{{ course_key }}" data-username="{{ name }}"
+                class="complete-course"{# onClick=completeOrder(this) #}>{% trans  "Get Credit" %}</button>
+      </div>
+    </div>
+
+    <div class="container"> <section class="wrapper carousel">
+        <div id="receipt-container" class="pay-and-verify" data-is-payment-complete='${is_payment_complete}'
+         data-platform-name='${platform_name}' data-verified='${verified}' data-username='${name}'>
+            {# data-is-request-in-themed-site='${is_request_in_themed_site}'> #}
+            <h1 class="hidden">{% trans "Loading Order Data..." %}</h1>
+            <span class="hidden">{% trans "Please wait while we retrieve your order details." %}</span>
+            <div class="wrapper-content-main payment-confirmation-step"> <article class="content-main">
+                <h3 class="title"> {% trans "Thank you!" %} </h3>
+
+                {% if order %}
+                    <div class="list-info">
+                        <div class="info-item payment-info">
+                            <div class="copy">
+                                <p> {% trans "Your order was processed successfully. " %}
+                                    {% trans "Print this page for your records; it serves as your receipt. " %}
+                                    {% trans "You will also receive a confirmation email with the same " %}
+                                    {% trans "information at " %}
+                                    <a href="mailto:{{ order.email }}">{{ order.email }}</a>.
+                                </p>
+                            </div>
+
+                            <div class="wrapper-report">
+                                <table class="report report-receipt">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col" > {% trans "Order No." %} </th>
+                                        <th scope="col" > {% trans "Description" %} </th>
+                                        <th scope="col" > {% trans "Date" %}</th>
+                                        <th scope="col" > {% trans "Amount" %}</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    {% for item in order.lines.all %}
+                                        {% if order.isRefunded %}
+                                          <td><del>{{ order.number }}</del></td>
+                                          <td><del>{{ item.description }}</del></td>
+                                          <td><del>{{ order.date_placed }}</del></td>
+                                          <td><del>{{ order.total_excl_tax }} ({{ order.currency | upper }})</del></td>
+                                        {% else %}
+                                          <tr>
+                                            <td>{{ order.number }}</td>
+                                            <td>{{ item.description }}</td>
+                                            <td>{{ order.date_placed }}</td>
+                                            <td>{{ order.total_excl_tax }} ({{ order.currency | upper }})</td>
+                                          </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+
+                                    <tfoot>
+                                      <tr>
+                                        <th scope="row" class="total-label"> {% trans "Total" %}</th>
+                                        <td colspan="2"></td>
+                                        <td class="total-value">
+                                          <span class="value-amount">{{ order.total_excl_tax }}</span>
+                                           <span class="value-currency">({{ order.currency | upper }})</span>
+                                        </td>
+                                      </tr>
+                                    </tfoot>
+                                  </table>
+
+                                  {% if order.isRefunded %}
+                                  <div class="msg msg-refunds">
+                                      <h4 class="title sr">{% trans "Please Note: "%}</h4>
+                                      <div class="copy"><p>{% trans "Crossed out items have been refunded." %}</p></div>
+                                  </div>
+                                  {% endif %}
+                            </div>
+
+                            {% if order.billedTo %}
+                                <div class="copy">
+                                    <p> {% trans "Billed to:" %}
+                                        <span class="name-first">{{ order.billedTo.firstName }}</span>
+                                        <span class="name-last">{{ order.billedTo.lastName }}</span>
+                                        <span class="address-city">{{ order.billedTo.city }}</span>,
+                                        <span class="address-state">{{ order.billedTo.state }}</span>
+                                        <span class="address-postalcode">{{ order.billedTo.postalCode }}</span>
+                                        <span class="address-country">{{ order.billedTo.country | upper }}</span>
+                                    </p>
+                                </div>
+                            {% elif order.shipping_address %}
+                                <h3>{% trans "Address" %}</h3>
+                                <address>
+                                    {% for field in order.shipping_address.active_address_fields %}
+                                        {{ field }}<br/>
+                                    {% endfor %}
+                                </address>
+
+                                {% if order.shipping_address.phone_number %}
+                                    <p>
+                                        {% trans "Phone" %}: {{ order.shipping_address.phone_number }}
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <p>{% trans "No shipping address required." %}</p>
+                            {% endif %}
+                            {% if codes %}
+                                <p>Codes applied:
+                                {% for code in codes %}
+                                    {{ code }}
+                                {% endfor %}
+                                </p>
+                            {% endif %}
+                            {% if order.sources.all %}
+                                <p>Paid for via {{ order.sources.all.0.source_type.name }}</p>
+                            {% endif %}
+                        <div class="report report-receipt report-receipt-provider hidden" id="receipt-provider"></div>
+                    </div>
+
+                {% else %}
+                    <p class="no-content"> {% trans "No receipt available" %} </p>
+                                <p>Order: {{ object }}</p>
+                {% endif %}
+            </div>
+            <nav class="nav-wizard is-ready">
+                <a id="verify_later_button" class="next action-secondary verify-later nav-link" href="{{ dashboard }}"
+                      data-tooltip="{% blocktrans %}
+                        If you don't verify your identity now, you can still explore your course from your dashboard.
+                        You will receive periodic reminders from {{ platformName }} to verify your identity.
+                        {% endblocktrans %}">
+                        {% trans "Want to confirm your identity later?" %}
+                </a>
+
+                  <a id="verify_now_button"
+                     class="next action-primary right"
+                     href="{{ verify_link }}{{ course_key }}/"
+                  >
+                   {% trans "Verify Now" %}
+                  </a>
+            </nav>
+        </article></div>
+     </div></section>
+</div>
+<div id="error-container" class="hidden">
+    <div id="error" class="wrapper-msg wrapper-msg-activate">
+        <div class=" msg msg-activate">
+            <span class="msg-icon icon fa fa-exclamation-triangle" aria-hidden="true"></span>
+            <div class="msg-content">
+                <h3 class="title">
+                    <span class="sr">{% blocktrans %} {{ error_summary }} {% endblocktrans %}</span>
+                    {{ error_summary }}
+                </h3>
+                {% if error_text %}
+                <div class="copy">
+                    <p>{% blocktrans %} {{ error_text }} {% endblocktrans %}</p>
+                    <br/>
+                </div>
+                {% endif %}
+                <div class="msg">
+                    <p>{% blocktrans %} {{ for_help_text }} {% endblocktrans %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</div>
+{% endblock content %}
+</div>

@@ -6,7 +6,7 @@ from oscar.core.loading import get_class
 from threadlocals import threadlocals
 import waffle
 
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
 from ecommerce.extensions.checkout.utils import get_provider_data
@@ -82,8 +82,8 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                         'CREDIT_RECEIPT',
                         {
                             'course_title': product.title,
-                            'receipt_page_url': get_lms_url(
-                                '{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
+                            'receipt_page_url': get_ecommerce_url(
+                                '{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
                             ),
                             'credit_hours': product.attr.credit_hours,
                             'credit_provider': provider_data['display_name'],

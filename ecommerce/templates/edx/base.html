@@ -18,6 +18,7 @@
         {% else %}
             <link rel="stylesheet" href="{% static 'css/base/main.css' %}" type="text/x-scss">
         {% endif %}
+        {% block extra_css %} {% endblock extra_css %}
     {% endcompress %}
 
     {% compress css %}
@@ -26,7 +27,7 @@
         {% endblock %}
     {% endcompress %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 {% block navbar %}
     {% include 'edx/partials/_staff_navbar.html' %}
 {% endblock navbar %}

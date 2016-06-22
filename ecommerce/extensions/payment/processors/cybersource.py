@@ -14,7 +14,7 @@ from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
@@ -65,7 +65,7 @@ class Cybersource(BasePaymentProcessor):
 
     @property
     def receipt_page_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
+        return get_ecommerce_url(self.configuration['receipt_path'])
 
     @property
     def cancel_page_url(self):
@@ -98,7 +98,7 @@ class Cybersource(BasePaymentProcessor):
             'amount': str(basket.total_incl_tax),
             'currency': basket.currency,
             'consumer_id': basket.owner.username,
-            'override_custom_receipt_page': '{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
+            'override_custom_receipt_page': '{}?order_number={}'.format(self.receipt_page_url, basket.order_number),
             'override_custom_cancel_page': self.cancel_page_url,
         }
 

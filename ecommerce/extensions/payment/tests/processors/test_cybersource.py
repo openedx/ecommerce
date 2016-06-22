@@ -58,7 +58,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             'amount': unicode(self.basket.total_incl_tax),
             'currency': self.basket.currency,
             'consumer_id': self.basket.owner.username,
-            'override_custom_receipt_page': '{}?orderNum={}'.format(self.processor.receipt_page_url,
+            'override_custom_receipt_page': '{}?order_number={}'.format(self.processor.receipt_page_url,
                                                                     self.basket.order_number),
             'override_custom_cancel_page': self.processor.cancel_page_url,
             'merchant_defined_data1': self.course.id,

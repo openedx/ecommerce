@@ -6,7 +6,7 @@ import httpretty
 from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.tests.testcases import TestCase
 
@@ -48,12 +48,12 @@ class FreeCheckoutViewTests(TestCase):
         """ Verify redirect to the receipt page. """
         self.prepare_basket(0)
         self.assertEqual(Order.objects.count(), 0)
-        receipt_page = get_lms_url(settings.RECEIPT_PAGE_PATH)
+        receipt_page = get_ecommerce_url(settings.RECEIPT_PAGE_PATH)
 
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        expected_url = '{}?orderNum={}'.format(receipt_page, Order.objects.first().number)
+        expected_url = '{}?order_number={}'.format(receipt_page, Order.objects.first().number)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
 

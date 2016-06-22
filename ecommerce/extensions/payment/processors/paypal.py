@@ -61,7 +61,7 @@ class Paypal(BasePaymentProcessor):
 
     @property
     def receipt_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
+        return get_ecommerce_url(self.configuration['receipt_path'])
 
     @property
     def cancel_url(self):

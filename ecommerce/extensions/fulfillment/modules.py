@@ -457,7 +457,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 'order_number': order.number,
                 'partner_name': order.site.siteconfiguration.partner.name,
                 'lms_url': get_lms_url(),
-                'receipt_page_url': get_lms_url('{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)),
+                'receipt_page_url': get_ecommerce_url('{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)),
             },
             site=order.site
         )
