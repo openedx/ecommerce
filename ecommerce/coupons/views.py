@@ -153,7 +153,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         then applies the voucher and if the basket total is FREE places the order and
         enrolls the user in the course.
         """
-        template_name = 'coupons/offer.html'
+        template_name = 'coupons/_offer_error.html'
         code = request.GET.get('code')
         sku = request.GET.get('sku')
 
