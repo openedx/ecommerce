@@ -1,6 +1,9 @@
 """HTTP endpoints for interacting with vouchers."""
+import hashlib
 import logging
 
+from django.conf import settings
+from django.core.cache import cache
 import django_filters
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
@@ -66,7 +69,14 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             logger.error('No product(s) are associated with this code.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        offers = self.get_offers(products, request, voucher)
+        query = voucher.offers.first().benefit.range.catalog_query
+        cache_key = 'catalog_query_{}'.format(query)
+        cache_hash = hashlib.md5(cache_key).hexdigest()
+        offers = cache.get(cache_hash)
+        if not offers:  # pragma: no cover
+            offers = self.get_offers(products, request, voucher)
+            cache.set(cache_hash, offers, settings.COURSES_API_CACHE_TIMEOUT)
+
         page = self.paginate_queryset(offers)
         return self.get_paginated_response(page)
 
