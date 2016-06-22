@@ -17,6 +17,9 @@ ENROLLMENT_CODE_PRODUCT_CLASS_NAME = 'Enrollment Code'
 ENROLLMENT_CODE_SWITCH = 'create_enrollment_codes'
 ENROLLMENT_CODE_SEAT_TYPES = ['verified', 'professional', 'no-id-professional']
 
+# Course Catalog constants
+DEFAULT_CATALOG_PAGE_SIZE = 10000
+
 
 class Status(object):
     """Health statuses."""
