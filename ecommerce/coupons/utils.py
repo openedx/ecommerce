@@ -19,7 +19,7 @@ def get_seats_from_query(site, query, seat_types):
     page = 1
     query_products = []
     while page:
-        response = site.siteconfiguration.course_catalog_api_client.course_runs.get(page=page, q=query)
+        response = site.siteconfiguration.course_catalog_api_client.course_runs.get(page=page, page_size=100, q=query)
         if response['next']:
             page += 1
         else:

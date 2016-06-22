@@ -85,7 +85,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         page = 1
         while page:
             response = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(
-                page=page, q=benefit.range.catalog_query)
+                page=page, page_size=100, q=benefit.range.catalog_query)
             for body in response['results']:
                 query_results.append(body)
             if response['next']:

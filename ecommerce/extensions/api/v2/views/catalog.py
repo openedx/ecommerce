@@ -46,7 +46,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
             try:
                 while page:
                     response = request.site.siteconfiguration.course_catalog_api_client.\
-                        course_runs.get(page=page, q=query)
+                        course_runs.get(page=page, page_size=100, q=query)
                     results = response['results']
                     for result in results:
                         course_ids.append(result['key'])
