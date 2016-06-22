@@ -8,8 +8,9 @@ from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework_extensions.decorators import action
 
-from ecommerce.courses.models import Course
+from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.views import get_voucher_and_products_from_code
+from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions, serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
@@ -82,7 +83,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         benefit = voucher.offers.first().benefit
         offers = []
         query_results = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(
-            q=benefit.range.catalog_query
+            q=benefit.range.catalog_query, page_size=DEFAULT_CATALOG_PAGE_SIZE, limit=DEFAULT_CATALOG_PAGE_SIZE
         )['results']
 
         course_ids = [product.course_id for product in products]
