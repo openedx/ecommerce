@@ -45,6 +45,9 @@ class Basket(AbstractBasket):
 
         return basket
 
+    class Meta(AbstractBasket.Meta):
+        get_latest_by = 'date_created'
+
     def __unicode__(self):
         return _(u"{id} - {status} basket (owner: {owner}, lines: {num_lines})").format(
             id=self.id,

@@ -6,16 +6,13 @@ from oscar.core.loading import get_model
 
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import generate_sku
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
-Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
 Product = get_model('catalogue', 'Product')
-StockRecord = get_model('partner', 'StockRecord')
-Voucher = get_model('voucher', 'Voucher')
 
 COURSE_ID = 'sku/test_course/course'
 
@@ -54,36 +51,6 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         actual = generate_sku(product, self.partner)
         self.assertEqual(actual, expected)
 
-    def test_get_or_create_catalog(self):
-        """Verify that the proper catalog is fetched."""
-        stock_record = self.seat.stockrecords.first()
-        self.catalog.stock_records.add(stock_record)
-
-        self.assertEqual(self.catalog.id, 1)
-
-        existing_catalog, created = get_or_create_catalog(
-            name='Test',
-            partner=self.partner,
-            stock_record_ids=[stock_record.id]
-        )
-        self.assertFalse(created)
-        self.assertEqual(self.catalog, existing_catalog)
-        self.assertEqual(Catalog.objects.count(), 1)
-
-        course_id = 'sku/test2/course'
-        course = Course.objects.create(id=course_id, name='Test Course 2')
-        seat_2 = course.create_or_update_seat('verified', False, 0, self.partner)
-        stock_record_2 = seat_2.stockrecords.first()
-
-        new_catalog, created = get_or_create_catalog(
-            name='Test',
-            partner=self.partner,
-            stock_record_ids=[stock_record.id, stock_record_2.id]
-        )
-        self.assertTrue(created)
-        self.assertNotEqual(self.catalog, new_catalog)
-        self.assertEqual(Catalog.objects.count(), 2)
-
 
 class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     def setUp(self):
@@ -93,7 +60,7 @@ class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_generate_sku_for_coupon(self):
         """Verify the method generates a SKU for a coupon."""
-        coupon = self.create_coupon(partner=self.partner, catalog=self.catalog)
+        coupon = self.create_coupon(partner=self.partner)
         _hash = ' '.join((
             unicode(coupon.id),
             str(self.partner.id)

@@ -19,9 +19,9 @@ from testfixtures import LogCapture
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import SiteConfiguration
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
-from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_url
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -44,7 +44,8 @@ COUPON_CODE = 'COUPONTEST'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, LmsApiMockMixin,
+                                TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -54,11 +55,8 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.client.login(username=self.user.username, password=self.password)
 
         self.course = CourseFactory()
-        self.course.create_or_update_seat('verified', True, 50, self.partner)
         product = self.course.create_or_update_seat('verified', False, 0, self.partner)
         self.stock_record = StockRecordFactory(product=product, partner=self.partner)
-        self.catalog = Catalog.objects.create(partner=self.partner)
-        self.catalog.stock_records.add(self.stock_record)
 
     def mock_enrollment_api_success_enrolled(self, course_id, mode='audit'):
         """
@@ -139,12 +137,16 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         self.assertEqual(response.content, expected_content)
 
     @httpretty.activate
+    @mock_course_catalog_api_client
     def test_redirect_to_basket_summary(self):
         """
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
+        catalog_query = 'key:*'
         self.mock_enrollment_api_success_enrolled(self.course.id)
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=self.course)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+        self.create_coupon(catalog_query=catalog_query, course_seat_types='verified', code=COUPON_CODE, benefit_value=5)
 
         self.mock_course_api_response(course=self.course)
         url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,

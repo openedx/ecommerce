@@ -11,6 +11,9 @@ class Product(AbstractProduct):
                                    help_text=_('Last date/time on which this product can be purchased.'))
     history = HistoricalRecords()
 
+    class Meta(AbstractProduct.Meta):
+        get_latest_by = 'date_created'
+
 
 class ProductAttributeValue(AbstractProductAttributeValue):
     history = HistoricalRecords()

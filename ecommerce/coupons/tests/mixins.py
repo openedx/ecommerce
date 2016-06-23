@@ -10,7 +10,7 @@ from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Applicator
+from ecommerce.tests.mixins import ProductClass, Benefit, Voucher, Applicator
 
 
 class CatalogPreviewMockMixin(object):
@@ -48,23 +48,13 @@ class CatalogPreviewMockMixin(object):
 
     def mock_dynamic_catalog_contains_api(self, course_run_ids, query):
         """ Helper function to register a dynamic course catalog API endpoint for the contains information. """
-        course_contains_info = {
-            'course_runs': {}
-        }
-        for course_run_id in course_run_ids:
-            course_contains_info['course_runs'][course_run_id] = True
-
-        course_run_info_json = json.dumps(course_contains_info)
-        course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}'.format(
-            settings.COURSE_CATALOG_API_URL,
-            (course_run_id for course_run_id in course_run_ids),
-            query if query else 'id:course*'
+        body = json.dumps({'course_runs': {course_run_id: True for course_run_id in course_run_ids}})
+        url = '{root}course_runs/contains/?course_run_ids={course_run_ids}&query={query}'.format(
+            root=settings.COURSE_CATALOG_API_URL,
+            course_run_ids=','.join(course_run_ids),
+            query=query
         )
-        httpretty.register_uri(
-            httpretty.GET, course_run_url,
-            body=course_run_info_json,
-            content_type='application/json'
-        )
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
 
 
 class CouponMixin(object):
@@ -100,7 +90,7 @@ class CouponMixin(object):
 
         return pc
 
-    def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
+    def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, code='',
                       benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
                       course_seat_types=None):
         """Helper method for creating a coupon.
@@ -108,8 +98,7 @@ class CouponMixin(object):
         Arguments:
             title(str): Title of the coupon
             price(int): Price of the coupon
-            partner(Partner): Partner used for creating a catalog
-            catalog(Catalog): Catalog of courses for which the coupon applies
+            partner(Partner): Partner used for creating a coupon stock record
             code(str): Custom coupon code
             benefit_value(int): The voucher benefit value
             catalog_query(str): Course query string
@@ -123,15 +112,12 @@ class CouponMixin(object):
             partner = PartnerFactory(name='Tester')
         if client is None:
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None and not (catalog_query and course_seat_types):
-            catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
         data = {
             'partner': partner,
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': benefit_value,
-            'catalog': catalog,
             'end_date': datetime.date(2020, 1, 1),
             'code': code,
             'quantity': quantity,

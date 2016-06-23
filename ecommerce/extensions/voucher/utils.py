@@ -222,7 +222,7 @@ def generate_coupon_report(coupon_vouchers):
 
 def _get_or_create_offer(product_range, benefit_type, benefit_value, coupon_id=None, max_uses=None):
     """
-    Return an offer for a catalog with condition and benefit.
+    Return an offer for a range with condition and benefit.
 
     If offer doesn't exist, new offer will be created and associated with
     provided Offer condition and benefit.
@@ -326,7 +326,6 @@ def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime,
 def create_vouchers(
         benefit_type,
         benefit_value,
-        catalog,
         coupon,
         end_datetime,
         name,
@@ -344,8 +343,6 @@ def create_vouchers(
     Args:
             benefit_type (str): Type of benefit associated with vouchers.
             benefit_value (Decimal): Value of benefit associated with vouchers.
-            catalog (Catalog): Catalog associated with range of products
-                               to which a voucher can be applied to.
             coupon (Coupon): Coupon entity associated with vouchers.
             end_datetime (datetime): End date for voucher offer.
             name (str): Voucher name.
@@ -353,6 +350,8 @@ def create_vouchers(
             start_datetime (datetime): Start date for voucher offer.
             voucher_type (str): Type of voucher.
             code (str): Code associated with vouchers. Defaults to None.
+            catalog_query (str): Dynamic course catalog search query.
+            course_seat_types (str): Comma-separated accepted course modes.
 
     Returns:
             List[Voucher]
@@ -369,7 +368,6 @@ def create_vouchers(
         range_name = (_('Range for coupon [{coupon_id}]').format(coupon_id=coupon.id))
         product_range, __ = Range.objects.get_or_create(
             name=range_name,
-            catalog=catalog,
             catalog_query=catalog_query,
             course_seat_types=course_seat_types
         )

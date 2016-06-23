@@ -7,14 +7,15 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 from oscar.test.factories import (
     ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 )
 from oscar.test.utils import RequestFactory
 
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
 from ecommerce.coupons.views import get_voucher_and_products_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
@@ -23,7 +24,6 @@ from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -78,12 +78,13 @@ class GetVoucherTests(TestCase):
 
     def test_no_product(self):
         """ Verify that an exception is raised if there is no product. """
-        voucher = VoucherFactory(code='NOPRODUCT')
+        code = 'NOPRODUCT'
+        voucher = VoucherFactory(code=code)
         offer = ConditionalOfferFactory()
         voucher.offers.add(offer)
 
         with self.assertRaises(exceptions.ProductNotFoundError):
-            get_voucher_and_products_from_code(code='NOPRODUCT')
+            get_voucher_and_products_from_code(code=code)
 
     def test_get_non_existing_voucher(self):
         """ Verify that get_voucher_and_products_from_code() raises exception for a non-existing voucher. """
@@ -220,27 +221,24 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
 
 
-class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, LmsApiMockMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course, self.seat = self.create_course_and_seat(
-            seat_type='verified',
-            id_verification=True,
-            price=50,
-            partner=self.partner
-        )
+        self.course = CourseFactory()
+        self.seat = self.course.create_or_update_seat('verified', True, 50, self.partner)
         self.stock_record = StockRecord.objects.get(product=self.seat)
-        self.catalog = Catalog.objects.create(partner=self.partner)
-        self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
         self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
+        self.catalog_query = 'key:*'
 
     def create_and_test_coupon(self):
         """ Creates enrollment code coupon. """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE)
+        self.mock_dynamic_catalog_course_runs_api(query=self.catalog_query, course_run=self.course)
+        self.mock_dynamic_catalog_contains_api(query=self.catalog_query, course_run_ids=[self.course.id])
+        self.create_coupon(catalog_query=self.catalog_query, course_seat_types='verified', code=COUPON_CODE)
         self.assertEqual(Voucher.objects.filter(code=COUPON_CODE).count(), 1)
 
     def assert_redemption_page_redirects(self, expected_url, target=200):
@@ -284,14 +282,19 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.assertEqual(response.context['error'], _('The product does not exist.'))
 
     @httpretty.activate
+    @mock_course_catalog_api_client
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
-        self.mock_course_api_response(course=self.course)
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        self.mock_dynamic_catalog_course_runs_api(query=self.catalog_query, course_run=self.course)
+        self.mock_dynamic_catalog_contains_api(query=self.catalog_query, course_run_ids=[self.course.id])
+        self.create_coupon(
+            catalog_query=self.catalog_query, course_seat_types='verified', code=COUPON_CODE, benefit_value=5
+        )
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
 
     @httpretty.activate
+    @mock_course_catalog_api_client
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to LMS when an enrollment code is provided. """
         self.create_and_test_coupon()
@@ -299,6 +302,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.assert_redemption_page_redirects(self.student_dashboard_url, target=301)
 
     @httpretty.activate
+    @mock_course_catalog_api_client
     def test_multiple_vouchers(self):
         """ Verify a redirect to LMS happens when a basket with already existing vouchers is used. """
         self.create_and_test_coupon()
