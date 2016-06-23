@@ -58,6 +58,26 @@ def _get_voucher_status(voucher, offer):
     return status
 
 
+def _get_discount_info(discount_data):
+    """Retrieve voucher discount info.
+
+    Arguments:
+        discount_data (dict)
+
+    Returns
+        coupon_type (str)
+        discount_amount (str)
+        discount_percentage (str)
+    """
+    if discount_data:
+        coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
+        discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
+        discount_amount = currency(discount_data['discount_value'])
+        return coupon_type, discount_percentage, discount_amount
+    logger.warning('Unable to get voucher discount info. Discount data not provided.')
+    return None, None, None
+
+
 def _get_info_for_coupon_report(coupon, voucher):
     offer = voucher.offers.all().first()
     if offer.condition.range.catalog:
@@ -70,27 +90,19 @@ def _get_info_for_coupon_report(coupon, voucher):
         discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
     else:
         # Note (multi-courses): Need to account for multiple seats.
+        catalog_query = offer.condition.range.catalog_query
+        course_seat_types = offer.condition.range.course_seat_types
+        course_id = None
         coupon_stockrecord = None
         invoiced_amount = None
         seat_stockrecord = None
-        course_id = None
         course_organization = None
         price = None
         discount_data = None
 
     history = coupon.history.first()
-
-    if discount_data:
-        coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
-        discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
-        discount_amount = currency(discount_data['discount_value'])
-    else:
-        coupon_type = None
-        discount_percentage = None
-        discount_amount = None
-
+    coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
     status = _get_voucher_status(voucher, offer)
-
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
     url = get_ecommerce_url(path)
     author = history.history_user.full_name
@@ -118,13 +130,11 @@ def _get_info_for_coupon_report(coupon, voucher):
     else:
         max_uses_count = offer.max_global_applications
 
-    return {
+    coupon_data = {
         'Coupon Name': voucher.name,
         'Code': voucher.code,
         'Coupon Type': coupon_type,
         'URL': url,
-        'Course ID': course_id,
-        'Organization': course_organization,
         'Category': category_names,
         'Note': note,
         'Price': price,
@@ -139,6 +149,15 @@ def _get_info_for_coupon_report(coupon, voucher):
         'Maximum Coupon Usage': max_uses_count,
         'Redemption Count': offer.num_applications,
     }
+
+    if course_id:
+        coupon_data['Course ID'] = course_id
+        coupon_data['Organization'] = course_organization
+    else:
+        coupon_data['Catalog Query'] = catalog_query
+        coupon_data['Course Seat Types'] = course_seat_types
+
+    return coupon_data
 
 
 def generate_coupon_report(coupon_vouchers):
@@ -161,6 +180,8 @@ def generate_coupon_report(coupon_vouchers):
         _('Coupon Type'),
         _('URL'),
         _('Course ID'),
+        _('Catalog Query'),
+        _('Course Seat Types'),
         _('Organization'),
         _('Client'),
         _('Category'),
@@ -172,6 +193,7 @@ def generate_coupon_report(coupon_vouchers):
         _('Status'),
         _('Order Number'),
         _('Redeemed By Username'),
+        _('Redeemed For Course ID'),
         _('Created By'),
         _('Create Date'),
         _('Coupon Start Date'),
@@ -205,8 +227,13 @@ def generate_coupon_report(coupon_vouchers):
                 voucher_applications = VoucherApplication.objects.filter(voucher=voucher)
                 for application in voucher_applications:
                     redemption_user_username = application.user.username
+                    redemption_course_id = application.order.lines.first().product.course_id
 
                     new_row = row.copy()
+
+                    if 'Catalog Query' in new_row:
+                        new_row['Redeemed For Course ID'] = redemption_course_id
+
                     new_row.update({
                         'Status': _('Redeemed'),
                         'Order Number': application.order.number,
@@ -216,6 +243,14 @@ def generate_coupon_report(coupon_vouchers):
                     })
 
                     rows.append(new_row)
+
+    if 'Catalog Query' in rows[0]:
+        field_names.remove('Course ID')
+        field_names.remove('Organization')
+    else:
+        field_names.remove('Catalog Query')
+        field_names.remove('Course Seat Types')
+        field_names.remove('Redeemed For Course ID')
 
     return field_names, rows
 

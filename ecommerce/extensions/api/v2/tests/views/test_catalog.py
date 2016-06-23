@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin
+from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
 from ecommerce.extensions.api.v2.views.catalog import CatalogViewSet
@@ -23,7 +23,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 @httpretty.activate
 @ddt.ddt
-class CatalogViewSetTest(CatalogMixin, CatalogPreviewMockMixin, ApiMockMixin, TestCase):
+class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, TestCase):
     """Test the Catalog and related products APIs."""
 
     catalog_list_path = reverse('api:v2:catalog-list')

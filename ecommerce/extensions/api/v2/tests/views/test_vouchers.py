@@ -18,7 +18,7 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
+from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.coupons.views import get_voucher_and_products_from_code
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import serializers
@@ -36,7 +36,7 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class VoucherViewSetTests(CatalogPreviewMockMixin, CourseCatalogTestMixin, TestCase):
+class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCase):
     """ Tests for the VoucherViewSet view set. """
     path = reverse('api:v2:vouchers-list')
 
@@ -114,7 +114,7 @@ class VoucherViewSetTests(CatalogPreviewMockMixin, CourseCatalogTestMixin, TestC
 @ddt.ddt
 @httpretty.activate
 class VoucherViewOffersEndpointTests(
-        CatalogPreviewMockMixin,
+        CourseCatalogMockMixin,
         CouponMixin,
         CourseCatalogTestMixin,
         LmsApiMockMixin,

@@ -17,7 +17,7 @@ from oscar.test import factories
 from rest_framework import status
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
+from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -300,7 +300,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, ThrottlingMixin,
+class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, ThrottlingMixin,
                                   TestCase):
     """Test the coupon order creation functionality."""
 
