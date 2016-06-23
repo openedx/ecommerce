@@ -112,7 +112,7 @@ define([
                 expect(view.$el.find('.invoiced-amount > .value').text()).toEqual(
                     _s.sprintf('$%s', model.get('price'))
                 );
-                expect(view.$el.find('.max-uses > .value').text()).toEqual(model.get('max_uses'));
+                expect(view.$('.max-uses > .value').text()).toEqual(model.get('max_uses'));
                 expect(view.renderVoucherTable).toHaveBeenCalled();
                 expect(view.$el.find('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
                 expect(view.$el.find('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));

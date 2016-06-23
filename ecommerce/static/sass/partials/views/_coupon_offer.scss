@@ -150,6 +150,8 @@
                     margin: 0 0 5px 0;
                     max-height: 28px;
                     overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
                     font-size: 1.25em;
                     line-height: 1.35;
                     font-weight: 600;
