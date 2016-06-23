@@ -220,7 +220,9 @@ def generate_coupon_report(coupon_vouchers):
     return field_names, rows
 
 
-def _get_or_create_offer(product_range, benefit_type, benefit_value, coupon_id=None, max_uses=None):
+def _get_or_create_offer(
+        product_range, benefit_type, benefit_value, coupon_id=None, max_uses=None, offer_number=None
+):
     """
     Return an offer for a catalog with condition and benefit.
 
@@ -248,9 +250,8 @@ def _get_or_create_offer(product_range, benefit_type, benefit_value, coupon_id=N
     )
 
     offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
-    if max_uses:
-        # Offer needs to be unique for each multi-use coupon.
-        offer_name = "{} (Coupon [{}] - max_uses:{})".format(offer_name, coupon_id, max_uses)
+    if offer_number:
+        offer_name = "{} [{}]".format(offer_name, offer_number)
 
     offer, __ = ConditionalOffer.objects.get_or_create(
         name=offer_name,
@@ -359,6 +360,7 @@ def create_vouchers(
     """
     logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
     vouchers = []
+    offers = []
 
     if _range:
         # Enrollment codes use a custom range.
@@ -374,18 +376,28 @@ def create_vouchers(
             course_seat_types=course_seat_types
         )
 
-    offer = _get_or_create_offer(
-        product_range=product_range,
-        benefit_type=benefit_type,
-        benefit_value=benefit_value,
-        max_uses=max_uses,
-        coupon_id=coupon.id
-    )
-    for __ in range(quantity):
+    # In case of more than 1 multi-usage coupon, each voucher needs to have an individual
+    # offer because the usage is tied to the offer so that a usage on one voucher would
+    # mean all vouchers will have their usage decreased by one, hence each voucher needs
+    # it's own offer to keep track of it's own usages without interfering with others.
+    multi_offer = True if quantity > 1 and max_uses > 1 else False
+    num_of_offers = quantity if multi_offer else 1
+    for num in range(num_of_offers):
+        offer = _get_or_create_offer(
+            product_range=product_range,
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            max_uses=max_uses,
+            coupon_id=coupon.id,
+            offer_number=num
+        )
+        offers.append(offer)
+
+    for i in range(quantity):
         voucher = _create_new_voucher(
             coupon=coupon,
             end_datetime=end_datetime,
-            offer=offer,
+            offer=offers[i] if multi_offer else offers[0],
             start_datetime=start_datetime,
             voucher_type=voucher_type,
             code=code,

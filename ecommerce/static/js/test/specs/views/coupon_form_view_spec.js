@@ -100,15 +100,6 @@ define([
                     expect(visible('[name=benefit_value]')).toBe(false);
                     expect(visible('[name=code]')).toBe(false);
                 });
-
-                it('should show the quantity field only for single-use vouchers', function () {
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(visible('[name=quantity]')).toBe(true);
-                    view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(visible('[name=quantity]')).toBe(false);
-                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(visible('[name=quantity]')).toBe(false);
-                });
             });
 
             describe('discount code', function () {
