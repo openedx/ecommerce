@@ -1,10 +1,9 @@
 import ddt
-
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.extensions.basket.utils import get_certificate_type_display_value, prepare_basket
+from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
@@ -111,18 +110,3 @@ class BasketUtilsTests(TestCase):
         # test referral record is deleted when no cookie set
         with self.assertRaises(Referral.DoesNotExist):
             Referral.objects.get(basket_id=basket.id)
-
-    @ddt.data(
-        ('honor', 'Honor'),
-        ('verified', 'Verified'),
-        ('professional', 'Professional'),
-        ('audit', 'Audit')
-    )
-    @ddt.unpack
-    def test_cert_display(self, cert_type, cert_display):
-        """ Verify certificate display types. """
-        self.assertEqual(get_certificate_type_display_value(cert_type), cert_display)
-
-    def test_cert_display_assertion(self):
-        """ Verify assertion for invalid cert type """
-        self.assertRaises(ValueError, lambda: get_certificate_type_display_value('junk'))

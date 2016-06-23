@@ -222,13 +222,15 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
 class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
+    HTTP_MOVED = 301
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
+        self.course_mode = 'verified'
         self.course, self.seat = self.create_course_and_seat(
-            seat_type='verified',
+            seat_type=self.course_mode,
             id_verification=True,
             price=50,
             partner=self.partner
@@ -238,6 +240,11 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
         self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
 
+    @property
+    def redeem_url_with_params(self):
+        """ Constructs the coupon redemption URL with the proper string query parameters. """
+        return self.redeem_url + '?code={}&sku={}'.format(COUPON_CODE, self.stock_record.partner_sku)
+
     def create_and_test_coupon(self):
         """ Creates enrollment code coupon. """
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE)
@@ -245,8 +252,9 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
     def assert_redemption_page_redirects(self, expected_url, target=200):
         """ Verify redirect from redeem page to expected page. """
-        url = self.redeem_url + '?code={}&sku={}'.format(COUPON_CODE, self.stock_record.partner_sku)
-        response = self.client.get(url)
+        self.request.user = self.user
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        response = self.client.get(self.redeem_url_with_params)
         self.assertRedirects(response, expected_url, status_code=302, target_status_code=target)
 
     def test_login_required(self):
@@ -295,8 +303,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to LMS when an enrollment code is provided. """
         self.create_and_test_coupon()
-        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=301)
-        self.assert_redemption_page_redirects(self.student_dashboard_url, target=301)
+        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=self.HTTP_MOVED)
+        self.assert_redemption_page_redirects(self.student_dashboard_url, target=self.HTTP_MOVED)
 
     @httpretty.activate
     def test_multiple_vouchers(self):
@@ -304,8 +312,17 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.create_and_test_coupon()
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=COUPON_CODE))
-        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=301)
-        self.assert_redemption_page_redirects(self.student_dashboard_url, target=301)
+        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=self.HTTP_MOVED)
+        self.assert_redemption_page_redirects(self.student_dashboard_url, target=self.HTTP_MOVED)
+
+    @httpretty.activate
+    def test_already_enrolled_rejection(self):
+        """ Verify a user is rejected from redeeming a coupon for a course she's already enrolled in."""
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
+        self.create_and_test_coupon()
+        response = self.client.get(self.redeem_url_with_params)
+        msg = 'You are already enrolled in the course.'
+        self.assertEqual(response.context['error'], _(msg))
 
 
 class EnrollmentCodeCsvViewTests(TestCase):

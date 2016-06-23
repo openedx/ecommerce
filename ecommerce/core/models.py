@@ -13,7 +13,10 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberBaseException
 
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
 
@@ -259,6 +262,45 @@ class User(AbstractUser):
 
     def get_full_name(self):
         return self.full_name or super(User, self).get_full_name()
+
+    def is_user_already_enrolled(self, request, seat):
+        """
+        Check if a user is already enrolled in the course.
+        Calls the LMS enrollment API endpoint and sends the course ID and username query parameters
+        and returns the status of the user's enrollment in the course.
+
+        Arguments:
+            request (WSGIRequest): the request from which the LMS enrollment API endpoint is created.
+            seat (Product): the seat for which the check is done if the user is enrolled in.
+
+        Returns:
+            A boolean value if the user is enrolled in the course or not.
+
+        Raises:
+            ConnectionError, SlumberBaseException and Timeout for failures in establishing a
+            connection with the LMS enrollment API endpoint.
+        """
+        course_key = seat.attr.course_key
+        try:
+            api = EdxRestApiClient(
+                request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
+                oauth_access_token=self.access_token,
+                append_slash=False
+            )
+            status = api.enrollment(','.join([self.username, course_key])).get()
+        except (ConnectionError, SlumberBaseException, Timeout) as ex:
+            log.exception(
+                'Failed to retrieve enrollment details for [%s] in course [%s], Because of [%s]',
+                self.username,
+                course_key,
+                ex,
+            )
+            raise ex
+
+        seat_type = mode_for_seat(seat)
+        if status.get('mode') == seat_type and status.get('is_active'):
+            return True
+        return False
 
 
 class Client(User):

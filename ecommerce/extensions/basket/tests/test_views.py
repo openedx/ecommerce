@@ -86,20 +86,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         json_body = json.dumps({'mode': mode, 'is_active': False})
         httpretty.register_uri(httpretty.GET, url, body=json_body, content_type='application/json')
 
-    def mock_enrollment_api_error(self, error):
-        """ Mock Enrollment api call which raises error when called """
-        self.assertTrue(httpretty.is_enabled())
-
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
-            raise error
-
-        url = '{host}/{username},{course_id}'.format(
-            host=get_lms_enrollment_api_url(),
-            username=self.user.username,
-            course_id=self.course.id
-        )
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
-
     def test_login_required(self):
         """ The view should redirect to login page if the user is not logged in. """
         self.client.logout()
@@ -209,7 +195,8 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockM
         """
         Verify the view returns HTTP status 400 if the Enrollment API is not available.
         """
-        self.mock_enrollment_api_error(error)
+        self.request.user = self.user
+        self.mock_enrollment_api_error(self.request, self.user, self.course.id, error)
         url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)

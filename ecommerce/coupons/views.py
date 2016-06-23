@@ -177,6 +177,9 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
+        if request.user.is_user_already_enrolled(request, product):
+            return render(request, template_name, {'error': _('You are already enrolled in the course.')})
+
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == AC.FREE:
             self.place_free_order(basket)

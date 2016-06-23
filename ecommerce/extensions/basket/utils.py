@@ -53,20 +53,6 @@ def prepare_basket(request, product, voucher=None):
     return basket
 
 
-def get_certificate_type_display_value(certificate_type):
-    display_values = {
-        'audit': _('Audit'),
-        'verified': _('Verified'),
-        'professional': _('Professional'),
-        'honor': _('Honor')
-    }
-
-    if certificate_type not in display_values:
-        raise ValueError('Certificate Type [%s] not found.', certificate_type)
-
-    return display_values[certificate_type]
-
-
 def get_basket_switch_data(product):
     product_class_name = product.get_product_class().name
 
