@@ -107,6 +107,15 @@ define([
                 };
             },
 
+            formatSeatTypes: function() {
+                var courseSeatTypes = this.model.get('course_seat_types');
+                if(courseSeatTypes.length === 1){
+                    return courseSeatTypes[0];
+                } else {
+                    return courseSeatTypes.join(', ');
+                }
+            },
+
             render: function () {
                 var html,
                     voucher = this.model.get('vouchers')[0],
@@ -126,7 +135,8 @@ define([
                     startDateTime: this.formatDateTime(voucher.start_datetime),
                     usage: this.usageLimitation(voucher),
                     category: category,
-                    note: note
+                    note: note,
+                    courseSeatType: this.formatSeatTypes()
                 };
 
                 $.extend(template_data, invoice_data);
