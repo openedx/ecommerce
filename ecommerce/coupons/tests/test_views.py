@@ -230,6 +230,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewM
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory()
         self.seat = self.course.create_or_update_seat('verified', True, 50, self.partner)
+        self.stock_record = StockRecord.objects.get(product=self.seat)
         self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
         self.catalog_query = 'key:*'
 
@@ -287,10 +288,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewM
         self.mock_dynamic_catalog_course_runs_api(query=self.catalog_query, course_run=self.course)
         self.mock_dynamic_catalog_contains_api(query=self.catalog_query, course_run_ids=[self.course.id])
         self.create_coupon(
-            catalog_query=self.catalog_query,
-            course_seat_types='verified',
-            code=COUPON_CODE,
-            benefit_value=5
+            catalog_query=self.catalog_query, course_seat_types='verified', code=COUPON_CODE, benefit_value=5
         )
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
