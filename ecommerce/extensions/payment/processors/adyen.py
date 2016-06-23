@@ -112,7 +112,7 @@ class Adyen(BasePaymentProcessor):
         adyen_response = response.json()
         adyen_response['eventCode'] = 'AUTHORISATION'
 
-        return response.status_code, response.json()
+        return adyen_response
 
     def handle_processor_response(self, response, basket=None):
         """
@@ -138,7 +138,7 @@ class Adyen(BasePaymentProcessor):
         try:
             event_code = response['eventCode']
             psp_reference = response['pspReference']
-            return getattr(self, '_handle_{event}'.format(event_code.lower()))(psp_reference, response, basket)
+            return getattr(self, '_handle_{event}'.format(event=event_code.lower()))(psp_reference, response, basket)
         except KeyError:
             raise MissingAdyenEventCodeException
         except AttributeError:

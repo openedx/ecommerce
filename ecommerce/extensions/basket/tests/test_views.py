@@ -357,7 +357,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         self.assertEqual(line_data['seat_type'], _(seat.attr.certificate_type.capitalize()))
         self.assertEqual(line_data['course_name'], self.course.name)
         self.assertFalse(line_data['enrollment_code'])
-        self.assertIn(DummyProcessor.NAME, response.context['payment_processors'].keys())
+        self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
 
     def test_no_basket_response(self):
         """ Verify there are no form and line data in the context for a non-existing basket. """

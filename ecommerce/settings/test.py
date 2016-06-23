@@ -96,6 +96,8 @@ PAYMENT_PROCESSOR_CONFIG = {
             'merchant_account_code': 'fake-merchant-id',
             'cse_js_url': 'https://replace-me/',
             'payment_api_url': 'https://replace-me/',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
         },
     },
     'other': {
@@ -121,11 +123,13 @@ PAYMENT_PROCESSOR_CONFIG = {
         },
         'invoice': {},
         'adyen': {
-            'web_service_username': 'fake-client-id',
-            'web_service_password': 'fake-client-secret',
-            'merchant_account_code': 'fake-merchant-id',
+            'web_service_username': 'other-fake-client-id',
+            'web_service_password': 'other-fake-client-secret',
+            'merchant_account_code': 'other-fake-merchant-id',
             'cse_js_url': 'https://replace-me/',
             'payment_api_url': 'https://replace-me/',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
         },
     }
 }
