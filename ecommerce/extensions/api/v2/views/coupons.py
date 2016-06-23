@@ -43,6 +43,21 @@ Voucher = get_model('voucher', 'Voucher')
 CATALOG_QUERY = 'catalog_query'
 CLIENT = 'client'
 COURSE_SEAT_TYPES = 'course_seat_types'
+INVOICE_DISCOUNT_TYPE = 'invoice_discount_type'
+INVOICE_DISCOUNT_VALUE = 'invoice_discount_value'
+INVOICE_NUMBER = 'invoice_number'
+INVOICE_PAYMENT_DATE = 'invoice_payment_date'
+INVOICE_TYPE = 'invoice_type'
+TAX_DEDUCTED_SOURCE = 'tax_deducted_source'
+
+UPDATEABLE_INVOICE_FIELDS = [
+    INVOICE_DISCOUNT_TYPE,
+    INVOICE_DISCOUNT_VALUE,
+    INVOICE_NUMBER,
+    INVOICE_PAYMENT_DATE,
+    INVOICE_TYPE,
+    TAX_DEDUCTED_SOURCE,
+]
 
 UPDATABLE_RANGE_FIELDS = [
     CATALOG_QUERY,
@@ -64,14 +79,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
     def retrieve_invoice_data(self, request_data):
         """ Retrieve the invoice information from the request data. """
-        return {
-            'number': request_data.get('invoice_number'),
-            'type': request_data.get('invoice_type'),
-            'payment_date': request_data.get('invoice_payment_date'),
-            'discount_type': request_data.get('invoice_discount_type'),
-            'discount_value': request_data.get('invoice_discount_value'),
-            'tax_deducted_source': request_data.get('tax_deducted_source'),
-        }
+        invoice_data = {}
+
+        for field in UPDATEABLE_INVOICE_FIELDS:
+            self.create_update_data_dict(
+                request_data=request_data,
+                request_data_key=field,
+                update_dict=invoice_data,
+                update_dict_key=field.replace('invoice_', '')
+            )
+
+        return invoice_data
 
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
@@ -373,8 +391,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             update_dict (dict): Dictionary containing the coupon update data
             update_dict_key (str): Update data dictionary key
         """
-        value = request_data.get(request_data_key, '')
-        if value:
+        if request_data_key in request_data:
+            value = request_data.get(request_data_key)
             update_dict[update_dict_key] = prepare_course_seat_types(value) \
                 if update_dict_key == COURSE_SEAT_TYPES else value
 
@@ -442,9 +460,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             data (dict): The request's data from which the invoice data is retrieved
                          and used for the updated.
         """
-        invoice = Invoice.objects.filter(order__basket__lines__product=coupon)
-        update_data = self.retrieve_invoice_data(data)
-        invoice.update(**update_data)
+        invoice_data = self.retrieve_invoice_data(data)
+
+        if invoice_data:
+            Invoice.objects.filter(order__basket__lines__product=coupon).update(**invoice_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:

@@ -145,6 +145,21 @@ define([
                     ajaxData = JSON.parse(args[0].data);
                     expect(ajaxData.quantity).toEqual(1);
                 });
+
+                it('should format start and end date if they are patch updated', function () {
+                    var model = Coupon.findOrCreate(discountCodeData, {parse: true});
+                    spyOn(moment, 'utc');
+                    model.save(
+                        {
+                            start_date: '2015-11-11T00:00:00Z',
+                            end_date: '2016-11-11T00:00:00Z'
+                        },
+                        {patch: true}
+                    );
+
+                    expect(moment.utc).toHaveBeenCalledWith('2015-11-11T00:00:00Z');
+                    expect(moment.utc).toHaveBeenCalledWith('2016-11-11T00:00:00Z');
+                });
             });
 
         });

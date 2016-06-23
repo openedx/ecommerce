@@ -139,7 +139,6 @@ define([
                 errorObj = { responseJSON: { error: 'An error occurred while saving the data.' }};
                 testErrorResponse();
             });
-
         });
     }
 );

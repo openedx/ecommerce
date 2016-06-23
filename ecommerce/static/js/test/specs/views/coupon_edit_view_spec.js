@@ -73,7 +73,7 @@ define([
                     expect(view.$el.find('[name=code]').val()).toEqual(model.get('code'));
                 });
             });
- 
+
             describe('Coupon with invoice data', function() {
                 beforeEach(function() {
                     model = Coupon.findOrCreate(invoice_coupon_data, {parse: true});
@@ -95,6 +95,17 @@ define([
                     expect(view.$el.find('[name=tax_deduction]:checked').val()).toEqual(tds);
                     expect(view.$el.find('[name=tax_deducted_source_value]').val())
                         .toEqual(model.get('tax_deducted_source'));
+                });
+
+                it('should patch save the model when form is in editing mode and has editable attributes', function () {
+                    var formView = view.formView;
+                    spyOn(formView.model, 'save');
+                    spyOn(formView.model, 'isValid').and.returnValue(true);
+
+                    expect(formView.modelServerState).toEqual(model.pick(formView.editableAttributes));
+                    formView.model.set('title', 'Test Title');
+                    formView.submit($.Event('click'));
+                    expect(model.save).toHaveBeenCalled();
                 });
             });
         });
