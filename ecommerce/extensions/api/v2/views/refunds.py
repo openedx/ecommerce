@@ -10,6 +10,7 @@ from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
 from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
+from ecommerce.extensions.refund.status import REFUND
 
 
 Refund = get_model('refund', 'Refund')
@@ -101,6 +102,9 @@ class RefundProcessView(generics.UpdateAPIView):
             result = refund.approve(revoke_fulfillment=revoke_fulfillment)
         elif action == DENY:
             result = refund.deny()
+
+        if result is None and refund.status in [REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION]:
+            result = True
 
         http_status = status.HTTP_200_OK if result else status.HTTP_500_INTERNAL_SERVER_ERROR
         serializer = self.get_serializer(refund)
