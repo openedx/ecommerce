@@ -219,6 +219,23 @@ define([
                     view.updateCourseSeatTypes();
                     expect(view.dynamic_catalog_view.seat_types).toEqual(model.get('course_seat_types'));
                 });
+
+                it('should remove dynamic catalog values from fields when toggled to single course', function() {
+                    var catalog_query = '*:*',
+                        course_seat_types = ['verified'];
+
+                    model.set('catalog_query', catalog_query);
+                    model.set('course_seat_types', course_seat_types);
+                    view.updateCatalogQuery();
+                    view.updateCourseSeatTypes();
+                    expect(view.dynamic_catalog_view.query).toEqual(catalog_query);
+                    expect(view.dynamic_catalog_view.seat_types).toEqual(course_seat_types);
+
+                    view.$('#single-course').prop('checked', true);
+                    view.toggleCatalogTypeField();
+                    expect(view.dynamic_catalog_view.query).toEqual(undefined);
+                    expect(view.dynamic_catalog_view.seat_types).toEqual([ ]);
+                });
             });
         });
     }

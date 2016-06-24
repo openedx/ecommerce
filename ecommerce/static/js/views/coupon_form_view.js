@@ -338,8 +338,10 @@ define([
                 }
             },
 
-            toggleCatalogTypeField: function () {
+            toggleCatalogTypeField: function() {
                 if (this.model.get('catalog_type') === 'Single course') {
+                    this.model.set('course_seat_types', []);
+                    this.model.unset('catalog_query');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
@@ -349,6 +351,8 @@ define([
                     this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
+                    this.model.unset('course_id');
+                    this.model.unset('seat_type');
                 }
             },
 
