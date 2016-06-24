@@ -72,7 +72,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         query = voucher.offers.first().benefit.range.catalog_query
-        cache_key = 'catalog_query_{}'.format(query)
+        if query:
+            cache_key = 'catalog_query_{}'.format(query)
+        else:
+            cache_key = 'voucher_offers_{}'.format(voucher.id)
+
         cache_hash = hashlib.md5(cache_key).hexdigest()
         offers = cache.get(cache_hash)
         if not offers:  # pragma: no cover

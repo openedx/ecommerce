@@ -145,6 +145,22 @@ class VoucherViewOffersEndpointTests(
         self.assertEqual(response.status_code, 200)
 
     @mock_course_catalog_api_client
+    def test_voucher_offers_listing_catalog_query(self):
+        """ Verify the endpoint returns offers data for single product range. """
+        course, seat = self.create_course_and_seat()
+        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        new_range.add_product(seat)
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+        voucher, __ = get_voucher_and_products_from_code(voucher.code)
+        request = self.prepare_offers_listing_request(voucher.code)
+        response = self.endpointView(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response.data), 0)
+        # More assertions here
+
+    @mock_course_catalog_api_client
     def test_get_offers_for_single_course_voucher(self):
         """ Verify that the course offers data is returned for a single course voucher. """
         course, seat = self.create_course_and_seat()
