@@ -68,6 +68,8 @@ class Refund(StatusMixin, TimeStampedModel):
         choices=[
             (REFUND.OPEN, REFUND.OPEN),
             (REFUND.DENIED, REFUND.DENIED),
+            (REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITH_REVOCATION),
+            (REFUND.PENDING_WITHOUT_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION),
             (REFUND.PAYMENT_REFUND_ERROR, REFUND.PAYMENT_REFUND_ERROR),
             (REFUND.PAYMENT_REFUNDED, REFUND.PAYMENT_REFUNDED),
             (REFUND.REVOCATION_ERROR, REFUND.REVOCATION_ERROR),
@@ -159,15 +161,18 @@ class Refund(StatusMixin, TimeStampedModel):
             processor = get_processor_class_by_name(source.source_type.name)()
             is_complete = processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
 
+            audit_log_name = 'credit_issued'
             if is_complete:
                 self.set_status(REFUND.PAYMENT_REFUNDED)
             elif revoke_fulfillment:
+                audit_log_name = 'credit_issue_pending_with_revocation'
                 self.set_status(REFUND.PENDING_WITH_REVOCATION)
             else:
+                audit_log_name = 'credit_issue_pending_without_revocation'
                 self.set_status(REFUND.PENDING_WITHOUT_REVOCATION)
 
             audit_log(
-                'credit_issued',
+                audit_log_name,
                 amount=self.total_credit_excl_tax,
                 currency=self.currency,
                 processor_name=processor.NAME,
