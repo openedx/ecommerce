@@ -298,7 +298,7 @@ class User(AbstractUser):
             raise ex
 
         seat_type = mode_for_seat(seat)
-        if status.get('mode') == seat_type and status.get('is_active'):
+        if status and status.get('mode') == seat_type and status.get('is_active'):
             return True
         return False
 
