@@ -245,7 +245,7 @@ class Adyen(BasePaymentProcessor):
                     transaction_id=adyen_response['pspReference'],
                     basket=order.basket
                 )
-                if adyen_response['response'] != 'cancelOrRefund-received':
+                if adyen_response['response'] != '[cancelOrRefund-received]':
                     raise GatewayError
             else:
                 raise GatewayError
