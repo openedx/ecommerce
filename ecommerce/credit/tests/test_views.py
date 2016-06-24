@@ -233,13 +233,11 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         }),
         (('ecommerce.extensions.payment.processors.paypal.Paypal',), {
             'payment_processors': {
-                'adyen': 'Checkout with adyen',
                 'cybersource': 'Checkout',
             }
         }),
         ((), {
             'payment_processors': {
-                'adyen': 'Checkout with adyen',
                 'cybersource': 'Checkout',
                 'paypal': 'Checkout with PayPal'
             }
