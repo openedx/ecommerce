@@ -131,11 +131,17 @@ class RedeemVoucherPage(EcommerceAppPage):
     @wait_for_js
     def proceed_to_enrollment(self):
         """ Enroll user to a course and redeem voucher code in the process """
+        WebDriverWait(self.browser, 10).until(
+            EC.presence_of_element_located((By.ID, 'RedeemEnrollment'))
+        )
         self.browser.find_element_by_id('RedeemEnrollment').click()
         self.wait_for_ajax()
 
     @wait_for_js
     def proceed_to_checkout(self):
         """ Purchase a course and redeem voucher code in the process """
+        WebDriverWait(self.browser, 10).until(
+            EC.presence_of_element_located((By.ID, 'PurchaseCertificate'))
+        )
         self.browser.find_element_by_id('PurchaseCertificate').click()
         self.wait_for_ajax()
