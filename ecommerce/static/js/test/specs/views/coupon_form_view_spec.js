@@ -152,16 +152,14 @@ define([
                     expect(visible('[name=max_uses]')).toBe(true);
                 });
 
-                it('should hide quantity field when code entered and single-use voucher selected', function () {
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                it('should hide quantity field when code entered', function () {
                     view.$el.find('[name=code]').val('E34T4GR342').trigger('input');
                     expect(visible('[name=quantity]')).toBe(false);
                     view.$el.find('[name=code]').val('').trigger('input');
                     expect(visible('[name=quantity]')).toBe(true);
                 });
 
-                it('should hide code field when quantity not 1 and single-use voucher selected', function () {
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                it('should hide code field when quantity not 1', function () {
                     view.$el.find('[name=quantity]').val(21).trigger('change');
                     expect(visible('[name=code]')).toBe(false);
                     view.$el.find('[name=quantity]').val(1).trigger('change');
