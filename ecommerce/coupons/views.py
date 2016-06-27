@@ -90,10 +90,10 @@ def voucher_is_valid(voucher, products, request):
             voucher_msg = msg.replace('voucher', 'coupon')
             return False, voucher_msg
 
-    for product in products:
-        purchase_info = request.strategy.fetch_for_product(product)
+    if len(products) == 1:
+        purchase_info = request.strategy.fetch_for_product(products[0])
         if not purchase_info.availability.is_available_to_buy:
-            return False, _('Product [{product}] not available for purchase.'.format(product=product))
+            return False, _('Product [{product}] not available for purchase.'.format(product=products[0]))
 
     # If the voucher's number of applications exceeds it's limit.
     offer = voucher.offers.first()

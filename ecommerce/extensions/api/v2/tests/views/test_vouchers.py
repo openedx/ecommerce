@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 
+import datetime
 import json
 import mock
 
 import ddt
 import httpretty
+import pytz
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from opaque_keys.edx.keys import CourseKey
@@ -22,6 +24,7 @@ from ecommerce.courses.models import Course
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import Catalog, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -33,7 +36,7 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class VoucherViewSetTests(TestCase):
+class VoucherViewSetTests(CatalogPreviewMockMixin, CourseCatalogTestMixin, TestCase):
     """ Tests for the VoucherViewSet view set. """
     path = reverse('api:v2:vouchers-list')
 
@@ -63,6 +66,50 @@ class VoucherViewSetTests(TestCase):
         self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['results'][0]['code'], COUPON_CODE)
 
+    # NOTE (VK): This unit test is added here because it results in a segmentation fault if
+    # added to the test class below.
+    @httpretty.activate
+    @mock_course_catalog_api_client
+    def test_omitting_unavailable_seats(self):
+        """ Verify an unavailable seat is omitted from offer page results. """
+        course1, seat1 = self.create_course_and_seat()
+        course2, seat2 = self.create_course_and_seat()
+        course_run_info = {
+            'count': 2,
+            'results': [{
+                'key': course1.id,
+                'title': course1.name,
+                'start': '2016-05-01T00:00:00Z',
+                'image': {
+                    'src': 'path/to/the/course/image'
+                }
+            }, {
+                'key': course2.id,
+                'title': course2.name,
+                'start': '2016-05-01T00:00:00Z',
+                'image': {
+                    'src': 'path/to/the/course/image'
+                }
+            }]
+        }
+
+        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run_info=course_run_info)
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        new_range.add_product(seat1)
+        new_range.add_product(seat2)
+        voucher, __ = prepare_voucher(_range=new_range)
+        voucher, products = get_voucher_and_products_from_code(voucher.code)
+        factory = APIRequestFactory()
+        request = factory.get('/?code={}&page_size=6'.format(voucher.code))
+        request.site = self.site
+        request.strategy = DefaultStrategy()
+        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+        self.assertEqual(len(offers), 2)
+
+        products[1].expires = pytz.utc.localize(datetime.datetime.min)
+        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)
+        self.assertEqual(len(offers), 1)
+
 
 @ddt.ddt
 @httpretty.activate
@@ -86,6 +133,7 @@ class VoucherViewOffersEndpointTests(
         factory = APIRequestFactory()
         request = factory.get('/?code={}&page_size=6'.format(code))
         request.site = self.site
+        request.strategy = DefaultStrategy()
         return request
 
     @ddt.data(('COUPONCODE',), ('NOT_FOUND_CODE',))

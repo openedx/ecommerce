@@ -19,22 +19,23 @@ class CatalogPreviewMockMixin(object):
     def setUp(self):
         super(CatalogPreviewMockMixin, self).setUp()
 
-    def mock_dynamic_catalog_course_runs_api(self, course_run=None, query=None):
+    def mock_dynamic_catalog_course_runs_api(self, course_run=None, query=None, course_run_info=None):
         """ Helper function to register a dynamic course catalog API endpoint for the course run information. """
-        course_run_info = {
-            'count': 1,
-            'results': [{
-                'key': course_run.id,
-                'title': course_run.name,
-                'start': '2016-05-01T00:00:00Z',
-                'image': {
-                    'src': 'path/to/the/course/image'
-                }
-            }] if course_run else [{
-                'key': 'test',
-                'title': 'Test course',
-            }],
-        }
+        if not course_run_info:
+            course_run_info = {
+                'count': 1,
+                'results': [{
+                    'key': course_run.id,
+                    'title': course_run.name,
+                    'start': '2016-05-01T00:00:00Z',
+                    'image': {
+                        'src': 'path/to/the/course/image'
+                    }
+                }] if course_run else [{
+                    'key': 'test',
+                    'title': 'Test course',
+                }],
+            }
         course_run_info_json = json.dumps(course_run_info)
         course_run_url = '{}course_runs/?q={}'.format(
             settings.COURSE_CATALOG_API_URL,

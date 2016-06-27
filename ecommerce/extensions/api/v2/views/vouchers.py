@@ -110,7 +110,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         benefit = voucher.offers.first().benefit
         catalog_query = benefit.range.catalog_query
         offers = []
-
         if catalog_query:
             query_results = request.site.siteconfiguration.course_catalog_api_client.course_runs.get(
                 q=catalog_query,
@@ -124,6 +123,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
 
             for product in products:
+                # Omit unavailable seats from the offer results so that one seat does not cause an
+                # error message for every seat in the query result.
+                if not request.strategy.fetch_for_product(product).availability.is_available_to_buy:
+                    logger.info('%s is unavailable to buy. Omitting it from the results.', product)
+                    continue
                 course_id = product.course_id
                 course_catalog_data = next((result for result in query_results if result['key'] == course_id), None)
 
