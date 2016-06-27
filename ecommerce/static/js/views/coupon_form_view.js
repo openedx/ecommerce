@@ -381,30 +381,27 @@ define([
             },
 
             /**
-             * When Discount code selected, code entered and Single use selected hide quantity field
-             * Show field when code empty and Single use selected
+             * When Discount code selected and code entered hide quantity field.
+             * Show field when code empty.
              */
             toggleCodeField: function () {
-                var voucherType = this.model.get('voucher_type');
                 if (this.model.get('coupon_type') === 'Discount code') {
-                    if (this.model.get('code') !== '' && voucherType === 'Single use') {
-                        this.formGroup('[name=quantity]').addClass(this.hiddenClass);
-                    } else if (voucherType === 'Single use') {
+                    if (this.model.get('code') !== '') {
+                        this.hideField('[name=quantity]', 1);
+                    } else {
                         this.formGroup('[name=quantity]').removeClass(this.hiddenClass);
                     }
                 }
             },
 
             /**
-             * When Discount code selected, Single use selected and
-             * quantity greater than 1 hide code field
+             * When Discount code selected and quantity greater than 1 hide code field.
              */
             toggleQuantityField: function () {
-                var voucherType = this.model.get('voucher_type');
                 if (this.model.get('coupon_type') === 'Discount code') {
-                    if (parseInt(this.model.get('quantity')) !== 1 && voucherType === 'Single use') {
-                        this.formGroup('[name=code]').addClass(this.hiddenClass);
-                    } else if (voucherType === 'Single use') {
+                    if (parseInt(this.model.get('quantity')) !== 1) {
+                        this.hideField('[name=code]', '');
+                    } else {
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);
                     }
                 }
