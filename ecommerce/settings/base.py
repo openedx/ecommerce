@@ -220,6 +220,7 @@ MIDDLEWARE_CLASSES = (
     'simple_history.middleware.HistoryRequestMiddleware',
     'threadlocals.middleware.ThreadLocalMiddleware',
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
+    'ecommerce.theming.middleware.ThemePreviewMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
