@@ -450,7 +450,7 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon):
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None):
     """
     Update voucher offer with new benefit value.
 
@@ -466,5 +466,6 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon):
         product_range=offer.benefit.range,
         benefit_value=benefit_value,
         benefit_type=benefit_type,
-        coupon_id=coupon.id
+        coupon_id=coupon.id,
+        max_uses=max_uses
     )

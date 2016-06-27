@@ -394,7 +394,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             offer=voucher_offer,
             benefit_value=benefit_value,
             benefit_type=voucher_offer.benefit.type,
-            coupon=coupon
+            coupon=coupon,
+            max_uses=voucher_offer.max_global_applications
         )
         for voucher in vouchers.all():
             voucher.offers.clear()
