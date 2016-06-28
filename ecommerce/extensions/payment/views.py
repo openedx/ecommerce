@@ -51,25 +51,28 @@ class AdyenNotificationView(EdxOrderPlacementMixin, View):
         return super(AdyenNotificationView, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
-        notification = json.loads(request.body)
-        psp_reference = notification['pspReference']
-        basket = None
+        request_body = json.loads(request.body)
+        notification_items = request_body['notificationItems']
+        for notification_item in notification_items:
+            notification = notification_item['NotificationRequestItem']
+            psp_reference = notification['pspReference']
+            basket = None
 
-        try:
-            source = Source.objects.get(psp_reference)
-            basket = source.order.basket
-        except Source.DoesNotExist:
-            return HttpResponse(status=500)
-        except MultipleObjectsReturned:
-            return HttpResponse(status=500)
-        finally:
-            self.payment_processor.record_processor_response(
-                notification,
-                transaction_id=psp_reference,
-                basket=basket
-            )
+            try:
+                source = Source.objects.get(reference=psp_reference)
+                basket = source.order.basket
+            except Source.DoesNotExist:
+                return HttpResponse(status=500)
+            except MultipleObjectsReturned:
+                return HttpResponse(status=500)
+            finally:
+                self.payment_processor.record_processor_response(
+                    notification,
+                    transaction_id=psp_reference,
+                    basket=basket
+                )
 
-        self.payment_processor.handle_processor_response(notification, basket)
+            self.payment_processor.handle_processor_response(notification, basket)
 
         # Adyen expects this response
         return HttpResponse('[accepted]')

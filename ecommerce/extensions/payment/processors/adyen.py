@@ -195,7 +195,7 @@ class Adyen(BasePaymentProcessor):
         return source, event
 
     def _handle_cancel_or_refund(self, psp_reference, response, basket):
-        order = basket.order
+        order = basket.order_set.first()
         # TODO Update this if we ever support multiple payment sources for a single order.
         source = order.sources.first()
         refund = order.refunds.get(status__in=[REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION])
