@@ -128,6 +128,8 @@ define([
                 expect(view.$el.find('.tax-deducted-source-value > .value').text()).toEqual(
                     view.taxDeductedSource(model.get('tax_deducted_source'))
                 );
+                expect(view.$('.seat-types > .value').text()).toEqual('');
+                expect(view.$('.catalog-query > .value').text()).toEqual('');
             });
 
             it('should not display invoice discount type on render.', function() {
@@ -138,6 +140,17 @@ define([
                 view.render();
                 expect(view.$el.find('.invoice-discount-value > .value').text()).toEqual('');
                 expect(view.$el.find('.invoice-discount-type > .value').text()).toEqual('');
+            });
+
+            it('should format seat types.', function() {
+                view.model.unset('course_seat_types');
+                expect(view.formatSeatTypes()).toEqual(null);
+
+                view.model.set({'course_seat_types': ['verified']});
+                expect(view.formatSeatTypes()).toEqual('verified');
+
+                view.model.set({'course_seat_types': ['verified', 'professional']});
+                expect(view.formatSeatTypes()).toEqual('verified, professional');
             });
 
             it('should render course data', function () {

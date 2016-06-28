@@ -109,10 +109,14 @@ define([
 
             formatSeatTypes: function() {
                 var courseSeatTypes = this.model.get('course_seat_types');
-                if(courseSeatTypes.length === 1){
-                    return courseSeatTypes[0];
+                if (courseSeatTypes) {
+                    if(courseSeatTypes.length === 1){
+                        return courseSeatTypes[0];
+                    } else {
+                        return courseSeatTypes.join(', ');
+                    }
                 } else {
-                    return courseSeatTypes.join(', ');
+                    return null;
                 }
             },
 
