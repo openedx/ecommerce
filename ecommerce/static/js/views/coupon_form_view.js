@@ -214,8 +214,8 @@ define([
                 // catch value after autocomplete
                 'blur [name=course_id]': 'fillFromCourse',
                 'change [name=seat_type]': 'changeSeatType',
-                'change [name=benefit_type]': 'changeUpperLimitForBenefitValue',
-                'change [name=invoice_discount_type]': 'changeUpperLimitForInvoiceDiscountValue',
+                'change [name=benefit_type]': 'changeLimitForBenefitValue',
+                'change [name=invoice_discount_type]': 'changeLimitForInvoiceDiscountValue',
                 'change [name=invoice_type]': 'toggleInvoiceFields',
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField'
             },
@@ -241,19 +241,23 @@ define([
                 this._super();
             },
 
-            changeUpperLimitForBenefitValue: function () {
+            setLimitToElement: function(element, max_value, min_value) {
+                element.attr({ 'max': max_value, 'min': min_value });
+            },
+
+            changeLimitForBenefitValue: function () {
                 var is_benefit_percentage = this.$('[name=benefit_type]:checked').val() === 'Percentage',
                     max_value = is_benefit_percentage ? '100' : '';
 
-                this.$('[name=benefit_value]').attr('max', max_value);
+                this.setLimitToElement(this.$('[name=benefit_value]'), max_value, 1);
             },
 
-            changeUpperLimitForInvoiceDiscountValue: function () {
+            changeLimitForInvoiceDiscountValue: function () {
                 var is_invoice_discount_percentage = this.$(
                     '[name=invoice_discount_type]:checked').val() === 'Percentage',
                     max_value = is_invoice_discount_percentage ? '100' : '';
 
-                this.$('[name=invoice_discount_value]').attr('max', max_value);
+                this.setLimitToElement(this.$('[name=invoice_discount_value]'), max_value, 1);
             },
 
             toggleDollarPercentIcon: function (val) {
@@ -284,6 +288,7 @@ define([
                     this.emptyCodeField();
                 }
                 if (this.model.get('coupon_type') === 'Discount code') {
+                    this.changeLimitForBenefitValue();
                     this.formGroup('[name=benefit_value]').removeClass(this.hiddenClass);
                     if (parseInt(this.model.get('quantity')) === 1) {
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);
@@ -292,6 +297,7 @@ define([
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);
                     }
                 } else {
+                    this.setLimitToElement(this.$('[name=benefit_value]'), '', '');
                     this.formGroup('[name=benefit_value]').addClass(this.hiddenClass);
                     this.formGroup('[name=code]').addClass(this.hiddenClass);
                 }
@@ -527,11 +533,12 @@ define([
                         'invoice_type': 'Prepaid',
                         'tax_deduction': 'No',
                     });
-                    this.$('[name=invoice_discount_value]').attr('max', 100);
-                    this.$('[name=benefit_value]').attr('max', 100);
                     this.$('button[type=submit]').html(gettext('Create Coupon'));
                     this.$('.catalog-query').removeClass('editing');
                 }
+
+                this.setLimitToElement(this.$('[name=invoice_discount_value]'), 100, 1);
+                this.setLimitToElement(this.$('[name=benefit_value]'), 100, 1);
 
                 // Add date picker
                 Utils.addDatePicker(this);

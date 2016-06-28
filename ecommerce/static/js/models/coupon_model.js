@@ -69,6 +69,12 @@ define([
                         return this.get('coupon_type') === 'Discount code';
                     }
                 },
+                invoice_discount_value: {
+                    pattern: 'number',
+                    required: function () {
+                        return this.get('invoice_type') === 'Postpaid';
+                    }
+                },
                 code: {
                     required: false,
                     rangeLength: [8, 16],

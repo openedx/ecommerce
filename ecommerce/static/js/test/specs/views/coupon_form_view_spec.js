@@ -124,18 +124,28 @@ define([
                     expect(view.$el.find('.benefit-addon').html()).toBe('$');
                 });
 
-                it('should toggle upper limit on the benefit value input', function () {
-                    view.$el.find('[name=code_type]').val('enrollment').trigger('change');
-                    expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('100');
-                    view.$el.find('[name=benefit_type]').val('Absolute').trigger('change');
-                    expect(view.$el.find('[name="benefit_value"]').attr('max')).toBe('');
+                it('should toggle limit on the benefit value input', function () {
+                    view.$('[name=code_type]').val('enrollment').trigger('change');
+                    expect(view.$('[name="benefit_value"]').attr('max')).toBe('');
+                    expect(view.$('[name="benefit_value"]').attr('min')).toBe('');
+
+                    view.$('[name=code_type]').val('Discount code').trigger('change');
+                    expect(view.$('[name="benefit_value"]').attr('max')).toBe('100');
+                    expect(view.$('[name="benefit_value"]').attr('min')).toBe('1');
+
+                    view.$('[name=benefit_type]').val('Absolute').trigger('change');
+                    expect(view.$('[name="benefit_value"]').attr('max')).toBe('');
+                    expect(view.$('[name="benefit_value"]').attr('min')).toBe('1');
                 });
 
-                it('should toggle upper limit on the invoice discount value input', function () {
-                    view.$el.find('#invoice-discount-percent').prop('checked', true).trigger('change');
-                    expect(view.$el.find('[name="invoice_discount_value"]').attr('max')).toBe('100');
-                    view.$el.find('#invoice-discount-fixed').prop('checked', true).trigger('change');
-                    expect(view.$el.find('[name="invoice_discount_value"]').attr('max')).toBe('');
+                it('should toggle limit on the invoice discount value input', function () {
+                    view.$('#invoice-discount-percent').prop('checked', true).trigger('change');
+                    expect(view.$('[name="invoice_discount_value"]').attr('max')).toBe('100');
+                    expect(view.$('[name="invoice_discount_value"]').attr('min')).toBe('1');
+
+                    view.$('#invoice-discount-fixed').prop('checked', true).trigger('change');
+                    expect(view.$('[name="invoice_discount_value"]').attr('max')).toBe('');
+                    expect(view.$('[name="invoice_discount_value"]').attr('min')).toBe('1');
                 });
 
                 it('should show the code field for once-per-customer and singe-use vouchers', function () {
