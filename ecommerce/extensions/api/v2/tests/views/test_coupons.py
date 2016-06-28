@@ -480,14 +480,17 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
     def test_update_coupon_benefit_value(self):
         coupon = Product.objects.get(title='Test coupon')
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        max_uses = vouchers[0].offers.first().max_global_applications
+        benefit_value = Decimal(54)
+
         CouponViewSet().update_coupon_benefit_value(
-            benefit_value=Decimal(54),
+            benefit_value=benefit_value,
             vouchers=vouchers,
             coupon=coupon
         )
-
         for voucher in vouchers:
-            self.assertEqual(voucher.offers.first().benefit.value, Decimal(54))
+            self.assertEqual(voucher.offers.first().benefit.value, benefit_value)
+            self.assertEqual(voucher.offers.first().max_global_applications, max_uses)
 
     def test_update_coupon_category(self):
         coupon = Product.objects.get(title='Test coupon')
