@@ -64,7 +64,7 @@ class CouponAppViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class GetVoucherTests(TestCase):
+class GetVoucherTests(CourseCatalogTestMixin, TestCase):
     def test_get_voucher_and_products_from_code(self):
         """ Verify that get_voucher_and_products_from_code() returns products and voucher. """
         original_voucher, original_product = prepare_voucher(code=COUPON_CODE)
@@ -129,6 +129,15 @@ class GetVoucherTests(TestCase):
         product.expires = pytz.utc.localize(datetime.datetime.min)
         valid, __ = voucher_is_valid(voucher=voucher, products=[product], request=request)
         self.assertFalse(valid)
+
+    def test_omitting_unavailable_voucher(self):
+        """ Verify if there are more than one product, that availability check is omitted. """
+        request = RequestFactory().request()
+        voucher, product = prepare_voucher(code=COUPON_CODE)
+        product.expires = pytz.utc.localize(datetime.datetime.min)
+        __, seat = self.create_course_and_seat()
+        valid, __ = voucher_is_valid(voucher=voucher, products=[product, seat], request=request)
+        self.assertTrue(valid)
 
     def assert_error_messages(self, voucher, product, user, error_msg):
         """ Assert the proper error message is returned. """
