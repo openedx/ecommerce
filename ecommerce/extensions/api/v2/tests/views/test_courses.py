@@ -1,8 +1,12 @@
 from __future__ import unicode_literals
+
 import json
 
-from django.core.urlresolvers import reverse
+import jwt
 import mock
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model, get_class
 
 from ecommerce.core.constants import ISO_8601_FORMAT
@@ -16,6 +20,7 @@ from ecommerce.tests.testcases import TestCase
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Selector = get_class('partner.strategy', 'Selector')
+User = get_user_model()
 
 
 class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
@@ -52,6 +57,41 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
             data['products'] = [self.serialize_product(product) for product in course.products.all()]
 
         return data
+
+    def test_staff_authorization(self):
+        """ Verify the endpoint is not accessible to non-staff users. """
+        self.client.logout()
+        response = self.client.get(self.list_path)
+        self.assertEqual(response.status_code, 401)
+
+        user = self.create_user()
+        self.client.login(username=user.username, password=self.password)
+        response = self.client.get(self.list_path)
+        self.assertEqual(response.status_code, 403)
+
+    def test_jwt_authentication(self):
+        """ Verify the endpoint supports JWT authentication and user creation. """
+        username = 'some-user'
+        email = 'some-user@example.com'
+        payload = {
+            'administrator': True,
+            'username': username,
+            'email': email,
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]
+        }
+        auth_header = "JWT {token}".format(token=jwt.encode(payload, settings.JWT_AUTH['JWT_SECRET_KEY']))
+        self.assertFalse(User.objects.filter(username=username).exists())
+
+        response = self.client.get(
+            self.list_path,
+            HTTP_AUTHORIZATION=auth_header
+        )
+        self.assertEqual(response.status_code, 200)
+
+        user = User.objects.latest()
+        self.assertEqual(user.username, username)
+        self.assertEqual(user.email, email)
+        self.assertTrue(user.is_staff)
 
     def test_list(self):
         """ Verify the view returns a list of Courses. """

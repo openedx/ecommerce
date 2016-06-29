@@ -532,7 +532,12 @@ THEME_CACHE_TIMEOUT = 30 * 60
 
 
 EDX_DRF_EXTENSIONS = {
-    'JWT_PAYLOAD_USER_ATTRIBUTES': ('full_name', 'email', 'tracking_context',),
+    'JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING': {
+        'administrator': 'is_staff',
+        'email': 'email',
+        'full_name': 'full_name',
+        'tracking_context': 'tracking_context',
+    },
 }
 
 # Enrollment codes voucher end datetime used for setting the end dates for vouchers
