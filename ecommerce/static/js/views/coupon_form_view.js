@@ -419,7 +419,7 @@ define([
             /**
              * Fill seat type options from course ID.
              */
-            fillFromCourse: _.debounce(function () {
+            fillFromCourse: function () {
                 var courseId = this.$('[name=course_id]').val(),
                     course = Course.findOrCreate({id: courseId}),
                     parseId = _.compose(parseInt, _.property('id'));
@@ -450,7 +450,7 @@ define([
                 }, this));
 
                 course.fetch({data: {include_products: true}});
-            }, 100),
+            },
 
             /*
              * Update price field and model.stockrecords
