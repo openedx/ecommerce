@@ -85,7 +85,7 @@
         <hr>
 
         <div class="form-group">
-            <label><%= gettext('Invoice Type') %></label>
+            <label><%= gettext('Invoice Type') %> *</label>
             <div class="invoice-type row">
                 <div class="form-inline col-md-4">
                     <input id="already-invoiced" type="radio" name="invoice_type" value="Prepaid">
@@ -103,13 +103,13 @@
         </div>
 
         <div class="form-group">
-            <label for="invoice-number"><%= gettext('Invoice Number') %></label>
+            <label for="invoice-number"><%= gettext('Invoice Number') %> *</label>
             <input id="invoice-number" class="form-control" type="text" name="invoice_number">
             <p class="help-block"></p>
         </div>
 
         <div class="form-group">
-            <label for="price"><%= gettext('Invoiced Amount') %></label>
+            <label for="price"><%= gettext('Invoiced Amount') %> *</label>
             <div class="input-group">
                 <div class="input-group-addon">$</div>
                 <input id="price" type="number" step="0.01" min="0" class="form-control" name="price">
@@ -118,7 +118,7 @@
         </div>
 
         <div class="form-group">
-            <label for="invoice-payment-date"><%= gettext('Payment Date') %></label>
+            <label for="invoice-payment-date"><%= gettext('Payment Date') %> *</label>
             <div class="input-group">
                 <div class="input-group-addon"><span class="fa fa-calendar" aria-hidden="true"></span></div>
                 <input id="invoice-payment-date" placeholder="<%- gettext('YYYY-MM-DDTHH:mm:ss') %>" class="form-control add-pikaday" name="invoice_payment_date">
@@ -127,7 +127,7 @@
         </div>
 
         <div class="form-group hidden">
-            <label for="invoice-discount-value"><%= gettext('Discount per Code') %></label>
+            <label for="invoice-discount-value"><%= gettext('Discount per Code') %> *</label>
             <div class="input-group">
                 <div class="invoice-discount-addon input-group-addon"></div>
                 <input id="invoice-discount-value" type="number" step="0.01" class="form-control invoice-discount-value" name="invoice_discount_value">
@@ -155,8 +155,8 @@
             <div class="input-group tax-deducted-source-value">
                 <input id="tax-deducted-source-value" type="number" step="1" min="1" max="100" class="form-control" name="tax_deducted_source_value">
                 <div class="input-group-addon">%</div>
-                <p class="help-block"></p>
             </div>
+            <p class="help-block"></p>
         </div>
     </div>
 
@@ -181,7 +181,7 @@
             <p class="help-block"></p>
         </div>
         <div class="form-group catalog-query">
-            <label for="catalog-query"><%= gettext('Query string:') %> * <a href="https://stage-edx-discovery.edx.org/" class="normal-font-weight">(query guidelines)</a></label>
+            <label for="catalog-query"><%= gettext('Query string:') %> * <a href="https://stage-edx-discovery.edx.org/" class="external-link normal-font-weight">(query guidelines)</a></label>
             <textarea id="catalog-query" class="form-control" name="catalog_query" rows="10"></textarea>
             <p class="help-block"></p>
         </div>

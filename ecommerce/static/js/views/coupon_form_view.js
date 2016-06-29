@@ -217,7 +217,8 @@ define([
                 'change [name=benefit_type]': 'changeLimitForBenefitValue',
                 'change [name=invoice_discount_type]': 'changeLimitForInvoiceDiscountValue',
                 'change [name=invoice_type]': 'toggleInvoiceFields',
-                'change [name=tax_deduction]': 'toggleTaxDeductedSourceField'
+                'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
+                'click .external-link': 'routeToLink'
             },
 
             initialize: function (options) {
@@ -330,8 +331,9 @@ define([
                     }, this);
                     this.hideField('[name=price]', 0);
                     this.hideField('[name=invoice_discount_value]', null);
-                    this.hideField('[name=tax_deducted_value]', null);
-                    this.formGroup('[name=tax_deduction]').addClass(this.hiddenClass);
+                    this.hideField('[name=tax_deducted_source_value]', null);
+                    this.$('#non-tax-deducted').prop('checked', true).trigger('change');
+                    this.hideField('[name=tax_deduction]', null);
                 }
             },
 
@@ -498,6 +500,15 @@ define([
 
             updateCourseSeatTypes: function() {
                 this.dynamic_catalog_view.seat_types = this.model.get('course_seat_types');
+            },
+
+            /* Open external links in a new tab.
+            *  Works only for anchor elements that contain 'external-link' class.
+            */
+            routeToLink: function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(e.currentTarget.href);
             },
 
             render: function () {

@@ -84,6 +84,22 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
                 });
+
+                it('should validate invoice data.', function() {
+                    model.set('price', 'text');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                    model.set('price', 100);
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+
+                    model.set('invoice_discount_value', 'text');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                    model.set('invoice_discount_value', 100);
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
             });
 
             describe('test model methods', function () {
