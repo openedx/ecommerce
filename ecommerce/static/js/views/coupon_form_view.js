@@ -375,9 +375,12 @@ define([
                 if (!this.editing) {
                     this.emptyCodeField();
                 }
-                // When creating a ONCE_PER_CUSTOMER or MULTI_USE code show the usage number field.
+                /* When creating a ONCE_PER_CUSTOMER or MULTI_USE code show the usage number field.
+                *  Show the code field only for discount coupons and when the quantity is 1 to avoid
+                *  integrity issues.
+                */
                 if (voucherType !== 'Single use') {
-                    if (this.model.get('coupon_type') === 'Discount code') {
+                    if (this.model.get('coupon_type') === 'Discount code' && this.$('[name=quantity]').val() === 1) {
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);
                     }
                     this.formGroup('[name=max_uses]').removeClass(this.hiddenClass);
