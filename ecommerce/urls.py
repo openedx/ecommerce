@@ -38,13 +38,13 @@ js_info_dict = {
     'packages': ('courses',),
 }
 
-# Use the same auth views for all logins, including those originating from the browseable API.
-AUTH_URLS = auth_urlpatterns + [
+# NOTE 1: Add our logout override first to ensure it is registered by Django as the actual logout view.
+# NOTE 2: These same patterns are used for rest_framework's browseable API authentication links.
+AUTH_URLS = [
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
-]
+] + auth_urlpatterns
 
-urlpatterns = [
-    url('', include(AUTH_URLS)),
+urlpatterns = AUTH_URLS + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
