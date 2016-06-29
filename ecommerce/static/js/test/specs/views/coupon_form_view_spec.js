@@ -176,10 +176,27 @@ define([
                     expect(visible('[name=code]')).toBe(true);
                 });
 
-                it('should show code field when changing to once-per-customer', function () {
+                it('should hide code field for every voucher type if quantity is not 1.', function() {
+                    view.$el.find('[name=quantity]').val(2).trigger('change');
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    view.$el.find('[name=quantity]').val(111).trigger('change');
+                    expect(visible('[name=code]')).toBe(false);
+
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    expect(visible('[name=code]')).toBe(false);
+
+                    view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
+                    expect(visible('[name=code]')).toBe(false);
+                });
+
+                it('should show the code field for every voucher type if quantity is 1.', function() {
+                    view.$el.find('[name=quantity]').val(1).trigger('change');
+                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    expect(visible('[name=code]')).toBe(true);
+
+                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    expect(visible('[name=code]')).toBe(true);
+
+                    view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
                     expect(visible('[name=code]')).toBe(true);
                 });
 
