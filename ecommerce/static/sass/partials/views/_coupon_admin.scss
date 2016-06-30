@@ -16,8 +16,13 @@
         width: $input-addon-width + $small-input-width;
     }
 
+    .hidden.help-block {
+        display: block !important; // !important to override hidden class
+    }
+
     .help-block {
         margin: 0;
+        height: 23px;
     }
 
     .catalog-type {
@@ -36,35 +41,35 @@
             margin-bottom: 30px;
         }
 
-        p {
-            margin-bottom: 20px;
-        }
-
         button {
             margin-top: 10px;
             margin-right: 10px;
         }
 
         textarea {
-            height: 216px;
+            height: 140px;
         }
     }
 
-    .course-seat-types {
-        margin-bottom: 27px;
-        height: 154px;
-
-        .form-inline label {
-            margin-bottom: 10px;
-            padding-right: 10px;
+    .fields {
+        .form-group {
+            margin-bottom: 1.24rem;
         }
+    }
 
-        .checkboxes {
-            margin-bottom: 25px;
-        }
+    .fields {
+        .course-seat-types {
+            margin-bottom: 55px;
+            height: 154px;
 
-        .catalog-buttons {
-            margin-bottom: 34px;
+            .form-inline label {
+                margin-bottom: 10px;
+                padding-right: 10px;
+            }
+
+            .checkboxes {
+                margin-bottom: 55px;
+            }
         }
     }
 }
@@ -154,7 +159,6 @@
 }
 
 .catalog_buttons {
-    margin-top: 10px;
     margin-bottom: 34px;
 }
 
