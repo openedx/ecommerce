@@ -1,0 +1,75 @@
+.receipt {
+
+    line-height: 1em;
+
+    .action-primary {
+        background: #006d01 none repeat scroll 0 0;
+        border: 0 none !important;
+        box-shadow: 0 2px 1px 0 #005201;
+        color: #fff !important;
+        text-decoration: none !important;
+    }
+
+    .action-primary:hover, .action-primary:focus {
+        background: #60bc61 none repeat scroll 0 0;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .content-container {
+        padding: 30px 30px 40px;
+    }
+
+    .content-main > .title {
+        border-bottom: 1px solid #b1b2b4;
+        color: #1790c7;
+        font-weight: 600;
+        margin: 0 0 15px;
+        padding-bottom: 10px;
+    }
+
+    .copy {
+        font-weight:300;
+        p:last-child {
+            margin-bottom: 15px;
+            line-height: 22px;
+        }
+    }
+
+     .is-ready {
+        background: #e8f6fc none repeat scroll 0 0;
+    }
+
+    .nav-wizard {
+        box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.2) inset;
+        padding: 15px 20px;
+    }
+
+    p, address {
+        color: #6f7074;
+        font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    }
+
+    .pay-and-verify {
+        .nav-wizard {
+            .nav-link {
+                line-height: 45px;
+            }
+            .right {
+                float: right;
+                padding: 15px 50px;
+            }
+        }
+        .payment-info {
+            .copy {
+                margin: 20px 0;
+            }
+        }
+    }
+
+    .summary {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 15px;
+    }
+}

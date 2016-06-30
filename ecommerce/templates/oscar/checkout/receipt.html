@@ -2,30 +2,22 @@
 {% load i18n %}
 {% load staticfiles %}
 
-{% block body_class %}
-    ltr register verification-process step-requirements lang_en
-{% endblock %}
-
 {% block title %}
     {{ page_title }}
 {% endblock title %}
 
-{% block extra_css %}
-    <link href="/static/css/base/temp.css" rel="stylesheet" type="text/css" />
-    <link href="/static/css/base/temp_vendor.css" rel="stylesheet" type="text/css" />
-    <link href="/static/css/base/temp_overrides.css" rel="stylesheet" type="text/css" />
-{% endblock extra_css %}
-
-<script src="{% static 'js/apps/receipt.js' %}"></script>
+{% block javascript %}
+    <script src="{% static 'js/views/receipt_view.js' %}"></script>
+{#    <script src="{% static 'vendor-extensions/oscar/js/jquery.ajax-retry.js' %}"></script>#}
+{% endblock javascript %}
 
 {% block navbar %}
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
-<div class="window-wrap" dir="ltr">
+{#<div class="window-wrap" dir="ltr">#}
 {% block content %}
-
-<div id="content" class="content-wrapper">
+<div class="receipt">
     <div class="provider-wrapper hidden">
         <div class="provider-info">
             {% blocktrans %}
@@ -49,7 +41,7 @@
       </div>
     </div>
 
-    <div class="container"> <section class="wrapper carousel">
+    <div class="container content-container"> <section class="wrapper carousel">
         <div id="receipt-container" class="pay-and-verify" data-is-payment-complete='${is_payment_complete}'
          data-platform-name='${platform_name}' data-verified='${verified}' data-username='${name}'>
             {# data-is-request-in-themed-site='${is_request_in_themed_site}'> #}
@@ -71,7 +63,7 @@
                             </div>
 
                             <div class="wrapper-report">
-                                <table class="report report-receipt">
+                                <table class="table table-striped table-bordered"> <!-- report report-receipt-->
                                     <thead>
                                     <tr>
                                         <th scope="col" > {% trans "Order No." %} </th>
@@ -119,6 +111,7 @@
                                   {% endif %}
                             </div>
 
+                            <h3 class="summary">{% trans "Payment Summary" %}</h3>
                             {% if order.billedTo %}
                                 <div class="copy">
                                     <p> {% trans "Billed to:" %}
@@ -131,7 +124,6 @@
                                     </p>
                                 </div>
                             {% elif order.shipping_address %}
-                                <h3>{% trans "Address" %}</h3>
                                 <address>
                                     {% for field in order.shipping_address.active_address_fields %}
                                         {{ field }}<br/>
@@ -206,7 +198,4 @@
     </div>
 </div>
 </div>
-
-</div>
 {% endblock content %}
-</div>

@@ -93,7 +93,6 @@ class ReceiptResponseView(ThankYouView):
         payment_support_email = settings.PAYMENT_SUPPORT_EMAIL
         payment_support_link = '<a href=\"mailto:{email}\">{email}</a>'.format(email=payment_support_email)
 
-        # NB: request POST?
         is_cybersource = all(k in self.request.POST for k in ('signed_field_names', 'decision', 'reason_code'))
         if is_cybersource and self.request.POST['decision'] != 'ACCEPT':
             # Cybersource may redirect users to this view if it couldn't recover
