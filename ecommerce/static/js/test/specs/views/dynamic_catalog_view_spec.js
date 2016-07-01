@@ -92,6 +92,23 @@ define([
                     {title: 'Seat type', data: 'type'}
                 ]);
             });
+
+            it('should call stopEventPropagation when disabled or active button pressed', function () {
+                var e = $.Event('click');
+                view.$el.append('<div class="pagination">' +
+                    '<li class="paginate_button previous disabled">' +
+                    '<a href="#">Previous</a>' +
+                    '</li></div>');
+
+                spyOn(e, 'stopPropagation');
+                view.stopEventPropagation(e);
+                expect(e.stopPropagation).toHaveBeenCalled();
+
+                spyOn(view, 'stopEventPropagation');
+                view.delegateEvents();
+                view.$('.pagination .disabled').trigger('click');
+                expect(view.stopEventPropagation).toHaveBeenCalled();
+            });
         });
     }
 );
