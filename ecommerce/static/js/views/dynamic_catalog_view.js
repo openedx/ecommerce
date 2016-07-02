@@ -15,13 +15,18 @@ define(['jquery',
             template: _.template(DynamicCatalogButtons),
 
             events: {
-                'click [name=preview_catalog]': 'previewCatalog'
+                'click [name=preview_catalog]': 'previewCatalog',
+                'click .pagination .disabled, .pagination .active': 'stopEventPropagation'
             },
 
             initialize: function (options) {
                 this.query = options.query;
                 this.seat_types = options.seat_types;
                 this._super();
+            },
+
+            stopEventPropagation: function(event) {
+                event.stopPropagation();
             },
 
             getRowData: function (course) {
