@@ -62,11 +62,27 @@ define([
                     }
                 },
                 quantity: {pattern: 'number'},
-                price: {pattern: 'number'},
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
                         return this.get('coupon_type') === 'Discount code';
+                    }
+                },
+                invoice_type: {required: true},
+                invoice_number: {
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
+                    }
+                },
+                price: {
+                    pattern: 'number',
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
+                    }
+                },
+                invoice_payment_date: {
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
                     }
                 },
                 invoice_discount_value: {
@@ -128,6 +144,10 @@ define([
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
+            },
+
+            isPrepaidInvoiceType: function() {
+                return this.get('invoice_type') === 'Prepaid';
             },
 
             /**

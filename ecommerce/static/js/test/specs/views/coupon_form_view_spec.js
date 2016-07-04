@@ -86,7 +86,6 @@ define([
                 });
             });
 
-
             describe('enrollment code', function () {
                 beforeEach(function () {
                     view.$el.find('[name=code_type]').val('enrollment').trigger('change');
@@ -99,6 +98,16 @@ define([
                 it('should hide discount and code fields', function () {
                     expect(visible('[name=benefit_value]')).toBe(false);
                     expect(visible('[name=code]')).toBe(false);
+                });
+            });
+
+            describe('routing', function() {
+                it('should route to external link.', function() {
+                    var href = 'http://www.google.com/';
+                    spyOn(window, 'open');
+                    view.$el.append('<a href="' + href + '" class="test external-link">Google</a>');
+                    view.$('.test.external-link').click();
+                    expect(window.open).toHaveBeenCalledWith(href);
                 });
             });
 

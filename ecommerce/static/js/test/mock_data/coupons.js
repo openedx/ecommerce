@@ -178,7 +178,8 @@ define([], function(){
         seat_type: 'verified',
         course: verifiedSeat,
         price: 100,
-        category: 4
+        category: 4,
+        invoice_type: 'Not-Applicable'
     },
     enrollmentCodeCouponData = {
         'id': 10,

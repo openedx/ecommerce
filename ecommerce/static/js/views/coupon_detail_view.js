@@ -149,6 +149,7 @@ define([
                 this.$el.html(html);
                 this.renderVoucherTable();
                 this.renderCourseData();
+                this.renderInvoiceData();
                 this.delegateEvents();
 
                 this.dynamic_catalog_view = new DynamicCatalogView({
@@ -202,6 +203,48 @@ define([
                     this.$('.seat-types').removeClass('hidden');
                 }
                 return this;
+            },
+
+            renderInvoiceData: function() {
+                var invoice_type = this.model.get('invoice_type'),
+                    tax_deducted = this.model.get('tax_deduction'),
+                    prepaid_fields = [
+                        '.invoice-number',
+                        '.invoiced-amount',
+                        '.invoice-payment-date'
+                    ],
+                    postpaid_fields = [
+                        '.invoice-discount-type',
+                        '.invoice-discount-value'
+                    ];
+                if (tax_deducted === 'Yes') {
+                    this.$('.tax-deducted-source-value').removeClass('hidden');
+                } else if (tax_deducted === 'No') {
+                    this.$('.tax-deducted-source-value').addClass('hidden');
+                }
+
+                if (invoice_type === 'Prepaid') {
+                    _.each(prepaid_fields, function(field) {
+                        this.$(field).removeClass('hidden');
+                    }, this);
+                    _.each(postpaid_fields, function(field) {
+                        this.$(field).addClass('hidden');
+                    }, this);
+                } else if (invoice_type === 'Postpaid') {
+                    _.each(prepaid_fields, function(field) {
+                        this.$(field).addClass('hidden');
+                    }, this);
+                    _.each(postpaid_fields, function(field) {
+                        this.$(field).removeClass('hidden');
+                    }, this);
+                } else if (invoice_type === 'Not-Applicable') {
+                    _.each(prepaid_fields, function(field) {
+                        this.$(field).addClass('hidden');
+                    }, this);
+                    _.each(postpaid_fields, function(field) {
+                        this.$(field).addClass('hidden');
+                    }, this);
+                }
             },
 
             downloadCouponReport: function (event) {
