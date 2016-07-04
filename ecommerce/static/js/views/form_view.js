@@ -55,8 +55,8 @@ define([
              * @param {String} level - Severity of the alert. This should be one of success, info, warning, or danger.
              * @param {Sring} message - Message to display to the user.
              */
-            renderAlert: function (level, message) {
-                var view = new AlertView({level: level, title: gettext('Error!'), message: message});
+            renderAlert: function (level, title, message) {
+                var view = new AlertView({level: level, title: title, message: message});
 
                 view.render();
                 this.$alerts.append(view.el);
@@ -96,7 +96,7 @@ define([
                     success: function (data) {
                         if(data.id === courseId) {
                             _this.clearAlerts();
-                            _this.renderAlert('danger', message);
+                            _this.renderAlert('danger', gettext('Error!'), message);
                             courseIDFound = true;
                         }
                     },
@@ -162,7 +162,7 @@ define([
                 // Validate the input and display a message, if necessary.
                 if (!this.model.isValid(true)) {
                     this.clearAlerts();
-                    this.renderAlert('danger', gettext('You must complete all required fields.'));
+                    this.renderAlert('danger', gettext('Error!'), gettext('You must complete all required fields.'));
                     return;
                 }
                 // Check if the courseID already exists.
@@ -202,7 +202,7 @@ define([
                     }
 
                     self.clearAlerts();
-                    self.renderAlert('danger', message);
+                    self.renderAlert('danger', gettext('Error!'), message);
                     self.$el.animate({scrollTop: 0}, 'slow');
                 };
 

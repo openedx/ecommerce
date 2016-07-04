@@ -13,7 +13,7 @@
             <p class="help-block"></p>
         </div>
       <div class="form-group">
-        <label for="category"><%= gettext('Category') %> *</label>
+        <label for="category"><%= gettext('Category') %></label>
         <select id="category" class="form-control" name="category"></select>
         <p class="help-block"></p>
       </div>
@@ -50,7 +50,7 @@
         </div>
 
         <div class="form-group">
-            <label for="quantity"><%= gettext('Number of Codes') %></label>
+            <label for="quantity"><%= gettext('Number of Codes') %> *</label>
             <input id="quantity" type="number" step="1" class="form-control non-editable" name="quantity" value="1" min="1">
             <p class="help-block"></p>
         </div>
@@ -186,7 +186,7 @@
             <p class="help-block"></p>
         </div>
         <div class="form-group course-seat-types">
-            <label for="course-seat-types"><%= gettext('Seat Types:') %></label>
+            <label for="course-seat-types"><%= gettext('Seat Types:') %> *</label>
             <div class="checkboxes">
                 <input id="verified" type="checkbox" name="course_seat_types" value="verified">
                 <label for="verified"><%= gettext('Verified') %></label>

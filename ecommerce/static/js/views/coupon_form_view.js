@@ -479,8 +479,8 @@ define([
                 course.fetch({data: {include_products: true}});
             },
 
-            /*
-             * Update price field and model.stockrecords
+            /**
+             * Update price field and model.stockrecords.
              */
             changeSeatType: function () {
                 var seatType = this.getSeatType(),
@@ -527,13 +527,25 @@ define([
                 this.dynamic_catalog_view.seat_types = this.model.get('course_seat_types');
             },
 
-            /* Open external links in a new tab.
-            *  Works only for anchor elements that contain 'external-link' class.
-            */
+            /**
+             * Open external links in a new tab.
+             * Works only for anchor elements that contain 'external-link' class.
+             */
             routeToLink: function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 window.open(e.currentTarget.href);
+            },
+
+
+            /**
+             * Override default renderAlert to display a custom message.
+             */
+            renderAlert: function (level, title, message) {
+                if (!this.model.isValid(true)) {
+                    message = 'Please complete all required fields.';
+                }
+                this._super(level, title='', message);
             },
 
             render: function () {
