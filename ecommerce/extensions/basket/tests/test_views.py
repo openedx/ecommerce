@@ -6,10 +6,13 @@ import ddt
 import httpretty
 import pytz
 from django.conf import settings
+from django.contrib.messages import get_messages
+from django.contrib.messages.storage.fallback import FallbackStorage  # Messages don't work without fallback
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.test import override_settings
+from django.test import override_settings, RequestFactory
 from django.utils.translation import ugettext_lazy as _
+from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import newfactories as factories
 from requests.exceptions import ConnectionError, Timeout
@@ -24,6 +27,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data
+from ecommerce.extensions.basket.views import VoucherAddMessagesView
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
@@ -39,6 +43,8 @@ Catalog = get_model('catalogue', 'Catalog')
 Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 COUPON_CODE = 'COUPONTEST'
 
@@ -419,3 +425,74 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data.get('image_url'), '')
         self.assertEqual(line_data.get('course_short_description'), None)
+
+
+class VoucherAddMessagesViewTests(TestCase):
+    """ VoucherAddMessagesView view tests. """
+    def setUp(self):
+        super(VoucherAddMessagesViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        self.basket = factories.BasketFactory(owner=self.user, site=self.site)
+
+        self.request = RequestFactory().request()
+        # Fallback storage is needed in tests with messages
+        setattr(self.request, 'session', 'session')
+        messages = FallbackStorage(self.request)
+        setattr(self.request, '_messages', messages)
+        self.request.user = self.user
+
+        self.voucher_add_view = VoucherAddMessagesView()
+        self.form = BasketVoucherForm()
+        self.form.cleaned_data = {'code': COUPON_CODE}
+
+    def get_error_message_from_request(self):
+        return list(get_messages(self.request))[-1].message
+
+    def assertMessage(self, message):
+        self.request.basket = self.basket
+        self.voucher_add_view.request = self.request
+        self.voucher_add_view.form_valid(self.form)
+        request_message = self.get_error_message_from_request()
+        self.assertEqual(request_message, message)
+
+    def test_no_voucher_error_msg(self):
+        """ Verify correct error message is returned when voucher can't be found. """
+        self.assertMessage(_("Coupon code '{code}' does not exist.").format(code=COUPON_CODE))
+
+    def test_voucher_already_in_basket_error_msg(self):
+        """ Verify correct error message is returned when voucher already in basket. """
+        voucher = factories.VoucherFactory(code=COUPON_CODE)
+        self.basket.vouchers.add(voucher)
+        self.assertMessage(_("You have already added coupon code '{code}' to your basket.").format(code=COUPON_CODE))
+
+    def test_voucher_expired_error_msg(self):
+        """ Verify correct error message is returned when voucher has expired. """
+        end_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
+        factories.VoucherFactory(code=COUPON_CODE, end_datetime=end_datetime)
+        self.assertMessage(_("Coupon code '{code}' has expired.").format(code=COUPON_CODE))
+
+    def test_voucher_added_to_basket_msg(self):
+        """ Verify correct message is returned when voucher is added to basket. """
+        __, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
+        self.assertMessage(_("Coupon code '{code}' added to basket.").format(code=COUPON_CODE))
+
+    def test_voucher_has_no_discount_error_msg(self):
+        """ Verify correct error message is returned when voucher has no discount. """
+        factories.VoucherFactory(code=COUPON_CODE)
+        self.assertMessage(_("Your basket does not qualify for a coupon code discount."))
+
+    def test_voucher_used_error_msg(self):
+        """ Verify correct error message is returned when voucher has been used (Single use). """
+        voucher, __ = prepare_voucher(code=COUPON_CODE)
+        order = factories.OrderFactory()
+        VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
+        self.assertMessage(_("Coupon code '{code}' has already been redeemed.").format(code=COUPON_CODE))
+
+    def test_voucher_else_error_msg(self):
+        """ Verify correct error message is returned when error case in not covered. """
+        voucher, __ = prepare_voucher(code=COUPON_CODE, usage=Voucher.ONCE_PER_CUSTOMER)
+        order = factories.OrderFactory()
+        VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
+        self.assertMessage(_("Coupon code '{code}' is invalid.").format(code=COUPON_CODE))
