@@ -6,7 +6,6 @@ from decimal import Decimal
 import dateutil.parser
 from django.conf import settings
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -106,6 +105,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         Returns:
             200 if the order was created successfully; the basket ID is included in the response
                 body along with the order ID and payment information.
+            400 if a custom code is received that already exists,
+                if a course mode is selected that is not supported.
             401 if an unauthenticated request is denied permission to access the endpoint.
             429 if the client has made requests at a rate exceeding that allowed by the configured rate limit.
             500 if an error occurs when attempting to create a coupon.
@@ -129,6 +130,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             max_uses = request.data.get('max_uses')
             catalog_query = request.data.get(CATALOG_QUERY)
             course_seat_types = request.data.get(COURSE_SEAT_TYPES)
+
+            if code:
+                try:
+                    Voucher.objects.get(code=code)
+                    return Response(
+                        'A coupon with code {code} already exists.'.format(code=code),
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                except Voucher.DoesNotExist:
+                    pass
 
             invoice_data = self.retrieve_invoice_data(request.data)
 
@@ -218,10 +229,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         Returns:
             A coupon product object.
-
-        Raises:
-            IntegrityError: An error occured when create_vouchers method returns
-                            an IntegrityError exception
         """
 
         product_class = ProductClass.objects.get(slug='coupon')
@@ -231,25 +238,21 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Vouchers are created during order and not fulfillment like usual
         # because we want vouchers to be part of the line in the order.
-        try:
-            create_vouchers(
-                name=title,
-                benefit_type=data['benefit_type'],
-                benefit_value=Decimal(data['benefit_value']),
-                catalog=data['catalog'],
-                coupon=coupon_product,
-                end_datetime=data['end_date'],
-                code=data['code'] or None,
-                quantity=int(data['quantity']),
-                start_datetime=data['start_date'],
-                voucher_type=data['voucher_type'],
-                max_uses=data['max_uses'],
-                catalog_query=data['catalog_query'],
-                course_seat_types=data['course_seat_types']
-            )
-        except IntegrityError:
-            logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-            raise
+        create_vouchers(
+            name=title,
+            benefit_type=data['benefit_type'],
+            benefit_value=Decimal(data['benefit_value']),
+            catalog=data['catalog'],
+            coupon=coupon_product,
+            end_datetime=data['end_date'],
+            code=data['code'] or None,
+            quantity=int(data['quantity']),
+            start_datetime=data['start_date'],
+            voucher_type=data['voucher_type'],
+            max_uses=data['max_uses'],
+            catalog_query=data['catalog_query'],
+            course_seat_types=data['course_seat_types']
+        )
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
 

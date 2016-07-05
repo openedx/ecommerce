@@ -92,9 +92,10 @@ define([
                     }
                 },
                 code: {
+                    pattern: /^[a-zA-Z0-9]+$/,
                     required: false,
-                    rangeLength: [8, 16],
-                    msg: gettext('Code field must be empty or between 8 and 16 characters')
+                    rangeLength: [1, 16],
+                    msg: gettext('This field must be empty or contain 1-16 alphanumeric characters.')
                 },
                 catalog_query: {
                     required: function () {

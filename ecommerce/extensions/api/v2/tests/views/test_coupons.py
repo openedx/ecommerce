@@ -9,7 +9,6 @@ import ddt
 import httpretty
 import pytz
 from django.core.urlresolvers import reverse
-from django.db.utils import IntegrityError
 from django.test import RequestFactory
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
@@ -189,25 +188,6 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.count(), 1)
         self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.first().code, 'CUSTOMCODE')
 
-    def test_custom_code_integrity_error(self):
-        """Test custom coupon code duplication."""
-        self.coupon_data.update({
-            'code': 'CUSTOMCODE',
-            'quantity': 1,
-        })
-        CouponViewSet().create_coupon_product(
-            title='Custom coupon',
-            price=100,
-            data=self.coupon_data
-        )
-
-        with self.assertRaises(IntegrityError):
-            CouponViewSet().create_coupon_product(
-                title='Coupon with integrity issue',
-                price=100,
-                data=self.coupon_data
-            )
-
     def test_coupon_note(self):
         """Test creating a coupon with a note."""
         self.coupon_data.update({
@@ -375,6 +355,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(response.status_code, 200)
         coupon_data = json.loads(response.content)['results'][0]
         self.assertEqual(coupon_data['title'], 'Test coupon')
+
+    def test_already_existing_code(self):
+        """Test custom coupon code duplication."""
+        self.data.update({
+            'code': 'CUSTOMCODE',
+            'quantity': 1,
+        })
+        self.client.post(COUPONS_LINK, data=self.data, format='json')
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        self.assertEqual(response.status_code, 400)
 
     def test_update(self):
         """Test updating a coupon."""

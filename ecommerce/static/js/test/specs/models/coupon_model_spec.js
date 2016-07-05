@@ -100,6 +100,16 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
                 });
+
+                it('should validate coupon code.', function() {
+                    model.set('code', '!#$%&/()=');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+
+                    model.set('code', 'CODE12345');
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
             });
 
             describe('test model methods', function () {
