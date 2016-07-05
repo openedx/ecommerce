@@ -258,6 +258,7 @@ DJANGO_APPS = [
     'waffle',
     'django_filters',
     'rest_framework_swagger',
+    'release_util',
 ]
 
 # Apps specific to this project go here.
