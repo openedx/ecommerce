@@ -28,6 +28,10 @@ define([
             initialize: function () {
                 this.alertViews = [];
 
+                if (this.editing && _.has(this, 'editableAttributes')) {
+                    this.modelServerState = this.model.pick(this.editableAttributes);
+                }
+
                 // Enable validation
                 Utils.bindValidation(this);
             },
@@ -149,7 +153,9 @@ define([
                     self = this,
                     courseId = $('input[name=id]').val(),
                     btnSavingContent = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> ' +
-                        gettext('Saving...');
+                        gettext('Saving...'),
+                    onSaveComplete,
+                    onSaveError;
 
                 e.preventDefault();
 
@@ -174,33 +180,54 @@ define([
                 // Disable all buttons by setting the attribute (for <button>) and class (for <a>)
                 $buttons.attr('disabled', 'disabled').addClass('disabled');
 
-                this.model.save({
-                    complete: function () {
-                        // Restore the button text
-                        $submitButton.text(btnDefaultText);
+                onSaveComplete = function () {
+                    // Restore the button text
+                    $submitButton.text(btnDefaultText);
 
-                        // Re-enable the buttons
-                        $buttons.removeAttr('disabled').removeClass('disabled');
-                    },
-                    success: this.saveSuccess.bind(this),
-                    error: function (model, response) {
-                        var message = gettext('An error occurred while saving the data.');
+                    // Re-enable the buttons
+                    $buttons.removeAttr('disabled').removeClass('disabled');
+                };
 
-                        if (response.responseJSON && response.responseJSON.error) {
-                            message = response.responseJSON.error;
+                onSaveError = function (model, response) {
+                    var message = gettext('An error occurred while saving the data.');
 
-                            // Log the error to the console for debugging purposes
-                            console.error(message);
-                        } else {
-                            // Log the error to the console for debugging purposes
-                            console.error(response.responseText);
-                        }
+                    if (response.responseJSON && response.responseJSON.error) {
+                        message = response.responseJSON.error;
 
-                        self.clearAlerts();
-                        self.renderAlert('danger', message);
-                        self.$el.animate({scrollTop: 0}, 'slow');
+                        // Log the error to the console for debugging purposes
+                        console.error(message);
+                    } else {
+                        // Log the error to the console for debugging purposes
+                        console.error(response.responseText);
                     }
-                });
+
+                    self.clearAlerts();
+                    self.renderAlert('danger', message);
+                    self.$el.animate({scrollTop: 0}, 'slow');
+                };
+
+                if (this.editing && _.has(this, 'editableAttributes')) {
+                    var editableAttributes = this.model.pick(this.editableAttributes),
+                        changedAttributes = _.omit(editableAttributes, function(value, key) {
+                            return value === this.modelServerState[key];
+                        }, this);
+
+                    this.model.save(
+                        changedAttributes,
+                        {
+                            complete: onSaveComplete,
+                            error: onSaveError,
+                            patch: true,
+                            success: this.saveSuccess.bind(this)
+                        }
+                    );
+                } else {
+                    this.model.save({
+                        complete: onSaveComplete,
+                        success: this.saveSuccess.bind(this),
+                        error: onSaveError
+                    });
+                }
 
                 return this;
             }

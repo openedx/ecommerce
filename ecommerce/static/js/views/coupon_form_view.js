@@ -79,6 +79,10 @@ define([
                     },
                     setOptions: {
                         validate: true
+                    },
+                    onSet: function(val) {
+                        this.model.set('category_ids', [val]);
+                        return val;
                     }
                 },
                 'input[name=title]': {
@@ -226,6 +230,27 @@ define([
                 this.editing = options.editing || false;
                 this.hiddenClass = 'hidden';
 
+                if (this.editing) {
+                    this.editableAttributes = [
+                        'benefit_value',
+                        'catalog_query',
+                        'category_ids',
+                        'client',
+                        'course_seat_types',
+                        'end_date',
+                        'invoice_discount_type',
+                        'invoice_discount_value',
+                        'invoice_number',
+                        'invoice_payment_date',
+                        'invoice_type',
+                        'note',
+                        'price',
+                        'start_date',
+                        'tax_deducted_source',
+                        'title',
+                    ];
+                }
+
                 this.dynamic_catalog_view = new DynamicCatalogView({
                     'query': this.model.get('catalog_query'),
                     'seat_types': this.model.get('course_seat_types')
@@ -303,7 +328,7 @@ define([
                     this.formGroup('[name=code]').addClass(this.hiddenClass);
                 }
             },
- 
+
             toggleInvoiceFields: function () {
                 var invoice_type = this.$('[name=invoice_type]:checked').val(),
                     prepaid_fields = [
@@ -523,7 +548,6 @@ define([
                 this.$alerts = this.$('.alerts');
 
                 if (this.editing) {
-                    this.$('select[name=category]').val(this.model.get('categories')[0].id).trigger('change');
                     this.disableNonEditableFields();
                     this.toggleCouponTypeField();
                     this.toggleVoucherTypeField();
