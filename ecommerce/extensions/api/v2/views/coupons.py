@@ -16,7 +16,6 @@ from rest_framework.response import Response
 from ecommerce.core.models import BusinessClient
 from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer, CouponListSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
@@ -39,30 +38,6 @@ Range = Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
-CATALOG_QUERY = 'catalog_query'
-CLIENT = 'client'
-COURSE_SEAT_TYPES = 'course_seat_types'
-INVOICE_DISCOUNT_TYPE = 'invoice_discount_type'
-INVOICE_DISCOUNT_VALUE = 'invoice_discount_value'
-INVOICE_NUMBER = 'invoice_number'
-INVOICE_PAYMENT_DATE = 'invoice_payment_date'
-INVOICE_TYPE = 'invoice_type'
-TAX_DEDUCTED_SOURCE = 'tax_deducted_source'
-
-UPDATEABLE_INVOICE_FIELDS = [
-    INVOICE_DISCOUNT_TYPE,
-    INVOICE_DISCOUNT_VALUE,
-    INVOICE_NUMBER,
-    INVOICE_PAYMENT_DATE,
-    INVOICE_TYPE,
-    TAX_DEDUCTED_SOURCE,
-]
-
-UPDATABLE_RANGE_FIELDS = [
-    CATALOG_QUERY,
-    COURSE_SEAT_TYPES,
-]
-
 
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
@@ -80,7 +55,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """ Retrieve the invoice information from the request data. """
         invoice_data = {}
 
-        for field in UPDATEABLE_INVOICE_FIELDS:
+        for field in Invoice.UPDATEABLE_INVOICE_FIELDS:
             self.create_update_data_dict(
                 request_data=request_data,
                 request_data_key=field,
@@ -112,24 +87,24 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             500 if an error occurs when attempting to create a coupon.
         """
         with transaction.atomic():
-            title = request.data[AC.KEYS.TITLE]
-            client_username = request.data[CLIENT]
-            stock_record_ids = request.data.get(AC.KEYS.STOCK_RECORD_IDS)
-            start_date = dateutil.parser.parse(request.data[AC.KEYS.START_DATE])
-            end_date = dateutil.parser.parse(request.data[AC.KEYS.END_DATE])
-            code = request.data[AC.KEYS.CODE]
-            benefit_type = request.data[AC.KEYS.BENEFIT_TYPE]
-            benefit_value = request.data[AC.KEYS.BENEFIT_VALUE]
-            voucher_type = request.data[AC.KEYS.VOUCHER_TYPE]
-            quantity = request.data[AC.KEYS.QUANTITY]
-            price = request.data[AC.KEYS.PRICE]
+            title = request.data.get('title')
+            client_username = request.data.get('client')
+            stock_record_ids = request.data.get('stock_record_ids')
+            start_date = dateutil.parser.parse(request.data.get('start_date'))
+            end_date = dateutil.parser.parse(request.data.get('end_date'))
+            code = request.data.get('code')
+            benefit_type = request.data.get('benefit_type')
+            benefit_value = request.data.get('benefit_value')
+            voucher_type = request.data.get('voucher_type')
+            quantity = request.data.get('quantity')
+            price = request.data.get('price')
             partner = request.site.siteconfiguration.partner
-            categories = Category.objects.filter(id__in=request.data[AC.KEYS.CATEGORY_IDS])
+            categories = Category.objects.filter(id__in=request.data.get('category_ids'))
             client, __ = BusinessClient.objects.get_or_create(name=client_username)
             note = request.data.get('note')
             max_uses = request.data.get('max_uses')
-            catalog_query = request.data.get(CATALOG_QUERY)
-            course_seat_types = request.data.get(COURSE_SEAT_TYPES)
+            catalog_query = request.data.get('catalog_query')
+            course_seat_types = request.data.get('course_seat_types')
 
             if code:
                 try:
@@ -289,22 +264,22 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         order_metadata = data_api.get_order_metadata(basket)
 
         response_data = {
-            AC.KEYS.COUPON_ID: coupon_id,
-            AC.KEYS.BASKET_ID: basket.id,
-            AC.KEYS.ORDER: None,
-            AC.KEYS.PAYMENT_DATA: None,
+            'coupon_id': coupon_id,
+            'id': basket.id,
+            'order': None,
+            'payment_data': None,
         }
         basket.freeze()
 
         order = self.handle_order_placement(
-            order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
+            order_number=order_metadata['number'],
             user=basket.owner,
             basket=basket,
             shipping_address=None,
-            shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
-            shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
+            shipping_method=order_metadata['shipping_method'],
+            shipping_charge=order_metadata['shipping_charge'],
             billing_address=None,
-            order_total=order_metadata[AC.KEYS.ORDER_TOTAL]
+            order_total=order_metadata['total']
         )
 
         # Invoice payment processor invocation.
@@ -312,14 +287,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         payment_processor().handle_processor_response(
             response={}, order=order, business_client=client, invoice_data=invoice_data
         )
-        response_data[AC.KEYS.PAYMENT_DATA] = {
-            AC.KEYS.PAYMENT_PROCESSOR_NAME: 'Invoice'
+        response_data['payment_data'] = {
+            'payment_processor_name': 'Invoice'
         }
 
-        response_data[AC.KEYS.ORDER] = order.id
+        response_data['order'] = order.id
         logger.info(
             'Created new order number [%s] from basket [%d]',
-            order_metadata[AC.KEYS.ORDER_NUMBER],
+            order_metadata['number'],
             basket.id
         )
 
@@ -334,7 +309,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
         data = {}
 
-        for field in AC.UPDATEABLE_VOUCHER_FIELDS:
+        for field in CouponVouchers.UPDATEABLE_VOUCHER_FIELDS:
             self.create_update_data_dict(
                 request_data=request.data,
                 request_data_key=field['request_data_key'],
@@ -347,7 +322,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         range_data = {}
 
-        for field in UPDATABLE_RANGE_FIELDS:
+        for field in Range.UPDATABLE_RANGE_FIELDS:
             self.create_update_data_dict(
                 request_data=request.data,
                 request_data_key=field,
@@ -359,23 +334,23 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             voucher_range = vouchers.first().offers.first().benefit.range
             Range.objects.filter(id=voucher_range.id).update(**range_data)
 
-        benefit_value = request.data.get(AC.KEYS.BENEFIT_VALUE, '')
+        benefit_value = request.data.get('benefit_value')
         if benefit_value:
             self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
 
-        category_ids = request.data.get(AC.KEYS.CATEGORY_IDS, '')
+        category_ids = request.data.get('category_ids')
         if category_ids:
             self.update_coupon_category(category_ids=category_ids, coupon=coupon)
 
-        client_username = request.data.get(AC.KEYS.CLIENT, '')
+        client_username = request.data.get('client')
         if client_username:
             self.update_coupon_client(baskets=baskets, client_username=client_username)
 
-        coupon_price = request.data.get(AC.KEYS.PRICE, '')
+        coupon_price = request.data.get('price')
         if coupon_price:
             StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
 
-        note = request.data.get(AC.KEYS.NOTE, None)
+        note = request.data.get('note')
         if note is not None:
             coupon.attr.note = note
             coupon.save()
@@ -397,7 +372,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if request_data_key in request_data:
             value = request_data.get(request_data_key)
             update_dict[update_dict_key] = prepare_course_seat_types(value) \
-                if update_dict_key == COURSE_SEAT_TYPES else value
+                if update_dict_key == 'course_seat_types' else value
 
     def update_coupon_benefit_value(self, benefit_value, coupon, vouchers):
         """

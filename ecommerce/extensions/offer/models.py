@@ -11,6 +11,10 @@ from ecommerce.coupons.utils import get_seats_from_query
 
 
 class Range(AbstractRange):
+    UPDATABLE_RANGE_FIELDS = [
+        'catalog_query',
+        'course_seat_types',
+    ]
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
     catalog_query = models.CharField(max_length=255, blank=True, null=True)
     course_seat_types = models.CharField(max_length=255, blank=True, null=True)

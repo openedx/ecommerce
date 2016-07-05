@@ -12,7 +12,6 @@ import waffle
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
 
@@ -131,7 +130,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             BasketNotFreeError: if the basket is not free.
         """
 
-        if basket.total_incl_tax != AC.FREE:
+        if basket.total_incl_tax != 0:
             raise BasketNotFreeError
 
         basket.freeze()
@@ -140,21 +139,21 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
         logger.info(
             'Preparing to place order [%s] for the contents of basket [%d]',
-            order_metadata[AC.KEYS.ORDER_NUMBER],
+            order_metadata['number'],
             basket.id,
         )
 
         # Place an order. If order placement succeeds, the order is committed
         # to the database so that it can be fulfilled asynchronously.
         order = self.handle_order_placement(
-            order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
+            order_number=order_metadata['number'],
             user=basket.owner,
             basket=basket,
             shipping_address=None,
-            shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
-            shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
+            shipping_method=order_metadata['shipping_method'],
+            shipping_charge=order_metadata['shipping_charge'],
             billing_address=None,
-            order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+            order_total=order_metadata['total'],
         )
 
         return order

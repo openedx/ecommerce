@@ -22,6 +22,14 @@ class Invoice(TimeStampedModel):
         (PERCENTAGE, _('Percentage')),
         (FIXED, _('Fixed'))
     )
+    UPDATEABLE_INVOICE_FIELDS = [
+        'invoice_discount_type',
+        'invoice_discount_value',
+        'invoice_number',
+        'invoice_payment_date',
+        'invoice_type',
+        'tax_deducted_source',
+    ]
     basket = models.ForeignKey('basket.Basket', null=True, blank=True)
     order = models.ForeignKey('order.Order', null=True, blank=False)
     business_client = models.ForeignKey('core.BusinessClient', null=True, blank=False)
