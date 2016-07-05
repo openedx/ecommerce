@@ -24,6 +24,18 @@ define([
                 verifiedSeat,
                 view;
 
+            /**
+              * Helper function to check if a form field is shown.
+              */
+            function visible(selector) {
+                var formGroup = view.$(selector).closest('.info-item');
+                if (formGroup.length > 0) {
+                    return !formGroup.hasClass('hidden');
+                } else {
+                    return false;
+                }
+            }
+
             beforeEach(function () {
                 data = Mock_Coupons.enrollmentCodeCouponData;
                 model = Coupon.findOrCreate(data, {parse: true});
@@ -89,43 +101,43 @@ define([
 
                 spyOn(view, 'renderVoucherTable');
                 view.render();
-                expect(view.$el.find('.coupon-title').text()).toEqual(model.get('title'));
-                expect(view.$el.find('.coupon-type').text()).toEqual(view.couponType(voucher));
-                expect(view.$el.find('.code-status').text()).toEqual(view.codeStatus(voucher));
-                expect(view.$el.find('.coupon-information > .heading > .pull-right > span').text()).toEqual(
+                expect(view.$('.coupon-title').text()).toEqual(model.get('title'));
+                expect(view.$('.coupon-type').text()).toEqual(view.couponType(voucher));
+                expect(view.$('.code-status').text()).toEqual(view.codeStatus(voucher));
+                expect(view.$('.coupon-information > .heading > .pull-right > span').text()).toEqual(
                     view.formatLastEditedData(model.get('last_edited'))
                 );
-                expect(view.$el.find('.category > .value').text()).toEqual(category);
-                expect(view.$el.find('.discount-value > .value').text()).toEqual(view.discountValue(voucher));
-                expect(view.$el.find('.course-info > .value').contents().get(0).nodeValue).toEqual(
+                expect(view.$('.category > .value').text()).toEqual(category);
+                expect(view.$('.discount-value > .value').text()).toEqual(view.discountValue(voucher));
+                expect(view.$('.course-info > .value').contents().get(0).nodeValue).toEqual(
                     'course-v1:edX+DemoX+Demo_Course'
                 );
-                expect(view.$el.find('.course-info > .value > .pull-right').text()).toEqual('verified');
-                expect(view.$el.find('.start-date-info > .value').text()).toEqual(
+                expect(view.$('.course-info > .value > .pull-right').text()).toEqual('verified');
+                expect(view.$('.start-date-info > .value').text()).toEqual(
                     view.formatDateTime(voucher.start_datetime)
                 );
-                expect(view.$el.find('.end-date-info > .value').text()).toEqual(
+                expect(view.$('.end-date-info > .value').text()).toEqual(
                     view.formatDateTime(voucher.end_datetime)
                 );
-                expect(view.$el.find('.usage-limitations > .value').text()).toEqual(view.usageLimitation(voucher));
-                expect(view.$el.find('.client-info > .value').text()).toEqual(model.get('client'));
-                expect(view.$el.find('.invoiced-amount > .value').text()).toEqual(
+                expect(view.$('.usage-limitations > .value').text()).toEqual(view.usageLimitation(voucher));
+                expect(view.$('.client-info > .value').text()).toEqual(model.get('client'));
+                expect(view.$('.invoiced-amount > .value').text()).toEqual(
                     _s.sprintf('$%s', model.get('price'))
                 );
                 expect(parseInt(view.$('.max-uses > .value').text())).toEqual(parseInt(model.get('max_uses')));
                 expect(view.renderVoucherTable).toHaveBeenCalled();
-                expect(view.$el.find('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
-                expect(view.$el.find('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
-                expect(view.$el.find('.invoice-payment-date > .value').text()).toEqual(
+                expect(view.$('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
+                expect(view.$('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
+                expect(view.$('.invoice-payment-date > .value').text()).toEqual(
                     view.formatDateTime(model.get('invoice_payment_date'))
                 );
-                expect(view.$el.find('.invoice-discount-value > .value').text()).toEqual(
+                expect(view.$('.invoice-discount-value > .value').text()).toEqual(
                     view.invoiceDiscountValue(
                         model.get('invoice_discount_type'),
                         model.get('invoice_discount_value')
                     )
                 );
-                expect(view.$el.find('.tax-deducted-source-value > .value').text()).toEqual(
+                expect(view.$('.tax-deducted-source-value > .value').text()).toEqual(
                     view.taxDeductedSource(model.get('tax_deducted_source'))
                 );
                 expect(view.$('.seat-types > .value').text()).toEqual('');
@@ -138,8 +150,8 @@ define([
                 model = Coupon.findOrCreate(data, {parse: true});
                 view = new CouponDetailView({model: model});
                 view.render();
-                expect(view.$el.find('.invoice-discount-value > .value').text()).toEqual('');
-                expect(view.$el.find('.invoice-discount-type > .value').text()).toEqual('');
+                expect(view.$('.invoice-discount-value > .value').text()).toEqual('');
+                expect(view.$('.invoice-discount-type > .value').text()).toEqual('');
             });
 
             it('should format seat types.', function() {
@@ -163,10 +175,10 @@ define([
 
                 view.render();
 
-                var course_info = view.$el.find('.course-info .value');
+                var course_info = view.$('.course-info .value');
                 expect(course_info.length).toEqual(1);
                 expect(course_info.text()).toEqual('a/b/cVerified');
-                expect(view.$el.find('.seat-types .value').text()).toEqual('verified');
+                expect(view.$('.seat-types .value').text()).toEqual('verified');
 
                 view.model.set({
                     'catalog_type': 'Multiple courses',
@@ -176,16 +188,74 @@ define([
 
                 view.render();
 
-                expect(view.$el.find('.catalog-query .value').text()).toEqual('id:*');
-                expect(view.$el.find('.seat-types .value').text()).toEqual('verified, professional');
+                expect(view.$('.catalog-query .value').text()).toEqual('id:*');
+                expect(view.$('.seat-types .value').text()).toEqual('verified, professional');
+            });
+
+            it('should render prepaid invoice data.', function() {
+                view.model.set({
+                    'invoice_type': 'Prepaid',
+                    'invoice_number': 'INV-001',
+                    'price': 1000,
+                    'invoice_payment_date': new Date(2016, 1, 1, 1, 0, 0)
+                });
+                view.render();
+
+                expect(view.$('.invoice-number .value').text()).toEqual(model.get('invoice_number'));
+                expect(view.$('.invoiced-amount .value').text()).toEqual(
+                    _s.sprintf('$%s', model.get('price'))
+                );
+                expect(view.$('.invoice-payment-date .value').text()).toEqual(
+                    view.formatDateTime(model.get('invoice_payment_date'))
+                );
+                expect(visible('.invoice_discount_type')).toBe(false);
+                expect(visible('.invoice_discount_value')).toBe(false);
+            });
+
+            it('should render postpaid invoice data.', function() {
+                view.model.set({
+                    'invoice_type': 'Postpaid',
+                    'invoice_discount_type': 'Percentage',
+                    'invoice_discount_value': 50,
+                });
+                view.render();
+                expect(view.$('.invoice-discount-type .value').text()).toEqual(model.get('invoice_discount_type'));
+                expect(view.$('.invoice-discount-value .value').text()).toEqual(
+                    view.invoiceDiscountValue(
+                        model.get('invoice_discount_type'),
+                        model.get('invoice_discount_value')
+                    )
+                );
+                expect(visible('.invoice-number')).toBe(false);
+                expect(visible('.invoiced-amount')).toBe(false);
+                expect(visible('.invoice-payment-date')).toBe(false);
+            });
+
+            it('should render not-applicable invoice data.', function() {
+                view.model.set('invoice_type', 'Not-Applicable');
+                view.render();
+                expect(visible('.invoice_discount_type')).toBe(false);
+                expect(visible('.invoice-number')).toBe(false);
+                expect(visible('.invoiced-amount')).toBe(false);
+                expect(visible('.invoice-payment-date')).toBe(false);
+            });
+
+            it('should display tax deducted source input field.', function() {
+                view.model.set('tax_deduction', 'Yes');
+                view.render();
+                expect(visible('.tax-deducted-source-value')).toBe(true);
+
+                view.model.set('tax_deduction', 'No');
+                view.render();
+                expect(visible('.tax-deducted-source-value')).toBe(false);
             });
 
             it('should display data table', function () {
                 view.renderVoucherTable();
-                expect(view.$el.find('#vouchersTable').DataTable().autowidth).toBeFalsy();
-                expect(view.$el.find('#vouchersTable').DataTable().paging).toBeFalsy();
-                expect(view.$el.find('#vouchersTable').DataTable().ordering).toBeFalsy();
-                expect(view.$el.find('#vouchersTable').DataTable().searching).toBeFalsy();
+                expect(view.$('#vouchersTable').DataTable().autowidth).toBeFalsy();
+                expect(view.$('#vouchersTable').DataTable().paging).toBeFalsy();
+                expect(view.$('#vouchersTable').DataTable().ordering).toBeFalsy();
+                expect(view.$('#vouchersTable').DataTable().searching).toBeFalsy();
             });
 
             it('should download voucher report in the new tab', function () {
@@ -197,7 +267,6 @@ define([
                 expect(e.preventDefault).toHaveBeenCalled();
                 expect(window.open).toHaveBeenCalledWith(url, '_blank');
             });
-
         });
     }
 );

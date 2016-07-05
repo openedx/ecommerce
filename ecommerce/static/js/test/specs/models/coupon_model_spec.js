@@ -84,6 +84,22 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
                 });
+
+                it('should validate invoice data.', function() {
+                    model.set('price', 'text');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                    model.set('price', 100);
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+
+                    model.set('invoice_discount_value', 'text');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                    model.set('invoice_discount_value', 100);
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
             });
 
             describe('test model methods', function () {
@@ -128,6 +144,21 @@ define([
                     args = $.ajax.calls.argsFor(0);
                     ajaxData = JSON.parse(args[0].data);
                     expect(ajaxData.quantity).toEqual(1);
+                });
+
+                it('should format start and end date if they are patch updated', function () {
+                    var model = Coupon.findOrCreate(discountCodeData, {parse: true});
+                    spyOn(moment, 'utc');
+                    model.save(
+                        {
+                            start_date: '2015-11-11T00:00:00Z',
+                            end_date: '2016-11-11T00:00:00Z'
+                        },
+                        {patch: true}
+                    );
+
+                    expect(moment.utc).toHaveBeenCalledWith('2015-11-11T00:00:00Z');
+                    expect(moment.utc).toHaveBeenCalledWith('2016-11-11T00:00:00Z');
                 });
             });
 

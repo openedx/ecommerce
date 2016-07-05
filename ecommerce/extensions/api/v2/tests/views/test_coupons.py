@@ -80,6 +80,27 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         site.siteconfiguration = site_configuration
         return site
 
+    def test_retrieve_invoice_data(self):
+        request_data = {
+            'invoice_discount_type': Invoice.PERCENTAGE,
+            'invoice_discount_value': 50,
+            'invoice_number': 'INV-00055',
+            'invoice_payment_date': datetime.datetime(2016, 1, 1, tzinfo=pytz.UTC).isoformat(),
+            'invoice_type': Invoice.PREPAID,
+            'tax_deducted_source': None
+        }
+
+        invoice_data = CouponViewSet().retrieve_invoice_data(request_data)
+
+        self.assertDictEqual(invoice_data, {
+            'discount_type': request_data['invoice_discount_type'],
+            'discount_value': request_data['invoice_discount_value'],
+            'number': request_data['invoice_number'],
+            'payment_date': request_data['invoice_payment_date'],
+            'type': request_data['invoice_type'],
+            'tax_deducted_source': request_data['tax_deducted_source']
+        })
+
     @ddt.data(
         (Voucher.ONCE_PER_CUSTOMER, 2, 2),
         (Voucher.SINGLE_USE, 2, None)
@@ -525,6 +546,20 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CatalogPr
 
         baskets = Basket.objects.filter(lines__product_id=coupon.id)
         self.assertEqual(baskets.first().owner.username, 'Test Client Username')
+
+    def test_update_invoice_data(self):
+        coupon = Product.objects.get(title='Test coupon')
+        invoice = Invoice.objects.get(order__basket__lines__product=coupon)
+        self.assertEqual(invoice.discount_type, Invoice.PERCENTAGE)
+        CouponViewSet().update_invoice_data(
+            coupon=coupon,
+            data={
+                'invoice_discount_type': Invoice.FIXED
+            }
+        )
+
+        invoice = Invoice.objects.get(order__basket__lines__product=coupon)
+        self.assertEqual(invoice.discount_type, Invoice.FIXED)
 
     @ddt.data('audit', 'honor')
     def test_restricted_course_mode(self, mode):

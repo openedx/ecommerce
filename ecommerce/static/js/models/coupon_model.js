@@ -62,11 +62,27 @@ define([
                     }
                 },
                 quantity: {pattern: 'number'},
-                price: {pattern: 'number'},
                 benefit_value: {
                     pattern: 'number',
                     required: function () {
                         return this.get('coupon_type') === 'Discount code';
+                    }
+                },
+                invoice_type: {required: true},
+                invoice_number: {
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
+                    }
+                },
+                price: {
+                    pattern: 'number',
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
+                    }
+                },
+                invoice_payment_date: {
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
                     }
                 },
                 invoice_discount_value: {
@@ -123,11 +139,16 @@ define([
             },
 
             initialize: function () {
+                this.on('change:categories', this.updateCategory, this);
                 this.on('change:voucher_type', this.changeVoucherType, this);
                 this.on('change:vouchers', this.updateVoucherData);
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
+            },
+
+            isPrepaidInvoiceType: function() {
+                return this.get('invoice_type') === 'Prepaid';
             },
 
             /**
@@ -156,6 +177,12 @@ define([
             getCourseID: function(seat_data) {
                 var course_id = _.findWhere(seat_data, {'name': 'course_key'});
                 return course_id ? course_id.value : '';
+            },
+
+            updateCategory: function() {
+                var categoryID = this.get('categories')[0].id;
+                this.set('category', categoryID);
+                this.set('category_ids', [categoryID]);
             },
 
             updateSeatData: function () {
@@ -210,27 +237,37 @@ define([
                     'invoice_payment_date': invoice.payment_date,
                     'tax_deducted_source': invoice.tax_deducted_source,
                     'tax_deduction': tax_deducted,
-                });       
+                });
             },
 
-            save: function (options) {
+            save: function (attributes, options) {
                 _.defaults(options || (options = {}), {
                     // The API requires a CSRF token for all POST requests using session authentication.
                     headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
                     contentType: 'application/json'
                 });
 
-                this.set('start_date', moment.utc(this.get('start_date')));
-                this.set('end_date', moment.utc(this.get('end_date')));
-                this.set('category_ids', [this.get('category')]);
+                if (!options.patch){
+                    this.set('start_date', moment.utc(this.get('start_date')));
+                    this.set('end_date', moment.utc(this.get('end_date')));
 
-                if (this.get('coupon_type') === 'Enrollment code') {
-                    this.set('benefit_type', 'Percentage');
-                    this.set('benefit_value', 100);
+                    if (this.get('coupon_type') === 'Enrollment code') {
+                        this.set('benefit_type', 'Percentage');
+                        this.set('benefit_value', 100);
+                    }
+
+                    options.data = JSON.stringify(this.toJSON());
+                } else {
+                    if (_.has(attributes, 'start_date')) {
+                        attributes.start_date = moment.utc(attributes.start_date);
+                    }
+
+                    if (_.has(attributes, 'end_date')) {
+                        attributes.end_date = moment.utc(attributes.end_date);
+                    }
                 }
 
-                options.data = JSON.stringify(this.toJSON());
-                return this._super(null, options);
+                return this._super(attributes, options);
             }
         });
     }

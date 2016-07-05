@@ -79,6 +79,10 @@ define([
                     },
                     setOptions: {
                         validate: true
+                    },
+                    onSet: function(val) {
+                        this.model.set('category_ids', [val]);
+                        return val;
                     }
                 },
                 'input[name=title]': {
@@ -217,13 +221,35 @@ define([
                 'change [name=benefit_type]': 'changeLimitForBenefitValue',
                 'change [name=invoice_discount_type]': 'changeLimitForInvoiceDiscountValue',
                 'change [name=invoice_type]': 'toggleInvoiceFields',
-                'change [name=tax_deduction]': 'toggleTaxDeductedSourceField'
+                'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
+                'click .external-link': 'routeToLink'
             },
 
             initialize: function (options) {
                 this.alertViews = [];
                 this.editing = options.editing || false;
                 this.hiddenClass = 'hidden';
+
+                if (this.editing) {
+                    this.editableAttributes = [
+                        'benefit_value',
+                        'catalog_query',
+                        'category_ids',
+                        'client',
+                        'course_seat_types',
+                        'end_date',
+                        'invoice_discount_type',
+                        'invoice_discount_value',
+                        'invoice_number',
+                        'invoice_payment_date',
+                        'invoice_type',
+                        'note',
+                        'price',
+                        'start_date',
+                        'tax_deducted_source',
+                        'title',
+                    ];
+                }
 
                 this.dynamic_catalog_view = new DynamicCatalogView({
                     'query': this.model.get('catalog_query'),
@@ -302,7 +328,7 @@ define([
                     this.formGroup('[name=code]').addClass(this.hiddenClass);
                 }
             },
- 
+
             toggleInvoiceFields: function () {
                 var invoice_type = this.$('[name=invoice_type]:checked').val(),
                     prepaid_fields = [
@@ -330,8 +356,9 @@ define([
                     }, this);
                     this.hideField('[name=price]', 0);
                     this.hideField('[name=invoice_discount_value]', null);
-                    this.hideField('[name=tax_deducted_value]', null);
-                    this.formGroup('[name=tax_deduction]').addClass(this.hiddenClass);
+                    this.hideField('[name=tax_deducted_source_value]', null);
+                    this.$('#non-tax-deducted').prop('checked', true).trigger('change');
+                    this.hideField('[name=tax_deduction]', null);
                 }
             },
 
@@ -500,6 +527,15 @@ define([
                 this.dynamic_catalog_view.seat_types = this.model.get('course_seat_types');
             },
 
+            /* Open external links in a new tab.
+            *  Works only for anchor elements that contain 'external-link' class.
+            */
+            routeToLink: function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(e.currentTarget.href);
+            },
+
             render: function () {
                 // Render the parent form/template
                 this.$el.html(this.template(this.model.attributes));
@@ -512,7 +548,6 @@ define([
                 this.$alerts = this.$('.alerts');
 
                 if (this.editing) {
-                    this.$('select[name=category]').val(this.model.get('categories')[0].id).trigger('change');
                     this.disableNonEditableFields();
                     this.toggleCouponTypeField();
                     this.toggleVoucherTypeField();
