@@ -42,6 +42,7 @@ Coupon Code Redemption
 There are two endpoints for redemption.
 
 - Offer landing page:
+
 http://localhost:8002/coupons/offer/?code=
 
 This page displays the offer to the learner and allows the leaner to apply the code supplied.
@@ -49,6 +50,7 @@ This landing page does not require registration / login and is there to provide
 context as well as to confirm this will in fact enroll the learner in the course.
 
 - Redeem endpoint
+
 http://localhost:8002/coupons/redeem/?code=
 
 This endpoint actually performs the code redemption by adding the associated course to
