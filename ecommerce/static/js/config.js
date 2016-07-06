@@ -14,6 +14,7 @@ require.config({
         'dataTablesBootstrap': 'bower_components/datatables/media/js/dataTables.bootstrap',
         'ecommerce': 'js/shims/ecommerce',
         'jquery': 'bower_components/jquery/dist/jquery',
+        'jquery.ajax-retry': 'vendor-extensions/oscar/js/jquery.ajax-retry',
         'js-cookie': 'bower_components/js-cookie/src/js.cookie',
         'models': 'js/models',
         'moment': 'bower_components/moment/moment',

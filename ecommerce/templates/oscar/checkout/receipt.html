@@ -7,15 +7,12 @@
 {% endblock title %}
 
 {% block javascript %}
-    <script src="{% static 'js/views/receipt_view.js' %}"></script>
-{#    <script src="{% static 'vendor-extensions/oscar/js/jquery.ajax-retry.js' %}"></script>#}
 {% endblock javascript %}
 
 {% block navbar %}
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
-{#<div class="window-wrap" dir="ltr">#}
 {% block content %}
 <div class="receipt">
     <div class="provider-wrapper hidden">
@@ -41,7 +38,7 @@
       </div>
     </div>
 
-    <div class="container content-container"> <section class="wrapper carousel">
+    <div class="container content-container"> <!--section class="wrapper carousel"-->
         <div id="receipt-container" class="pay-and-verify" data-is-payment-complete='${is_payment_complete}'
          data-platform-name='${platform_name}' data-verified='${verified}' data-username='${name}'>
             {# data-is-request-in-themed-site='${is_request_in_themed_site}'> #}
@@ -173,7 +170,7 @@
                   </a>
             </nav>
         </article></div>
-     </div></section>
+     </div><!--/section-->
 </div>
 <div id="error-container" class="hidden">
     <div id="error" class="wrapper-msg wrapper-msg-activate">

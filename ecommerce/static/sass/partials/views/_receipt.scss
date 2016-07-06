@@ -8,12 +8,12 @@
         box-shadow: 0 2px 1px 0 #005201;
         color: #fff !important;
         text-decoration: none !important;
-    }
 
-    .action-primary:hover, .action-primary:focus {
-        background: #60bc61 none repeat scroll 0 0;
-        color: #fff;
-        text-decoration: none;
+        &:hover, &:focus {
+            background: #60bc61 none repeat scroll 0 0;
+            color: #fff;
+            text-decoration: none;
+        }
     }
 
     .content-container {
