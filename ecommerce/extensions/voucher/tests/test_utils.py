@@ -459,6 +459,26 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         new_basket = self.apply_voucher(self.user, self.site, voucher)
         self.assertEqual(len(new_basket.applied_offers()), 0)
 
+    def test_single_use_redemption_count(self):
+        """Verify redemption count does not increment for other, unused, single-use vouchers."""
+        coupon = self.create_coupon(
+            title='Test single use',
+            catalog=self.catalog,
+            quantity=2
+        )
+        coupon.history.all().update(history_user=self.user)
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        self.use_voucher('TEST', vouchers[0], self.user)
+        __, rows = generate_coupon_report([coupon.attr.coupon_vouchers])
+
+        # rows[0] - first voucher header row
+        # rows[1] - first voucher row with usage information
+        # rows[2] - second voucher header row
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[0]['Redemption Count'], 1)
+        self.assertEqual(rows[1]['Redeemed By Username'], self.user.username)
+        self.assertEqual(rows[2]['Redemption Count'], 0)
+
     def test_generate_coupon_report_for_used_query_coupon(self):
         """Test that used query coupon voucher reports which course was it used for."""
         catalog_query = '*:*'
