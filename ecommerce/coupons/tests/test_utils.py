@@ -1,7 +1,7 @@
 import httpretty
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
+from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.coupons.utils import get_seats_from_query
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -9,7 +9,7 @@ from ecommerce.tests.testcases import TestCase
 
 @httpretty.activate
 @mock_course_catalog_api_client
-class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
+class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
         self.query = 'key:*'

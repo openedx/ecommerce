@@ -5,14 +5,14 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.coupons.tests.mixins import CatalogPreviewMockMixin, CouponMixin
+from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
 
 
-class RangeTests(CouponMixin, CourseCatalogTestMixin, CatalogPreviewMockMixin, TestCase):
+class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
     def setUp(self):
         super(RangeTests, self).setUp()
 
