@@ -265,10 +265,9 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     'ecommerce.core',
     'ecommerce.courses',
+    'ecommerce.features',
     'ecommerce.invoice',
     'ecommerce.referrals',
-
-    # Theming app for customizing visual and behavioral attributes of a site
     'ecommerce.theming',
 ]
 
@@ -456,6 +455,10 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'ecommerce_language'
+
+# This is the domain that will be used when setting cookies that should be read by sibling subdomains,
+# and the parent domain.
+TOP_LEVEL_COOKIE_DOMAIN = None
 # END COOKIE CONFIGURATION
 
 
