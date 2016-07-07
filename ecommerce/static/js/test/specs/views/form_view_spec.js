@@ -35,7 +35,7 @@ define([
             it('should save model on submit', function () {
                 spyOn(model, 'isValid').and.returnValue(true);
                 spyOn(Backbone.history, 'navigate');
-                spyOn(model, 'save').and.callFake(function (options) {
+                spyOn(model, 'save').and.callFake(function (attributes, options) {
                     options.success({ id: 'fake_id' });
                     options.complete();
                 });
@@ -109,7 +109,7 @@ define([
             it('should call saveSuccess when model is successfully saved', function () {
                 spyOn(view, 'saveSuccess');
                 spyOn(model, 'isValid').and.returnValue(true);
-                spyOn(model, 'save').and.callFake(function (options) {
+                spyOn(model, 'save').and.callFake(function (attributes, options) {
                     options.success({ id: 'fake_id' });
                 });
                 view.submit($.Event('click'));
@@ -128,7 +128,7 @@ define([
                 }
 
                 spyOn(model, 'isValid').and.returnValue(true);
-                spyOn(model, 'save').and.callFake(function (options) {
+                spyOn(model, 'save').and.callFake(function (attributes, options) {
                     options.error(model, errorObj);
                     options.complete();
                 });

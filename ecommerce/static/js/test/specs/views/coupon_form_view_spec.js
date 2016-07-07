@@ -99,6 +99,10 @@ define([
                     expect(visible('[name=benefit_value]')).toBe(false);
                     expect(visible('[name=code]')).toBe(false);
                 });
+
+                it('should set model attribute category_ids on render', function () {
+                    expect(view.model.get('category_ids')[0]).toBe(4);
+                });
             });
 
             describe('routing', function() {
