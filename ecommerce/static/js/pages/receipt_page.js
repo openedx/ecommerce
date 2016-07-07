@@ -7,7 +7,7 @@ define([
         'use strict';
 
         return Page.extend({
-            title: gettext('Thank You'),
+            title: gettext('Receipt'),
 
             initialize: function () {
                 this.view = new ReceiptView();

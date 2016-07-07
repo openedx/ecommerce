@@ -1,9 +1,10 @@
 define([
         'jquery',
-        'jquery.ajax-retry',
+        'jquery-ajax-retry',
         'backbone',
         'underscore',
-        'bootstrap'
+        'bootstrap',
+        'jquery-url'
     ],
 function ($, AjaxRetry, Backbone, _) {
     'use strict';
@@ -102,7 +103,7 @@ function ($, AjaxRetry, Backbone, _) {
             var self = this,
                 orderId = this.ecommerceOrderNumber || this.ecommerceBasketId || $.url('?payment-order-num');
 
-            if (orderId && this.$el.data('is-payment-complete') === 'True') {
+            if (orderId) {
                 // Get the order details
                 self.$el.removeClass('hidden');
                 self.getReceiptData(orderId).then(self.renderReceipt, self.renderError);
@@ -135,16 +136,16 @@ function ($, AjaxRetry, Backbone, _) {
          * @return {object} JQuery Promise.
          */
         getReceiptData: function (orderId) {
-            var urlFormat = '/shoppingcart/receipt/{orderId}/';
+            var urlFormat = '/api/v2/orders/' + orderId;
 
             if (this.ecommerceOrderNumber) {
-                urlFormat = '/api/v2/orders/{orderId}/';
+                urlFormat = '/api/v2/orders/' + orderId;
             } else if (this.ecommerceBasketId){
-                urlFormat = '/api/v2/baskets/{orderId}/order/';
+                urlFormat = '/api/v2/baskets/' + orderId + '/order/';
             }
 
             return $.ajax({
-                url: edx.StringUtils.interpolate(urlFormat, {orderId: orderId}),
+                url: urlFormat,
                 type: 'GET',
                 dataType: 'json'
             }).retry({times: 5, timeout: 2000, statusCodes: [404]});

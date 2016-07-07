@@ -7,7 +7,7 @@ require([
         'use strict';
 
         $(function () {
-            var receiptApp = new ReceiptRouter({el: $('.receipt')});
+            var receiptApp = new ReceiptRouter({$el: $('.receipt')});
             receiptApp.start();
         });
     }

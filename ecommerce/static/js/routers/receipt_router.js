@@ -12,17 +12,13 @@ define([
             root: '/checkout/',
 
             routes: {
-                'receipt/?order_number=:order': 'showReceiptPage',
-                'payment-details/': 'index'
+                'receipt/?order_number=:order': 'showReceiptPage'
             },
 
-            index: function() {
-              console.log('Triggered');
-            },
             showReceiptPage: function() {
                 var page = new ReceiptPage();
                 this.currentView = page;
-                this.$el.html(page.el);
+                //this.$el.html(page.el); Restore this once figure out what we want to render
             }
         });
     }
