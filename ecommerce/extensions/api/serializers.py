@@ -1,4 +1,6 @@
 """Serializers for data manipulated by ecommerce API endpoints."""
+from __future__ import unicode_literals
+
 from decimal import Decimal
 import logging
 

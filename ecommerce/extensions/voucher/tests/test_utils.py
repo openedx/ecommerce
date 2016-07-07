@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import httpretty
 from django.db import IntegrityError
 from django.test import override_settings
@@ -43,7 +44,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
     def setUp(self):
         super(UtilTests, self).setUp()
 
-        self.user = self.create_user(full_name="Test User", is_staff=True)
+        self.user = self.create_user(full_name="Tešt Ušer", is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
         self.course = CourseFactory(id='course-v1:test-org+course+run')
@@ -58,7 +59,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.coupon = self.create_coupon(
             title='Test product',
             catalog=self.catalog,
-            note='Test note',
+            note='Tešt note',
             quantity=1,
             max_uses=1
         )
@@ -156,7 +157,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             catalog=self.catalog,
             coupon=self.coupon,
             end_datetime=datetime.date(2015, 10, 30),
-            name="Test voucher",
+            name="Tešt voučher",
             quantity=10,
             start_datetime=datetime.date(2015, 10, 1),
             voucher_type=Voucher.SINGLE_USE
@@ -283,7 +284,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             get_ecommerce_url() + self.REDEMPTION_URL.format(voucher.code)
         )
         self.assertEqual(row['Note'], coupon.attr.note)
-        self.assertEqual(row['Created By'], coupon.history.first().history_user.full_name)
+        self.assertEqual(row['Created By'].decode('utf-8'), coupon.history.first().history_user.full_name)
         self.assertEqual(row['Create Date'], coupon.history.latest().history_date.strftime("%b %d, %y"))
         self.assertEqual(row['Coupon Start Date'], voucher.start_datetime.strftime("%b %d, %y"))
         self.assertEqual(row['Coupon Expiry Date'], voucher.end_datetime.strftime("%b %d, %y"))
@@ -340,13 +341,14 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_report_for_inactive_coupons(self):
         """ Verify the coupon report show correct status for inactive coupons. """
+        coupon_name = 'Inačtive ćođe'
         create_vouchers(
             benefit_type=Benefit.FIXED,
             benefit_value=100.00,
             catalog=self.catalog,
             coupon=self.coupon,
             end_datetime=datetime.date(2015, 10, 30),
-            name="Inactive code",
+            name=coupon_name,
             quantity=1,
             start_datetime=datetime.date(2015, 10, 30),
             voucher_type=Voucher.SINGLE_USE
@@ -355,7 +357,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         __, rows = generate_coupon_report(self.coupon_vouchers)
 
         inactive_coupon_row = rows[1]
-        self.assertEqual(inactive_coupon_row['Coupon Name'], 'Inactive code')
+        self.assertEqual(inactive_coupon_row['Coupon Name'], coupon_name)
         self.assertEqual(inactive_coupon_row['Status'], _('Inactive'))
 
     def test_generate_coupon_report_for_old_coupons(self):

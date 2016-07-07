@@ -105,10 +105,10 @@ def _get_info_for_coupon_report(coupon, voucher):
     status = _get_voucher_status(voucher, offer)
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
     url = get_ecommerce_url(path)
-    author = history.history_user.full_name
+    author = history.history_user.full_name.encode('utf8')
 
     try:
-        note = coupon.attr.note
+        note = coupon.attr.note.encode('utf8')
     except AttributeError:
         note = ''
 
@@ -131,7 +131,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         max_uses_count = offer.max_global_applications
 
     coupon_data = {
-        'Coupon Name': voucher.name,
+        'Coupon Name': voucher.name.encode('utf8'),
         'Code': voucher.code,
         'Coupon Type': coupon_type,
         'URL': url,
@@ -221,7 +221,7 @@ def generate_coupon_report(coupon_vouchers):
             for item in ('Order Number', 'Redeemed By Username',):
                 row[item] = ''
 
-            row['Client'] = client
+            row['Client'] = client.encode('utf8')
             rows.append(row)
             if voucher.num_orders > 0:
                 voucher_applications = VoucherApplication.objects.filter(voucher=voucher)
