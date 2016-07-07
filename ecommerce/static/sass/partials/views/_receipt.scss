@@ -40,6 +40,16 @@
         background: #e8f6fc none repeat scroll 0 0;
     }
 
+    .nav-link {
+
+        border-bottom: none;
+        text-decoration: none !important;
+
+        &:active, &:hover, &:focus {
+            border-bottom: 1px dotted #0079bc;
+        }
+    }
+
     .nav-wizard {
         box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.2) inset;
         padding: 15px 20px;
@@ -73,7 +83,3 @@
         margin: 0 0 15px;
     }
 }
-
-// For the links:
-
-.nav-link {border-bottom: 1px dotted #0079bc; text-decoration: none !important;}

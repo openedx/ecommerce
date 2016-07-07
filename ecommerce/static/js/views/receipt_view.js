@@ -19,8 +19,6 @@ function ($, AjaxRetry, Backbone, _) {
             this.ecommerceOrderNumber = $.url('?order_number');
             this.useEcommerceApi = this.ecommerceBasketId || this.ecommerceOrderNumber;
             _.bindAll(this, 'renderReceipt', 'renderError', 'getProviderData', 'renderProvider', 'getCourseData');
-
-            this.render();
         },
 
         renderReceipt: function (data) {
@@ -139,7 +137,7 @@ function ($, AjaxRetry, Backbone, _) {
             var urlFormat = '/api/v2/orders/' + orderId;
 
             if (this.ecommerceOrderNumber) {
-                urlFormat = '/api/v2/orders/' + orderId;
+                urlFormat = '/api/v2/orders/' + orderId + '/';
             } else if (this.ecommerceBasketId){
                 urlFormat = '/api/v2/baskets/' + orderId + '/order/';
             }

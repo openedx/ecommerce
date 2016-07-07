@@ -123,6 +123,7 @@ class ReceiptResponseView(ThankYouView):
             'nav_hidden': True,
             'verify_link': get_lms_url('/verify_student/verify-now/'),
             'dashboard': get_lms_url('/dashboard'),
+            # Alternative code: self.object.voucherapplication_set.all()[0].voucher.code
             'codes': [voucher.code for voucher in self.object.basket.vouchers.all()],
             # Need an LMS endpoint! 'is_request_in_themed_site': is_request_in_themed_site(),
             'course_key': self.object.lines.all()[0].product.course,

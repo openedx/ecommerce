@@ -35,7 +35,7 @@
       </div>
       <div class="complete-order">
         <button data-provider="{{ id }}" data-course-key="{{ course_key }}" data-username="{{ name }}"
-                class="complete-course"{# onClick=completeOrder(this) #}>{% trans  "Get Credit" %}</button>
+                class="complete-course" onClick="completeOrder(this)">{% trans  "Get Credit" %}</button>
       </div>
     </div>
 
@@ -56,7 +56,7 @@
                                     {% trans "Print this page for your records; it serves as your receipt. " %}
                                     {% trans "You will also receive a confirmation email with the same " %}
                                     {% trans "information at " %}
-                                    <a href="mailto:{{ order.email }}">{{ order.email }}</a>.
+                                    <a class="nav-link" href="mailto:{{ order.email }}">{{ order.email }}</a>.
                                 </p>
                             </div>
 
