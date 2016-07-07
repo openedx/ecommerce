@@ -225,8 +225,8 @@ define([
                 });
 
                 if (!options.patch){
-                    this.set('start_date', moment.utc(this.get('start_date')));
-                    this.set('end_date', moment.utc(this.get('end_date')));
+                    this.set('start_datetime', moment.utc(this.get('start_date')));
+                    this.set('end_datetime', moment.utc(this.get('end_date')));
 
                     if (this.get('coupon_type') === 'Enrollment code') {
                         this.set('benefit_type', 'Percentage');
@@ -236,11 +236,17 @@ define([
                     options.data = JSON.stringify(this.toJSON());
                 } else {
                     if (_.has(attributes, 'start_date')) {
-                        attributes.start_date = moment.utc(attributes.start_date);
+                        attributes.start_datetime = moment.utc(attributes.start_date);
+                        delete attributes.start_date;
                     }
 
                     if (_.has(attributes, 'end_date')) {
-                        attributes.end_date = moment.utc(attributes.end_date);
+                        attributes.end_datetime = moment.utc(attributes.end_date);
+                        delete attributes.end_date;
+                    }
+
+                    if (_.has(attributes, 'title')) {
+                        attributes.name = attributes.title;
                     }
                 }
 

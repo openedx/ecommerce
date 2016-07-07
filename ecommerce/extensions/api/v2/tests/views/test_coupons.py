@@ -60,10 +60,10 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100,
             'catalog': self.catalog,
-            'end_date': '2020-1-1',
+            'end_datetime': '2020-1-1',
             'code': '',
             'quantity': 2,
-            'start_date': '2015-1-1',
+            'start_datetime': '2015-1-1',
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
             'categories': [self.category],
             'note': None,
@@ -77,27 +77,6 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         site = SiteFactory()
         site.siteconfiguration = site_configuration
         return site
-
-    def test_retrieve_invoice_data(self):
-        request_data = {
-            'invoice_discount_type': Invoice.PERCENTAGE,
-            'invoice_discount_value': 50,
-            'invoice_number': 'INV-00055',
-            'invoice_payment_date': datetime.datetime(2016, 1, 1, tzinfo=pytz.UTC).isoformat(),
-            'invoice_type': Invoice.PREPAID,
-            'tax_deducted_source': None
-        }
-
-        invoice_data = CouponViewSet().retrieve_invoice_data(request_data)
-
-        self.assertDictEqual(invoice_data, {
-            'discount_type': request_data['invoice_discount_type'],
-            'discount_value': request_data['invoice_discount_value'],
-            'number': request_data['invoice_number'],
-            'payment_date': request_data['invoice_payment_date'],
-            'type': request_data['invoice_type'],
-            'tax_deducted_source': request_data['tax_deducted_source']
-        })
 
     @ddt.data(
         (Voucher.ONCE_PER_CUSTOMER, 2, 2),
@@ -239,21 +218,18 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
     def test_create_update_data_dict(self):
-        """Test the update data dictionary"""
-        data = {}
+        """Test creating update data dictionary"""
+        fields = ['title', 'start_datetime', 'end_datetime']
 
-        for field in CouponVouchers.UPDATEABLE_VOUCHER_FIELDS:
-            CouponViewSet().create_update_data_dict(
-                request_data=self.coupon_data,
-                request_data_key=field['request_data_key'],
-                update_dict=data,
-                update_dict_key=field['attribute']
-            )
+        data = CouponViewSet().create_update_data_dict(
+            data=self.coupon_data,
+            fields=fields
+        )
 
         self.assertDictEqual(data, {
-            'end_datetime': self.coupon_data['end_date'],
-            'start_datetime': self.coupon_data['start_date'],
-            'name': self.coupon_data['title'],
+            'end_datetime': self.coupon_data['end_datetime'],
+            'start_datetime': self.coupon_data['start_datetime'],
+            'title': self.coupon_data['title'],
         })
 
     def test_delete_coupon(self):
@@ -295,8 +271,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'title': 'Tešt čoupon',
             'client': 'TeštX',
             'stock_record_ids': [1, 2],
-            'start_date': '2015-01-01',
-            'end_date': '2020-01-01',
+            'start_datetime': '2015-01-01',
+            'end_datetime': '2020-01-01',
             'code': '',
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100,
@@ -392,7 +368,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """Test updating a coupon's title."""
         data = {
             'id': self.coupon.id,
-            'title': 'New title'
+            'name': 'New title'
         }
         response_data = self.get_response_json(
             'PUT',
@@ -410,8 +386,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """Test that updating a coupons date updates all of it's voucher dates."""
         data = {
             'id': self.coupon.id,
-            'start_date': '2030-01-01',
-            'end_date': '2035-01-01'
+            'start_datetime': '2030-01-01',
+            'end_datetime': '2035-01-01'
         }
         response_data = self.get_response_json(
             'PUT',

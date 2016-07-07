@@ -51,20 +51,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return CouponListSerializer
         return CouponSerializer
 
-    def retrieve_invoice_data(self, request_data):
-        """ Retrieve the invoice information from the request data. """
-        invoice_data = {}
-
-        for field in Invoice.UPDATEABLE_INVOICE_FIELDS:
-            self.create_update_data_dict(
-                request_data=request_data,
-                request_data_key=field,
-                update_dict=invoice_data,
-                update_dict_key=field.replace('invoice_', '')
-            )
-
-        return invoice_data
-
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
 
@@ -90,8 +76,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             title = request.data.get('title')
             client_username = request.data.get('client')
             stock_record_ids = request.data.get('stock_record_ids')
-            start_date = dateutil.parser.parse(request.data.get('start_date'))
-            end_date = dateutil.parser.parse(request.data.get('end_date'))
+            start_datetime = dateutil.parser.parse(request.data.get('start_datetime'))
+            end_datetime = dateutil.parser.parse(request.data.get('end_datetime'))
             code = request.data.get('code')
             benefit_type = request.data.get('benefit_type')
             benefit_value = request.data.get('benefit_value')
@@ -116,7 +102,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 except Voucher.DoesNotExist:
                     pass
 
-            invoice_data = self.retrieve_invoice_data(request.data)
+            invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
             if course_seat_types:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
@@ -152,21 +138,20 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 coupon_catalog = None
 
             data = {
-                'partner': partner,
-                'title': title,
                 'benefit_type': benefit_type,
                 'benefit_value': benefit_value,
                 'catalog': coupon_catalog,
-                'end_date': end_date,
-                'code': code,
-                'quantity': quantity,
-                'start_date': start_date,
-                'voucher_type': voucher_type,
-                'categories': categories,
-                'note': note,
-                'max_uses': max_uses,
                 'catalog_query': catalog_query,
-                'course_seat_types': course_seat_types
+                'categories': categories,
+                'code': code,
+                'course_seat_types': course_seat_types,
+                'end_datetime': end_datetime,
+                'max_uses': max_uses,
+                'note': note,
+                'partner': partner,
+                'quantity': quantity,
+                'start_datetime': start_datetime,
+                'voucher_type': voucher_type
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -219,10 +204,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             benefit_value=Decimal(data['benefit_value']),
             catalog=data['catalog'],
             coupon=coupon_product,
-            end_datetime=data['end_date'],
+            end_datetime=data['end_datetime'],
             code=data['code'] or None,
             quantity=int(data['quantity']),
-            start_datetime=data['start_date'],
+            start_datetime=data['start_datetime'],
             voucher_type=data['voucher_type'],
             max_uses=data['max_uses'],
             catalog_query=data['catalog_query'],
@@ -307,28 +292,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         coupon = self.get_object()
         vouchers = coupon.attr.coupon_vouchers.vouchers
         baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
-        data = {}
-
-        for field in CouponVouchers.UPDATEABLE_VOUCHER_FIELDS:
-            self.create_update_data_dict(
-                request_data=request.data,
-                request_data_key=field['request_data_key'],
-                update_dict=data,
-                update_dict_key=field['attribute']
-            )
+        data = self.create_update_data_dict(data=request.data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
 
         if data:
             vouchers.all().update(**data)
 
-        range_data = {}
-
-        for field in Range.UPDATABLE_RANGE_FIELDS:
-            self.create_update_data_dict(
-                request_data=request.data,
-                request_data_key=field,
-                update_dict=range_data,
-                update_dict_key=field
-            )
+        range_data = self.create_update_data_dict(data=request.data, fields=Range.UPDATABLE_RANGE_FIELDS)
 
         if range_data:
             voucher_range = vouchers.first().offers.first().benefit.range
@@ -360,19 +329,24 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
 
-    def create_update_data_dict(self, request_data, request_data_key, update_dict, update_dict_key):
+    def create_update_data_dict(self, data, fields):
         """
-        Adds the value from request data to the update data dictionary
+        Creates a dictionary for updating model attributes.
+
         Arguments:
-            request_data (QueryDict): Request data
-            request_data_key (str): Request data dictionary key
-            update_dict (dict): Dictionary containing the coupon update data
-            update_dict_key (str): Update data dictionary key
+            data (QueryDict): Request data
+            fields (list): List of updatable model fields
+
+        Returns:
+            update_dict (dict): Dictionary that will be used to update model objects.
         """
-        if request_data_key in request_data:
-            value = request_data.get(request_data_key)
-            update_dict[update_dict_key] = prepare_course_seat_types(value) \
-                if update_dict_key == 'course_seat_types' else value
+        update_dict = {}
+
+        for field in fields:
+            if field in data:
+                value = prepare_course_seat_types(data.get(field)) if field == 'course_seat_types' else data.get(field)
+                update_dict[field.replace('invoice_', '')] = value
+        return update_dict
 
     def update_coupon_benefit_value(self, benefit_value, coupon, vouchers):
         """
@@ -429,7 +403,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             data (dict): The request's data from which the invoice data is retrieved
                          and used for the updated.
         """
-        invoice_data = self.retrieve_invoice_data(data)
+        invoice_data = self.create_update_data_dict(data=data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
         if invoice_data:
             Invoice.objects.filter(order__basket__lines__product=coupon).update(**invoice_data)
