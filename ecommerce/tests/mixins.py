@@ -257,7 +257,8 @@ class SiteMixin(object):
             oauth_settings={
                 'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
                 'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
-            }
+            },
+            order_attribution_period=0
         )
         self.partner = site_configuration.partner
         self.site = site_configuration.site

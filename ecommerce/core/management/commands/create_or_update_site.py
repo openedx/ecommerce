@@ -88,6 +88,11 @@ class Command(BaseCommand):
                             type=str,
                             required=True,
                             help='from email')
+        parser.add_argument('--order-attribution-period',
+                            action='store',
+                            dest='order_attribution_period',
+                            type=int,
+                            help='Number of days after an order is placed before it can be attributed to an affiliate.')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -100,6 +105,7 @@ class Command(BaseCommand):
         client_secret = options.get('client_secret')
         segment_key = options.get('segment_key')
         from_email = options.get('from_email')
+        order_attribution_period = options.get('order_attribution_period')
 
         try:
             site = Site.objects.get(id=site_id)
@@ -135,6 +141,7 @@ class Command(BaseCommand):
                     'SOCIAL_AUTH_EDX_OIDC_SECRET': client_secret,
                     'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': client_secret,
                     'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [lms_url_root]
-                }
+                },
+                'order_attribution_period': order_attribution_period,
             }
         )

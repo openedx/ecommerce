@@ -26,6 +26,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.client_secret = 'ecommerce-secret'
         self.segment_key = 'test-segment-key'
         self.from_email = 'site_from_email@example.com'
+        self.order_attribution_period = 30
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -38,10 +39,11 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
         self.assertEqual(site_configuration.segment_key, self.segment_key)
         self.assertEqual(site_configuration.from_email, self.from_email)
+        self.assertEqual(site_configuration.order_attribution_period, self.order_attribution_period)
 
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, theme_scss_path=None,
-                      payment_processors=None, segment_key=None):
+                      payment_processors=None, segment_key=None, order_attribution_period=None):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -65,9 +67,17 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         if theme_scss_path:
             command_args.append('--theme-scss-path={theme_scss_path}'.format(theme_scss_path=theme_scss_path))
         if payment_processors:
-            command_args.append('--payment-processors={payment_processors}'.format(payment_processors=payment_processors))  # pylint: disable=line-too-long
+            command_args.append(
+                '--payment-processors={payment_processors}'.format(payment_processors=payment_processors)
+            )
         if segment_key:
             command_args.append('--segment-key={segment_key}'.format(segment_key=segment_key))
+        if order_attribution_period:
+            command_args.append(
+                '--order-attribution-period={order_attribution_period}'.format(
+                    order_attribution_period=order_attribution_period
+                )
+            )
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -83,7 +93,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             client_id=self.client_id,
             client_secret=self.client_secret,
             segment_key=self.segment_key,
-            from_email=self.from_email
+            from_email=self.from_email,
+            order_attribution_period=self.order_attribution_period
         )
 
         site = Site.objects.get(domain=site_domain)
@@ -109,7 +120,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             client_id=self.client_id,
             client_secret=self.client_secret,
             segment_key=self.segment_key,
-            from_email=self.from_email
+            from_email=self.from_email,
+            order_attribution_period=self.order_attribution_period
         )
 
         site = Site.objects.get(id=site.id)
