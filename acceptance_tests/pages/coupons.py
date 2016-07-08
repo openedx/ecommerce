@@ -74,6 +74,10 @@ class CouponsCreatePage(EcommerceAppPage):
 
             self.q(css="input[name='benefit_value']").fill('50')
 
+        self.q(css="input[name='invoice_number']").fill('1001')
+        self.q(css="input[name='invoice_payment_date']").fill(str(DEFAULT_END_DATE))
+        self.q(css="input[name='price']").fill('100')
+
         self.q(css="div.form-actions > button.btn").click()
 
         self.wait_for_ajax()
