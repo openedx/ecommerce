@@ -13,7 +13,7 @@ from rest_framework import filters, generics, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.core.models import BusinessClient, User
+from ecommerce.core.models import BusinessClient
 from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.constants import APIConstants as AC
@@ -437,22 +437,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
     def update_coupon_client(self, baskets, client_username):
         """
-        Update Invoice client for new coupons or Basket owner for old coupons
+        Update Invoice client for new coupons.
         Arguments:
             baskets (QuerySet): Baskets associated with the coupons
             client_username (str): Client username
         """
-        try:
-            client, __ = BusinessClient.objects.get_or_create(name=client_username)
-            order = get_object_or_404(Order, basket=baskets.first())
-            invoices = Invoice.objects.filter(order=order)
-            if invoices:
-                invoices.update(business_client=client)
-            else:
-                raise Http404
-        except Http404:
-            user, __ = User.objects.get_or_create(username=client_username)
-            baskets.update(owner=user)
+        client, __ = BusinessClient.objects.get_or_create(name=client_username)
+        Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
 
     def update_invoice_data(self, coupon, data):
         """

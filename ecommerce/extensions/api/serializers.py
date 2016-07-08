@@ -6,8 +6,6 @@ import logging
 
 from dateutil.parser import parse
 from django.db import transaction
-from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model, get_class
@@ -471,13 +469,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return serializer.data
 
     def get_client(self, obj):
-        basket = Basket.objects.filter(lines__product_id=obj.id).first()
-        try:
-            order = get_object_or_404(Order, basket=basket)
-            invoice = get_object_or_404(Invoice, order=order)
-            return invoice.business_client.name
-        except Http404:
-            return basket.owner.username
+        return Invoice.objects.get(order__basket__lines__product=obj).business_client.name
 
     def get_vouchers(self, obj):
         vouchers = obj.attr.coupon_vouchers.vouchers.all()

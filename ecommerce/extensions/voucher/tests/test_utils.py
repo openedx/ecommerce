@@ -360,20 +360,6 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(inactive_coupon_row['Coupon Name'], coupon_name)
         self.assertEqual(inactive_coupon_row['Status'], _('Inactive'))
 
-    def test_generate_coupon_report_for_old_coupons(self):
-        """ Verify that the client info is present for old coupons. """
-        self.setup_coupons_for_report()
-
-        Order.objects.get(basket=self.basket).delete()
-        ProductCategory.objects.all().delete()
-
-        self.mock_course_api_response(course=self.course)
-        __, rows = generate_coupon_report(self.coupon_vouchers)
-
-        for row in rows:
-            self.assertEqual(row['Client'], self.basket.owner.username)
-            self.assertEqual(row['Category'], '')
-
     def test_generate_coupon_report_for_query_coupons(self):
         """ Verify empty report fields for query coupons. """
         catalog_query = 'course:*'

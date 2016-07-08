@@ -521,16 +521,6 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, client_username)
 
-        # To test the old coupon clients, we need to delete all basket orders
-        Order.objects.filter(basket__in=baskets).delete()
-        CouponViewSet().update_coupon_client(
-            baskets=baskets,
-            client_username=client_username
-        )
-
-        baskets = Basket.objects.filter(lines__product_id=self.coupon.id)
-        self.assertEqual(baskets.first().owner.username, client_username)
-
     def test_update_invoice_data(self):
         invoice = Invoice.objects.get(order__basket__lines__product=self.coupon)
         self.assertEqual(invoice.discount_type, Invoice.PERCENTAGE)
