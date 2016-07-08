@@ -70,7 +70,7 @@ define([
             setNewPrice: function(course) {
                 var benefit = course.get('benefit'),
                     new_price,
-                    price = parseInt(course.get('stockrecords').price_excl_tax);
+                    price = parseFloat(course.get('stockrecords').price_excl_tax).toFixed(2);
 
                 if (benefit.type === 'Percentage') {
                     new_price = price - (price * (benefit.value / 100));
@@ -81,8 +81,8 @@ define([
                     }
                 }
 
-                course.get('stockrecords').price_excl_tax = Math.round(price);
-                course.set({new_price: Math.round(new_price)});
+                course.get('stockrecords').price_excl_tax = price;
+                course.set({new_price: new_price.toFixed(2)});
             },
 
             formatBenefitValue: function(course) {
