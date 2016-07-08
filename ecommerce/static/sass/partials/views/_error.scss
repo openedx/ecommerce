@@ -1,0 +1,24 @@
+.receipt_error {
+
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+
+    h1 {
+        font-weight: 600;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .nav-link {
+
+          border-bottom: none;
+          text-decoration: none !important;
+
+          &:active, &:hover, &:focus {
+              border-bottom: 1px dotted #0079bc;
+          }
+    }
+
+    p {
+        font-size: large;
+    }
+}

@@ -6,12 +6,14 @@ from oscar.core.loading import get_class
 class CheckoutApplication(app.CheckoutApplication):
     free_checkout = get_class('checkout.views', 'FreeCheckoutView')
     cancel_response = get_class('checkout.views', 'CancelResponseView')
+    error_response = get_class('checkout.views', 'ErrorResponseView')
     receipt_response = get_class('checkout.views', 'ReceiptResponseView')
 
     def get_urls(self):
         urls = [
             url(r'^free-checkout/$', self.free_checkout.as_view(), name='free-checkout'),
             url(r'^cancel/(?P<basket_id>\d+)/$', self.cancel_response.as_view(), name='cancel'),
+            url(r'^error/', self.error_response.as_view(), name='error'),
             url(r'^receipt/', self.receipt_response.as_view(), name='receipt'),
 
             url(r'^$', self.index_view.as_view(), name='index'),

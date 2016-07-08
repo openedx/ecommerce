@@ -1,0 +1,20 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+    {% trans "Checkout Error" %}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+    <div class="container receipt_error">
+        <h1>{% trans "Checkout Error" %}</h1>
+        <p>{% trans "An error has occurred with your payment." %} <b>{% trans "You have not been charged." %}</b></p>
+        <p>{% trans "Please try to submit your payment again. If this problem persists, contact" %}
+            <a class="nav-link" href="mailto:{{ payment_support_email }}">{{ payment_support_email }}</a>.</p>
+    </div>
+{% endblock content %}

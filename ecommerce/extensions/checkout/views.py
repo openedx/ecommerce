@@ -76,6 +76,22 @@ class CancelResponseView(RedirectView):
         return reverse('basket:summary')
 
 
+class ErrorResponseView(TemplateView):
+    """ Displays an error page when checkout does not complete successfully. """
+
+    template_name = 'checkout/error.html'
+
+    def get_context_data(self, **kwargs):
+        """
+        Currently, only collects support email; more information may be needed later based on page design.
+        """
+        context = super(ErrorResponseView, self).get_context_data(**kwargs)
+        context.update({
+            'payment_support_email': settings.PAYMENT_SUPPORT_EMAIL,
+        })
+        return context
+
+
 class ReceiptResponseView(ThankYouView):
     """ Handles behavior needed to display an order receipt. """
 
