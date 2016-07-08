@@ -222,11 +222,14 @@ define([
                         }
                     );
                 } else {
-                    this.model.save({
-                        complete: onSaveComplete,
-                        success: this.saveSuccess.bind(this),
-                        error: onSaveError
-                    });
+                    this.model.save(
+                        null,
+                        {
+                            complete: onSaveComplete,
+                            success: this.saveSuccess.bind(this),
+                            error: onSaveError
+                        }
+                    );
                 }
 
                 return this;

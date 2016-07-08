@@ -577,6 +577,7 @@ define([
                         'coupon_type': this.codeTypes[0].value,
                         'voucher_type': this.voucherTypes[0].value,
                         'category': defaultCategory[0].id,
+                        'category_ids': [defaultCategory[0].id],
                         'benefit_type': 'Percentage',
                         'catalog_type': 'Single course',
                         'invoice_discount_type': 'Percentage',
