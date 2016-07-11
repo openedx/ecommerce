@@ -113,7 +113,7 @@ define([
 
             render: function () {
                 var html,
-                    category = this.model.get('categories')[0].name,
+                    category = this.model.get('category').name,
                     invoice_data = this.formatInvoiceData(),
                     emailDomains = this.model.get('email_domains'),
                     template_data,

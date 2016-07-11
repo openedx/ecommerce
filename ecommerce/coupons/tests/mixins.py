@@ -8,6 +8,7 @@ from django.test import RequestFactory
 from oscar.test import factories
 
 from ecommerce.core.models import BusinessClient
+from ecommerce.extensions.catalogue.utils import create_coupon_product
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.tests.factories import PartnerFactory
@@ -161,28 +162,25 @@ class CouponMixin(object):
             catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
-        data = {
-            'partner': partner,
-            'benefit_type': benefit_type,
-            'benefit_value': benefit_value,
-            'catalog': catalog,
-            'end_datetime': datetime.date(2020, 1, 1),
-            'code': code,
-            'quantity': quantity,
-            'start_datetime': datetime.date(2015, 1, 1),
-            'voucher_type': voucher_type,
-            'categories': [self.category],
-            'note': note,
-            'max_uses': max_uses,
-            'catalog_query': catalog_query,
-            'course_seat_types': course_seat_types,
-            'email_domains': email_domains,
-        }
 
-        coupon = CouponViewSet().create_coupon_product(
-            title=title,
+        coupon = create_coupon_product(
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            catalog=catalog,
+            catalog_query=catalog_query,
+            category=self.category,
+            code=code,
+            course_seat_types=course_seat_types,
+            email_domains=email_domains,
+            end_datetime=datetime.date(2020, 1, 1),
+            max_uses=max_uses,
+            note=note,
+            partner=partner,
             price=price,
-            data=data
+            quantity=quantity,
+            start_datetime=datetime.date(2015, 1, 1),
+            title=title,
+            voucher_type=voucher_type
         )
 
         request = RequestFactory()

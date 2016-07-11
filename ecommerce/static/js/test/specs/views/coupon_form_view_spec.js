@@ -90,10 +90,6 @@ define([
                     expect(SpecUtils.formGroup(view, '[name=benefit_value]')).not.toBeVisible();
                     expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
                 });
-
-                it('should set model attribute category_ids on render', function () {
-                    expect(view.model.get('category_ids')[0]).toBe(4);
-                });
             });
 
             describe('toggle credit seats', function() {
