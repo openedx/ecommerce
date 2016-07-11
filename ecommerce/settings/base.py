@@ -269,6 +269,9 @@ LOCAL_APPS = [
 
     # Theming app for customizing visual and behavioral attributes of a site
     'ecommerce.theming',
+
+    # Sailthru email marketing integration
+    'ecommerce.sailthru',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -479,9 +482,11 @@ BROKER_HEARTBEAT_CHECKRATE = 2
 # See http://celery.readthedocs.org/en/latest/configuration.html#celery-imports.
 CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
+    'ecommerce.sailthru.tasks',
 )
 
-CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'}}
+CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'},
+                 'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'fulfillment'}}
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
 # See http://celery.readthedocs.org/en/latest/configuration.html#celeryd-hijack-root-logger.
@@ -541,3 +546,6 @@ ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(w
 
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
+
+# Settings for Sailthru email marketting integration
+SAILTHRU_ENABLE = False
