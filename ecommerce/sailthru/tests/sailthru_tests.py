@@ -1,4 +1,4 @@
-"""Tests of email marketing signal handlers."""
+"""Tests of ecommerce sailthru signal handlers."""
 import logging
 
 from mock import patch
@@ -19,7 +19,7 @@ TEST_EMAIL = "test@edx.org"
 
 class SailthruTests(CourseCatalogTestMixin, TestCase):
     """
-    Tests for the Sailthru signals and tasks classes.
+    Tests for the Sailthru signals class.
     """
 
     def setUp(self):
@@ -92,7 +92,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_price_zero(self, mock_update_course_enrollment):
         """
-        Make that the price of zero skips update_course_enrollment
+        Test that a price of zero skips update_course_enrollment
         """
 
         seat, order = self._create_order(0)
