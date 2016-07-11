@@ -33,6 +33,7 @@ Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 Partner = get_model('partner', 'Partner')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
@@ -420,6 +421,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Category
+        fields = ('id', 'name',)
 
 
 class CouponListSerializer(serializers.ModelSerializer):
@@ -432,12 +434,12 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
     benefit_type = serializers.SerializerMethodField()
     benefit_value = serializers.SerializerMethodField()
-    coupon_type = serializers.SerializerMethodField()
     catalog_query = serializers.SerializerMethodField()
-    categories = CategorySerializer(many=True, read_only=True)
+    category = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
     code = serializers.SerializerMethodField()
     code_status = serializers.SerializerMethodField()
+    coupon_type = serializers.SerializerMethodField()
     course_seat_types = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
@@ -569,10 +571,14 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_voucher_type(self, obj):
         return self.retrieve_voucher_usage(obj)
 
+    def get_category(self, obj):
+        category = ProductCategory.objects.filter(product=obj).first().category
+        return CategorySerializer(category).data
+
     class Meta(object):
         model = Product
         fields = (
-            'benefit_type', 'benefit_value', 'catalog_query', 'categories',
+            'benefit_type', 'benefit_value', 'catalog_query', 'category',
             'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
             'end_date', 'id', 'last_edited', 'max_uses', 'note',
             'num_uses', 'payment_information', 'price', 'quantity',

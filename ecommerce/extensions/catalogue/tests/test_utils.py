@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from hashlib import md5
 
+from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import create_coupon_product, generate_sku, get_or_create_catalog
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -102,3 +104,71 @@ class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         expected = digest.upper()
         actual = generate_sku(coupon, self.partner)
         self.assertEqual(actual, expected)
+
+
+class CouponCreationTests(CouponMixin, TestCase):
+    def setUp(self):
+        super(CouponCreationTests, self).setUp()
+        self.catalog = Catalog.objects.create(partner=self.partner)
+
+    def create_custom_coupon(self, code='', max_uses=None, note=None, quantity=1, title='Tešt Čoupon'):
+        """Create a custom test coupon product."""
+
+        return create_coupon_product(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100,
+            catalog=self.catalog,
+            catalog_query=None,
+            category=self.category,
+            code=code,
+            course_seat_types=None,
+            end_datetime='2020-1-1',
+            max_uses=max_uses,
+            note=note,
+            partner=self.partner,
+            price=100,
+            quantity=quantity,
+            start_datetime='2015-1-1',
+            title=title,
+            voucher_type=Voucher.ONCE_PER_CUSTOMER,
+        )
+
+    def test_custom_code_integrity_error(self):
+        """Test custom coupon code duplication."""
+        self.create_custom_coupon(
+            code='CUSTOMCODE',
+            title='Custom coupon',
+        )
+
+        with self.assertRaises(IntegrityError):
+            self.create_custom_coupon(
+                code='CUSTOMCODE',
+                title='Coupon with integrity issue',
+            )
+
+    def test_coupon_note(self):
+        """Test creating a coupon with a note."""
+        note_coupon = self.create_custom_coupon(
+            note='𝑵𝑶𝑻𝑬',
+            title='Coupon',
+        )
+        self.assertEqual(note_coupon.attr.note, '𝑵𝑶𝑻𝑬')
+        self.assertEqual(note_coupon.title, 'Coupon')
+
+    def test_custom_code_string(self):
+        """Test creating a coupon with custom voucher code."""
+        custom_code = 'ČUSTOMĆODE'
+        custom_coupon = self.create_custom_coupon(
+            code=custom_code,
+            quantity=1,
+            title='Custom coupon',
+        )
+        self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.count(), 1)
+        self.assertEqual(custom_coupon.attr.coupon_vouchers.vouchers.first().code, custom_code)
+
+    def test_multi_use_coupon_creation(self):
+        """Test that the endpoint supports the creation of multi-usage coupons."""
+        max_uses_number = 2
+        coupon = self.create_custom_coupon(max_uses=max_uses_number)
+        voucher = coupon.attr.coupon_vouchers.vouchers.first()
+        self.assertEqual(voucher.offers.first().max_global_applications, max_uses_number)

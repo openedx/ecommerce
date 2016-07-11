@@ -56,7 +56,7 @@ define([
                     invoice_discount_type = this.model.get('invoice_discount_type'),
                     invoice_discount_value = this.model.get('invoice_discount_value'),
                     tax_deducted_source = this.model.get('tax_deducted_source');
-                
+
                 if (invoice_discount_value === null) {
                     invoice_discount_type = null;
                 } else  {
@@ -106,7 +106,7 @@ define([
 
             render: function () {
                 var html,
-                    category = this.model.get('categories')[0].name,
+                    category = this.model.get('category').name,
                     invoice_data = this.formatInvoiceData(),
                     template_data;
 

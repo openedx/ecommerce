@@ -80,9 +80,14 @@ define([
                     setOptions: {
                         validate: true
                     },
-                    onSet: function(val) {
-                        this.model.set('category_ids', [val]);
-                        return val;
+                    onGet: function (val) {
+                        return val.id;
+                    },
+                    onSet: function (val) {
+                        return {
+                            id: val,
+                            name: $('select[name=category] option:selected').text()
+                        };
                     }
                 },
                 'input[name=title]': {
@@ -234,7 +239,7 @@ define([
                     this.editableAttributes = [
                         'benefit_value',
                         'catalog_query',
-                        'category_ids',
+                        'category',
                         'client',
                         'course_seat_types',
                         'end_date',
@@ -571,13 +576,9 @@ define([
                     this.$('[name=tax_deduction]').trigger('change');
                     this.fillFromCourse();
                 } else {
-                    var firstEntry = function(obj, i){ return i === 0 ? obj : null; },
-                        defaultCategory = ecommerce.coupons.categories.filter(firstEntry);
                     this.model.set({
                         'coupon_type': this.codeTypes[0].value,
                         'voucher_type': this.voucherTypes[0].value,
-                        'category': defaultCategory[0].id,
-                        'category_ids': [defaultCategory[0].id],
                         'benefit_type': 'Percentage',
                         'catalog_type': 'Single course',
                         'invoice_discount_type': 'Percentage',

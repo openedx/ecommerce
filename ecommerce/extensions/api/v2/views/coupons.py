@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-from decimal import Decimal
 
 import dateutil.parser
 from django.conf import settings
@@ -19,11 +18,11 @@ from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer, CouponListSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers, update_voucher_offer
+from ecommerce.extensions.voucher.utils import update_voucher_offer
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
@@ -73,24 +72,25 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             500 if an error occurs when attempting to create a coupon.
         """
         with transaction.atomic():
-            title = request.data.get('title')
-            client_username = request.data.get('client')
-            stock_record_ids = request.data.get('stock_record_ids')
-            start_datetime = dateutil.parser.parse(request.data.get('start_datetime'))
-            end_datetime = dateutil.parser.parse(request.data.get('end_datetime'))
-            code = request.data.get('code')
             benefit_type = request.data.get('benefit_type')
             benefit_value = request.data.get('benefit_value')
-            voucher_type = request.data.get('voucher_type')
-            quantity = request.data.get('quantity')
-            price = request.data.get('price')
-            partner = request.site.siteconfiguration.partner
-            categories = Category.objects.filter(id__in=request.data.get('category_ids'))
-            client, __ = BusinessClient.objects.get_or_create(name=client_username)
-            note = request.data.get('note')
-            max_uses = request.data.get('max_uses')
             catalog_query = request.data.get('catalog_query')
+            category_data = request.data.get('category')
+            client_username = request.data.get('client')
+            code = request.data.get('code')
             course_seat_types = request.data.get('course_seat_types')
+            end_datetime = dateutil.parser.parse(request.data.get('end_datetime'))
+            max_uses = request.data.get('max_uses')
+            note = request.data.get('note')
+            partner = request.site.siteconfiguration.partner
+            price = request.data.get('price')
+            quantity = request.data.get('quantity')
+            start_datetime = dateutil.parser.parse(request.data.get('start_datetime'))
+            stock_record_ids = request.data.get('stock_record_ids')
+            title = request.data.get('title')
+            voucher_type = request.data.get('voucher_type')
+
+            client, __ = BusinessClient.objects.get_or_create(name=client_username)
 
             if code:
                 try:
@@ -106,6 +106,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             if course_seat_types:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
+
+            if category_data:
+                category = self.get_category(category_data)
 
             # Maximum number of uses can be set for each voucher type and disturb
             # the predefined behaviours of the different voucher types. Therefor
@@ -137,24 +140,24 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             else:
                 coupon_catalog = None
 
-            data = {
-                'benefit_type': benefit_type,
-                'benefit_value': benefit_value,
-                'catalog': coupon_catalog,
-                'catalog_query': catalog_query,
-                'categories': categories,
-                'code': code,
-                'course_seat_types': course_seat_types,
-                'end_datetime': end_datetime,
-                'max_uses': max_uses,
-                'note': note,
-                'partner': partner,
-                'quantity': quantity,
-                'start_datetime': start_datetime,
-                'voucher_type': voucher_type
-            }
-
-            coupon_product = self.create_coupon_product(title, price, data)
+            coupon_product = create_coupon_product(
+                benefit_type=benefit_type,
+                benefit_value=benefit_value,
+                catalog=coupon_catalog,
+                catalog_query=catalog_query,
+                category=category,
+                code=code,
+                course_seat_types=course_seat_types,
+                end_datetime=end_datetime,
+                max_uses=max_uses,
+                note=note,
+                partner=partner,
+                price=price,
+                quantity=quantity,
+                start_datetime=start_datetime,
+                title=title,
+                voucher_type=voucher_type
+            )
 
             basket = prepare_basket(request, coupon_product)
 
@@ -164,85 +167,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             )
 
             return Response(response_data, status=status.HTTP_200_OK)
-
-    def create_coupon_product(self, title, price, data):
-        """Creates a coupon product and a stock record for it.
-
-        Arguments:
-            title (str): The name of the coupon.
-            price (int): The price of the coupon(s).
-            data (dict): Contains data needed to create vouchers,SKU and UPC:
-                - partner (User)
-                - benefit_type (str)
-                - benefit_value (int)
-                - catalog (Catalog)
-                - end_date (Datetime)
-                - code (str)
-                - quantity (int)
-                - start_date (Datetime)
-                - voucher_type (str)
-                - categories (list of Category objects)
-                - note (str)
-                - max_uses (int)
-                - catalog_query (str)
-                - course_seat_types (str)
-
-        Returns:
-            A coupon product object.
-        """
-
-        product_class = ProductClass.objects.get(slug='coupon')
-        coupon_product = Product.objects.create(title=title, product_class=product_class)
-
-        self.assign_categories_to_coupon(coupon=coupon_product, categories=data['categories'])
-
-        # Vouchers are created during order and not fulfillment like usual
-        # because we want vouchers to be part of the line in the order.
-        create_vouchers(
-            name=title,
-            benefit_type=data['benefit_type'],
-            benefit_value=Decimal(data['benefit_value']),
-            catalog=data['catalog'],
-            coupon=coupon_product,
-            end_datetime=data['end_datetime'],
-            code=data['code'] or None,
-            quantity=int(data['quantity']),
-            start_datetime=data['start_datetime'],
-            voucher_type=data['voucher_type'],
-            max_uses=data['max_uses'],
-            catalog_query=data['catalog_query'],
-            course_seat_types=data['course_seat_types']
-        )
-
-        coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
-
-        coupon_product.attr.coupon_vouchers = coupon_vouchers
-        coupon_product.attr.note = data['note']
-        coupon_product.save()
-
-        sku = generate_sku(product=coupon_product, partner=data['partner'])
-        StockRecord.objects.update_or_create(
-            product=coupon_product,
-            partner=data['partner'],
-            partner_sku=sku,
-            defaults={
-                'price_currency': 'USD',
-                'price_excl_tax': price
-            }
-        )
-
-        return coupon_product
-
-    def assign_categories_to_coupon(self, coupon, categories):
-        """
-        Assigns categories to a coupon.
-
-        Arguments:
-            coupon (Product): Coupon product
-            categories (list): List of Category instances
-        """
-        for category in categories:
-            ProductCategory.objects.get_or_create(product=coupon, category=category)
 
     def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
@@ -285,6 +209,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         return response_data
 
+    def get_category(self, category_data):
+        try:
+            return Category.objects.get(id=category_data['id'])
+        except Category.DoesNotExist:
+            logger.exception('Category [%s] with ID [%s] not found.', category_data['name'], category_data['id'])
+            raise
+
     def update(self, request, *args, **kwargs):
         """Update start and end dates of all vouchers associated with the coupon."""
         super(CouponViewSet, self).update(request, *args, **kwargs)
@@ -307,9 +238,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if benefit_value:
             self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
 
-        category_ids = request.data.get('category_ids')
-        if category_ids:
-            self.update_coupon_category(category_ids=category_ids, coupon=coupon)
+        category_data = request.data.get('category')
+        if category_data:
+            category = self.get_category(category_data)
+            ProductCategory.objects.filter(product=coupon).update(category=category)
 
         client_username = request.data.get('client')
         if client_username:
@@ -370,19 +302,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         for voucher in vouchers.all():
             voucher.offers.clear()
             voucher.offers.add(new_offer)
-
-    def update_coupon_category(self, category_ids, coupon):
-        """
-        Remove categories currently assigned to a coupon and assigned new categories
-        Arguments:
-            category_ids (list): List of category IDs
-            coupon (Product): Coupon product to be updated
-        """
-        new_categories = Category.objects.filter(id__in=category_ids)
-
-        ProductCategory.objects.filter(product=coupon).exclude(category__in=new_categories).delete()
-
-        self.assign_categories_to_coupon(coupon=coupon, categories=new_categories)
 
     def update_coupon_client(self, baskets, client_username):
         """

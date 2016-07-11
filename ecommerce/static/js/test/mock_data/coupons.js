@@ -190,12 +190,10 @@ define([], function(){
         'last_edited': lastEditData,
         'seats': [verifiedSeat],
         'client': 'Client Name',
-        'categories': [
-            {
-                'id': 4,
-                'name': 'TESTCAT'
-            }
-        ],
+        'category': {
+            'id': 4,
+            'name': 'TESTCAT'
+        },
         'price': '100.00',
         'invoice_type': 'Prepaid',
         'invoice_discount_type': 'Percentage',
