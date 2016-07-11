@@ -8,11 +8,13 @@
     <div class="list-info">
       <div class="info-item payment-info">
         <div class="copy">
-          <p><%- gettext( "Please print this page for your records; it serves as your receipt. You will also receive an email with the same information." ) %></p>
+        <p><%- gettext( "Your order was processed successfully. Print this page for your records; it serves as your \
+        receipt. You will also receive a confirmation email with the same information at ") %>
+        <a class="nav-link" href="mailto:<%- receipt.email %>"><%- receipt.email %></a>.</p>
         </div>
 
         <div class="wrapper-report">
-          <table class="report report-receipt">
+          <table class="table table-striped table-bordered">
             <thead>
               <tr>
                 <th scope="col" ><%- gettext( "Order No." ) %></th>
@@ -64,7 +66,7 @@
 
         <% if ( receipt.billedTo ) { %>
             <div class="copy">
-              <p><%- gettext( "Billed to" ) %>:
+              <p><%- gettext( "Billed to:" ) %>:
                   <span class="name-first"><%- receipt.billedTo.firstName %></span>
                   <span class="name-last"><%- receipt.billedTo.lastName %></span>
                   (<span class="address-city"><%- receipt.billedTo.city %></span>,
@@ -74,6 +76,8 @@
               </p>
             </div>
         <% } %>
+
+
 
         <div class="report report-receipt report-receipt-provider hidden" id="receipt-provider"></div>
 
@@ -85,15 +89,15 @@
 
     <nav class="nav-wizard is-ready">
         <% if ( verified ) { %>
-            <a class="next action-primary right" href="/dashboard"><%- gettext( "Go to Dashboard" ) %></a>
+            <a class="next action-primary right" href="<%- lmsUrl %>/dashboard"><%- gettext( "Go to Dashboard" ) %></a>
         <% } else { %>
-          <a id="verify_later_button" class="next action-secondary verify-later nav-link" href="/dashboard">
+          <a id="verify_later_button" class="next action-secondary verify-later nav-link" href="<%- lmsUrl %>/dashboard">
             <%- gettext( "Want to confirm your identity later?" ) %>
           </a>
 
           <a id="verify_now_button"
              class="next action-primary right"
-             href="/verify_student/verify-now/<%courseKey%>/"
+             href="<%- lmsUrl %>/verify_student/verify-now/<%- courseKey %>/"
           >
             <%- gettext( "Verify Now" ) %>
           </a>

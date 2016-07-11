@@ -43,14 +43,13 @@
       </div>
     </div>
 
-    <div class="container content-container"> <article class="content-main">
-        <div id="receipt-container" class="pay-and-verify" data-is-payment-complete='${is_payment_complete}'
-         data-platform-name='${platform_name}' data-verified='${verified}' data-username='${name}'>
+    <div class="container content-container">
+        <div id="receipt-container" class="pay-and-verify hidden" data-is-payment-complete='${is_payment_complete}'
+         data-platform-name='${platform_name}' data-verified='true' data-username='${name}' data-lms-url='{{ lms_url }}'>
             {# data-is-request-in-themed-site='${is_request_in_themed_site}'> #}
-            <h1 class="hidden">{% trans "Loading Order Data..." %}</h1>
-            <span class="hidden">{% trans "Please wait while we retrieve your order details." %}</span>
-
-     </div></article>
+            <h1>{% trans "Loading Order Data..." %}</h1>
+            <span>{% trans "Please wait while we retrieve your order details." %}</span>
+        </div>
     </div>
 <div id="error-container" class="hidden">
     <div id="error" class="wrapper-msg wrapper-msg-activate">

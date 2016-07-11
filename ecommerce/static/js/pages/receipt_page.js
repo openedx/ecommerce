@@ -11,7 +11,7 @@ define([
 
             initialize: function () {
                 this.view = new ReceiptView();
-                this.render();
+                this.view.render();
             }
         });
     }

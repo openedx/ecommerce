@@ -23,10 +23,12 @@ function ($, AjaxRetry, Backbone, _) {
         },
 
         renderReceipt: function (data) {
+            console.log(this.$el.data('verified'));
             var templateHtml = $("#receipt-tpl").html(),
                 context = {
                     platformName: this.$el.data('platform-name'),
-                    verified: this.$el.data('verified').toLowerCase() === 'true'//,
+                    verified: this.$el.data('verified') === 'true',
+                    lmsUrl: this.$el.data('lms-url')
                     // is_request_in_themed_site: this.$el.data('is-request-in-themed-site').toLowerCase() === 'true'
                 },
                 providerId;
@@ -39,13 +41,8 @@ function ($, AjaxRetry, Backbone, _) {
                 courseKey: this.courseKey
             });
 
-            console.log("This.el: " + JSON.stringify(this.$el));
-            console.log('Context currently is ' + JSON.stringify(context));
-            console.log('Will render ' + templateHtml);
-            var rendered = _.template(templateHtml)(context);
-            console.log(rendered);
-
-            //this.$el.html(rendered);
+            this.$el.html(_.template(templateHtml)(context));
+            return this;
 
         },
         renderCourseNamePlaceholder: function (courseId) {
@@ -187,10 +184,14 @@ function ($, AjaxRetry, Backbone, _) {
             var self = this,
                 receiptContext;
 
+            console.log("Order: " + JSON.stringify(order));
+
             if (this.useEcommerceApi) {
+                console.log('Case 1');
                 receiptContext = {
                     orderNum: order.number,
                     currency: order.currency,
+                    email: order.user.email,
                     purchasedDatetime: order.date_placed,
                     totalCost: self.formatMoney(order.total_excl_tax),
                     isRefunded: false,
@@ -199,6 +200,7 @@ function ($, AjaxRetry, Backbone, _) {
                 };
 
                 if (order.billing_address) {
+                    console.log('Case 2');
                     receiptContext.billedTo = {
                         firstName: order.billing_address.first_name,
                         lastName: order.billing_address.last_name,
@@ -219,6 +221,7 @@ function ($, AjaxRetry, Backbone, _) {
                     }
                 );
             } else {
+                console.log('Case 3');
                 receiptContext = {
                     orderNum: order.orderNum,
                     currency: order.currency,
