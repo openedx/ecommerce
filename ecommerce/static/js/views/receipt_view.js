@@ -13,6 +13,7 @@ function ($, AjaxRetry, Backbone, _) {
         useEcommerceApi: true,
         ecommerceBasketId: null,
         ecommerceOrderNumber: null,
+        el: '#receipt-container',
 
         initialize: function () {
             this.ecommerceBasketId = $.url('?basket_id');
@@ -25,8 +26,8 @@ function ($, AjaxRetry, Backbone, _) {
             var templateHtml = $("#receipt-tpl").html(),
                 context = {
                     platformName: this.$el.data('platform-name'),
-                    verified: this.$el.data('verified').toLowerCase() === 'true',
-                    is_request_in_themed_site: this.$el.data('is-request-in-themed-site').toLowerCase() === 'true'
+                    verified: this.$el.data('verified').toLowerCase() === 'true'//,
+                    // is_request_in_themed_site: this.$el.data('is-request-in-themed-site').toLowerCase() === 'true'
                 },
                 providerId;
 
@@ -38,20 +39,14 @@ function ($, AjaxRetry, Backbone, _) {
                 courseKey: this.courseKey
             });
 
-            this.$el.html(_.template(templateHtml)(context));
+            console.log("This.el: " + JSON.stringify(this.$el));
+            console.log('Context currently is ' + JSON.stringify(context));
+            console.log('Will render ' + templateHtml);
+            var rendered = _.template(templateHtml)(context);
+            console.log(rendered);
 
-            this.trackLinks();
+            //this.$el.html(rendered);
 
-            this.trackPurchase(data);
-
-            this.renderCourseNamePlaceholder(this.courseKey);
-
-            this.renderUserFullNamePlaceholder(this.username);
-
-            providerId = this.getCreditProviderId(data);
-            if (providerId) {
-                this.getProviderData(providerId).then(this.renderProvider, this.renderError)
-            }
         },
         renderCourseNamePlaceholder: function (courseId) {
             // Display the course Id or name (if available) in the placeholder

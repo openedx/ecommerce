@@ -14,6 +14,10 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
+{% block header_extras %}
+    <script type="text/template" id="receipt-tpl">{% include "checkout/receipt.underscore" %}</script>
+{% endblock header_extras %}
+
 {% block content %}
 <div class="receipt">
     <div class="provider-wrapper hidden">
@@ -39,140 +43,15 @@
       </div>
     </div>
 
-    <div class="container content-container"> <!--section class="wrapper carousel"-->
+    <div class="container content-container"> <article class="content-main">
         <div id="receipt-container" class="pay-and-verify" data-is-payment-complete='${is_payment_complete}'
          data-platform-name='${platform_name}' data-verified='${verified}' data-username='${name}'>
             {# data-is-request-in-themed-site='${is_request_in_themed_site}'> #}
             <h1 class="hidden">{% trans "Loading Order Data..." %}</h1>
             <span class="hidden">{% trans "Please wait while we retrieve your order details." %}</span>
-            <div class="wrapper-content-main payment-confirmation-step"> <article class="content-main">
-                <h3 class="title"> {% trans "Thank you!" %} </h3>
 
-                {% if order %}
-                    <div class="list-info">
-                        <div class="info-item payment-info">
-                            <div class="copy">
-                                <p> {% trans "Your order was processed successfully. " %}
-                                    {% trans "Print this page for your records; it serves as your receipt. " %}
-                                    {% trans "You will also receive a confirmation email with the same " %}
-                                    {% trans "information at " %}
-                                    <a class="nav-link" href="mailto:{{ order.email }}">{{ order.email }}</a>.
-                                </p>
-                            </div>
-
-                            <div class="wrapper-report">
-                                <table class="table table-striped table-bordered"> <!-- report report-receipt-->
-                                    <thead>
-                                    <tr>
-                                        <th scope="col" > {% trans "Order No." %} </th>
-                                        <th scope="col" > {% trans "Description" %} </th>
-                                        <th scope="col" > {% trans "Date" %}</th>
-                                        <th scope="col" > {% trans "Amount" %}</th>
-                                    </tr>
-                                    </thead>
-
-                                    <tbody>
-                                    {% for item in order.lines.all %}
-                                        {% if order.isRefunded %}
-                                          <td><del>{{ order.number }}</del></td>
-                                          <td><del>{{ item.description }}</del></td>
-                                          <td><del>{{ order.date_placed }}</del></td>
-                                          <td><del>{{ order.total_excl_tax }} ({{ order.currency | upper }})</del></td>
-                                        {% else %}
-                                          <tr>
-                                            <td>{{ order.number }}</td>
-                                            <td>{{ item.description }}</td>
-                                            <td>{{ order.date_placed }}</td>
-                                            <td>{{ order.total_excl_tax }} ({{ order.currency | upper }})</td>
-                                          </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                    </tbody>
-
-                                    <tfoot>
-                                      <tr>
-                                        <th scope="row" class="total-label"> {% trans "Total" %}</th>
-                                        <td colspan="2"></td>
-                                        <td class="total-value">
-                                          <span class="value-amount">{{ order.total_excl_tax }}</span>
-                                           <span class="value-currency">({{ order.currency | upper }})</span>
-                                        </td>
-                                      </tr>
-                                    </tfoot>
-                                  </table>
-
-                                  {% if order.isRefunded %}
-                                  <div class="msg msg-refunds">
-                                      <h4 class="title sr">{% trans "Please Note: "%}</h4>
-                                      <div class="copy"><p>{% trans "Crossed out items have been refunded." %}</p></div>
-                                  </div>
-                                  {% endif %}
-                            </div>
-
-                            <h3 class="summary">{% trans "Payment Summary" %}</h3>
-                            {% if order.billedTo %}
-                                <div class="copy">
-                                    <p> {% trans "Billed to:" %}
-                                        <span class="name-first">{{ order.billedTo.firstName }}</span>
-                                        <span class="name-last">{{ order.billedTo.lastName }}</span>
-                                        <span class="address-city">{{ order.billedTo.city }}</span>,
-                                        <span class="address-state">{{ order.billedTo.state }}</span>
-                                        <span class="address-postalcode">{{ order.billedTo.postalCode }}</span>
-                                        <span class="address-country">{{ order.billedTo.country | upper }}</span>
-                                    </p>
-                                </div>
-                            {% elif order.shipping_address %}
-                                <address>
-                                    {% for field in order.shipping_address.active_address_fields %}
-                                        {{ field }}<br/>
-                                    {% endfor %}
-                                </address>
-
-                                {% if order.shipping_address.phone_number %}
-                                    <p>
-                                        {% trans "Phone" %}: {{ order.shipping_address.phone_number }}
-                                    </p>
-                                {% endif %}
-                            {% else %}
-                                <p>{% trans "No shipping address required." %}</p>
-                            {% endif %}
-                            {% if codes %}
-                                <p>Codes applied:
-                                {% for code in codes %}
-                                    {{ code }}
-                                {% endfor %}
-                                </p>
-                            {% endif %}
-                            {% if order.sources.all %}
-                                <p>Paid for via {{ order.sources.all.0.source_type.name }}</p>
-                            {% endif %}
-                        <div class="report report-receipt report-receipt-provider hidden" id="receipt-provider"></div>
-                    </div>
-
-                {% else %}
-                    <p class="no-content"> {% trans "No receipt available" %} </p>
-                                <p>Order: {{ object }}</p>
-                {% endif %}
-            </div>
-            <nav class="nav-wizard is-ready">
-                <a id="verify_later_button" class="next action-secondary verify-later nav-link" href="{{ dashboard }}"
-                      data-tooltip="{% blocktrans %}
-                        If you don't verify your identity now, you can still explore your course from your dashboard.
-                        You will receive periodic reminders from {{ platformName }} to verify your identity.
-                        {% endblocktrans %}">
-                        {% trans "Want to confirm your identity later?" %}
-                </a>
-
-                  <a id="verify_now_button"
-                     class="next action-primary right"
-                     href="{{ verify_link }}{{ course_key }}/"
-                  >
-                   {% trans "Verify Now" %}
-                  </a>
-            </nav>
-        </article></div>
-     </div><!--/section-->
-</div>
+     </div></article>
+    </div>
 <div id="error-container" class="hidden">
     <div id="error" class="wrapper-msg wrapper-msg-activate">
         <div class=" msg msg-activate">
