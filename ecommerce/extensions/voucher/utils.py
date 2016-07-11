@@ -119,12 +119,14 @@ def _get_info_for_coupon_report(coupon, voucher):
         category_names = ''
 
     # Set the max_uses_count for single-use vouchers to 1,
-    # for other usage limitations (once per customer and multi-use in the future)
+    # for other usage limitations (once per customer and multi-use)
     # which don't have the max global applications limit set,
     # set the max_uses_count to 10000 which is the arbitrary limit Oscar sets:
     # https://github.com/django-oscar/django-oscar/blob/master/src/oscar/apps/offer/abstract_models.py#L253
+    redemption_count = offer.num_applications
     if voucher.usage == Voucher.SINGLE_USE:
         max_uses_count = 1
+        redemption_count = voucher.num_orders
     elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
         max_uses_count = 10000
     else:
@@ -147,7 +149,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         'Coupon Start Date': voucher.start_datetime.strftime("%b %d, %y"),
         'Coupon Expiry Date': voucher.end_datetime.strftime("%b %d, %y"),
         'Maximum Coupon Usage': max_uses_count,
-        'Redemption Count': offer.num_applications,
+        'Redemption Count': redemption_count,
     }
 
     if course_id:
