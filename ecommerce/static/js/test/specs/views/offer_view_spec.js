@@ -97,9 +97,9 @@ define([
 
             it('should set new price when setNewPrice called', function() {
                 view.setNewPrice(view.collection.models[0]);
-                expect(view.collection.models[0].get('new_price')).toBe(0);
+                expect(view.collection.models[0].get('new_price')).toBe('0.00');
                 view.setNewPrice(view.collection.models[1]);
-                expect(view.collection.models[1].get('new_price')).toBe(80);
+                expect(view.collection.models[1].get('new_price')).toBe('80.00');
             });
 
             it('should set benefit value when formatBenefitValue called', function() {
