@@ -24,7 +24,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for coupon in Product.objects.filter(product_class__name='Coupon'):
             try:
-                basket = Basket.objects.get(lines__product=coupon, status=Basket.SUBMITTED)
+                basket = Basket.objects.filter(lines__product=coupon, status=Basket.SUBMITTED).first()
+                if basket is None:
+                    raise Basket.DoesNotExist
                 order = Order.objects.get(basket=basket)
                 Invoice.objects.get(order=order)
                 logger.info('Invoice for order %s already exists - skipping.', order.number)
