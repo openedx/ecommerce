@@ -1,5 +1,8 @@
+import hashlib
+
 import httpretty
 import mock
+from django.core.cache import cache
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -73,10 +76,18 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.mock_dynamic_catalog_contains_api(query='key:*', course_run_ids=[course.id])
         request = RequestFactory()
         request.site = self.site
+        self.range.catalog_query = 'key:*'
+
+        cache_key = 'catalog_query_contains [{}] [{}]'.format('key:*', seat.course_id)
+        cache_hash = hashlib.md5(cache_key).hexdigest()
+        cached_response = cache.get(cache_hash)
+        self.assertIsNone(cached_response)
 
         with mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=request)):
             response = self.range.run_catalog_query(seat)
             self.assertTrue(response['course_runs'][course.id])
+            cached_response = cache.get(cache_hash)
+            self.assertEqual(response, cached_response)
 
     @httpretty.activate
     @mock_course_catalog_api_client
@@ -86,6 +97,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         """
         course, seat = self.create_course_and_seat()
         self.mock_dynamic_catalog_contains_api(query='key:*', course_run_ids=[course.id])
+
         false_response = self.range.contains_product(seat)
         self.assertFalse(false_response)
 
