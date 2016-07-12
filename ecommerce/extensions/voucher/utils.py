@@ -7,8 +7,6 @@ import uuid
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
@@ -205,17 +203,7 @@ def generate_coupon_report(coupon_vouchers):
 
     for coupon_voucher in coupon_vouchers:
         coupon = coupon_voucher.coupon
-
-        # Get client based on the invoice that was created during coupon creation.
-        # We used to save the client as the basket owner and therefor the exception
-        # catch is put in place for backwards compatibility with older coupons.
-        basket = Basket.objects.filter(lines__product_id=coupon.id).first()
-        try:
-            order = get_object_or_404(Order, basket=basket)
-            invoice = get_object_or_404(Invoice, order=order)
-            client = invoice.business_client.name
-        except Http404:
-            client = basket.owner.username
+        client = Invoice.objects.get(order__basket__lines__product=coupon).business_client.name
 
         for voucher in coupon_voucher.vouchers.all():
             row = _get_info_for_coupon_report(coupon, voucher)
