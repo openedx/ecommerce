@@ -27,6 +27,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         self.request_factory = RequestFactory()
         self.request = self.request_factory.get("foo")
         self.request.COOKIES['sailthru_bid'] = 'cookie_bid'
+        self.request.site = self.site
         self.user = UserFactory.create(username='test', email=TEST_EMAIL)
 
         # create some test course objects
@@ -65,6 +66,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
                                                          course_id=self.course_id,
                                                          currency=order.currency,
                                                          message_id='cookie_bid',
+                                                         site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 
     @override_settings(SAILTHRU_ENABLE=True)
@@ -86,6 +88,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
                                                          course_id=self.course_id,
                                                          currency=order.currency,
                                                          message_id='cookie_bid',
+                                                         site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 
     @override_settings(SAILTHRU_ENABLE=True)

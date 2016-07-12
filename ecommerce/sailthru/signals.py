@@ -41,6 +41,7 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
     # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
     update_course_enrollment.delay(user.email, course_url, False, product.attr.certificate_type,
                                    unit_cost=price, course_id=course_id, currency=order.currency,
+                                   site_code=request.site.siteconfiguration.partner.short_code,
                                    message_id=request.COOKIES.get('sailthru_bid'))
 
 
@@ -73,12 +74,13 @@ def process_basket_addition(sender, product=None, request=None, user=None, **kwa
     # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
     update_course_enrollment.delay(user.email, course_url, True, product.attr.certificate_type,
                                    unit_cost=price, course_id=course_id, currency=currency,
+                                   site_code=request.site.siteconfiguration.partner.short_code,
                                    message_id=request.COOKIES.get('sailthru_bid'))
 
 
 def _build_course_url(course_id):
-    """
-    Build a course url from a course id and the host
+    """Build a course url from a course id and the host
+
     :param request:
     :param course_id:
     :return:
