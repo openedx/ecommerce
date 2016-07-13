@@ -196,8 +196,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
             # Verify product price and expiration time.
             expires = EXPIRES if product['expires'] else None
             self.assertEqual(seat.expires, expires)
-            print self.partner
-            print seat.stockrecords.all()
             self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, product['price'])
 
     def test_lms_publication_disabled(self):
