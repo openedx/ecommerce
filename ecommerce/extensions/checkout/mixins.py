@@ -14,6 +14,7 @@ from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
+from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
@@ -35,6 +36,51 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         if self._payment_events is None:
             self._payment_events = []
         self._payment_events.append(event)
+
+    def create_order_for_invoice(self, basket, client, coupon_id, invoice_data):
+        """ Creates an order from the basket and invokes the invoice payment processor."""
+        order_metadata = data_api.get_order_metadata(basket)
+
+        response_data = {
+            'coupon_id': coupon_id,
+            'id': basket.id,
+            'order': None,
+            'payment_data': None,
+        }
+        basket.freeze()
+
+        order = self.handle_order_placement(
+            basket=basket,
+            billing_address=None,
+            order_number=order_metadata['number'],
+            order_total=order_metadata['total'],
+            shipping_address=None,
+            shipping_charge=order_metadata['shipping_charge'],
+            shipping_method=order_metadata['shipping_method'],
+            user=basket.owner
+        )
+
+        # Invoice payment processor invocation.
+        payment_processor = InvoicePayment()
+        payment_processor.handle_processor_response(
+            business_client=client,
+            invoice_data=invoice_data,
+            order=order,
+            response={}
+        )
+
+        response_data['order'] = order.id
+        response_data['payment_data'] = {
+            'payment_processor_name': 'Invoice'
+        }
+
+        logger.info(
+            'Created new order number [%s] from basket [%d]',
+            order_metadata['number'],
+            basket.id
+        )
+
+        return response_data
 
     def handle_payment(self, response, basket):
         """

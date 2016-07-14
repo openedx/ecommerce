@@ -8,9 +8,9 @@ from django.test import RequestFactory
 from oscar.test import factories
 
 from ecommerce.core.models import BusinessClient
-from ecommerce.extensions.catalogue.utils import create_coupon_product
-from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
+from ecommerce.extensions.catalogue.utils import create_coupon_product
+from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Applicator
 
@@ -105,6 +105,15 @@ class CouponMixin(object):
 
         return pc
 
+    def apply_voucher(self, user, site, voucher):
+        """ Apply the voucher to a basket. """
+        basket = factories.BasketFactory(owner=user, site=site)
+        product = voucher.offers.first().benefit.range.all_products()[0]
+        basket.add_product(product)
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket, self.user)
+        return basket
+
     def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
                       benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
                       course_seat_types=None):
@@ -159,16 +168,12 @@ class CouponMixin(object):
 
         self.basket = prepare_basket(request, coupon)
 
-        self.response_data = CouponViewSet().create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
+        self.response_data = EdxOrderPlacementMixin().create_order_for_invoice(
+            basket=self.basket,
+            client=client,
+            coupon_id=coupon.id,
+            invoice_data={}
+        )
         coupon.client = client
 
         return coupon
-
-    def apply_voucher(self, user, site, voucher):
-        """ Apply the voucher to a basket. """
-        basket = factories.BasketFactory(owner=user, site=site)
-        product = voucher.offers.first().benefit.range.all_products()[0]
-        basket.add_product(product)
-        basket.vouchers.add(voucher)
-        Applicator().apply(basket, self.user)
-        return basket
