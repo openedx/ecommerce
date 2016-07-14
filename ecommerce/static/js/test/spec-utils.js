@@ -39,6 +39,18 @@ define([
                         return { pass: $(actual).hasClass(className) };
                     }
                 };
+            },
+
+            /**
+              * Helper function to check if a form field is visible.
+              */
+            visibleElement: function(view, selector, groupSelector) {
+                var formGroup = view.$(selector).closest(groupSelector);
+                if (formGroup.length > 0) {
+                    return !formGroup.hasClass('hidden');
+                } else {
+                    return false;
+                }
             }
         };
     }

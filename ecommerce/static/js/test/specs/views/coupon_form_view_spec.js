@@ -6,6 +6,7 @@ define([
         'models/coupon_model',
         'test/mock_data/categories',
         'test/mock_data/coupons',
+        'test/spec-utils',
         'ecommerce'
     ],
     function ($,
@@ -15,6 +16,7 @@ define([
               Coupon,
               Mock_Categories,
               Mock_Coupons,
+              SpecUtils,
               ecommerce) {
         'use strict';
 
@@ -22,18 +24,6 @@ define([
             var view,
                 model,
                 courseData = Mock_Coupons.courseData;
-
-            /**
-              * Helper function to check if a form field is shown.
-              */
-            function visible(selector) {
-                var formGroup = view.$el.find(selector).closest('.form-group');
-                if (formGroup.length > 0) {
-                    return !formGroup.hasClass('hidden');
-                } else {
-                    return false;
-                }
-            }
 
             beforeEach(function () {
                 ecommerce.coupons = {
@@ -92,12 +82,12 @@ define([
                 });
 
                 it('should show the price field', function () {
-                    expect(visible('[name=price]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=price]', '.form-group')).toBe(true);
                 });
 
                 it('should hide discount and code fields', function () {
-                    expect(visible('[name=benefit_value]')).toBe(false);
-                    expect(visible('[name=code]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=benefit_value]', '.form-group')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(false);
                 });
 
                 it('should set model attribute category_ids on render', function () {
@@ -127,7 +117,7 @@ define([
                 });
 
                 it('should show the discount field', function () {
-                    expect(visible('[name=benefit_value]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=benefit_value]', '.form-group')).toBe(true);
                 });
 
                 it('should indicate the benefit type', function () {
@@ -163,85 +153,89 @@ define([
 
                 it('should show the code field for once-per-customer and singe-use vouchers', function () {
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(true);
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(true);
                 });
 
                 it('should show the usage number field only for once-per-customer vouchers', function () {
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(visible('[name=max_uses]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=max_uses]', '.form-group')).toBe(false);
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(visible('[name=max_uses]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=max_uses]', '.form-group')).toBe(true);
                 });
 
                 it('should hide quantity field when code entered', function () {
                     view.$el.find('[name=code]').val('E34T4GR342').trigger('input');
-                    expect(visible('[name=quantity]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=quantity]', '.form-group')).toBe(false);
                     view.$el.find('[name=code]').val('').trigger('input');
-                    expect(visible('[name=quantity]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=quantity]', '.form-group')).toBe(true);
                 });
 
                 it('should hide code field when quantity not 1', function () {
                     view.$el.find('[name=quantity]').val(21).trigger('change');
-                    expect(visible('[name=code]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(false);
                     view.$el.find('[name=quantity]').val(1).trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(true);
                 });
 
                 it('should hide code field for every voucher type if quantity is not 1.', function() {
                     view.$el.find('[name=quantity]').val(2).trigger('change');
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(visible('[name=code]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(false);
 
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(visible('[name=code]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(false);
 
                     view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(visible('[name=code]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(false);
                 });
 
                 it('should show the code field for every voucher type if quantity is 1.', function() {
                     view.$el.find('[name=quantity]').val(1).trigger('change');
                     view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(true);
 
                     view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(true);
 
                     view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(visible('[name=code]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(true);
                 });
 
                 it('should show prepaid invoice fields when changing to Prepaid invoice type.', function() {
                     view.$el.find('#already-invoiced').prop('checked', true).trigger('change');
                     _.each(prepaid_invoice_fields, function(field) {
-                        expect(visible(field)).toBe(true);
+                        expect(SpecUtils.visibleElement(view, field, '.form-group')).toBe(true);
                     });
-                    expect(visible('[name=invoice_discount_value]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=invoice_discount_value]', '.form-group')).toBe(false);
                 });
 
                 it('should show postpaid invoice fields when changing to Postpaid invoice type.', function() {
                     view.$el.find('#invoice-after-redemption').prop('checked', true).trigger('change');
                     _.each(prepaid_invoice_fields, function(field) {
-                        expect(visible(field)).toBe(false);
+                        expect(SpecUtils.visibleElement(view, field, '.form-group')).toBe(false);
                     });
-                    expect(visible('[name=invoice_discount_value]')).toBe(true);
+                    expect(SpecUtils.visibleElement(view, '[name=invoice_discount_value]', '.form-group')).toBe(true);
                 });
 
                 it('should hide all invoice fields when changing to Not applicable invoice type.', function() {
                     view.$el.find('#not-applicable').prop('checked', true).trigger('change');
                     _.each(prepaid_invoice_fields, function(field) {
-                        expect(visible(field)).toBe(false);
+                        expect(SpecUtils.visibleElement(view, field, '.form-group')).toBe(false);
                     });
-                    expect(visible('[name=invoice_discount_value]')).toBe(false);
+                    expect(SpecUtils.visibleElement(view, '[name=invoice_discount_value]', '.form-group')).toBe(false);
                 });
 
                 it('should show tax deduction source field when TSD is selected.', function() {
                     view.$el.find('#tax-deducted').prop('checked', true).trigger('change');
-                    expect(visible('[name=tax_deducted_source_value]')).toBe(true);
+                    expect(
+                        SpecUtils.visibleElement(view, '[name=tax_deducted_source_value]', '.form-group')
+                    ).toBe(true);
                     view.$el.find('#non-tax-deducted').prop('checked', true).trigger('change');
-                    expect(visible('[name=tax_deducted_source_value]')).toBe(false);
+                    expect(
+                        SpecUtils.visibleElement(view, '[name=tax_deducted_source_value]', '.form-group')
+                    ).toBe(false);
                 });
             });
 

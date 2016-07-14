@@ -4,6 +4,7 @@ define([
         'models/coupon_model',
         'views/coupon_detail_view',
         'test/mock_data/coupons',
+        'test/spec-utils',
         'moment',
     ],
     function ($,
@@ -11,6 +12,7 @@ define([
               Coupon,
               CouponDetailView,
               Mock_Coupons,
+              SpecUtils,
               moment) {
         'use strict';
 
@@ -23,18 +25,6 @@ define([
                 valueDiscountCodeVoucher,
                 verifiedSeat,
                 view;
-
-            /**
-              * Helper function to check if a form field is shown.
-              */
-            function visible(selector) {
-                var formGroup = view.$(selector).closest('.info-item');
-                if (formGroup.length > 0) {
-                    return !formGroup.hasClass('hidden');
-                } else {
-                    return false;
-                }
-            }
 
             beforeEach(function () {
                 data = Mock_Coupons.enrollmentCodeCouponData;
@@ -208,8 +198,8 @@ define([
                 expect(view.$('.invoice-payment-date .value').text()).toEqual(
                     view.formatDateTime(model.get('invoice_payment_date'))
                 );
-                expect(visible('.invoice_discount_type')).toBe(false);
-                expect(visible('.invoice_discount_value')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice_discount_type', '.info-item')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice_discount_value', '.info-item')).toBe(false);
             });
 
             it('should render postpaid invoice data.', function() {
@@ -226,28 +216,28 @@ define([
                         model.get('invoice_discount_value')
                     )
                 );
-                expect(visible('.invoice-number')).toBe(false);
-                expect(visible('.invoiced-amount')).toBe(false);
-                expect(visible('.invoice-payment-date')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice-number', '.info-item')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoiced-amount', '.info-item')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice-payment-date', '.info-item')).toBe(false);
             });
 
             it('should render not-applicable invoice data.', function() {
                 view.model.set('invoice_type', 'Not-Applicable');
                 view.render();
-                expect(visible('.invoice_discount_type')).toBe(false);
-                expect(visible('.invoice-number')).toBe(false);
-                expect(visible('.invoiced-amount')).toBe(false);
-                expect(visible('.invoice-payment-date')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice_discount_type', '.info-item')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice-number', '.info-item')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoiced-amount', '.info-item')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.invoice-payment-date', '.info-item')).toBe(false);
             });
 
             it('should display tax deducted source input field.', function() {
                 view.model.set('tax_deduction', 'Yes');
                 view.render();
-                expect(visible('.tax-deducted-source-value')).toBe(true);
+                expect(SpecUtils.visibleElement(view, '.tax-deducted-source-value', '.info-item')).toBe(true);
 
                 view.model.set('tax_deduction', 'No');
                 view.render();
-                expect(visible('.tax-deducted-source-value')).toBe(false);
+                expect(SpecUtils.visibleElement(view, '.tax-deducted-source-value', '.info-item')).toBe(false);
             });
 
             it('should display data table', function () {

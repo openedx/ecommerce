@@ -270,12 +270,18 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         """Verify the correct seat type attribute is retrieved."""
         course = CourseFactory()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat('verified', False, 10, self.partner)
+        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.create_basket_and_add_product(enrollment_code)
         self.mock_course_api_response(course)
+
+        # Enable enrollment codes
+        self.site.siteconfiguration.enable_enrollment_codes = True
+        self.site.siteconfiguration.save()
+
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['is_bulk_purchase'])
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], _(enrollment_code.attr.seat_type.capitalize()))
 
@@ -284,7 +290,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         course = CourseFactory()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course.create_or_update_seat('invalid', False, 10, self.partner)
-        seat = course.create_or_update_seat('verified', False, 10, self.partner)
+        seat = course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         seat_sku = StockRecord.objects.get(product=seat).partner_sku
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku

@@ -444,7 +444,7 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course = CourseFactory()
-        course.create_or_update_seat('verified', True, 50, self.partner)
+        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = UserFactory()
         basket = BasketFactory()

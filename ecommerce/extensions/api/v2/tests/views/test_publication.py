@@ -41,7 +41,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'id_verification_required',
                             'value': False
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 },
                 {
                     'product_class': 'Seat',
@@ -56,7 +64,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'id_verification_required',
                             'value': False
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 },
                 {
                     'product_class': 'Seat',
@@ -71,7 +87,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'id_verification_required',
                             'value': True
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 },
                 {
                     'product_class': 'Seat',
@@ -94,7 +118,15 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                             'name': 'credit_hours',
                             'value': 1
                         }
-                    ]
+                    ],
+                    'course': {
+                        'create_enrollment_code': 'true',
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
                 }
             ]
         }
