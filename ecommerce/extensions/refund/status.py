@@ -11,6 +11,8 @@ class REFUND(object):
 
 class REFUND_LINE(object):
     OPEN = 'Open'
+    PENDING_WITH_REVOCATION = 'Pending With Revocation'
+    PENDING_WITHOUT_REVOCATION = 'Pending Without Revocation'
     REVOCATION_ERROR = 'Revocation Error'
     DENIED = 'Denied'
     COMPLETE = 'Complete'

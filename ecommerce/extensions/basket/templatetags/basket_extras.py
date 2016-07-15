@@ -18,4 +18,3 @@ def get_formatted_benefit_value(benefit):
         benefit_value (str): String value containing formatted benefit value and type.
     """
     return format_benefit_value(benefit)
-

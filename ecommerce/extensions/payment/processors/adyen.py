@@ -13,7 +13,6 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.exceptions import (
-    InvalidAdyenDecision,
     MissingAdyenEventCodeException,
     UnsupportedAdyenEventException
 )
@@ -170,11 +169,6 @@ class Adyen(BasePaymentProcessor):
         # and logging the exception.
         result_code = response['resultCode'].lower()
         if result_code != 'authorised':
-            error_code = response['errorCode']
-            # exception = {
-            #     'decline': TransactionDeclined,
-            # }.get(result_code, InvalidAdyenDecision)
-
             raise TransactionDeclined
 
         # Create Source to track all transactions related to this processor and order
