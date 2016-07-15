@@ -4,9 +4,11 @@ import logging
 
 import dateutil.parser
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from rest_framework import filters, generics, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -48,6 +50,31 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return CouponListSerializer
         return CouponSerializer
 
+    def create_update_data_dict(self, data, fields):
+        """
+        Creates a dictionary for updating model attributes.
+
+        Arguments:
+            data (QueryDict): Request data
+            fields (list): List of updatable model fields
+
+        Returns:
+            update_dict (dict): Dictionary that will be used to update model objects.
+        """
+        update_dict = {}
+
+        for field in fields:
+            if field in data:
+                value = prepare_course_seat_types(data.get(field)) if field == 'course_seat_types' else data.get(field)
+                update_dict[field.replace('invoice_', '')] = value
+        return update_dict
+
+    def get_category(self, category_data):
+        try:
+            return Category.objects.get(id=category_data['id'])
+        except Category.DoesNotExist:
+            raise ValueError(_('Category with ID {category_id} not found.'.format(category_id=category_data['id'])))
+
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
 
@@ -70,111 +97,134 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             500 if an error occurs when attempting to create a coupon.
         """
         with transaction.atomic():
-            benefit_type = request.data.get('benefit_type')
-            benefit_value = request.data.get('benefit_value')
-            catalog_query = request.data.get('catalog_query')
-            category_data = request.data.get('category')
-            client_username = request.data.get('client')
-            code = request.data.get('code')
-            course_seat_types = request.data.get('course_seat_types')
-            end_datetime = dateutil.parser.parse(request.data.get('end_datetime'))
-            max_uses = request.data.get('max_uses')
-            note = request.data.get('note')
-            partner = request.site.siteconfiguration.partner
-            price = request.data.get('price')
-            quantity = request.data.get('quantity')
-            start_datetime = dateutil.parser.parse(request.data.get('start_datetime'))
-            stock_record_ids = request.data.get('stock_record_ids')
-            title = request.data.get('title')
-            voucher_type = request.data.get('voucher_type')
+            try:
+                self.validate_coupon_data(request.data)
+            except ValidationError as exc:
+                return Response(exc.message, status=status.HTTP_400_BAD_REQUEST)
 
-            client, __ = BusinessClient.objects.get_or_create(name=client_username)
+            try:
+                invoice_data = self.prepare_data(request)
+            except ValueError as exc:
+                return Response(exc.message, status=status.HTTP_400_BAD_REQUEST)
 
-            if code:
-                try:
-                    Voucher.objects.get(code=code)
-                    return Response(
-                        'A coupon with code {code} already exists.'.format(code=code),
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                except Voucher.DoesNotExist:
-                    pass
-
-            invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
-
-            if course_seat_types:
-                course_seat_types = prepare_course_seat_types(course_seat_types)
-
-            if category_data:
-                category = self.get_category(category_data)
-
-            # Maximum number of uses can be set for each voucher type and disturb
-            # the predefined behaviours of the different voucher types. Therefor
-            # here we enforce that the max_uses variable can't be used for SINGLE_USE
-            # voucher types.
-            if max_uses and voucher_type != Voucher.SINGLE_USE:
-                max_uses = int(max_uses)
-            else:
-                max_uses = None
-
-            # When a black-listed course mode is received raise an exception.
-            # Audit modes do not have a certificate type and therefore will raise
-            # an AttributeError exception.
-            if stock_record_ids:
-                seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
-                for seat in seats:
-                    try:
-                        if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
-                            return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-                    except AttributeError:
-                        return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-
-                stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-                coupon_catalog, __ = get_or_create_catalog(
-                    name='Catalog for stock records: {}'.format(stock_records_string),
-                    partner=partner,
-                    stock_record_ids=stock_record_ids
-                )
-            else:
-                coupon_catalog = None
-
-            coupon_product = create_coupon_product(
-                benefit_type=benefit_type,
-                benefit_value=benefit_value,
-                catalog=coupon_catalog,
-                catalog_query=catalog_query,
-                category=category,
-                code=code,
-                course_seat_types=course_seat_types,
-                end_datetime=end_datetime,
-                max_uses=max_uses,
-                note=note,
-                partner=partner,
-                price=price,
-                quantity=quantity,
-                start_datetime=start_datetime,
-                title=title,
-                voucher_type=voucher_type
-            )
-
-            basket = prepare_basket(request, coupon_product)
-
-            # Create an order now since payment is handled out of band via an invoice.
-            response_data = self.create_order_for_invoice(
-                basket=basket,
-                client=client,
-                coupon_id=coupon_product.id,
-                invoice_data=invoice_data
-            )
-
+            response_data = self.create_coupon(invoice_data=invoice_data, request=request)
             return Response(response_data, status=status.HTTP_200_OK)
 
-    def get_category(self, category_data):
-        try:
-            return Category.objects.get(id=category_data['id'])
-        except Category.DoesNotExist:
-            logger.exception('Category [%s] with ID [%s] not found.', category_data['name'], category_data['id'])
-            raise
+    def create_coupon(self, invoice_data, request):
+        """
+        Creates a coupon product, adds it to a basket and creates an order.
+        Arguments:
+            invoice_data (dict): Dictionary containing Invoice data
+            request (HttpRequest): Request containing coupon data and partner information
+        Returns:
+            response_data (dict): Serialized coupon data.
+        """
+        coupon_data = request.data
+        coupon_product = create_coupon_product(
+            benefit_type=coupon_data.get('benefit_type'),
+            benefit_value=coupon_data.get('benefit_value'),
+            catalog=coupon_data.get('catalog'),
+            catalog_query=coupon_data.get('catalog_query'),
+            category=coupon_data.get('category'),
+            code=coupon_data.get('code'),
+            course_seat_types=coupon_data.get('course_seat_types'),
+            end_datetime=coupon_data.get('end_datetime'),
+            max_uses=coupon_data.get('max_uses'),
+            note=coupon_data.get('note'),
+            partner=request.site.siteconfiguration.partner,
+            price=coupon_data.get('price'),
+            quantity=coupon_data.get('quantity'),
+            start_datetime=coupon_data.get('start_datetime'),
+            title=coupon_data.get('title'),
+            voucher_type=coupon_data.get('voucher_type')
+        )
+
+        basket = prepare_basket(request, coupon_product)
+
+        # Create an order now since payment is handled out of band via an invoice.
+        response_data = self.create_order_for_invoice(
+            basket=basket,
+            client=coupon_data.get('client'),
+            coupon_id=coupon_product.id,
+            invoice_data=invoice_data
+        )
+
+        return response_data
+
+    def prepare_data(self, request):
+        """
+        Prepare request data for coupon creation.
+        Arguments:
+            request (HttpRequest): Request containing coupon data and partner information
+        Returns:
+            invoice_data (dict): Dictionary containing Invoice data.
+        """
+        data = request.data
+
+        category_data = data.get('category')
+        course_seat_types = data.get('course_seat_types')
+        max_uses = data.get('max_uses')
+        quantity = data.get('quantity')
+        stock_record_ids = data.get('stock_record_ids')
+
+        if category_data:
+            data['category'] = self.get_category(category_data)
+
+        data['client'], __ = BusinessClient.objects.get_or_create(name=data.get('client'))
+
+        if course_seat_types:
+            data['course_seat_types'] = prepare_course_seat_types(course_seat_types)
+
+        data['end_datetime'] = dateutil.parser.parse(data.get('end_datetime'))
+
+        # Maximum number of uses can be set for each voucher type and disturb
+        # the predefined behaviours of the different voucher types. Therefor
+        # here we enforce that the max_uses variable can't be used for SINGLE_USE
+        # voucher types.
+        data['max_uses'] = int(max_uses) if max_uses and data.get('voucher_type') != Voucher.SINGLE_USE else None
+
+        if quantity:
+            data['quantity'] = int(quantity)
+
+        data['start_datetime'] = dateutil.parser.parse(data.get('start_datetime'))
+
+        # When a black-listed course mode is received raise an exception.
+        # Audit modes do not have a certificate type and therefore will raise
+        # an AttributeError exception.
+        if stock_record_ids:
+            seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
+            for seat in seats:
+                try:
+                    if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                        raise ValueError(_('Course mode not supported'))
+                except AttributeError:
+                    raise ValueError(_('Course mode not supported'))
+
+            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+            data['catalog'], __ = get_or_create_catalog(
+                name='Catalog for stock records: {}'.format(stock_records_string),
+                partner=request.site.siteconfiguration.partner,
+                stock_record_ids=stock_record_ids
+            )
+        else:
+            data['catalog'] = None
+
+        return self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
+
+    def validate_coupon_data(self, data):
+        """
+        Validates coupon data sent via request.
+        Raises:
+            ValidationError: If request data fields contains invalid values
+        """
+        # TODO: (SOL-1903) Move validation code to the Coupon serializer
+        code = data.get('code')
+        if code:
+            try:
+                Voucher.objects.get(code=code)
+                raise ValidationError(_('A coupon with code {code} already exists.'.format(code=code)))
+            except Voucher.DoesNotExist:
+                pass
 
     def update(self, request, *args, **kwargs):
         """Update start and end dates of all vouchers associated with the coupon."""
@@ -220,25 +270,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         serializer = self.get_serializer(coupon)
         return Response(serializer.data)
-
-    def create_update_data_dict(self, data, fields):
-        """
-        Creates a dictionary for updating model attributes.
-
-        Arguments:
-            data (QueryDict): Request data
-            fields (list): List of updatable model fields
-
-        Returns:
-            update_dict (dict): Dictionary that will be used to update model objects.
-        """
-        update_dict = {}
-
-        for field in fields:
-            if field in data:
-                value = prepare_course_seat_types(data.get(field)) if field == 'course_seat_types' else data.get(field)
-                update_dict[field.replace('invoice_', '')] = value
-        return update_dict
 
     def update_coupon_benefit_value(self, benefit_value, coupon, vouchers):
         """

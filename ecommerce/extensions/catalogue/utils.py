@@ -142,7 +142,7 @@ def create_coupon_product(
             end_datetime=end_datetime,
             max_uses=max_uses,
             name=title,
-            quantity=int(quantity),
+            quantity=quantity,
             start_datetime=start_datetime,
             voucher_type=voucher_type
         )
