@@ -8,6 +8,7 @@ from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
@@ -187,23 +188,26 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         self.site.siteconfiguration.segment_key = None
         refund = self.create_refund()
-        with LogCapture(LOGGER_NAME) as l:
-            self.approve(refund)
 
-            l.check(
-                (
-                    LOGGER_NAME,
-                    'INFO',
-                    'credit_issued: amount="{}", currency="{}", processor_name="{}", '
-                    'refund_id="{}", user_id="{}"'.format(
-                        refund.total_credit_excl_tax,
-                        refund.currency,
-                        refund.order.sources.first().source_type.name,
-                        refund.id,
-                        refund.user.id
+        with mock.patch.object(DummyProcessor, 'issue_credit', return_value=True):
+            with LogCapture(LOGGER_NAME) as l:
+
+                self.approve(refund)
+
+                l.check(
+                    (
+                        LOGGER_NAME,
+                        'INFO',
+                        'credit_issued: amount="{}", currency="{}", processor_name="{}", '
+                        'refund_id="{}", user_id="{}"'.format(
+                            refund.total_credit_excl_tax,
+                            refund.currency,
+                            refund.order.sources.first().source_type.name,
+                            refund.id,
+                            refund.user.id
+                        )
                     )
                 )
-            )
 
     def test_approve_payment_error(self):
         """

@@ -199,6 +199,8 @@ class Refund(StatusMixin, TimeStampedModel):
         elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
             try:
                 self._issue_credit(revoke_fulfillment)
+                if self.status == REFUND.OPEN:
+                    self.set_status(REFUND.PAYMENT_REFUNDED)
             except PaymentError:
                 logger.exception('Failed to issue credit for refund [%d].', self.id)
                 self.set_status(REFUND.PAYMENT_REFUND_ERROR)
