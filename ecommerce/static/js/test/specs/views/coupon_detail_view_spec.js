@@ -4,16 +4,14 @@ define([
         'models/coupon_model',
         'views/coupon_detail_view',
         'test/mock_data/coupons',
-        'test/spec-utils',
-        'moment',
+        'test/spec-utils'
     ],
     function ($,
               _s,
               Coupon,
               CouponDetailView,
               Mock_Coupons,
-              SpecUtils,
-              moment) {
+              SpecUtils) {
         'use strict';
 
         describe('coupon detail view', function() {
@@ -37,26 +35,27 @@ define([
                 verifiedSeat = Mock_Coupons.verifiedSeat;
             });
 
-            it('should get code status from voucher data', function () {
-                expect(view.codeStatus(enrollmentCodeVoucher)).toBe('ACTIVE');
-
-                enrollmentCodeVoucher.end_datetime = moment().fromNow();
-                expect(view.codeStatus(enrollmentCodeVoucher)).toBe('INACTIVE');
-
-                enrollmentCodeVoucher.start_datetime = moment().toNow();
-                enrollmentCodeVoucher.end_datetime = moment(enrollmentCodeVoucher.start_datetime).toNow();
-                expect(view.codeStatus(enrollmentCodeVoucher)).toBe('INACTIVE');
-            });
-
-            it('should get coupon type from voucher data', function () {
-                expect(view.couponType(percentageDiscountCodeVoucher)).toBe('Discount Code');
-                expect(view.couponType(enrollmentCodeVoucher)).toBe('Enrollment Code');
+            it('should compare view.model with model sent', function () {
+                expect(view.model).toBe(model);
             });
 
             it('should get discount value from voucher data', function () {
-                expect(view.discountValue(percentageDiscountCodeVoucher)).toBe('50%');
-                expect(view.discountValue(valueDiscountCodeVoucher)).toBe('$12');
-                expect(view.discountValue(enrollmentCodeVoucher)).toBe('100%');
+                expect(view.discountValue()).toBe('100%');
+                view.model.set({'benefit_type': 'Absolute', 'benefit_value': 12.0});
+                expect(view.discountValue()).toBe('$12');
+            });
+
+            it('should get usage limitation from voucher data', function () {
+                expect(view.usageLimitation()).toBe('Can be used once by one customer');
+
+                view.model.set('voucher_type', 'Once per customer');
+                expect(view.usageLimitation()).toBe('Can be used once by multiple customers');
+
+                view.model.set('voucher_type', 'Multi-use');
+                expect(view.usageLimitation()).toBe('Can be used multiple times by multiple customers');
+
+                view.model.set('voucher_type', '');
+                expect(view.usageLimitation()).toBe('');
             });
 
             it('should format date time as MM/DD/YYYY h:mm A', function () {
@@ -67,55 +66,39 @@ define([
                 expect(view.formatLastEditedData(lastEditData)).toBe('user - 01/15/2016 7:26 AM');
             });
 
-            it('should get usage limitation from voucher data', function () {
-                expect(view.usageLimitation(enrollmentCodeVoucher)).toBe('Can be used once by one customer');
-                expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe('Can be used once by multiple customers');
-
-                valueDiscountCodeVoucher.usage = 'Multi-use';
-                expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe(
-                    'Can be used multiple times by multiple customers'
-                );
-
-                valueDiscountCodeVoucher.usage = '';
-                expect(view.usageLimitation(valueDiscountCodeVoucher)).toBe('');
-            });
-
             it('should format tax deducted source value.', function() {
                 expect(view.taxDeductedSource(50)).toBe('50%');
                 expect(view.taxDeductedSource()).toBe(null);
             });
 
             it('should display correct data upon rendering', function () {
-                var voucher = model.get('vouchers')[0],
-                    category = model.get('categories')[0].name;
+                var category = model.get('categories')[0].name;
 
-                spyOn(view, 'renderVoucherTable');
                 view.render();
                 expect(view.$('.coupon-title').text()).toEqual(model.get('title'));
-                expect(view.$('.coupon-type').text()).toEqual(view.couponType(voucher));
-                expect(view.$('.code-status').text()).toEqual(view.codeStatus(voucher));
+                expect(view.$('.coupon-type').text()).toEqual(model.get('coupon_type'));
+                expect(view.$('.code-status').text()).toEqual(model.get('code_status'));
                 expect(view.$('.coupon-information > .heading > .pull-right > span').text()).toEqual(
                     view.formatLastEditedData(model.get('last_edited'))
                 );
                 expect(view.$('.category > .value').text()).toEqual(category);
-                expect(view.$('.discount-value > .value').text()).toEqual(view.discountValue(voucher));
+                expect(view.$('.discount-value > .value').text()).toEqual(view.discountValue());
                 expect(view.$('.course-info > .value').contents().get(0).nodeValue).toEqual(
                     'course-v1:edX+DemoX+Demo_Course'
                 );
                 expect(view.$('.course-info > .value > .pull-right').text()).toEqual('verified');
                 expect(view.$('.start-date-info > .value').text()).toEqual(
-                    view.formatDateTime(voucher.start_datetime)
+                    view.formatDateTime(model.get('start_date'))
                 );
                 expect(view.$('.end-date-info > .value').text()).toEqual(
-                    view.formatDateTime(voucher.end_datetime)
+                    view.formatDateTime(model.get('end_date'))
                 );
-                expect(view.$('.usage-limitations > .value').text()).toEqual(view.usageLimitation(voucher));
+                expect(view.$('.usage-limitations > .value').text()).toEqual(view.usageLimitation());
                 expect(view.$('.client-info > .value').text()).toEqual(model.get('client'));
                 expect(view.$('.invoiced-amount > .value').text()).toEqual(
                     _s.sprintf('$%s', model.get('price'))
                 );
                 expect(parseInt(view.$('.max-uses > .value').text())).toEqual(parseInt(model.get('max_uses')));
-                expect(view.renderVoucherTable).toHaveBeenCalled();
                 expect(view.$('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
                 expect(view.$('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
                 expect(view.$('.invoice-payment-date > .value').text()).toEqual(
@@ -238,14 +221,6 @@ define([
                 view.model.set('tax_deduction', 'No');
                 view.render();
                 expect(SpecUtils.visibleElement(view, '.tax-deducted-source-value', '.info-item')).toBe(false);
-            });
-
-            it('should display data table', function () {
-                view.renderVoucherTable();
-                expect(view.$('#vouchersTable').DataTable().autowidth).toBeFalsy();
-                expect(view.$('#vouchersTable').DataTable().paging).toBeFalsy();
-                expect(view.$('#vouchersTable').DataTable().ordering).toBeFalsy();
-                expect(view.$('#vouchersTable').DataTable().searching).toBeFalsy();
             });
 
             it('should download voucher report in the new tab', function () {

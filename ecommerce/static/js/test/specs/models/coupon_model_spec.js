@@ -121,14 +121,6 @@ define([
                     model.set('seats', [{'price': 100}]);
                     expect(model.getSeatPrice()).toEqual(100);
                 });
-
-                it('should set max uses 1 if voucher usage Single use', function () {
-                    var model = new Coupon();
-                    model.set('vouchers', [{ usage: 'Single use' }]);
-
-                    model.updateVoucherData();
-                    expect(model.get('max_uses')).toBe(1);
-                });
             });
 
             describe('save', function () {

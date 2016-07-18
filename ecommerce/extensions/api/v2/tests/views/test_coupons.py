@@ -303,7 +303,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 2,
             'price': 100,
-            'category_ids': [self.category.id],
+            'category_ids': [self.category.id]
         }
         self.response = self.client.post(COUPONS_LINK, data=self.data, format='json')
         self.coupon = Product.objects.get(title=self.data['title'])
@@ -317,6 +317,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         elif method == 'PUT':
             response = self.client.put(path, json.dumps(data), 'application/json')
         return json.loads(response.content)
+
+    def test_create_serializer_data(self):
+        """Test if coupon serializer creates data for details page"""
+        details_response = self.get_response_json(
+            'GET',
+            reverse('api:v2:coupons-detail', args=[self.coupon.id]),
+            data=self.data
+        )
+        self.assertEqual(details_response['coupon_type'], 'Enrollment code')
+        self.assertEqual(details_response['code_status'], 'ACTIVE')
 
     def test_response(self):
         """Test the response data given after the order was created."""
