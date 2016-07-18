@@ -79,8 +79,7 @@ class LogistrationMixin(LmsUserMixin):
         email = email or LMS_EMAIL
         password = password or LMS_PASSWORD
 
-        # Note: We use Selenium directly here (as opposed to bok-choy) to avoid issues with promises being broken.
-        self.lms_login_page.browser.get(self.lms_login_page.url(course_id))  # pylint: disable=not-callable
+        self.lms_login_page.visit(course_id)
         self.lms_login_page.login(email, password)
 
     def register_via_ui(self, course_id=None):
@@ -110,8 +109,7 @@ def login_with_lms(self, email=None, password=None, course_id=None):
     email = email or LMS_EMAIL
     password = password or LMS_PASSWORD
 
-    # Note: We use Selenium directly here (as opposed to bok-choy) to avoid issues with promises being broken.
-    self.lms_login_page.browser.get(self.lms_login_page.url(course_id))  # pylint: disable=not-callable
+    self.lms_login_page.visit(course_id)
     self.lms_login_page.login(email, password)
 
 
@@ -124,6 +122,11 @@ class OttoAuthenticationMixin(object):
         """ Start the login process via Otto's login page (which should redirect to LMS.) """
         email = email or LMS_EMAIL
         password = password or LMS_PASSWORD
+
+        # Note: We have to visit LMS Login page to provide basic auth as otto login page redirect to LMS login page
+        # which requires basic auth and not providing that could cause the test to hang.
+        lms_login_page = LMSLoginPage(self.browser)
+        lms_login_page.visit()
 
         self.otto_login_page.visit()
         submit_lms_login_form(self.otto_login_page, email, password)
