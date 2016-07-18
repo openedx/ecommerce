@@ -124,7 +124,7 @@ class Command(BaseCommand):
 
         handle, filename = tempfile.mkstemp(prefix='export_factures_', suffix='.csv')
         with os.fdopen(handle, 'w') as file:
-            writer = csv.writer(file)
+            writer = csv.writer(file, delimiter=str(";"))
             writer.writerow([field.encode('utf-8') for field in csv_header])
 
             for row in rows:
