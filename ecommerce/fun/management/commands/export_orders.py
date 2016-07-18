@@ -114,7 +114,7 @@ class Command(BaseCommand):
         if options['end-date']:
             try:
                 end_date = datetime.datetime.strptime(options['end-date'], '%m-%d-%Y')
-                order_queryset = order_queryset.filter(date_placed__gte=end_date)
+                order_queryset = order_queryset.filter(date_placed__lte=end_date)
             except ValueError:
                 raise CommandError(u"End date must be of format MM-DD-YYYY")
 
