@@ -5,9 +5,9 @@ from mock import patch
 from oscar.test.factories import create_order
 from oscar.test.newfactories import UserFactory, BasketFactory
 from django.test.client import RequestFactory
-from django.test import override_settings
 
 from ecommerce.tests.testcases import TestCase
+from ecommerce.core.tests import toggle_switch
 from ecommerce.sailthru.signals import process_checkout_complete, process_basket_addition
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -30,24 +30,25 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         self.request.site = self.site
         self.user = UserFactory.create(username='test', email=TEST_EMAIL)
 
+        toggle_switch('sailthru_enable', True)
+
         # create some test course objects
         self.course_id = 'edX/toy/2012_Fall'
         self.course_url = 'http://lms.testserver.fake/courses/edX/toy/2012_Fall/info'
         self.course = Course.objects.create(id=self.course_id, name='Demo Course')
 
-    @override_settings(SAILTHRU_ENABLE=False)
     @patch('ecommerce.sailthru.signals.logger.error')
     def test_just_return_signals(self, mock_log_error):
         """
         Ensure that disabling Sailthru just returns
         """
+        toggle_switch('sailthru_enable', False)
         process_checkout_complete(None)
         self.assertFalse(mock_log_error.called)
 
         process_basket_addition(None)
         self.assertFalse(mock_log_error.called)
 
-    @override_settings(SAILTHRU_ENABLE=True)
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_process_checkout_complete(self, mock_update_course_enrollment):
         """
@@ -69,7 +70,6 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
                                                          site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 
-    @override_settings(SAILTHRU_ENABLE=True)
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_process_basket_addition(self, mock_update_course_enrollment):
         """
@@ -91,7 +91,6 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
                                                          site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 
-    @override_settings(SAILTHRU_ENABLE=True)
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_price_zero(self, mock_update_course_enrollment):
         """

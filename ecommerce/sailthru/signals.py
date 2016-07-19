@@ -1,8 +1,8 @@
 import logging
 
-from django.conf import settings
 from django.dispatch import receiver
 from oscar.core.loading import get_class
+import waffle
 
 from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 from ecommerce.extensions.analytics.utils import silence_exceptions
@@ -19,10 +19,11 @@ basket_addition = get_class('basket.signals', 'basket_addition')
 def process_checkout_complete(sender, order=None, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
     """Tell Sailthru when payment done.
 
-    Parameters described at http://django-oscar.readthedocs.io/en/releases-1.1/ref/signals.html
+    Arguments:
+            Parameters described at http://django-oscar.readthedocs.io/en/releases-1.1/ref/signals.html
     """
 
-    if not settings.SAILTHRU_ENABLE:
+    if not waffle.switch_is_active('sailthru_enable'):
         return
 
     # get product (should only be 1)
@@ -30,7 +31,7 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
 
     # return if no price, since enrolls are handled by lms
     price = order.total_excl_tax
-    if not price or price == 0:
+    if not price:
         return
 
     course_id = product.course_id
@@ -46,14 +47,15 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
 
 
 @receiver(basket_addition)
-@silence_exceptions("Failed to call Sailthru upon backet addition.")
+@silence_exceptions("Failed to call Sailthru upon basket addition.")
 def process_basket_addition(sender, product=None, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
     """Tell Sailthru when payment started.
 
-    Parameters described at http://django-oscar.readthedocs.io/en/releases-1.1/ref/signals.html
+    Arguments:
+            Parameters described at http://django-oscar.readthedocs.io/en/releases-1.1/ref/signals.html
     """
 
-    if not settings.SAILTHRU_ENABLE:
+    if not waffle.switch_is_active('sailthru_enable'):
         return
 
     course_id = product.course_id
@@ -68,7 +70,7 @@ def process_basket_addition(sender, product=None, request=None, user=None, **kwa
         currency = stock_record.price_currency
 
     # return if no price, since enrolls are handled by lms
-    if not price or price == 0:
+    if not price:
         return
 
     # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
@@ -79,17 +81,5 @@ def process_basket_addition(sender, product=None, request=None, user=None, **kwa
 
 
 def _build_course_url(course_id):
-    """Build a course url from a course id and the host
-
-    :param request:
-    :param course_id:
-    :return:
-    """
-    host = get_lms_url()
-    # hack for integration testing since Sailthru rejects urls without a valid domain
-    if host.startswith('http://127.0.0.1'):
-        host = 'http://courses.edx.org'
-    return '{host}/courses/{course}/info'.format(
-        host=host,
-        course=course_id
-    )
+    """Build a course url from a course id and the host"""
+    return get_lms_url('courses/{}/info'.format(course_id))
