@@ -68,11 +68,21 @@
             <label class="radio-inline">
                 <input type="radio" name="honor_mode" value="false" aria-describedby="honorModeHelpBlock"> No
             </label>
-        <!-- NOTE: This help-block is here for validation messages. -->
+            <!-- NOTE: This help-block is here for validation messages. -->
+            <span class="help-block"></span>
+            <span id="honorModeHelpBlock" class="help-block">
+                <%- gettext('Include an Honor Seat with this course') %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="fields">
+    <div class="form-group create-enrollment-code hidden checkbox">
+        <label for="bulkEnrollment">
+        <input type="checkbox" id="bulkEnrollment" name="create_enrollment_code" value="true"> <%- gettext('Include Enrollment Code') %>
+        </label>
         <span class="help-block"></span>
-        <span id="honorModeHelpBlock" class="help-block">
-            <%- gettext('Include an Honor Seat with this course') %>
-        </span>
     </div>
 </div>
 

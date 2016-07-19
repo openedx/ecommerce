@@ -14,6 +14,7 @@ from rest_framework.reverse import reverse
 import waffle
 
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
+from ecommerce.core.models import Site, SiteConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.coupons.utils import get_seats_from_query
@@ -299,6 +300,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
                     # Extract arguments required for Seat creation, deserializing as necessary.
                     certificate_type = attrs.get('certificate_type', '')
+                    create_enrollment_code = product['course'].get('create_enrollment_code') and \
+                        self.context['request'].site.siteconfiguration.enable_enrollment_codes
                     id_verification_required = attrs['id_verification_required']
                     price = Decimal(product['price'])
 
@@ -317,6 +320,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         expires=expires,
                         credit_provider=credit_provider,
                         credit_hours=credit_hours,
+                        create_enrollment_code=create_enrollment_code
                     )
 
                 resp_message = course.publish_to_lms(access_token=self.access_token)
@@ -530,3 +534,15 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Invoice
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Site
+
+
+class SiteConfigurationSerializer(serializers.ModelSerializer):
+    site = SiteSerializer(read_only=True)
+
+    class Meta(object):
+        model = SiteConfiguration

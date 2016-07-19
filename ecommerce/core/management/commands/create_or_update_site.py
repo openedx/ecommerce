@@ -88,6 +88,12 @@ class Command(BaseCommand):
                             type=str,
                             required=True,
                             help='from email')
+        parser.add_argument('--enable-enrollment-codes',
+                            action='store',
+                            dest='enable_enrollment_codes',
+                            type=bool,
+                            required=False,
+                            help='Enable the creation of enrollment codes.')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -100,6 +106,7 @@ class Command(BaseCommand):
         client_secret = options.get('client_secret')
         segment_key = options.get('segment_key')
         from_email = options.get('from_email')
+        enable_enrollment_codes = True if options.get('enable_enrollment_codes') else False
 
         try:
             site = Site.objects.get(id=site_id)
@@ -120,7 +127,7 @@ class Command(BaseCommand):
             partner.save()
             logger.info('Partner created with code %s', partner_code)
 
-        _, _ = SiteConfiguration.objects.get_or_create(
+        SiteConfiguration.objects.update_or_create(
             site=site,
             defaults={
                 'partner': partner,
@@ -129,6 +136,7 @@ class Command(BaseCommand):
                 'payment_processors': options['payment_processors'],
                 'segment_key': segment_key,
                 'from_email': from_email,
+                'enable_enrollment_codes': enable_enrollment_codes,
                 'oauth_settings': {
                     'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),
                     'SOCIAL_AUTH_EDX_OIDC_KEY': client_id,

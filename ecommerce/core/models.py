@@ -74,6 +74,12 @@ class SiteConfiguration(models.Model):
         null=True,
         blank=True
     )
+    enable_enrollment_codes = models.BooleanField(
+        verbose_name=_('Enable enrollment codes'),
+        help_text=_('Enable the creation of enrollment codes.'),
+        blank=True,
+        default=False
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')

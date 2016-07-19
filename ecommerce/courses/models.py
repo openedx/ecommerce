@@ -119,10 +119,33 @@ class Course(models.Model):
 
         return name
 
-    def create_or_update_seat(self, certificate_type, id_verification_required, price, partner,
-                              credit_provider=None, expires=None, credit_hours=None, remove_stale_modes=True):
+    def create_or_update_seat(
+            self,
+            certificate_type,
+            id_verification_required,
+            price,
+            partner,
+            credit_provider=None,
+            expires=None,
+            credit_hours=None,
+            remove_stale_modes=True,
+            create_enrollment_code=False
+    ):
         """
         Creates course seat products.
+
+        Arguments:
+            certificate_type(str): The seat type.
+            id_verification_required(bool): Whether an ID verification is required.
+            price(int): Price of the seat.
+            partner(Partner): Site partner.
+
+        Optional arguments:
+            credit_provider(str): Name of the organization that provides the credit
+            expires(Datetime): Date when the seat type expires.
+            credit_hours(int): Number of credit hours provided.
+            remove_stale_modes(bool): Remove stale modes.
+            create_enrollment_code(bool): Whether an enrollment code is created in additon to the seat.
 
         Returns:
             Product:  The seat that has been created or updated.
@@ -188,8 +211,9 @@ class Course(models.Model):
         seat.attr.certificate_type = certificate_type
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
-
-        if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and certificate_type in ENROLLMENT_CODE_SEAT_TYPES:
+        if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and \
+                certificate_type in ENROLLMENT_CODE_SEAT_TYPES and \
+                create_enrollment_code:
             self._create_or_update_enrollment_code(certificate_type, id_verification_required, partner, price)
 
         if credit_provider:
@@ -261,7 +285,6 @@ class Course(models.Model):
         Returns:
             Enrollment code product.
         """
-
         enrollment_code_product_class = ProductClass.objects.get(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         enrollment_code = self.enrollment_code_product
         if not enrollment_code:

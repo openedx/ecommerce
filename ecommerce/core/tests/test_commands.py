@@ -41,7 +41,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
 
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, theme_scss_path=None,
-                      payment_processors=None, segment_key=None):
+                      payment_processors=None, segment_key=None, enable_enrollment_codes=False):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -65,9 +65,15 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         if theme_scss_path:
             command_args.append('--theme-scss-path={theme_scss_path}'.format(theme_scss_path=theme_scss_path))
         if payment_processors:
-            command_args.append('--payment-processors={payment_processors}'.format(payment_processors=payment_processors))  # pylint: disable=line-too-long
+            command_args.append('--payment-processors={payment_processors}'.format(
+                payment_processors=payment_processors
+            ))
         if segment_key:
             command_args.append('--segment-key={segment_key}'.format(segment_key=segment_key))
+        if enable_enrollment_codes:
+            command_args.append('--enable-enrollment-codes={enable_enrollment_codes}'.format(
+                enable_enrollment_codes=enable_enrollment_codes
+            ))
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -90,6 +96,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         partner = Partner.objects.get(code=self.partner)
 
         self._check_site_configuration(site, partner)
+        self.assertFalse(site.siteconfiguration.enable_enrollment_codes)
 
     def test_update_site(self):
         """ Verify the command updates Site and creates Partner, and SiteConfiguration """
@@ -109,7 +116,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             client_id=self.client_id,
             client_secret=self.client_secret,
             segment_key=self.segment_key,
-            from_email=self.from_email
+            from_email=self.from_email,
+            enable_enrollment_codes=True
         )
 
         site = Site.objects.get(id=site.id)
@@ -118,6 +126,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site.domain, updated_site_domain)
         self.assertEqual(site.name, updated_site_name)
         self._check_site_configuration(site, partner)
+        self.assertTrue(site.siteconfiguration.enable_enrollment_codes)
 
     @data(
         ['--site-id=1'],

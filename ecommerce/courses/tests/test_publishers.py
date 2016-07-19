@@ -190,7 +190,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
     def test_serialize_seat_with_enrollment_code(self):
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        seat = self.course.create_or_update_seat('verified', False, 10, self.partner)
+        seat = self.course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         stock_record = seat.stockrecords.first()
         ec_stock_record = StockRecord.objects.get(product__product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 

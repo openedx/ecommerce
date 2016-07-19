@@ -117,6 +117,9 @@ define([
                         validate: true
                     },
                     onSet: 'cleanHonorMode'
+                },
+                'input[name=create_enrollment_code]': {
+                    observe: 'create_enrollment_code'
                 }
             },
 
@@ -130,6 +133,7 @@ define([
                 this.listenTo(this.model, 'change:type change:honor_mode',
                     this.renderHonorMode);
                 this.listenTo(this.model, 'change:id' , this.validateCourseID);
+                this.listenTo(this.model, 'change:type', this.toggleBulkEnrollmentField);
 
                 // Listen for the sync event so that we can keep track of the original course type.
                 // This helps us determine which course types the course can be upgraded to.
@@ -318,8 +322,39 @@ define([
                 Utils.addDatePicker(this);
 
                 return this;
-            }
+            },
 
+            /**
+             * Toggle the bulk enrollment checkbox. Hidden only for audit mode.
+             */
+            toggleBulkEnrollmentField: function() {
+                var bulk_enrollment_field = this.$('[name=create_enrollment_code]'),
+                    form_group = bulk_enrollment_field.closest('.form-group');
+                $.ajax({
+                    url: '/api/v2/siteconfiguration/',
+                    method: 'get',
+                    contentType: 'application/json',
+                    async: false,
+                    success: this.onSuccess.bind(this)
+                });
+
+                if (this.$('[name=type]:checked').val() === 'audit') {
+                    bulk_enrollment_field.prop('checked', false).trigger('change');
+                    form_group.addClass('hidden');
+                } else {
+                    form_group.removeClass('hidden');
+                }
+            },
+
+            onSuccess: function(data) {
+                var site_configuration;
+                site_configuration = _.find(data.results, function(item) {
+                    return item.site.domain === window.location.host;
+                }) || {};
+                if (!site_configuration.enable_enrollment_codes) {
+                    this.$('[name=create_enrollment_code]').attr('disabled', true);
+                }
+            }
         });
     }
 );

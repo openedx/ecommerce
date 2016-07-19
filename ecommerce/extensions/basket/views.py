@@ -114,13 +114,14 @@ class BasketSummaryView(BasketView):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
 
             # Set to true if any course in basket has bulk purchase scenario
-            if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+            if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME and \
+                    self.request.site.siteconfiguration.enable_enrollment_codes:
                 is_bulk_purchase = True
                 # Iterate on message storage so all messages are marked as read
                 list(messages.get_messages(self.request))
 
-            # Get variables for alternative basket view
-            switch_link_text, partner_sku = get_basket_switch_data(line.product)
+                # Get variables for alternative basket view
+                switch_link_text, partner_sku = get_basket_switch_data(line.product)
 
             if line.has_discount:
                 benefit = self.request.basket.applied_offers().values()[0].benefit

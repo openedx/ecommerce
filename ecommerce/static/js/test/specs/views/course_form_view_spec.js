@@ -1,6 +1,6 @@
 define([
         'models/course_model',
-        'views/course_form_view'
+        'views/course_form_view',
     ],
     function (Course,
               CourseFormView) {
@@ -23,20 +23,35 @@ define([
 
             describe('getActiveCourseTypes', function () {
                 it('should return expected course types', function () {
+                    var mockAjaxData = {'results': [{
+                            'enable_enrollment_codes': true,
+                            'site': {
+                                'domain': 'test.site.domain'
+                            }
+                        }]
+                    };
+                    spyOn($, 'ajax').and.callFake(function(options) {
+                        options.success(mockAjaxData);
+                    });
                     view.model.set('type', 'audit');
                     expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'credit']);
+                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'verified');
                     expect(view.getActiveCourseTypes()).toEqual(['verified', 'credit']);
+                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'professional');
                     expect(view.getActiveCourseTypes()).toEqual(['professional']);
+                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'credit');
                     expect(view.getActiveCourseTypes()).toEqual(['credit']);
+                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'default');
                     expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'professional', 'credit']);
+                    expect($.ajax).toHaveBeenCalled();
                 });
             });
         });

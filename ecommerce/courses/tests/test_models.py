@@ -40,7 +40,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         # Create the seat products
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seats = [course.create_or_update_seat('honor', False, 0, self.partner),
-                 course.create_or_update_seat('verified', True, 50, self.partner)]
+                 course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)]
         self.assertEqual(course.products.count(), 4)
 
         # The property should return only the child seats.
@@ -140,7 +140,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         seat_type = 'verified'
         price = 5
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat(seat_type, True, price, self.partner)
+        course.create_or_update_seat(seat_type, True, price, self.partner, create_enrollment_code=True)
 
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.assertEqual(enrollment_code.attr.course_key, course.id)
@@ -301,7 +301,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
             enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
         # Verified seat products should have a corresponding enrollment code
-        course.create_or_update_seat('verified', True, 10, self.partner)
+        course.create_or_update_seat('verified', True, 10, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, 'verified')

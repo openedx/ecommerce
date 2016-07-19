@@ -2,13 +2,22 @@ from django.conf.urls import url, include
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN
-from ecommerce.extensions.api.v2.views import (baskets as basket_views,
-                                               checkout as checkout_views, payments as payment_views,
-                                               orders as order_views, refunds as refund_views,
-                                               products as product_views, courses as course_views,
-                                               publication as publication_views, partners as partner_views,
-                                               catalog as catalog_views, stockrecords as stockrecords_views,
-                                               coupons as coupon_views, vouchers as voucher_views)
+from ecommerce.extensions.api.v2.views import (
+    baskets as basket_views,
+    catalog as catalog_views,
+    checkout as checkout_views,
+    coupons as coupon_views,
+    courses as course_views,
+    orders as order_views,
+    partners as partner_views,
+    payments as payment_views,
+    products as product_views,
+    publication as publication_views,
+    refunds as refund_views,
+    siteconfiguration as siteconfiguration_views,
+    stockrecords as stockrecords_views,
+    vouchers as voucher_views
+)
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
@@ -86,5 +95,5 @@ router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
 router.register(r'orders', order_views.OrderViewSet)
 
 router.register(r'vouchers', voucher_views.VoucherViewSet, base_name='vouchers')
-
+router.register(r'siteconfiguration', siteconfiguration_views.SiteConfigurationViewSet, base_name='siteconfiguration')
 urlpatterns += router.urls
