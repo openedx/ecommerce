@@ -53,8 +53,8 @@ def get_payment_processor_template_sources():
     request = get_current_request()
     if request:
         # template is being accessed by a view, so return templates sources for current payment processors
-        payment_processors = request.site.site_configuration.get_payment_processors()
-        processor_names = [name for name, __ in payment_processors]
+        payment_processors = request.site.siteconfiguration.get_payment_processors()
+        processor_names = [name for name, __ in payment_processors.iteritems()]
     else:
         # if request object is not present, then this method is being called inside a management
         # command and return all theme template sources for compression
