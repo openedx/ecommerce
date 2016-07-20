@@ -7,14 +7,12 @@ define([
         'underscore',
         'underscore.string',
         'utils/utils',
-        'utils/analytics_utils',
         'js-cookie'
     ],
     function ($,
               _,
               _s,
               Utils,
-              AnalyticsUtils,
               Cookies
     ) {
         'use strict';
@@ -120,8 +118,6 @@ define([
                     btn.prev('disabled', true);
                 }
             });
-
-            AnalyticsUtils.analyticsSetUp();
         },
         showVoucherForm = function() {
             $('#voucher_form_container').show();

@@ -1,11 +1,13 @@
 define([
         'jquery',
+        'utils/analytics_utils',
         'pages/coupon_offer_page',
         'models/tracking_model',
         'models/user_model',
         'views/analytics_view',
     ],
     function($,
+             AnalyticsUtils,
              CouponOfferPage,
              TrackingModel,
              UserModel,
@@ -32,12 +34,16 @@ define([
             });
 
             describe('Analytics', function() {
-                it('should trigger purchase certificate event', function() {
+                beforeEach(function () {
                     spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function() {
                         return true;
                     });
                     spyOn(AnalyticsView.prototype, 'track');
+                    AnalyticsUtils.analyticsSetUp();
                     new CouponOfferPage();
+                });
+
+                it('should trigger purchase certificate event', function() {
                     $('a#PurchaseCertificate').trigger('click');
                     expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.coupons.accept_offer',
@@ -45,5 +51,5 @@ define([
                     );
                 });
             });
-    });
+        });
 });

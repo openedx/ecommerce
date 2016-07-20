@@ -115,12 +115,6 @@
         </div>
 
         <form id="payment-processor-form"></form>
-
-        {% if analytics_data %}
-            <script type="text/javascript">
-                var initModelData = {{ analytics_data|safe }};
-            </script>
-        {% endif %}
     </div>
 {% endblock content %}
 
