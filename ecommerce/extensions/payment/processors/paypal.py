@@ -65,7 +65,7 @@ class Paypal(BasePaymentProcessor):
 
     @property
     def cancel_url(self):
-        return get_lms_url(self.configuration['cancel_path'])
+        return get_ecommerce_url(self.configuration['cancel_checkout_path'])
 
     @property
     def error_url(self):

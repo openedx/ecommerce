@@ -31,7 +31,7 @@ PAYMENT_PROCESSOR_CONFIG = {
             'secret_key': 'fake-secret-key',
             'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
             'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'send_level_2_3_details': True,
         },
         'paypal': {
@@ -39,7 +39,7 @@ PAYMENT_PROCESSOR_CONFIG = {
             'client_id': 'fake-client-id',
             'client_secret': 'fake-client-secret',
             'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
     },

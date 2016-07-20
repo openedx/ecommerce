@@ -5,10 +5,12 @@ from oscar.core.loading import get_class
 
 class CheckoutApplication(app.CheckoutApplication):
     free_checkout = get_class('checkout.views', 'FreeCheckoutView')
+    cancel_checkout = get_class('checkout.views', 'CancelCheckoutView')
 
     def get_urls(self):
         urls = [
             url(r'^free-checkout/$', self.free_checkout.as_view(), name='free-checkout'),
+            url(r'^cancel-checkout/$', self.cancel_checkout.as_view(), name='cancel-checkout'),
 
             url(r'^$', self.index_view.as_view(), name='index'),
 

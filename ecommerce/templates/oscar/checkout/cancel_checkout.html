@@ -1,0 +1,24 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+    {% trans "Checkout Cancelled" %}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="container content-wrapper receipt-cancel-error">
+    <h1>{% trans "Checkout Cancelled" %}</h1>
+    <p> {% with "<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe as start_link %}
+            {% blocktrans with end_link="</a>"|safe %}
+            Your transaction has been cancelled. If you feel an error has occurred, contact {{ start_link }}
+            {{ payment_support_email }}{{ end_link }}.
+            {% endblocktrans %}
+        {% endwith %}
+    </p>
+</div>
+{% endblock content %}
