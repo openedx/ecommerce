@@ -171,8 +171,10 @@ TEMPLATES = [
         ),
         'OPTIONS': {
             'loaders': [
-                # ThemeTemplateLoader should come before any other loader to give theme templates
-                # priority over system templates
+                # This is a prioritized list of template loaders.
+                # A template found using a lower-indexed loader, will be used
+                # before a template found using a higher-indexed loader.
+                'ecommerce.extensions.payment.processors.template_loaders.PaymentProcessorTemplateLoader',
                 'ecommerce.theming.template_loaders.ThemeTemplateLoader',
                 'django.template.loaders.app_directories.Loader',
             ],
@@ -196,6 +198,11 @@ TEMPLATES = [
             'debug': True,  # Django will only display debug pages if the global DEBUG setting is set to True.
         }
     },
+]
+
+# Payment processor template override directories
+PAYMENT_PROCESSOR_TEMPLATE_DIRS = [
+    normpath(join(DJANGO_ROOT, 'templates', 'payment_processors')),
 ]
 # END TEMPLATE CONFIGURATION
 

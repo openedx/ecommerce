@@ -1,0 +1,92 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+{% trans "Basket" %}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+
+{% block javascript %}
+    <script src="{% static 'mitprofessionalx.mit.edu/js/apps/basket_app.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="basket">
+        <div class="container">
+            {# Use a partial template so that AJAX can be used to re-render basket #}
+            {% include 'basket/partials/basket_content.html' %}
+
+        </div>
+        <div class="container gross-total">
+            <div class="total">
+                <div class="row">
+                    <div class="col-sx-12 hidden-sm hidden-xs">
+                        {% block baskettotals %}
+                            {% include 'basket/partials/basket_totals.html' with editable=1 %}
+                        {% endblock baskettotals %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    {% if free_basket %}
+                        <div class="payment-buttons" data-basket-id="{{ basket.id }}">
+                            <a href="{% url 'checkout:free-checkout' %}"
+                                data-track-type="click"
+                                data-track-event="edx.bi.ecommerce.basket.free_checkout"
+                                data-track-category="checkout"
+                                data-course-id="{{ course.id }}"
+                                class="btn checkout-button">
+                                {% trans "Place Order" %}
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="checkout-buttons-section" data-basket-id="{{ basket.id }}">
+                            {% for processor in payment_processors %}
+                                {% if processor.NAME|lower == 'adyen'%}
+                                    <input data-track-type="click"
+                                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                            data-track-category="checkout"
+                                            data-processor-name="{{ processor.NAME }}"
+                                            data-course-id="{{ course.id }}"
+                                            class="btn btn-default checkout-button"
+                                            value='{% trans "Pay" %}'
+                                            id="{{ processor.NAME|lower }}"
+                                            type="submit"
+                                            form="adyen-encrypted-form"/>
+
+                                    <a href="{{ processor.cancel_page_url }}" class="btn btn-lg btn-transparent">
+                                        {% trans "Cancel" %}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if analytics_data %}
+        <script type="text/javascript">
+            var initModelData = {{ analytics_data|safe }};
+        </script>
+    {% endif %}
+
+    {% for processor in payment_processors %}
+        {% if processor.NAME|lower == 'adyen'%}
+            <script type="text/javascript" src="{{ processor.cse_js_url }}"></script>
+            <script type="text/javascript">
+                var adyenForm = document.getElementById('adyen-encrypted-form');
+                var adyenFormOptions = {};
+                adyen.createEncryptedForm(adyenForm, adyenFormOptions);
+            </script>
+        {% endif %}
+    {% endfor %}
+{% endblock content %}
