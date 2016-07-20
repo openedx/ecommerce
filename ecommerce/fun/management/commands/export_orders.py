@@ -159,7 +159,7 @@ class Command(BaseCommand):
             ('user_username', u"Utilsateur"),
             ('user_email', u"Email"),
             ('user_name', u"Nom"),
-            ('total_incl_tax', u"Total TTC"),
+            ('total_incl_tax', u"Total HT"),
             ('total_excl_tax', u"Total TTC"),
             ('course_key', u"Ref cours"),
             ('course_name', u"Nom du cours"),
