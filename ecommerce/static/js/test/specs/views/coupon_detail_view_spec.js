@@ -72,7 +72,7 @@ define([
             });
 
             it('should display correct data upon rendering', function () {
-                var category = model.get('category').name;
+                var category = model.get('category');
 
                 view.render();
                 expect(view.$('.coupon-title').text()).toEqual(model.get('title'));

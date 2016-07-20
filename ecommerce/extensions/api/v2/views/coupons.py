@@ -69,11 +69,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def get_category(self, category_data):
+    def get_category(self, category_name):
         try:
-            return Category.objects.get(id=category_data['id'])
+            return Category.objects.get(name=category_name)
         except Category.DoesNotExist:
-            raise ValueError(_('Category with ID {category_id} not found.'.format(category_id=category_data['id'])))
+            raise ValueError(_('Category {category_name} not found.'.format(category_name=category_name)))
 
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
@@ -107,8 +107,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             except ValueError as exc:
                 return Response(exc.message, status=status.HTTP_400_BAD_REQUEST)
 
-            response_data = self.create_coupon(invoice_data=invoice_data, request=request)
-            return Response(response_data, status=status.HTTP_200_OK)
+            coupon = self.create_coupon(invoice_data=invoice_data, request=request)
+
+            # TODO: Replace current data with serialized Coupon object, once Coupon serializer is cleaned up
+            return Response({'id': coupon.id}, status=status.HTTP_201_CREATED)
 
     def create_coupon(self, invoice_data, request):
         """
@@ -117,7 +119,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             invoice_data (dict): Dictionary containing Invoice data
             request (HttpRequest): Request containing coupon data and partner information
         Returns:
-            response_data (dict): Serialized coupon data.
+            coupon_product (Product): Created coupon product.
         """
         coupon_data = request.data
         coupon_product = create_coupon_product(
@@ -142,14 +144,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         basket = prepare_basket(request, coupon_product)
 
         # Create an order now since payment is handled out of band via an invoice.
-        response_data = self.create_order_for_invoice(
+        self.create_order_for_invoice(
             basket=basket,
             client=coupon_data.get('client'),
-            coupon_id=coupon_product.id,
             invoice_data=invoice_data
         )
 
-        return response_data
+        return coupon_product
 
     def prepare_data(self, request):
         """
@@ -161,14 +162,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """
         data = request.data
 
-        category_data = data.get('category')
+        category_name = data.get('category')
         course_seat_types = data.get('course_seat_types')
         max_uses = data.get('max_uses')
         quantity = data.get('quantity')
         stock_record_ids = data.get('stock_record_ids')
 
-        if category_data:
-            data['category'] = self.get_category(category_data)
+        if category_name:
+            data['category'] = self.get_category(category_name)
 
         data['client'], __ = BusinessClient.objects.get_or_create(name=data.get('client'))
 
@@ -248,9 +249,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if benefit_value:
             self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
 
-        category_data = request.data.get('category')
-        if category_data:
-            category = self.get_category(category_data)
+        category_name = request.data.get('category')
+        if category_name:
+            category = self.get_category(category_name)
             ProductCategory.objects.filter(product=coupon).update(category=category)
 
         client_username = request.data.get('client')

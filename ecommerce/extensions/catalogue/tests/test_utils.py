@@ -87,7 +87,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(Catalog.objects.count(), 2)
 
 
-class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+class CouponUtilsTests(CouponMixin, TestCase):
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
         self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
@@ -95,14 +95,14 @@ class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_generate_sku_for_coupon(self):
         """Verify the method generates a SKU for a coupon."""
-        coupon = self.create_coupon(partner=self.partner, catalog=self.catalog)
+        self.create_coupon(partner=self.partner, catalog=self.catalog)
         _hash = ' '.join((
-            unicode(coupon.id),
+            unicode(self.coupon.id),
             str(self.partner.id)
         ))
         digest = md5(_hash.lower()).hexdigest()[-7:]
         expected = digest.upper()
-        actual = generate_sku(coupon, self.partner)
+        actual = generate_sku(self.coupon, self.partner)
         self.assertEqual(actual, expected)
 
 

@@ -106,7 +106,7 @@ define([
 
             render: function () {
                 var html,
-                    category = this.model.get('category').name,
+                    category = this.model.get('category'),
                     invoice_data = this.formatInvoiceData(),
                     template_data;
 

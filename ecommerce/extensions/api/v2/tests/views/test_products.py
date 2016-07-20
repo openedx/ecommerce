@@ -132,21 +132,21 @@ class ProductViewSetTests(ProductViewSetBase):
 class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
     def test_coupon_product_details(self):
         """Verify the endpoint returns all coupon information."""
-        coupon = self.create_coupon()
-        url = reverse('api:v2:product-detail', kwargs={'pk': coupon.id})
+        self.create_coupon()
+        url = reverse('api:v2:product-detail', kwargs={'pk': self.coupon.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         request = RequestFactory(SERVER_NAME=self.site.domain).get('/')
         request.user = self.user
         request.site = self.site
-        expected = ProductSerializer(coupon, context={'request': request}).data
+        expected = ProductSerializer(self.coupon, context={'request': request}).data
         self.assertDictEqual(response.data, expected)
 
     def test_coupon_voucher_serializer(self):
         """Verify that the vouchers of a coupon are properly serialized."""
-        coupon = self.create_coupon()
-        url = reverse('api:v2:product-detail', kwargs={'pk': coupon.id})
+        self.create_coupon()
+        url = reverse('api:v2:product-detail', kwargs={'pk': self.coupon.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -164,7 +164,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
-        self.assertEqual(response_data['count'], 3)
+        self.assertEqual(response_data['count'], 5)
 
         filtered_url = '{}?product_class=CoUpOn'.format(url)
         response = self.client.get(filtered_url)

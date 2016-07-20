@@ -75,19 +75,16 @@ define([
                             return ecommerce.coupons.categories;
                         },
                         labelPath: 'name',
-                        valuePath: 'id'
+                        valuePath: 'name'
                     },
                     setOptions: {
                         validate: true
                     },
                     onGet: function (val) {
-                        return val.id;
+                        return val;
                     },
                     onSet: function (val) {
-                        return {
-                            id: val,
-                            name: $('select[name=category] option:selected').text()
-                        };
+                        return val;
                     }
                 },
                 'input[name=title]': {

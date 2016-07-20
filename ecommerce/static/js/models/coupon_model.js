@@ -32,7 +32,7 @@ define([
             urlRoot: '/api/v2/coupons/',
 
             defaults: {
-                category: {id: 3, name: 'Affiliate Promotion'},
+                category: 'Affiliate Promotion',
                 code: '',
                 course_seats: [],
                 course_seat_types: [],

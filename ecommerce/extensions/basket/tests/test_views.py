@@ -44,7 +44,7 @@ COUPON_CODE = 'COUPONTEST'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 

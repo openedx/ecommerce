@@ -37,16 +37,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             self._payment_events = []
         self._payment_events.append(event)
 
-    def create_order_for_invoice(self, basket, client, coupon_id, invoice_data):
+    def create_order_for_invoice(self, basket, client, invoice_data):
         """ Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
-
-        response_data = {
-            'coupon_id': coupon_id,
-            'id': basket.id,
-            'order': None,
-            'payment_data': None,
-        }
         basket.freeze()
 
         order = self.handle_order_placement(
@@ -69,18 +62,11 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             response={}
         )
 
-        response_data['order'] = order.id
-        response_data['payment_data'] = {
-            'payment_processor_name': 'Invoice'
-        }
-
         logger.info(
             'Created new order number [%s] from basket [%d]',
             order_metadata['number'],
             basket.id
         )
-
-        return response_data
 
     def handle_payment(self, response, basket):
         """

@@ -36,6 +36,194 @@ User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
 
+class APIMixin(object):
+    """Provides utility methods for API endpoint test cases."""
+
+    def get_response_json(self, method, path, data=None):
+        """Helper method for sending requests and returning JSON response content."""
+        if method == 'GET':
+            response = self.client.get(path)
+        elif method == 'POST':
+            response = self.client.post(path, json.dumps(data), 'application/json')
+        elif method == 'PUT':
+            response = self.client.put(path, json.dumps(data), 'application/json')
+        return json.loads(response.content), response.status_code
+
+
+class ApiMockMixin(object):
+    """ Common Mocks for the API responses. """
+
+    def setUp(self):
+        super(ApiMockMixin, self).setUp()
+
+    def mock_api_error(self, error, url):
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+
+
+class BusinessIntelligenceMixin(object):
+    """Provides assertions for test cases validating the emission of business intelligence events."""
+
+    def assert_correct_event(
+            self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency, total
+    ):
+        """Check that the tracking context was correctly reflected in the emitted event."""
+        (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
+        self.assertEqual(event_user_id, expected_user_id)
+        self.assertEqual(event_name, 'Completed Order')
+        self.assertEqual(kwargs['context'], {'ip': expected_ip, 'Google Analytics': {'clientId': expected_client_id}})
+        self.assert_correct_event_payload(instance, event_payload, order_number, currency, total)
+
+    def assert_correct_event_payload(self, instance, event_payload, order_number, currency, total):
+        """
+        Check that field values in the event payload correctly represent the
+        completed order or refund.
+        """
+        self.assertEqual(['currency', 'orderId', 'products', 'total'], sorted(event_payload.keys()))
+        self.assertEqual(event_payload['orderId'], order_number)
+        self.assertEqual(event_payload['currency'], currency)
+
+        lines = instance.lines.all()
+        self.assertEqual(len(lines), len(event_payload['products']))
+
+        model_name = instance.__class__.__name__
+        tracked_products_dict = {product['id']: product for product in event_payload['products']}
+
+        if model_name == 'Order':
+            self.assertEqual(event_payload['total'], str(total))
+
+            for line in lines:
+                tracked_product = tracked_products_dict.get(line.partner_sku)
+                self.assertIsNotNone(tracked_product)
+                self.assertEqual(line.product.course.id, tracked_product['name'])
+                self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
+                self.assertEqual(line.quantity, tracked_product['quantity'])
+                self.assertEqual(mode_for_seat(line.product), tracked_product['sku'])
+                self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
+        elif model_name == 'Refund':
+            self.assertEqual(event_payload['total'], '-{}'.format(total))
+
+            for line in lines:
+                tracked_product = tracked_products_dict.get(line.order_line.partner_sku)
+                self.assertIsNotNone(tracked_product)
+                self.assertEqual(line.order_line.product.course.id, tracked_product['name'])
+                self.assertEqual(str(line.line_credit_excl_tax), tracked_product['price'])
+                self.assertEqual(-1 * line.quantity, tracked_product['quantity'])
+                self.assertEqual(mode_for_seat(line.order_line.product), tracked_product['sku'])
+                self.assertEqual(line.order_line.product.get_product_class().name, tracked_product['category'])
+        else:
+            # Payload validation is currently limited to order and refund events
+            self.fail()
+
+
+class JwtMixin(object):
+    """ Mixin with JWT-related helper functions. """
+    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_SECRET_KEY']
+    issuer = settings.JWT_AUTH['JWT_ISSUERS'][0]
+
+    def generate_token(self, payload, secret=None):
+        """Generate a JWT token with the provided payload."""
+        secret = secret or self.JWT_SECRET_KEY
+        token = jwt.encode(dict(payload, iss=self.issuer), secret)
+        return token
+
+
+class LmsApiMockMixin(object):
+    """ Mocks for the LMS API reponses. """
+
+    def setUp(self):
+        super(LmsApiMockMixin, self).setUp()
+
+    def mock_course_api_response(self, course=None):
+        """ Helper function to register an API endpoint for the course information. """
+        course_info = {
+            'short_description': 'Test description',
+            'media': {
+                'course_image': {
+                    'uri': '/asset-v1:test+test+test+type@asset+block@images_course_image.jpg'
+                },
+                'image': {
+                    'raw': 'path/to/the/course/image'
+                }
+            },
+            'start': '2013-02-05T05:00:00Z',
+            'name': course.name if course else 'Test course',
+            'org': 'test'
+        }
+        course_info_json = json.dumps(course_info)
+        course_id = course.id if course else 'course-v1:test+test+test'
+        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
+        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+
+    def mock_enrollment_api(self, request, user, course_id, is_active=True, mode='audit'):
+        """ Returns a successful response indicating self.user is enrolled in the specified course mode. """
+        url = '{host}/enrollment/{username},{course_id}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
+            username=user.username,
+            course_id=course_id
+        )
+        body = json.dumps({'mode': mode, 'is_active': is_active})
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
+
+    def mock_enrollment_api_error(self, request, user, course_id, error):
+        """ Mock Enrollment api call which raises error when called """
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+
+        url = '{host}/enrollment/{username},{course_id}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
+            username=user.username,
+            course_id=course_id
+        )
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+
+
+class SiteMixin(object):
+    def setUp(self):
+        super(SiteMixin, self).setUp()
+
+        # Set the domain used for all test requests
+        domain = 'testserver.fake'
+        self.client = self.client_class(SERVER_NAME=domain)
+
+        Site.objects.all().delete()
+        site_configuration = SiteConfigurationFactory(
+            partner__name='edX',
+            site__id=settings.SITE_ID,
+            site__domain=domain,
+            segment_key='fake_segment_key',
+            oauth_settings={
+                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
+                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
+            }
+        )
+        self.partner = site_configuration.partner
+        self.site = site_configuration.site
+
+        self.request = RequestFactory().get('')
+        self.request.session = None
+        self.request.site = self.site
+        set_thread_variable('request', self.request)
+
+
+class TestServerUrlMixin(object):
+    def get_full_url(self, path, site=None):
+        """ Returns a complete URL with the given path. """
+        site = site or self.site
+        return 'http://{domain}{path}'.format(domain=site.domain, path=path)
+
+
+class ThrottlingMixin(object):
+    """Provides utility methods for test cases validating the behavior of rate-limited endpoints."""
+
+    def setUp(self):
+        super(ThrottlingMixin, self).setUp()
+
+        # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
+        self.addCleanup(cache.clear)
+
+
 class UserMixin(object):
     """Provides utility methods for creating and authenticating users in test cases."""
     access_token = 'test-access-token'
@@ -64,27 +252,10 @@ class UserMixin(object):
         }
         return "JWT {token}".format(token=jwt.encode(payload, secret))
 
-
-class ThrottlingMixin(object):
-    """Provides utility methods for test cases validating the behavior of rate-limited endpoints."""
-
-    def setUp(self):
-        super(ThrottlingMixin, self).setUp()
-
-        # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
-        self.addCleanup(cache.clear)
-
-
-class JwtMixin(object):
-    """ Mixin with JWT-related helper functions. """
-    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_SECRET_KEY']
-    issuer = settings.JWT_AUTH['JWT_ISSUERS'][0]
-
-    def generate_token(self, payload, secret=None):
-        """Generate a JWT token with the provided payload."""
-        secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(dict(payload, iss=self.issuer), secret)
-        return token
+    def create_and_login_user(self, is_staff=True):
+        """ Create a user and use its credentials to login. """
+        self.user = self.create_user(is_staff=is_staff)
+        self.client.login(username=self.user.username, password=self.password)
 
 
 class BasketCreationMixin(UserMixin, JwtMixin):
@@ -182,155 +353,3 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             else:
                 self.assertIsNone(response.data['order'])
                 self.assertIsNone(response.data['payment_data'])
-
-
-class BusinessIntelligenceMixin(object):
-    """Provides assertions for test cases validating the emission of business intelligence events."""
-
-    def assert_correct_event(
-            self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency, total
-    ):
-        """Check that the tracking context was correctly reflected in the emitted event."""
-        (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
-        self.assertEqual(event_user_id, expected_user_id)
-        self.assertEqual(event_name, 'Completed Order')
-        self.assertEqual(kwargs['context'], {'ip': expected_ip, 'Google Analytics': {'clientId': expected_client_id}})
-        self.assert_correct_event_payload(instance, event_payload, order_number, currency, total)
-
-    def assert_correct_event_payload(self, instance, event_payload, order_number, currency, total):
-        """
-        Check that field values in the event payload correctly represent the
-        completed order or refund.
-        """
-        self.assertEqual(['currency', 'orderId', 'products', 'total'], sorted(event_payload.keys()))
-        self.assertEqual(event_payload['orderId'], order_number)
-        self.assertEqual(event_payload['currency'], currency)
-
-        lines = instance.lines.all()
-        self.assertEqual(len(lines), len(event_payload['products']))
-
-        model_name = instance.__class__.__name__
-        tracked_products_dict = {product['id']: product for product in event_payload['products']}
-
-        if model_name == 'Order':
-            self.assertEqual(event_payload['total'], str(total))
-
-            for line in lines:
-                tracked_product = tracked_products_dict.get(line.partner_sku)
-                self.assertIsNotNone(tracked_product)
-                self.assertEqual(line.product.course.id, tracked_product['name'])
-                self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
-                self.assertEqual(line.quantity, tracked_product['quantity'])
-                self.assertEqual(mode_for_seat(line.product), tracked_product['sku'])
-                self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
-        elif model_name == 'Refund':
-            self.assertEqual(event_payload['total'], '-{}'.format(total))
-
-            for line in lines:
-                tracked_product = tracked_products_dict.get(line.order_line.partner_sku)
-                self.assertIsNotNone(tracked_product)
-                self.assertEqual(line.order_line.product.course.id, tracked_product['name'])
-                self.assertEqual(str(line.line_credit_excl_tax), tracked_product['price'])
-                self.assertEqual(-1 * line.quantity, tracked_product['quantity'])
-                self.assertEqual(mode_for_seat(line.order_line.product), tracked_product['sku'])
-                self.assertEqual(line.order_line.product.get_product_class().name, tracked_product['category'])
-        else:
-            # Payload validation is currently limited to order and refund events
-            self.fail()
-
-
-class SiteMixin(object):
-    def setUp(self):
-        super(SiteMixin, self).setUp()
-
-        # Set the domain used for all test requests
-        domain = 'testserver.fake'
-        self.client = self.client_class(SERVER_NAME=domain)
-
-        Site.objects.all().delete()
-        site_configuration = SiteConfigurationFactory(
-            partner__name='edX',
-            site__id=settings.SITE_ID,
-            site__domain=domain,
-            segment_key='fake_segment_key',
-            oauth_settings={
-                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
-                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
-            }
-        )
-        self.partner = site_configuration.partner
-        self.site = site_configuration.site
-
-        self.request = RequestFactory().get('')
-        self.request.session = None
-        self.request.site = self.site
-        set_thread_variable('request', self.request)
-
-
-class TestServerUrlMixin(object):
-    def get_full_url(self, path, site=None):
-        """ Returns a complete URL with the given path. """
-        site = site or self.site
-        return 'http://{domain}{path}'.format(domain=site.domain, path=path)
-
-
-class ApiMockMixin(object):
-    """ Common Mocks for the API responses. """
-
-    def setUp(self):
-        super(ApiMockMixin, self).setUp()
-
-    def mock_api_error(self, error, url):
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
-            raise error
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
-
-
-class LmsApiMockMixin(object):
-    """ Mocks for the LMS API reponses. """
-
-    def setUp(self):
-        super(LmsApiMockMixin, self).setUp()
-
-    def mock_course_api_response(self, course=None):
-        """ Helper function to register an API endpoint for the course information. """
-        course_info = {
-            'short_description': 'Test description',
-            'media': {
-                'course_image': {
-                    'uri': '/asset-v1:test+test+test+type@asset+block@images_course_image.jpg'
-                },
-                'image': {
-                    'raw': 'path/to/the/course/image'
-                }
-            },
-            'start': '2013-02-05T05:00:00Z',
-            'name': course.name if course else 'Test course',
-            'org': 'test'
-        }
-        course_info_json = json.dumps(course_info)
-        course_id = course.id if course else 'course-v1:test+test+test'
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
-        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
-
-    def mock_enrollment_api(self, request, user, course_id, is_active=True, mode='audit'):
-        """ Returns a successful response indicating self.user is enrolled in the specified course mode. """
-        url = '{host}/enrollment/{username},{course_id}'.format(
-            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
-            username=user.username,
-            course_id=course_id
-        )
-        body = json.dumps({'mode': mode, 'is_active': is_active})
-        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
-
-    def mock_enrollment_api_error(self, request, user, course_id, error):
-        """ Mock Enrollment api call which raises error when called """
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
-            raise error
-
-        url = '{host}/enrollment/{username},{course_id}'.format(
-            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
-            username=user.username,
-            course_id=course_id
-        )
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
