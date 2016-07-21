@@ -3,7 +3,6 @@ define([
         'backbone',
         'views/payment_button_view',
         'utils/utils',
-        'utils/analytics_utils',
         'views/provider_selection_view',
         'pages/page'
     ],
@@ -11,7 +10,6 @@ define([
               Backbone,
               PaymentButtonView,
               Utils,
-              AnalyticsUtils,
               ProviderSelectionView,
               Page) {
         'use strict';
@@ -33,8 +31,6 @@ define([
                 // select the first available product.
                 paymentButtonView.render();
                 providerSelectionView.render();
-
-                AnalyticsUtils.analyticsSetUp();
             }
         });
     }

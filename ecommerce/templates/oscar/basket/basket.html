@@ -22,10 +22,4 @@
             {% include 'basket/partials/basket_content.html' %}
         </div>
     </div>
-
-    {% if analytics_data %}
-        <script type="text/javascript">
-            var initModelData = {{ analytics_data|safe }};
-        </script>
-    {% endif %}
 {% endblock content %}

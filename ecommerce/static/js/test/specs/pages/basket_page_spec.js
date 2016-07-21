@@ -199,6 +199,7 @@ define([
                         return true;
                     });
                     spyOn(AnalyticsView.prototype, 'track');
+                    AnalyticsUtils.analyticsSetUp();
                     BasketPage.onReady();
                     spyOn(window.analytics, 'page');
                 });

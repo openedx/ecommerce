@@ -1,14 +1,11 @@
 define([
-        'utils/analytics_utils',
         'pages/page'
     ],
-    function (AnalyticsUtils,
-              Page) {
+    function (Page) {
         'use strict';
 
         return Page.extend({
             initialize: function () {
-                AnalyticsUtils.analyticsSetUp();
             }
         });
     }
