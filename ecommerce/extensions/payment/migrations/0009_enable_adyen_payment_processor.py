@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations
 
-from ecommerce.extensions.payment.processors.adyen import Adyen
+from ecommerce.adyen.processor import Adyen
 
 
 def enable_payment_processor(apps, schema_editor):

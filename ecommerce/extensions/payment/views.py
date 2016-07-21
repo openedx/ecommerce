@@ -18,7 +18,7 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
-from ecommerce.extensions.payment.processors.adyen import Adyen
+from ecommerce.adyen.processor import Adyen
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
 

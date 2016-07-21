@@ -199,11 +199,6 @@ TEMPLATES = [
         }
     },
 ]
-
-# Payment processor template override directories
-PAYMENT_PROCESSOR_TEMPLATE_DIRS = [
-    normpath(join(DJANGO_ROOT, 'templates', 'payment_processors')),
-]
 # END TEMPLATE CONFIGURATION
 
 
@@ -270,6 +265,7 @@ DJANGO_APPS = [
 
 # Apps specific to this project go here.
 LOCAL_APPS = [
+    'ecommerce.adyen',
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',

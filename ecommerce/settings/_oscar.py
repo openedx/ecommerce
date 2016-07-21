@@ -104,7 +104,7 @@ CURRENCY_CODES = {
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
-    'ecommerce.extensions.payment.processors.adyen.Adyen',
+    'ecommerce.adyen.processor.Adyen',
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
 )

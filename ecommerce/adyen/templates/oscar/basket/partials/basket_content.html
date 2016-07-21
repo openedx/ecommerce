@@ -181,10 +181,10 @@
                         <div class="col-xs-9 col-sm-7">
                             <div class="btn-group" role="group" aria-label="...">
                                 <button type="button" class="btn btn-default selected">
-                                    <img src="{% static 'mitprofessionalx.mit.edu/images/discover.png' %}" alt="Discover" />
-                                    <img src="{% static 'mitprofessionalx.mit.edu/images/visa.png' %}" alt="Visa card" />
-                                    <img src="{% static 'mitprofessionalx.mit.edu/images/mastercard.png' %}" alt="Master card" />
-                                    <img src="{% static 'mitprofessionalx.mit.edu/images/american-express.png' %}" alt="American express" />
+                                    <img src="{% static 'adyen/images/discover.png' %}" alt="Discover" />
+                                    <img src="{% static 'adyen/images/visa.png' %}" alt="Visa card" />
+                                    <img src="{% static 'adyen/images/mastercard.png' %}" alt="Master card" />
+                                    <img src="{% static 'adyen/images/american-express.png' %}" alt="American express" />
                                 </button>
 
                                 <button type="button" class="btn btn-default more-options">
@@ -207,7 +207,7 @@
                                                     value="{{ processor.NAME|lower }}"
                                                     id="{{ processor.NAME|lower }}"
                                                     type="button">
-                                                <img src="{% static 'mitprofessionalx.mit.edu/images/paypal.png' %}" alt="Paypal"/>
+                                                <img src="{% static 'adyen/images/paypal.png' %}" alt="Paypal"/>
                                             </button>
                                         {% endif %}
                                     {% endfor %}
