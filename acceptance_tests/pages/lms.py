@@ -1,9 +1,10 @@
 import abc
 import urllib
+import socket
 
-from bok_choy.page_object import PageObject
+from bok_choy.page_object import PageObject, PageLoadError, unguarded
 from bok_choy.promise import EmptyPromise
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.select import Select
 
 from acceptance_tests.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, MARKETING_URL_ROOT
@@ -43,6 +44,16 @@ class LMSLoginPage(LMSPage):
 
         # Wait for LMS to redirect to the dashboard
         EmptyPromise(self._is_browser_on_lms_dashboard, "LMS login redirected to dashboard").fulfill()
+
+    @unguarded
+    def visit(self, course_id=None):  # pylint: disable=arguments-differ
+        url = self.url(course_id)  # pylint: disable=not-callable
+        try:
+            self.browser.get(url)
+        except (WebDriverException, socket.gaierror):
+            raise PageLoadError("Could not load page '{!r}' at URL '{}'".format(
+                self, url
+            ))
 
 
 class LMSRegistrationPage(LMSPage):

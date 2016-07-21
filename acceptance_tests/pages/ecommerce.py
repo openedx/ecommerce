@@ -36,6 +36,5 @@ class EcommerceLoginPage(LMSLoginPage):
     that page and it's properties.
     """
 
-    @property
-    def url(self):  # pylint: disable=arguments-differ
+    def url(self, course_id=None):  # pylint: disable=arguments-differ,unused-argument
         return EcommerceAppPage.build_ecommerce_url('login')
