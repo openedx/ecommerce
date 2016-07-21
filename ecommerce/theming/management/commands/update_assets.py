@@ -5,10 +5,14 @@ Managements for asset compilation and collection.
 from __future__ import unicode_literals
 import logging
 import datetime
+import os
 
+from django.apps import apps
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
 from django.core.management import call_command
+from django.utils import lru_cache
+from django.utils._os import upath
 
 import sass
 from path import Path
@@ -188,6 +192,7 @@ def get_sass_directories(themes, system=True):
         })
 
     applicable_dirs.extend(get_theme_sass_directories(themes))
+    applicable_dirs.extend(get_app_sass_directories())
     return applicable_dirs
 
 
@@ -222,6 +227,34 @@ def get_theme_sass_directories(themes):
             })
 
     return applicable_dirs
+
+
+@lru_cache.lru_cache()
+def get_app_sass_directories():
+    """
+    Get sass directories inside app directories
+
+    Args:
+        themes (list): list of all the themes for whom to fetch sass directories
+
+    Returns:
+        List of all sass directories that need to be compiled for the given themes.
+
+    """
+    sass_dirs = list()
+
+    for app_config in apps.get_app_configs():
+        if not app_config.path:
+            continue
+        sass_dir = os.path.join(app_config.path, 'static/sass')
+        if os.path.isdir(sass_dir):
+            sass_dirs.append({
+                "sass_source_dir": Path(sass_dir),
+                "css_destination_dir": Path(app_config.path) / "static" / app_config.label / "css",
+                "lookup_paths": [Path(app_config.path) / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
+            })
+    # Immutable return value because it will be cached and shared by callers.
+    return tuple(sass_dirs)
 
 
 def compile_sass(sass_source_dir, css_destination_dir, lookup_paths, **kwargs):

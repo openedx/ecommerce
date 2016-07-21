@@ -10,6 +10,9 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'adyen/css/basket.css' %}" type="text/x-scss">
+{% endblock %}
 
 {% block javascript %}
     <script src="{% static 'adyen/js/apps/basket_app.js' %}"></script>
