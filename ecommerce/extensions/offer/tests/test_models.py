@@ -13,6 +13,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
 class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
@@ -121,3 +122,50 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.course_seat_types = 'verified'
         self.assertEqual(len(self.range.all_products()), 2)
         self.assertTrue(seat in self.range.all_products())
+
+
+class ConditionalOfferTests(TestCase):
+    """Tests for custom ConditionalOffer model."""
+    def setUp(self):
+        super(ConditionalOfferTests, self).setUp()
+
+        self.email_domains = 'example.com'
+        self.product = factories.ProductFactory()
+        _range = factories.RangeFactory(products=[self.product, ])
+
+        self.offer = ConditionalOffer.objects.create(
+            condition=factories.ConditionFactory(value=1, range=_range),
+            benefit=factories.BenefitFactory(),
+            email_domains=self.email_domains
+        )
+
+    def create_basket(self, email):
+        """Helper method for creating a basket with specific owner."""
+        user = self.create_user(email=email)
+        basket = factories.BasketFactory(owner=user)
+        basket.add_product(self.product, 1)
+        return basket
+
+    def test_condition_satisfied(self):
+        """Verify a condition is satisfied."""
+        self.assertEqual(self.offer.email_domains, self.email_domains)
+        email = 'test@{}'.format(self.email_domains)
+        basket = self.create_basket(email=email)
+        self.assertTrue(self.offer.is_condition_satisfied(basket))
+
+    def test_condition_not_satisfied(self):
+        """Verify a condition is not satisfied."""
+        self.assertEqual(self.offer.email_domains, self.email_domains)
+        basket = self.create_basket(email='test@invalid.domain')
+        self.assertFalse(self.offer.is_condition_satisfied(basket))
+
+    def test_is_email_valid(self):
+        """Verify method returns True for valid emails."""
+        invalid_email = 'invalid@email.fake'
+        self.assertFalse(self.offer.is_email_valid(invalid_email))
+
+        valid_email = 'valid@{}'.format(self.email_domains)
+        self.assertTrue(self.offer.is_email_valid(valid_email))
+
+        no_email_offer = factories.ConditionalOffer()
+        self.assertTrue(no_email_offer.is_email_valid(invalid_email))

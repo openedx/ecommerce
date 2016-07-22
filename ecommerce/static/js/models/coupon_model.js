@@ -107,6 +107,7 @@ define([
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
+                email_domains: {required: false},
                 start_date: function (val) {
                     var startDate,
                         endDate;

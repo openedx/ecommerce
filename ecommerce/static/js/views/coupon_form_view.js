@@ -161,6 +161,9 @@ define([
                 'input[name=course_seat_types]': {
                     observe: 'course_seat_types'
                 },
+                'input[name=email_domains]': {
+                    observe: 'email_domains'
+                },
                 'input[name=invoice_type]': {
                     observe: 'invoice_type'
                 },
@@ -248,6 +251,7 @@ define([
                         'start_date',
                         'tax_deducted_source',
                         'title',
+                        'email_domains'
                     ];
                 }
 

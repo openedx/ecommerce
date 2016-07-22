@@ -235,7 +235,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
-        self.user = self.create_user()
+        self.user = self.create_user(email='test@tester.fake')
         self.client.login(username=self.user.username, password=self.password)
         self.course_mode = 'verified'
         self.course, self.seat = self.create_course_and_seat(
@@ -254,9 +254,9 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         """ Constructs the coupon redemption URL with the proper string query parameters. """
         return self.redeem_url + '?code={}&sku={}'.format(COUPON_CODE, self.stock_record.partner_sku)
 
-    def create_and_test_coupon(self):
+    def create_and_test_coupon(self, email_domains=None):
         """ Creates enrollment code coupon. """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE)
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, email_domains=email_domains)
         self.assertEqual(Voucher.objects.filter(code=COUPON_CODE).count(), 1)
 
     def assert_redemption_page_redirects(self, expected_url, target=200):
@@ -331,6 +331,15 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.create_and_test_coupon()
         response = self.client.get(self.redeem_url_with_params)
         msg = 'You are already enrolled in the course.'
+        self.assertEqual(response.context['error'], _(msg))
+
+    @httpretty.activate
+    def test_invalid_email_domain_rejection(self):
+        """ Verify a user with invalid email domain is rejected. """
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
+        self.create_and_test_coupon(email_domains='example.com')
+        response = self.client.get(self.redeem_url_with_params)
+        msg = 'You are not eligible to use this coupon.'
         self.assertEqual(response.context['error'], _(msg))
 
 

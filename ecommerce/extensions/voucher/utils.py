@@ -117,6 +117,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         'Create Date': history.history_date.strftime("%b %d, %y"),
         'Discount Percentage': discount_percentage,
         'Discount Amount': discount_amount,
+        'Email Domains': offer.email_domains,
         'Invoiced Amount': invoiced_amount,
         'Note': note,
         'Price': price
@@ -201,6 +202,7 @@ def generate_coupon_report(coupon_vouchers):
         _('Create Date'),
         _('Coupon Start Date'),
         _('Coupon Expiry Date'),
+        _('Email Domains'),
     ]
     rows = []
 
@@ -251,7 +253,8 @@ def generate_coupon_report(coupon_vouchers):
 
 
 def _get_or_create_offer(
-        product_range, benefit_type, benefit_value, coupon_id=None, max_uses=None, offer_number=None
+        product_range, benefit_type, benefit_value, coupon_id=None,
+        max_uses=None, offer_number=None, email_domains=None
 ):
     """
     Return an offer for a catalog with condition and benefit.
@@ -263,6 +266,13 @@ def _get_or_create_offer(
         product_range (Range): Range of products associated with condition
         benefit_type (str): Type of benefit associated with the offer
         benefit_value (Decimal): Value of benefit associated with the offer
+    Kwargs:
+        coupon_id (int): ID of the coupon
+        max_uses (int): number of maximum global application number an offer can have
+        offer_number (int): number of the consecutive offer - used in case of a multiple
+                            multi-use coupon
+        email_domains (str): a comma-separated string of email domains allowed to apply
+                            this offer
 
     Returns:
         Offer
@@ -288,7 +298,8 @@ def _get_or_create_offer(
         offer_type=ConditionalOffer.VOUCHER,
         condition=offer_condition,
         benefit=offer_benefit,
-        max_global_applications=max_uses
+        max_global_applications=max_uses,
+        email_domains=email_domains
     )
 
     return offer
@@ -368,7 +379,8 @@ def create_vouchers(
         max_uses=None,
         _range=None,
         catalog_query=None,
-        course_seat_types=None):
+        course_seat_types=None,
+        email_domains=None):
     """
     Create vouchers.
 
@@ -384,6 +396,7 @@ def create_vouchers(
             start_datetime (datetime): Start date for voucher offer.
             voucher_type (str): Type of voucher.
             code (str): Code associated with vouchers. Defaults to None.
+            email_domains (str): List of email domains to restrict coupons. Defaults to None.
 
     Returns:
             List[Voucher]
@@ -403,13 +416,13 @@ def create_vouchers(
             name=range_name,
             catalog=catalog,
             catalog_query=catalog_query,
-            course_seat_types=course_seat_types
+            course_seat_types=course_seat_types,
         )
 
     # In case of more than 1 multi-usage coupon, each voucher needs to have an individual
     # offer because the usage is tied to the offer so that a usage on one voucher would
     # mean all vouchers will have their usage decreased by one, hence each voucher needs
-    # it's own offer to keep track of it's own usages without interfering with others.
+    # its own offer to keep track of its own usages without interfering with others.
     multi_offer = True if quantity > 1 and max_uses > 1 else False
     num_of_offers = quantity if multi_offer else 1
     for num in range(num_of_offers):
@@ -419,7 +432,8 @@ def create_vouchers(
             benefit_value=benefit_value,
             max_uses=max_uses,
             coupon_id=coupon.id,
-            offer_number=num
+            offer_number=num,
+            email_domains=email_domains
         )
         offers.append(offer)
 
@@ -480,7 +494,7 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None):
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None):
     """
     Update voucher offer with new benefit value.
 
@@ -488,6 +502,12 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         offer (Offer): Offer associated with a voucher.
         benefit_value (Decimal): Value of benefit associated with vouchers.
         benefit_type (str): Type of benefit associated with vouchers.
+        coupon (Product): The coupon whos offer(s) is updated.
+
+    Kwargs:
+        max_uses (int): number of maximum global application number an offer can have.
+        email_domains (str): a comma-separated string of email domains allowed to apply
+                            this offer.
 
     Returns:
         Offer
@@ -497,5 +517,6 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         benefit_value=benefit_value,
         benefit_type=benefit_type,
         coupon_id=coupon.id,
-        max_uses=max_uses
+        max_uses=max_uses,
+        email_domains=email_domains
     )

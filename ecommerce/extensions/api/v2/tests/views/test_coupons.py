@@ -71,6 +71,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'max_uses': None,
             'catalog_query': None,
             'course_seat_types': None,
+            'email_domains': None,
         }
 
     def setup_site_configuration(self):
@@ -387,6 +388,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         )
         self.assertEqual(response_data['id'], self.coupon.id)
         self.assertEqual(response_data['title'], 'New title')
+        self.assertIsNone(response_data['email_domains'])
 
     def test_update_title(self):
         """Test updating a coupon's title."""
@@ -646,6 +648,30 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             data=self.data
         )
         self.assert_invoice_serialized_data(updated_coupon)
+
+    def test_coupon_with_email_domains(self):
+        """ Verify a coupon is created with specified email domains. """
+        email_domains = 'example.com'
+        self.data.update({'email_domains': email_domains})
+
+        response = self.client.post(COUPONS_LINK, data=self.data, format='json')
+        coupon_id = json.loads(response.content)['coupon_id']
+
+        details_response = self.client.get(reverse('api:v2:coupons-detail', args=[coupon_id]))
+        details = json.loads(details_response.content)
+        self.assertEqual(details['email_domains'], email_domains)
+
+    def test_update_email_domains(self):
+        """ Verify a coupons email domains is updated. """
+        path = reverse('api:v2:coupons-detail', args=[self.coupon.id])
+        details = self.get_response_json('GET', path)
+        self.assertIsNone(details['email_domains'])
+
+        email_domains = 'example.com'
+        self.data.update({'email_domains': email_domains})
+
+        response = self.get_response_json('PUT', path, self.data)
+        self.assertEqual(response['email_domains'], email_domains)
 
 
 class CouponCategoriesListViewTests(TestCase):

@@ -65,6 +65,12 @@
             <div class="catalog_buttons"></div>
         </div>
         <%}%>
+        <% if(emailDomains) {%>
+        <div class="info-item grid-item email-domains">
+            <div class="heading"><%= gettext('Email Domains:') %></div>
+            <div class="value"><%= emailDomains %></div>
+        </div>
+        <%}%>
         <div class="info-item grid-item usage-limitations">
             <div class="heading"><%= gettext('Usage Limitations:') %></div>
             <div class="value"><%= usage %></div>

@@ -448,6 +448,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     start_date = serializers.SerializerMethodField()
     voucher_type = serializers.SerializerMethodField()
     seats = serializers.SerializerMethodField()
+    email_domains = serializers.SerializerMethodField()
 
     def retrieve_benefit(self, obj):
         """Helper method to retrieve the benefit from voucher. """
@@ -533,6 +534,10 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         offer = self.retrieve_offer(obj)
         return offer.num_applications
 
+    def get_email_domains(self, obj):
+        offer = self.retrieve_offer(obj)
+        return offer.email_domains
+
     def get_payment_information(self, obj):
         """
         Retrieve the payment information.
@@ -571,7 +576,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             'categories', 'client', 'code', 'code_status', 'coupon_type',
             'course_seat_types', 'end_date', 'id', 'last_edited', 'max_uses',
             'note', 'num_uses', 'payment_information', 'price', 'quantity',
-            'start_date', 'title', 'voucher_type', 'seats'
+            'start_date', 'title', 'voucher_type', 'seats', 'email_domains'
         )
 
 

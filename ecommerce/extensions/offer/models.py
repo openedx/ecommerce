@@ -4,10 +4,31 @@ import hashlib
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from oscar.apps.offer.abstract_models import AbstractRange
+from oscar.apps.offer.abstract_models import AbstractConditionalOffer, AbstractRange
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.coupons.utils import get_seats_from_query
+
+
+class ConditionalOffer(AbstractConditionalOffer):
+    email_domains = models.CharField(max_length=255, blank=True, null=True)
+
+    def is_email_valid(self, email):
+        """
+        Check if the email is within the email_domains if email_domains are set,
+        else return True.
+        """
+        domain = email.split('@')[1]
+        return domain in self.email_domains if self.email_domains else True  # pylint: disable=unsupported-membership-test
+
+    def is_condition_satisfied(self, basket):
+        """
+        In addition to Oscar's check to see if the condition is satisfied,
+        a check for if basket owners email domain is within the allowed email domains.
+        """
+        if not self.is_email_valid(basket.owner.email):
+            return False
+        return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
 
 class Range(AbstractRange):
@@ -37,6 +58,9 @@ class Range(AbstractRange):
         return response
 
     def contains_product(self, product):
+        """
+        Assert if the range contains the product.
+        """
         if self.catalog_query and self.course_seat_types:
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
                 response = self.run_catalog_query(product)
@@ -65,5 +89,6 @@ class Range(AbstractRange):
             catalog_products = [record.product for record in self.catalog.stock_records.all()]
             return catalog_products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call
         return super(Range, self).all_products()  # pylint: disable=bad-super-call
+
 
 from oscar.apps.offer.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

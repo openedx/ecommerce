@@ -106,7 +106,7 @@ class CouponMixin(object):
 
     def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
                       benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
-                      course_seat_types=None):
+                      course_seat_types=None, email_domains=None):
         """Helper method for creating a coupon.
 
         Arguments:
@@ -118,6 +118,7 @@ class CouponMixin(object):
             benefit_value(int): The voucher benefit value
             catalog_query(str): Course query string
             course_seat_types(str): A string of comma-separated list of seat types
+            email_domains(str): A comma seperated list of email domains
 
         Returns:
             coupon (Coupon)
@@ -146,6 +147,7 @@ class CouponMixin(object):
             'max_uses': max_uses,
             'catalog_query': catalog_query,
             'course_seat_types': course_seat_types,
+            'email_domains': email_domains,
         }
 
         coupon = CouponViewSet().create_coupon_product(

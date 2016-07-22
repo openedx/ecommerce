@@ -153,6 +153,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         """
         Test voucher creation
         """
+        email_domains = 'edx.org,example.com'
         vouchers = create_vouchers(
             benefit_type=Benefit.PERCENTAGE,
             benefit_value=100.00,
@@ -162,7 +163,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             name="Tešt voučher",
             quantity=10,
             start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE
+            voucher_type=Voucher.SINGLE_USE,
+            email_domains=email_domains
         )
 
         self.assertEqual(len(vouchers), 10)
@@ -174,6 +176,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(voucher_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(voucher_offer.benefit.value, 100.00)
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
+        self.assertEqual(voucher_offer.email_domains, email_domains)
         self.assertEqual(len(coupon_voucher.vouchers.all()), 11)
         self.assertEqual(voucher.end_datetime, datetime.date(2015, 10, 30))
         self.assertEqual(voucher.start_datetime, datetime.date(2015, 10, 1))
@@ -356,6 +359,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             'Create Date',
             'Coupon Start Date',
             'Coupon Expiry Date',
+            'Email Domains',
         ])
 
         voucher = Voucher.objects.get(name=rows[0]['Coupon Name'])
@@ -517,6 +521,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(rows[-1]['Redeemed For Course ID'], self.course.id)
 
     def test_update_voucher_offer(self):
+        """Test updating a voucher."""
         vouchers = create_vouchers(
             benefit_type=Benefit.PERCENTAGE,
             benefit_value=100.00,
@@ -526,7 +531,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             name="Test voucher",
             quantity=10,
             start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE
+            voucher_type=Voucher.SINGLE_USE,
+            email_domains='example.com'
         )
 
         voucher = vouchers[0]
@@ -535,7 +541,12 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(voucher_offer.benefit.value, 100.00)
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
 
-        new_offer = update_voucher_offer(voucher_offer, 50.00, Benefit.PERCENTAGE, self.coupon)
+        new_email_domains = 'example.org'
+        new_offer = update_voucher_offer(
+            voucher_offer, 50.00, Benefit.PERCENTAGE,
+            self.coupon, email_domains=new_email_domains
+        )
         self.assertEqual(new_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(new_offer.benefit.value, 50.00)
         self.assertEqual(new_offer.benefit.range.catalog, self.catalog)
+        self.assertEqual(new_offer.email_domains, new_email_domains)
