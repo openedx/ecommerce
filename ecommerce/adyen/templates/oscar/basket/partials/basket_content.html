@@ -296,7 +296,7 @@
                         <div class="form-field col-sm-4">
                             <label for="card_cvc">
                                 {% trans "Security Code" %}*
-                                <i class="fa fa-question-circle" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="This code is a three or four digit number printed on the back or front of credit cards."></i>
+                                <i class="fa fa-question-circle" aria-hidden="true" data-toggle="tooltip" data-placement="top" title={% trans "This code is a three or four digit number printed on the back or front of credit cards." %}></i>
                             </label>
                             <input type="password" class="form-control security required" id="card_cvc" size="4" maxlength="4" autocomplete="off" data-encrypted-name="cvc" aria-required="true"/>
                             <span class="error-text">{% trans "Enter a valid CVN" %}</span>
