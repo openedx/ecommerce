@@ -103,6 +103,11 @@ class TestUpdateAssets(TestCase):
                 "css_destination_dir": themes_dirs[1] / "test-theme-3" / "static" / "css" / "base",
                 "lookup_paths": [themes_dirs[1] / "test-theme-3" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
             },
+            {
+                "sass_source_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass"),
+                "css_destination_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/adyen/css"),
+                "lookup_paths": [Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass") / "partials"] + SYSTEM_SASS_PATHS,
+            },
         ]
 
         returned_dirs = get_sass_directories(themes=self.themes, system=True)
@@ -118,7 +123,12 @@ class TestUpdateAssets(TestCase):
                 "sass_source_dir": Path("ecommerce/static/sass/base"),
                 "css_destination_dir": Path("ecommerce/static/css/base"),
                 "lookup_paths": SYSTEM_SASS_PATHS,
-            }
+            },
+            {
+                "sass_source_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass"),
+                "css_destination_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/adyen/css"),
+                "lookup_paths": [Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass") / "partials"] + SYSTEM_SASS_PATHS,
+            },
         ]
 
         returned_dirs = get_sass_directories(themes=[], system=True)
