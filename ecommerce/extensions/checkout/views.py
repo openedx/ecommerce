@@ -7,6 +7,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import RedirectView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -52,3 +53,21 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
             # page which displays the appropriate message for empty baskets.
             url = reverse('basket:summary')
         return url
+
+
+class CancelResponseView(RedirectView):
+    """ Handles behaviour for the 'cancel' redirect. """
+    permanent = False
+
+    def get(self, request, *args, **kwargs):
+        """ Retrieves the previously frozen basket from the kwargs and thaws it. """
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'],
+                                   status=Basket.FROZEN)
+        basket.thaw()
+        logger.info('Payment cancelled (token %s) - basket #%s thawed',
+                    request.GET.get('token', '<no token>'), basket.id)
+        return super(CancelResponseView, self).get(request, *args, **kwargs)
+
+    def get_redirect_url(self, **kwargs):
+        """ Redirects back to the basket summary page. """
+        return reverse('basket:summary')
