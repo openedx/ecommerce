@@ -7,6 +7,7 @@ import waffle
 from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 from ecommerce.extensions.analytics.utils import silence_exceptions
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.courses.utils import mode_for_seat
 
 
 logger = logging.getLogger(__name__)
@@ -29,10 +30,8 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
     # get product (should only be 1)
     product = order.lines.first().product
 
-    # return if no price, since enrolls are handled by lms
+    # get price
     price = order.total_excl_tax
-    if not price:
-        return
 
     course_id = product.course_id
 
@@ -40,7 +39,7 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
     course_url = _build_course_url(course_id)
 
     # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
-    update_course_enrollment.delay(user.email, course_url, False, product.attr.certificate_type,
+    update_course_enrollment.delay(user.email, course_url, False, mode_for_seat(product),
                                    unit_cost=price, course_id=course_id, currency=order.currency,
                                    site_code=request.site.siteconfiguration.partner.short_code,
                                    message_id=request.COOKIES.get('sailthru_bid'))
@@ -69,12 +68,12 @@ def process_basket_addition(sender, product=None, request=None, user=None, **kwa
         price = stock_record.price_excl_tax
         currency = stock_record.price_currency
 
-    # return if no price, since enrolls are handled by lms
+    # return if no price, no need to add free items to shopping cart
     if not price:
         return
 
     # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
-    update_course_enrollment.delay(user.email, course_url, True, product.attr.certificate_type,
+    update_course_enrollment.delay(user.email, course_url, True, mode_for_seat(product),
                                    unit_cost=price, course_id=course_id, currency=currency,
                                    site_code=request.site.siteconfiguration.partner.short_code,
                                    message_id=request.COOKIES.get('sailthru_bid'))

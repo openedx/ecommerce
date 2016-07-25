@@ -94,18 +94,13 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_price_zero(self, mock_update_course_enrollment):
         """
-        Test that a price of zero skips update_course_enrollment
+        Test that a price of zero skips update_course_enrollment in process basket
         """
 
         seat, order = self._create_order(0)
         process_basket_addition(None, request=self.request,
                                 user=self.user,
                                 product=seat)
-        self.assertFalse(mock_update_course_enrollment.called)
-
-        process_checkout_complete(None, request=self.request,
-                                  user=self.user,
-                                  order=order)
         self.assertFalse(mock_update_course_enrollment.called)
 
     def _create_order(self, price):
