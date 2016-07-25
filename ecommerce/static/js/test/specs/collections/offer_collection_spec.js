@@ -32,19 +32,19 @@ define([
             });
 
             it('should fetch the next page of results', function() {
-                spyOn(collection, 'fetch');
+                spyOn(collection, 'goToPage');
                 collection.page = 1;
                 collection.total = 8;
                 collection.perPage = 4;
 
                 collection.nextPage();
-                expect(collection.fetch).toHaveBeenCalled();
+                expect(collection.goToPage).toHaveBeenCalledWith(2);
             });
 
             it('should not fetch the next page of results', function() {
                 spyOn(collection, 'fetch');
                 collection.page = 2;
-                collection.total = 8;
+                collection.numberOfPages = 2;
                 collection.perPage = 4;
 
                 response = collection.nextPage();
@@ -52,13 +52,13 @@ define([
             });
 
             it('should fetch the previous page of results', function() {
-                spyOn(collection, 'fetch');
+                spyOn(collection, 'goToPage');
                 collection.page = 2;
-                collection.total = 8;
+                collection.numberOfPages = 8;
                 collection.perPage = 4;
 
                 collection.previousPage();
-                expect(collection.fetch).toHaveBeenCalled();
+                expect(collection.goToPage).toHaveBeenCalledWith(1);
             });
 
             it('should not fetch the previous page of results', function() {
@@ -72,33 +72,12 @@ define([
             });
 
             it('should fetch the page that is selected', function() {
-                var ev = $.Event('click');
-                ev.target = '<div>1</div>';
-                spyOn(collection, 'fetch');
+                spyOn(collection, 'updateLimits');
 
-                collection.goToPage(ev);
+                collection.goToPage(1);
                 expect(collection.page).toBe(1);
-                expect(collection.fetch).toHaveBeenCalled();
+                expect(collection.updateLimits).toHaveBeenCalled();
             });
-
-            it('should set page', function() {
-                collection.parse(response);
-                expect(collection.page).toBe(1);
-            });
-
-            it('should set code', function() {
-                collection = new OfferCollection({code: 'abcd'});
-                expect(collection.code).toBe('abcd');
-            });
-
-            it('should return url with parameters set', function() {
-                collection.code = 'abcd';
-                collection.page = 1;
-                collection.perPage = 2;
-
-                expect(collection.url()).toBe('/api/v2/vouchers/offers/?code=abcd&page=1&page_size=2');
-            });
-
         });
     }
 );
