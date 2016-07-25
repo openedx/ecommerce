@@ -24,23 +24,6 @@ require([
                 }
             });
 
-            $('div.payment-buttons').on('click', function(e) {
-                resetAdyenFormValidation();
-            });
-
-            $('div.checkout-buttons-section .checkout-button').on('click', function(e) {
-                var basketId = $('.checkout-buttons-section').data('basket-id');
-                $('#messages').empty();
-
-                validateRequiredFields();
-                validateEmail($("#email")[0]);
-                validateCardHolderName($("#card_holder_name")[0]);
-                validateCardNumber($("#card_number")[0]);
-                validateCardCVC($("#card_cvc")[0]);
-                validateCardExpiryMonth($("#card_expiry_month")[0]);
-                validateCardExpiryYear($("#card_expiry_year")[0]);
-            });
-
             $('input.required').on('focusout', function(e) {
                 var el = e.currentTarget;
                 validateRequiredField(el);
@@ -77,30 +60,6 @@ require([
                 validateCardExpiryYear(this);
             });
 
-            $('#adyen-encrypted-form').on('submit', function (e) {
-                var formData;
-                e.preventDefault();
-                if ($('form#adyen-encrypted-form div.form-field.has-error').length == 0) {
-                    formData = $('form#adyen-encrypted-form').serializeArray();
-                    formData.push(
-                        getAdyenFormFieldByID('first_name'),
-                        getAdyenFormFieldByID('last_name'),
-                        getAdyenFormFieldByID('email'),
-                        getAdyenFormFieldByID('address'),
-                        getAdyenFormFieldByID('appartment'),
-                        getAdyenFormFieldByID('city'),
-                        getAdyenFormFieldByID('state'),
-                        getAdyenFormFieldByID('country'),
-                        getAdyenFormFieldByID('zip_code')
-                    );
-                    $.post( $('form#adyen-encrypted-form').attr('action'), formData );
-                }
-            });
-
-            function getAdyenFormFieldByID(fieldId) {
-                return {name: fieldId, value: $('form#adyen-encrypted-form #' + fieldId).val()};
-            }
-
             function validateEmail(el) {
                 var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
                 if (!re.test(el.value)){
@@ -108,14 +67,6 @@ require([
                 } else {
                     hideValidationError(el);
                 }
-            }
-
-            function validateRequiredFields() {
-                Array.prototype.slice.call(
-                    $('input.required')
-                ).forEach(function (el) {
-                    validateRequiredField(el);
-                });
             }
 
             function validateRequiredField(el) {

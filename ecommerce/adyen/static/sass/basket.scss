@@ -102,7 +102,7 @@
                 -webkit-appearance: none;
                 -moz-appearance: none;
                 appearance: none;
-                background: url("../../images/caret-down.png") no-repeat 90% center;
+                background: url("../images/caret-down.png") no-repeat 90% center;
                 &::ms-expand {
                   display: none;
                 }
@@ -119,11 +119,11 @@
                 line-height: 0;
                 &.down {
                   bottom: 1px;
-                  background: url("../../images/bottom.png") no-repeat center;
+                  background: url("../images/bottom.png") no-repeat center;
                 }
                 &.up {
                   top: 1px;
-                  background: url("../../images/top.png") no-repeat center;
+                  background: url("../images/top.png") no-repeat center;
                 }
               }
             }
@@ -276,29 +276,29 @@
         display: none;
       }
       .security{
-        background-image: url("../../images/lock.png");
+        background-image: url("../images/lock.png");
         background-repeat: no-repeat, no-repeat;
         background-position: calc(100% - 14px) center, calc(100% - 35px) center;
         padding-right: 40px;
       }
       .mastercard{
         .security{
-          background-image: url("../../images/lock.png"), url("../../images/mastercard-s.png");
+          background-image: url("../images/lock.png"), url("../images/mastercard-s.png");
         }
       }
       .visa{
         .security {
-          background-image: url("../../images/lock.png"), url("../../images/visa-s.png");
+          background-image: url("../images/lock.png"), url("../images/visa-s.png");
         }
       }
       .discover{
         .security {
-          background-image: url("../../images/lock.png"), url("../../images/discover-s.png");
+          background-image: url("../images/lock.png"), url("../images/discover-s.png");
         }
       }
       .american-express{
         .security {
-          background-image: url("../../images/lock.png"), url("../../images/ae-s.png");
+          background-image: url("../images/lock.png"), url("../images/ae-s.png");
         }
       }
     }
@@ -411,7 +411,7 @@
       -moz-appearance: none;
       -webkit-appearance: none;
       appearance: none;
-      background: url("../../images/caret-down.png") no-repeat calc(100% - 10px) center;
+      background: url("../images/caret-down.png") no-repeat calc(100% - 10px) center;
       padding-right: 30px;
       font-size: 16px;
       &::-ms-expand{

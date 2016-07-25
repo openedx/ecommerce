@@ -50,7 +50,7 @@ class Adyen(BasePaymentProcessor):
         self.web_service_username = configuration['web_service_username']
         self.web_service_password = configuration['web_service_password']
         self.merchant_account_code = configuration['merchant_account_code']
-        self.cse_js_url = configuration['cse_js_url']
+        self.cse_public_key = configuration['cse_public_key']
         self.payment_api_url = configuration['payment_api_url']
 
     @property

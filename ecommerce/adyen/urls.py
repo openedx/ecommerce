@@ -1,7 +1,7 @@
 """ Payment-related URLs """
 from django.conf.urls import url
 
-from ecommerce.extensions.payment import views
+from ecommerce.adyen import views
 
 urlpatterns = [
     url(r'^notification/$', views.AdyenNotificationView.as_view(), name='notification'),

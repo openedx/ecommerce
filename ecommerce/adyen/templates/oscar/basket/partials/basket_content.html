@@ -169,12 +169,7 @@
         <div class="col-md-6 col-xs-12 border-left-md payment-details">
 
             <form method="POST" action="{% url 'adyen:payment' %}" id="adyen-encrypted-form">
-                {% for processor in payment_processors %}
-                    {% if processor.NAME|lower == 'adyen'%}
-                        <input type="hidden" value="{{ processor.generation_time }}" data-encrypted-name="generationtime" />
-                    {% endif %}
-                {% endfor %}
-
+                <input type="hidden" value="{{ payment_processors.0.generation_time }}" data-encrypted-name="generationtime" />
                 <div class="form-group">
                     <label class="group-label">{% trans "Select Payment Method" %}</label>
                     <div class="row pb0">

@@ -51,24 +51,21 @@
                         </div>
                     {% else %}
                         <div class="checkout-buttons-section" data-basket-id="{{ basket.id }}">
-                            {% for processor in payment_processors %}
-                                {% if processor.NAME|lower == 'adyen'%}
-                                    <input data-track-type="click"
-                                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                                            data-track-category="checkout"
-                                            data-processor-name="{{ processor.NAME }}"
-                                            data-course-id="{{ course.id }}"
-                                            class="btn btn-default checkout-button"
-                                            value='{% trans "Pay" %}'
-                                            id="{{ processor.NAME|lower }}"
-                                            type="submit"
-                                            form="adyen-encrypted-form"/>
+                            <input data-track-type="click"
+                                    data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                    data-track-category="checkout"
+                                    data-processor-name="{{ payment_processors.0.NAME }}"
+                                    data-course-id="{{ course.id }}"
+                                    class="btn btn-default checkout-button"
+                                    disabled="disabled"
+                                    value='{% trans "Pay" %}'
+                                    id="{{ payment_processors.0.NAME|lower }}"
+                                    type="submit"
+                                    form="adyen-encrypted-form"/>
 
-                                    <a href="{{ processor.cancel_page_url }}" class="btn btn-lg btn-transparent">
-                                        {% trans "Cancel" %}
-                                    </a>
-                                {% endif %}
-                            {% endfor %}
+                            <a href="{{ payment_processors.0.cancel_page_url }}" class="btn btn-lg btn-transparent">
+                                {% trans "Cancel" %}
+                            </a>
                         </div>
                     {% endif %}
                 </div>
@@ -76,20 +73,11 @@
         </div>
     </div>
 
-    {% if analytics_data %}
-        <script type="text/javascript">
-            var initModelData = {{ analytics_data|safe }};
-        </script>
-    {% endif %}
-
-    {% for processor in payment_processors %}
-        {% if processor.NAME|lower == 'adyen'%}
-            <script type="text/javascript" src="{{ processor.cse_js_url }}"></script>
-            <script type="text/javascript">
-                var adyenForm = document.getElementById('adyen-encrypted-form');
-                var adyenFormOptions = {};
-                adyen.createEncryptedForm(adyenForm, adyenFormOptions);
-            </script>
-        {% endif %}
-    {% endfor %}
+    <script type="text/javascript" src="{% static 'adyen/js/adyen.encrypt.min.js' %}"></script>
+    <script type="text/javascript">
+        var adyenForm = document.getElementById('adyen-encrypted-form');
+        var adyenKey = '{{ payment_processors.0.cse_public_key }}';
+        var adyenFormOptions = {};
+        adyen.encrypt.createEncryptedForm(adyenForm, adyenKey, adyenFormOptions);
+    </script>
 {% endblock content %}
