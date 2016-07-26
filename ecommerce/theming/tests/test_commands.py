@@ -104,9 +104,9 @@ class TestUpdateAssets(TestCase):
                 "lookup_paths": [themes_dirs[1] / "test-theme-3" / "static" / "sass" / "partials"] + SYSTEM_SASS_PATHS,
             },
             {
-                "sass_source_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass"),
-                "css_destination_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/adyen/css"),
-                "lookup_paths": [Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass") / "partials"] + SYSTEM_SASS_PATHS,
+                "sass_source_dir": Path(settings.DJANGO_ROOT + "/adyen/static/sass"),
+                "css_destination_dir": Path(settings.DJANGO_ROOT + "/adyen/static/adyen/css"),
+                "lookup_paths": [Path(settings.DJANGO_ROOT + "/adyen/static/sass" + "/partials")] + SYSTEM_SASS_PATHS,
             },
         ]
 
@@ -125,13 +125,15 @@ class TestUpdateAssets(TestCase):
                 "lookup_paths": SYSTEM_SASS_PATHS,
             },
             {
-                "sass_source_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass"),
-                "css_destination_dir": Path(settings.DJANGO_ROOT) + Path("/adyen/static/adyen/css"),
-                "lookup_paths": [Path(settings.DJANGO_ROOT) + Path("/adyen/static/sass") / "partials"] + SYSTEM_SASS_PATHS,
+                "sass_source_dir": Path(settings.DJANGO_ROOT + "/adyen/static/sass"),
+                "css_destination_dir": Path(settings.DJANGO_ROOT + "/adyen/static/adyen/css"),
+                "lookup_paths": [Path(settings.DJANGO_ROOT + "/adyen/static/sass" + "/partials")] + SYSTEM_SASS_PATHS,
             },
         ]
 
         returned_dirs = get_sass_directories(themes=[], system=True)
+        print "expected_directories ====> ", expected_directories
+        print "returned_dirs ====> ", returned_dirs
         self.assertItemsEqual(expected_directories, returned_dirs)
 
     def test_non_existent_sass_dir_error(self):

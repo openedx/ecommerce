@@ -6,7 +6,7 @@ import os
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
