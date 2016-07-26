@@ -171,8 +171,10 @@ TEMPLATES = [
         ),
         'OPTIONS': {
             'loaders': [
-                # ThemeTemplateLoader should come before any other loader to give theme templates
-                # priority over system templates
+                # This is a prioritized list of template loaders.
+                # A template found using a lower-indexed loader, will be used
+                # before a template found using a higher-indexed loader.
+                'ecommerce.extensions.payment.processors.template_loaders.PaymentProcessorTemplateLoader',
                 'ecommerce.theming.template_loaders.ThemeTemplateLoader',
                 'django.template.loaders.app_directories.Loader',
             ],
@@ -263,6 +265,7 @@ DJANGO_APPS = [
 
 # Apps specific to this project go here.
 LOCAL_APPS = [
+    'ecommerce.adyen',
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',
