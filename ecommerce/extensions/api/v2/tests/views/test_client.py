@@ -74,3 +74,13 @@ class ClientViewSetTests(TestCase):
         invalid_client_path = reverse('api:v2:clients-detail', args=[123])
         response = self.client.delete(invalid_client_path)
         self.assertEqual(response.status_code, 404)
+
+    def test_name_filtering(self):
+        """Verify filtering clients by name."""
+        invalid_path = '{}?name=invalid'.format(self.list_path)
+        response = self.client.get(invalid_path)
+        self.assertEqual(json.loads(response.content)['count'], 0)
+
+        path = '{}?name={}'.format(self.list_path, self.business_client.name)
+        response = self.client.get(path)
+        self.assertEqual(json.loads(response.content)['count'], 1)
