@@ -6,6 +6,7 @@ from ecommerce.extensions.api.v2.views import (
     baskets as basket_views,
     catalog as catalog_views,
     checkout as checkout_views,
+    clients as client_views,
     coupons as coupon_views,
     courses as course_views,
     orders as order_views,
@@ -96,4 +97,5 @@ router.register(r'orders', order_views.OrderViewSet)
 
 router.register(r'vouchers', voucher_views.VoucherViewSet, base_name='vouchers')
 router.register(r'siteconfiguration', siteconfiguration_views.SiteConfigurationViewSet, base_name='siteconfiguration')
+router.register(r'clients', client_views.ClientViewSet, base_name='clients')
 urlpatterns += router.urls

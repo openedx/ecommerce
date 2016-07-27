@@ -14,7 +14,7 @@ from rest_framework.reverse import reverse
 import waffle
 
 from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
-from ecommerce.core.models import Site, SiteConfiguration
+from ecommerce.core.models import BusinessClient, Site, SiteConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.coupons.utils import get_seats_from_query
@@ -546,3 +546,8 @@ class SiteConfigurationSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = SiteConfiguration
+
+
+class BusinessClientSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = BusinessClient

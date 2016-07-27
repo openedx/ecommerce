@@ -309,10 +309,6 @@ class User(AbstractUser):
         return False
 
 
-class Client(User):
-    pass
-
-
 class BusinessClient(models.Model):
     """The model for the business client."""
 
