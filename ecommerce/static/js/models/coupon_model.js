@@ -142,7 +142,6 @@ define([
             initialize: function () {
                 this.on('change:categories', this.updateCategory, this);
                 this.on('change:voucher_type', this.changeVoucherType, this);
-                this.on('change:vouchers', this.updateVoucherData);
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
@@ -200,29 +199,6 @@ define([
                         this.set('course_id', this.getCourseID(seat_data));
                         this.updateTotalValue(this.getSeatPrice());
                     }
-                }
-            },
-
-            updateVoucherData: function () {
-                var vouchers = this.get('vouchers'),
-                    voucher = vouchers[0],
-                    code_count = _.findWhere(voucher, {'code': voucher.code});
-                this.set('start_date', voucher.start_datetime);
-                this.set('end_date', voucher.end_datetime);
-                this.set('voucher_type', voucher.usage);
-                this.set('quantity', _.size(vouchers));
-                this.updateTotalValue(this.getSeatPrice());
-                if (this.get('coupon_type') === 'Discount code') {
-                    this.set('benefit_type', voucher.benefit.type);
-                    this.set('benefit_value', voucher.benefit.value);
-                }
-
-                if (code_count > 1 || _.size(vouchers) === 1) {
-                    this.set('code', voucher.code);
-                }
-
-                if (voucher.usage === 'Single use') {
-                    this.set('max_uses', 1);
                 }
             },
 

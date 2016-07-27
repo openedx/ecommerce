@@ -14,12 +14,12 @@
             </div>
         </h1>
         <h3 class="hd-3">
-            <span class="coupon-type"><%= couponType %></span>
+            <span class="coupon-type"><%= coupon['coupon_type'] %></span>
         </h3>
     </div>
     <div class="coupon-information">
         <div class="heading"><%= gettext('Code Status:') %>
-            <span class="code-status value <% if(codeStatus == 'ACTIVE') { %>active <% } %>"><%= codeStatus %></span>
+            <span class="code-status value <% if(coupon['code_status'] == 'ACTIVE') { %>active <% } %>"><%= coupon['code_status'] %></span>
             <div class="pull-right">
                 <%= gettext('Last edit:') %>
                 <span><%= lastEdited %></span>
@@ -31,7 +31,7 @@
         </div>
         <div class="info-item grid-item note">
             <div class="heading"><%= gettext('Note') %></div>
-            <div class="value"><%= note %></div><br />
+            <div class="value"><%= coupon['note'] %></div><br />
         </div>
         <div class="info-item grid-item discount-value">
             <div class="heading"><%= gettext('Discount Value:') %></div>
@@ -67,12 +67,9 @@
             <div class="heading"><%= gettext('Maximum Uses:') %></div>
             <div class="value"><%= coupon['max_uses'] %></div>
         </div>
-        <div class="info-item codes">
-            <div class="heading"><%= gettext('Code(s):') %></div>
-            <a href="/<%= coupon['id'] %>/" class="btn btn-primary btn-small pull-right voucher-report-button"><%= gettext('Download') %></a>
-            <table id="vouchersTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
-                <caption class="sr-only"><%= gettext('Current Voucher Codes') %></caption>
-            </table>
+        <div class="info-item grid-item codes">
+            <div class="heading"><%= gettext('Download Voucher(s):') %></div>
+            <a href="/<%= coupon['id'] %>/" class="btn btn-primary btn-small pull-left voucher-report-button"><%= gettext('Download') %></a>
         </div>
         <div class="info-item grid-item client-info">
             <div class="heading"><%= gettext('Client:') %></div>

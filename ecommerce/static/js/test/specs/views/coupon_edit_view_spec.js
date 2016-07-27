@@ -25,7 +25,6 @@ define([
                 beforeEach(function () {
                     model = Coupon.findOrCreate(enrollment_code_data, {parse: true});
                     model.updateSeatData();
-                    model.updateVoucherData();
                     view = new CouponCreateEditView({model: model, editing: true}).render();
                 });
 
@@ -50,7 +49,6 @@ define([
                 beforeEach(function () {
                     model = new Coupon(discount_code_data);
                     model.updateSeatData();
-                    model.updateVoucherData();
                     view = new CouponCreateEditView({model: model, editing: true}).render();
                 });
 

@@ -50,7 +50,7 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, LmsApiMockMix
         response = CouponReportCSVView().get(request, coupon_id=coupon.id)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.content.splitlines()), 6)
+        self.assertEqual(len(response.content.splitlines()), 7)
 
     @httpretty.activate
     def test_get_csv_report_for_specific_coupon(self):

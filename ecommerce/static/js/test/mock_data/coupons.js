@@ -72,10 +72,8 @@ define([], function(){
             true,
             ''
         ],
-        'benefit': {
-            'type': 'Absolute',
-            'value': 12.0
-        }
+        'benefit_type': 'Absolute',
+        'benefit_value': 12.0
     },
     verifiedSeat = {
         id: 9,
@@ -161,7 +159,11 @@ define([], function(){
                 'name': 'TESTCAT'
             }
         ],
-        'vouchers': [percentageDiscountCodeVoucher]
+        'start_date': '2015-01-01T00:00:00Z',
+        'end_date': '2016-01-01T00:00:00Z',
+        'voucher_type': 'Single use',
+        'benefit_type': 'Percentage',
+        'benefit_value': 25
     },
     discountCodeCouponModelData = {
         title: 'Test Discount',
@@ -195,13 +197,19 @@ define([], function(){
             }
         ],
         'price': '100.00',
-        'vouchers': [enrollmentCodeVoucher],
         'invoice_type': 'Prepaid',
         'invoice_discount_type': 'Percentage',
         'invoice_discount_value': 40,
         'invoice_number': 'INV-00001',
         'invoice_payment_date': '2015-01-01T00:00:00Z',
         'tax_deducted_source': 50,
+        'start_date': '2015-01-01T00:00:00Z',
+        'end_date': '2016-01-01T00:00:00Z',
+        'voucher_type': 'Single use',
+        'code_status': 'ACTIVE',
+        'coupon_type': 'Enrollment Code',
+        'benefit_type': 'Percentage',
+        'benefit_value': 100
     },
     enrollmentCodeCouponModelData = {
         title: 'Test Enrollment',
