@@ -97,7 +97,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         Test that a price of zero skips update_course_enrollment in process basket
         """
 
-        seat, order = self._create_order(0)
+        seat = self._create_order(0)[0]
         process_basket_addition(None, request=self.request,
                                 user=self.user,
                                 product=seat)
