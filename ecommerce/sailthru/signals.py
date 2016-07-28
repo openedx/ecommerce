@@ -29,7 +29,8 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
 
     # loop through lines in order
     #  If multi product orders become common it may be worthwhile to pass an array of
-    #  orders to the worker in one call to save overhead
+    #  orders to the worker in one call to save overhead, however, that would be difficult
+    #  because of the fact that there are different templates for free enroll versus paid enroll
     for line in order.lines.all():
 
         # get product
