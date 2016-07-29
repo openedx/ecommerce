@@ -35,7 +35,8 @@ define([
                     title: 'edX Demonstration Course',
                     course_start_date: '2013-02-05T05:00:00Z',
                     id: 'course-v1:edX+DemoX+Demo_Course',
-                    voucher_end_date: '2016-07-29T00:00:00Z'
+                    voucher_end_date: '2016-07-29T00:00:00Z',
+                    contains_verified: true,
                 }),
                 course2 = new OfferModel({
                     benefit: {
@@ -56,18 +57,26 @@ define([
                     title: 'edX Demonstration Course',
                     course_start_date: '2013-02-05T05:00:00Z',
                     id: 'course-v1:edX+DemoX+Demo_Courseewewe',
-                    voucher_end_date: '2016-07-29T00:00:00Z'
+                    voucher_end_date: '2016-07-29T00:00:00Z',
+                    contains_verified: true,
                 });
 
             beforeEach(function() {
+                $('body').append('<div class="verified-info"></div>');
                 code = 'ABCDE';
                 collection = new OfferCollection(null, {code: code});
                 collection.add([ course, course2 ]);
-                view = new OfferView({code: code, collection: collection});
+                view = new OfferView({code: code, collection: collection}).render();
+            });
+
+            it('should show the verified certificate info', function() {
+                expect($('.verified-info').hasClass('hidden')).toBeFalsy();
             });
 
             it('should hide the verified certificate info', function() {
-                expect(view.$('.verified-info:hidden')).toBeTruthy();
+                view.collection.at(0).set('contains_verified', false);
+                view.showVerifiedCertificate();
+                expect($('.verified-info').hasClass('hidden')).toBeTruthy();
             });
 
             it('should call functions when formatValues called with course', function() {
@@ -81,10 +90,8 @@ define([
             });
 
             it('should call functions when refreshData called', function() {
-                spyOn(view, 'showVerifiedCertificate');
                 spyOn(_, 'each');
                 view.refreshData();
-                expect(view.showVerifiedCertificate).toHaveBeenCalled();
                 expect(_.each).toHaveBeenCalledWith(view.collection.models, view.formatValues, view);
             });
 
@@ -130,31 +137,17 @@ define([
             it('should fetch the page that is selected', function() {
                 var ev = $.Event('click');
                 ev.target = '<div>1</div>';
-                spyOn(view.collection, 'fetch');
+                spyOn(view.collection, 'goToPage');
 
                 view.goToPage(ev);
                 expect(view.collection.page).toBe(1);
-                expect(view.collection.fetch).toHaveBeenCalled();
-            });
-
-            it('should fetch the next page of results', function() {
-                spyOn(view.collection, 'fetch');
-                view.collection.page = 1;
-                view.collection.total = 8;
-                view.collection.perPage = 4;
-
-                view.next();
-                expect(view.collection.fetch).toHaveBeenCalled();
+                expect(view.collection.goToPage).toHaveBeenCalled();
             });
 
             it('should fetch the previous page of results', function() {
-                spyOn(view.collection, 'fetch');
-                view.collection.page = 2;
-                view.collection.total = 8;
-                view.collection.perPage = 4;
-
+                spyOn(view.collection, 'previousPage');
                 view.previous();
-                expect(view.collection.fetch).toHaveBeenCalled();
+                expect(view.collection.previousPage).toHaveBeenCalled();
             });
 
             it('should create list item', function() {
@@ -168,7 +161,7 @@ define([
             it('should create ellipsis item', function() {
                 var value = view.createEllipsisItem(),
                     string = '<li class="page-item disabled">' +
-                    '<button aria-label="Ellipsis" class="page-number page-link"><span>' +
+                    '<button aria-label="Ellipsis" class="page-number page-link disabled"><span>' +
                     '&hellip;</span></button</li>';
                 expect(value).toBe(string);
             });
@@ -197,17 +190,16 @@ define([
                 spyOn(view, 'createNextItem');
                 spyOn(view, 'createListItem');
 
-                collection.total = 10;
+                collection.numberOfPages = 10;
                 collection.perPage = 1;
 
-                for (var i=1; i<=collection.total; i++) {
+                for (var i=1; i<=collection.numberOfPages; i++) {
                     collection.page = i;
-                    collection.pageInfo();
                     view.renderPagination();
 
                     expect(view.createPreviousItem).toHaveBeenCalled();
                     expect(view.createNextItem).toHaveBeenCalled();
-                    if (collection.page - 4 >= 1 && collection.page + 4 <= collection.total) {
+                    if (collection.page - 4 >= 1 && collection.page + 4 <= collection.numberOfPages) {
                         expect(view.createEllipsisItem.calls.count()).toBe(ellipsisSpyCounter+1);
                         ellipsisSpyCounter += 2;
                     }else {
@@ -222,22 +214,39 @@ define([
                 spyOn(view, 'createPreviousItem');
                 spyOn(view, 'createNextItem');
 
-                collection.total = 2;
-                collection.perPage = 1;
                 collection.page = 1;
-                collection.next = 'some/link';
-                collection.prev = null;
+                collection.numberOfPages = 5;
                 view.renderPagination();
 
-                expect(view.createPreviousItem).toHaveBeenCalledWith(collection.prev);
-                expect(view.createNextItem).toHaveBeenCalledWith(collection.next);
+                expect(view.createPreviousItem).toHaveBeenCalledWith(true);
+                expect(view.createNextItem).toHaveBeenCalledWith(false);
 
-                collection.next = null;
-                collection.prev = 'some/link';
+                collection.page = 5;
+                collection.numberOfPages = 5;
                 view.renderPagination();
 
-                expect(view.createPreviousItem).toHaveBeenCalledWith(collection.prev);
-                expect(view.createNextItem).toHaveBeenCalledWith(collection.next);
+                expect(view.createPreviousItem).toHaveBeenCalledWith(false);
+                expect(view.createNextItem).toHaveBeenCalledWith(true);
+            });
+
+            it('should get next page from the collection', function() {
+                var next_collection_page = {'1': 1, '2': 2};
+                spyOn(view.collection, 'nextPage').and.returnValue(next_collection_page);
+                spyOn(view, 'changePage');
+                view.next();
+                expect(view.collection.nextPage).toHaveBeenCalled();
+                expect(view.page).toEqual(next_collection_page);
+                expect(view.changePage).toHaveBeenCalled();
+            });
+
+            it('should get previous page from the collection', function() {
+                var previous_collection_page = {'1': 1, '2': 2};
+                spyOn(view.collection, 'previousPage').and.returnValue(previous_collection_page);
+                spyOn(view, 'changePage');
+                view.previous();
+                expect(view.collection.previousPage).toHaveBeenCalled();
+                expect(view.page).toEqual(previous_collection_page);
+                expect(view.changePage).toHaveBeenCalled();
             });
 
         });

@@ -11,7 +11,6 @@ define([
                     this.url = response.next;
                     this.fetch({remove: false});
                 }
-
                 return response.results;
             }
         });

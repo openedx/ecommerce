@@ -1,99 +1,62 @@
 define([
         'backbone',
-        'models/offer_model',
-        'underscore.string'
+        'collections/paginated_collection',
+        'models/offer_model'
     ],
     function (Backbone,
-              OfferModel,
-              _s) {
+              PaginatedCollection,
+              OfferModel) {
         'use strict';
 
-        return Backbone.Collection.extend({
+        return PaginatedCollection.extend({
             model: OfferModel,
-            baseUrl: '/api/v2/vouchers/offers/',
+            url: '/api/v2/vouchers/offers/',
 
-            initialize: function(options) {
-                if (options) {
-                    this.code = options.code;
-                }
+            initialize: function() {
                 this.page = 1;
                 this.perPage = 6;
+                this.updateLimits();
+                this.on('update', this.updateNumberOfPages);
             },
 
-            parse: function(response) {
-                if (response.page) {
-                    this.page = response.page;
-                }
-                this.total = response.count;
-                this.prev = response.previous;
-                this.next = response.next;
-                return response.results;
+            updateNumberOfPages: function() {
+                this.numberOfPages = Math.ceil(this.length / this.perPage);
             },
 
-            url: function() {
-                return _s.sprintf('%s?%s',
-                    this.baseUrl,
-                    $.param({
-                        code: this.code,
-                        page: this.page,
-                        page_size: this.perPage
-                    })
-                );
+            updateLimits: function() {
+                this.lowerLimit = (this.page - 1) * this.perPage;
+                this.upperLimit = this.page * this.perPage;
             },
 
-            pageInfo: function() {
-                var info = {
-                        total: this.total,
-                        page: this.page,
-                        perPage: this.perPage,
-                        pages: this.numberOfPages(),
-                        prev: false,
-                        next: false
-                    },
-                    max = Math.min(this.total, this.page * this.perPage);
-
-                if (this.total === this.pages * this.perPage) {
-                    max = this.total;
-                }
-
-                info.range = [(this.page - 1) * this.perPage + 1, max];
-
-                if (this.page > 1) {
-                    info.prev = this.page - 1;
-                }
-
-                if (this.page < info.pages) {
-                    info.next = this.page + 1;
-                }
-
-                return info;
-            },
-
-            numberOfPages: function() {
-                return Math.ceil(this.total / this.perPage);
+            goToPage: function(pageNumber) {
+                this.page = pageNumber;
+                this.updateLimits();
+                return this.slice(this.lowerLimit, this.upperLimit);
             },
 
             nextPage: function() {
-                if (!this.pageInfo().next) {
+                if (this.onLastPage()) {
                     return false;
                 } else {
-                    this.page = this.page + 1;
-                    return this.fetch();
-                }
-              },
-            previousPage: function() {
-                if (!this.pageInfo().prev) {
-                    return false;
-                } else {
-                    this.page = this.page - 1;
-                    return this.fetch();
+                    return this.goToPage(this.page + 1);
                 }
             },
-            goToPage: function(ev) {
-                this.page = parseInt($(ev.target).text());
-                return this.fetch();
-            }
 
+            previousPage: function() {
+                if (this.onFirstPage()) {
+                    return false;
+                } else {
+                    return this.goToPage(this.page - 1);
+                }
+            },
+
+            onFirstPage: function() {
+                return this.page === 1;
+            },
+
+            onLastPage: function() {
+                return this.page === this.numberOfPages;
+            }
         });
     }
 );

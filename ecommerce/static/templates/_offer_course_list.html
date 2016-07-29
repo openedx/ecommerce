@@ -4,79 +4,79 @@
     <h3 class="number-of-products-header col-xs-12"><%- gettext('Select one of the following courses.') %></h3>
     <% } %>
 
-    <% if (courses && courses[0].attributes.stockrecords) { %>
-        <% if(pageInfo.pages > 1) { %>
-            <div class="pagination-block col-xs-12">
-                <nav class="pull-right hidden-xs">
-                    <ul class="pagination">
-                    </ul>
-                </nav>
-                <h4 class="pagination-range pull-right">Showing <%= pageInfo.range[0] %> - <%= pageInfo.range[1] %> of [<%= pageInfo.total %>]</h4>
-            </div>
-        <% } %>
-        <% _.each(courses, function(course) { %>
-        <div class="discount-multiple-courses col-xs-12 <% if (courses.length > 1) { %>col-lg-6<% } %>">
-            <div class="box-shadow col-xs-12">
-                <div class="col-sm-5">
-                    <div class="image-container">
-                        <div class="discount-percentage"><p><%= course.attributes.benefit_value %>
-                            <span><%- gettext('off') %></span></p>
-                        </div>
-                        <img class="img-responsive" src="<%= course.attributes.image_url %>"
-                             alt="<%= course.attributes.title %>"/>
-
-                        <div class="voucher-valid-until">
-                            <p><%= course.attributes.voucher_end_date_text %></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-7 col-xs-12">
-                    <p class="course-name"><%= course.attributes.title %></p>
-
-                    <p class="course-org"><%= course.attributes.organization %></p>
-
-                    <p class="course-start"><%= course.attributes.course_start_date_text %></p>
-
-                    <div class="discount-mc-price-group clearfix">
-                        <div class="pull-left">
-                            <p class="course-price">
-                                <span>$<%= course.attributes.stockrecords.price_excl_tax %></span>
-                            </p>
-                        </div>
-                        <div class="pull-left">
-                            <p class="course-new-price">
-                                <span><%- gettext('Now') %> $<%= course.attributes.new_price %></span>
-                            </p>
-                        </div>
-                        <div class="pull-right">
-                            <% if (isEnrollmentCode) { %>
-                            <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
-                               id="RedeemEnrollment"
-                               class="btn btn-success"><%- gettext('Enroll Now') %></a>
-                            <% } else { %>
-                            <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
-                               id="PurchaseCertificate"
-                               class="btn btn-success btn-purchase"
-                               data-track-type="click"
-                               data-track-event="edx.bi.ecommerce.coupons.accept_offer"
-                               data-track-category="coupon-codes"
-                               data-course-id="<%= course.attributes.id %>">
-                                <%- gettext('Checkout') %>
-                            </a>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <% }); %>
-        <% if(pageInfo.pages > 1) { %>
+    <% if (courses) { %>
+        <% if(courses.numberOfPages > 1) { %>
             <div class="pagination-block col-xs-12">
                 <nav class="pull-right">
                     <ul class="pagination">
                     </ul>
                 </nav>
-                <h4 class="pagination-range pull-right hidden-xs">Showing <%= pageInfo.range[0] %> - <%= pageInfo.range[1] %> of [<%= pageInfo.total %>]</h4>
+                <h4 class="pagination-range pull-right hidden-xs">Showing <%= (courses.lowerLimit + 1) %> - <%= courses.upperLimit %> of [<%= courses.length %>]</h4>
+            </div>
+        <% } %>
+        <% _.each(page, function(course) { %>
+            <div class="discount-multiple-courses col-xs-12 <% if (courses.length > 1) { %>col-lg-6<% } %>">
+                <div class="box-shadow col-xs-12">
+                    <div class="col-sm-5">
+                        <div class="image-container">
+                            <div class="discount-percentage"><p><%= course.attributes.benefit_value %>
+                                <span><%- gettext('off') %></span></p>
+                            </div>
+                            <img class="img-responsive" src="<%= course.attributes.image_url %>"
+                                 alt="<%= course.attributes.title %>"/>
+
+                            <div class="voucher-valid-until">
+                                <p><%= course.attributes.voucher_end_date_text %></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-7 col-xs-12">
+                        <p class="course-name"><%= course.attributes.title %></p>
+
+                        <p class="course-org"><%= course.attributes.organization %></p>
+
+                        <p class="course-start"><%= course.attributes.course_start_date_text %></p>
+
+                        <div class="discount-mc-price-group clearfix">
+                            <div class="pull-left">
+                                <p class="course-price">
+                                    <span>$<%= course.attributes.stockrecords.price_excl_tax %></span>
+                                </p>
+                            </div>
+                            <div class="pull-left">
+                                <p class="course-new-price">
+                                    <span><%- gettext('Now') %> $<%= course.attributes.new_price %></span>
+                                </p>
+                            </div>
+                            <div class="pull-right">
+                                <% if (course.isEnrollmentCode) { %>
+                                <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
+                                   id="RedeemEnrollment"
+                                   class="btn btn-success"><%- gettext('Enroll Now') %></a>
+                                <% } else { %>
+                                <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
+                                   id="PurchaseCertificate"
+                                   class="btn btn-success btn-purchase"
+                                   data-track-type="click"
+                                   data-track-event="edx.bi.ecommerce.coupons.accept_offer"
+                                   data-track-category="coupon-codes"
+                                   data-course-id="<%= course.attributes.id %>">
+                                    <%- gettext('Checkout') %>
+                                </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+        <% if(courses.numberOfPages > 1) { %>
+            <div class="pagination-block col-xs-12">
+                <nav class="pull-right">
+                    <ul class="pagination">
+                    </ul>
+                </nav>
+                <h4 class="pagination-range pull-right hidden-xs">Showing <%= (courses.lowerLimit + 1) %> - <%= courses.upperLimit %> of [<%= courses.length %>]</h4>
             </div>
         <% } %>
     <% } else { %>

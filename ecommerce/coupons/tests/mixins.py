@@ -3,6 +3,7 @@ import json
 
 import httpretty
 from django.conf import settings
+from django.core.cache import cache
 from django.test import RequestFactory
 from oscar.test import factories
 
@@ -18,12 +19,14 @@ class CourseCatalogMockMixin(object):
 
     def setUp(self):
         super(CourseCatalogMockMixin, self).setUp()
+        cache.clear()
 
     def mock_dynamic_catalog_course_runs_api(self, course_run=None, query=None, course_run_info=None):
         """ Helper function to register a dynamic course catalog API endpoint for the course run information. """
         if not course_run_info:
             course_run_info = {
                 'count': 1,
+                'next': 'path/to/next/page',
                 'results': [{
                     'key': course_run.id,
                     'title': course_run.name,

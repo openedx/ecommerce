@@ -14,10 +14,10 @@ define([
             title: gettext('Redeem'),
 
             initialize: function(options) {
-                this.collection = new OfferCollection({code: options.code});
+                this.collection = new OfferCollection();
                 this.view = new OfferView({code: options.code, collection: this.collection});
-                this.listenTo(this.collection, 'update', this.refresh);
-                this.collection.fetch();
+                this.render();
+                this.collection.fetch({remove: false, data: {code: options.code, limit: 50}});
             }
         });
     }
