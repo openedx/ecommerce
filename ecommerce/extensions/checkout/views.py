@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
@@ -58,6 +59,20 @@ class CancelCheckoutView(TemplateView):
     """ Displays a cancellation message when the customer cancels checkout on the payment processor page. """
 
     template_name = 'checkout/cancel_checkout.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        """
+        Request needs to be csrf_exempt so CyberSource can POST back to page.
+        """
+        return super(CancelCheckoutView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        """
+        Handle CyberSource's post back.
+        """
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super(CancelCheckoutView, self).get_context_data(**kwargs)

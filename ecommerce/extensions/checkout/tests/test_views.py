@@ -67,9 +67,23 @@ class CancelCheckoutViewTests(TestCase):
         self.client.login(username=self.user.username, password=self.password)
 
     @httpretty.activate
-    def test_payment_support_email_in_context(self):
-        """ Verify that the view returns a payment support email in its context. """
+    def test_get_returns_payment_support_email_in_context(self):
+        """
+        Verify that after receiving a GET response, the view returns a payment support email in its context.
+        """
         response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['payment_support_email'], self.request.site.siteconfiguration.payment_support_email
+        )
+
+    @httpretty.activate
+    def test_post_returns_payment_support_email_in_context(self):
+        """
+        Verify that after receiving a POST response, the view returns a payment support email in its context.
+        """
+        post_data = {'decision': 'CANCEL', 'reason_code': '200', 'signed_field_names': 'dummy'}
+        response = self.client.post(self.path, data=post_data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.context['payment_support_email'], self.request.site.siteconfiguration.payment_support_email
