@@ -1,0 +1,394 @@
+.basket {
+  background: #ffffff;
+  overflow: hidden;
+  border-bottom: 1px solid #979797; }
+  .basket div#messages .alert-error {
+    background-color: none; }
+  .basket div#messages .alertinner p {
+    margin: 0; }
+  .basket .container {
+    padding: 0 15px;
+    margin: 30px auto 0;
+    border: 0; }
+    .basket .container .basket-items {
+      border-bottom: 0;
+      margin: 0;
+      display: block;
+      padding-bottom: 0; }
+      .basket .container .basket-items > .row {
+        display: block; }
+        .basket .container .basket-items > .row > [class*="col"] {
+          display: inline-block;
+          float: left; }
+      .basket .container .basket-items .course_name {
+        font-size: 16px !important;
+        margin-left: 0; }
+        .basket .container .basket-items .course_name span {
+          margin-left: 5px;
+          font-size: 18px;
+          color: #acacac;
+          font-weight: normal; }
+      .basket .container .basket-items .course_description {
+        margin-left: 0; }
+      .basket .container .basket-items .label-headings {
+        padding-bottom: 15px; }
+        .basket .container .basket-items .label-headings label {
+          font-size: 16px;
+          margin-bottom: 0;
+          font-weight: normal;
+          color: #acacac; }
+        .basket .container .basket-items .label-headings [class*="col"] {
+          padding-left: 10px;
+          padding-right: 10px; }
+      .basket .container .basket-items .value-labels {
+        line-height: 34px;
+        font-size: 14px; }
+        .basket .container .basket-items .value-labels .price {
+          font-size: 14px; }
+        .basket .container .basket-items .value-labels .checkout-quantity {
+          display: block;
+          margin-bottom: 10px; }
+          .basket .container .basket-items .value-labels .checkout-quantity .quantity {
+            border: 1px solid #4a4a4a;
+            padding-left: 10px;
+            border-radius: 3px;
+            font-size: 16px; }
+          .basket .container .basket-items .value-labels .checkout-quantity button {
+            border: 1px solid #4a4a4a;
+            font-size: 14px;
+            width: 50%;
+            height: 32px;
+            padding: 3px 0;
+            text-align: center;
+            margin: 0;
+            float: right; }
+          .basket .container .basket-items .value-labels .checkout-quantity .input-group {
+            display: block; }
+            .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number {
+              width: 45%;
+              position: relative;
+              display: inline-block; }
+              .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number input {
+                width: 100%;
+                height: 32px;
+                border: 1px solid #4a4a4a;
+                border-radius: 5px;
+                position: relative;
+                z-index: 1;
+                padding-right: 35px;
+                padding-left: 5px;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background: url("../images/caret-down.png") no-repeat 90% center; }
+                .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number input::ms-expand {
+                  display: none; }
+              .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number span {
+                display: none;
+                position: absolute;
+                right: 1px;
+                width: 29px;
+                height: 15px;
+                z-index: 2;
+                cursor: pointer;
+                overflow: hidden;
+                line-height: 0; }
+                .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number span.down {
+                  bottom: 1px;
+                  background: url("../images/bottom.png") no-repeat center; }
+                .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number span.up {
+                  top: 1px;
+                  background: url("../images/top.png") no-repeat center; }
+        .basket .container .basket-items .value-labels [class*="col"] {
+          padding-left: 10px;
+          padding-right: 10px; }
+      .basket .container .basket-items .row .course_prices {
+        text-align: left;
+        margin-top: 0; }
+      .basket .container .basket-items .row .price {
+        padding: 0;
+        float: none;
+        font-weight: normal;
+        font-size: 14px; }
+        .basket .container .basket-items .row .price.actual-price {
+          text-decoration: line-through;
+          color: #979797; }
+        .basket .container .basket-items .row .price.discounted-price {
+          font-weight: bold; }
+      .basket .container .basket-items .row .course_image img {
+        margin-bottom: 15px;
+        border: 1px solid #828282;
+        max-width: 100%;
+        width: 100% !important; }
+    .basket .container.gross-total {
+      border: 0;
+      background: transparent;
+      padding: 0 30px;
+      margin: 0 auto;
+      margin-bottom: 50px; }
+      .basket .container.gross-total #basket_totals {
+        color: #1f78bd;
+        font-size: 30px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        margin-right: 30px; }
+      .basket .container.gross-total .btn-primary {
+        background: #0079bc;
+        color: #fcfcfc;
+        padding: 13px 20px;
+        font-size: 24px;
+        border: 1px solid #014b75;
+        width: 226px; }
+      .basket .container.gross-total .btn-transparent {
+        background-color: transparent;
+        color: #0079bc;
+        padding: 0;
+        margin-top: 30px;
+        font-weight: normal;
+        font-size: 20px;
+        float: none; }
+    .basket .container .checkout-button {
+      border: 1px solid #014b75;
+      background-color: #0079bc;
+      width: 100%;
+      font-size: 28px;
+      color: #fff;
+      font-weight: bold;
+      float: none;
+      padding: 15px;
+      border-radius: 5px; }
+    .basket .container .use-voucher #id_code {
+      box-shadow: none;
+      border: 1px solid #979797;
+      vertical-align: top;
+      width: calc(100% - 64px);
+      padding: 6px 10px;
+      height: 50px; }
+      .basket .container .use-voucher #id_code:focus {
+        outline: none; }
+    .basket .container .use-voucher button {
+      margin-left: -5px;
+      -webkit-border-radius: 0 2px 2px 0;
+      background-color: #337ab7;
+      color: white;
+      height: 50px; }
+      .basket .container .use-voucher button:hover {
+        border-color: #337ab7; }
+    .basket .container .use-voucher #voucher_form_link {
+      margin-bottom: 0;
+      color: #afafaf; }
+    .basket .container .coupon-applied span {
+      color: #53B7DD; }
+      .basket .container .coupon-applied span.fa {
+        margin-right: 5px;
+        color: #383838; }
+    .basket .container .coupon-applied .remove-voucher {
+      padding-left: 0;
+      border: none;
+      background: none; }
+    .basket .container .coupon-section, .basket .container .change-enrollment-section {
+      padding: 0 0 15px; }
+    .basket .container .form-group {
+      margin-bottom: 15px;
+      display: block; }
+      .basket .container .form-group .form-field.has-error input[type="text"] {
+        border: 1px solid #d9242b;
+        background-color: #f8e3e5; }
+      .basket .container .form-group .form-field.has-error .error-text {
+        margin-top: 5px;
+        color: #d9242b;
+        position: relative;
+        display: block;
+        padding-left: 18px; }
+        .basket .container .form-group .form-field.has-error .error-text:before {
+          content: "\f06a";
+          font-family: "FontAwesome";
+          position: absolute;
+          left: 0;
+          top: 0px;
+          color: #d9242b; }
+      .basket .container .form-group .error-text {
+        display: none; }
+      .basket .container .form-group .security {
+        background-image: url("../images/lock.png");
+        background-repeat: no-repeat, no-repeat;
+        background-position: calc(100% - 14px) center, calc(100% - 35px) center;
+        padding-right: 40px; }
+      .basket .container .form-group .mastercard .security {
+        background-image: url("../images/lock.png"), url("../images/mastercard-s.png"); }
+      .basket .container .form-group .visa .security {
+        background-image: url("../images/lock.png"), url("../images/visa-s.png"); }
+      .basket .container .form-group .discover .security {
+        background-image: url("../images/lock.png"), url("../images/discover-s.png"); }
+      .basket .container .form-group .american-express .security {
+        background-image: url("../images/lock.png"), url("../images/ae-s.png"); }
+    .basket .container .payment-buttons .payment-button {
+      background: none;
+      padding: 10px 10px 14px;
+      border: 1px solid #979797;
+      float: right;
+      max-width: 99px;
+      width: 100%; }
+      .basket .container .payment-buttons .payment-button img {
+        width: 100%; }
+      .basket .container .payment-buttons .payment-button:hover, .basket .container .payment-buttons .payment-button:focus {
+        background-color: transparent;
+        border-color: #0079bc;
+        opacity: 1; }
+  .basket button:hover {
+    opacity: 0.9; }
+  .basket .payment-details {
+    padding: 0 15px; }
+    .basket .payment-details h4 {
+      margin-bottom: 5px;
+      padding-top: 10px; }
+    .basket .payment-details label {
+      color: #6a6a6a;
+      font-weight: normal;
+      margin-bottom: 10px;
+      display: block; }
+    .basket .payment-details form .group-label {
+      color: #337ab7;
+      text-decoration: none;
+      text-transform: uppercase;
+      font-weight: bold; }
+    .basket .payment-details form .form-field {
+      margin-bottom: 10px; }
+      .basket .payment-details form .form-field label {
+        margin-bottom: 0; }
+    .basket .payment-details form .btn-group {
+      display: block;
+      overflow: hidden;
+      border: 1px solid #979797; }
+      .basket .payment-details form .btn-group button {
+        border: 0;
+        padding: 10px;
+        background-color: #fff;
+        position: relative;
+        border-radius: 0;
+        margin-left: 0;
+        width: auto;
+        box-shadow: 0px 5px 0 transparent; }
+        .basket .payment-details form .btn-group button:focus, .basket .payment-details form .btn-group button:hover {
+          background-color: #fff;
+          box-shadow: 0px 5px 0 #0079bc;
+          outline: none; }
+        .basket .payment-details form .btn-group button img {
+          margin: 4px 0;
+          height: 20px; }
+        .basket .payment-details form .btn-group button:after {
+          content: "";
+          position: absolute;
+          right: 0;
+          height: 100%;
+          top: 0;
+          background-color: #979797;
+          width: 1px; }
+        .basket .payment-details form .btn-group button.more-options {
+          width: auto;
+          color: #6a6a6a;
+          padding: 12px;
+          width: 27%; }
+          .basket .payment-details form .btn-group button.more-options:hover {
+            color: #2e2f33; }
+          .basket .payment-details form .btn-group button.more-options:focus, .basket .payment-details form .btn-group button.more-options:hover {
+            box-shadow: 0px 5px 0px transparent; }
+          .basket .payment-details form .btn-group button.more-options:after {
+            display: none; }
+      .basket .payment-details form .btn-group .selected {
+        border-bottom: 3px solid #337ab7; }
+    .basket .payment-details .form-control {
+      height: 42px;
+      border-radius: 0;
+      border: 1px solid #979797;
+      margin-bottom: 10px; }
+    .basket .payment-details select {
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      appearance: none;
+      background: url("../images/caret-down.png") no-repeat calc(100% - 10px) center;
+      padding-right: 30px;
+      font-size: 16px; }
+      .basket .payment-details select::-ms-expand {
+        display: none; }
+
+.footer-main {
+  border-top: 0; }
+
+.border-left-md {
+  border-left: 0; }
+
+.pb0 {
+  padding-bottom: 0 !important; }
+
+@media (min-width: 768px) {
+  .basket .container .basket-items .row .course_name, .basket .container .basket-items .row .course_description {
+    margin-left: -15px; }
+  .basket .container .basket-items .value-labels {
+    font-size: 18px; }
+    .basket .container .basket-items .value-labels .checkout-quantity {
+      font-size: 18px; }
+      .basket .container .basket-items .value-labels .checkout-quantity button {
+        font-size: 18px; }
+  .basket .container .basket-items .row .price {
+    font-size: 18px; }
+  .basket .payment-details .btn-group .btn.more-options {
+    line-height: 26px; }
+  .basket .payment-details .btn-paypal {
+    padding: 12px 10px 14px; } }
+
+@media (min-width: 992px) {
+  .basket {
+    border-bottom: none;
+    background: #f3f3f3; }
+    .basket .container {
+      padding: 30px 15px;
+      margin: 35px auto 0;
+      border: 1px solid #979797; }
+      .basket .container .basket-items {
+        display: table;
+        width: 100%;
+        padding-bottom: 20px; }
+        .basket .container .basket-items > .row {
+          display: table-row; }
+          .basket .container .basket-items > .row > [class*="col"] {
+            display: table-cell;
+            float: none; }
+        .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number select {
+          background: none; }
+        .basket .container .basket-items .value-labels .checkout-quantity .input-group .custom-number span {
+          display: block; }
+        .basket .container .basket-items .course_name span {
+          margin-left: 0;
+          display: block; }
+        .basket .container .basket-items .use-voucher #id_code {
+          height: 33px;
+          width: 70%; }
+        .basket .container .basket-items .use-voucher #voucher_form_link {
+          margin-bottom: 5px;
+          margin-top: 10px; }
+        .basket .container .basket-items .use-voucher button {
+          height: 33px; }
+      .basket .container.gross-total {
+        padding: 0; }
+        .basket .container.gross-total .checkout-button {
+          width: auto;
+          float: right;
+          padding: 10px 70px;
+          font-weight: normal;
+          font-size: 22px; }
+        .basket .container.gross-total .btn-transparent {
+          margin-top: 0;
+          padding: 14px 30px;
+          float: right; }
+      .basket .container .coupon-section, .basket .container .change-enrollment-section {
+        padding: 0 15px; }
+    .basket .payment-details {
+      padding: 0 30px; }
+      .basket .payment-details .form-control {
+        margin-bottom: 0; }
+      .basket .payment-details .btn-group .input-group label img {
+        margin: 4px 2px;
+        height: 18px; }
+  .border-left-md {
+    border-left: 1px solid #979797; } }

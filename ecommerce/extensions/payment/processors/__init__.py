@@ -1,11 +1,8 @@
 import abc
+import importlib
 
-from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
-from threadlocals.threadlocals import get_current_request
-import waffle
-
-from ecommerce.core.exceptions import MissingRequestError
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -14,7 +11,14 @@ class BasePaymentProcessor(object):  # pragma: no cover
     """Base payment processor class."""
     __metaclass__ = abc.ABCMeta
 
+    CHECKOUT_BUTTON_LABEL = _('Checkout')
+    CONFIGURATION_MODEL = None
     NAME = None
+    URLS_MODULE = None
+
+    def __init__(self, site=None):
+        self._configuration = None
+        self.site = site
 
     @abc.abstractmethod
     def get_transaction_parameters(self, basket, request=None):
@@ -62,11 +66,24 @@ class BasePaymentProcessor(object):  # pragma: no cover
             KeyError: If no settings found for this payment processor
             MissingRequestError: if no `request` is available
         """
-        request = get_current_request()
-        if request:
-            partner_short_code = request.site.siteconfiguration.partner.short_code
-            return settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.NAME.lower()]
-        raise MissingRequestError
+        if self._configuration is not None:
+            return self._configuration
+
+        if self.CONFIGURATION_MODEL:
+            module_name, class_name = self.CONFIGURATION_MODEL.rsplit('.', 1)
+            m = importlib.import_module(module_name)
+            Configuration = getattr(m, class_name)
+            try:
+                self._configuration = Configuration.objects.get(site=self.site, active=True)
+            except Configuration.DoesNotExist:
+                pass
+
+        return self._configuration
+
+    @property
+    def is_enabled(self):
+        configuration = self.configuration
+        return configuration and configuration.active
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """
@@ -96,10 +113,3 @@ class BasePaymentProcessor(object):  # pragma: no cover
             currency (string): currency of the amount to be credited
         """
         raise NotImplementedError
-
-    @classmethod
-    def is_enabled(cls):
-        """
-        Returns True if this payment processor is enabled, and False otherwise.
-        """
-        return waffle.switch_is_active(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + cls.NAME)

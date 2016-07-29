@@ -37,7 +37,7 @@ def find_orders_associated_with_course(user, course_id):
     return list(orders)
 
 
-def create_refunds(orders, course_id):
+def create_refunds(site, orders, course_id):
     """
     Creates refunds for the given list of orders.
 
@@ -56,7 +56,7 @@ def create_refunds(orders, course_id):
                                    product__attribute_values__attribute__code='course_key',
                                    product__attribute_values__value_text=course_id)
 
-        refund = Refund.create_with_lines(order, lines)
+        refund = Refund.create_with_lines(site, order, lines)
         if refund is not None:
             refunds.append(refund)
 

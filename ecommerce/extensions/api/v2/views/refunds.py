@@ -60,7 +60,7 @@ class RefundCreateView(generics.CreateAPIView):
         # We can only create refunds if the user has orders.
         if user.orders.exists():
             orders = find_orders_associated_with_course(user, course_id)
-            refunds = create_refunds(orders, course_id)
+            refunds = create_refunds(request.site, orders, course_id)
 
         # Return HTTP 201 if we created refunds.
         if refunds:
@@ -99,7 +99,7 @@ class RefundProcessView(generics.UpdateAPIView):
 
         if action in (APPROVE, APPROVE_PAYMENT_ONLY):
             revoke_fulfillment = action == APPROVE
-            result = refund.approve(revoke_fulfillment=revoke_fulfillment)
+            result = refund.approve(request.site, revoke_fulfillment=revoke_fulfillment)
         elif action == DENY:
             result = refund.deny()
 

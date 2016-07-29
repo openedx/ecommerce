@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 
-from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.payment.processors.paypal import Paypal
+from ecommerce.payment_processors.cybersource.processor import Cybersource
+from ecommerce.payment_processors.paypal.processor import Paypal
 
 
 def enable_payment_processors(apps, schema_editor):

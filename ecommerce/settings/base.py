@@ -171,10 +171,8 @@ TEMPLATES = [
         ),
         'OPTIONS': {
             'loaders': [
-                # This is a prioritized list of template loaders.
-                # A template found using a lower-indexed loader, will be used
-                # before a template found using a higher-indexed loader.
-                'ecommerce.extensions.payment.processors.template_loaders.PaymentProcessorTemplateLoader',
+                # ThemeTemplateLoader should come before any other loader to give theme templates
+                # priority over system templates
                 'ecommerce.theming.template_loaders.ThemeTemplateLoader',
                 'django.template.loaders.app_directories.Loader',
             ],
@@ -265,10 +263,12 @@ DJANGO_APPS = [
 
 # Apps specific to this project go here.
 LOCAL_APPS = [
-    'ecommerce.adyen',
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',
+    'ecommerce.payment_processors.adyen.apps.AdyenConfig',
+    'ecommerce.payment_processors.cybersource.apps.CybersourceConfig',
+    'ecommerce.payment_processors.paypal.apps.PaypalConfig',
     'ecommerce.referrals',
 
     # Theming app for customizing visual and behavioral attributes of a site
@@ -507,6 +507,12 @@ THEME_SCSS = 'sass/themes/default.scss'
 # Link to the support site
 SUPPORT_URL = 'SET-ME-PLEASE'
 
+# Path to the cancel page
+CANCEL_PAGE_PATH = '/commerce/checkout/cancel/'
+
+# Path to the error page
+ERROR_PAGE_PATH = '/commerce/checkout/error/'
+
 # Path to the receipt page
 RECEIPT_PAGE_PATH = '/commerce/checkout/receipt/'
 
@@ -555,3 +561,8 @@ ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(w
 
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
+
+TWO_PAGE_CHECKOUT_TEMPLATE = 'checkout/_two_page.html'
+CHECKOUT_TEMPLATES = (
+    (TWO_PAGE_CHECKOUT_TEMPLATE, 'Two Page'),
+)

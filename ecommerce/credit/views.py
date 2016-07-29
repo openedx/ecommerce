@@ -1,10 +1,8 @@
 from __future__ import unicode_literals
 
 import logging
-from collections import OrderedDict
 
 from dateutil.parser import parse
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -18,7 +16,6 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.extensions.payment.helpers import get_processor_class
 
 logger = logging.getLogger(__name__)
 
@@ -79,19 +76,7 @@ class Checkout(TemplateView):
             })
             return context
 
-        # Make button text for each processor which will be shown to user.
-        processors_dict = OrderedDict()
-        for path in settings.PAYMENT_PROCESSORS:
-            processor_class = get_processor_class(path)
-            if not processor_class.is_enabled():
-                continue
-            processor = processor_class.NAME.lower()
-            if processor == 'cybersource':
-                processors_dict[processor] = 'Checkout'
-            elif processor == 'paypal':
-                processors_dict[processor] = 'Checkout with PayPal'
-            else:
-                processors_dict[processor] = 'Checkout with {}'.format(processor)
+        processors_dict = self.request.site.siteconfiguration.get_payment_processors()
         if len(processors_dict) == 0:
             context.update({
                 'error': _(

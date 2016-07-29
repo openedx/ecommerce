@@ -1,11 +1,14 @@
 require([
         'jquery',
-        'pages/basket_page'
+        'views/basket_view',
+        'views/checkout_button_view'
     ],
     function ($,
-              BasketPage) {
+              BasketView,
+              CheckoutButtonView) {
         'use strict';
 
-        $(document).ready(BasketPage.onReady);
+        new BasketView({el: $('.basket')});
+        new CheckoutButtonView({el: $('.payment-buttons')})
     }
 );

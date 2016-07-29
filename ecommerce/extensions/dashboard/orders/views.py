@@ -61,7 +61,7 @@ class OrderDetailView(CoreOrderDetailView):
     line_actions = ('change_line_statuses', 'create_shipping_event', 'create_payment_event', 'create_refund')
 
     def create_refund(self, request, order, lines, _quantities):  # pylint: disable=unused-argument
-        refund = Refund.create_with_lines(order, lines)
+        refund = Refund.create_with_lines(request.site, order, lines)
 
         if refund:
             data = {

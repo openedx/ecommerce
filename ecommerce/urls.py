@@ -46,7 +46,6 @@ AUTH_URLS = [
 
 urlpatterns = AUTH_URLS + [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^adyen/', include('ecommerce.adyen.urls', namespace='adyen')),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
     url(r'^api-docs/', include('rest_framework_swagger.urls')),

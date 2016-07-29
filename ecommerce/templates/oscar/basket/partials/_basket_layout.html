@@ -1,0 +1,36 @@
+{% load i18n %}
+
+<div class="row">
+    <div class="col-xs-12">
+        {% include 'oscar/basket/partials/_basket_content.html' %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="pull-right payment-buttons checkout" data-basket-id="{{ basket.id }}">
+            {% if free_basket %}
+            <a  href="{% url 'checkout:free-checkout' %}"
+                data-track-type="click"
+                data-track-event="edx.bi.ecommerce.basket.free_checkout"
+                data-track-category="checkout"
+                data-course-id="{{ course.id }}"
+                class="btn btn-success checkout-button">
+                {% trans "Place Order" %}
+            </a>
+            {% else %}
+                {% for processor in payment_processors %}
+                    <button data-track-type="click"
+                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                            data-track-category="checkout"
+                            data-processor-name="{{ processor.NAME }}"
+                            data-course-id="{{ course.id }}"
+                            class="btn payment-button"
+                            value="{{ processor.NAME|lower }}"
+                            id="{{ processor.NAME|lower }}">
+                        {{ processor.CHECKOUT_BUTTON_LABEL }}
+                    </button>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>

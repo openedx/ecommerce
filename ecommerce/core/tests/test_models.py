@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 
-from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
+from ecommerce.core.models import BusinessClient, User, SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
@@ -265,46 +265,3 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], COURSE_CATALOG_API_URL)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
-
-
-class HelperMethodTests(TestCase):
-    """ Tests helper methods in models.py """
-
-    def setUp(self):
-        """ setUp test """
-        self.site_config_objects = mock.Mock()
-
-        patcher = mock.patch('ecommerce.core.models.SiteConfiguration.objects', self.site_config_objects)
-        patcher.start()
-
-        self.addCleanup(patcher.stop)
-
-    @override_settings(PAYMENT_PROCESSORS=[
-        'ecommerce.extensions.payment.tests.processors.DummyProcessor',
-        'ecommerce.extensions.payment.tests.processors.AnotherDummyProcessor',
-    ])
-    def test_validate_configuration_passes(self):
-        """
-        Test that site configurations with available payment processor(s) pass validation
-        """
-        config1 = _make_site_config(DummyProcessor.NAME)
-        config2 = _make_site_config(DummyProcessor.NAME + ',' + AnotherDummyProcessor.NAME)
-
-        self.site_config_objects.all.return_value = [config1, config2]
-
-        validate_configuration()  # checks that no exception is thrown
-
-    @override_settings(PAYMENT_PROCESSORS=[
-        'ecommerce.extensions.payment.tests.processors.DummyProcessor',
-    ])
-    def test_validate_configuration_fails(self):
-        """
-        Test that site configurations with unknown payment processor(s) fail validation
-        """
-        config1 = _make_site_config(DummyProcessor.NAME)
-        config2 = _make_site_config(DummyProcessor.NAME + ',' + AnotherDummyProcessor.NAME)
-
-        self.site_config_objects.all.return_value = [config1, config2]
-
-        with self.assertRaises(ValidationError):
-            validate_configuration()

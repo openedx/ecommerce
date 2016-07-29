@@ -1,0 +1,146 @@
+{% load currency_filters %}
+{% load i18n %}
+{% load purchase_info_tags %}
+{% load widget_tweaks %}
+
+<div class="basket">
+    <div class="content-inner">
+        {% block basket_form_main %}
+            <form action="." method="post" class="basket_summary" id="basket_formset">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                {% for form, line_data in formset_lines_data %}
+                    {% purchase_info_for_line request line_data.line as session %}
+                    <div class="basket-items">
+                        {% if line_data.seat_type %}
+                        <p class="certificate_type">
+                            {% trans "Earn a valuable certificate to showcase the skills you learn in" %}
+                        </p>
+                        {% endif %}
+                        <div class="row">
+                            <div class="col-md-2 col-sm-12 course_image">
+                                {{ form.id }}
+                                <img class="thumbnail" src="{{ line_data.image_url }}" alt="{{ line_data.course_name }}"/>
+                            </div>
+                            <div class="col-md-5 col-sm-12">
+                                <p class="course_name">{{ line_data.course_name }} - {{ line_data.course_key.org }} ({{ line_data.course_key.run }})</p>
+                                <p class="course_description">{{ line_data.course_short_description }}</p>
+                            </div>
+                            {% if line_data.enrollment_code %}
+                                <div class="col-md-1 col-xs-12">
+                                    <label class="course-price-label text-muted">{% trans 'Item Price' %}</label>
+                                    <span>{{ line_data.line.price_incl_tax|currency:line_data.line.price_currency }}</span>
+                                </div>
+                                <div class="col-md-3 col-xs-12 form-inline">
+                                    <label class="course-price-label text-muted">{% trans 'Quantity' %}</label>
+                                    <div class="checkout-quantity form-group">
+                                        <div class="input-group spinner  {% if form.errors %}error{% endif %}">
+                                            {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
+                                            <div class="input-group-btn-vertical">
+                                                <button class="btn btn-primary" type="button"><i class="fa fa-caret-up"></i></button>
+                                                <button class="btn btn-primary" type="button"><i class="fa fa-caret-down"></i></button>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary update-button" type="submit" data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="col-md-{% if line_data.enrollment_code %}1{% else %}5{% endif %} col-xs-12 course_prices pull-right">
+                                {% if line_data.enrollment_code %}
+                                    <label class="course-price-label text-muted">{% trans 'Price' %}</label>
+                                {% endif %}
+
+                                {% if line_data.line.has_discount %}
+                                    <div class="discount">
+                                        <div class="benefit">
+                                            {% blocktrans with benefit_value=line_data.benefit_value %}
+                                                {{benefit_value}} off
+                                            {% endblocktrans %}
+                                        </div>
+                                        <div class="old-price">
+                                            {{ line_data.line.line_price_incl_tax|currency:line_data.line.price_currency }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="price {% if line_data.line.has_discount %}discounted{% endif %}">
+                                    {{ line_data.line.line_price_incl_tax_incl_discounts|currency:line_data.line.price_currency }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </form>
+        {% endblock %}
+
+        <div class="total">
+            <div class="row">
+            {% if not is_bulk_purchase %}
+                {% block vouchers %}
+                    {% if basket.contains_a_voucher %}
+                        <div class="vouchers col-sm-6">
+                            {% for voucher in basket.vouchers.all %}
+                                <p class="voucher">
+                                {% blocktrans with voucher_code=voucher.code %}
+                                    Coupon code {{voucher_code}} applied
+                                {% endblocktrans %}
+                                <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button class="remove-voucher" type="submit"><i class="fa fa-times"></i></button>
+                                </form>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
+                        {% if voucher_form %}
+                            <div class="use-voucher col-sm-6">
+                                <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a coupon code" %}</a></p>
+                                <div id="voucher_form_container">
+                                    <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="code">
+                                            <input id="id_code" name="code" type="text" placeholder="{% trans 'Enter a coupon code' %}">
+                                            <button type="submit"
+                                                    class="btn btn-default"
+                                                    data-loading-text="{% trans 'Applying...' %}"
+                                                    data-track-type="click"
+                                                    data-track-event="edx.bi.ecommerce.basket.voucher_applied"
+                                                    data-track-category="voucher-application"
+                                                    data-voucher-code="{{voucher_code}}">
+                                                {% trans "Apply" %}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endblock vouchers %}
+            {% endif %}
+
+            {% block baskettotals %}
+                <div id="basket_totals" class="col-xs-3">
+                    {% block order_total %}
+                        {% trans "Total:" %}
+                        {{ order_total.incl_tax|currency:basket.currency }}
+                    {% endblock %}
+                </div>
+            {% endblock baskettotals %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                {# Switch Basket view in between single and bulk purchase items #}
+                {% if partner_sku %}
+                    <div class="pull-left basket-switch-link">
+                        <a href="/basket/single-item/?sku={{ partner_sku }}" class="btn btn-link">
+                            {{ switch_link_text }}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

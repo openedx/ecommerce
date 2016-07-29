@@ -12,11 +12,11 @@ from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
 from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
 from ecommerce.core.tests.patched_httpretty import httpretty
+from ecommerce.payment_processors.cybersource.processor import Cybersource
+from ecommerce.payment_processors.paypal.processor import Paypal
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')

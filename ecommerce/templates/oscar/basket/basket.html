@@ -1,4 +1,5 @@
 {% extends 'edx/base.html' %}
+{% load core_extras %}
 {% load i18n %}
 {% load staticfiles %}
 
@@ -10,16 +11,57 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
-
-{% block javascript %}
-    <script src="{% static 'js/apps/basket_app.js' %}"></script>
-{% endblock %}
-
 {% block content %}
-    <div class="basket">
-        <div class="container">
-            {# Use a partial template so that AJAX can be used to re-render basket #}
-            {% include 'basket/partials/basket_content.html' %}
-        </div>
+    <div class="basket-page">
+        {% if basket.is_empty %}
+            {% block emptybasket %}
+            <div class="depth depth-2 message-error">
+                <h3>{% trans "Your purchase could not be completed" %}</h3>
+                {% captureas dashboard_link_start %}
+                  <a href="{{ homepage_url }}">
+                {% endcaptureas %}
+
+                {% captureas support_link_start %}
+                  <a href="{{ support_url }}">
+                {% endcaptureas %}
+
+                {% blocktrans with link_end="</a>" %}
+                  You have not been charged. Return to your {{ dashboard_link_start }}dashboard{{ link_end }} to try again, or {{ support_link_start }}contact {{ platform_name }} Support{{ link_end }}.
+                {% endblocktrans %}
+            </div>
+            {% endblock %}
+        {% else %}
+            <div class="container">
+                {% if not is_bulk_purchase %}
+                    {% include 'partials/alert_messages.html' %}
+                {% endif %}
+                {% block basket_layout %}
+                    {% include 'oscar/basket/partials/_basket_layout.html' %}
+                {% endblock basket_layout %}
+            </div>
+            <div class="container">
+                <div class="row verification-note">
+                    <div class="col-sm-12">
+                        <span><i class="fa fa-exclamation-circle"></i></span>
+                        {# Translators: <b></b> tags will bold the text within. Keep the tags and translate the text within. #}
+                        {% if is_verification_required %}
+                            {% trans "<b>Note:</b> To earn a verified certificate, you must verify your identity with a <b>webcam</b> and a <b>government-issued photo ID</b>. " %}
+                        {% else %}
+                            {% trans "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with PayPal." %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row help">
+                    <div class="col-sm-12">
+                        <p><b>{% trans "Have questions?" %}</b></p>
+                        <a href="{{ support_url }}">{% trans "Please read our FAQs to view common questions about our certificates." %}</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock content %}
+
+{% block javascript %}
+<script src="{% static 'js/apps/basket_app.js' %}"></script>
+{% endblock javascript %}

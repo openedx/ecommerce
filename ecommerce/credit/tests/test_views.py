@@ -11,12 +11,10 @@ import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
-from waffle.models import Switch
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.tests.mixins import JwtMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -86,14 +84,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
             body=json.dumps(body)
         )
 
-    def _enable_payment_providers(self):
-        for path in settings.PAYMENT_PROCESSORS:
-            processor = get_processor_class(path)
-            Switch.objects.get_or_create(
-                name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor.NAME,
-                defaults={'active': True}
-            )
-
     def _assert_error_without_deadline(self):
         """ Verify that response has eligibility error message if no eligibility
         is available.
@@ -123,8 +113,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
             'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
         )
 
-        self._enable_payment_providers()
-
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset({'course': self.course}, response.context)
@@ -132,7 +120,7 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         # Verify that the payment processors are returned
         self.assertEqual(
             sorted(response.context['payment_processors'].keys()),
-            sorted([get_processor_class(path).NAME.lower() for path in settings.PAYMENT_PROCESSORS])
+            sorted([name for name, __ in self.site.siteconfiguration.get_payment_processors()])
         )
 
         self.assertContains(
@@ -225,52 +213,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self._mock_providers_api(body=self.provider_data)
 
         self._assert_success_checkout_page()
-
-    @ddt.data(
-        (settings.PAYMENT_PROCESSORS, {
-            'payment_processors': {},
-            'error': u'All payment options are currently unavailable. Try the transaction again in a few minutes.'
-        }),
-        (('ecommerce.extensions.payment.processors.paypal.Paypal',), {
-            'payment_processors': {
-                'adyen': 'Checkout with adyen',
-                'cybersource': 'Checkout',
-            }
-        }),
-        ((), {
-            'payment_processors': {
-                'adyen': 'Checkout with adyen',
-                'cybersource': 'Checkout',
-                'paypal': 'Checkout with PayPal'
-            }
-        })
-    )
-    @ddt.unpack
-    @httpretty.activate
-    def test_disabled_providers(self, disabled_processors, expected_context):
-        """ Verify that payment processors can be disabled with their Waffle
-        switches, and that an error is shown if none are available.
-        """
-        self._enable_payment_providers()
-
-        for path in disabled_processors:
-            processor_class = get_processor_class(path)
-            switch, __ = Switch.objects.get_or_create(
-                name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor_class.NAME
-            )
-            switch.active = False
-            switch.save()
-
-        self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
-        )
-
-        self._mock_eligibility_api(body=self.eligibilities)
-        self._mock_providers_api(body=self.provider_data)
-
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(expected_context, response.context)
 
     @httpretty.activate
     def test_seat_unavailable(self):

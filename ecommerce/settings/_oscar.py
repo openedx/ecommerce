@@ -104,9 +104,9 @@ CURRENCY_CODES = {
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSORS = (
-    'ecommerce.adyen.processor.Adyen',
-    'ecommerce.extensions.payment.processors.cybersource.Cybersource',
-    'ecommerce.extensions.payment.processors.paypal.Paypal',
+    'ecommerce.payment_processors.adyen.processor.Adyen',
+    'ecommerce.payment_processors.cybersource.processor.Cybersource',
+    'ecommerce.payment_processors.paypal.processor.Paypal',
 )
 
 PAYMENT_PROCESSOR_RECEIPT_PATH = '/commerce/checkout/receipt/'

@@ -1,9 +1,0 @@
-{% load i18n %}
-{% load currency_filters %}
-
-<div id="basket_totals" class="col-xs-3">
-    {% block order_total %}
-        {% trans "Total:" %}
-        {{ order_total.incl_tax|currency:basket.currency }}
-    {% endblock %}
-</div>

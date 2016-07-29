@@ -11,7 +11,6 @@ from simple_history.models import HistoricalRecords
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
-from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
@@ -86,7 +85,7 @@ class Refund(StatusMixin, TimeStampedModel):
         return list(getattr(settings, cls.pipeline_setting).keys())
 
     @classmethod
-    def create_with_lines(cls, order, lines):
+    def create_with_lines(cls, site, order, lines):
         """Given an order and order lines, creates a Refund with corresponding RefundLines.
 
         Only creates RefundLines for unrefunded order lines. Refunds corresponding to a total
@@ -131,7 +130,7 @@ class Refund(StatusMixin, TimeStampedModel):
                 )
 
             if total_credit_excl_tax == 0:
-                refund.approve()
+                refund.approve(site)
 
             return refund
 
@@ -153,12 +152,12 @@ class Refund(StatusMixin, TimeStampedModel):
         """Returns a boolean indicating if this Refund can be denied."""
         return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
-    def _issue_credit(self, revoke_fulfillment):
+    def _issue_credit(self, site, revoke_fulfillment):
         """Issue a credit to the purchaser via the payment processor used for the original order."""
         try:
             # TODO Update this if we ever support multiple payment sources for a single order.
             source = self.order.sources.first()
-            processor = get_processor_class_by_name(source.source_type.name)()
+            processor = site.siteconfiguration.get_payment_processor_by_name(source.source_type.name)
             is_complete = processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
 
             audit_log_name = 'credit_issued'
@@ -192,13 +191,13 @@ class Refund(StatusMixin, TimeStampedModel):
             logger.error('Unable to revoke fulfillment of all lines of Refund [%d].', self.id)
             self.set_status(REFUND.REVOCATION_ERROR)
 
-    def approve(self, revoke_fulfillment=True):
+    def approve(self, site, revoke_fulfillment=True):
         if not self.can_approve:
             logger.debug('Refund [%d] cannot be approved.', self.id)
             return False
         elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
             try:
-                self._issue_credit(revoke_fulfillment)
+                self._issue_credit(site, revoke_fulfillment)
                 if self.status == REFUND.OPEN:
                     self.set_status(REFUND.PAYMENT_REFUNDED)
             except PaymentError:
