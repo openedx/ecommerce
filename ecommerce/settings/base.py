@@ -270,6 +270,9 @@ LOCAL_APPS = [
 
     # Theming app for customizing visual and behavioral attributes of a site
     'ecommerce.theming',
+
+    # Sailthru email marketing integration
+    'ecommerce.sailthru',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -483,7 +486,8 @@ CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
 )
 
-CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'}}
+CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'},
+                 'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'}}
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
 # See http://celery.readthedocs.org/en/latest/configuration.html#celeryd-hijack-root-logger.
