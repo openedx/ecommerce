@@ -32,16 +32,17 @@ define([
             urlRoot: '/api/v2/coupons/',
 
             defaults: {
-                id: null,
-                quantity: 1,
-                stock_record_ids: [],
+                category: 'Affiliate Promotion',
                 code: '',
-                price: 0,
-                total_value: 0,
-                max_uses: 1,
-                seats: [],
                 course_seats: [],
-                course_seat_types: []
+                course_seat_types: [],
+                id: null,
+                max_uses: 1,
+                price: 0,
+                quantity: 1,
+                seats: [],
+                stock_record_ids: [],
+                total_value: 0,
             },
 
             validation: {
@@ -140,7 +141,6 @@ define([
             },
 
             initialize: function () {
-                this.on('change:categories', this.updateCategory, this);
                 this.on('change:voucher_type', this.changeVoucherType, this);
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
@@ -177,12 +177,6 @@ define([
             getCourseID: function(seat_data) {
                 var course_id = _.findWhere(seat_data, {'name': 'course_key'});
                 return course_id ? course_id.value : '';
-            },
-
-            updateCategory: function() {
-                var categoryID = this.get('categories')[0].id;
-                this.set('category', categoryID);
-                this.set('category_ids', [categoryID]);
             },
 
             updateSeatData: function () {
@@ -225,8 +219,8 @@ define([
                 });
 
                 if (!options.patch){
-                    this.set('start_date', moment.utc(this.get('start_date')));
-                    this.set('end_date', moment.utc(this.get('end_date')));
+                    this.set('start_datetime', moment.utc(this.get('start_date')));
+                    this.set('end_datetime', moment.utc(this.get('end_date')));
 
                     if (this.get('coupon_type') === 'Enrollment code') {
                         this.set('benefit_type', 'Percentage');
@@ -236,11 +230,17 @@ define([
                     options.data = JSON.stringify(this.toJSON());
                 } else {
                     if (_.has(attributes, 'start_date')) {
-                        attributes.start_date = moment.utc(attributes.start_date);
+                        attributes.start_datetime = moment.utc(attributes.start_date);
+                        delete attributes.start_date;
                     }
 
                     if (_.has(attributes, 'end_date')) {
-                        attributes.end_date = moment.utc(attributes.end_date);
+                        attributes.end_datetime = moment.utc(attributes.end_date);
+                        delete attributes.end_date;
+                    }
+
+                    if (_.has(attributes, 'title')) {
+                        attributes.name = attributes.title;
                     }
                 }
 

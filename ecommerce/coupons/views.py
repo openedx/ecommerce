@@ -18,7 +18,6 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.api import exceptions
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 
@@ -181,7 +180,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})
 
         basket = prepare_basket(request, product, voucher)
-        if basket.total_excl_tax == AC.FREE:
+        if basket.total_excl_tax == 0:
             self.place_free_order(basket)
         else:
             return HttpResponseRedirect(reverse('basket:summary'))

@@ -12,7 +12,6 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.utils import (
@@ -38,7 +37,7 @@ VOUCHER_CODE_LENGTH = 1
 
 @httpretty.activate
 @mock_course_catalog_api_client
-class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class UtilTests(CouponMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
@@ -58,14 +57,12 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.seat_price = self.stock_record.price_excl_tax
         self.catalog.stock_records.add(self.stock_record)
 
-        self.coupon = self.create_coupon(
+        self.create_coupon(
             title='Tešt product',
             catalog=self.catalog,
             note='Tešt note',
-            quantity=1,
             max_uses=1
         )
-        self.coupon.history.all().update(history_user=self.user)
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
     def create_benefits(self):
@@ -121,7 +118,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             course_seat_types='verified'
     ):
         self.mock_dynamic_catalog_course_runs_api()
-        return self.create_coupon(
+        self.create_coupon(
             title=coupon_title,
             quantity=quantity,
             catalog_query=catalog_query,
@@ -397,9 +394,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         """ Verify empty report fields for query coupons. """
         catalog_query = 'course:*'
         self.mock_dynamic_catalog_course_runs_api()
-        query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
-        query_coupon.history.all().update(history_user=self.user)
-        field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
+        self.create_catalog_coupon(catalog_query=catalog_query)
+        field_names, rows = generate_coupon_report([self.coupon.attr.coupon_vouchers])
 
         empty_fields = (
             'Coupon Type',
@@ -480,15 +476,14 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_single_use_redemption_count(self):
         """Verify redemption count does not increment for other, unused, single-use vouchers."""
-        coupon = self.create_coupon(
+        self.create_coupon(
             title='Test single use',
             catalog=self.catalog,
             quantity=2
         )
-        coupon.history.all().update(history_user=self.user)
-        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        vouchers = self.coupon.attr.coupon_vouchers.vouchers.all()
         self.use_voucher('TEST', vouchers[0], self.user)
-        __, rows = generate_coupon_report([coupon.attr.coupon_vouchers])
+        __, rows = generate_coupon_report([self.coupon.attr.coupon_vouchers])
 
         # rows[0] - This row is different from other rows
         # rows[1] - first voucher header row
@@ -504,12 +499,11 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         catalog_query = '*:*'
         self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=self.course)
         self.mock_dynamic_catalog_contains_api(course_run_ids=[self.verified_seat.course_id], query=catalog_query)
-        query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
-        query_coupon.history.all().update(history_user=self.user)
-        voucher = query_coupon.attr.coupon_vouchers.vouchers.first()
+        self.create_catalog_coupon(catalog_query=catalog_query)
+        voucher = self.coupon.attr.coupon_vouchers.vouchers.first()
         voucher.offers.first().condition.range.add_product(self.verified_seat)
         self.use_voucher('TESTORDER4', voucher, self.user)
-        field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
+        field_names, rows = generate_coupon_report([self.coupon.attr.coupon_vouchers])
 
         self.assertIn('Redeemed For Course ID', field_names)
         self.assertIn('Redeemed By Username', field_names)

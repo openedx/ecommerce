@@ -1,17 +1,24 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import datetime
 import json
 
 import httpretty
+import pytz
 from django.conf import settings
 from django.core.cache import cache
 from django.test import RequestFactory
+from django.utils.timezone import now
 from oscar.test import factories
 
-from ecommerce.core.models import BusinessClient
-from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Applicator
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.utils import create_coupon_product
+from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.invoice.models import Invoice
+from ecommerce.tests.factories import BusinessClientFactory, CatalogFactory, PartnerFactory
+from ecommerce.tests.mixins import ProductClass, Benefit, Voucher, Applicator
 
 
 class CourseCatalogMockMixin(object):
@@ -71,17 +78,49 @@ class CourseCatalogMockMixin(object):
         )
 
 
-class CouponMixin(object):
+class CouponMixin(CourseCatalogTestMixin):
     """ Mixin for preparing data for coupons and creating coupons. """
 
     REDEMPTION_URL = "/coupons/offer/?code={}"
 
     def setUp(self):
         super(CouponMixin, self).setUp()
-        self.category = factories.CategoryFactory()
-
         # Force the creation of a coupon ProductClass
         self.coupon_product_class  # pylint: disable=pointless-statement
+        self.category = factories.CategoryFactory()
+
+        self.create_and_login_user()
+        self.course, self.seat = self.create_course_and_seat(
+            id_verification=True,
+            partner=self.partner
+        )
+
+        self.coupon_data = {
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100,
+            'catalog_query': None,
+            'category': self.category.name,
+            'client': 'Člient',
+            'code': '',
+            'course_seat_types': [],
+            'end_datetime': '2020-1-1',
+            'max_uses': None,
+            'note': None,
+            'price': 100,
+            'quantity': 2,
+            'start_datetime': '2015-1-1',
+            'stock_record_ids': [self.seat.stockrecords.first().id],
+            'title': 'Tešt Čoupon',
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+        }
+
+        self.invoice_data = {
+            'invoice_discount_type': None,
+            'invoice_discount_value': 77,
+            'invoice_type': Invoice.PREPAID,
+            'invoice_number': 'INVOIĆE-00001',
+            'invoice_payment_date': datetime.datetime(2015, 1, 1, tzinfo=pytz.UTC).isoformat(),
+        }
 
     @property
     def coupon_product_class(self):
@@ -104,68 +143,6 @@ class CouponMixin(object):
 
         return pc
 
-    def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
-                      benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
-                      course_seat_types=None):
-        """Helper method for creating a coupon.
-
-        Arguments:
-            title(str): Title of the coupon
-            price(int): Price of the coupon
-            partner(Partner): Partner used for creating a catalog
-            catalog(Catalog): Catalog of courses for which the coupon applies
-            code(str): Custom coupon code
-            benefit_value(int): The voucher benefit value
-            catalog_query(str): Course query string
-            course_seat_types(str): A string of comma-separated list of seat types
-
-        Returns:
-            coupon (Coupon)
-
-        """
-        if partner is None:
-            partner = PartnerFactory(name='Tester')
-        if client is None:
-            client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None and not (catalog_query and course_seat_types):
-            catalog = Catalog.objects.create(partner=partner)
-        if code is not '':
-            quantity = 1
-        data = {
-            'partner': partner,
-            'benefit_type': Benefit.PERCENTAGE,
-            'benefit_value': benefit_value,
-            'catalog': catalog,
-            'end_date': datetime.date(2020, 1, 1),
-            'code': code,
-            'quantity': quantity,
-            'start_date': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE,
-            'categories': [self.category],
-            'note': note,
-            'max_uses': max_uses,
-            'catalog_query': catalog_query,
-            'course_seat_types': course_seat_types,
-        }
-
-        coupon = CouponViewSet().create_coupon_product(
-            title=title,
-            price=price,
-            data=data
-        )
-
-        request = RequestFactory()
-        request.site = self.site
-        request.user = factories.UserFactory()
-        request.COOKIES = {}
-
-        self.basket = prepare_basket(request, coupon)
-
-        self.response_data = CouponViewSet().create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
-        coupon.client = client
-
-        return coupon
-
     def apply_voucher(self, user, site, voucher):
         """ Apply the voucher to a basket. """
         basket = factories.BasketFactory(owner=user, site=site)
@@ -174,3 +151,105 @@ class CouponMixin(object):
         basket.vouchers.add(voucher)
         Applicator().apply(basket, self.user)
         return basket
+
+    def assert_invoice_serialized_data(self, coupon_data):
+        """ Assert that the coupon details show the invoice data. """
+        invoice_details = coupon_data['payment_information']['Invoice']
+        self.assertEqual(invoice_details['type'], self.coupon_data['invoice_type'])
+        self.assertEqual(invoice_details['number'], self.coupon_data['invoice_number'])
+        self.assertEqual(invoice_details['discount_type'], self.coupon_data['invoice_discount_type'])
+        self.assertEqual(invoice_details['discount_value'], self.coupon_data['invoice_discount_value'])
+
+    def create_coupon(
+            self,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100,
+            catalog=None,
+            catalog_query=None,
+            client=None,
+            code='',
+            course_seat_types=None,
+            end_datetime=(now() + datetime.timedelta(days=15)),
+            invoice_data=None,
+            max_uses=None,
+            note=None,
+            partner=None,
+            price=100,
+            quantity=1,
+            start_datetime=(now() - datetime.timedelta(days=15)),
+            title='Test coupon',
+            voucher_type=Voucher.SINGLE_USE
+    ):
+        """
+        Helper method for creating a coupon and associated vouchers.
+
+        Arguments:
+            benefit_type(str): Benefit type associated with vouchers.
+            benefit_value(int): Benefit value associated with vouchers.
+            catalog(Catalog): Catalog of course seats for which vouchers apply.
+            catalog_query(str): ElasticSearch query for Dynamic Coupons.
+            category(Category): Product Category associated with the coupon.
+            client(BusinessClient): Client for the Coupon Order.
+            code(str): Custom unique voucher code.
+            course_seat_types(str): A comma-separated list of seat types.
+            end_datetime(datetime): Voucher expiration datetime.
+            invoice_data(dict): Coupon invoice data.
+            max_uses(int): Number of Voucher max uses.
+            note(str): Coupon description.
+            partner(Partner): Partner used to create the Catalog.
+            price(int): Course seat price.
+            quantity(int): Number of Vouchers associated with the Coupon.
+            start_datetime(datetime): Start datetime of Voucher Offer.
+            title(str): Title of the Coupon and name of all associated Vouchers.
+            voucher_type(str): Voucher type.
+        """
+        if partner is None:
+            partner = PartnerFactory(name='Tester')
+        if catalog is None and not (catalog_query and course_seat_types):
+            catalog = CatalogFactory(partner=partner)
+        if client is None:
+            client = BusinessClientFactory()
+        if invoice_data is None:
+            invoice_data = {
+                'invoice_type': Invoice.PREPAID,
+                'invoice_number': 'INVOIĆE-00001',
+                'invoice_payment_date': now(),
+                'invoice_discount_type': None,
+                'invoice_discount_value': 77
+            }
+        self.coupon = create_coupon_product(
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            catalog=catalog,
+            catalog_query=catalog_query,
+            category=self.category,
+            code=code,
+            course_seat_types=course_seat_types,
+            end_datetime=end_datetime,
+            max_uses=max_uses,
+            note=note,
+            partner=partner,
+            price=price,
+            quantity=quantity,
+            start_datetime=start_datetime,
+            title=title,
+            voucher_type=voucher_type
+        )
+
+        request = RequestFactory()
+        request.site = self.site
+        request.user = factories.UserFactory()
+        request.COOKIES = {}
+        self.basket = prepare_basket(request, self.coupon)
+
+        EdxOrderPlacementMixin().create_order_for_invoice(
+            basket=self.basket,
+            client=client,
+            invoice_data=invoice_data
+        )
+        self.coupon.client = client
+        self.coupon.history.all().update(history_user=self.user)
+
+    def update_prepaid_invoice_data(self):
+        """ Update the 'data' class variable with invoice information. """
+        self.coupon_data.update(self.invoice_data)

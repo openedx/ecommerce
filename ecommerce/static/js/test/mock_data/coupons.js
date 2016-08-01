@@ -153,12 +153,7 @@ define([], function(){
         'seats': [verifiedSeat],
         'client': 'Client Name',
         'price': '100.00',
-        'categories': [
-            {
-                'id': 4,
-                'name': 'TESTCAT'
-            }
-        ],
+        'category': 'TESTCAT',
         'start_date': '2015-01-01T00:00:00Z',
         'end_date': '2016-01-01T00:00:00Z',
         'voucher_type': 'Single use',
@@ -190,12 +185,7 @@ define([], function(){
         'last_edited': lastEditData,
         'seats': [verifiedSeat],
         'client': 'Client Name',
-        'categories': [
-            {
-                'id': 4,
-                'name': 'TESTCAT'
-            }
-        ],
+        'category': 'TESTCAT',
         'price': '100.00',
         'invoice_type': 'Prepaid',
         'invoice_discount_type': 'Percentage',
@@ -252,12 +242,7 @@ define([], function(){
         id: 2,
         title: 'Test Enrollment',
         catalog_type: 'Single course',
-        categories: [
-            {
-                id: 4,
-                name: 'TESTCAT'
-            }
-        ],
+        category: 'TESTCAT',
         coupon_type: 'Enrollment code',
         client: 'test_client',
         last_edited: lastEditData,

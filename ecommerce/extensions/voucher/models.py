@@ -3,6 +3,11 @@ from django.db import models
 
 
 class CouponVouchers(models.Model):
+    UPDATEABLE_VOUCHER_FIELDS = [
+        'end_datetime',
+        'start_datetime',
+        'name'
+    ]
     coupon = models.ForeignKey('catalogue.Product', related_name='coupon_vouchers')
     vouchers = models.ManyToManyField('voucher.Voucher', blank=True, related_name='coupon_vouchers')
 

@@ -4,7 +4,21 @@ from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_model
 from oscar.test.factories import ProductFactory, StockRecordFactory as OscarStockRecordFactory
 
-from ecommerce.core.models import SiteConfiguration
+from ecommerce.core.models import BusinessClient, SiteConfiguration
+
+
+class BusinessClientFactory(factory.DjangoModelFactory):
+    class Meta(object):
+        model = BusinessClient
+
+    name = FuzzyText(prefix='test-client-')
+
+
+class CatalogFactory(factory.DjangoModelFactory):
+    class Meta(object):
+        model = get_model('catalogue', 'Catalog')
+
+    name = FuzzyText(prefix='test-catalog-')
 
 
 class PartnerFactory(factory.DjangoModelFactory):

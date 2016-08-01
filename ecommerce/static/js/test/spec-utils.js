@@ -13,7 +13,8 @@ define([
             getModelForValidation: function (valid) {
                 return Backbone.Model.extend({
                     defaults: {
-                        id: null
+                        id: null,
+                        category: {}
                     },
 
                     isValid: function () {

@@ -406,10 +406,10 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
 
     def setUp(self):
         super(CouponFulfillmentModuleTest, self).setUp()
-        coupon = self.create_coupon()
+        self.create_coupon()
         user = UserFactory()
         basket = BasketFactory()
-        basket.add_product(coupon, 1)
+        basket.add_product(self.coupon, 1)
         self.order = factories.create_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):

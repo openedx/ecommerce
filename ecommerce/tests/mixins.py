@@ -19,7 +19,6 @@ from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory
 
@@ -37,152 +36,30 @@ User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
 
-class UserMixin(object):
-    """Provides utility methods for creating and authenticating users in test cases."""
-    access_token = 'test-access-token'
-    password = 'test'
+class APIMixin(object):
+    """Provides utility methods for API endpoint test cases."""
 
-    def create_user(self, **kwargs):
-        """Create a user, with overrideable defaults."""
-        return factories.UserFactory(password=self.password, **kwargs)
-
-    def create_access_token(self, user, access_token=None):
-        """
-        Create an OAuth access token for the specified user.
-
-        If no access_token value is supplied, the default (self.access_token) will be used.
-        """
-        access_token = access_token or self.access_token
-        UserSocialAuth.objects.create(user=user, extra_data={'access_token': access_token})
-
-    def generate_jwt_token_header(self, user, secret=None):
-        """Generate a valid JWT token header for authenticated requests."""
-        secret = secret or settings.JWT_AUTH['JWT_SECRET_KEY']
-        payload = {
-            'username': user.username,
-            'email': user.email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]
-        }
-        return "JWT {token}".format(token=jwt.encode(payload, secret))
+    def get_response_json(self, method, path, data=None):
+        """Helper method for sending requests and returning JSON response content."""
+        if method == 'GET':
+            response = self.client.get(path)
+        elif method == 'POST':
+            response = self.client.post(path, json.dumps(data), 'application/json')
+        elif method == 'PUT':
+            response = self.client.put(path, json.dumps(data), 'application/json')
+        return json.loads(response.content), response.status_code
 
 
-class ThrottlingMixin(object):
-    """Provides utility methods for test cases validating the behavior of rate-limited endpoints."""
+class ApiMockMixin(object):
+    """ Common Mocks for the API responses. """
 
     def setUp(self):
-        super(ThrottlingMixin, self).setUp()
+        super(ApiMockMixin, self).setUp()
 
-        # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
-        self.addCleanup(cache.clear)
-
-
-class JwtMixin(object):
-    """ Mixin with JWT-related helper functions. """
-    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_SECRET_KEY']
-    issuer = settings.JWT_AUTH['JWT_ISSUERS'][0]
-
-    def generate_token(self, payload, secret=None):
-        """Generate a JWT token with the provided payload."""
-        secret = secret or self.JWT_SECRET_KEY
-        token = jwt.encode(dict(payload, iss=self.issuer), secret)
-        return token
-
-
-class BasketCreationMixin(UserMixin, JwtMixin):
-    """Provides utility methods for creating baskets in test cases."""
-    PATH = reverse('api:v2:baskets:create')
-    FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
-
-    def setUp(self):
-        super(BasketCreationMixin, self).setUp()
-
-        self.user = self.create_user()
-
-        product_class = factories.ProductClassFactory(
-            name=u'𝑨𝒖𝒕𝒐𝒎𝒐𝒃𝒊𝒍𝒆',
-            requires_shipping=False,
-            track_stock=False
-        )
-        self.base_product = factories.ProductFactory(
-            structure='parent',
-            title=u'𝑳𝒂𝒎𝒃𝒐𝒓𝒈𝒉𝒊𝒏𝒊 𝑮𝒂𝒍𝒍𝒂𝒓𝒅𝒐',
-            product_class=product_class,
-            stockrecords=None,
-        )
-        self.free_product = factories.ProductFactory(
-            structure='child',
-            parent=self.base_product,
-            title=u'𝑪𝒂𝒓𝒅𝒃𝒐𝒂𝒓𝒅 𝑪𝒖𝒕𝒐𝒖𝒕',
-            stockrecords__partner_sku=self.FREE_SKU,
-            stockrecords__price_excl_tax=Decimal('0.00'),
-        )
-
-    def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
-        """Issue a POST request to the basket creation endpoint."""
-        request_data = {}
-        if skus:
-            request_data[AC.KEYS.PRODUCTS] = []
-            for sku in skus:
-                request_data[AC.KEYS.PRODUCTS].append({AC.KEYS.SKU: sku})
-
-        if checkout:
-            request_data[AC.KEYS.CHECKOUT] = checkout
-
-        if payment_processor_name:
-            request_data[AC.KEYS.PAYMENT_PROCESSOR_NAME] = payment_processor_name
-
-        if auth:
-            response = self.client.post(
-                self.PATH,
-                data=json.dumps(request_data),
-                content_type='application/json',
-                HTTP_AUTHORIZATION='JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
-            )
-        else:
-            response = self.client.post(
-                self.PATH,
-                data=json.dumps(request_data),
-                content_type='application/json'
-            )
-
-        return response
-
-    def assert_successful_basket_creation(
-            self, skus=None, checkout=None, payment_processor_name=None, requires_payment=False
-    ):
-        """Verify that basket creation succeeded."""
-        # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
-        ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
-
-        with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
-            response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
-
-            self.assertEqual(response.status_code, 200)
-
-            basket = Basket.objects.get()
-            basket.strategy = Selector().strategy(user=self.user)
-            self.assertEqual(response.data['id'], basket.id)
-
-            if checkout:
-                self.assertTrue(mock_audit_log.called_with(
-                    'basket_frozen',
-                    amount=basket.total_excl_tax,
-                    basket_id=basket.id,
-                    currency=basket.currency,
-                    user_id=basket.owner.id
-                ))
-
-                if requires_payment:
-                    self.assertIsNone(response.data[AC.KEYS.ORDER])
-                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME])
-                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_FORM_DATA])
-                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PAGE_URL])
-                else:
-                    self.assertEqual(response.data[AC.KEYS.ORDER][AC.KEYS.ORDER_NUMBER], Order.objects.get().number)
-                    self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
-            else:
-                self.assertIsNone(response.data[AC.KEYS.ORDER])
-                self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
+    def mock_api_error(self, error, url):
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
 
 
 class BusinessIntelligenceMixin(object):
@@ -240,51 +117,16 @@ class BusinessIntelligenceMixin(object):
             self.fail()
 
 
-class SiteMixin(object):
-    def setUp(self):
-        super(SiteMixin, self).setUp()
+class JwtMixin(object):
+    """ Mixin with JWT-related helper functions. """
+    JWT_SECRET_KEY = settings.JWT_AUTH['JWT_SECRET_KEY']
+    issuer = settings.JWT_AUTH['JWT_ISSUERS'][0]
 
-        # Set the domain used for all test requests
-        domain = 'testserver.fake'
-        self.client = self.client_class(SERVER_NAME=domain)
-
-        Site.objects.all().delete()
-        site_configuration = SiteConfigurationFactory(
-            partner__name='edX',
-            site__id=settings.SITE_ID,
-            site__domain=domain,
-            segment_key='fake_segment_key',
-            oauth_settings={
-                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
-                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
-            }
-        )
-        self.partner = site_configuration.partner
-        self.site = site_configuration.site
-
-        self.request = RequestFactory().get('')
-        self.request.session = None
-        self.request.site = self.site
-        set_thread_variable('request', self.request)
-
-
-class TestServerUrlMixin(object):
-    def get_full_url(self, path, site=None):
-        """ Returns a complete URL with the given path. """
-        site = site or self.site
-        return 'http://{domain}{path}'.format(domain=site.domain, path=path)
-
-
-class ApiMockMixin(object):
-    """ Common Mocks for the API responses. """
-
-    def setUp(self):
-        super(ApiMockMixin, self).setUp()
-
-    def mock_api_error(self, error, url):
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
-            raise error
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+    def generate_token(self, payload, secret=None):
+        """Generate a JWT token with the provided payload."""
+        secret = secret or self.JWT_SECRET_KEY
+        token = jwt.encode(dict(payload, iss=self.issuer), secret)
+        return token
 
 
 class LmsApiMockMixin(object):
@@ -335,3 +177,179 @@ class LmsApiMockMixin(object):
             course_id=course_id
         )
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+
+
+class SiteMixin(object):
+    def setUp(self):
+        super(SiteMixin, self).setUp()
+
+        # Set the domain used for all test requests
+        domain = 'testserver.fake'
+        self.client = self.client_class(SERVER_NAME=domain)
+
+        Site.objects.all().delete()
+        site_configuration = SiteConfigurationFactory(
+            partner__name='edX',
+            site__id=settings.SITE_ID,
+            site__domain=domain,
+            segment_key='fake_segment_key',
+            oauth_settings={
+                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
+                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
+            }
+        )
+        self.partner = site_configuration.partner
+        self.site = site_configuration.site
+
+        self.request = RequestFactory().get('')
+        self.request.session = None
+        self.request.site = self.site
+        set_thread_variable('request', self.request)
+
+
+class TestServerUrlMixin(object):
+    def get_full_url(self, path, site=None):
+        """ Returns a complete URL with the given path. """
+        site = site or self.site
+        return 'http://{domain}{path}'.format(domain=site.domain, path=path)
+
+
+class ThrottlingMixin(object):
+    """Provides utility methods for test cases validating the behavior of rate-limited endpoints."""
+
+    def setUp(self):
+        super(ThrottlingMixin, self).setUp()
+
+        # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
+        self.addCleanup(cache.clear)
+
+
+class UserMixin(object):
+    """Provides utility methods for creating and authenticating users in test cases."""
+    access_token = 'test-access-token'
+    password = 'test'
+
+    def create_user(self, **kwargs):
+        """Create a user, with overrideable defaults."""
+        return factories.UserFactory(password=self.password, **kwargs)
+
+    def create_access_token(self, user, access_token=None):
+        """
+        Create an OAuth access token for the specified user.
+
+        If no access_token value is supplied, the default (self.access_token) will be used.
+        """
+        access_token = access_token or self.access_token
+        UserSocialAuth.objects.create(user=user, extra_data={'access_token': access_token})
+
+    def generate_jwt_token_header(self, user, secret=None):
+        """Generate a valid JWT token header for authenticated requests."""
+        secret = secret or settings.JWT_AUTH['JWT_SECRET_KEY']
+        payload = {
+            'username': user.username,
+            'email': user.email,
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]
+        }
+        return "JWT {token}".format(token=jwt.encode(payload, secret))
+
+    def create_and_login_user(self, is_staff=True):
+        """ Create a user and use its credentials to login. """
+        self.user = self.create_user(is_staff=is_staff)
+        self.client.login(username=self.user.username, password=self.password)
+
+
+class BasketCreationMixin(UserMixin, JwtMixin):
+    """Provides utility methods for creating baskets in test cases."""
+    PATH = reverse('api:v2:baskets:create')
+    FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
+
+    def setUp(self):
+        super(BasketCreationMixin, self).setUp()
+
+        self.user = self.create_user()
+
+        product_class = factories.ProductClassFactory(
+            name=u'𝑨𝒖𝒕𝒐𝒎𝒐𝒃𝒊𝒍𝒆',
+            requires_shipping=False,
+            track_stock=False
+        )
+        self.base_product = factories.ProductFactory(
+            structure='parent',
+            title=u'𝑳𝒂𝒎𝒃𝒐𝒓𝒈𝒉𝒊𝒏𝒊 𝑮𝒂𝒍𝒍𝒂𝒓𝒅𝒐',
+            product_class=product_class,
+            stockrecords=None,
+        )
+        self.free_product = factories.ProductFactory(
+            structure='child',
+            parent=self.base_product,
+            title=u'𝑪𝒂𝒓𝒅𝒃𝒐𝒂𝒓𝒅 𝑪𝒖𝒕𝒐𝒖𝒕',
+            stockrecords__partner_sku=self.FREE_SKU,
+            stockrecords__price_excl_tax=Decimal('0.00'),
+        )
+
+    def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
+        """Issue a POST request to the basket creation endpoint."""
+        request_data = {}
+        if skus:
+            request_data['products'] = []
+            for sku in skus:
+                request_data['products'].append({'sku': sku})
+
+        if checkout:
+            request_data['checkout'] = checkout
+
+        if payment_processor_name:
+            request_data['payment_processor_name'] = payment_processor_name
+
+        if auth:
+            response = self.client.post(
+                self.PATH,
+                data=json.dumps(request_data),
+                content_type='application/json',
+                HTTP_AUTHORIZATION='JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
+            )
+        else:
+            response = self.client.post(
+                self.PATH,
+                data=json.dumps(request_data),
+                content_type='application/json'
+            )
+
+        return response
+
+    def assert_successful_basket_creation(
+            self, skus=None, checkout=None, payment_processor_name=None, requires_payment=False
+    ):
+        """Verify that basket creation succeeded."""
+        # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
+        ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
+
+        with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
+            response = self.create_basket(skus=skus, checkout=checkout, payment_processor_name=payment_processor_name)
+
+            self.assertEqual(response.status_code, 200)
+
+            basket = Basket.objects.get()
+            basket.strategy = Selector().strategy(user=self.user)
+            self.assertEqual(response.data['id'], basket.id)
+
+            if checkout:
+                self.assertTrue(mock_audit_log.called_with(
+                    'basket_frozen',
+                    amount=basket.total_excl_tax,
+                    basket_id=basket.id,
+                    currency=basket.currency,
+                    user_id=basket.owner.id
+                ))
+
+                if requires_payment:
+                    self.assertIsNone(response.data['order'])
+                    self.assertIsNotNone(response.data['payment_data']['payment_processor_name'])
+                    self.assertIsNotNone(response.data['payment_data']['payment_form_data'])
+                    self.assertIsNotNone(response.data['payment_data']['payment_page_url'])
+                else:
+                    self.assertEqual(response.data['order']['number'], Order.objects.get().number)
+                    self.assertIsNone(response.data['payment_data'])
+            else:
+                self.assertIsNone(response.data['order'])
+                self.assertIsNone(response.data['payment_data'])

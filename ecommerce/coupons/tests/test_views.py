@@ -229,7 +229,7 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
 
 
-class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponRedeemViewTests(CouponMixin, LmsApiMockMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
     HTTP_MOVED = 301
 

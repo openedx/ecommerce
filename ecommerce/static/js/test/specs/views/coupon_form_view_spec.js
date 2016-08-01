@@ -89,10 +89,6 @@ define([
                     expect(SpecUtils.visibleElement(view, '[name=benefit_value]', '.form-group')).toBe(false);
                     expect(SpecUtils.visibleElement(view, '[name=code]', '.form-group')).toBe(false);
                 });
-
-                it('should set model attribute category_ids on render', function () {
-                    expect(view.model.get('category_ids')[0]).toBe(4);
-                });
             });
 
             describe('routing', function() {

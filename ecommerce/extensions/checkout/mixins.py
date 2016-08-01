@@ -12,9 +12,9 @@ import waffle
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
+from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
@@ -36,6 +36,37 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         if self._payment_events is None:
             self._payment_events = []
         self._payment_events.append(event)
+
+    def create_order_for_invoice(self, basket, client, invoice_data):
+        """ Creates an order from the basket and invokes the invoice payment processor."""
+        order_metadata = data_api.get_order_metadata(basket)
+        basket.freeze()
+
+        order = self.handle_order_placement(
+            basket=basket,
+            billing_address=None,
+            order_number=order_metadata['number'],
+            order_total=order_metadata['total'],
+            shipping_address=None,
+            shipping_charge=order_metadata['shipping_charge'],
+            shipping_method=order_metadata['shipping_method'],
+            user=basket.owner
+        )
+
+        # Invoice payment processor invocation.
+        payment_processor = InvoicePayment()
+        payment_processor.handle_processor_response(
+            business_client=client,
+            invoice_data=invoice_data,
+            order=order,
+            response={}
+        )
+
+        logger.info(
+            'Created new order number [%s] from basket [%d]',
+            order_metadata['number'],
+            basket.id
+        )
 
     def handle_payment(self, response, basket):
         """
@@ -131,7 +162,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             BasketNotFreeError: if the basket is not free.
         """
 
-        if basket.total_incl_tax != AC.FREE:
+        if basket.total_incl_tax != 0:
             raise BasketNotFreeError
 
         basket.freeze()
@@ -140,21 +171,21 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
         logger.info(
             'Preparing to place order [%s] for the contents of basket [%d]',
-            order_metadata[AC.KEYS.ORDER_NUMBER],
+            order_metadata['number'],
             basket.id,
         )
 
         # Place an order. If order placement succeeds, the order is committed
         # to the database so that it can be fulfilled asynchronously.
         order = self.handle_order_placement(
-            order_number=order_metadata[AC.KEYS.ORDER_NUMBER],
+            order_number=order_metadata['number'],
             user=basket.owner,
             basket=basket,
             shipping_address=None,
-            shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
-            shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
+            shipping_method=order_metadata['shipping_method'],
+            shipping_charge=order_metadata['shipping_charge'],
             billing_address=None,
-            order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+            order_total=order_metadata['total'],
         )
 
         return order
