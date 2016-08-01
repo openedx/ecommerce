@@ -222,6 +222,8 @@ define([
                         }
                     );
                 } else {
+                    // Remove all saved models from store, which prevents Duplicate id errors
+                    Backbone.Relational.store.reset();
                     this.model.save(
                         null,
                         {
