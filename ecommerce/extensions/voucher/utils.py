@@ -388,7 +388,6 @@ def create_vouchers(
     Returns:
             List[Voucher]
     """
-    logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
     vouchers = []
     offers = []
 
