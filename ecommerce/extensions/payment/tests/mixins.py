@@ -479,7 +479,7 @@ class AdyenMixin(object):
             status=status_code
         )
 
-    def mock_payment_creation_response(self, basket=None, payment_refused=False, payment_creation_response=None):
+    def mock_payment_creation_response(self, payment_refused=False, payment_creation_response=None):
         if payment_creation_response is None:
             payment_creation_response = self.ADYEN_PAYMENT_REFUSED
             if not payment_refused:
@@ -489,7 +489,7 @@ class AdyenMixin(object):
 
         return payment_creation_response
 
-    def mock_refund_creation_response(self, basket=None, refund_refused=False, refund_response=None, status_code=200):
+    def mock_refund_creation_response(self, refund_refused=False, refund_response=None, status_code=200):
         if refund_response is None:
             refund_response = self.ADYEN_REFUND_ERROR
             if not refund_refused:

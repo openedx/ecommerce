@@ -56,14 +56,14 @@ class AdyenPaymentViewTests(AdyenMixin, PaymentEventsMixin, TestCase):
         self.processor_name = self.processor.NAME
 
     @httpretty.activate
-    def _assert_execution(self, url_redirect=None):
+    def _assert_execution(self):
         """Verify payment execution."""
 
         # Create a payment record the view can use to retrieve a basket
-        self.mock_payment_creation_response(self.basket)
+        self.mock_payment_creation_response()
         self.processor.get_transaction_parameters(self.basket, request=self.request)
 
-        creation_response = self.mock_payment_creation_response(self.basket)
+        creation_response = self.mock_payment_creation_response()
         self.request.POST.update(self.POST_DATA)
         adyen_payment_view = AdyenPaymentView()
         payment_response = adyen_payment_view.post(request=self.request)
@@ -73,7 +73,7 @@ class AdyenPaymentViewTests(AdyenMixin, PaymentEventsMixin, TestCase):
     @httpretty.activate
     def _assert_execution_redirect(self, url_redirect=None):
         """Verify redirection to the configured receipt page after attempted payment execution."""
-        creation_response, payment_response = self._assert_execution(url_redirect)
+        creation_response, payment_response = self._assert_execution()
         self.assertRedirects(
             payment_response,
             url_redirect or u'{}?orderNum={}'.format(self.processor.receipt_page_url, self.basket.order_number),
@@ -83,11 +83,11 @@ class AdyenPaymentViewTests(AdyenMixin, PaymentEventsMixin, TestCase):
         return creation_response
 
     @httpretty.activate
-    def _assert_execution_failure(self, url_redirect=None):
+    def _assert_execution_failure(self):
         """Verify server error after attempted payment execution failed due to
         order placement failure.
         """
-        creation_response, payment_response = self._assert_execution(url_redirect)
+        creation_response, payment_response = self._assert_execution()
         self.assertEqual(payment_response.status_code, 500)
 
         return creation_response
