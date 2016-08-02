@@ -71,14 +71,12 @@ class AdyenTests(AdyenMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(response['eventCode'], 'AUTHORISATION')
         self.assertEqual(response['resultCode'], 'Refused')
 
-
     @httpretty.activate
     def test_handle_processor_response(self):
         """Verify that the processor creates the appropriate PaymentEvent and Source objects."""
         adyen_payment_response = self.mock_payment_creation_response(self.basket)
 
         self._assert_payment_event_and_source(adyen_payment_response)
-
 
     @httpretty.activate
     def test_handle_processor_response_refused_payment(self):
@@ -90,7 +88,6 @@ class AdyenTests(AdyenMixin, PaymentProcessorTestCaseMixin, TestCase):
                 adyen_payment_response,
                 basket=self.basket
             )
-
 
     @httpretty.activate
     def test_handle_processor_response_error(self):
@@ -115,7 +112,6 @@ class AdyenTests(AdyenMixin, PaymentProcessorTestCaseMixin, TestCase):
                 basket=self.basket
             )
 
-
     @httpretty.activate
     def test_issue_credit(self):
         """
@@ -132,7 +128,6 @@ class AdyenTests(AdyenMixin, PaymentProcessorTestCaseMixin, TestCase):
         transaction_id = self.ADYEN_REDUND_REFERENCE
         self.processor.issue_credit(source, amount, currency)
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id, adyen_refund_response, basket)
-
 
     @httpretty.activate
     def test_issue_credit_error(self):

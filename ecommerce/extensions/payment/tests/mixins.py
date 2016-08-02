@@ -206,10 +206,10 @@ class PaypalMixin(object):
 
         url = self._create_api_url(path)
         httpretty.register_uri(
-                httpretty.POST if post else httpretty.GET,
-                url,
-                body=json.dumps(body),
-                status=200
+            httpretty.POST if post else httpretty.GET,
+            url,
+            body=json.dumps(body),
+            status=200
         )
 
     def mock_oauth2_response(self):
@@ -266,7 +266,7 @@ class PaypalMixin(object):
                             u'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
-                        ],
+                    ],
                 },
                 u'invoice_number': basket.order_number,
                 u'related_resources': []
@@ -283,9 +283,9 @@ class PaypalMixin(object):
 
         if find:
             self.mock_api_response(
-                    '/v1/payments/payment/{}'.format(self.PAYMENT_ID),
-                    payment_creation_response,
-                    post=False
+                '/v1/payments/payment/{}'.format(self.PAYMENT_ID),
+                payment_creation_response,
+                post=False
             )
         else:
             self.mock_api_response('/v1/payments/payment', payment_creation_response)
@@ -329,7 +329,7 @@ class PaypalMixin(object):
                             u'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
-                        ],
+                    ],
                 },
                 u'invoice_number': basket.order_number,
                 u'related_resources': [{
@@ -348,14 +348,14 @@ class PaypalMixin(object):
                             },
                             {
                                 u'href': u'https://api.sandbox.paypal.com/v1/payments/sale/{}/refund'.format(
-                                        self.SALE_ID
+                                    self.SALE_ID
                                 ),
                                 u'method': u'POST',
                                 u'rel': u'refund'
                             },
                             {
                                 u'href': u'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(
-                                        self.PAYMENT_ID
+                                    self.PAYMENT_ID
                                 ),
                                 u'method': u'GET',
                                 u'rel': u'parent_payment'
@@ -378,8 +378,8 @@ class PaypalMixin(object):
         }
 
         self.mock_api_response(
-                '/v1/payments/payment/{}/execute'.format(self.PAYMENT_ID),
-                payment_execution_response
+            '/v1/payments/payment/{}/execute'.format(self.PAYMENT_ID),
+            payment_execution_response
         )
 
         return payment_execution_response
