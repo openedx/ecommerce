@@ -275,6 +275,10 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         self.create_basket_and_add_product(enrollment_code)
         self.mock_course_api_response(course)
 
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['is_bulk_purchase'])
+
         # Enable enrollment codes
         self.site.siteconfiguration.enable_enrollment_codes = True
         self.site.siteconfiguration.save()
@@ -285,15 +289,44 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], _(enrollment_code.attr.seat_type.capitalize()))
 
+    def test_no_switch_link(self):
+        """Verify response does not contain variables for the switch link if seat does not have an EC."""
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        ec_course = CourseFactory()
+        no_ec_course = CourseFactory()
+        seat_without_ec = no_ec_course.create_or_update_seat('verified', False, 10, self.partner)
+        seat_with_ec = ec_course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        self.create_basket_and_add_product(seat_without_ec)
+        self.mock_course_api_response(no_ec_course)
+
+        response = self.client.get(self.path)
+        self.assertFalse(response.context['switch_link_text'])
+        self.assertFalse(response.context['partner_sku'])
+
+        # Enable enrollment codes
+        self.site.siteconfiguration.enable_enrollment_codes = True
+        self.site.siteconfiguration.save()
+
+        Basket.objects.all().delete()
+        self.create_basket_and_add_product(seat_with_ec)
+        self.mock_course_api_response(ec_course)
+
+        response = self.client.get(self.path)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        enrollment_code_stockrecord = StockRecord.objects.get(product=enrollment_code)
+        self.assertTrue(response.context['switch_link_text'])
+        self.assertEqual(response.context['partner_sku'], enrollment_code_stockrecord.partner_sku)
+
     def test_basket_switch_data(self):
         """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""
         course = CourseFactory()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat('invalid', False, 10, self.partner)
+
         seat = course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         seat_sku = StockRecord.objects.get(product=seat).partner_sku
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku
+
         __, partner_sku = get_basket_switch_data(seat)
         self.assertEqual(partner_sku, ec_sku)
         __, partner_sku = get_basket_switch_data(enrollment_code)
