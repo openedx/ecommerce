@@ -217,22 +217,21 @@ class Adyen(BasePaymentProcessor):
     def issue_credit(self, source, amount, currency):
         order = source.order
 
-        response = requests.post(
-            urljoin(self.payment_api_url, 'cancelOrRefund'),
-            auth=(self.web_service_username, self.web_service_password),
-            headers={
-                'Content-Type': 'application/json'
-            },
-            json={
-                'merchantAccount': self.merchant_account_code,
-                'originalReference': source.reference,
-                'reference': order.number
-            }
-        )
-
-        adyen_response = response.json()
-
         try:
+            response = requests.post(
+                urljoin(self.payment_api_url, 'cancelOrRefund'),
+                auth=(self.web_service_username, self.web_service_password),
+                headers={
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'merchantAccount': self.merchant_account_code,
+                    'originalReference': source.reference,
+                    'reference': order.number
+                }
+            )
+            adyen_response = response.json()
+
             if response.status_code == requests.codes.ok:
                 self.record_processor_response(
                     response.json(),
