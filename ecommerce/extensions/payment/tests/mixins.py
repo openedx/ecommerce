@@ -450,11 +450,15 @@ class AdyenMixin(object):
         'message': 'Original pspReference required for this operation',
         'errorType': 'validation',
     }
+    POST_DATA = {
+        u'adyen-encrypted-data': 'adyenjs_0_1_18$aran4h8FhkovuZ8gBc9MOA+30....',
+    }
 
     def mock_api_response(self, body, post=True):
         assert httpretty.is_enabled()
-
         url = settings.PAYMENT_PROCESSOR_CONFIG['edx']['adyen']['payment_api_url']
+        url = urljoin(url, 'authorise')
+
         httpretty.register_uri(
             httpretty.POST if post else httpretty.GET,
             url,
@@ -475,7 +479,7 @@ class AdyenMixin(object):
             status=status_code
         )
 
-    def mock_payment_creation_response(self, basket, payment_refused=False, payment_creation_response=None):
+    def mock_payment_creation_response(self, basket=None, payment_refused=False, payment_creation_response=None):
         if payment_creation_response is None:
             payment_creation_response = self.ADYEN_PAYMENT_REFUSED
             if not payment_refused:
@@ -485,11 +489,11 @@ class AdyenMixin(object):
 
         return payment_creation_response
 
-    def mock_refund_creation_response(self, basket, refund_refused=False, adyen_refund_response=None, status_code=200):
-        if adyen_refund_response is None:
-            adyen_refund_response = self.ADYEN_REFUND_ERROR
+    def mock_refund_creation_response(self, basket=None, refund_refused=False, refund_response=None, status_code=200):
+        if refund_response is None:
+            refund_response = self.ADYEN_REFUND_ERROR
             if not refund_refused:
-                adyen_refund_response = self.ADYEN_REFUND_RECEIVED
+                refund_response = self.ADYEN_REFUND_RECEIVED
 
-        self.mock_api_refund_response(adyen_refund_response, status_code)
-        return adyen_refund_response
+        self.mock_api_refund_response(refund_response, status_code)
+        return refund_response

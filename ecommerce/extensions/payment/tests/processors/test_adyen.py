@@ -136,7 +136,6 @@ class AdyenTests(AdyenMixin, PaymentProcessorTestCaseMixin, TestCase):
         """
         refund = self.create_refund(self.processor_name)
         order = refund.order
-        basket = order.basket
         amount = refund.total_credit_excl_tax
         currency = refund.currency
         source = order.sources.first()
