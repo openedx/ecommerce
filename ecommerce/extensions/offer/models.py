@@ -27,7 +27,8 @@ class Range(AbstractRange):
             try:
                 response = request.site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
                     query=self.catalog_query,
-                    course_run_ids=product.course_id
+                    course_run_ids=product.course_id,
+                    partner=request.site.siteconfiguration.partner.short_code
                 )
                 cache.set(cache_hash, response, settings.COURSES_API_CACHE_TIMEOUT)
             except:  # pylint: disable=bare-except
