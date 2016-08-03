@@ -33,6 +33,16 @@ define([
                 percentageDiscountCodeVoucher = Mock_Coupons.percentageDiscountCodeVoucher;
                 valueDiscountCodeVoucher = Mock_Coupons.valueDiscountCodeVoucher;
                 verifiedSeat = Mock_Coupons.verifiedSeat;
+
+                jasmine.addMatchers({      
+                    toExist: function () {
+                        return {
+                            compare: function (actual) {
+                                return { pass: $.contains(document.documentElement, $(actual)[0]) };
+                            }
+                        };
+                    }
+                });
             });
 
             it('should compare view.model with model sent', function () {
@@ -181,8 +191,8 @@ define([
                 expect(view.$('.invoice-payment-date .value').text()).toEqual(
                     view.formatDateTime(model.get('invoice_payment_date'))
                 );
-                expect(SpecUtils.visibleElement(view, '.invoice_discount_type', '.info-item')).toBe(false);
-                expect(SpecUtils.visibleElement(view, '.invoice_discount_value', '.info-item')).toBe(false);
+                expect(view.$('.invoice_discount_type')).not.toExist();
+                expect(view.$('.invoice_discount_value')).not.toExist();
             });
 
             it('should render postpaid invoice data.', function() {
@@ -192,25 +202,24 @@ define([
                     'invoice_discount_value': 50,
                 });
                 view.render();
-                expect(view.$('.invoice-discount-type .value').text()).toEqual(model.get('invoice_discount_type'));
                 expect(view.$('.invoice-discount-value .value').text()).toEqual(
                     view.invoiceDiscountValue(
                         model.get('invoice_discount_type'),
                         model.get('invoice_discount_value')
                     )
                 );
-                expect(SpecUtils.visibleElement(view, '.invoice-number', '.info-item')).toBe(false);
-                expect(SpecUtils.visibleElement(view, '.invoiced-amount', '.info-item')).toBe(false);
-                expect(SpecUtils.visibleElement(view, '.invoice-payment-date', '.info-item')).toBe(false);
+                expect(view.$('.invoice-number')).not.toExist();
+                expect(view.$('.invoiced-amount')).not.toExist();
+                expect(view.$('.invoice-payment-date')).not.toExist();
             });
 
             it('should render not-applicable invoice data.', function() {
                 view.model.set('invoice_type', 'Not-Applicable');
                 view.render();
-                expect(SpecUtils.visibleElement(view, '.invoice_discount_type', '.info-item')).toBe(false);
-                expect(SpecUtils.visibleElement(view, '.invoice-number', '.info-item')).toBe(false);
-                expect(SpecUtils.visibleElement(view, '.invoiced-amount', '.info-item')).toBe(false);
-                expect(SpecUtils.visibleElement(view, '.invoice-payment-date', '.info-item')).toBe(false);
+                expect(view.$('.invoice_discount_type')).not.toExist();
+                expect(view.$('.invoice-number')).not.toExist();
+                expect(view.$('.invoiced-amount')).not.toExist();
+                expect(view.$('.invoice-payment-date')).not.toExist();
             });
 
             it('should display tax deducted source input field.', function() {
@@ -220,7 +229,7 @@ define([
 
                 view.model.set('tax_deduction', 'No');
                 view.render();
-                expect(SpecUtils.visibleElement(view, '.tax-deducted-source-value', '.info-item')).toBe(false);
+                expect(view.$('.tax-deducted-source-value')).not.toExist();
             });
 
             it('should download voucher report in the new tab', function () {
