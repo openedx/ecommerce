@@ -69,7 +69,7 @@ class Paypal(BasePaymentProcessor):
 
     @property
     def error_url(self):
-        return get_lms_url(self.configuration['error_path'])
+        return get_ecommerce_url(self.configuration['error_path'])
 
     def get_transaction_parameters(self, basket, request=None):
         """
