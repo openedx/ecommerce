@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 from decimal import Decimal
+from time import time
 
 import dateutil.parser
 from django.conf import settings
@@ -230,7 +231,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         Returns:
             A coupon product object.
         """
-
+        start_time = time()
         product_class = ProductClass.objects.get(slug='coupon')
         coupon_product = Product.objects.create(title=title, product_class=product_class)
 
@@ -270,7 +271,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 'price_excl_tax': price
             }
         )
-
+        end_time = time() - start_time
+        logger.info(
+            "Created coupon %s with [%s] vouchers in [%.2fs] ",
+            title, data['quantity'], end_time
+        )
         return coupon_product
 
     def assign_categories_to_coupon(self, coupon, categories):
