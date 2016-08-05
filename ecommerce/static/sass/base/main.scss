@@ -36,3 +36,6 @@
 @import 'views/coupon_offer';
 
 @import "default";
+
+// djangoapps
+@import '../../../extensions/payment/processors/adyen/static/sass/_payment.scss';

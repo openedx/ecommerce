@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from requests.exceptions import ConnectionError, Timeout
 from opaque_keys.edx.keys import CourseKey
@@ -100,7 +100,6 @@ class BasketSummaryView(BasketView):
         is_verification_required = is_bulk_purchase = False
         switch_link_text = partner_sku = ''
         site_configuration = self.request.site.siteconfiguration
-        basket_layout = site_configuration.basket_layout
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
@@ -158,9 +157,8 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'basket_layout_template': 'oscar/basket/partials/_{layout}.html'.format(layout=basket_layout),
-            'checkout_template': site_configuration.checkout_template,
-            'payment_processors': site_configuration.get_payment_processors().values(),
+            'payment_processors': site_configuration.get_payment_processors(),
+            'cancel_page_url': get_lms_url(settings.CANCEL_PAGE_PATH),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
@@ -171,3 +169,18 @@ class BasketSummaryView(BasketView):
         })
 
         return context
+
+    def get_template_names(self):
+        """
+        Returns a list of template names to be used for the request. Must return
+        a list. May not be called if render_to_response is overridden.
+        """
+        template_names = []
+        for processor in self.request.site.siteconfiguration.get_payment_processors().values():
+            template = processor.BASKET_TEMPLATE
+            if template:
+                template_names.append(template)
+
+        template_names.extend(super(BasketSummaryView, self).get_template_names())
+
+        return template_names

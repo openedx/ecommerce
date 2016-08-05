@@ -102,44 +102,6 @@ CURRENCY_CODES = {
 # END ORDER PROCESSING
 
 
-# PAYMENT PROCESSING
-PAYMENT_PROCESSORS = (
-    'ecommerce.payment_processors.adyen.processor.Adyen',
-    'ecommerce.payment_processors.cybersource.processor.Cybersource',
-    'ecommerce.payment_processors.paypal.processor.Paypal',
-)
-
-PAYMENT_PROCESSOR_RECEIPT_PATH = '/commerce/checkout/receipt/'
-PAYMENT_PROCESSOR_CANCEL_PATH = '/checkout/cancel-checkout/'
-PAYMENT_PROCESSOR_ERROR_PATH = '/checkout/error/'
-
-PAYMENT_PROCESSOR_CONFIG = {
-    'edx': {
-        'cybersource': {
-            'profile_id': None,
-            'access_key': None,
-            'secret_key': None,
-            'payment_page_url': None,
-            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
-            'send_level_2_3_details': True,
-        },
-        'paypal': {
-            # 'mode' can be either 'sandbox' or 'live'
-            'mode': None,
-            'client_id': None,
-            'client_secret': None,
-            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
-            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
-            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
-        },
-    },
-}
-
-PAYMENT_PROCESSOR_SWITCH_PREFIX = 'payment_processor_active_'
-# END PAYMENT PROCESSING
-
-
 # ANALYTICS
 # Here Be Dragons: Use this feature flag to control whether Oscar should install its
 # default analytics receivers. This is disabled by default. Some default receivers,

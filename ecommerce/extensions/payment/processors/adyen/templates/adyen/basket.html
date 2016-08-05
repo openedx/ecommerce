@@ -1,0 +1,18 @@
+{% extends 'oscar/basket/basket.html' %}
+{% load staticfiles %}
+
+{% block basket_layout %}
+    {% if free_basket %}
+        {% include 'oscar/basket/partials/_basket_layout.html' %}
+    {% else %}
+        {% include 'adyen/_basket_layout.html' %}
+    {% endif %}
+{% endblock basket_layout %}
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+    window.adyenCSEPublicKey = '{{ payment_processors.adyen.configuration.cse_public_key }}';
+</script>
+<script type="text/javascript" src="{% static 'adyen/js/apps/payment_app.js' %}"></script>
+{% endblock javascript %}

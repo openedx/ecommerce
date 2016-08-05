@@ -2,6 +2,7 @@ analytics-python==1.1.0
 Django==1.8.14
 django-appconf==0.6
 django-compressor==2.0
+django-countries==3.4.1
 django_extensions==1.5.5
 django-fernet-fields==0.4
 django-filter==0.11.0

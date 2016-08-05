@@ -1,8 +1,15 @@
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from django_countries import countries
+
 
 register = template.Library()
+
+
+@register.assignment_tag
+def get_countries():
+    return countries
 
 
 @register.simple_tag

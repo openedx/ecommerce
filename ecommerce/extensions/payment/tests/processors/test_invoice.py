@@ -10,7 +10,7 @@ import pytz
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api.serializers import InvoiceSerializer
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors.invoice import InvoicePayment
+from ecommerce.extensions.payment.processors.invoice_payment.processor import InvoicePayment
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase

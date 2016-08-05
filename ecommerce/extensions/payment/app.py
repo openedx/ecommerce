@@ -2,7 +2,7 @@ import importlib
 
 from oscar.core.application import Application
 
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors.base import BasePaymentProcessor
 
 
 class PaymentApplication(Application):

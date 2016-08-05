@@ -17,7 +17,7 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError, PROCESSOR_NOT_FOUND_DEVELOPER_MESSAGE
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors.base import BasePaymentProcessor
 
 log = logging.getLogger(__name__)
 
@@ -71,26 +71,6 @@ class SiteConfiguration(models.Model):
         help_text=_('Enable the creation of enrollment codes.'),
         blank=True,
         default=False
-    )
-    payment_support_email = models.CharField(
-        verbose_name=_('Payment support email'),
-        help_text=_('Contact email for payment support issues.'),
-        max_length=255,
-        blank=True,
-        default="support@example.com"
-    basket_layout = models.CharField(
-        verbose_name=_('Basket Page Layout'),
-        help_text=_('The layout of the basket page.'),
-        max_length=16,
-        choices=BASKET_LAYOUT_CHOICES,
-        default=SINGLE_COLUMN
-    )
-    checkout_template = models.CharField(
-        verbose_name=_('Checkout Template'),
-        help_text=_('The template to use for checkout.'),
-        max_length=255,
-        choices=getattr(settings, 'CHECKOUT_TEMPLATES'),
-        default=getattr(settings, 'TWO_PAGE_CHECKOUT_TEMPLATE')
     )
 
     class Meta(object):

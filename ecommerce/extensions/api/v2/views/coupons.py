@@ -21,7 +21,7 @@ from ecommerce.extensions.api.serializers import CategorySerializer, CouponSeria
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment.processors.invoice import InvoicePayment
+from ecommerce.extensions.payment.processors.invoice_payment.processor import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers, update_voucher_offer
 from ecommerce.invoice.models import Invoice

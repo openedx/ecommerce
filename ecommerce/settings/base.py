@@ -259,6 +259,7 @@ DJANGO_APPS = [
     'django_filters',
     'rest_framework_swagger',
     'release_util',
+    'django_countries',
 ]
 
 # Apps specific to this project go here.
@@ -266,9 +267,10 @@ LOCAL_APPS = [
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',
-    'ecommerce.payment_processors.adyen.apps.AdyenConfig',
-    'ecommerce.payment_processors.cybersource.apps.CybersourceConfig',
-    'ecommerce.payment_processors.paypal.apps.PaypalConfig',
+    'ecommerce.extensions.payment.processors.adyen.apps.AdyenConfig',
+    'ecommerce.extensions.payment.processors.cybersource.apps.CybersourceConfig',
+    'ecommerce.extensions.payment.processors.invoice_payment.apps.InvoicePaymentConfig',
+    'ecommerce.extensions.payment.processors.paypal.apps.PaypalConfig',
     'ecommerce.referrals',
 
     # Theming app for customizing visual and behavioral attributes of a site
@@ -561,8 +563,3 @@ ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(w
 
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
-
-TWO_PAGE_CHECKOUT_TEMPLATE = 'checkout/_two_page.html'
-CHECKOUT_TEMPLATES = (
-    (TWO_PAGE_CHECKOUT_TEMPLATE, 'Two Page'),
-)

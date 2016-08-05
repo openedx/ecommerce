@@ -1,4 +1,4 @@
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors.base import BasePaymentProcessor
 
 
 class DummyProcessor(BasePaymentProcessor):

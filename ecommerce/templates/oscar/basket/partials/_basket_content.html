@@ -94,7 +94,7 @@
                     {% else %}
                         {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                         {% if voucher_form %}
-                            <div class="use-voucher col-sm-6">
+                            <div class="use-voucher col-xs-8">
                                 <p id="voucher_form_link"><a href="#voucher">{% trans "Apply a coupon code" %}</a></p>
                                 <div id="voucher_form_container">
                                     <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">

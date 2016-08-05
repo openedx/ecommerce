@@ -1,13 +1,11 @@
 define([
         'jquery',
         'underscore',
-        'underscore.string',
         'backbone',
         'js-cookie'
     ],
     function ($,
               _,
-              _s,
               Backbone,
               Cookies
     ) {
@@ -96,7 +94,15 @@ define([
                 }
 
                  $('#messages').empty().append(
-                    _s.sprintf('<div class="error">%s</div>', errorMsg)
+                    '<div class="alert alert-danger fade in" role="alert">' +
+                    '<a class="close" data-dismiss="alert" href="#">' +
+                    '<span aria-hidden="true">×</span>' +
+                    '<span class="sr-only">Close</span>' +
+                    '</a>' +
+                    '<div class="alertinner wicon">' +
+                    errorMsg +
+                    '</div>' +
+                    '</div>'
                 );
 
                 // Re-enable the button so the user can re-try
