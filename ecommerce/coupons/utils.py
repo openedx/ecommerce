@@ -31,6 +31,7 @@ def get_range_catalog_query_results(limit, query, site, offset=None):
             limit=limit,
             offset=offset,
             q=query,
+            partner=site.siteconfiguration.partner.short_code
         )
         cache.set(cache_hash, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response
