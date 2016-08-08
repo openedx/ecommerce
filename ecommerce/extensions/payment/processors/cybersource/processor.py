@@ -51,6 +51,7 @@ class Cybersource(BasePaymentProcessor):
     def receipt_url(self):
         return get_lms_url(settings.RECEIPT_PAGE_PATH)
 
+    @property
     def cancel_url(self):
         return get_ecommerce_url(settings.CANCEL_PAGE_PATH)
 
