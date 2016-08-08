@@ -35,7 +35,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     """Execute an approved PayPal payment and place an order for paid products as appropriate."""
     @property
     def payment_processor(self):
-        return Paypal()
+        return Paypal(self.request.site)
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block
