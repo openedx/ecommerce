@@ -16,11 +16,9 @@ define([
 
             initialize: function() {
                 var self = this;
-                AdyenEncrypt.createEncryptedForm(this.el, window.adyenCSEPublicKey, {
-                    onsubmit: function(event) {
-                        self.handleSubmit(event);
-                    }
-                });
+                // Add client-side encryption of payment details
+                AdyenEncrypt.createEncryptedForm(this.el, window.adyenCSEPublicKey, {});
+                // Add payment form validation
                 $(this.el).validator();
             }
         });

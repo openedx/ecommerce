@@ -144,6 +144,44 @@ class Adyen(BasePaymentProcessor):
         except AttributeError:
             raise UnsupportedAdyenEventException
 
+    def issue_credit(self, source, amount, currency):
+        order = source.order
+
+        response = requests.post(
+            urljoin(self.configuration.payment_api_url, 'cancelOrRefund'),
+            auth=(self.configuration.web_service_username, self.configuration.web_service_password),
+            headers={
+                'Content-Type': 'application/json'
+            },
+            json={
+                'merchantAccount': self.configuration.merchant_account_code,
+                'originalReference': source.reference,
+                'reference': order.number
+            }
+        )
+
+        adyen_response = response.json()
+
+        try:
+            if response.status_code == requests.codes.ok:
+                self.record_processor_response(
+                    response.json(),
+                    transaction_id=adyen_response['pspReference'],
+                    basket=order.basket
+                )
+                if adyen_response['response'] != '[cancelOrRefund-received]':
+                    raise GatewayError
+            else:
+                raise GatewayError
+        except GatewayError:
+            msg = 'An error occurred while attempting to issue a credit (via Adyen) for order [{}].'.format(
+                order.number
+            )
+            logger.exception(msg)
+            raise GatewayError(msg)
+
+        return False
+
     def _handle_authorisation(self, psp_reference, response, basket):
         """
         Handle an authorise response from Adyen.
@@ -215,97 +253,22 @@ class Adyen(BasePaymentProcessor):
                 )
             )
 
-    def issue_credit(self, source, amount, currency):
-        order = source.order
 
-        response = requests.post(
-            urljoin(self.configuration.payment_api_url, 'cancelOrRefund'),
-            auth=(self.configuration.web_service_username, self.configuration.web_service_password),
-            headers={
-                'Content-Type': 'application/json'
-            },
-            json={
-                'merchantAccount': self.configuration.merchant_account_code,
-                'originalReference': source.reference,
-                'reference': order.number
-            }
-        )
-
-        adyen_response = response.json()
-
-        try:
-            if response.status_code == requests.codes.ok:
-                self.record_processor_response(
-                    response.json(),
-                    transaction_id=adyen_response['pspReference'],
-                    basket=order.basket
-                )
-                if adyen_response['response'] != '[cancelOrRefund-received]':
-                    raise GatewayError
-            else:
-                raise GatewayError
-        except GatewayError:
-            msg = 'An error occurred while attempting to issue a credit (via Adyen) for order [{}].'.format(
-                order.number
-            )
-            logger.exception(msg)
-            raise GatewayError(msg)
-
-        return False
-
-
-def _get_shopper_data(first_name='', last_name='', email='', billing_address='',
+def _get_shopper_data(first_name='', last_name='', email='', street_address='', apartment_number='',
                       city='', state='', postal_code='', country='', ip=''):
-    shopper_data = {}
-    shopper_data.update(_get_shopper_name(first_name, last_name))
-    shopper_data.update(_get_shopper_email(email))
-    shopper_data.update(_get_shopper_billing_address(billing_address, city, state, postal_code, country))
-    shopper_data.update(_get_shopper_ip(ip))
-    return shopper_data
-
-
-def _get_shopper_name(first_name, last_name):
-    shopper_name = {}
-    if first_name or last_name:
-        shopper_name['shopper_name'] = name = {}
-        if first_name:
-            name['firstName'] = first_name
-        if last_name:
-            name['lastName'] = last_name
-    return shopper_name
-
-
-def _get_shopper_email(email):
-    shopper_email = {}
-    if email:
-        shopper_email['shopperEmail'] = email
-    return shopper_email
-
-
-def _get_shopper_billing_address(billing_address, city, state, postal_code, country):
-    shopper_billing_address = {}
-    if billing_address or city or state or postal_code or country:
-        shopper_billing_address['billingAddress'] = address = {}
-        if billing_address:
-            try:
-                house_number, street = billing_address.split(' ', 1)
-                address['houseNumberOrName'] = house_number
-                address['street'] = street
-            except ValueError:
-                return {}
-        if city:
-            address['city'] = city
-        if state:
-            address['stateOrProvince'] = state
-        if postal_code:
-            address['postalCode'] = postal_code
-        if country:
-            address['country'] = country
-    return shopper_billing_address
-
-
-def _get_shopper_ip(ip):
-    shopper_ip = {}
-    if ip:
-        shopper_ip['shopperIP'] = ip
-    return shopper_ip
+    return {
+        'shopper_name': {
+            'firstName': first_name,
+            'lastName': last_name
+        },
+        'shopperEmail': email,
+        'billingAddress': {
+            'street': street_address,
+            'houseNumberOrName': apartment_number,
+            'city': city,
+            'stateOrProvince': state,
+            'postalCode': postal_code,
+            'country': country
+        },
+        'shopperIP': ip
+    }

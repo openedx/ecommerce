@@ -30,18 +30,27 @@ class SiteConfiguration(models.Model):
     The multi-tenant implementation has one site per partner.
     """
 
-    SINGLE_COLUMN = 'single_column'
-    TWO_COLUMN = 'two_column'
-    BASKET_LAYOUT_CHOICES = (
-        (SINGLE_COLUMN, _('Single Column')),
-        (TWO_COLUMN, _('Two Column'))
-    )
-
     site = models.OneToOneField('sites.Site', null=False, blank=False)
     partner = models.ForeignKey('partner.Partner', null=False, blank=False)
     lms_url_root = models.URLField(
         verbose_name=_('LMS base url for custom site/microsite'),
         help_text=_("Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"),
+        null=False,
+        blank=False
+    )
+    # TODO: The theme_scss_path field is deprecated and will be removed in a subsequent release.
+    theme_scss_path = models.CharField(
+        verbose_name=_('Path to custom site theme'),
+        help_text=_('Path to scss files of the custom site theme'),
+        max_length=255,
+        null=False,
+        blank=False
+    )
+    # TODO: The payment_processors field is deprecated and will be removed in a subsequent release.
+    payment_processors = models.CharField(
+        verbose_name=_('Payment processors'),
+        help_text=_("Comma-separated list of processor names: 'cybersource,paypal'"),
+        max_length=255,
         null=False,
         blank=False
     )
