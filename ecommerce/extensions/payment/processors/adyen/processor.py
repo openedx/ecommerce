@@ -47,9 +47,6 @@ class Adyen(BasePaymentProcessor):
     def generation_time(self):
         return datetime.utcnow().strftime(ISO_8601_FORMAT)
 
-    def get_alternative_payment_methods(self, basket):
-        return ['hello']
-
     def get_transaction_parameters(self, basket, request=None):
         """
         Generate a dictionary of parameters Adyen requires to complete a transaction.
