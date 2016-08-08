@@ -23,7 +23,8 @@ def get_range_catalog_query_results(limit, query, site, offset=None):
     Returns:
         dict: Query seach results received from Course Catalog API
     """
-    cache_key = 'course_runs_{}_{}_{}'.format(query, limit, offset)
+    partner_code = site.siteconfiguration.partner.short_code
+    cache_key = 'course_runs_{}_{}_{}_{}'.format(query, limit, offset, partner_code)
     cache_hash = hashlib.md5(cache_key).hexdigest()
     response = cache.get(cache_hash)
     if not response:
@@ -31,7 +32,7 @@ def get_range_catalog_query_results(limit, query, site, offset=None):
             limit=limit,
             offset=offset,
             q=query,
-            partner=site.siteconfiguration.partner.short_code
+            partner=partner_code
         )
         cache.set(cache_hash, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response
