@@ -6,7 +6,9 @@
 {% get_alternative_payment_methods payment_processors.adyen basket as alternative_payment_methods %}
 
 <div id="adyen-payment">
+    {% if payment_processors.paypal or alternative_payment_methods %}
     <label class="group-label">{% trans "Select a Payment Method" %}</label>
+    {% endif %}
     <div class="btn-group payment-method-btns" role="group">
         <a href="#card-payment" class="btn btn-default" aria-label="Credit Card"><div class="separator"><img src="{% static 'adyen/images/cards.png' %}"/></div></a>
         {% if payment_processors.paypal %}
