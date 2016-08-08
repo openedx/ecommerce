@@ -568,7 +568,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'course_seat_types': course_seat_types,
         })
         self.data.pop('stock_record_ids')
-        course, seat = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
+        course, __ = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
         self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=course)
 
         response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
@@ -577,7 +577,6 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         detail = json.loads(details_response.content)
         self.assertEqual(detail['catalog_query'], catalog_query)
         self.assertEqual(detail['course_seat_types'], course_seat_types)
-        self.assertEqual(detail['seats'][0]['id'], seat.id)
 
     @ddt.data(
         (Voucher.SINGLE_USE, None),
