@@ -18,7 +18,6 @@ from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
 from ecommerce.core.models import Site, SiteConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
-from ecommerce.coupons.utils import get_seats_from_query
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -446,7 +445,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     num_uses = serializers.SerializerMethodField()
     payment_information = serializers.SerializerMethodField()
     quantity = serializers.SerializerMethodField()
-    seats = serializers.SerializerMethodField()
     start_date = serializers.SerializerMethodField()
     voucher_type = serializers.SerializerMethodField()
 
@@ -547,22 +545,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_quantity(self, obj):
         return self.retrieve_quantity(obj)
 
-    def get_seats(self, obj):
-        offer = self.retrieve_offer(obj)
-        _range = offer.condition.range
-        request = self.context['request']
-        if _range.catalog:
-            stockrecords = _range.catalog.stock_records.all()
-            seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
-        else:
-            seats = get_seats_from_query(
-                request.site,
-                _range.catalog_query,
-                _range.course_seat_types
-            )
-        serializer = ProductSerializer(seats, many=True, context={'request': request})
-        return serializer.data
-
     def get_start_date(self, obj):
         return self.retrieve_start_date(obj)
 
@@ -572,11 +554,11 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = (
-            'benefit_type', 'benefit_value', 'catalog_query', 'categories',
-            'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
-            'end_date', 'id', 'last_edited', 'max_uses', 'note',
-            'num_uses', 'payment_information', 'price', 'quantity',
-            'seats', 'start_date', 'title', 'voucher_type'
+            'benefit_type', 'benefit_value', 'catalog_query',
+            'categories', 'client', 'code', 'code_status', 'coupon_type',
+            'course_seat_types', 'end_date', 'id', 'last_edited', 'max_uses',
+            'note', 'num_uses', 'payment_information', 'price', 'quantity',
+            'start_date', 'title', 'voucher_type'
         )
 
 
