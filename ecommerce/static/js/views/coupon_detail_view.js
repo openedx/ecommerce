@@ -67,7 +67,6 @@ define([
                 if (invoice_payment_date) {
                     invoice_payment_date = this.formatDateTime(invoice_payment_date);
                 }
-
                 return {
                     'invoice_type': this.model.get('invoice_type'),
                     'invoice_number': this.model.get('invoice_number'),
@@ -81,7 +80,7 @@ define([
 
             formatSeatTypes: function() {
                 var courseSeatTypes = this.model.get('course_seat_types');
-                if (courseSeatTypes) {
+                if (courseSeatTypes && courseSeatTypes[0] !== '[]') {
                     if(courseSeatTypes.length === 1){
                         return courseSeatTypes[0];
                     } else {
@@ -108,7 +107,12 @@ define([
                 var html,
                     category = this.model.get('categories')[0].name,
                     invoice_data = this.formatInvoiceData(),
-                    template_data;
+                    template_data,
+                    price = null;
+
+                if (this.model.get('price') !== '0.00') {
+                    price = _s.sprintf('$%s', this.model.get('price'));
+                }
 
                 template_data = {
                     category: category,
@@ -117,7 +121,7 @@ define([
                     discountValue: this.discountValue(),
                     endDateTime: this.formatDateTime(this.model.get('end_date')),
                     lastEdited: this.formatLastEditedData(this.model.get('last_edited')),
-                    price: _s.sprintf('$%s', this.model.get('price')),
+                    price: price,
                     startDateTime: this.formatDateTime(this.model.get('start_date')),
                     usage: this.usageLimitation()
                 };
@@ -127,7 +131,6 @@ define([
 
                 this.$el.html(html);
                 this.renderCourseData();
-                this.renderInvoiceData();
                 this.delegateEvents();
 
                 this.dynamic_catalog_view = new DynamicCatalogView({
@@ -149,58 +152,8 @@ define([
                             this.model.get('course_id'),
                             this.model.get('seat_type'))
                     );
-
-                    this.$('.catalog-query').addClass('hidden');
-                    this.$('.seat-types').addClass('hidden');
-                    this.$('.course-info').removeClass('hidden');
-                } else if (this.model.get('catalog_type') === 'Multiple courses') {
-                    this.$('.course-info').addClass('hidden');
-                    this.$('.catalog-query').removeClass('hidden');
-                    this.$('.seat-types').removeClass('hidden');
                 }
                 return this;
-            },
-
-            renderInvoiceData: function() {
-                var invoice_type = this.model.get('invoice_type'),
-                    tax_deducted = this.model.get('tax_deduction'),
-                    prepaid_fields = [
-                        '.invoice-number',
-                        '.invoiced-amount',
-                        '.invoice-payment-date'
-                    ],
-                    postpaid_fields = [
-                        '.invoice-discount-type',
-                        '.invoice-discount-value'
-                    ];
-                if (tax_deducted === 'Yes') {
-                    this.$('.tax-deducted-source-value').removeClass('hidden');
-                } else if (tax_deducted === 'No') {
-                    this.$('.tax-deducted-source-value').addClass('hidden');
-                }
-
-                if (invoice_type === 'Prepaid') {
-                    _.each(prepaid_fields, function(field) {
-                        this.$(field).removeClass('hidden');
-                    }, this);
-                    _.each(postpaid_fields, function(field) {
-                        this.$(field).addClass('hidden');
-                    }, this);
-                } else if (invoice_type === 'Postpaid') {
-                    _.each(prepaid_fields, function(field) {
-                        this.$(field).addClass('hidden');
-                    }, this);
-                    _.each(postpaid_fields, function(field) {
-                        this.$(field).removeClass('hidden');
-                    }, this);
-                } else if (invoice_type === 'Not-Applicable') {
-                    _.each(prepaid_fields, function(field) {
-                        this.$(field).addClass('hidden');
-                    }, this);
-                    _.each(postpaid_fields, function(field) {
-                        this.$(field).addClass('hidden');
-                    }, this);
-                }
             },
 
             downloadCouponReport: function (event) {
