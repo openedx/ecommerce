@@ -137,8 +137,12 @@ class Adyen(BasePaymentProcessor):
             psp_reference = response['pspReference']
             return getattr(self, '_handle_{event}'.format(event=event_code.lower()))(psp_reference, response, basket)
         except KeyError:
+            logger.exception('Received Adyen notification with missing eventCode.')
             raise MissingAdyenEventCodeException
         except AttributeError:
+            logger.exception(
+                'Received Adyen notification with unknown Adyen eventCode {event_code}.'.format(event_code=event_code)
+            )
             raise UnsupportedAdyenEventException
 
     def issue_credit(self, source, amount, currency):

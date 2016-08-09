@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -15,7 +15,11 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
-from ecommerce.extensions.payment.processors.adyen.exceptions import AdyenRequestError
+from ecommerce.extensions.payment.processors.adyen.exceptions import (
+    AdyenRequestError,
+    MissingAdyenEventCodeException,
+    UnsupportedAdyenEventException,
+)
 from ecommerce.extensions.payment.processors.adyen.processor import Adyen
 
 
@@ -51,18 +55,16 @@ class AdyenNotificationView(EdxOrderPlacementMixin, View):
             try:
                 source = Source.objects.get(reference=psp_reference)
                 basket = source.order.basket
-            except Source.DoesNotExist:
-                return HttpResponse(status=500)
-            except MultipleObjectsReturned:
-                return HttpResponse(status=500)
+                self.payment_processor.handle_processor_response(notification, basket)
+            except (Source.DoesNotExist, MultipleObjectsReturned, MissingAdyenEventCodeException,
+                    UnsupportedAdyenEventException):
+                return HttpResponseBadRequest()
             finally:
                 self.payment_processor.record_processor_response(
                     notification,
                     transaction_id=psp_reference,
                     basket=basket
                 )
-
-            self.payment_processor.handle_processor_response(notification, basket)
 
         # Adyen expects this response
         return HttpResponse('[accepted]')
