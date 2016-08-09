@@ -64,19 +64,20 @@ define([
                 // these parameters, then submit it to the payment processor.
                 // This will send the user to an externally-hosted page
                 // where she can proceed with payment.
-                var paymentData = paymentDataResponse.payment_form_data,
+                var self = this,
+                    paymentData = paymentDataResponse.payment_form_data,
                     paymentUrl = paymentDataResponse.payment_page_url;
 
                 $('input', this.$paymentForm).remove();
 
                 this.$paymentForm.attr('action', paymentUrl);
 
-                _.each(paymentData.payment_form_data, function (value, key) {
+                _.each(paymentData, function (value, key) {
                     $('<input>').attr({
                         type: 'hidden',
                         name: key,
                         value: value
-                    }).appendTo(this.$paymentForm);
+                    }).appendTo(self.$paymentForm);
                 });
 
                 this.submitForm(this.$paymentForm);
