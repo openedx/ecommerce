@@ -21,19 +21,20 @@ define([
                 this.card_payment_view = new CardPaymentView({el: $('#card-payment-view')});
 
                 // Select the appropriate view if the current location has a hash
-                var selectedPaymentMethodId = window.location.hash || '#card-payment';
+                // Default to the first payment view
+                var selectedPaymentMethodId = window.location.hash || '#' + this.$paymentMethodViews.attr('id');
                 if (selectedPaymentMethodId) {
                     this.selectPaymentMethodButton(
                         $el.find('.payment-method-btns .btn[href="' + selectedPaymentMethodId + '"]')
                     );
-                    this.selectPaymentMethodView($el.find(selectedPaymentMethodId + '-view'));
+                    this.selectPaymentMethodView($el.find(selectedPaymentMethodId));
                 }
             },
 
             handlePaymentMethodSelection: function(event) {
                 var $selectedPaymentMethodBtn = $(event.currentTarget).closest('.btn'),
                     $selectedPaymentMethodView = this.$paymentMethodViews.filter(
-                        $selectedPaymentMethodBtn.attr('href') + '-view'
+                        $selectedPaymentMethodBtn.attr('href')
                     );
 
                 this.selectPaymentMethodButton($selectedPaymentMethodBtn);

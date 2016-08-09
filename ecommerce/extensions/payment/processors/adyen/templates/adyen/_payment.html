@@ -10,12 +10,12 @@
     <label class="group-label">{% trans "Select a Payment Method" %}</label>
     {% endif %}
     <div class="btn-group payment-method-btns" role="group">
-        <a href="#card-payment" class="btn btn-default" aria-label="Credit Card"><div class="separator"><img src="{% static 'adyen/images/cards.png' %}"/></div></a>
+        <a href="#card-payment-view" class="btn btn-default" aria-label="Credit Card"><div class="separator"><img src="{% static 'adyen/images/cards.png' %}"/></div></a>
         {% if payment_processors.paypal %}
-        <a href="#paypal-payment" class="btn btn-default" aria-label="Paypal"><div class="separator"><img src="{% static 'adyen/images/paypal.png' %}"/></div></a>
+        <a href="#paypal-payment-view" class="btn btn-default" aria-label="Paypal"><div class="separator"><img src="{% static 'adyen/images/paypal.png' %}"/></div></a>
         {% endif %}
         {% if alternative_payment_methods %}
-        <a href="#alternative-payment" class="btn btn-default" aria-label="Alternative Payment Methods"><span class="content-block" aria-hidden="true">...</span></a>
+        <a href="#alternative-payment-view" class="btn btn-default" aria-label="Alternative Payment Methods"><span class="content-block" aria-hidden="true">...</span></a>
         {% endif %}
     </div>
 
