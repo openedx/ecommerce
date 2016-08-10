@@ -3,6 +3,7 @@ import logging
 from django.dispatch import receiver
 from oscar.core.loading import get_class
 import waffle
+from threadlocals import threadlocals
 
 from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 from ecommerce.extensions.analytics.utils import silence_exceptions
@@ -17,7 +18,7 @@ basket_addition = get_class('basket.signals', 'basket_addition')
 
 @receiver(post_checkout)
 @silence_exceptions("Failed to call Sailthru upon order completion.")
-def process_checkout_complete(sender, order=None, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
+def process_checkout_complete(sender, order=None, **kwargs):  # pylint: disable=unused-argument
     """Tell Sailthru when payment done.
 
     Arguments:
@@ -44,8 +45,11 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
         # figure out course url
         course_url = _build_course_url(course_id)
 
+        # get current request
+        request = threadlocals.get_current_request()
+
         # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
-        update_course_enrollment.delay(user.email, course_url, False, mode_for_seat(product),
+        update_course_enrollment.delay(order.user.email, course_url, False, mode_for_seat(product),
                                        unit_cost=price, course_id=course_id, currency=order.currency,
                                        site_code=request.site.siteconfiguration.partner.short_code,
                                        message_id=request.COOKIES.get('sailthru_bid'))
@@ -53,7 +57,7 @@ def process_checkout_complete(sender, order=None, request=None, user=None, **kwa
 
 @receiver(basket_addition)
 @silence_exceptions("Failed to call Sailthru upon basket addition.")
-def process_basket_addition(sender, product=None, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
+def process_basket_addition(sender, product=None, user=None, request=None, **kwargs):  # pylint: disable=unused-argument
     """Tell Sailthru when payment started.
 
     Arguments:
