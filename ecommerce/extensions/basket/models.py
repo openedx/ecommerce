@@ -45,6 +45,11 @@ class Basket(AbstractBasket):
 
         return basket
 
+    def clear_vouchers(self):
+        """Remove all vouchers applied to the basket."""
+        for v in self.vouchers.all():
+            self.vouchers.remove(v)
+
     def __unicode__(self):
         return _(u"{id} - {status} basket (owner: {owner}, lines: {num_lines})").format(
             id=self.id,

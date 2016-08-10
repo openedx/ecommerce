@@ -7,6 +7,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import prepare_basket
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
@@ -19,7 +20,7 @@ Product = get_model('catalogue', 'Product')
 
 
 @ddt.ddt
-class BasketUtilsTests(TestCase):
+class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
     """ Tests for basket utility functions. """
 
     def setUp(self):
@@ -51,20 +52,22 @@ class BasketUtilsTests(TestCase):
         self.assertEqual(basket.total_excl_tax, 90.00)
 
     def test_prepare_basket_enrollment_with_voucher(self):
+        """Verify the basket does not contain a voucher if enrollment code is added to it."""
         course = CourseFactory()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        # Prepare a product with price of 100 and a voucher with 10% discount for that product.
-        product = ProductFactory(stockrecords__price_excl_tax=100)
-        new_range = RangeFactory(products=[product, ])
-        voucher, product = prepare_voucher(_range=new_range, benefit_value=10)
+        voucher, product = prepare_voucher()
+
         basket = prepare_basket(self.request, product, voucher)
         self.assertIsNotNone(basket)
-        self.assertEqual(basket.vouchers.count(), 1)
-        basket = prepare_basket(self.request, enrollment_code)
+        self.assertEqual(basket.all_lines()[0].product, product)
+        self.assertTrue(basket.contains_a_voucher)
+
+        basket = prepare_basket(self.request, enrollment_code, voucher)
         self.assertIsNotNone(basket)
-        self.assertEqual(basket.vouchers.count(), 0)
+        self.assertEqual(basket.all_lines()[0].product, enrollment_code)
+        self.assertFalse(basket.contains_a_voucher)
 
     def test_multiple_vouchers(self):
         """ Verify only the last entered voucher is contained in the basket. """
