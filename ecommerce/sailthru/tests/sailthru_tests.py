@@ -5,6 +5,7 @@ from mock import patch
 from oscar.test.factories import create_order
 from oscar.test.newfactories import UserFactory, BasketFactory
 from django.test.client import RequestFactory
+from threadlocals.threadlocals import get_current_request
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.core.tests import toggle_switch
@@ -49,16 +50,16 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         process_basket_addition(None)
         self.assertFalse(mock_log_error.called)
 
+    @patch('threadlocals.threadlocals.get_current_request')
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
-    def test_process_checkout_complete(self, mock_update_course_enrollment):
+    def test_process_checkout_complete(self, mock_update_course_enrollment, mock_gcr):
         """
         Test that the process_checkout signal handler properly calls the task routine
         """
 
         seat, order = self._create_order(99)
-        process_checkout_complete(None, request=self.request,
-                                  user=self.user,
-                                  order=order)
+        mock_gcr.return_value = self.request
+        process_checkout_complete(None, order=order)
         self.assertTrue(mock_update_course_enrollment.called)
         mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
                                                          self.course_url,
