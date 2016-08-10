@@ -56,9 +56,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         """
 
         seat, order = self._create_order(99)
-        process_checkout_complete(None, request=self.request,
-                                  user=self.user,
-                                  order=order)
+        process_checkout_complete(None, order=order, request=self.request)
         self.assertTrue(mock_update_course_enrollment.called)
         mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
                                                          self.course_url,
@@ -67,6 +65,25 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
                                                          course_id=self.course_id,
                                                          currency=order.currency,
                                                          message_id='cookie_bid',
+                                                         site_code='edX',
+                                                         unit_cost=order.total_excl_tax)
+
+    @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
+    def test_process_checkout_complete_no_request(self, mock_update_course_enrollment):
+        """
+        Test that the process_checkout signal handler properly handles null request
+        """
+
+        seat, order = self._create_order(99)
+        process_checkout_complete(None, order=order)
+        self.assertTrue(mock_update_course_enrollment.called)
+        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
+                                                         self.course_url,
+                                                         False,
+                                                         seat.attr.certificate_type,
+                                                         course_id=self.course_id,
+                                                         currency=order.currency,
+                                                         message_id=None,
                                                          site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 

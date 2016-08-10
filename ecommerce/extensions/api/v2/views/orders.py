@@ -54,7 +54,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
         logger.info('Attempting fulfillment of order [%s]...', order.number)
         post_checkout = get_class('checkout.signals', 'post_checkout')
-        post_checkout.send(sender=post_checkout, order=order)
+        post_checkout.send(sender=post_checkout, order=order, request=request)
 
         if order.is_fulfillable:
             logger.warning('Fulfillment of order [%s] failed!', order.number)

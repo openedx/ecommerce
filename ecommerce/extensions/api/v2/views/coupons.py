@@ -200,7 +200,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             # Create an order now since payment is handled out of band via an invoice.
             response_data = self.create_order_for_invoice(
-                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
+                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data, request=request
             )
 
             return Response(response_data, status=status.HTTP_200_OK)
@@ -284,7 +284,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         for category in categories:
             ProductCategory.objects.get_or_create(product=coupon, category=category)
 
-    def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
+    def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None, request=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
 
@@ -304,7 +304,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             shipping_method=order_metadata[AC.KEYS.SHIPPING_METHOD],
             shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
             billing_address=None,
-            order_total=order_metadata[AC.KEYS.ORDER_TOTAL]
+            order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+            request=request
         )
 
         # Invoice payment processor invocation.
