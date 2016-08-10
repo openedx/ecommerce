@@ -447,6 +447,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     quantity = serializers.SerializerMethodField()
     start_date = serializers.SerializerMethodField()
     voucher_type = serializers.SerializerMethodField()
+    seats = serializers.SerializerMethodField()
 
     def retrieve_benefit(self, obj):
         """Helper method to retrieve the benefit from voucher. """
@@ -551,6 +552,18 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_voucher_type(self, obj):
         return self.retrieve_voucher_usage(obj)
 
+    def get_seats(self, obj):
+        offer = self.retrieve_offer(obj)
+        _range = offer.condition.range
+        request = self.context['request']
+        if _range.catalog:
+            stockrecords = _range.catalog.stock_records.all()
+            seats = Product.objects.filter(id__in=[sr.product.id for sr in stockrecords])
+            serializer = ProductSerializer(seats, many=True, context={'request': request})
+            return serializer.data
+        else:
+            return None
+
     class Meta(object):
         model = Product
         fields = (
@@ -558,7 +571,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             'categories', 'client', 'code', 'code_status', 'coupon_type',
             'course_seat_types', 'end_date', 'id', 'last_edited', 'max_uses',
             'note', 'num_uses', 'payment_information', 'price', 'quantity',
-            'start_date', 'title', 'voucher_type'
+            'start_date', 'title', 'voucher_type', 'seats'
         )
 
 
