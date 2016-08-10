@@ -5,7 +5,6 @@ from mock import patch
 from oscar.test.factories import create_order
 from oscar.test.newfactories import UserFactory, BasketFactory
 from django.test.client import RequestFactory
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.core.tests import toggle_switch
