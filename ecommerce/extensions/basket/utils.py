@@ -34,13 +34,13 @@ def prepare_basket(request, product, voucher=None):
     basket = Basket.get_basket(request.user, request.site)
     basket.flush()
     basket.add_product(product, 1)
-    if voucher or product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
-        for v in basket.vouchers.all():
-            basket.vouchers.remove(v)
-        if voucher:
-            basket.vouchers.add(voucher)
-            Applicator().apply(basket, request.user, request)
-            logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
+    if product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        basket.clear_vouchers()
+    elif voucher:
+        basket.clear_vouchers()
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket, request.user, request)
+        logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
 
     affiliate_id = request.COOKIES.get(settings.AFFILIATE_COOKIE_KEY)
     if affiliate_id:
