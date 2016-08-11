@@ -16,7 +16,7 @@ from ecommerce.theming.management.commands.update_assets import (
 
 class TestUpdateAssets(TestCase):
     """
-    Test comprehensive theming helper functions.
+    Test management command for updating/compiling themed assets.
     """
     def setUp(self):
         super(TestUpdateAssets, self).setUp()

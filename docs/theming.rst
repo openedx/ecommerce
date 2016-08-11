@@ -130,6 +130,50 @@ Disabling a Theme
 -----------------
 Theme can be disabled by removing its corresponding ``Site Theme`` entry using django admin.
 
+---------------------------------------
+Creating or Updating Site and SiteTheme
+---------------------------------------
+If you have already setup ``COMPREHENSIVE_THEME_DIRS`` then you can use management command for adding
+``Site`` and ``SiteTheme`` directly from the terminal.
+
+.. code-block:: Bash
+
+    python manage.py create_or_update_site_theme --site-domain=localhost:8002 --site-name=localhost:8002 --site-theme=my-theme
+
+``create_or_update_site_theme`` accepts the following optional arguments
+
+    :--settings: settings file to use, ``default: ecommerce.settings.devstack``
+
+        .. code-block:: Bash
+
+            python manage.py create_or_update_site_theme --settings=ecommerce.settings.production
+
+    :--site-id: id of the site that you want to update
+
+        .. code-block:: Bash
+
+            # update domain of the site with id 1 and add a new theme ``my-theme`` for this site
+            python manage.py create_or_update_site_theme --site-id=1 --site-domain=my-theme.localhost:8002 --site-name=my-theme.localhost:8002 --site-theme=my-theme
+
+    :--site-domain: domain of the site to be created,
+
+        .. code-block:: Bash
+
+            python manage.py create_or_update_site_theme --site-domain=localhost:8002 --site-theme=my-theme
+
+    :--site-name: Name of the site to be created, ``default: ''``
+
+        .. code-block:: Bash
+
+            python manage.py create_or_update_site_theme --site-domain=localhost:8002 --site-name=localhost:8002 --site-theme=my-theme
+
+    :--site-theme: theme dir for the new theme,
+
+        .. code-block:: Bash
+
+            python manage.py create_or_update_site_theme --site-domain=localhost:8002 --site-name=localhost:8002 --site-theme=my-theme
+
+
 --------------------
 Compiling Theme Sass
 --------------------
