@@ -162,7 +162,8 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
                 shipping_method,
                 shipping_charge,
                 billing_address,
-                order_total
+                order_total,
+                request=request
             )
 
             return HttpResponse()
@@ -255,7 +256,8 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 shipping_method=shipping_method,
                 shipping_charge=shipping_charge,
                 billing_address=None,
-                order_total=order_total
+                order_total=order_total,
+                request=request
             )
 
             return redirect(receipt_url)

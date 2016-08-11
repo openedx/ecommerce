@@ -70,6 +70,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                                shipping_charge,
                                billing_address,
                                order_total,
+                               request=None,
                                **kwargs):
         """
         Place an order and mark the corresponding basket as submitted.
@@ -93,9 +94,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
             basket.submit()
 
-        return self.handle_successful_order(order)
+        return self.handle_successful_order(order, request)
 
-    def handle_successful_order(self, order):
+    def handle_successful_order(self, order, request=None):  # pylint: disable=arguments-differ
         """Send a signal so that receivers can perform relevant tasks (e.g., fulfill the order)."""
         audit_log(
             'order_placed',
@@ -114,11 +115,11 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             # See http://celery.readthedocs.org/en/latest/userguide/tasks.html#database-transactions.
             fulfill_order.delay(order.number, site_code=order.site.siteconfiguration.partner.short_code)
         else:
-            post_checkout.send(sender=self, order=order)
+            post_checkout.send(sender=self, order=order, request=request)
 
         return order
 
-    def place_free_order(self, basket):
+    def place_free_order(self, basket, request=None):
         """Fulfill a free order.
 
         Arguments:
@@ -155,6 +156,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             shipping_charge=order_metadata[AC.KEYS.SHIPPING_CHARGE],
             billing_address=None,
             order_total=order_metadata[AC.KEYS.ORDER_TOTAL],
+            request=request
         )
 
         return order
