@@ -75,7 +75,7 @@ urlpatterns = [
 ]
 
 router = ExtendedSimpleRouter()
-router.register(r'courses', course_views.CourseViewSet) \
+router.register(r'courses', course_views.CourseViewSet, base_name='course') \
     .register(r'products', product_views.ProductViewSet,
               base_name='course-product', parents_query_lookups=['course_id'])
 router.register(r'partners', partner_views.PartnerViewSet) \
