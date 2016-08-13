@@ -32,3 +32,6 @@ pytz==2015.7
 requests==2.9.1
 sailthru-client==2.2.3
 suds==0.4
+
+# ECOM-5232: This custom version includes a migration fix that prevents us from having to fake migrations.
+git+https://github.com/clintonb/python-social-auth.git@edx-migration-fix#python-social-auth==0.2.21.edx
