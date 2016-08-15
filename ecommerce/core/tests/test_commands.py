@@ -26,6 +26,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.client_secret = 'ecommerce-secret'
         self.segment_key = 'test-segment-key'
         self.from_email = 'site_from_email@example.com'
+        self.partner_orgs = 'test-orgs'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -41,7 +42,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
 
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, theme_scss_path=None,
-                      payment_processors=None, segment_key=None, enable_enrollment_codes=False):
+                      payment_processors=None, segment_key=None, enable_enrollment_codes=False, partner_orgs=None):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -74,6 +75,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             command_args.append('--enable-enrollment-codes={enable_enrollment_codes}'.format(
                 enable_enrollment_codes=enable_enrollment_codes
             ))
+        if partner_orgs:
+            command_args.append('--partner-orgs={partner_orgs}'.format(partner_orgs=partner_orgs))
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -127,6 +130,67 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site.name, updated_site_name)
         self._check_site_configuration(site, partner)
         self.assertTrue(site.siteconfiguration.enable_enrollment_codes)
+
+    def test_create_partner(self):
+        """ Verify the command creates Site, Partner, and SiteConfiguration. """
+        site_domain = 'ecommerce-fake1.server'
+        new_partner = 'fake2'
+        partner_orgs = 'test-org'
+
+        self.assertFalse(Partner.objects.filter(code=new_partner))
+
+        self._call_command(
+            site_domain=site_domain,
+            partner_code=new_partner,
+            lms_url_root=self.lms_url_root,
+            theme_scss_path=self.theme_scss_path,
+            payment_processors=self.payment_processors,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            segment_key=self.segment_key,
+            from_email=self.from_email,
+            partner_orgs=partner_orgs
+        )
+
+        partner = Partner.objects.get(code=new_partner)
+        self.assertEqual(partner.short_code, new_partner)
+        self.assertEqual(partner.organization_list, partner_orgs)
+
+    def test_update_partner_org(self):
+        """ Verify the command updates partner organization """
+        site_domain = 'ecommerce-fake2.server'
+        partner_org1 = 'test-org1'
+        partner_org2 = 'test-org2'
+
+        self._call_command(
+            site_domain=site_domain,
+            partner_code=self.partner,
+            lms_url_root=self.lms_url_root,
+            theme_scss_path=self.theme_scss_path,
+            payment_processors=self.payment_processors,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            segment_key=self.segment_key,
+            from_email=self.from_email,
+            partner_orgs=partner_org1
+        )
+
+        self.assertEqual(Partner.objects.get(code=self.partner).organization_list, partner_org1)
+
+        self._call_command(
+            site_domain=site_domain,
+            partner_code=self.partner,
+            lms_url_root=self.lms_url_root,
+            theme_scss_path=self.theme_scss_path,
+            payment_processors=self.payment_processors,
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            segment_key=self.segment_key,
+            from_email=self.from_email,
+            partner_orgs=partner_org2
+        )
+
+        self.assertEqual(Partner.objects.get(code=self.partner).organization_list, partner_org2)
 
     @data(
         ['--site-id=1'],
