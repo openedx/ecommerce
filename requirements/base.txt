@@ -13,7 +13,7 @@ django-waffle==0.11.1
 djangorestframework==3.2.3
 djangorestframework-jwt==1.8.0
 drf-extensions==0.2.8
-edx-auth-backends==0.5.1
+edx-auth-backends==0.5.2
 edx-django-release-util==0.1.0
 edx-django-sites-extensions==1.0.0
 edx-drf-extensions==1.0.0
@@ -32,6 +32,3 @@ pytz==2015.7
 requests==2.9.1
 sailthru-client==2.2.3
 suds==0.4
-
-# ECOM-5232: This custom version includes a migration fix that prevents us from having to fake migrations.
-git+https://github.com/clintonb/python-social-auth.git@edx-migration-fix#python-social-auth==0.2.21.edx
