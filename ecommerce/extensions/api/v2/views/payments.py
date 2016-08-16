@@ -120,7 +120,7 @@ class PaymentProcessorNotificationView(APIView):
 
     def post(self, request):
         notification_data = request.data
-        payment_processor = self._get_processor_for_notification(notification_data)
+        payment_processor = self._get_processor_for_notification(request.site, notification_data)
         if not payment_processor:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -154,8 +154,7 @@ class PaymentProcessorNotificationView(APIView):
 
         return Response()
 
-    def _get_processor_for_notification(self, request, notification_data):
-        site = request.site
+    def _get_processor_for_notification(self, site, notification_data):
         payment_processors = site.siteconfiguration.get_payment_processors()
         for processor in payment_processors:
             if processor.can_handle_notification(notification_data):
