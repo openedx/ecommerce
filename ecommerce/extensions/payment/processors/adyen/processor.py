@@ -179,9 +179,19 @@ class Adyen(BasePaymentProcessor):
                 )
                 continue
 
-            basket_id = OrderNumberGenerator().basket_id(order_number)
             try:
+                basket_id = OrderNumberGenerator().basket_id(order_number)
                 basket = self._get_basket(basket_id)
+            except IndexError:
+                payment_processor_response = self.record_processor_response(notification, transaction_id)
+                logger.error(
+                    'Received Adyen notification for transaction [%s], associated with unknown order [%s].'
+                    'The payment processor response was recorded in record [%d].',
+                    transaction_id,
+                    order_number,
+                    payment_processor_response.id
+                )
+                continue
             except UnknownBasketError:
                 payment_processor_response = self.record_processor_response(notification, transaction_id)
                 logger.error(
