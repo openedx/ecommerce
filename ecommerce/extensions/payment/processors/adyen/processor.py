@@ -355,8 +355,8 @@ class Adyen(BasePaymentProcessor):
 
     def _parse_notification_items(self, notification_data):
         try:
-            return json.loads(notification_data)['notificationItems']
-        except (ValueError, KeyError):
+            return notification_data['notificationItems']
+        except (KeyError, TypeError, ValueError):
             raise NotificationParseError
 
     def _process_authorization(self, transaction_id, basket):
