@@ -301,7 +301,7 @@ class Adyen(BasePaymentProcessor):
         if success:
             signed_values.append(str(success).lower())
 
-        message = ':'.join([val for val in signed_values if val is not None])
+        message = ':'.join([str(val) for val in signed_values if val is not None])
 
         return sign(message, self.configuration.notifications_hmac_key)
 
