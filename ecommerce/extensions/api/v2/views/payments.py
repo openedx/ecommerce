@@ -156,7 +156,7 @@ class PaymentProcessorNotificationView(APIView):
 
     def _get_processor_for_notification(self, site, notification_data):
         payment_processors = site.siteconfiguration.get_payment_processors()
-        for _, processor in payment_processors:
+        for _, processor in payment_processors.iteritems():
             if processor.can_handle_notification(notification_data):
                 return processor
 
