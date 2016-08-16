@@ -294,7 +294,7 @@ class Adyen(BasePaymentProcessor):
             notification.get('merchantAccountCode', ''),
             notification.get('merchantReference', ''),
             str(amount.get('value', '')),
-            amount.get('currencyCode'),
+            amount.get('currencyCode', ''),
             notification.get('eventCode', ''),
             str(notification.get('success', '')).lower()
         ]
