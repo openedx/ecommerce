@@ -162,7 +162,7 @@ class Paypal(BasePaymentProcessor):
 
         return parameters
 
-    def handle_processor_response(self, response, basket=None):
+    def handle_payment_authorization_response(self, response, basket=None):
         """
         Execute an approved PayPal payment.
 
@@ -317,3 +317,9 @@ class Paypal(BasePaymentProcessor):
             raise GatewayError(msg)
 
         return True
+
+    def process_notification(self, notification_data):
+        raise NotImplementedError
+
+    def send_payment_authorization_request(self, basket, authorization_data):
+        raise NotImplementedError

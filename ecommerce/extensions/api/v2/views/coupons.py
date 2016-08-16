@@ -274,7 +274,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Invoice payment processor invocation.
         payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(
+        payment_processor().handle_payment_authorization_response(
             response={}, order=order, business_client=client, invoice_data=invoice_data
         )
         response_data['payment_data'] = {

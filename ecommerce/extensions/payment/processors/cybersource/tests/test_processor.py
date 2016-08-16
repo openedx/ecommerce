@@ -145,12 +145,12 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         response['signature'] = self.generate_signature(self.processor.secret_key, response)
         self.assertTrue(self.processor.is_signature_valid(response))
 
-    def test_handle_processor_response(self):
+    def test_handle_payment_authorization_response(self):
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
 
         response = self.generate_notification(self.processor.secret_key, self.basket)
         reference = response['transaction_id']
-        source, payment_event = self.processor.handle_processor_response(response, basket=self.basket)
+        source, payment_event = self.processor.handle_payment_authorization_response(response, basket=self.basket)
 
         # Validate the Source
         source_type = SourceType.objects.get(code=self.processor.NAME)
@@ -169,14 +169,19 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         amount = self.basket.total_incl_tax
         self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
 
-    def test_handle_processor_response_invalid_signature(self):
+    def test_handle_payment_authorization_response_invalid_signature(self):
         """
-        The handle_processor_response method should raise an InvalidSignatureError if the response's
+        The handle_payment_authorization_response method should raise an InvalidSignatureError if the response's
         signature is not valid.
         """
         response = self.generate_notification(self.processor.secret_key, self.basket)
         response['signature'] = 'Tampered.'
-        self.assertRaises(InvalidSignatureError, self.processor.handle_processor_response, response, basket=self.basket)
+        self.assertRaises(
+            InvalidSignatureError,
+            self.processor.handle_payment_authorization_response,
+            response,
+            basket=self.basket
+        )
 
     @ddt.data(
         ('CANCEL', UserCancelled),
@@ -184,19 +189,19 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         ('ERROR', GatewayError),
         ('huh?', InvalidCybersourceDecision))
     @ddt.unpack
-    def test_handle_processor_response_not_accepted(self, decision, exception):
-        """ The handle_processor_response method should raise an exception if payment was not accepted. """
+    def test_handle_payment_authorization_response_not_accepted(self, decision, exception):
+        """ The handle_payment_authorization_response method should raise an exception if payment was not accepted. """
 
         response = self.generate_notification(self.processor.secret_key, self.basket, decision=decision)
-        self.assertRaises(exception, self.processor.handle_processor_response, response, basket=self.basket)
+        self.assertRaises(exception, self.processor.handle_payment_authorization_response, response, basket=self.basket)
 
-    def test_handle_processor_response_invalid_auth_amount(self):
+    def test_handle_payment_authorization_response_invalid_auth_amount(self):
         """
-        The handle_processor_response method should raise PartialAuthorizationError if the authorized amount
+        The handle_payment_authorization_response method should raise PartialAuthorizationError if the authorized amount
         differs from the requested amount.
         """
         response = self.generate_notification(self.processor.secret_key, self.basket, auth_amount='0.00')
-        self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
+        self.assertRaises(PartialAuthorizationError, self.processor.handle_payment_authorization_response, response,
                           basket=self.basket)
 
     def test_get_single_seat(self):

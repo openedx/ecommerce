@@ -27,6 +27,8 @@ from ecommerce.extensions.payment.transport import RequestsTransport
 
 logger = logging.getLogger(__name__)
 
+BillingAddress = get_model('order', 'BillingAddress')
+Country = get_model('address', 'Country')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -54,6 +56,23 @@ class Cybersource(BasePaymentProcessor):
     @property
     def cancel_url(self):
         return get_ecommerce_url(settings.CANCEL_PAGE_PATH)
+
+    def get_billing_address(self, cybersource_response):
+        return BillingAddress(
+            first_name=cybersource_response['req_bill_to_forename'],
+            last_name=cybersource_response['req_bill_to_surname'],
+            line1=cybersource_response['req_bill_to_address_line1'],
+
+            # Address line 2 is optional
+            line2=cybersource_response.get('req_bill_to_address_line2', ''),
+
+            # Oscar uses line4 for city
+            line4=cybersource_response['req_bill_to_address_city'],
+            postcode=cybersource_response['req_bill_to_address_postal_code'],
+            # State is optional
+            state=cybersource_response.get('req_bill_to_address_state', ''),
+            country=Country.objects.get(iso_3166_1_a2=cybersource_response['req_bill_to_address_country'])
+        )
 
     def get_transaction_parameters(self, basket, request=None):
         """
@@ -155,7 +174,7 @@ class Cybersource(BasePaymentProcessor):
 
         return None
 
-    def handle_processor_response(self, response, basket=None):
+    def handle_payment_authorization_response(self, response, basket=None):
         """
         Handle a response (i.e., "merchant notification") from CyberSource.
 
@@ -299,6 +318,12 @@ class Cybersource(BasePaymentProcessor):
                     order_number=order.number, response_id=ppr.id))
 
         return True
+
+    def process_notification(self, notification_data):
+        raise NotImplementedError
+
+    def send_payment_authorization_request(self, basket, authorization_data):
+        raise NotImplementedError
 
 
 def suds_response_to_dict(d):  # pragma: no cover

@@ -18,7 +18,7 @@ class InvoicePayment(BasePaymentProcessor):
 
     NAME = u'invoice'
 
-    def handle_processor_response(
+    def handle_payment_authorization_response(
             self, response, order=None, business_client=None, invoice_data=None
     ):  # pylint: disable=arguments-differ
         """
@@ -47,4 +47,10 @@ class InvoicePayment(BasePaymentProcessor):
         return None
 
     def issue_credit(self, source, amount, currency):
+        raise NotImplementedError
+
+    def process_notification(self, notification_data):
+        raise NotImplementedError
+
+    def send_payment_authorization_request(self, basket, authorization_data):
         raise NotImplementedError

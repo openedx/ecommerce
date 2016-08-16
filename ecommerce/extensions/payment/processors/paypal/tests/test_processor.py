@@ -84,7 +84,10 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
     def _assert_payment_event_and_source(self, payer_info):
         """DRY helper for verifying a payment event and source."""
-        source, payment_event = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+        source, payment_event = self.processor.handle_payment_authorization_response(
+            self.RETURN_DATA,
+            basket=self.basket
+        )
 
         # Validate Source
         source_type = SourceType.objects.get(code=self.processor.NAME)
@@ -162,7 +165,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
     @httpretty.activate
-    def test_handle_processor_response(self):
+    def test_handle_payment_authorization_response(self):
         """Verify that the processor creates the appropriate PaymentEvent and Source objects."""
         for payer_info in (PaypalMixin.PAYER_INFO, {"shipping_address": None}):
             httpretty.reset()
@@ -185,7 +188,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
             logger_name = 'ecommerce.extensions.payment.processors.paypal'
             with LogCapture(logger_name) as paypal_logger:
-                self.assertRaises(GatewayError, self.processor.handle_processor_response, self.RETURN_DATA, self.basket)
+                self.assertRaises(GatewayError, self.processor.handle_payment_authorization_response, self.RETURN_DATA, self.basket)
                 payment_processor_response = self.assert_processor_response_recorded(
                     self.processor.NAME,
                     self.ERROR['debug_id'],
@@ -225,7 +228,12 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         with mock.patch.object(paypalrestsdk.Payment, 'success', return_value=False):
             logger_name = 'ecommerce.extensions.payment.processors.paypal'
             with LogCapture(logger_name) as paypal_logger:
-                self.assertRaises(GatewayError, self.processor.handle_processor_response, self.RETURN_DATA, self.basket)
+                self.assertRaises(
+                    GatewayError,
+                    self.processor.handle_payment_authorization_response,
+                    self.RETURN_DATA,
+                    self.basket
+                )
 
                 # Each failure response is saved into db.
                 payment_processor_responses = self.assert_processor_multiple_response_recorded()

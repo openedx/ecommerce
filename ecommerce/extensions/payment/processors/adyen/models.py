@@ -1,5 +1,4 @@
 from django.db import models
-
 from fernet_fields import EncryptedCharField
 
 from ecommerce.extensions.payment.models import PaymentProcessorConfiguration

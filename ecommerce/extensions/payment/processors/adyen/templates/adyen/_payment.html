@@ -19,7 +19,8 @@
         {% endif %}
     </div>
 
-    <form method="POST" action="{% url 'adyen_payment' %}" id="card-payment-view" class="payment-view">
+    <form method="POST" action="#" id="card-payment-view" class="payment-view" data-receipt-url="{{ receipt_page_url }}?orderNum={{ basket.order_number }}" data-error-url="{{ error_page_url }}">
+        <input type="hidden" value="adyen" id="payment_processor" name="payment_processor" />
         <input type="hidden" value="{{ payment_processors.adyen.generation_time }}" id="generationtime" data-encrypted-name="generationtime" />
 
         <div class="form-group">
@@ -171,6 +172,7 @@
                 </div>
             </div>
         </div>
+        <div id="payment-messages"></div>
         <div class="payment-form-btns">
             <div class="row">
                 <div class="col-sm-6">
@@ -184,6 +186,7 @@
                             data-track-category="checkout"
                             data-processor-name="{{ payment_processors.adyen.NAME }}"
                             data-course-id="{{ course.id }}"
+                            data-loading-text="<i class='fa fa-spinner fa-spin'></i> {% trans "Pay" %}"
                             class="btn btn-lg btn-primary btn-block"
                             disabled="disabled"
                             value="{{ payment_processors.adyen.NAME }}"

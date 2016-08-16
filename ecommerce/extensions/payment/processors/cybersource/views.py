@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
-BillingAddress = get_model('order', 'BillingAddress')
-Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
@@ -33,7 +31,9 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
     @property
     def payment_processor(self):
-        return Cybersource(self.request.site)
+        if not hasattr(self, '_payment_processor'):
+            self._payment_processor = Cybersource(self.request.site)
+        return self._payment_processor
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block
@@ -43,23 +43,6 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(CybersourceNotifyView, self).dispatch(request, *args, **kwargs)
-
-    def _get_billing_address(self, cybersource_response):
-        return BillingAddress(
-            first_name=cybersource_response['req_bill_to_forename'],
-            last_name=cybersource_response['req_bill_to_surname'],
-            line1=cybersource_response['req_bill_to_address_line1'],
-
-            # Address line 2 is optional
-            line2=cybersource_response.get('req_bill_to_address_line2', ''),
-
-            # Oscar uses line4 for city
-            line4=cybersource_response['req_bill_to_address_city'],
-            postcode=cybersource_response['req_bill_to_address_postal_code'],
-            # State is optional
-            state=cybersource_response.get('req_bill_to_address_state', ''),
-            country=Country.objects.get(
-                iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 
     def _get_basket(self, basket_id):
         if not basket_id:
@@ -146,7 +129,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
             # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
             # thus we use the amounts stored in the database rather than those received from the payment processor.
             order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-            billing_address = self._get_billing_address(cybersource_response)
+            billing_address = self.payment_processor.get_billing_address(cybersource_response)
 
             user = basket.owner
 

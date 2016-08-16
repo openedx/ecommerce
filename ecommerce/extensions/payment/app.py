@@ -15,13 +15,17 @@ class PaymentApplication(Application):
     def get_urls(self):
         """Returns the URL patterns for the Payment Application."""
         urlpatterns = []
+
+        # Get URLs defined by payment processor apps
         for processor_class in BasePaymentProcessor.__subclasses__():
             urls_module_name = processor_class().URLS_MODULE
             if urls_module_name:
-                urls_module = importlib.import_module(urls_module_name)
-                module_urlpatterns = getattr(urls_module, 'urlpatterns')
-                if module_urlpatterns:
-                    urlpatterns.extend(module_urlpatterns)
+                try:
+                    urls_module = importlib.import_module(urls_module_name)
+                    urlpatterns.extend(urls_module.urlpatterns)
+                except (AttributeError, ImportError):
+                    # Payment processor does not define any URLs
+                    continue
         return self.post_process_urls(urlpatterns)
 
 

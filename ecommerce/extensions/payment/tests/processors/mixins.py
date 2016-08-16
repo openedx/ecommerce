@@ -61,7 +61,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
         raise NotImplementedError
 
-    def test_handle_processor_response(self):
+    def test_handle_payment_authorization_response(self):
         """ Verify that the processor creates the appropriate PaymentEvent and Source objects. """
         raise NotImplementedError
 

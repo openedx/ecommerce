@@ -54,8 +54,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
             processor_name=processor_name,
             reference=reference
         )
-        mock_handle_processor_response = Mock(return_value=(mock_source, mock_payment_event))
-        mock_payment_processor = Mock(handle_processor_response=mock_handle_processor_response)
+        mock_handle_payment_authorization_response = Mock(return_value=(mock_source, mock_payment_event))
+        mock_payment_processor = Mock(handle_payment_authorization_response=mock_handle_payment_authorization_response)
 
         with patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.payment_processor',
                    mock_payment_processor):

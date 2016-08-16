@@ -13,6 +13,7 @@
 {{ block.super }}
 <script type="text/javascript">
     window.adyenCSEPublicKey = '{{ payment_processors.adyen.configuration.cse_public_key }}';
+    window.paymentAuthorizationApiUrl = '{% url 'api:v2:payment:payment_authorization' %}';
 </script>
 <script type="text/javascript" src="{% static 'adyen/js/apps/payment_app.js' %}"></script>
 {% endblock javascript %}

@@ -48,7 +48,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
-        source, payment_event = self.payment_processor.handle_processor_response(response, basket=basket)
+        source, payment_event = self.payment_processor.handle_payment_authorization_response(response, basket=basket)
 
         self.add_payment_source(source)
         self.add_payment_event(payment_event)

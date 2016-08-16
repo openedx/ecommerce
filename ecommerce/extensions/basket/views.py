@@ -11,7 +11,7 @@ from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.coupons.views import get_voucher_and_products_from_code
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_lms, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
@@ -158,6 +158,8 @@ class BasketSummaryView(BasketView):
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': site_configuration.get_payment_processors(),
+            'receipt_page_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
+            'error_page_url': get_lms_url(settings.ERROR_PAGE_PATH),
             'cancel_page_url': get_lms_url(settings.CANCEL_PAGE_PATH),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),

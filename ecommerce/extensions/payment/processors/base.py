@@ -11,6 +11,7 @@ class BasePaymentProcessor(object):  # pragma: no cover
     """Base payment processor class."""
     __metaclass__ = abc.ABCMeta
 
+    ACCEPTED_NOTIFICATION_RESPONSE = None
     BASKET_TEMPLATE = None
     CHECKOUT_BUTTON_LABEL = _('Checkout')
     CONFIGURATION_MODEL = None
@@ -20,40 +21,6 @@ class BasePaymentProcessor(object):  # pragma: no cover
     def __init__(self, site=None):
         self._configuration = None
         self.site = site
-
-    @abc.abstractmethod
-    def get_transaction_parameters(self, basket, request=None):
-        """
-        Generate a dictionary of signed parameters required for this processor to complete a transaction.
-
-        Arguments:
-            basket (Basket): The basket of products being purchased.
-
-        Keyword Arguments:
-            request (Request): A Request object which can be used to construct an absolute URL in
-                cases where one is required.
-
-        Returns:
-            dict: Payment processor-specific parameters required to complete a transaction. At a minimum,
-                this dict must include a `payment_page_url` indicating the location of the processor's
-                hosted payment page.
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def handle_processor_response(self, response, basket=None):
-        """
-        Handle a response from the payment processor.
-
-        This method creates PaymentEvents and Sources for successful payments.
-
-        Arguments:
-            response (dict): Dictionary of parameters received from the payment processor
-
-        Keyword Arguments:
-            basket (Basket): Basket whose contents have been purchased via the payment processor
-        """
-        raise NotImplementedError
 
     @property
     def configuration(self):
@@ -86,6 +53,62 @@ class BasePaymentProcessor(object):  # pragma: no cover
         configuration = self.configuration
         return configuration and configuration.active
 
+    def can_handle_notification(self, notification_data):
+        return False
+
+    def get_billing_address(self, payment_form_data):
+        return None
+
+    @abc.abstractmethod
+    def get_transaction_parameters(self, basket, request=None):
+        """
+        Generate a dictionary of signed parameters required for this processor to complete a transaction.
+
+        Arguments:
+            basket (Basket): The basket of products being purchased.
+
+        Keyword Arguments:
+            request (Request): A Request object which can be used to construct an absolute URL in
+                cases where one is required.
+
+        Returns:
+            dict: Payment processor-specific parameters required to complete a transaction. At a minimum,
+                this dict must include a `payment_page_url` indicating the location of the processor's
+                hosted payment page.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def handle_payment_authorization_response(self, response, basket=None):
+        """
+        Handle a response from the payment processor.
+
+        This method creates PaymentEvents and Sources for successful payments.
+
+        Arguments:
+            response (dict): Dictionary of parameters received from the payment processor
+
+        Keyword Arguments:
+            basket (Basket): Basket whose contents have been purchased via the payment processor
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def issue_credit(self, source, amount, currency):
+        """
+        Issue a credit for the specified transaction.
+
+        Arguments:
+            source (Source): Payment Source used for the original debit/purchase.
+            amount (Decimal): amount to be credited/refunded
+            currency (string): currency of the amount to be credited
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def process_notification(self, notification_data):
+        raise NotImplementedError
+
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """
         Save the processor's response to the database for auditing.
@@ -104,13 +127,5 @@ class BasePaymentProcessor(object):  # pragma: no cover
                                                        response=response, basket=basket)
 
     @abc.abstractmethod
-    def issue_credit(self, source, amount, currency):
-        """
-        Issue a credit for the specified transaction.
-
-        Arguments:
-            source (Source): Payment Source used for the original debit/purchase.
-            amount (Decimal): amount to be credited/refunded
-            currency (string): currency of the amount to be credited
-        """
+    def send_payment_authorization_request(self, basket, authorization_data):
         raise NotImplementedError
