@@ -288,20 +288,17 @@ class Adyen(BasePaymentProcessor):
 
     def _generate_signature(self, notification):
         amount = notification.get('amount', {})
-        success = notification.get('success')
         signed_values = [
-            notification.get('pspReference'),
-            notification.get('originalReference'),
-            notification.get('merchantAccountCode'),
-            notification.get('merchantReference'),
-            amount.get('value'),
-            amount.get('currencyCode'),
-            notification.get('eventCode')
+            notification.get('pspReference', ''),
+            notification.get('originalReference', ''),
+            notification.get('merchantAccountCode', ''),
+            notification.get('merchantReference', ''),
+            str(amount.get('value', '')),
+            amount.get('currency', ''),
+            notification.get('eventCode', ''),
+            str(notification.get('success', '')).lower()
         ]
-        if success:
-            signed_values.append(str(success).lower())
-
-        message = ':'.join([str(val) for val in signed_values if val is not None])
+        message = ':'.join(signed_values)
 
         return sign(message, self.configuration.notifications_hmac_key)
 
