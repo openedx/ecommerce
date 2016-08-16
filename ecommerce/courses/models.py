@@ -36,7 +36,6 @@ class Course(models.Model):
     )
     history = HistoricalRecords()
     thumbnail_url = models.URLField(null=True, blank=True)
-    organization = models.CharField(max_length=100, null=False, blank=False)
 
     def __unicode__(self):
         return unicode(self.id)

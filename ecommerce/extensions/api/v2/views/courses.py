@@ -13,18 +13,9 @@ from ecommerce.extensions.api import serializers
 
 class CourseViewSet(NonDestroyableModelViewSet):
     lookup_value_regex = COURSE_ID_REGEX
+    queryset = Course.objects.all()
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
-
-    def get_queryset(self):
-        """Returns Courses that belongs to the are related to site partner"""
-        qs = Course.objects.all()
-
-        organizations = self.request.site.siteconfiguration.partner.organization_list
-        if organizations:
-            qs = qs.filter(organization__in=organizations.split(','))
-
-        return qs
 
     def list(self, request, *args, **kwargs):
         """

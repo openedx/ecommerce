@@ -17,7 +17,6 @@ from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSe
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
-Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Selector = get_class('partner.strategy', 'Selector')
@@ -102,16 +101,6 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
 
         # If no Courses exist, the view should return an empty results list.
         Course.objects.all().delete()
-        response = self.client.get(self.list_path)
-        self.assertDictEqual(json.loads(response.content), {'count': 0, 'next': None, 'previous': None, 'results': []})
-
-    def test_list_with_organization(self):
-        """ Verify the view returns a list of Courses. """
-        # If courses organization is not same as partner.
-        partner = Partner.objects.first()
-        partner.organization_list = 'test-org-which-is-not-in-course'
-        partner.save()
-
         response = self.client.get(self.list_path)
         self.assertDictEqual(json.loads(response.content), {'count': 0, 'next': None, 'previous': None, 'results': []})
 
