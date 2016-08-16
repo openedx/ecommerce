@@ -143,7 +143,6 @@ class Adyen(BasePaymentProcessor):
         """
         Handle notification/response from Adyen.
         """
-        self.record_processor_response()
         try:
             notification_items = self._parse_notification_items(notification_data)
         except NotificationParseError:
