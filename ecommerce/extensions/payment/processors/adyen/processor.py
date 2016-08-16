@@ -220,7 +220,7 @@ class Adyen(BasePaymentProcessor):
                     return getattr(
                         self,
                         '_handle_{event}'.format(event=event_code.lower())
-                    )(transaction_id, notification)
+                    )(transaction_id, notification, basket)
                 except KeyError:
                     logger.error(
                         'Received Adyen notification with missing eventCode for transaction [%s], '
@@ -332,16 +332,16 @@ class Adyen(BasePaymentProcessor):
             'shopperIP': kwargs.get('ip', '')
         }
 
-    def _handle_authorisation(self, psp_reference, response, basket):
+    def _handle_authorisation(self, transaction_id, notification, basket):
         pass
 
-    def _handle_cancel_or_refund(self, transaction_id, response, basket):
+    def _handle_cancel_or_refund(self, transaction_id, notification, basket):
         order = basket.order_set.first()
         # TODO Update this if we ever support multiple payment sources for a single order.
         source = order.sources.first()
         refund = order.refunds.get(status__in=[REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION])
         amount = refund.total_credit_excl_tax
-        if response.get('success'):
+        if notification.get('success'):
             source.refund(amount, reference=transaction_id)
             revoke_fulfillment = refund.status == REFUND.PENDING_WITH_REVOCATION
             refund.set_status(REFUND.PAYMENT_REFUNDED)
