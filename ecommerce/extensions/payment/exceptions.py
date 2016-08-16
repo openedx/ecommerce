@@ -12,7 +12,7 @@ class ProcessorNotFoundError(Exception):
     pass
 
 
-class NotificationParseError(Exception):
+class NotificationParserError(Exception):
     """Raised when a payment processor notification cannot be parsed."""
 
 
@@ -23,9 +23,4 @@ class InvalidSignatureError(GatewayError):
 
 class PartialAuthorizationError(PaymentError):
     """The amount authorized by the payment processor differs from the requested amount."""
-    pass
-
-
-class UnknownBasketError(PaymentError):
-    """The basket could not be determined from the order number returned from the payment processor"""
     pass

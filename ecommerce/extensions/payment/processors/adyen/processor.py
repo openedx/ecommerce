@@ -2,10 +2,10 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
-import json
 import logging
 from urlparse import urljoin
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined
 from oscar.core.loading import get_class, get_model
@@ -13,7 +13,7 @@ import requests
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.exceptions import NotificationParseError, UnknownBasketError
+from ecommerce.extensions.payment.exceptions import NotificationParserError
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors.base import BasePaymentProcessor
 from ecommerce.extensions.payment.utils import minor_units
@@ -22,6 +22,7 @@ from ecommerce.extensions.refund.status import REFUND
 
 logger = logging.getLogger(__name__)
 
+Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
@@ -52,7 +53,7 @@ class Adyen(BasePaymentProcessor):
     def can_handle_notification(self, notification_data):
         try:
             self._parse_notification_items(notification_data)
-        except NotificationParseError:
+        except NotificationParserError:
             return False
 
         return True
@@ -145,7 +146,7 @@ class Adyen(BasePaymentProcessor):
         """
         try:
             notification_items = self._parse_notification_items(notification_data)
-        except NotificationParseError:
+        except NotificationParserError:
             payment_processor_response = self.record_processor_response(notification_data)
             logger.error(
                 'Received invalid Adyen notification. '
@@ -181,7 +182,7 @@ class Adyen(BasePaymentProcessor):
 
             try:
                 basket_id = OrderNumberGenerator().basket_id(order_number)
-                basket = self._get_basket(basket_id)
+                basket = Basket.objects.get(id=int(basket_id))
             except IndexError:
                 payment_processor_response = self.record_processor_response(notification, transaction_id)
                 logger.error(
@@ -192,7 +193,7 @@ class Adyen(BasePaymentProcessor):
                     payment_processor_response.id
                 )
                 continue
-            except UnknownBasketError:
+            except ObjectDoesNotExist:
                 payment_processor_response = self.record_processor_response(notification, transaction_id)
                 logger.error(
                     'Received Adyen notification for transaction [%s], associated with unknown basket [%s].'
@@ -367,7 +368,7 @@ class Adyen(BasePaymentProcessor):
         try:
             return notification_data['notificationItems']
         except (KeyError, TypeError, ValueError):
-            raise NotificationParseError
+            raise NotificationParserError
 
     def _process_authorization(self, transaction_id, basket):
         # Create Source to track all transactions related to this processor and order
