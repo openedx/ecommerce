@@ -290,21 +290,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assert_course_does_not_exist(self.course_id)
 
-    def test_invalid_course_org(self):
-        """Verify that attempting to save a course with a bad ORG yields a 500."""
-        partner = self.partner
-        dummy_org_name = 'bad-org'
-        partner.organization_list = dummy_org_name
-        partner.save()
-        error_msg = 'Course [{course_id}] is not saved. ' \
-                    'Courses only from organization {partner_org}' \
-                    ' will be saved.'.format(course_id=self.course_id, partner_org=dummy_org_name)
-
-        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.data['error'], error_msg)
-        self.assert_course_does_not_exist(self.course_id)
-
     def test_invalid_product_class(self):
         """Verify that attempting to save a product with a product class other than 'Seat' yields a 400."""
         product_class = 'Not a Seat'
