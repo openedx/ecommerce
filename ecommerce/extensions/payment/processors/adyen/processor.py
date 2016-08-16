@@ -287,6 +287,7 @@ class Adyen(BasePaymentProcessor):
         return payment_processor_response
 
     def _generate_signature(self, notification):
+        secret = self.configuration.notifications_hmac_key.decode('hex')
         amount = notification.get('amount', {})
         signed_values = [
             notification.get('pspReference', ''),
@@ -300,7 +301,7 @@ class Adyen(BasePaymentProcessor):
         ]
         message = ':'.join(signed_values)
 
-        return sign(message, self.configuration.notifications_hmac_key)
+        return sign(message, secret)
 
     def _get_shopper_data(self, **kwargs):
         return {

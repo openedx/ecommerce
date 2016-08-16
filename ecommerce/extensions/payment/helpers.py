@@ -9,13 +9,12 @@ def sign(message, secret):
 
     Arguments:
         message (unicode): The value to be signed.
-        secret (unicode): The secret key to use when signing the message.
+        secret (str): The secret key to use when signing the message.
 
     Returns:
         unicode: The message signature.
     """
     message = message.encode('utf-8')
-    secret = secret.encode('utf-8')
 
     # Calculate a message hash (i.e., digest) using the provided secret key
     digest = hmac.new(secret, msg=message, digestmod=hashlib.sha256).digest()
