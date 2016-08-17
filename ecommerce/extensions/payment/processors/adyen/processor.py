@@ -228,7 +228,7 @@ class Adyen(BasePaymentProcessor):
                         'The payment processor response was recorded in record [%d].',
                         transaction_id,
                         basket.order_number,
-                        payment_processor_response
+                        payment_processor_response.id
                     )
                     continue
                 except AttributeError:
@@ -239,7 +239,7 @@ class Adyen(BasePaymentProcessor):
                         event_code,
                         transaction_id,
                         basket.order_number,
-                        payment_processor_response
+                        payment_processor_response.id
                     )
                     continue
 
@@ -336,6 +336,9 @@ class Adyen(BasePaymentProcessor):
         pass
 
     def _handle_cancel_or_refund(self, transaction_id, notification, basket):
+        self._handle_refund(transaction_id, notification, basket)
+
+    def _handle_refund(self, transaction_id, notification, basket):
         order = basket.order_set.first()
         # TODO Update this if we ever support multiple payment sources for a single order.
         source = order.sources.first()
