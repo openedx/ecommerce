@@ -46,6 +46,12 @@ class Command(BaseCommand):
                             type=str,
                             default='',
                             help='Partner name to select/create and associate with site.')
+        parser.add_argument('--partner-orgs',
+                            action='store',
+                            dest='partner_orgs',
+                            type=str,
+                            default='',
+                            help='Organization filter for partner course listings.')
         parser.add_argument('--lms-url-root',
                             action='store',
                             dest='lms_url_root',
@@ -101,6 +107,7 @@ class Command(BaseCommand):
         site_name = options.get('site_name')
         partner_code = options.get('partner_code')
         partner_name = options.get('partner_name')
+        partner_orgs = options.get('partner_orgs')
         lms_url_root = options.get('lms_url_root')
         client_id = options.get('client_id')
         client_secret = options.get('client_secret')
@@ -121,11 +128,11 @@ class Command(BaseCommand):
         site.save()
 
         partner, partner_created = Partner.objects.get_or_create(code=partner_code)
-        if partner_created:
-            partner.name = partner_name
-            partner.short_code = partner_code
-            partner.save()
-            logger.info('Partner created with code %s', partner_code)
+        partner.name = partner_name
+        partner.short_code = partner_code
+        partner.organization_list = partner_orgs
+        partner.save()
+        logger.info('Partner %s with code %s', 'created' if partner_created else 'updated', partner_code)
 
         SiteConfiguration.objects.update_or_create(
             site=site,
