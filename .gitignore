@@ -50,8 +50,6 @@ acceptance_tests/xunit.xml
 !django.mo
 !djangojs.po
 !djangojs.mo
-conf/locale/en/LC_MESSAGES/*.po
-conf/locale/en/LC_MESSAGES/*.mo
 conf/locale/fake*/LC_MESSAGES/*.po
 conf/locale/fake*/LC_MESSAGES/*.mo
 conf/locale/messages.mo

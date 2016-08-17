@@ -5,17 +5,21 @@
 # Translators:
 # JauhorngChen <jauhorng.chen@gmail.com>, 2015
 # JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
-# Mushiyo <Mushiyo@ya.ru>, 2015
+# Mushiyo, 2015
 # vincent <orzkng2007@yahoo.com.tw>, 2015
+# Wun-Han Syu <whsyu@mail.fcu.edu.tw>, 2016
+# Xaver Y.R. Chen <yrchen@atcity.org>, 2016
+# Ya-chi Chang <yacchang@mail.fcu.edu.tw>, 2016
+# Ya-chi Chang <yacchang@mail.fcu.edu.tw>, 2016
 # Yenling Chen <bugchen.chen@gmail.com>, 2015
 # 薛念林 <nlhsueh@mail.fcu.edu.tw>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-12-29 13:25+0000\n"
-"Last-Translator: Yenling Chen <bugchen.chen@gmail.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-07-06 09:48+0000\n"
+"Last-Translator: Ya-chi Chang <yacchang@mail.fcu.edu.tw>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -36,13 +40,115 @@ msgid "Important dates"
 msgstr "重要日期"
 
 #: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr "LMS基於URL自訂網站/夥伴平臺"
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr "此網站的LMS的原URL (例如： https://courses.stage.edx.org)"
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr "自訂網站主題的路徑"
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr "自訂網站主題SCSS文件的路徑"
+
+#: core/models.py
+msgid "Payment processors"
+msgstr "付款處理器"
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
+msgstr "處理器名稱逗號分格清單：'cybersource,paypal'"
+
+#: core/models.py
 msgid "Full Name"
 msgstr "全名"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr "優惠券不存在。"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr "優惠券過期。"
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr "此優惠券已經被使用"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "此優惠券代碼是無效的。"
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr "edX 示範課程"
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr "優惠券測試"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr "不提供代碼。"
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr "購物車總金額非0元，現值 = 50.00元"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr "贖回代碼時發生錯誤"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr "產品 [{product}] 無法購買。"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr "無法取得課程資訊。[{error}]"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr "購物車總金額非0元，現值 = ${basket_price}"
 
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "驗證產品的期限已經可以設置。"
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
+msgstr "無法發佈電子商務數據 {course_id} 的 LMS。"
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
+msgstr "執行發生錯誤。無法確認您課程學分是否合格。請再次嘗試。"
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr "此門課程沒有學分席位可用。"
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr "執行發生錯誤。無法確認您選擇的機構是否提供了這個課程學分。請再次嘗試。"
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr "所有的付款方式目前是不可用的。請等待幾分鐘後再嘗試。"
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
@@ -52,7 +158,7 @@ msgstr "不能留置空欄位。"
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
-msgstr ""
+msgstr "無法找到所需的識別碼去找到您的其中一個產品。"
 
 #: extensions/api/exceptions.py
 msgid "We couldn't find one of the products you're looking for."
@@ -65,19 +171,38 @@ msgstr "你訂購的產品其中一種現在無法提供。"
 #: extensions/api/serializers.py
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
-msgstr ""
+msgstr "無效的課程產品類 [{product_class}] 需求 。"
 
 #: extensions/api/serializers.py
 msgid "Products must indicate whether ID verification is required."
-msgstr ""
+msgstr "產品必須註明是否需要ID驗證。"
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
 msgstr "產品必須標示價格。"
 
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
+msgstr ""
+"課程 [{course_id}] 無法發布於LMS 因為轉換器 [publish_course_modes_to_lms] 是無效的。 "
+"為了避免ghost SKUs，數據沒有被存檔。"
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr "網站"
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
+msgstr "{id} - {status} 購物車 (owner: {owner}, lines: {num_lines})"
+
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
-msgstr ""
+msgstr "此產品可購買之最後日期/時間。"
 
 #: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -86,7 +211,7 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Username"
-msgstr "使用者名稱"
+msgstr "使用者帳號"
 
 #: extensions/dashboard/orders/views.py
 #, python-brace-format
@@ -94,12 +219,13 @@ msgid ""
 "{link_start}Refund #{refund_id}{link_end} created! Click "
 "{link_start}here{link_end} to view it."
 msgstr ""
+"{link_start}退費 #{refund_id}{link_end} 創建! 點選 {link_start} 這裡 {link_end} 去查看。"
 
 #: extensions/dashboard/orders/views.py
 msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
-msgstr ""
+msgstr "在這些lines 退費無法被創建。這些可能已經完成退費。"
 
 #: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
@@ -109,7 +235,7 @@ msgstr "退款儀表板"
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Refund ID"
-msgstr ""
+msgstr "退款帳號"
 
 #: extensions/dashboard/refunds/forms.py extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -123,15 +249,23 @@ msgstr "狀態"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "無法恢復註冊數據。"
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
 msgstr "付款處理器"
 
-#: extensions/payment/admin.py extensions/payment/models.py
-msgid "Basket"
-msgstr "籃"
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
+msgstr "點選'儲存和繼續編輯'增加庫存紀錄"
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr "夥伴"
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "合作夥伴"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
@@ -142,12 +276,16 @@ msgid "Transaction ID"
 msgstr "交易編號"
 
 #: extensions/payment/models.py
+msgid "Basket"
+msgstr "籃"
+
+#: extensions/payment/models.py
 msgid "Payment Processor Response"
-msgstr "付款處理器響應"
+msgstr "付款處理器回應"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Responses"
-msgstr "付款處理器響應"
+msgstr "付款處理器回應"
 
 #. Translators: This is a string placed in the middle of a truncated string
 #. to indicate that truncation has occurred. For example, if a title may only
@@ -164,7 +302,7 @@ msgstr "序"
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "User"
-msgstr "用戶"
+msgstr "使用者"
 
 #: extensions/refund/models.py
 msgid "Total Credit (excl. tax)"
@@ -184,13 +322,58 @@ msgstr "訂單行"
 
 #: extensions/refund/models.py
 msgid "Line Credit (excl. tax)"
-msgstr ""
+msgstr "Line 學分(不含稅)"
 
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity"
 msgstr "數量"
+
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "名稱"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "代碼"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "折扣"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "網址"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
+msgstr "{percentage} %"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr "{amount} {currency}"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr "範圍從 {catalog_name}"
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr "優惠券報告 {coupon_name}"
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr "未付款"
+
+#: invoice/models.py
+msgid "Paid"
+msgstr "已付款"
 
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -211,7 +394,7 @@ msgstr "產品"
 
 #: settings/_oscar.py
 msgid "Product Types"
-msgstr "產品型態"
+msgstr "產品類型"
 
 #: settings/_oscar.py
 msgid "Categories"
@@ -239,10 +422,6 @@ msgstr "訂單"
 msgid "Statistics"
 msgstr "統計"
 
-#: settings/_oscar.py
-msgid "Partners"
-msgstr "合作夥伴"
-
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -261,38 +440,109 @@ msgid "Stock alert requests"
 msgstr "庫存警報請求"
 
 #: settings/_oscar.py
+msgid "Offers"
+msgstr "報價"
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "憑證"
+
+#: settings/_oscar.py
 msgid "Reports"
 msgstr "報告"
+
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr "如果您需要協助，請聯繫edX 。"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
+msgstr "註冊代碼應用課程價格。要兌換註冊代碼，報名參加課程。"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr "註冊並追蹤以下已驗證的課程證書。"
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "免費"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr "總共：0元"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr "註冊及兌換代碼"
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr "筆記："
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr "您必須在課程結束前使用網路攝影機和使用政府發行的照片ID驗證您的身份。"
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "問題？"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr "請閱讀問答集來獲得常見關於證書問題的解答。"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "優惠卷代碼"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle navigation"
+msgstr "切換導航"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr "優惠券代碼管理"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Dashboard for:"
+msgstr "我的課程："
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle Dropdown"
+msgstr "切換下拉"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
+msgid "Login"
+msgstr "登入"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr "優惠券管理工具"
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr "兌換"
 
 #: templates/courses/course_app.html
 msgid "Courses"
 msgstr "課程"
 
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle navigation"
-msgstr "切換導航"
-
 #: templates/courses/course_app.html
 msgid "Course Administration"
 msgstr "課程管理"
 
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Dashboard for:"
-msgstr "我的課程："
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle Dropdown"
-msgstr "切換下拉"
-
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
-msgid "Login"
-msgstr "登入"
-
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "%(platform_name)s 課程管理工具"
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
@@ -312,16 +562,14 @@ msgstr "登出"
 
 #: templates/customer/email_base.html
 #, python-format
-msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
+msgstr "版權 © %(year)s %(platform_name)s.保留所有權利。"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "%(full_name)s您好，"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -331,6 +579,7 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"感謝您購買 %(course_title)s.以下費用會顯示在您的下一期含有公司名稱之信用卡或現金卡帳單 %(platform_name)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -338,7 +587,7 @@ msgstr ""
 msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
-msgstr ""
+msgstr "您可存取您的課程及完成您的驗證(if required)在您的%(platform_name)s儀表板上。"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -346,7 +595,7 @@ msgstr ""
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
-msgstr ""
+msgstr "探索其他優質之課程，連至 %(platform_name)s 網站。更多的課程每天都在增加中！"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -356,287 +605,413 @@ msgstr "謝謝。我們希望你喜歡的課程！"
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "%(platform_name)s團隊"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
-msgstr ""
+msgstr "由於您購買課程席位 %(platform_name)s 課程 %(course_title)s 您將會收到此e-mail。"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
 msgstr "收貨確認書："
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
-msgstr ""
+msgstr "%(platform_name)s 團隊"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
-msgstr "EDX團隊"
+msgstr "edX團隊"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
 msgstr "已下訂單"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
-msgstr "收到確認"
+msgid "Payment Confirmation"
+msgstr "付款確認"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
-msgstr "收貨確認書："
+msgid "Payment confirmation for:"
+msgstr "付款確認："
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
-msgstr "查看收據"
+msgid "View Payment Information"
+msgstr "查看付款資訊"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "親愛的 %(full_name)s,"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
+msgstr ""
+"\n"
+"感謝您購買 %(credit_hours)s 從學分時數 %(credit_provider)s for %(course_title)s. 費用會顯示在您的下一期含有公司名稱之信用卡或現金卡帳單 \"%(platform_name)s\"."
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
+msgstr ""
+"為了取得您的課程學分，您也必須申請學分在%(credit_provider)s "
+"網站。從%(credit_provider)s連結申請學分，或觀看您申請學分之狀態，前往您的%(platform_name)s 儀表板。"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
+msgstr "探索其他合格證書課程，連至%(platform_name)s 網站。我們常常新增課程！"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr "謝謝。我們希望您能喜歡您的課程！"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr "%(platform_name)s 團隊"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+"\n"
+"由於您購買學分時數 %(course_title)s 一個 %(platform_name)s 課程，因此您收到此訊息 。"
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr "付款確認："
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
+"感謝您購買 %(credit_hours)s 從學分時數 %(credit_provider)s for %(course_title)s. "
+"費用會顯示在您的下一期含有公司名稱之信用卡或現金卡帳單 \"%(platform_name)s\"。"
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr "查看您的付款資訊，請連至以下網站。"
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
-msgstr ""
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
+msgstr "由於您購買學分時數 %(course_title)s, an %(platform_name)s 課程，因此您收到此訊息 。"
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
+msgstr "訂單收據"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "選擇"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr "學分："
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "價格："
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Learn more about %(display_name)s credit?\n"
+"                "
 msgstr ""
+"\n"
+"學習更多關於 %(display_name)s 學分?"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
+"                    "
+msgstr ""
+"\n"
+"您可以購買此長達一年的課程學分透過 %(display_name)s \n"
+"在此課程結束後。您可以在使用學分 %(display_name)s 或轉送\n"
+"學分到其他可承認學分之機構。"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr "購買課程學分："
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr "在此頁，選擇一個結帳選項。"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr "在付款頁面，請輸入您的付款資訊。"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+"\n"
+"當您完成付款，請依連結至%(display_name)s 網站。"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+"\n"
+"在%(display_name)s 網站上, 輸入全部所需的資訊去申請您的課程\n"
+"學分。"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+"\n"
+"在批准 %(display_name)s 您的學分之後, 您可申請一份正式的成績單\n"
+"%(display_name)s."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
+msgstr ""
+"\n"
+"有效學分到 %(date)s"
 
 #: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
-msgstr ""
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
+msgstr "購買學分 %(course_name)s"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
+"                                Purchase Credit for %(course_name)s\n"
+"                            "
+msgstr ""
 "\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
-"                    "
-msgstr[0] ""
+"購買學分 %(course_name)s"
 
 #: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
 msgstr ""
+"\n"
+"恭喜！您可以購買此堂課之學術課程學分。 \n"
+"您必須購買學分在 %(date)s. 之前。\n"
+"選擇一個下列的機構購買您的學分。"
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
 msgstr "總數："
 
 #: templates/edx/credit/checkout.html
-#, python-format
-msgid ""
-"\n"
-"                                Credit eligibility expires on %(date)s\n"
-"                            "
-msgstr ""
-
-#: templates/edx/credit/checkout.html
-msgid "You deserved it."
-msgstr ""
+msgid "You deserve it."
+msgstr "您應得到的。"
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
-msgstr ""
+msgstr "艱難的工作已結束-您已通過此課程！現在開始取得您應得的學分或完成學位。"
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "是經濟實惠的。"
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
-msgstr ""
+msgstr "edX 提供相同學分的花費通常比大部份的機構還要低。"
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "它開啟了大門。"
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr ""
-
-#: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr ""
+msgstr "現今多數受歡迎的工作皆需要大學文憑。開始邁向您的成功之路！"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
+"\n"
+"請閱讀 %(link_start)s 問答集去看關於證書常見的問題。%(link_end)s"
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "您的收藏統計"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "全部訂單"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "新消費者"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "全部消費者"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "全部產品"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "最新的訂單(過去 24 小時)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "訂單-過去24小時"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "全部訂單"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "全部 lines"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "總收入"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "平均訂單花費"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "平均(已付費)訂單花費"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "管理"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "訂單- 無限時段"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "總共 <em>開放</em> 購物籃"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "全部消費者"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "新消費者"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "查看庫存警告"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "目錄與庫存"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "全部產品"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>開放</em> 庫存警告"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>關閉</em> 庫存警告"
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "報價，憑證及促銷"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "啟動 <em>網站</em> 報價"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "啟動 <em>憑證</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "促銷"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
-msgstr ""
+msgstr "訂單 %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
-msgstr ""
+msgstr "訂單 #%(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
-msgstr ""
+msgstr "消費者資訊"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -652,7 +1027,7 @@ msgstr "電子郵件地址"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer has deleted their account."
-msgstr ""
+msgstr "消費者已刪除他們的帳號。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order information"
@@ -660,7 +1035,7 @@ msgstr "訂單資訊"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Total"
-msgstr ""
+msgstr "訂單總數"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -681,7 +1056,7 @@ msgstr "訂單內容"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
-msgstr ""
+msgstr "出貨"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment"
@@ -697,11 +1072,11 @@ msgstr "筆記"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Items ordered"
-msgstr ""
+msgstr "訂單專案："
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
-msgstr ""
+msgstr "Line ID"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -711,7 +1086,7 @@ msgstr "產品"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "UPC"
-msgstr ""
+msgstr "商品通用條碼"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -729,11 +1104,11 @@ msgstr "美東時間。發貨日期"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price excl tax (before discounts)"
-msgstr ""
+msgstr "價格不含稅 (折扣前)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price inc tax (before discounts)"
-msgstr ""
+msgstr "價格含稅 (折扣前)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -751,36 +1126,32 @@ msgid "View"
 msgstr "檢視"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr "折扣"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
-msgstr ""
+msgstr "購物車總數 (不包含折扣)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (inc. discounts)"
-msgstr ""
+msgstr "購物車總數 (包含折扣)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total"
-msgstr ""
+msgstr "購物車總數"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (excl. discounts)"
-msgstr ""
+msgstr "出貨總數 (不包含折扣)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (inc. discounts)"
-msgstr ""
+msgstr "出貨總數 (包含折扣)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total"
-msgstr ""
+msgstr "出貨總數"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order total"
-msgstr ""
+msgstr "訂單總數"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
@@ -797,7 +1168,7 @@ msgstr "選擇新的狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
-msgstr ""
+msgstr "創建出貨事件"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
@@ -826,12 +1197,12 @@ msgstr "開始！"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change order status"
-msgstr "更改訂單狀態"
+msgstr "變更訂單狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change status"
-msgstr "更改狀態"
+msgstr "變更狀態"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -840,7 +1211,7 @@ msgstr "這個順序不能有其狀態更改。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
-msgstr ""
+msgstr "出貨事件"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -855,7 +1226,7 @@ msgstr "事件"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Lines"
-msgstr ""
+msgstr "Lines"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -869,6 +1240,8 @@ msgid ""
 "                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
 msgstr ""
+"\n"
+"%(title)s (quantity %(event_qty)s/%(total_qty)s)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
@@ -900,11 +1273,11 @@ msgstr "沒有付款的事件。"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method name"
-msgstr ""
+msgstr "方法名稱"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method code"
-msgstr ""
+msgstr "方法代碼"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (incl tax)"
@@ -931,7 +1304,6 @@ msgid "Instructions"
 msgstr "說明"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
 msgstr "帳單地址"
 
@@ -973,7 +1345,7 @@ msgstr "憑證"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
-msgstr ""
+msgstr "其他名稱"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
@@ -1051,17 +1423,13 @@ msgid "Number of items"
 msgstr "項目數"
 
 #: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr "收貨地址"
-
-#: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Deleted"
 msgstr "已刪除"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
-msgstr ""
+msgstr "重試執行"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
@@ -1086,7 +1454,7 @@ msgstr "繳活?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "找不到註冊資訊。"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
@@ -1125,7 +1493,7 @@ msgstr "項目數"
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "總學分"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -1141,7 +1509,7 @@ msgstr "沒有發現退款。"
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
 msgid "Refund #%(id)s"
-msgstr ""
+msgstr "退款 #%(id)s"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
@@ -1157,7 +1525,7 @@ msgstr "退款項目"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
-msgstr ""
+msgstr "退款 Line ID"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
@@ -1165,11 +1533,11 @@ msgstr "相關訂單行"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
-msgstr ""
+msgstr "學分 (excl. tax)"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
-msgstr ""
+msgstr "處理器"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
@@ -1249,7 +1617,7 @@ msgstr "訂單編號"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
-msgstr ""
+msgstr "數字項目"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"

@@ -4,14 +4,15 @@
 #
 # Translators:
 # JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
-# Mushiyo <Mushiyo@ya.ru>, 2015
+# Mushiyo, 2015
+# Wun-Han Syu <whsyu@mail.fcu.edu.tw>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-12-14 07:57+0000\n"
-"Last-Translator: JEN-HAO HSIEH <orienthauz@gmail.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-05-09 11:26+0000\n"
+"Last-Translator: Wun-Han Syu <whsyu@mail.fcu.edu.tw>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,9 +20,37 @@ msgstr ""
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "此為必填欄位"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "此數值必須為數字"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "此數值必須為日期"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "需要一個有效的ID"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "必須發生於結束日期之前"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "必須發生於開始日期之後"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "您必須選擇一個課程類別。"
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "您必須選擇如果優先席位需備創建。"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -46,6 +75,10 @@ msgstr "課程類別"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "驗證期限"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "包含優先席位"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -101,6 +134,26 @@ msgstr "所有學分必須有學分提供方。"
 msgid "All credit seats must designate a number of credit hours."
 msgstr "所有學分必須指定學分小時數。"
 
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "創建新的優惠券"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "查看優惠券"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "編輯優惠券"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "優惠卷代碼"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "創建新的課程"
+
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "檢視課程"
@@ -109,13 +162,97 @@ msgstr "檢視課程"
 msgid "Edit Course"
 msgstr "編輯課程"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "免費(榮譽)"
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "課程"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "啟動"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "註冊代碼"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "只能被一位消費者使用一次"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "可多次被多位消費者使用"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "每位消費者只可使用一次"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "代碼"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "賠償 URL"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "折扣代碼"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "可被多位消費者使用一次"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "儲存變更"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "創建優惠券"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "搜索..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "下一個"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "上一個"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "顯示_開始_到_結束_在_所有_優惠券"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(filtered from _MAX_ total coupons)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "顯示 _選單_ 優惠券"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "名稱"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "優惠券報告"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "免費的榮譽課程語認證"
+msgid "Free (Audit)"
+msgstr "免費(成人)"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "免費審核追蹤。沒有證書。"
 
 #: static/js/views/course_form_view.js
 msgid ""
@@ -137,34 +274,6 @@ msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr "初步認證與簽名認證的付費證書課程，可選擇購買學分課程。"
-
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "錯誤!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "儲存中"
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "請完成所有的欄位。"
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "儲存時發生錯誤。"
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "搜索..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "下一個"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "上一個"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -189,3 +298,53 @@ msgstr "課程"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "上一次編輯"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "錯誤!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "儲存中"
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "您必須完成全有需求欄位。"
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "儲存時發生錯誤。"
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "發生錯誤。請再試一次。"
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "選擇"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "被選擇的"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "訂單 %(order_number)s 已經被履行。"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "未能履行訂單 %(order_number)s: %(error)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "退費 #%(refund_id)s 已經被處理。"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "錯誤"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr "無法處理退費#%(refund_id)s: %(error)s。請再試一遍，或是聯繫電子商務發展團隊。"

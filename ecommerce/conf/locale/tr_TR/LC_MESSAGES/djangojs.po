@@ -5,16 +5,18 @@
 # Translators:
 # Adem Özgür <admozgur@gmail.com>, 2015
 # ali selek <aliselek01@gmail.com>, 2015
+# Bilal Oğuz marifet <bilalmarifet@gmail.com>, 2016
 # Emrah Emirtekin <eemirtekin@gmail.com>, 2015
 # İlker IŞIK <m.ilkerisik@hotmail.com>, 2015
 # Kubilay <kubilayinceoren10@gmail.com>, 2015
+# Tevfik Bagcivan <tevfik.bagcivan@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-12-28 17:49+0000\n"
-"Last-Translator: ali selek <aliselek01@gmail.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-07-20 12:36+0000\n"
+"Last-Translator: Bilal Oğuz marifet <bilalmarifet@gmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,9 +24,37 @@ msgstr ""
 "Language: tr_TR\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "Bu alan gereklidir"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "Bu değer bir sayı olmalı"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "Bu değer bir tarih olmalı"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "Geçerli bir kurs kimliği gereklidir"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "Bitiş tarihinden önce gerçekleşmelidir"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "Başlangıç tarihinden sonra gerçekleşmeli"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "Kurs tipinizi seçmelisiniz."
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr ""
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -49,6 +79,10 @@ msgstr "Ders Türü"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "Doğrulama için son tarih"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr ""
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -105,6 +139,26 @@ msgstr "Tüm kredi yerlerinin kredi sağlayıcısı olmalıdır."
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Tüm kredi yerleri kredi saatlerinin sayısını belirlemelidir."
 
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "Yeni kupon oluştur"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "Kupon göster"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "Kuponu düzenle"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "Kupon Kodu"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "Yeni kurs oluştur"
+
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "Derse Gözat"
@@ -113,13 +167,97 @@ msgstr "Derse Gözat"
 msgid "Edit Course"
 msgstr "Dersi Düzenle"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "Ücretsiz (Onur)"
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "Dersler"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "AKTİF"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "Kayıt Kodu"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "Bir müşteri tarafından bir kez kullanılabilir"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr ""
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "her müşteri tarafından yanlız bir kere kullanılabilir"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "Kod"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr ""
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "İndirim kodu"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "Birden fazla müşteri için bir kez kullanılabilir"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "Değişikleri Kaydet"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "Kupon oluştur"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "Arama..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "Sonraki"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "Önceki"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr ""
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr ""
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr ""
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "İsim"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "Kupon Raporu"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "Onur Sertifikası ile ücretsiz onur yolu"
+msgid "Free (Audit)"
+msgstr "Ücretsiz (Denetim)"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "Ücretsiz denetim yolu. Sertifikasız."
 
 #: static/js/views/course_form_view.js
 msgid ""
@@ -145,34 +283,6 @@ msgstr ""
 "Başlangıç onayı ve Onaylı Sertifika ile ücretli sertifika yolu, ve kredi "
 "satın almak için seçenek"
 
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "Hata!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "Kaydediliyor..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "Lütfen tüm gerekli alanları tamamlayın."
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "Veriyi kaydederken bir hata oluştu."
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "Arama..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "Sonraki"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "Önceki"
-
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
@@ -196,3 +306,53 @@ msgstr "Ders"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "Son değiştirilme"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "Hata!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "Kaydediliyor..."
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "Gerekli tüm alanları doldurunuz."
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "Veriyi kaydederken bir hata oluştu."
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "Bir hata oluştu. Lütfen tekrar deneyin."
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "Seç"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "Seçili"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr ""
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr ""
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr ""
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "Hata"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""

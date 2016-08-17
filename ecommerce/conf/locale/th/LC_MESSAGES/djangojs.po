@@ -5,14 +5,14 @@
 # Translators:
 # Jirayu Chamamahattana <mman2x@gmail.com>, 2015
 # Noppachai Eiamwasant <noporo@hotmail.com>, 2015
-# Pornchai Tummarattananont <yantaku@gmail.com>, 2015
+# Pornchai TummarATTAnanonT <yantaku@gmail.com>, 2015-2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-10-28 14:29+0000\n"
-"Last-Translator: Jirayu Chamamahattana <mman2x@gmail.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-05-09 11:26+0000\n"
+"Last-Translator: Pornchai TummarATTAnanonT <yantaku@gmail.com>\n"
 "Language-Team: Thai (http://www.transifex.com/open-edx/edx-platform/language/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,9 +20,37 @@ msgstr ""
 "Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "จำเป็นต้องระบุข้อมูล"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "ค่านี้ต้องเป็นตัวเลข"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "ค่านี้ต้องเป็นวันที่"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "ระบุรหัสหลักสูตรที่ถูกต้อง"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "ต้องกำหนดก่อนวัดสิ้นสุด"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "ต้องกำหนดหลังวันเริ่มต้น"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "คุณต้องเลือกประเภทหลักสูตร"
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "คุณต้องเลือกถ้าที่นั่ง honor ถูกสร้าง"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -47,6 +75,10 @@ msgstr "ประเภทหลักสูตร"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "วันสิ้นสุดการตรวจสอบ"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "รวมที่นั่ง Honor"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -102,6 +134,26 @@ msgstr "ทุกหน่วยกิตจะต้องมีผู้ให
 msgid "All credit seats must designate a number of credit hours."
 msgstr "ทุกหน่วยกิตจะต้องกำหนดจำนวนชั่วโมงหน่วยกิต"
 
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "สร้างคูปองใหม่"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "ดูคูปอง"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "แก้ไขคูปอง"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "รหัสคูปอง"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "สร้างหลักสูตรใหม่"
+
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "ดูหลักสูตร"
@@ -110,13 +162,97 @@ msgstr "ดูหลักสูตร"
 msgid "Edit Course"
 msgstr "แก้ไขหลักสูตร"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "ฟรี (เกียรติคุณ)"
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "หลักสูตร"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "ทำงาน"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "รหัสการลงทะเบียน"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "สามารถใช้ได้ครั้งเดียวโดยลูกค้าท่านเดียว"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "สามารถใช้ได้หลายครั้งโดยลูกค้าหลายท่าน"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "สามารถใช้ได้ครั้งเดียวต่อลูกค้า"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "โค้ด"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "URL สำหรับการกู้คืน"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "รหัสลดราคา"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "สามารถใช้ได้ครั้งเดียวโดยลูกค้าหลายท่าน"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "บันทึกการเปลี่ยนแปลง"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "สร้างคูปอง"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "ค้นหา..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "ถัดไป"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "ก่อนหน้า"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "กำลังแสดง _เริ่มต้น_ ถึง _สิ้นสุด_ ของ _ทั้งหมด_ คูปอง"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(คัดกรองจาก _มากที่สุด_ คูปองทั้งหมด)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "แสดง _เมนู_ คูปอง"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "ชื่อ"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "รายงานคูปอง"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "ติดตามเกียรติคุณฟรีพร้อมประกาศนียบัตรเกียรติคุณ"
+msgid "Free (Audit)"
+msgstr "ฟรี (ผู้ใหญ่)"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "ตรวจสอบฟรี  ไม่มีการรับรอง"
 
 #: static/js/views/course_form_view.js
 msgid ""
@@ -141,34 +277,6 @@ msgid ""
 msgstr ""
 "ชุดวิชาประกาศนียบัตรที่ชำระเงินแล้วพร้อมการตรวจสอบและรับรอง และการชำระเครดิต"
 
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "ผิดพลาด!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "กำลังบันทึก..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "โปรดกรอกข้อมูลสำคัญให้ครบ"
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "เกิดข้อผิดพลาดขณะบันทึกข้อมูล"
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "ค้นหา..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "ถัดไป"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "ก่อนหน้า"
-
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
@@ -192,3 +300,55 @@ msgstr "หลักสูตร"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "แก้ไขล่าสุด"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "ผิดพลาด!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "กำลังบันทึก..."
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "คุณต้องป้อนฟิลด์ข้อมูลที่จำเป็นให้ครบ"
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "เกิดข้อผิดพลาดขณะบันทึกข้อมูล"
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "มีข้อผิดพลาด. กรุณาลองอีกครั้ง"
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "เลือก"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "ถูกเลือก"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "เรียงลำดับ %(order_number)s บรรลุผลแล้ว"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "เกิดข้อผิดพลาดในการเรียงลำดับ %(order_number)s: %(error)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "คืนเงิน #%(refund_id)s ได้ถูกดำเนินการ"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "ผิดพลาด"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"กระบวนการคืนเงินผิดพลาด #%(refund_id)s: %(error)s. กรุณาทดลองอีกครั้ง, "
+"หรือติดต่อทีมพัฒนา E-Commerce"

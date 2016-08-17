@@ -3,14 +3,16 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# qualityalltext <quality@alltext.co.il>, 2016
+# Ron Rozen <Ronrozen@gmail.com>, 2016
 # yuval zana, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-10-25 12:07+0000\n"
-"Last-Translator: yuval zana\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-08-01 12:26+0000\n"
+"Last-Translator: qualityalltext <quality@alltext.co.il>\n"
 "Language-Team: Hebrew (http://www.transifex.com/open-edx/edx-platform/language/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,21 +20,49 @@ msgstr ""
 "Language: he\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "זהו שדה חובה"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "ערך זה חייב להיות מספר"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "ערך זה חייב להיות תאריך"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "נדרש מזהה קורס חוקי"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "חייב להתרחש לפני תאריך הסיום"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "חייב להתרחש לאחר תאריך ההתחלה"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr "עליך לבחור סוג קורס"
+msgstr "עליכם לבחור סוג קורס."
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "עליך לבחור אם יש ליצור מושב כבוד."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "המועד האחרון לאימות חייב להיות לאחר מועד השדרוג."
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr "וידוא מוצר נכשל"
+msgstr "אימות מוצר נכשל."
 
 #: static/js/models/course_model.js
 msgid "Course ID"
-msgstr "מזהה קורס"
+msgstr "מזהה הקורס"
 
 #: static/js/models/course_model.js
 msgid "Course Name"
@@ -40,19 +70,23 @@ msgstr "שם הקורס"
 
 #: static/js/models/course_model.js static/js/views/course_list_view.js
 msgid "Course Type"
-msgstr "סוג קורס"
+msgstr "סוג הקורס"
 
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
-msgstr ""
+msgstr "מועד אחרון לאימות"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "הכלילו מושב כבוד"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "לכל מושבי הקורס חייב להיות מחיר."
 
 #: static/js/models/course_seats/course_seat.js
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "מועד השדרוג חייב להיות לפני מועד האימות."
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
@@ -62,7 +96,7 @@ msgstr "מאומת"
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "נקודות זכות"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -70,7 +104,7 @@ msgstr "מקצועי"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor"
-msgstr "קוד אתי"
+msgstr "כבוד"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Audit"
@@ -78,48 +112,152 @@ msgstr "שומע חופשי"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"
-msgstr ""
+msgstr "תעודה מאומתת"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "תעודה מקצועית"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
-msgstr ""
+msgstr "תעודת כבוד"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "ללא תעודה"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "לכל מושבי נקודות הזכות חייב להיות ספק נקודות זכות."
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "כל מושבי נקודות הזכות חייבים להקצות מספר שעות של נקודות זכות."
+
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "צרו שובר חדש"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "הצגת שובר"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "עריכת שובר"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "קודי שוברים"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "צרו קורס חדש"
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
-msgstr "צפה בקורס"
+msgstr "הצגת קורס"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr "ערוך קורס"
+msgstr "עריכת קורס"
+
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "קורסים"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "פעיל"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "קוד הרשמה"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "לקוח אחד יכול להשתמש בזה פעם אחת"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "מספר לקוחות יכולים להשתמש בזה מספר פעמים"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "כל לקוח יכול להשתמש בזה פעם אחת בלבד"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "קוד"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "כתובת URL למימוש"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "קוד הנחה"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "מספר לקוחות יכולים להשתמש בזה פעם אחת"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "שמור שינויים"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "צור שובר"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "חיפוש..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "הבא"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "הקודם"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "הצגת _START_ to _END_ of _TOTAL_ שוברים"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(מסונן מתוך _MAX_  שוברים בסך הכל)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "הצג _MENU_ שוברים"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "שם"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "דוח שוברים"
 
 #: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr ""
+msgid "Free (Audit)"
+msgstr "חינם (שומע חופשי)"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgid "Free audit track. No certificate."
+msgstr "מסלול חינם לשומע חופשי. ללא תעודה."
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
-msgstr ""
+msgstr "מסלול תעודה בתשלום עם אימות התחלתי ותעודה מאומתת"
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -129,57 +267,30 @@ msgstr "השכלה מקצועית"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "מסלול תעודה בתשלום עם אימות התחלתי ותעודת חינוך מקצועי"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr ""
-
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "שגיאה!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "שומר..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "אנא מלא את כל השדות הנדרשים"
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr ""
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "חפש..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "הבא"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "קודם"
+"מסלול תעודה בתשלום עם אימות התחלתי ותעודה מאומתת, ואפשרות לרכוש נקודות זכות"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "מציג _START_ to _END_ of _TOTAL_  קורסים"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(מסונן מתוך _MAX_  קורסים בסך הכל)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "הצגת _MENU_  קורסים"
 
 #: static/js/views/course_list_view.js
 msgid "Course"
@@ -188,3 +299,55 @@ msgstr "קורס"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "נערך לאחרונה"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "שגיאה!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "שומר..."
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "עליכם למלא את כל שדות החובה."
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "אירעה שגיאה בזמן שמירת הנתונים."
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "אירעה שגיאה. נסו שוב."
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "בחרו"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "נבחר"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "הזמנה %(order_number)s בוצעה."
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "ביצוע הזמנה %(order_number)s נכשל: %(error)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "בוצע עיבוד של החזר #%(refund_id)s."
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "שגיאה"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"עיבוד של החזר #%(refund_id)s נכשל: %(error)s. נסו שוב, או פנו אל צוות הפיתוח"
+" של המסחר האלקטרוני."

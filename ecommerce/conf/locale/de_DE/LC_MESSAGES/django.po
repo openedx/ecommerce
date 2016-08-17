@@ -3,15 +3,18 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
-# mc <marc.mannsfeld@phil.hhu.de>, 2015
+# Akif Vohra <akifvohra@gmail.com>, 2016
+# Alexander L. <alexander.lohberg@ufo-style.de>, 2016
+# Ettore Atalan <atalanttore@googlemail.com>, 2016
+# mc <marc.mannsfeld@phil.hhu.de>, 2015-2016
 # yamahapsr200 <yamahapsr200@googlemail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-10-02 13:12+0000\n"
-"Last-Translator: mc <marc.mannsfeld@phil.hhu.de>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-08-01 15:21+0000\n"
+"Last-Translator: Akif Vohra <akifvohra@gmail.com>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,32 +35,146 @@ msgid "Important dates"
 msgstr "Wichtige Daten"
 
 #: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr ""
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr ""
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr ""
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr ""
+
+#: core/models.py
+msgid "Payment processors"
+msgstr ""
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
+msgstr ""
+
+#: core/models.py
 msgid "Full Name"
 msgstr "Vollständiger Name"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr "Gutschein existiert nicht"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr "Gutschein ist abgelaufen"
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr "Dieser Gutschein wurde bereits benutzt. "
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "Dieser Gutschein-Code ist ungültig. "
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr "edX Beispielkurs"
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr "Code nicht angegeben"
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr "Fehler beim Einlösen des Codes"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr "Das Produkt [{product}] ist nicht zum Kauf erhältlich. "
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr "Kursinformationen konnten nicht abgerufen werden. [{error}]"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr ""
 
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr ""
+"Letzter Zeitpunkt zu dem eine Verifizierung für dieses Produkt eingereicht "
+"werden kann. "
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
+msgstr ""
+"Konnte Einkaufsdaten für {course_id} nicht auf dem LMS veröffentlichen. "
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
+msgstr ""
+"Ein Fehler ist aufgetreten. Wir können nicht bestätigen, das Sie für "
+"Kurscredits zugelassen sind. Versuchen Sie die Transaktion erneut. "
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr ""
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr ""
+"Ein Fehler ist aufgetreten. Wir können nicht bestätigen, dass die "
+"Institution, die Sie ausgewählt haben, diesen Kurscredit anbietet. Versuchen"
+" Sie die Transaktion erneut. "
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr ""
+"Alle Bezahlmethoden sind momentan nicht verfügbar. Bitte versuchen Sie es "
+"erneut in einigen Minuten. "
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
-msgstr "Du kannst nicht mit leerem Einkaufswagen zur Kasse."
+msgstr "Sie können nicht mit einem leerem Einkaufswagen zur Kasse."
 
 #: extensions/api/exceptions.py
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
 msgstr ""
+"Wir konnten den Identifikations-Code nicht lokalisieren, um ihre Produkte zu"
+" finden. "
 
 #: extensions/api/exceptions.py
 msgid "We couldn't find one of the products you're looking for."
-msgstr "Wir konnten keines der produkte finden, welche Sie suchen."
+msgstr "Wir konnten keines der Produkte finden, welche Sie suchen."
 
 #: extensions/api/exceptions.py
 msgid "One of the products you're trying to order is unavailable."
 msgstr ""
-"Eines der Produkte, welche sie versuchen zu Bestellen ist nicht verfügbar."
+"Eines der Produkte, welches Sie bestellen möchten, ist nicht verfügbar."
 
 #: extensions/api/serializers.py
 #, python-brace-format
@@ -66,15 +183,32 @@ msgstr ""
 
 #: extensions/api/serializers.py
 msgid "Products must indicate whether ID verification is required."
-msgstr ""
+msgstr "Produkte müssen anzeigen, ob eine ID Verifizierung benötigt wird. "
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
+msgstr "Produkte müssen einen Preis haben."
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
+msgstr ""
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr "Seite"
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr ""
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
-msgstr ""
+msgstr "Letzter Zeitpunkt zu dem dieses Produkt gekauft werden kann. "
 
 #: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -99,10 +233,12 @@ msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
 msgstr ""
+"Eine Rückerstattung für diese Auswahl konnte nicht erstellt werden. "
+"Eventuell wurden diese bereits rückerstattet. "
 
 #: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
-msgstr ""
+msgstr "Rückerstattungen"
 
 #: extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/partials/refund_table.html
@@ -122,23 +258,35 @@ msgstr "Status"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "Konnte Einschreibungsinformationen nicht abrufen. "
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
 msgstr ""
 
-#: extensions/payment/admin.py extensions/payment/models.py
-msgid "Basket"
-msgstr "Einkaufswagen"
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
+msgstr ""
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr "Partner"
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "Partner"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
-msgstr "Wir unterstützen nicht die ausgewählte Zahlungsmethode."
+msgstr "Wir unterstützen die ausgewählte Zahlungsmethode nicht."
 
 #: extensions/payment/models.py
 msgid "Transaction ID"
 msgstr "Transaktions-ID"
+
+#: extensions/payment/models.py
+msgid "Basket"
+msgstr "Einkaufswagen"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Response"
@@ -191,6 +339,51 @@ msgstr ""
 msgid "Quantity"
 msgstr "Menge"
 
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "Name"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "Code"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "Rabatt"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "URL"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
+msgstr "{percentage} %"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr "{amount} {currency}"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr ""
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr "Gutschein-Report für {coupon_name}"
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr "Nicht bezahlt"
+
+#: invoice/models.py
+msgid "Paid"
+msgstr "Bezahlt"
+
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -198,7 +391,7 @@ msgstr "Menge"
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Dashboard"
-msgstr "Übersichtsseite"
+msgstr "Meine Kurse"
 
 #: settings/_oscar.py
 msgid "Catalogue"
@@ -226,7 +419,7 @@ msgstr ""
 
 #: settings/_oscar.py
 msgid "Fulfillment"
-msgstr ""
+msgstr "Ausführung"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -237,10 +430,6 @@ msgstr "Bestellungen"
 #: settings/_oscar.py
 msgid "Statistics"
 msgstr "Statistiken"
-
-#: settings/_oscar.py
-msgid "Partners"
-msgstr "Partner"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
@@ -260,50 +449,129 @@ msgid "Stock alert requests"
 msgstr ""
 
 #: settings/_oscar.py
+msgid "Offers"
+msgstr "Angebote"
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "Gutscheine"
+
+#: settings/_oscar.py
 msgid "Reports"
 msgstr "Meldungen"
+
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr "Wenn Sie Hilfe benötigen, kontaktieren Sie den Support. "
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
+msgstr ""
+"Der Einschreibungscode wurde auf den Kurspreis angewandt. Um den Code "
+"einzulösen, schreiben Sie sich in den Kurs ein. "
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr ""
+"Schreiben Sie sich ein und erhalten Sie ein verifiziertes Zertifikat im "
+"folgenden Kurs. "
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "KOSTENLOS"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr "Gesamt: $0"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr "Einscheiben und Code einlösen"
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr "Anmerkung:"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr ""
+"Sie müssen Ihre Identität mit einem offiziellen Ausweisdokument und Ihrer "
+"Webcam verifizieren, bevor der Kurs endet. "
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "Fragen?"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr ""
+"Lesen Sie unsere FAQs für Antworten zu den häufigsten Fragen rund um "
+"Zertifikate. "
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "Gutschein-Codes"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle navigation"
+msgstr "Wechsle die Menüführung"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr "Gutschein-Code Verwaltung"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Dashboard for:"
+msgstr "Übersichtsseite für:"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle Dropdown"
+msgstr "Dropdown wechseln"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
+msgid "Login"
+msgstr "Einloggen"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr "Gutschein-Verwaltung"
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr "Einlösen"
 
 #: templates/courses/course_app.html
 msgid "Courses"
 msgstr "Kurse"
 
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle navigation"
-msgstr "Wechsle die Menüführung"
-
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Dashboard for:"
-msgstr "Übersichtsseite für:"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle Dropdown"
-msgstr ""
-
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
-msgid "Login"
-msgstr "Einloggen"
+msgstr "Kurs-Verwaltung"
 
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "%(platform_name)s Kursverwaltungswerkzeug"
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "Teilnehmer-Dashboard"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "Kursverwaltungs-Werkzeug"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "E-Commerce Übersicht"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
@@ -311,16 +579,14 @@ msgstr "Abmelden"
 
 #: templates/customer/email_base.html
 #, python-format
-msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
+msgstr "Copyright © %(year)s %(platform_name)s. Alle Rechte vorbehalten."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "Hallo %(full_name)s,"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -330,6 +596,9 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"Vielen Dank für Ihren Einkauf von %(course_title)s. Der aufgeführte Preis "
+"wird auf Ihrer nächsten Abrechnung erscheinen mit dem Betreff: "
+"%(platform_name)s. "
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -338,6 +607,8 @@ msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
 msgstr ""
+"Sie können auf der %(platform_name)s Kursübersichtsseite Ihren Kurs aufrufen"
+" und die Verifizierung abschließen (sofern nötig)."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -346,123 +617,238 @@ msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
 msgstr ""
+"Um weitere großartige Kurse zu finden, besuchen Sie die "
+"%(platform_name)s-Website. Dort werden täglich neue Kurse angeboten!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "Danke! Wir hoffen, Sie werden an diesem Kurs viel Freude haben!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "%(platform_name)s Team "
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"Sie erhalten diese E-Mail, weil Sie einen Platz im Kurs %(course_title)s auf"
+" %(platform_name)s erworben haben. "
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
-msgstr ""
+msgstr "Bestätigungsbeleg für:"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
-msgstr ""
+msgstr "%(platform_name)s Team"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
-msgstr ""
+msgstr "Das edx Team"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
+msgstr "Bestellung aufgegeben"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+msgid "Payment Confirmation"
+msgstr "Zahlungsbestätigung"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+msgid "Payment confirmation for:"
+msgstr "Zahlungsbestätigung für:"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+msgid "View Payment Information"
+msgstr "Zahlungsdaten ansehen"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "Hallo %(full_name)s,"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
 msgstr ""
+"Um weitere qualifizierende Kurse zu finden, besuchen Sie die "
+"%(platform_name)s-Website. Wir aktualisieren regelmäßig das Angebot!"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
-msgstr ""
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr "Danke! Wir hoffen, Sie hatten an diesem Kurs viel Freude!"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr "Das %(platform_name)s Team"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr "Zahlungsbestätigung für:"
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr ""
+"Um Ihre Bezahlinformationen zu sehen, besuchen Sie die folgende Webseite. "
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
+msgstr "Bestellbestätigung"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "Auswählen"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr "Credits:"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "Preis:"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Learn more about %(display_name)s credit?\n"
+"                "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
+"                    "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr "Wählen Sie auf dieser Seite eine Bezahlmethode. "
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr "Auf der Bezahlseite tragen Sie Ihre Zahlungsinformationen ein. "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+"\n"
+"                            Wenn Ihre Zahlung abgeschlossen ist, folgen Sie dem Link zur %(display_name)s Webseite.\n"
+"                        "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
 msgstr ""
 
 #: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
 msgstr ""
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
-"\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
-"                    "
-msgstr[0] ""
-msgstr[1] ""
+"                                Purchase Credit for %(course_name)s\n"
+"                            "
+msgstr ""
 
 #: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
 msgstr ""
 
 #: templates/edx/credit/checkout.html
@@ -470,26 +856,20 @@ msgid "Total:"
 msgstr "Gesamt:"
 
 #: templates/edx/credit/checkout.html
-#, python-format
-msgid ""
-"\n"
-"                                Credit eligibility expires on %(date)s\n"
-"                            "
-msgstr ""
-
-#: templates/edx/credit/checkout.html
-msgid "You deserved it."
-msgstr ""
+msgid "You deserve it."
+msgstr "Sie haben es verdient. "
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"Die harte Arbeit ist vorüber - Sie haben den Kurs bestanden. Holen Sie sich "
+"die Credits, die Sie verdient haben, um diese Ihrem Abschluss zuzufügen."
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "Es ist bezahlbar. "
 
 #: templates/edx/credit/checkout.html
 msgid ""
@@ -499,7 +879,7 @@ msgstr ""
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "Es öffnet Türen."
 
 #: templates/edx/credit/checkout.html
 msgid ""
@@ -508,48 +888,47 @@ msgid ""
 msgstr ""
 
 #: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr ""
-
-#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
+"\n"
+"                    Bitte lesen Sie %(link_start)sunsere FAQs, um allgemeine Fragen zu Zertifikaten anzuschauen.%(link_end)s\n"
+"                "
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "Ihre Shopstatisiken"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "Alle Bestellungen"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "Neukunden"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "Kunden gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "Produkte gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "Letzte Bestellungen (letzte 24 Stunden)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "Bestellungen - Letzte 24 Stunden"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "Bestellungen gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
@@ -557,81 +936,81 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "Einnahmen gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "Durchschnittliche Bestellkosten"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "Durchschnittliche (bezahlte) Bestellkosten"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "Verwalten"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "Bestellungen - Gesamtzeit"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "<em>Offene</em> Einkaufswagen gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "Kunden gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "Neukunden"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "Bestandwarnungen ansehen"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "Katalog und Bestand"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "Produkte gesamt"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>Offene</em> Bestandswarnungen"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>Geschlossene</em> Bestandswarnungen"
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "Angebote, Voucher und Aktionen"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "Aktive <em>Angebote</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "Aktive <em>Voucher</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "Aktionen"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
-msgstr ""
+msgstr "Bestellung %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
-msgstr ""
+msgstr "Bestellung #%(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -660,7 +1039,7 @@ msgstr "Bestellungsinformation"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Total"
-msgstr ""
+msgstr "Bestellung gesamt"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -751,28 +1130,24 @@ msgid "View"
 msgstr "Anzeigen"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr "Rabatt"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
-msgstr ""
+msgstr "Einkaufswagen gesamt (exkl. Rabatte)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (inc. discounts)"
-msgstr ""
+msgstr "Einkaufswagen gesamt (inkl. Rabatte)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total"
-msgstr ""
+msgstr "Einkaufswagen gesamt"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (excl. discounts)"
-msgstr ""
+msgstr "Versand gesamt (exkl. Rabatte)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (inc. discounts)"
-msgstr ""
+msgstr "Versand gesamt (inkl. Rabatte)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total"
@@ -793,7 +1168,7 @@ msgstr ""
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "choose new status"
-msgstr ""
+msgstr "neuen Status wählen"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
@@ -805,7 +1180,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
-msgstr ""
+msgstr "mit Referenz"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
@@ -813,11 +1188,11 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
-msgstr ""
+msgstr "mit Betrag"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
-msgstr ""
+msgstr "Rückerstattung erstellen"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
@@ -836,7 +1211,7 @@ msgstr "Status ändern"
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "This order can't have its status changed."
-msgstr ""
+msgstr "Sie können nicht den Status dieser Order verändern. "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
@@ -860,7 +1235,7 @@ msgstr ""
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Reference"
-msgstr ""
+msgstr "Referenz"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -869,6 +1244,9 @@ msgid ""
 "                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
 msgstr ""
+"\n"
+"                                              %(title)s (Menge %(event_qty)s/%(total_qty)s)\n"
+"                                            "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
@@ -912,7 +1290,7 @@ msgstr "Kosten (einschließlich Steuern)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (excl tax)"
-msgstr ""
+msgstr "Kosten (exkl. Steuern)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Address"
@@ -931,13 +1309,12 @@ msgid "Instructions"
 msgstr "Anleitungen"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
-msgstr ""
+msgstr "Rechnungsanschrift"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
-msgstr ""
+msgstr "Zahlungsquelle"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
@@ -945,19 +1322,19 @@ msgstr "Quelle"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
-msgstr ""
+msgstr "Verteilung"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
-msgstr ""
+msgstr "Abgebuchter Betrag"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
-msgstr ""
+msgstr "Erstatteter Betrag"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
-msgstr ""
+msgstr "Keine Zahlungsquelle für diese Bestellung gefunden. "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
@@ -973,7 +1350,7 @@ msgstr "Gutschein"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
-msgstr ""
+msgstr "Angebotsbezeichnung"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
@@ -981,11 +1358,11 @@ msgstr "Häufigkeit"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Message"
-msgstr "Nachicht"
+msgstr "Nachricht"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
-msgstr ""
+msgstr "Es wurden keine Rabatte bei dieser Bestellung berücksichtigt. "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
@@ -1010,6 +1387,7 @@ msgstr "Notiz speichern"
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes are only editable for 5 minutes after being saved."
 msgstr ""
+"Notizen sind nur 5 Minuten bearbeitbar, bevor diese gespeichert werden"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
@@ -1028,11 +1406,11 @@ msgstr "Schließen"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "Suche..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
-msgstr ""
+msgstr "Ausgewählte Bestellungen als CSV herunterladen"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
@@ -1044,15 +1422,11 @@ msgstr "Bestellnummer"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
-msgstr ""
+msgstr "Gesamt inkl. Steuern"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr "Lieferadresse"
+msgstr "Anzahl Artikel"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
@@ -1061,7 +1435,7 @@ msgstr "Gelöscht"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
-msgstr ""
+msgstr "Ausführung erneut probieren"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
@@ -1082,23 +1456,24 @@ msgstr "Modus"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "Aktiv?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "Keine Einschreibung gefunden. "
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
-msgstr ""
+msgstr "Rückerstattungsabwicklung bestätigen"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to issue a full refund?"
 msgstr ""
+"Sind Sie sicher, dass Sie eine volle Rückerstattung auszahlen möchten?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to deny this refund request?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie diese Rückerstattung ablehnen möchten?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Cancel"
@@ -1110,7 +1485,7 @@ msgstr "Bestätigen"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve"
-msgstr ""
+msgstr "Bestätigen"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
@@ -1119,13 +1494,13 @@ msgstr "Ablehnen"
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
-msgstr ""
+msgstr "Anzahl Artikel"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "Gutschrift gesamt"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -1141,7 +1516,7 @@ msgstr "Keine Rückerstattungen gefunden."
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
 msgid "Refund #%(id)s"
-msgstr ""
+msgstr "Rückerstattung #%(id)s"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
@@ -1149,11 +1524,11 @@ msgstr "Rückerstattungsüberblick"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
-msgstr ""
+msgstr "Dazugehörige Bestellung"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
-msgstr ""
+msgstr "Rückerstattete Artikel"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
@@ -1165,7 +1540,7 @@ msgstr ""
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
-msgstr ""
+msgstr "Gutschrift (exkl. Steuern)"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
@@ -1193,7 +1568,7 @@ msgstr "Ja,Nein"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Superuser"
-msgstr ""
+msgstr "Superuser"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
@@ -1249,7 +1624,7 @@ msgstr "Bestellnummer"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
-msgstr ""
+msgstr "Anzahl Artikel"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
@@ -1261,28 +1636,28 @@ msgstr "Eingestellt am"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not placed any orders yet."
-msgstr ""
+msgstr "Dieser Teilnehmer hat noch keine Bestellung getätigt. "
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
-msgstr ""
+msgstr "Dieser Teilnehmer hat noch keine Adresse gespeichert. "
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
-msgstr ""
+msgstr "Produkt-ID"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Score"
-msgstr ""
+msgstr "Punkte"
 
 #: templates/oscar/dashboard/users/detail.html
 msgctxt "Product review title"
 msgid "Title"
-msgstr ""
+msgstr "Titel"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Body"
-msgstr ""
+msgstr "Body"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date created"

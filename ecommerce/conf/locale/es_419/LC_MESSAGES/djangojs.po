@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
-# Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015
+# Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015-2016
 # Laura Silva <lingison@edx.org>, 2016
+# Matías Olivera <MatiasOlivera@outlook.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2016-01-21 18:06+0000\n"
+"POT-Creation-Date: 2016-08-17 14:48-0400\n"
+"PO-Revision-Date: 2016-08-18 15:25+0000\n"
 "Last-Translator: Laura Silva <lingison@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
@@ -19,183 +20,448 @@ msgstr ""
 "Language: es_419\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: static/js/models/course_model.js
-msgid "You must select a course type."
-msgstr "Debe seleccionar un tipo de curso."
-
-#: static/js/models/course_model.js
-msgid "The verification deadline must occur AFTER the upgrade deadline."
+#: static/build/js/apps/basket_app.js static/js/pages/basket_page.js
+msgid "Problem occurred during checkout. Please contact support"
 msgstr ""
-"La fecha límite de verificación debe ser DESPUÉS de la fecha límite para "
-"upgrades."
+"Hubo un problema con la transacción de pago. Por favor contacte al equipo de"
+" soporte técnico."
 
-#: static/js/models/course_model.js
-msgid "Product validation failed."
-msgstr "La validación del producto ha fallado."
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "This field is required."
+msgstr "Este campo es requerido."
 
-#: static/js/models/course_model.js
-msgid "Course ID"
-msgstr "Id de Curso"
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "This value must be a number."
+msgstr "Este valor debe ser un número."
 
-#: static/js/models/course_model.js
-msgid "Course Name"
-msgstr "Nombre del curso"
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "This value must be a date."
+msgstr "Este valor debe ser una fecha."
 
-#: static/js/models/course_model.js static/js/views/course_list_view.js
-msgid "Course Type"
-msgstr "Tipo de curso"
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "At least one seat type must be selected."
+msgstr "Al menos un modo de inscripción debe ser seleccionado."
 
-#: static/js/models/course_model.js
-msgid "Verification Deadline"
-msgstr "Fecha límite de verificación"
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "Un ID de curso válido es requerido"
 
-#: static/js/models/course_seats/course_seat.js
-msgid "All course seats must have a price."
-msgstr "Todas las sillas del curso deben tener un precio."
-
-#: static/js/models/course_seats/course_seat.js
-msgid "The upgrade deadline must occur BEFORE the verification deadline."
+#: static/build/js/apps/coupon_admin_app.js
+msgid "Code field must be empty or between 8 and 16 characters"
 msgstr ""
-"La fecha límite para upgrades debe ser ANTES de la fecha límite de "
-"verificación."
 
-#: static/js/models/course_seats/course_seat.js
-#: static/js/views/course_form_view.js
-msgid "Verified"
-msgstr "Verificado"
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "Debe suceder antes de la fecha de finalización"
 
-#: static/js/models/course_seats/course_seat.js
-#: static/js/views/course_form_view.js
-msgid "Credit"
-msgstr "Crédito"
+#: static/build/js/apps/coupon_admin_app.js static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "Debe suceder despues de la fecha de inicio"
 
-#: static/js/models/course_seats/course_seat.js
-msgid "Professional"
-msgstr "Profesional"
-
-#: static/js/models/course_seats/course_seat.js
-msgid "Honor"
-msgstr "Honor"
-
-#: static/js/models/course_seats/course_seat.js
-msgid "Audit"
-msgstr "Tomar como oyente"
-
-#: static/js/models/course_seats/course_seat.js
-msgid "Verified Certificate"
-msgstr "Certificado verificado"
-
-#: static/js/models/course_seats/course_seat.js
-msgid "Professional Certificate"
-msgstr "Certificado Profesional"
-
-#: static/js/models/course_seats/course_seat.js
-msgid "Honor Certificate"
-msgstr "Certificado de honor"
-
-#: static/js/models/course_seats/course_seat.js
-msgid "No Certificate"
-msgstr "Sin certificado"
-
-#: static/js/models/course_seats/credit_seat.js
-msgid "All credit seats must have a credit provider."
-msgstr "Todas las sillas de crédito deben tener un proveedor de crédito."
-
-#: static/js/models/course_seats/credit_seat.js
-msgid "All credit seats must designate a number of credit hours."
-msgstr ""
-"Todas las sillas de crédito deben designar un número de horas de crédito."
-
-#: static/js/pages/course_detail_page.js
-msgid "View Course"
-msgstr "Ver curso"
-
-#: static/js/pages/course_edit_page.js
-msgid "Edit Course"
-msgstr "Editar el curso"
-
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "Gratis (Honor)"
-
-#: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "Ruta de honor gratuita, con Certificado de código de honor."
-
-#: static/js/views/course_form_view.js
-msgid ""
-"Paid certificate track with initial verification and Verified Certificate"
-msgstr ""
-"Ruta de certificado pago, con verificación inicial y Certificado Verificado"
-
-#: static/js/views/course_form_view.js
-msgid "Professional Education"
-msgstr "Educación profesional"
-
-#: static/js/views/course_form_view.js
-msgid ""
-"Paid certificate track with initial verification and Professional Education "
-"Certificate"
-msgstr ""
-"Ruta de certificado pago con verificación inicial y Certificado de Educación"
-" Profesional"
-
-#: static/js/views/course_form_view.js
-msgid ""
-"Paid certificate track with initial verification and Verified Certificate, "
-"and option to purchase credit"
-msgstr ""
-"Ruta de certificado pago con verificación inicial, Certificado Verificado y "
-"opción de compra de créditos"
-
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "Error!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "Guardando..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "Por favor completar todos los campos requeridos."
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "Ocurrió un error guardando los datos."
-
-#: static/js/views/course_list_view.js
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
 msgid "Search..."
 msgstr "Buscar..."
 
-#: static/js/views/course_list_view.js
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
 msgid "Next"
 msgstr "Siguiente"
 
-#: static/js/views/course_list_view.js
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
 msgid "Previous"
 msgstr "Anterior"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "Mostrando _START_ al _END_ de _TOTAL_ cupones"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(filtrado desde _MAX_ cupones en total)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "Mostrar _MENU_ cupones"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "Nombre"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "Informe de Cupón"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "Códigos de Cupón"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js static/js/views/form_view.js
+msgid "Error!"
+msgstr "¡Error!"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js static/js/views/form_view.js
+msgid "A course with the specified ID already exists."
+msgstr "Ya existe un curso con el ID especificado."
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js static/js/views/form_view.js
+msgid "Saving..."
+msgstr "Guardando..."
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "Debes completar todos los campos requeridos."
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/build/js/apps/course_admin_app.js static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "Ocurrió un error guardando los datos."
+
+#: static/build/js/apps/coupon_admin_app.js static/build/js/common.js
+#: static/js/models/course_model.js static/js/views/dynamic_catalog_view.js
+msgid "Course ID"
+msgstr "Id de Curso"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/dynamic_catalog_view.js
+msgid "Course name"
+msgstr "Nombre del curso"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/dynamic_catalog_view.js
+msgid "Seat type"
+msgstr "Modo de inscripción"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "Código de Inscripción"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "Cupón de Descuento"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "Puede ser usado una vez por un cliente"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "Puede ser usado una vez por múltiples clientes"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "Puede ser usado múltiples veces por múltiples clientes"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "Guardar Cambios"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "Crear Cupón"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "Crear un Cupón Nuevo"
+
+#: static/build/js/apps/coupon_admin_app.js
+msgid "ACTIVE"
+msgstr "ACTIVO"
+
+#: static/build/js/apps/coupon_admin_app.js
+msgid "Code"
+msgstr "Código"
+
+#: static/build/js/apps/coupon_admin_app.js
+msgid "Redemption URL"
+msgstr "URL de redención"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "Ver Cupón"
+
+#: static/build/js/apps/coupon_admin_app.js
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "Editar Cupón"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/build/js/apps/course_admin_app.js
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
 msgstr "Mostrando _START_ a _END_ de _TOTAL_ cursos"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/build/js/apps/course_admin_app.js
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
 msgstr "(filtrado de _MAX_ cursos en total)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/build/js/apps/course_admin_app.js
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
 msgstr "Mostrar _MENU_ cursos"
 
+#: static/build/js/apps/course_admin_app.js
 #: static/js/views/course_list_view.js
 msgid "Course"
 msgstr "Curso"
 
+#: static/build/js/apps/course_admin_app.js static/build/js/common.js
+#: static/js/models/course_model.js static/js/views/course_list_view.js
+msgid "Course Type"
+msgstr "Tipo de curso"
+
+#: static/build/js/apps/course_admin_app.js
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "Última modificación"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "Cursos"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/pages/course_detail_page.js
+msgid "View Course"
+msgstr "Ver curso"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/course_form_view.js
+msgid "Free (Audit)"
+msgstr "Gratis (Oyente)"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "Modalidad gratuita como oyente. Sin certificado."
+
+#: static/build/js/apps/course_admin_app.js static/build/js/common.js
+#: static/js/models/course_seats/course_seat.js
+#: static/js/views/course_form_view.js
+msgid "Verified"
+msgstr "Verificado"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate"
+msgstr "Modalidad pagada, con verificación inicial y Certificado Verificado"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/course_form_view.js
+msgid "Professional Education"
+msgstr "Educación profesional"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
+msgstr ""
+"Modalidad pagada, con verificación inicial y Certificado de Educación "
+"Profesional"
+
+#: static/build/js/apps/course_admin_app.js static/build/js/common.js
+#: static/js/models/course_seats/course_seat.js
+#: static/js/views/course_form_view.js
+msgid "Credit"
+msgstr "Crédito"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/views/course_form_view.js
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
+msgstr ""
+"Modalidad pagada con verificación inicial y Certificado Verificado, y la "
+"opción de comprar créditos"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "Crear un Curso Nuevo"
+
+#: static/build/js/apps/course_admin_app.js
+#: static/js/pages/course_edit_page.js
+msgid "Edit Course"
+msgstr "Editar el curso"
+
+#: static/build/js/apps/credit_checkout.js
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "Ocurrió un error. Por favor intente nuevamente."
+
+#: static/build/js/apps/credit_checkout.js
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "Seleccionar"
+
+#: static/build/js/apps/credit_checkout.js
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "Seleccionado"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "All course seats must have a price."
+msgstr "Todas las sillas del curso deben tener un precio."
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
+msgstr ""
+"La fecha límite para upgrades debe ser ANTES de la fecha límite de "
+"verificación."
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "Professional"
+msgstr "Profesional"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "Honor"
+msgstr "Honor"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "Audit"
+msgstr "Tomar como oyente"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "Verified Certificate"
+msgstr "Certificado Verificado"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "Professional Certificate"
+msgstr "Certificado Profesional"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "Honor Certificate"
+msgstr "Certificado de Código de Honor"
+
+#: static/build/js/common.js static/js/models/course_seats/course_seat.js
+msgid "No Certificate"
+msgstr "Sin certificado"
+
+#: static/build/js/common.js static/js/models/course_seats/credit_seat.js
+msgid "All credit seats must have a credit provider."
+msgstr "Todas las sillas de crédito deben tener un proveedor de crédito."
+
+#: static/build/js/common.js static/js/models/course_seats/credit_seat.js
+msgid "Please select a valid credit provider."
+msgstr "Por favor seleccione un proveedor de crédito válido."
+
+#: static/build/js/common.js static/js/models/course_seats/credit_seat.js
+msgid "All credit seats must designate a number of credit hours."
+msgstr ""
+"Todas las sillas de crédito deben designar un número de horas de crédito."
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "You must select a course type."
+msgstr "Debe seleccionar un tipo de curso."
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "Debes elegir si un asiento de honor debería ser creado."
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "The verification deadline must occur AFTER the upgrade deadline."
+msgstr ""
+"La fecha límite de verificación debe ser DESPUÉS de la fecha límite para "
+"upgrades."
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "Product validation failed."
+msgstr "La validación del producto ha fallado."
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "Course Name"
+msgstr "Nombre del curso"
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "Verification Deadline"
+msgstr "Fecha límite de verificación"
+
+#: static/build/js/common.js static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "Incluye Asiento de Honor"
+
+#: static/build/js/pages/offer_page.js static/js/pages/offer_page.js
+msgid "Redeem"
+msgstr "Canjear"
+
+#: static/build/js/views/offer_view.js static/js/views/offer_view.js
+msgid "Load the records for page "
+msgstr ""
+
+#: static/build/js/views/offer_view.js static/js/views/offer_view.js
+msgid "Ellipsis"
+msgstr "Elipsis"
+
+#: static/build/js/views/offer_view.js static/js/views/offer_view.js
+msgid "Load the records for the previous page"
+msgstr ""
+
+#: static/build/js/views/offer_view.js static/js/views/offer_view.js
+msgid "Load the records for the next page"
+msgstr ""
+
+#: static/build/vendor-extensions/oscar/js/order_list.js
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "La orden número %(order_number)s ha sido tramitada."
+
+#: static/build/vendor-extensions/oscar/js/order_list.js
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "Falló al tramitar la orden %(order_number)s: %(error)s"
+
+#: static/build/vendor-extensions/oscar/js/refund_list.js
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "La devolución #%(refund_id)s ha sido procesada."
+
+#: static/build/vendor-extensions/oscar/js/refund_list.js
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "Error"
+
+#: static/build/vendor-extensions/oscar/js/refund_list.js
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"Falló al procesar la devolución #%(refund_id)s: %(error)s. Por favor intente"
+" nuevamente o contacte al equipo de soporte."
+
+#: static/js/models/coupon_model.js
+msgid "This field must be empty or contain 1-16 alphanumeric characters."
+msgstr ""
