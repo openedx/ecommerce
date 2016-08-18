@@ -19,6 +19,7 @@ class PaymentProcessorResponseInline(admin.TabularInline):
 
 @admin.register(Basket)
 class BasketAdminExtended(BasketAdmin):
+    raw_id_fields = ('vouchers', )
     inlines = (LineInline, PaymentProcessorResponseInline,)
     show_full_result_count = False
 
