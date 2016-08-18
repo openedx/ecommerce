@@ -3,15 +3,18 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# hohomi <hohomi@gmail.com>, 2016
+# jsgang <jsgang9@gmail.com>, 2016
 # Wenyong Hu <huwenyong.nl@gmail.com>, 2015
+# Yue Fang <yfang@juilliard.edu>, 2016
 # zhaojina <zhaojianwei187@126.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-21 06:27+0000\n"
-"Last-Translator: Wenyong Hu <huwenyong.nl@gmail.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-06-24 17:48+0000\n"
+"Last-Translator: Yue Fang <yfang@juilliard.edu>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,9 +22,37 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "此项必填"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "必须填数字"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "必须填日期"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "需要一个有效的课程编号"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "应在结束日期之前"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "应在开始日期之后"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
-msgstr "您必须选择其中一种课程。"
+msgstr "您必须选择一种课程类型。"
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "您必须选择是否创建荣誉席位。"
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -46,6 +77,10 @@ msgstr "课程类型"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "认证截止日期"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "包含荣誉座位"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -91,15 +126,35 @@ msgstr "荣誉证书"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr "未获得证书"
+msgstr "无证书"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
-msgstr "所有的学分项必须由某个学分授予者授予。"
+msgstr "所有的学分席位必须有一个学分颁发者。"
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
-msgstr "所有学分项必须指定一定的时长。"
+msgstr "所有学分席位必须规定学分时长。"
+
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "创建新优惠卷"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "查看优惠券"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "编辑优惠券"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "优惠码"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "创建新课程"
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
@@ -109,18 +164,102 @@ msgstr "查看课程"
 msgid "Edit Course"
 msgstr "编辑课程"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "免费(荣誉)"
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "课程"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "有效的"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "选课码"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "能被1位顾客使用1次"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "能被多位顾客使用多次"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "每位顾客只能使用一次"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "代码"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "兑现 URL"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "折扣码"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "能被多位顾客使用一次"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "保存更改"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "创建优惠券"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "搜索"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "下一个"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "上一个"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "正在显示第 _START_ 张到第 _END_ 张优惠券，共 _TOTAL_ 张优惠券"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(已从_MAX_ 张优惠券中筛选)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "显示 _MENU_ 优惠券"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr " 名字"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "优惠券报告"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "免费提供荣誉证书"
+msgid "Free (Audit)"
+msgstr "免费(试听)"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "免费试听路径。无证书。"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
-msgstr "初始认证和认证证书需要付费获取"
+msgstr "付费证书路径，包含初始认证和认证证书"
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -130,57 +269,29 @@ msgstr "专业教育"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr "初始认证和专业教育证书需要付费获取"
+msgstr "付费证书路径，包含初始认证和专业教育证书"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr "初始认证和认证证书需要付费获取，同时你可以选择购买学分。"
-
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "错误！"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "正在保存…"
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "请完成所有必填项。"
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "保存数据时发生错误。"
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "搜索"
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "下一个"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "上一个"
+msgstr "付费证书路径，包含初始认证和认证证书，可以选择付费获得学分。"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr "显示“已经开始”到“已经结束”的所有课程"
+msgstr "显示_START_到_END_的_TOTAL_课程"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr "(结果筛选于所有课程中“最大的”)"
+msgstr "(结果筛选于_MAX_所有课程)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr "显示“菜单”课程"
+msgstr "显示_MENU_课程"
 
 #: static/js/views/course_list_view.js
 msgid "Course"
@@ -189,3 +300,53 @@ msgstr "课程"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "最后一次编辑"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "错误！"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "正在保存…"
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "您必须完成所有必填选项。"
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "保存数据时发生错误。"
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "发生了一个未知错误，请重试。"
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "选择"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "已选"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "编号为 %(order_number)s 的订单已完成。"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "未能完成编号为 %(order_number)s 的订单: %(error)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "退款 #%(refund_id)s 处理完毕。"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "错误"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr "无法处理退款 #%(refund_id)s: %(error)s。请重试，或者联系电子商务开发团队。"

@@ -3,15 +3,19 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# Angelos Chraniotis <chraniotis@gmail.com>, 2016
+# Evdokia <evipericleous@live.co.uk>, 2016
 # Giannoulis Thanasis <thanasis@giannoulis.net>, 2015
+# Katerina Ligkovanli <kaligova@gmail.com>, 2016
 # LOUKAS SKOUROLIAKOS, 2015
+# SYMI PASALIDOU <simipass@hotmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-11-30 21:31+0000\n"
-"Last-Translator: LOUKAS SKOUROLIAKOS\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-07-26 15:06+0000\n"
+"Last-Translator: Katerina Ligkovanli <kaligova@gmail.com>\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,21 +23,51 @@ msgstr ""
 "Language: el\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "Αυτό το πεδίο είναι υποχρεωτικό."
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "Αυτό το σημείο πρέπει να είναι ένας αριθμός."
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "Αυτή η τιμή πρέπει να είναι μια ημερομηνία."
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "Απαιτείται έγκυρη ταυτότητα μαθήματος"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "Πρέπει να γίνει πριν από την ημερομηνία λήξης."
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "Πρέπει να γίνει μετά την ημερομηνία έναρξης."
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
+msgstr "Πρέπει να επιλέξετε ένα είδος προγράμματος."
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
 msgstr ""
+"Θα πρέπει να επιλέξετε αν θα πρέπει να δημιουργηθεί προς τιμήν μία θέση."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr ""
+"Η προθεσμία επαλήθευσης πρέπει να γίνει μετά την προθεσμία αναβάθμισης."
 
 #: static/js/models/course_model.js
 msgid "Product validation failed."
-msgstr ""
+msgstr "Η επικύρωση του προϊόντος απέτυχε."
 
 #: static/js/models/course_model.js
 msgid "Course ID"
-msgstr ""
+msgstr "Ταυτότητα προγράμματος."
 
 #: static/js/models/course_model.js
 msgid "Course Name"
@@ -41,29 +75,35 @@ msgstr "Τίτλος Μαθήματος"
 
 #: static/js/models/course_model.js static/js/views/course_list_view.js
 msgid "Course Type"
-msgstr "Τύπος μαθήματος"
+msgstr "Τύπος/ειδος μαθήματος"
 
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Προθεσμία επαλήθευσης."
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "Να συμπεριληφθεί θέση επισήμου"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "Όλες οι θέσεις του προγράμματος πρέπει να έχουν μια τιμή."
 
 #: static/js/models/course_seats/course_seat.js
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
+"Η προθεσμία αναβάθμισης πρέπει να συμβεί πριν από τη λήξη της προθεσμίας "
+"ελέγχου."
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Verified"
-msgstr "Επαληθευμένο"
+msgstr "Επαληθευμένο/επικυρωμένο"
 
 #: static/js/models/course_seats/course_seat.js
 #: static/js/views/course_form_view.js
 msgid "Credit"
-msgstr ""
+msgstr "Πίστωση."
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional"
@@ -71,116 +111,201 @@ msgstr "Επαγγελματικό"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor"
-msgstr ""
+msgstr "Τίμιση/τιμώ"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Audit"
-msgstr ""
+msgstr "Ακροατές"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Πιστοποιητικό επαληθευμένο/επικυρωμένο"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Πιστοποιητικό επαγγέλματος."
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Τιμητικό πιστοποιητικό."
 
 #: static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
-msgstr ""
+msgstr "Χωρίς πιστοποιητικό."
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
 msgstr ""
+"Όλες οι θέσεις που έχουν πιστωθεί πρέπει να έχουν ένα πάροχο πίστωσης."
 
 #: static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
+"Όλες οι θέσεις που έχουν πιστωθεί πρέπει να ορίσουν έναν αριθμό διδακτικών "
+"ωρών."
+
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "Δημιουργία νέου κουπονιού."
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "Προβολή κουπονιού/δελτίου"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "Επεξεργασία κουπονιού/δελτίου"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "Κωδικοί κουπονιού/δελτίου"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "Δημιουργία νέου μσθήματος."
 
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
-msgstr "Δείτε το μάθημα"
+msgstr "Ενεργό μάθημα"
 
 #: static/js/pages/course_edit_page.js
 msgid "Edit Course"
-msgstr ""
+msgstr "Επεξεργασία μαθήματος."
+
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "Μαθήματα"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "Ενεργός"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "κωδικός εγγραφής"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "Μπορεί να χρησιμοποιηθεί μία φορά από έναν πελάτη"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "Μπορεί να χρησιμοποιηθεί πολλές φορές από πολλούς πελάτες"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "Μπορεί να χρησιμοποιηθεί μόνο μία φορά από κάθε πελάτη"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "κωδικός"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "Εξαγορά/εξαργύρωση Ενιαίου Εντοπιστή Πόρων"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "Κωδικός έκπτωσης"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "Μπορεί να χρησιμοποιηθεί μία φορά από πολλούς πελάτες"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "Αποθήκευση αλλαγών"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "Δημιουργία κουπονιού/δελτίου"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "Αναζήτηση..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "Επόμενο"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "Προηγούμενο"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "Εμφάνιση αρχής μέχρι τέλους του στυνόλου των κουπονιών/δελτίων"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(φιλτραρισμένο από _MAX_ συνολικά κουπόνια)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "Εμφάνιση μενού κουπονιών/δελτίων"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "Όνομα"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "Αναφορά/έκθεση κουπονιού/δελτίου"
 
 #: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr ""
+msgid "Free (Audit)"
+msgstr "Δωρεάν (παρακολούθηση)"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr ""
+msgid "Free audit track. No certificate."
+msgstr "Δωρεάν κομμάτι παρακολούθησης . Κανένα πιστοποιητικό"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr ""
+"Επί πληρομή πιστοποιητικό με εξ' αρχή επαλήθευση και απικυρωμένο "
+"πιστοποιητικό "
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
-msgstr "Επαγγελματική Κατάρτιση"
+msgstr "Επαγγελματική εκπαίδευση"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr ""
+"Επί πληρωμή με εξ'αρχής επαλήθευση και επαγγελματικό πιστοποιητικό "
+"εκπαίδευσης"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr ""
-
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "Σφάλμα!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "Γίνεται αποθήκευση..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr ""
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr ""
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "Αναζήτηση..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "Επόμενο"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "Προηγούμενο"
+"Πρόσβαση πιστοποιητικού με πληρωμή με το αρχικό έλεγχο και ελεγμένο "
+"πιστοποιητικό, και  επιλογή για αγορά πίστωσης."
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "Προβάλλονται _START_ μέχρι _END_ από _TOTAL_ μαθήματα"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(φιλτραρισμένα από _MAX_ συνολικά μαθήματα)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "Εμφάνιση του Μενού μαθημάτων."
 
 #: static/js/views/course_list_view.js
 msgid "Course"
@@ -189,3 +314,56 @@ msgstr "Το μάθημα"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "Τελευταία επεξεργασία"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "Σφάλμα!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "Γίνεται αποθήκευση..."
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "Πρέπει να συμπληρώσετε όλα τα απαιτούμενα πεδία."
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "Προέκυψε σφάλμα κατά την αποθήκευση των δεδομένων."
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "Προέκυψε κάποιο πρόβλημα. Παρακαλώ δοκιμάστε ξανά."
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "Επιλέξτε."
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "Επιλεγμένα."
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "Η παραγγελία %(order_number)s έχει ολοκληρωθεί."
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "Παρέλειψε να ικανοποιήσει την παραγγελία %(order_number)s: %(error)s."
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "Η επιστροφή χρημάτων #%(refund_id)s έχει επεξεργαστεί."
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "Σφάλμα"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"Αποτυχία επεξεργασίας επιστροφής χρημάτων #%(refund_id)s: %(error)s. "
+"Παρακαλούμε δοκιμάστε αργότερα, ή επικοινωνήστε με την ομάδα ανάπτυξης "
+"ηλέκτρονικού εμπορίου."

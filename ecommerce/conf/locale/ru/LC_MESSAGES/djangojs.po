@@ -4,14 +4,15 @@
 #
 # Translators:
 # Maksimenkova Olga <omaksimenkova@hse.ru>, 2015
-# Michael Savin <m.savin.ru@gmail.com>, 2015
+# Michael Savin <m.savin.ru@gmail.com>, 2015-2016
 # Weyedide <weyedide@gmail.com>, 2015
+# Яна Ловягина <yana.lovyagina@raccoongang.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-12-10 06:18+0000\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-05-09 11:26+0000\n"
 "Last-Translator: Michael Savin <m.savin.ru@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -20,9 +21,37 @@ msgstr ""
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "Обязательно"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "Здесь должно быть число"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "Здесь должна быть дата"
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "Укажите действительный ID курса"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "Должна быть раньше даты окончания"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "Должна быть после даты начала"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "Вы должны выбрать тип курса"
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "Выберите, должно ли быть создано место."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -47,6 +76,10 @@ msgstr "Вид курса"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "Срок подтверждения данных"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "Включить место Кодекса чести"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -76,7 +109,7 @@ msgstr "Сертификат Кодекса чести"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Audit"
-msgstr "Слушатели"
+msgstr "Бесплатный курс"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"
@@ -84,7 +117,7 @@ msgstr "Подтверждённый сертификат"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
-msgstr "Сертификат по профессии"
+msgstr "Сертификат повышения квалификации"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
@@ -102,6 +135,26 @@ msgstr "У курса должен быть указан провайдер за
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Должно быть определено количество зачётных единиц."
 
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "Создать новый купон"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "Просмотреть купон"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "Редактировать купон"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "Коды купонов"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "Создайте новый курс"
+
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "Посмотреть курс"
@@ -110,20 +163,104 @@ msgstr "Посмотреть курс"
 msgid "Edit Course"
 msgstr "Редактировать курс"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "Бесплатно (Кодекс чести)"
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "Курсы"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "АКТИВНЫЙ"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "Регистрационный код"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "Может быть использован один раз одним клиентом"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "Может быть использован много раз многими клиентами"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "Может быть использован каждым клиентом только по одному разу"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "Код"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "URL для погашения"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "Скидочный код"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "Может быть использован один раз многими клиентами"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "Сохранить изменения"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "Создать купон"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "Поиск..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "Следующее"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "Предыдущее"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "Отображено _START_ to _END_ of _TOTAL_ купонов"
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(отобрано из _MAX_ купонов)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "Отобразить _MENU_ купоны"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "Имя"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "Отчет по купонам"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "Бесплатный трек с сертификатом Кодекса чести"
+msgid "Free (Audit)"
+msgstr "Бесплатно (без сертификата)"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "Бесплатный курс. Без сертификата."
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr ""
-"Платный трек с предварительным подтверждением и Подтверждённым Сертификатом."
-" "
+"Платный курс с предварительным удостоверением личности и Подтверждённым "
+"сертификатом. "
 
 #: static/js/views/course_form_view.js
 msgid "Professional Education"
@@ -134,44 +271,16 @@ msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr ""
-"Платный трек с предварительным подтверждением и Сертификатом "
-"профессионального образования"
+"Платный курс с предварительным удостоверением личности и Сертификатом "
+"повышения квалификации"
 
 #: static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
 msgstr ""
-"Платный трек с предварительным подтверждением, Подтверждённым сертификатом и"
-" возможностью получения кредита."
-
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "Ошибка!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "Сохранение..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "Пожалуйста, заполните все обязательные поля."
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "При сохранении данных возникла ошибка."
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "Поиск..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "Следующее"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "Предыдущее"
+"Платный курс с предварительным удостоверением личности, Подтверждённым "
+"сертификатом и возможностью получения зачётных единиц."
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -196,3 +305,55 @@ msgstr "Курс"
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "Последняя модификация"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "Ошибка!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "Сохранение..."
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "Вы должны заполнить все обязательные поля."
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "При сохранении данных возникла ошибка."
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "Возникла ошибка.  Пожалуйста, попробуйте ещё раз."
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "Выберите"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "Выбрано"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "Заказ %(order_number)s сделан."
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "Не получилось сделать заказ %(order_number)s: %(error)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "Процесс возврата денег #%(refund_id)s выполнен."
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "Ошибка"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"Не удалось выполнить возврат денег #%(refund_id)s: %(error)s. Пожалуйста, "
+"попробуйте позже или свяжитесь с командой разработчиков E-Commerce."

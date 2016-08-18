@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# Chanamon Chaiyakul <tarn.chanamon5@gmail.com>, 2016
 # Jirayu Chamamahattana <mman2x@gmail.com>, 2015
 # Noppachai Eiamwasant <noporo@hotmail.com>, 2015
 # Sitdhibong Laokok <sitdhibong@gmail.com>, 2015
@@ -10,9 +11,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-10-28 15:24+0000\n"
-"Last-Translator: Jirayu Chamamahattana <mman2x@gmail.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-05-09 11:26+0000\n"
+"Last-Translator: Chanamon Chaiyakul <tarn.chanamon5@gmail.com>\n"
 "Language-Team: Thai (http://www.transifex.com/open-edx/edx-platform/language/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,13 +34,115 @@ msgid "Important dates"
 msgstr "วันที่ที่สำคัญ"
 
 #: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr ""
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr ""
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr ""
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr ""
+
+#: core/models.py
+msgid "Payment processors"
+msgstr ""
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
+msgstr ""
+
+#: core/models.py
 msgid "Full Name"
 msgstr "ชื่อและนามสกุล"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr ""
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr ""
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr ""
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr ""
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr ""
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr ""
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr ""
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr ""
 
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "วันที่/เวลาล่าสุดที่เข้าสู่ระบบสามารถใช้งานได้กับผลิตภัณฑ์นี้"
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
+msgstr ""
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
+msgstr ""
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr ""
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr ""
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr ""
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
@@ -71,6 +174,23 @@ msgstr "ผลิตภัณฑ์จำเป็นต้องระบุร
 #: extensions/api/serializers.py
 msgid "Products must have a price."
 msgstr "ผลิตภัณฑ์ต้องมีราคา"
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
+msgstr ""
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr ""
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
+msgstr ""
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
@@ -128,9 +248,17 @@ msgstr "ล้มเหลวในการดึงข้อมูลการ
 msgid "Payment Processor"
 msgstr "หน่วยประมวลผลการชำระเงิน"
 
-#: extensions/payment/admin.py extensions/payment/models.py
-msgid "Basket"
-msgstr "ตะกร้า"
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
+msgstr ""
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr ""
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "พันธมิตร"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
@@ -139,6 +267,10 @@ msgstr "เราไม่สนับสนุนตัวเลือกกา
 #: extensions/payment/models.py
 msgid "Transaction ID"
 msgstr "รหัสการดำเนินการ"
+
+#: extensions/payment/models.py
+msgid "Basket"
+msgstr "ตะกร้า"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Response"
@@ -191,6 +323,51 @@ msgstr "วงเงิน (ไม่รวมภาษี)"
 msgid "Quantity"
 msgstr "ปริมาณ"
 
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "ชื่อ"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "โค้ด"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "ส่วนลด"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "URL"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
+msgstr ""
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr ""
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr ""
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr ""
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr ""
+
+#: invoice/models.py
+msgid "Paid"
+msgstr ""
+
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -238,10 +415,6 @@ msgstr "รายการที่สั่ง"
 msgid "Statistics"
 msgstr "สถิติ"
 
-#: settings/_oscar.py
-msgid "Partners"
-msgstr "พันธมิตร"
-
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -260,33 +433,104 @@ msgid "Stock alert requests"
 msgstr "ขอการแจ้งเตือนหุ้น"
 
 #: settings/_oscar.py
+msgid "Offers"
+msgstr ""
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "บัตรกำนัล"
+
+#: settings/_oscar.py
 msgid "Reports"
 msgstr "รายงาน"
+
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "ฟรี"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr ""
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "คำถาม?"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr ""
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "รหัสคูปอง"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle navigation"
+msgstr "สลับการนำทาง"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr ""
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Dashboard for:"
+msgstr "แดชบอร์ดสำหรับ:"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle Dropdown"
+msgstr "สลับเลื่อนลง"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
+msgid "Login"
+msgstr "เข้าสู่ระบบ"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr ""
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr ""
 
 #: templates/courses/course_app.html
 msgid "Courses"
 msgstr "หลักสูตร"
 
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle navigation"
-msgstr "สลับการนำทาง"
-
 #: templates/courses/course_app.html
 msgid "Course Administration"
 msgstr "การดูแลหลักสูตร"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Dashboard for:"
-msgstr "แดชบอร์ดสำหรับ:"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle Dropdown"
-msgstr "สลับเลื่อนลง"
-
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
-msgid "Login"
-msgstr "เข้าสู่ระบบ"
 
 #: templates/courses/course_app.html
 #, python-format
@@ -311,13 +555,11 @@ msgstr "ออกจากระบบ"
 
 #: templates/customer/email_base.html
 #, python-format
-msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr "ลิขสิทธิ์© 2015 %(platform_name)s, สงวนลิขสิทธิ์"
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
+msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr "สวัสดี %(full_name)s,"
@@ -365,7 +607,6 @@ msgid "%(platform_name)s team "
 msgstr "ทีมงาน %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
@@ -375,19 +616,15 @@ msgstr ""
 "%(course_title)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
 msgstr "ยืนยันใบเสร็จสำหรับ:"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
 msgstr "ทีมงาน %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
 msgstr "ทีมงาน edX"
 
@@ -396,115 +633,201 @@ msgid "Order Placed"
 msgstr "รายการสั่งถูกวาง"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
-msgstr "ยืนยันใบเสร็จ"
+msgid "Payment Confirmation"
+msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
-msgstr "ยืนยันใบเสร็จสำหรับ:"
+msgid "Payment confirmation for:"
+msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
-msgstr "ดูใบเสร็จ"
+msgid "View Payment Information"
+msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
-"ขอขอบคุณสำหรับการซื้อชั่วโมงหน่วยกิต%(credit_hours)s จาก %(credit_provider)s"
-" สำหรับ %(course_title)s "
-"ค่าใช้จ่ายด้านล่างจะปรากฏบนใบแจ้งยอดบัตรเครดิตหรือเดบิตถัดไปของคุณที่มีชื่อ "
-"บริษัท %(platform_name)s"
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
 msgstr ""
-"คุณสามารถดูสถานะของคำขอหน่วยกิตของคุณหรือเสร็จสิ้นขั้นตอนการร้องขอหน่วยกิตในแดชบอร์ด\n"
-"%(platform_name)s"
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-"ในการเรียกดูหลักสูตรที่มีสิทธิ์ให้เครคิตอื่น ๆ เยี่ยมชมเว็บไซต์ "
-"%(platform_name)s  มีการเพิ่มหลักสูตรตลอดเวลา"
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr ""
-"ขอบคุณและขอแสดงความยินดีในความสำเร็จของคุณ "
-"เราหวังว่าคุณจะเพลิดเพลินไปกับหลักสูตร"
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-"ในการเรียกดูหลักสูตรที่มีสิทธิ์ให้เครคิตอื่น ๆ เยี่ยมชมเว็บไซต์edX  "
-"มีการเพิ่มหลักสูตรตลอดเวลา"
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
-msgstr "กดลิงค์ด้านล่างเพื่อเรียกดูใบเสร็จ"
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
 msgstr "ใบรายการสั่ง"
 
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "เลือก"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "ราคา"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Learn more about %(display_name)s credit?\n"
+"                "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
+"                    "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
+msgstr ""
+
 #: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
-msgstr "การชำระเงินเครดิต"
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
+msgstr ""
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
-"\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
-"                    "
-msgstr[0] ""
-"\n"
-"ซื้อ %(hours)s เครดิตจาก %(provider)s สำหรับ:"
+"                                Purchase Credit for %(course_name)s\n"
+"                            "
+msgstr ""
 
 #: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
-msgstr " มีบางสิ่งผิดพลาด กรุณาลองใหม่อีกครั้ง"
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
+msgstr ""
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
 msgstr "ทั้งหมด:"
 
 #: templates/edx/credit/checkout.html
-#, python-format
-msgid ""
-"\n"
-"                                Credit eligibility expires on %(date)s\n"
-"                            "
+msgid "You deserve it."
 msgstr ""
-"\n"
-"สิทธิ์การให้หน่วยกิตหมดอายุใน %(date)s\n"
-"                            "
-
-#: templates/edx/credit/checkout.html
-msgid "You deserved it."
-msgstr "คุณสมควรได้รับมัน"
 
 #: templates/edx/credit/checkout.html
 msgid ""
@@ -538,19 +861,12 @@ msgstr ""
 "เริ่มต้นเส้นทางของคุณเพื่อประสบความสำเร็จ!"
 
 #: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr "คำถาม?"
-
-#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
-"\n"
-"                โปรดอ่าน %(link)s\n"
-"            "
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
@@ -784,10 +1100,6 @@ msgid "View"
 msgstr "ดู"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr "ส่วนลด"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
 msgstr "ตะกร้าทั้งหมด (ไม่รวมส่วนลด)"
 
@@ -967,7 +1279,6 @@ msgid "Instructions"
 msgstr "คำแนะนำ"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
 msgstr "ที่อยู่เรียกเก็บเงิน"
 
@@ -1085,10 +1396,6 @@ msgstr "การรวมภาษีโดยรวม"
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
 msgstr "จำนวนรายการ"
-
-#: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr "ที่อยู่สำหรับการจัดส่ง"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html

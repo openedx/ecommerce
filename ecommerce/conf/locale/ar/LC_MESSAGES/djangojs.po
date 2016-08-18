@@ -8,14 +8,14 @@
 # Fatimah Ahmad Abu Sarir <miss-fatimah@hotmail.com>, 2015
 # may <may@qordoba.com>, 2015
 # Nabeel El-Dughailib <nabeel@qordoba.com>, 2015
-# Soha Assali <soha+transifex@qordoba.com>, 2015
+# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
 # soliman osman <solimanosman@windowslive.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-12-17 08:32+0000\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-07-26 14:03+0000\n"
 "Last-Translator: Soha Assali <soha+transifex@qordoba.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -24,9 +24,37 @@ msgstr ""
 "Language: ar\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
+#: static/js/models/coupon_model.js
+msgid "This field is required"
+msgstr "هذا الحقل مطلوب"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a number"
+msgstr "يجب أن تكون هذه القيمة عدديّة"
+
+#: static/js/models/coupon_model.js
+msgid "This value must be a date"
+msgstr "يجب أن تكون هذه القيمة تاريخًا."
+
+#: static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "الرقم التعريفي الصحيح للمساق مطلوب"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "يجب حدوثه قبل تاريخ انتهاء المساق"
+
+#: static/js/models/coupon_model.js
+msgid "Must occur after start date"
+msgstr "يجب حدوثه بعد تاريخ ابتداء المساق"
+
 #: static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "يجب أن تختار نوع المساق."
+
+#: static/js/models/course_model.js
+msgid "You must choose if an honor seat should be created."
+msgstr "يجب أن تختار فيما إذا كان يتوجّب إنشاء مقعد شرف."
 
 #: static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -53,6 +81,10 @@ msgstr "نوع المساق"
 #: static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "الموعد النهائي للتحقّق"
+
+#: static/js/models/course_model.js
+msgid "Include Honor Seat"
+msgstr "شمل مقعد الشرف"
 
 #: static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
@@ -110,6 +142,26 @@ msgstr "يجب أن يتوفّر لجميع مقاعد حضور المادّة �
 msgid "All credit seats must designate a number of credit hours."
 msgstr "يجب أن يُحدّد لجميع مقاعد حضور المادّة عدد ساعات حضور معتمدة."
 
+#: static/js/pages/coupon_create_page.js
+msgid "Create New Coupon"
+msgstr "إنشاء قسيمة جديدة"
+
+#: static/js/pages/coupon_detail_page.js
+msgid "View Coupon"
+msgstr "عرض القسيمة"
+
+#: static/js/pages/coupon_edit_page.js
+msgid "Edit Coupon"
+msgstr "تعديل القسيمة"
+
+#: static/js/pages/coupon_list_page.js
+msgid "Coupon Codes"
+msgstr "رموز القسائم"
+
+#: static/js/pages/course_create_page.js
+msgid "Create New Course"
+msgstr "إنشاء مساق جديد"
+
 #: static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "استعرض المساق "
@@ -118,13 +170,97 @@ msgstr "استعرض المساق "
 msgid "Edit Course"
 msgstr "تعديل المساق"
 
-#: static/js/views/course_form_view.js
-msgid "Free (Honor)"
-msgstr "مجاني (شرف أكاديمي)"
+#: static/js/pages/course_list_page.js
+msgid "Courses"
+msgstr "المساقات"
+
+#: static/js/views/coupon_detail_view.js
+msgid "ACTIVE"
+msgstr "فعّال"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "رمز التسجيل"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used once by one customer"
+msgstr "يمكن لزبون واحد استخدامه لمرّة واحدة"
+
+#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+msgid "Can be used multiple times by multiple customers"
+msgstr "يمكن  لعدّة زبائن استخدامه لعدّة مرات"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Can only be used once per customer"
+msgstr "يمكن لكل زبون استخدامه لمرّة واحدة"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Code"
+msgstr "الرمز"
+
+#: static/js/views/coupon_detail_view.js
+msgid "Redemption URL"
+msgstr "رابط الاسترداد"
+
+#: static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "رمز الخصم"
+
+#: static/js/views/coupon_form_view.js
+msgid "Can be used once by multiple customers"
+msgstr "يمكن لعدّة زبائن استخدامه لمرّة واحدة"
+
+#: static/js/views/coupon_form_view.js
+msgid "Save Changes"
+msgstr "حفّظ التغييرات"
+
+#: static/js/views/coupon_form_view.js
+msgid "Create Coupon"
+msgstr "إنشاء قسيمة"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Search..."
+msgstr "بحث..."
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Next"
+msgstr "التالي"
+
+#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+msgid "Previous"
+msgstr "السابق"
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: static/js/views/coupon_list_view.js
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr "عرض قسائم _START_ to _END_ of _TOTAL_ "
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "(filtered from _MAX_ total coupons)"
+msgstr "(مرشّح من إجمالي _MAX_ قسيمة)"
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: static/js/views/coupon_list_view.js
+msgid "Display _MENU_ coupons"
+msgstr "عرض قسائم _MENU_"
+
+#: static/js/views/coupon_list_view.js
+msgid "Name"
+msgstr "الاسم"
+
+#: static/js/views/coupon_list_view.js
+msgid "Coupon Report"
+msgstr "تقرير القسيمة"
 
 #: static/js/views/course_form_view.js
-msgid "Free honor track with Honor Certificate"
-msgstr "مسار مجاني إلى جانب شهادة الشرف الأكاديمي"
+msgid "Free (Audit)"
+msgstr "مجاني (مستمع)"
+
+#: static/js/views/course_form_view.js
+msgid "Free audit track. No certificate."
+msgstr "مساق استماع مجاني. لا تُمنح شهادة."
 
 #: static/js/views/course_form_view.js
 msgid ""
@@ -149,34 +285,6 @@ msgstr ""
 "مسار نيل شهادة مدفوع ذا مصادقة مبدئية وشهادة موثّقة بالإضافة إلى خيار شراء "
 "مادّة دراسيّة"
 
-#: static/js/views/course_form_view.js
-msgid "Error!"
-msgstr "حدث خطأ!"
-
-#: static/js/views/course_form_view.js
-msgid "Saving..."
-msgstr "جاري الحفظ..."
-
-#: static/js/views/course_form_view.js
-msgid "Please complete all required fields."
-msgstr "يُرجى إتمام ملئ جميع الخانات المطلوبة."
-
-#: static/js/views/course_form_view.js
-msgid "An error occurred while saving the data."
-msgstr "حدث خطأ أثناء حفظ المعلومات."
-
-#: static/js/views/course_list_view.js
-msgid "Search..."
-msgstr "بحث..."
-
-#: static/js/views/course_list_view.js
-msgid "Next"
-msgstr "التالي"
-
-#: static/js/views/course_list_view.js
-msgid "Previous"
-msgstr "السابق"
-
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: static/js/views/course_list_view.js
@@ -200,3 +308,55 @@ msgstr "مساق "
 #: static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "آخر مراجعة في"
+
+#: static/js/views/form_view.js
+msgid "Error!"
+msgstr "حدث خطأ!"
+
+#: static/js/views/form_view.js
+msgid "Saving..."
+msgstr "جاري الحفظ..."
+
+#: static/js/views/form_view.js
+msgid "You must complete all required fields."
+msgstr "يجب ملئ جميع الحقول المطلوبة."
+
+#: static/js/views/form_view.js
+msgid "An error occurred while saving the data."
+msgstr "حدث خطأ أثناء حفظ المعلومات."
+
+#: static/js/views/payment_button_view.js
+msgid "An error has occurred. Please try again."
+msgstr "نأسف لحدوث خطأ. يُرجى إعادة المحاولة."
+
+#: static/js/views/provider_selection_view.js
+msgid "Select"
+msgstr "اختيار"
+
+#: static/js/views/provider_selection_view.js
+msgid "Selected"
+msgstr "جرى انتقاؤه"
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Order %(order_number)s has been fulfilled."
+msgstr "لقد استوفي %(order_number)s طلبًا."
+
+#: static/vendor-extensions/oscar/js/order_list.js
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr "تعذّر استيفاء الطلب %(order_number)s: %(error)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Refund #%(refund_id)s has been processed."
+msgstr "جرت معالجة طلبات استعادة المبلغ ذات الأرقام #%(refund_id)s"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid "Error"
+msgstr "حدث خطأ"
+
+#: static/vendor-extensions/oscar/js/refund_list.js
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
+"تعذّرت معالجة طلب إعادة المبلغ ذا الرقم #%(refund_id)s: %(error)s. يُرجى "
+"إعادة المحاولة أو الاتصال بفريق تطوير التجارة الإلكترونية."

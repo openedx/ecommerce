@@ -3,13 +3,16 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# dana bublil <dana.bublil@gmail.com>, 2016
+# qualityalltext <quality@alltext.co.il>, 2016
+# Ron Rozen <Ronrozen@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-05 02:23+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-08-08 11:52+0000\n"
+"Last-Translator: qualityalltext <quality@alltext.co.il>\n"
 "Language-Team: Hebrew (http://www.transifex.com/open-edx/edx-platform/language/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +22,7 @@ msgstr ""
 
 #: core/admin.py
 msgid "Personal info"
-msgstr ""
+msgstr "מידע אישי"
 
 #: core/admin.py
 msgid "Permissions"
@@ -27,51 +30,177 @@ msgstr "הרשאות"
 
 #: core/admin.py
 msgid "Important dates"
-msgstr ""
+msgstr "תאריכים חשובים"
+
+#: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr "כתובת url בסיסית של LMS עבור אתר/מיקרו-אתר מותאם אישית"
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr "שתלו URL של ה-LMS של האתר הזה (לדוגמה, https://courses.stage.edx.org)"
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr "נתיב לנושא אתר מותאם אישית"
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr "נתיב לקובצי scss של נושא אתר מותאם אישית"
+
+#: core/models.py
+msgid "Payment processors"
+msgstr "מעבדי תשלום"
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
+msgstr "רשימה מופרדת פסיק של שמות מעבד: 'cybersource,paypal'"
 
 #: core/models.py
 msgid "Full Name"
 msgstr "שם מלא"
 
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr "השובר אינו קיים"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr "השובר פג תוקף"
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr "בשובר זה נעשה כבר  שימוש "
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "קוד קופון זה אינו חוקי."
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr "קורס הדגמת edX"
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr "COUPONTEST"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr "הקוד לא סופק"
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr "סך כל הסל אינו שווה ל-0$, הערך הנוכחי = 50.00$"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr "אירעה שגיאה בעת ניסיון לממש קופון"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr "המוצר [{product}] אינו זמין לרכישה."
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr "לא ניתן לקבל את פרטי הקורס. [{error}]"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr "סך כל הסל אינו שווה ל-0$, הערך הנוכחי = {basket_price}"
+
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
+msgstr "התאריך/השעה האחרונים שניתן לשלוח אימות עבור מוצר זה."
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
+msgstr "פרסום נתוני מסחר עבור {course_id} אל LMS נכשל."
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
 msgstr ""
+"אירעה שגיאה. לא יכולנו לאשר שהנכם כשירים לקבלת נקודות זכות על הקורס. נסו את "
+"העסקה שוב."
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr "אין מושב לנקודות זכות זמין עבור קורס זה."
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr ""
+"אירעה שגיאה. לא יכולנו לאשר שהמוסד שבחרתם מציע את נקודות הזכות עבור קורס זה."
+" נסו את העסקה שוב."
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr ""
+"כל אפשרויות התשלום אינן זמינות כרגע. נסו להשלים את העסקה שוב בעוד כמה דקות."
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
-msgstr ""
+msgstr "לא ניתן להתנתק עם סל ריק."
 
 #: extensions/api/exceptions.py
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
-msgstr ""
+msgstr "לא יכולנו לאתר את קוד הזיהוי הנחוץ למציאת אחד ממוצריך."
 
 #: extensions/api/exceptions.py
 msgid "We couldn't find one of the products you're looking for."
-msgstr ""
+msgstr "לא מצאנו את אחד מהמוצרים שהנכם מחפשים."
 
 #: extensions/api/exceptions.py
 msgid "One of the products you're trying to order is unavailable."
-msgstr ""
+msgstr "אחד מהמוצרים שאתם מנסים להזמין אינו זמין."
 
 #: extensions/api/serializers.py
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
-msgstr ""
+msgstr "נדרש סיווג מוצר לא חוקי [{product_class}]."
 
 #: extensions/api/serializers.py
 msgid "Products must indicate whether ID verification is required."
-msgstr ""
+msgstr "המוצרים חייבים לציין אם נדרש אימות המזהה."
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
+msgstr "חייב להיות מחיר למוצרים."
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
 msgstr ""
+"הקורס [{course_id}] לא פורסם ל-LMS משום שהמתג [publish_course_modes_to_lms] "
+"מושבת. על מנת להימנע מ-SKUs רפאים, לא נשמרו הנתונים."
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr "אתר"
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
+msgstr "{id} - {status} סל (בעלים: {owner}, קווים: {num_lines})"
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
-msgstr ""
+msgstr "התאריך/השעה האחרונים שניתן לרכוש מוצר זה."
 
 #: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -80,7 +209,7 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Username"
-msgstr ""
+msgstr "שם משתמש"
 
 #: extensions/dashboard/orders/views.py
 #, python-brace-format
@@ -88,22 +217,24 @@ msgid ""
 "{link_start}Refund #{refund_id}{link_end} created! Click "
 "{link_start}here{link_end} to view it."
 msgstr ""
+"{link_start}מספר ההחזר הכספי {refund_id}{link_end} נוצר! לחצו "
+"{link_start}כאן{link_end} על מנת להציג."
 
 #: extensions/dashboard/orders/views.py
 msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
-msgstr ""
+msgstr "לא ניתן ליצור החזר כספי עבור שורות אלו. ייתכן שנעשה כבר החזר עבורן."
 
 #: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
-msgstr ""
+msgstr "לוח השליטה של ההחזרים הכספיים"
 
 #: extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Refund ID"
-msgstr ""
+msgstr "מזהה החזר כספי"
 
 #: extensions/dashboard/refunds/forms.py extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -113,35 +244,47 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Status"
-msgstr ""
+msgstr "סטטוס"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "אחזור נתוני ההרשמה נכשל."
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
-msgstr ""
+msgstr "מעבד תשלום"
 
-#: extensions/payment/admin.py extensions/payment/models.py
-msgid "Basket"
-msgstr ""
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
+msgstr "לחצו על 'שמרו והמשיכו בעריכה' על מנת להוסיף רשומות מניות"
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr "שותף"
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "שותפים"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
-msgstr ""
+msgstr "איננו תומכים באפשרות התשלום שבחרתם."
 
 #: extensions/payment/models.py
 msgid "Transaction ID"
-msgstr ""
+msgstr "מזהה עסקה"
+
+#: extensions/payment/models.py
+msgid "Basket"
+msgstr "סל"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Response"
-msgstr ""
+msgstr "תגובה למעבד תשלום"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Responses"
-msgstr ""
+msgstr "תגובות למעבד תשלום"
 
 #. Translators: This is a string placed in the middle of a truncated string
 #. to indicate that truncation has occurred. For example, if a title may only
@@ -153,16 +296,16 @@ msgstr "..."
 
 #: extensions/refund/models.py
 msgid "Order"
-msgstr "סדר"
+msgstr "הזמנה"
 
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "User"
-msgstr ""
+msgstr "משתמש"
 
 #: extensions/refund/models.py
 msgid "Total Credit (excl. tax)"
-msgstr ""
+msgstr "סך כל האשראי (ללא מיסים)"
 
 #: extensions/refund/models.py
 msgid "Currency"
@@ -170,21 +313,66 @@ msgstr "מטבע"
 
 #: extensions/refund/models.py
 msgid "Refund"
-msgstr ""
+msgstr "החזר כספי"
 
 #: extensions/refund/models.py
 msgid "Order Line"
-msgstr ""
+msgstr "שורת הזמנה"
 
 #: extensions/refund/models.py
 msgid "Line Credit (excl. tax)"
-msgstr ""
+msgstr "שורת האשראי (ללא מס)"
 
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity"
-msgstr ""
+msgstr "כמות"
+
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "שם"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "קוד"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "הנחה"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "כתובת URL"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
+msgstr "{percentage} %"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr "{amount} {currency}"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr "טווח עבור {catalog_name}"
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr "דוח שוברים עבור {coupon_name}"
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr "לא שולם"
+
+#: invoice/models.py
+msgid "Paid"
+msgstr "שולם"
 
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -193,49 +381,45 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Dashboard"
-msgstr ""
+msgstr "לוח בקרה"
 
 #: settings/_oscar.py
 msgid "Catalogue"
-msgstr ""
+msgstr "קטלוג"
 
 #: settings/_oscar.py
 msgid "Products"
-msgstr ""
+msgstr "מוצרים"
 
 #: settings/_oscar.py
 msgid "Product Types"
-msgstr ""
+msgstr "סוגי מוצר"
 
 #: settings/_oscar.py
 msgid "Categories"
-msgstr ""
+msgstr "קטגוריות"
 
 #: settings/_oscar.py
 msgid "Ranges"
-msgstr ""
+msgstr "טווחים"
 
 #: settings/_oscar.py
 msgid "Low stock alerts"
-msgstr ""
+msgstr "התראות על מלאי נמוך"
 
 #: settings/_oscar.py
 msgid "Fulfillment"
-msgstr ""
+msgstr "השלמה"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Orders"
-msgstr ""
+msgstr "הזמנות"
 
 #: settings/_oscar.py
 msgid "Statistics"
-msgstr ""
-
-#: settings/_oscar.py
-msgid "Partners"
-msgstr ""
+msgstr "סטיסטיקה"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
@@ -243,79 +427,149 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Refunds"
-msgstr ""
+msgstr "החזרים כספיים"
 
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Customers"
-msgstr ""
+msgstr "לקוחות"
 
 #: settings/_oscar.py
 msgid "Stock alert requests"
-msgstr ""
+msgstr "בקשות להתראה על מלאי"
+
+#: settings/_oscar.py
+msgid "Offers"
+msgstr "הצעות"
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "תלושים"
 
 #: settings/_oscar.py
 msgid "Reports"
 msgstr "דוחות"
 
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr "אם אתם זקוקים לעזרה, צרו קשר עם צוות התמיכה של edX."
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
+msgstr "קוד ההרשמה חל על מחיר הקורס. כדי לממש את קוד ההרשמה, הירשמו לקורס."
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr "הירשמו ובקשו תעודה מאומתת בקורס הבא."
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "חינם"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr "סך הכל: 0$"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr "הירשמו וממשו את הקוד"
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr "הערה:"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr ""
+"עליכם לאמת את זהותכם באמצעות מצלמת אינטרנט ותעודת זהות לפני סיום הקורס."
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "שאלות?"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr "קראו את השאלות הנפוצות לקבלת תשובות לשאלות נפוצות אודות תעודותינו."
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "קודי שוברים"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle navigation"
+msgstr "החליפו ניווט"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr "מינהל קוד שוברים"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Dashboard for:"
+msgstr "לוח בקרה עבור:"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle Dropdown"
+msgstr "החליפו את הרשימה הנפתחת"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
+msgid "Login"
+msgstr "כניסה"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr "כלי מינהל שובר"
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr "מימוש"
+
 #: templates/courses/course_app.html
 msgid "Courses"
-msgstr ""
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle navigation"
-msgstr ""
+msgstr "קורסים"
 
 #: templates/courses/course_app.html
 msgid "Course Administration"
-msgstr ""
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Dashboard for:"
-msgstr "לוח בקרה של:"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle Dropdown"
-msgstr ""
-
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
-msgid "Login"
-msgstr "כניסה"
+msgstr "מינהל הקורס"
 
 #: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "%(platform_name)sכלי מינהל הקורס"
 
 #: templates/courses/menu_options.html
 msgid "Student Dashboard"
-msgstr ""
+msgstr "לוח הבקרה של הסטודנטים"
 
 #: templates/courses/menu_options.html
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "כלי מינהל קורס"
 
 #: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "לוח בקרה של מסחר אלקטרוני"
 
 #: templates/courses/menu_options.html
 msgid "Sign Out"
-msgstr "התנתק"
+msgstr "התנתקו"
 
 #: templates/customer/email_base.html
 #, python-format
-msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr ""
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
+msgstr "זכויות יוצרים © %(year)s %(platform_name)s. כל הזכויות שמורות."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "שלום %(full_name)s,"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -325,6 +579,8 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
+"תודה שרכשתם %(course_title)s. החיוב להלן יופיע בהצהרת כרטיס האשראי או החיוב "
+"הבאה עם שם חברה של %(platform_name)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -333,6 +589,7 @@ msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
 msgstr ""
+"ניתן לגשת לקורס ולהשלים את האימות (אם נדרש) בלוח הבקרה %(platform_name)s. "
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
@@ -341,401 +598,551 @@ msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
 msgstr ""
+"כדי לגלות קורסים מעולים נוספים, בקרו באתר האינטרנט %(platform_name)s. קורסים"
+" נוספים מתווספים בכל יום!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "תודה. אנחנו מקווים שאתם נהנים מהקורס!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
-msgstr ""
+msgstr "צוות %(platform_name)s "
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
 msgstr ""
+"אתם מקבלים את הדוא\"ל הזה משום שרכשתם מושב ב%(platform_name)s קורס "
+"%(course_title)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
-msgstr ""
+msgstr "אישור קבלה עבור: "
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
-msgstr ""
+msgstr "צוות %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
-msgstr ""
+msgstr "צוות edX"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
-msgstr ""
+msgstr "ההזמנה בוצעה"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
-msgstr ""
+msgid "Payment Confirmation"
+msgstr "אישור תשלום"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
-msgstr ""
+msgid "Payment confirmation for:"
+msgstr "אישור תשלום עבור:"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
-msgstr ""
+msgid "View Payment Information"
+msgstr "הציגו אישור תשלום"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "%(full_name)s יקר,"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
+msgstr ""
+"\n"
+"                            תודה שרכשתם %(credit_hours)s שעות זכות %(credit_provider)s עבור %(course_title)s. חיוב יופיע בהצהרת כרטיס האשראי או החיוב הבאה עם שם חברה של \"%(platform_name)s\".\n"
+"                        "
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
+msgstr ""
+"כדי לקבל את נקודות הזכות של הקורס, עליכם לבקש נקודות זכות גם באתר האינטרנט "
+"%(credit_provider)s. לקישור לקבלת נקודות זכות מ- %(credit_provider)s, או כדי"
+" לראות את סטטוס בקשת נקודות הזכות שלך, עברו אל לוח הבקרה %(platform_name)s "
+"שלכם."
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
+msgstr ""
+"כדי לגלות קורסים נוספים המאפשרים קבלת נקודות זכות, בקרו באתר האינטרנט  "
+"%(platform_name)s. אנו מוסיפים קורסים חדשים כל הזמן!"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr "תודה. אנו מקווים שנהניתם מהקורס!"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr "צוות %(platform_name)s "
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+"\n"
+"                            קיבלתם הודעה זו משום שרכשתם שעות זכות עבור %(course_title)s,  קורס %(platform_name)s.\n"
+"                        "
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr "אישור תשלום עבור: "
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
+msgstr ""
+"תודה שרכשת %(credit_hours)s נקודות זכות מ-%(credit_provider)s עבור "
+"%(course_title)s. חיוב יופיע בהצהרת כרטיס האשראי או החיוב הבאה עם שם חברה של"
+" \"%(platform_name)s\"."
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr "כדי להציג את פרטי התשלום, בקר באתר האינטרנט הבא."
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
+msgstr ""
+"קיבלתם הודעה זו משום שרכשתם שעות זכות עבור %(course_title)s, קורס "
 "%(platform_name)s."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-#, python-format
-msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
-msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
+msgstr "קבלה על הזמנה"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "בחרו"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr "נקודות זכות: "
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "מחיר:"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Learn more about %(display_name)s credit?\n"
+"                "
 msgstr ""
+"\n"
+"                    מעוניינים לקבל מידע נוסף על  %(display_name)s נקודת זכות?\n"
+"                "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
+"                    "
+msgstr ""
+"\n"
+"                        ניתן לרכוש נקודות זכות דרך %(display_name)s עבור קורס זה עד שנה\n"
+"                        מתאריך הסיום של הקורס. ניתן להשתמש בנקודות זכות ב-%(display_name)s או להעביר את\n"
+"                        נקודות הזכות למוסד אחר שמקבל את נקודות הזכות.\n"
+"                    "
+
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr "לקניית נקודות זכות בקורס:"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr "בעמוד זה, בחרו אפשרות ליציאה."
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr "בעמוד התשלום, הזינו את פרטי התשלום."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+"\n"
+"                            כאשר התשלום שלך הושלם, עקוב אחר הקישור לאתר האינטרנט %(display_name)s.\n"
+"                        "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+"\n"
+"                            באתר האינטרנט %(display_name)s הזינו את כל המידע הדרוש על מנת לבקש את נקודות הזכות של \n"
+"                            הקורס.\n"
+"                        "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+"\n"
+"                        לאחר ש-%(display_name)s מאשר את נקודות הזכות שלכם, תוכלו לבקש טופס העתקה רשמי\n"
+"                        %(display_name)s.\n"
+"                    "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
+msgstr ""
+"\n"
+"                    נקודות הזכות זמינות עד %(date)s\n"
+"                "
 
 #: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
-msgstr ""
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
+msgstr "קניית נקודות זכות עבור %(course_name)s"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
+"                                Purchase Credit for %(course_name)s\n"
+"                            "
+msgstr ""
 "\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
-"                    "
-msgstr[0] ""
-msgstr[1] ""
+"קניית נקודות זכות עבור ‏‎ %(course_name)s‎‏‎‏‎ \n"
+"                            "
 
 #: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
 msgstr ""
+"\n"
+"ברכות! הנכם כשירים לרכוש נקודות זכות עבור קורס זה. עליכם לרכוש את נקודות הזכות לפני %(date)s.\n"
+"בחרו אחד מהמוסדות הבאים לרכישת נקודות הזכות.\n"
+"                    "
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
-msgstr ""
+msgstr "סך הכל:"
 
 #: templates/edx/credit/checkout.html
-#, python-format
-msgid ""
-"\n"
-"                                Credit eligibility expires on %(date)s\n"
-"                            "
-msgstr ""
-
-#: templates/edx/credit/checkout.html
-msgid "You deserved it."
-msgstr ""
+msgid "You deserve it."
+msgstr "זה מגיע לך."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"העבודה הקשה הסתיימה - עברתם את הקורס! כעת קבלו את נקודות הזכות המגיעות לכם "
+"על מנת להתחיל או להשלים את התואר."
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "במחיר נוח."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr ""
+"לרוב, נקודות הזכות שניתן לרכוש דרך edX עולות פחות מאשר אותן נקודות זכות ברוב"
+" המוסדות האקדמיים."
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "הן פותחות דלתות."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr ""
-
-#: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr ""
+msgstr "ברוב העבודות המבוקשות כיום דרוש תואר ראשון. התחילו בנתיבכם להצלחה!"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
+"\n"
+"                    אנא קראו %(link_start)sאת השאלות הנפוצות שלנו על מנת להציג שאלות נפוצות אודות תעודותינו.%(link_end)s\n"
+"                "
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "הסטטיסטיקות של החנות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "סך כל ההזמנות"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "לקוחות חדשים"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "סך כל הלקוחות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "סך כל המוצרים"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "הזמנות האחרונות (ב-24 השעות האחרונות)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "הזמנות - 24 השעות האחרונות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "סך כל ההזמנות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "סך כל השורות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "סך הכנסות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "עלות הזמנה ממוצעת"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "עלות הזמנה ממוצעת (ששולמה)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "נהלו"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "הזמנות - מכל הזמנים"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "סך כל הסלים <em>הפתוחים</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "סך כל הלקוחות"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "לקוחות חדשים"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "הצג התראות על מלאי"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "קטלוג ומלאי"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "סך כל המוצרים"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "התראות מלאי <em>פתוחות</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "התראות מלאי <em>סגורות</em>"
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "הצעות, תלושים וקידומי מכירות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
-msgstr ""
+msgstr "הצעות <em>אתר</em> פעילות"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
-msgstr ""
+msgstr "<em>תלושים</em> פעילים"
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "קידומי מכירות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
-msgstr ""
+msgstr "הזמנה %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
-msgstr ""
+msgstr "%(number)s הזמנות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
-msgstr ""
+msgstr "מידע לקוח"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Full name"
-msgstr ""
+msgstr "שם מלא"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Email address"
-msgstr ""
+msgstr "כתובת דואר אלקטרוני"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer has deleted their account."
-msgstr ""
+msgstr "הלקוח מחק את החשבון."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order information"
-msgstr ""
+msgstr "מידע על ההזמנה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Total"
-msgstr ""
+msgstr "סך כל הזמנה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Date of purchase"
-msgstr ""
+msgstr "תאריך הרכישה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Time of purchase"
-msgstr ""
+msgstr "שעת הרכישה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
-msgstr ""
+msgstr "פרטי הזמנה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
-msgstr ""
+msgstr "תוכן ההזמנה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
-msgstr ""
+msgstr "משלוח"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment"
-msgstr ""
+msgstr "תשלום"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discounts"
-msgstr ""
+msgstr "הנחות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes"
-msgstr ""
+msgstr "הערות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Items ordered"
-msgstr ""
+msgstr "פריטים שהוזמנו"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
-msgstr ""
+msgstr "מזהה שורה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product"
-msgstr ""
+msgstr "מוצר"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "UPC"
-msgstr ""
+msgstr "UPC"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier"
-msgstr ""
+msgstr "ספק"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier SKU"
-msgstr ""
+msgstr "SKU של ספק"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Est. dispatch date"
-msgstr ""
+msgstr "תאריך שליחה משוער"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price excl tax (before discounts)"
-msgstr ""
+msgstr "מחיר ללא מס (לפני הנחות)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price inc tax (before discounts)"
-msgstr ""
+msgstr "מחיר כולל מס (לפני הנחות)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Actions"
-msgstr ""
+msgstr "פעולות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -743,119 +1150,115 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "View"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr ""
+msgstr "הציגו"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
-msgstr ""
+msgstr "סך כל הסל (ללא הנחות)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (inc. discounts)"
-msgstr ""
+msgstr "סך כל הסל (כולל הנחות)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total"
-msgstr ""
+msgstr "סך הכל הסל"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (excl. discounts)"
-msgstr ""
+msgstr "סך כל המשלוח (ללא הנחות)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (inc. discounts)"
-msgstr ""
+msgstr "סך כל המשלוח (כולל הנחות)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total"
-msgstr ""
+msgstr "סך כל המשלוח"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order total"
-msgstr ""
+msgstr "סך כל הזמנה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
-msgstr ""
+msgstr "עם שורות נבחרות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
-msgstr ""
+msgstr "שנו את שורת הסטטוס ל"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "choose new status"
-msgstr ""
+msgstr "בחרו סטטוס חדש"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
-msgstr ""
+msgstr "צרו אירוע משלוח"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
-msgstr ""
+msgstr "בחרו סוג אירוע"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
-msgstr ""
+msgstr "כולל סימוכין"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
-msgstr ""
+msgstr "צרו אירוע תשלום"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
-msgstr ""
+msgstr "כולל סכום"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
-msgstr ""
+msgstr "צרו החזר כספי"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
-msgstr ""
+msgstr "קדימה!"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change order status"
-msgstr ""
+msgstr "שנה את סטטוס ההזמנה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change status"
-msgstr ""
+msgstr "שנה סטטוס"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "This order can't have its status changed."
-msgstr ""
+msgstr "לא ניתן לשנות את סטטוס הזמנה זו."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
-msgstr ""
+msgstr "אירועי משלוח"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Date"
-msgstr ""
+msgstr "תאריך"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Event"
-msgstr ""
+msgstr "אירוע"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Lines"
-msgstr ""
+msgstr "שורות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Reference"
-msgstr ""
+msgstr "סימוכין"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -864,203 +1267,201 @@ msgid ""
 "                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
 msgstr ""
+"\n"
+"                                              %(title)s (כמות %(event_qty)s/%(total_qty)s)\n"
+"                                            "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
-msgstr ""
+msgstr "אין אירועי משלוח."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Payment Events"
-msgstr ""
+msgstr "אירועי תשלום"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Amount"
-msgstr ""
+msgstr "סכום"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product:"
-msgstr ""
+msgstr "מוצר:"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "quantity"
-msgstr ""
+msgstr "כמות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "No payment events."
-msgstr ""
+msgstr "אין אירועי תשלום."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method name"
-msgstr ""
+msgstr "שם שיטה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method code"
-msgstr ""
+msgstr "קוד שיטה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (incl tax)"
-msgstr ""
+msgstr "חיוב (כולל מיסים)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (excl tax)"
-msgstr ""
+msgstr "חיוב (ללא מיסים)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Address"
-msgstr ""
+msgstr "כתובת"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Update"
-msgstr "עדכן"
+msgstr "עדכנו"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "מס' טלפון"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Instructions"
-msgstr ""
+msgstr "הוראות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
-msgstr ""
+msgstr "כתובת לחיוב"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
-msgstr ""
+msgstr "מקורות לתשלום"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
-msgstr ""
+msgstr "מקור"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
-msgstr ""
+msgstr "הקצאה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
-msgstr ""
+msgstr "סכום שנגבה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
-msgstr ""
+msgstr "סכום שהוחזר"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
-msgstr ""
+msgstr "לא נמצאו מקורות תשלום עבור הזמנה זו."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
-msgstr ""
+msgstr "עסקאות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Type"
-msgstr ""
+msgstr "סוג"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"
-msgstr ""
+msgstr "תלוש"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
-msgstr ""
+msgstr "שם הצעה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
-msgstr ""
+msgstr "תדירות"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Message"
-msgstr ""
+msgstr "הודעה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
-msgstr ""
+msgstr "לא חלו הנחות על הזמנה זו."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
-msgstr ""
+msgstr "מינהל"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Edit"
-msgstr ""
+msgstr "ערכו"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Delete"
-msgstr ""
+msgstr "מחקו"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No notes available."
-msgstr ""
+msgstr "אין הערות זמינות."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Save note"
-msgstr ""
+msgstr "שמרו הערה"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes are only editable for 5 minutes after being saved."
-msgstr ""
+msgstr "ההזמנות ניתנות לעריכה למשך 5 דקות לאחר שמירתן."
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Search"
-msgstr ""
+msgstr "חיפוש"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Advanced Search"
-msgstr ""
+msgstr "חיפוש מתקדם"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Close"
-msgstr ""
+msgstr "סגור"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "מחפש..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
-msgstr ""
+msgstr "הורידו הזמנות נבחרות כקובץ CSV"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
-msgstr ""
+msgstr "הורדה"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Order number"
-msgstr ""
+msgstr "מספר הזמנה"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
-msgstr ""
+msgstr "סך הכל כולל מיסים"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr ""
+msgstr "מספר הפריטים"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Deleted"
-msgstr ""
+msgstr "נמחק"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
-msgstr ""
+msgstr "נסו שוב השלמה"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
-msgstr ""
+msgstr "לא נמצאו הזמנות."
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 #: templates/oscar/dashboard/users/detail.html
@@ -1077,212 +1478,212 @@ msgstr "מצב"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "פעיל?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "לא נמצאו הרשמות."
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
-msgstr ""
+msgstr "אשרו את תהליך ההחזר הכספי"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to issue a full refund?"
-msgstr ""
+msgstr "האם אתם בטוחים שברצונכם לנפק החזר כספי מלא?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to deny this refund request?"
-msgstr ""
+msgstr "האם אתם בטוחים שברצונכם לדחות את בקשת ההחזר הכספי?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Cancel"
-msgstr ""
+msgstr "ביטול"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm"
-msgstr ""
+msgstr "אישור"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve"
-msgstr ""
+msgstr "אשרו"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
-msgstr ""
+msgstr "דחיה"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
-msgstr ""
+msgstr "מספר הפריטים"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "סך כל נקודות הזכות"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Created"
-msgstr ""
+msgstr "נוצר"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "No refunds found."
-msgstr ""
+msgstr "לא נמצאו החזרים כספיים."
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
 msgid "Refund #%(id)s"
-msgstr ""
+msgstr "מספר החזר כספי%(id)s"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
-msgstr ""
+msgstr "סקירה כללית של ההחזר הכספי"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
-msgstr ""
+msgstr "הזמנה מקושרת"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
-msgstr ""
+msgstr "פריטים להחזר כספי"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
-msgstr ""
+msgstr "מזהה שורת ההחזר הכספי"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
-msgstr ""
+msgstr "שורת הזמנה משויכת"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
-msgstr ""
+msgstr "אשראי (ללא מס)"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
-msgstr ""
+msgstr "מעבד"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
-msgstr ""
+msgstr "כמות:"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "General"
-msgstr ""
+msgstr "כללי"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Email"
-msgstr ""
+msgstr "דוא\"ל"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Active"
-msgstr ""
+msgstr "פעיל"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Yes,No"
-msgstr ""
+msgstr "כן, לא"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Superuser"
-msgstr ""
+msgstr "משתמש על"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
-msgstr ""
+msgstr "אמת, שקר"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Staff"
-msgstr ""
+msgstr "צוות"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Last login"
-msgstr ""
+msgstr "כניסה אחרונה"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date joined"
-msgstr ""
+msgstr "הצטרף בתאריך "
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
-msgstr ""
+msgstr "מוצרים שנצפו"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of orders"
-msgstr ""
+msgstr "מספר ההזמנות"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of ordered items"
-msgstr ""
+msgstr "מספר הפריטים שהוזמנו"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total spent"
-msgstr ""
+msgstr "סך כל ההוצאה"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
-msgstr ""
+msgstr "ביקורות שנכתבו"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
-msgstr ""
+msgstr "שלחו דוא\"ל לאיפוס סיסמה"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
-msgstr ""
+msgstr "כתובות"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews"
-msgstr ""
+msgstr "ביקורות"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
-msgstr ""
+msgstr "מספר הזמנה"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
-msgstr ""
+msgstr "מספר פריטים"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
-msgstr ""
+msgstr "סך כל הערך"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date placed"
-msgstr ""
+msgstr "הוגש בתאריך"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not placed any orders yet."
-msgstr ""
+msgstr "לקוח זה לא הגיש עדיין אף הזמנה."
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
-msgstr ""
+msgstr "לקוח זה לא שמר אף כתובת."
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
-msgstr ""
+msgstr "מזהה מוצר"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Score"
-msgstr ""
+msgstr "דירוג"
 
 #: templates/oscar/dashboard/users/detail.html
 msgctxt "Product review title"
 msgid "Title"
-msgstr ""
+msgstr "כותרת"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Body"
-msgstr ""
+msgstr "גוף"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date created"
-msgstr ""
+msgstr "התאריך שבו נוצר"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."
-msgstr ""
+msgstr "לקוח זה לא כתב עדיין אף ביקורת."

@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# Перизат Мендыханқызы <perya1995@mail.ru>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-09-05 02:23+0000\n"
-"Last-Translator: cblackburn <cblackburn@edx.org>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-06-17 16:41+0000\n"
+"Last-Translator: Перизат Мендыханқызы <perya1995@mail.ru>\n"
 "Language-Team: Kazakh (Kazakhstan) (http://www.transifex.com/open-edx/edx-platform/language/kk_KZ/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +20,7 @@ msgstr ""
 
 #: core/admin.py
 msgid "Personal info"
-msgstr ""
+msgstr "Жеке дерек"
 
 #: core/admin.py
 msgid "Permissions"
@@ -27,34 +28,142 @@ msgstr "Қол жеткізу құқығы"
 
 #: core/admin.py
 msgid "Important dates"
+msgstr "Маңызды деректер"
+
+#: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr ""
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr ""
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr ""
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr ""
+
+#: core/models.py
+msgid "Payment processors"
+msgstr ""
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr ""
 
 #: core/models.py
 msgid "Full Name"
 msgstr "Толық аты"
 
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr "Купон жоқ"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr "Купон мерзімі бітті"
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr "Бұл купон қолданылған"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "Купон коды жарамсыз болып табылады."
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr ""
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr ""
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr ""
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr ""
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr "Өнім [{product}]  сатуға қол жетімсіз."
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr "Курс ақпаратын алу жүзеге аспады. [{error}] "
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr ""
+
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
+msgstr "Берілген өнім үшін тексеріліс ұсынылу мүмкін болатын соңғы күн/уақыт."
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr ""
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
+msgstr ""
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr ""
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr ""
+"Қателік туындады. Біз сіз таңдаған мекеменің курс кредитын ұсынатынына көз "
+"жеткізе алмадық. Транзакцияны қайта көріңіз."
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr ""
+"Қазіргі таңда төлемнің барлық түрлері қол жетімсіз. Транзакцияны бірнеше "
+"минуттан кейін қайта көріңіз."
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
-msgstr ""
+msgstr "Сіз бос себетпен тексере алмайсыз."
 
 #: extensions/api/exceptions.py
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
 msgstr ""
+"Сіздің өнімдеріңіздің бірін табу үшін қажетті сәйкестендіру кодын таба "
+"алмадық."
 
 #: extensions/api/exceptions.py
 msgid "We couldn't find one of the products you're looking for."
-msgstr ""
+msgstr "Сіз іздеген өнімдердің бірін таппадық."
 
 #: extensions/api/exceptions.py
 msgid "One of the products you're trying to order is unavailable."
-msgstr ""
+msgstr "Тапсырыс бергіңіз келген өнімнің бірі қол жетімсіз."
 
 #: extensions/api/serializers.py
 #, python-brace-format
@@ -67,11 +176,28 @@ msgstr ""
 
 #: extensions/api/serializers.py
 msgid "Products must have a price."
+msgstr "Өнімде баға болуы тиіс."
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
+msgstr ""
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr "сайт"
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr ""
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
-msgstr ""
+msgstr "Өнімге қол жеткізуге болатын соңғы күн/уақыт."
 
 #: extensions/dashboard/orders/forms.py extensions/dashboard/refunds/forms.py
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -80,7 +206,7 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Username"
-msgstr ""
+msgstr "Пайдаланушының аты"
 
 #: extensions/dashboard/orders/views.py
 #, python-brace-format
@@ -94,6 +220,8 @@ msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
 msgstr ""
+"Бұл желіліер үшін қайтарым мүмкін емес. Олар, мүмкін, қайтарылған болуы "
+"керек."
 
 #: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
@@ -113,27 +241,41 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Status"
-msgstr ""
+msgstr "Мәртебе:"
 
 #: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
-msgstr ""
+msgstr "Тіркеу жайлы ешқандай мәлімет алынбады."
 
 #: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
 msgstr ""
 
-#: extensions/payment/admin.py extensions/payment/models.py
-msgid "Basket"
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
 msgstr ""
+"Қор жазбаларын қосу үшін \"Сақтау және өзгертуді жалғастыру\" түймесін "
+"басыңыз."
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr "Серіктес"
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "Серіктестер"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
-msgstr ""
+msgstr "Таңдалған төлем түрін қолдамаймыз."
 
 #: extensions/payment/models.py
 msgid "Transaction ID"
-msgstr ""
+msgstr "Транзакция ID"
+
+#: extensions/payment/models.py
+msgid "Basket"
+msgstr "Себет"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Response"
@@ -153,12 +295,12 @@ msgstr ""
 
 #: extensions/refund/models.py
 msgid "Order"
-msgstr ""
+msgstr "Реті"
 
 #: extensions/refund/models.py
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "User"
-msgstr ""
+msgstr "Пайдаланушы"
 
 #: extensions/refund/models.py
 msgid "Total Credit (excl. tax)"
@@ -170,11 +312,11 @@ msgstr "Валюта"
 
 #: extensions/refund/models.py
 msgid "Refund"
-msgstr ""
+msgstr "қайтарым"
 
 #: extensions/refund/models.py
 msgid "Order Line"
-msgstr ""
+msgstr "Тапсырыс желісі"
 
 #: extensions/refund/models.py
 msgid "Line Credit (excl. tax)"
@@ -184,7 +326,52 @@ msgstr ""
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity"
+msgstr "Саны"
+
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "Аты"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "Code"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "Жеңілдік"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "URL"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
 msgstr ""
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr ""
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr ""
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr ""
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr "Төленбеді"
+
+#: invoice/models.py
+msgid "Paid"
+msgstr "Төленді"
 
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
@@ -193,23 +380,23 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Dashboard"
-msgstr ""
+msgstr "Үстел"
 
 #: settings/_oscar.py
 msgid "Catalogue"
-msgstr ""
+msgstr "Каталог"
 
 #: settings/_oscar.py
 msgid "Products"
-msgstr ""
+msgstr "Өнімдер"
 
 #: settings/_oscar.py
 msgid "Product Types"
-msgstr ""
+msgstr "Өнім түрі"
 
 #: settings/_oscar.py
 msgid "Categories"
-msgstr ""
+msgstr "Категориялар"
 
 #: settings/_oscar.py
 msgid "Ranges"
@@ -221,21 +408,17 @@ msgstr ""
 
 #: settings/_oscar.py
 msgid "Fulfillment"
-msgstr ""
+msgstr "Тапсырыс орындау"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Orders"
-msgstr ""
+msgstr "Тапсырыстар"
 
 #: settings/_oscar.py
 msgid "Statistics"
-msgstr ""
-
-#: settings/_oscar.py
-msgid "Partners"
-msgstr ""
+msgstr "Статистика"
 
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
@@ -243,45 +426,118 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Refunds"
-msgstr ""
+msgstr "Қайтарымдар"
 
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Customers"
-msgstr ""
+msgstr "Тұтынушылар"
 
 #: settings/_oscar.py
 msgid "Stock alert requests"
 msgstr ""
 
 #: settings/_oscar.py
+msgid "Offers"
+msgstr "Ұсыныстар"
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "Ваучерлер"
+
+#: settings/_oscar.py
 msgid "Reports"
 msgstr "Есептер"
 
-#: templates/courses/course_app.html
-msgid "Courses"
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr "Егер сізге көмек керек болса, EDX қолдау қызметіне хабарласыңыз."
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
 msgstr ""
 
-#: templates/courses/course_app.html templates/edx/base.html
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "Тегін"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr "Барлығы: $0"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr ""
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr "Ескерту:"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr ""
+"Сіз курс соңына дейін веб-камера көмегімен өзіңіздің жеке басыңызды "
+"растауыңыз керек, үкімет берген фотолы жеке куәлігіңізді көрсетуіңіз керек."
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "Сұрақтар?"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr ""
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "Жеңілдік купондары"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
 msgid "Toggle navigation"
 msgstr ""
 
-#: templates/courses/course_app.html
-msgid "Course Administration"
-msgstr ""
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr "Купон коды әкімшілігі"
 
-#: templates/courses/course_app.html templates/edx/base.html
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
 msgid "Dashboard for:"
 msgstr "үшін үстел"
 
-#: templates/courses/course_app.html templates/edx/base.html
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
 msgid "Toggle Dropdown"
 msgstr ""
 
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
 msgid "Login"
 msgstr "Кіру"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr ""
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr ""
+
+#: templates/courses/course_app.html
+msgid "Courses"
+msgstr "Курстар"
+
+#: templates/courses/course_app.html
+msgid "Course Administration"
+msgstr "Курс әкімшілігі"
 
 #: templates/courses/course_app.html
 #, python-format
@@ -306,13 +562,11 @@ msgstr "Шығу "
 
 #: templates/customer/email_base.html
 #, python-format
-msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr ""
@@ -345,7 +599,7 @@ msgstr ""
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
-msgstr ""
+msgstr "Рахмет. Сізге курс ұнайды деген үміттеміз!"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
@@ -353,7 +607,6 @@ msgid "%(platform_name)s team "
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
@@ -361,249 +614,349 @@ msgid ""
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
 msgstr ""
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
-msgstr ""
+msgstr "EDX командасы"
 
 #: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
+msgstr "тапсырыс берді"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+msgid "Payment Confirmation"
+msgstr "Төлемді растау"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+msgid "Payment confirmation for:"
+msgstr "Төлемді растау үшін:"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+msgid "View Payment Information"
+msgstr "Төлем туралы ақпаратты қарау"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "Қымбатты, %(full_name)s"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr "Рахмет сізге. Біз сізге курс ұнады деген үміттеміз!"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr ""
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr "Төлем туралы ақпаратты көру үшін, келесі веб-сайтқа кіріңіз."
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
 msgstr ""
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
-msgstr ""
+msgstr "Тапсырыс қабылдау"
 
-#: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
-msgstr ""
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "Таңдау"
 
-#: templates/edx/credit/checkout.html
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr "Несиелер:"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "Бағасы:"
+
+#: templates/edx/credit/_provider_detail.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
+"                    Learn more about %(display_name)s credit?\n"
+"                "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
 "\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
 "                    "
-msgstr[0] ""
+msgstr ""
 
-#: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr "Курс кредитін алу үшін:"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr "Бұл бетте тапсырыс берудің түрін таңдаңыз."
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr "Төлем бетінде сіздің төлем туралы ақпаратыңызды енгізіңіз."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
 msgstr ""
 
 #: templates/edx/credit/checkout.html
-msgid "Total:"
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
 msgstr ""
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                                Credit eligibility expires on %(date)s\n"
+"                                Purchase Credit for %(course_name)s\n"
 "                            "
 msgstr ""
 
 #: templates/edx/credit/checkout.html
-msgid "You deserved it."
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
 msgstr ""
+
+#: templates/edx/credit/checkout.html
+msgid "Total:"
+msgstr "Барлығы:"
+
+#: templates/edx/credit/checkout.html
+msgid "You deserve it."
+msgstr "Сіз оған лайықсыз."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr ""
+"Ауыр жұмыс аяқталды - сіз курстан өттіңіз! Енді деңгейді бастау не аяқтау "
+"үшін тиісті кредиттерді алу."
 
 #: templates/edx/credit/checkout.html
 msgid "It's affordable."
-msgstr ""
+msgstr "Ол қол жетімді."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr ""
+"EDX ұсынған кредит, басқа мекемелер ұсынған кредитке қарағанда әлдеқайда аз."
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
-msgstr ""
+msgstr "Ол есігін ашады."
 
 #: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
 msgstr ""
-
-#: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr ""
+"Қазіргі таңда көптеген сұранысқа ие жұмыс орындары колледж бітіру туралы "
+"дипломды талап етеді. Табысқа жету жолын баста!"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
-msgstr ""
+msgstr "Сіздің статистикаңыз."
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Orders"
-msgstr ""
+msgstr "Барлық тапсырыстар"
 
 #: templates/oscar/dashboard/index.html
 msgid "New Customers"
-msgstr ""
+msgstr "Жаңа тұтынушылар"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Customers"
-msgstr ""
+msgstr "Барлық тұтынушылар"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total Products"
-msgstr ""
+msgstr "Барлық өнімдер"
 
 #: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
-msgstr ""
+msgstr "Соңғы тапсырыстар (соңғы 24 сағат)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
-msgstr ""
+msgstr "Соңғы 24 сағаттағы тапсырыстар"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total orders"
-msgstr ""
+msgstr "Барлық тапсырыстар"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total lines"
-msgstr ""
+msgstr "Барлық желілер"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total revenue"
-msgstr ""
+msgstr "Барлық табыс"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average order costs"
-msgstr ""
+msgstr "Тапсырыстың орта шығыны"
 
 #: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
-msgstr ""
+msgstr "Тапсырыстың орта шығыны (төлемдік)"
 
 #: templates/oscar/dashboard/index.html
 msgid "Manage"
-msgstr ""
+msgstr "Басқару"
 
 #: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
-msgstr ""
+msgstr "Барлық уақыттағы тапсырыстар"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
-msgstr ""
+msgstr "Барлығы<em> ашу</em> себеттер"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total customers"
-msgstr ""
+msgstr "Барлық тұтынушылар"
 
 #: templates/oscar/dashboard/index.html
 msgid "New customers"
-msgstr ""
+msgstr "Жаңа тұтынушылар"
 
 #: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
-msgstr ""
+msgstr "Ескерту суретін қарау"
 
 #: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
-msgstr ""
+msgstr "Каталог және қор"
 
 #: templates/oscar/dashboard/index.html
 msgid "Total products"
-msgstr ""
+msgstr "Барлық өнімдер"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
-msgstr ""
+msgstr "<em>ашу</em>қор туралы ескертулер"
 
 #: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
-msgstr ""
+msgstr "<em>жабу</em>қор туралы ескертулер"
 
 #: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
-msgstr ""
+msgstr "Ұсыныстар, талондар және акциялар"
 
 #: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
@@ -615,126 +968,126 @@ msgstr ""
 
 #: templates/oscar/dashboard/index.html
 msgid "Promotions"
-msgstr ""
+msgstr "Акциялар"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
-msgstr ""
+msgstr "Тапсырыс беру %(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
-msgstr ""
+msgstr "Тапсырыс беру  #%(number)s"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
-msgstr ""
+msgstr "Тұтынушыларға ақпарат"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Full name"
-msgstr ""
+msgstr "Толық аты"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Email address"
-msgstr ""
+msgstr "Электрондық пошта мекенжайы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer has deleted their account."
-msgstr ""
+msgstr "Клиент өз аккаунтын жойған."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order information"
-msgstr ""
+msgstr "Тапсырыс ақпараты"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Total"
-msgstr ""
+msgstr "Барлық тапсырыс"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Date of purchase"
-msgstr ""
+msgstr "Сатып алу күні"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Time of purchase"
-msgstr ""
+msgstr "Сатып алу уақыты"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
-msgstr ""
+msgstr "Тапсырыс мәліметі"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
-msgstr ""
+msgstr "Тапсырыс мазмұны"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
-msgstr ""
+msgstr "Жеткізу"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment"
-msgstr ""
+msgstr "Төлем"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discounts"
-msgstr ""
+msgstr "Жеңілдік"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes"
-msgstr ""
+msgstr "Белгілеулер"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Items ordered"
-msgstr ""
+msgstr "Тапсырыс элементтері"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
-msgstr ""
+msgstr "Желі  ID"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product"
-msgstr ""
+msgstr "Өнім"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "UPC"
-msgstr ""
+msgstr "UPC"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier"
-msgstr ""
+msgstr "Өнім жеткізуші"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier SKU"
-msgstr ""
+msgstr "Жеткізуші SKU"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Est. dispatch date"
-msgstr ""
+msgstr "Стандартты шығыс уақыты. Жіберу күні"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price excl tax (before discounts)"
-msgstr ""
+msgstr "Салық ескермегендегі баға (жеңілдікке дейін)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price inc tax (before discounts)"
-msgstr ""
+msgstr "Салық ескергендегі баға (жеңілдікке дейін)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Actions"
-msgstr ""
+msgstr "Қолданылу"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -742,119 +1095,115 @@ msgstr ""
 #: templates/oscar/dashboard/refunds/refund_list.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "View"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr ""
+msgstr "Қарау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
-msgstr ""
+msgstr "Барлық себет( жеңілдік ескермей)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (inc. discounts)"
-msgstr ""
+msgstr "Барлық себет(жеңілдік ескеріп)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total"
-msgstr ""
+msgstr "Барлық себет"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (excl. discounts)"
-msgstr ""
+msgstr "Жалпы жеткізу (жеңілдік ескермей)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (inc. discounts)"
-msgstr ""
+msgstr "Жалпы жеткізу (женілдік ескеріп)"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total"
-msgstr ""
+msgstr "Жалпы жеткізу"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order total"
-msgstr ""
+msgstr "Барлық тапсырыс"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
-msgstr ""
+msgstr "Таңдалған желілермен"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
-msgstr ""
+msgstr "Желі статусының өзгеруі"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "choose new status"
-msgstr ""
+msgstr "Жаңа статус таңдау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
-msgstr ""
+msgstr "Жеткізуді жасау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
-msgstr ""
+msgstr "Іс-әрекет түрін таңдау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
-msgstr ""
+msgstr "сілтеме жасай отырып"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
-msgstr ""
+msgstr "Төлем әрекетін жасау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
-msgstr ""
+msgstr "санымен "
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
-msgstr ""
+msgstr "Қайтарым жасау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
-msgstr ""
+msgstr "Алға!"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change order status"
-msgstr ""
+msgstr "Тапсырыс статусын өзгерту"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Change status"
-msgstr ""
+msgstr "Статус өзгерту"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "This order can't have its status changed."
-msgstr ""
+msgstr "Бұл тапсырыстың статусы өзгеруі мүмкін емес."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
-msgstr ""
+msgstr "Жеткізуі оқиғасы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Date"
-msgstr ""
+msgstr "Күні"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Event"
-msgstr ""
+msgstr "Оқиға"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Lines"
-msgstr ""
+msgstr "Желі"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Reference"
-msgstr ""
+msgstr "Анықтама"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
@@ -866,39 +1215,39 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
-msgstr ""
+msgstr "Жеткізу оқиғасы жоқ."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Payment Events"
-msgstr ""
+msgstr "Төлем оқиғасы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Amount"
-msgstr ""
+msgstr "Сомасы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product:"
-msgstr ""
+msgstr "Өнім"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "quantity"
-msgstr ""
+msgstr "Жалпы саны"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "No payment events."
-msgstr ""
+msgstr "Төлем оқиғасы жоқ."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method name"
-msgstr ""
+msgstr "Әдіс атауы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method code"
-msgstr ""
+msgstr "Әдіс коды"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (incl tax)"
@@ -910,148 +1259,143 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Address"
-msgstr ""
+msgstr "Мекен-жай"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Update"
-msgstr ""
+msgstr "Жаңарту"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "Телефон"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Instructions"
-msgstr ""
+msgstr "Нұсқаулықтар"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
-msgstr ""
+msgstr "Төлем мекен-жайы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
-msgstr ""
+msgstr "Төлем қайнар көзі"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
-msgstr ""
+msgstr "Қайнар көз"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
-msgstr ""
+msgstr "Бөлу"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
-msgstr ""
+msgstr "Сомасы есептен шығарылады"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
-msgstr ""
+msgstr "Сомасы қайтарылады"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
-msgstr ""
+msgstr "Бұл тапсырыс үшін төлем қайнар көзі табылмады."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
-msgstr ""
+msgstr "Операциялар"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Type"
-msgstr ""
+msgstr "Түрі"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"
-msgstr ""
+msgstr "Ваучер"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
-msgstr ""
+msgstr "Ұсыныс атауы"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
-msgstr ""
+msgstr "Жиілілік"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Message"
-msgstr ""
+msgstr "Хабарлама"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
-msgstr ""
+msgstr "Бұл тапсырысқа жеңілдіктер қолданылмады."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
-msgstr ""
+msgstr "Әкімші"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Edit"
-msgstr ""
+msgstr "Редакциялау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Delete"
-msgstr ""
+msgstr "Жою"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "No notes available."
-msgstr ""
+msgstr "Қазіргі таңда түйіндер жоқ."
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Save note"
-msgstr ""
+msgstr "Жазбаны сақтау"
 
 #: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes are only editable for 5 minutes after being saved."
-msgstr ""
+msgstr "Жазбаны сақталғаннан кейін 5 минут ішінде өзгертуге болады."
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Search"
-msgstr ""
+msgstr "Іздеу"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Advanced Search"
-msgstr ""
+msgstr "Кеңейтілген іздеу"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Close"
-msgstr ""
+msgstr "Жабу"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Searching..."
-msgstr ""
+msgstr "Іздеу ..."
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
-msgstr ""
+msgstr "Таңдалған тапсырыстарды  CSV сияқты жүктеу"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
-msgstr ""
+msgstr "Жүктеу"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Order number"
-msgstr ""
+msgstr "Тапсырыс нөмері"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
-msgstr ""
+msgstr "Барлығы салық қосылған"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
-msgstr ""
-
-#: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr ""
+msgstr "Элемент саны"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Deleted"
-msgstr ""
+msgstr "Жойылды"
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
@@ -1059,12 +1403,12 @@ msgstr ""
 
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
-msgstr ""
+msgstr "Тапсырыс табылмады."
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 #: templates/oscar/dashboard/users/detail.html
 msgid "Enrollments"
-msgstr ""
+msgstr "Тіркеу"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Course ID"
@@ -1072,216 +1416,216 @@ msgstr "Курстың сәйкестендіргіші"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Mode"
-msgstr ""
+msgstr "Режим"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
-msgstr ""
+msgstr "Белсенді?"
 
 #: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
-msgstr ""
+msgstr "Тіркелгендер табылмады."
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
-msgstr ""
+msgstr "Растау Қайтару Өңдеу"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to issue a full refund?"
-msgstr ""
+msgstr "Толық қайтарым жасағыңыз келетініне сенімдісіз бе?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to deny this refund request?"
-msgstr ""
+msgstr "Толық қайтарым орындағыңыз келетініне сенімдісіз бе?"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Cancel"
-msgstr ""
+msgstr "Болдырмау"
 
 #: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm"
-msgstr ""
+msgstr "Растау"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve"
-msgstr ""
+msgstr "Құптау"
 
 #: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
-msgstr ""
+msgstr "Жоққа шығару"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
-msgstr ""
+msgstr "Элементтер саны"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
-msgstr ""
+msgstr "Барлық кредит"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Created"
-msgstr ""
+msgstr "Құрылды"
 
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_list.html
 msgid "No refunds found."
-msgstr ""
+msgstr "Қайтарым табылмады."
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
 msgid "Refund #%(id)s"
-msgstr ""
+msgstr "Қайтарым #%(id)s"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
-msgstr ""
+msgstr "Қайтарымды шолу"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
-msgstr ""
+msgstr "Тапсырыс байланысы"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
-msgstr ""
+msgstr "Қайтарым элементтері"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
-msgstr ""
+msgstr "Желі ID қайтарымы"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
-msgstr ""
+msgstr "Қауымдасқан тапсырыс жолы"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
-msgstr ""
+msgstr "Кредит(Салық қосылған)"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
-msgstr ""
+msgstr "Процессор"
 
 #: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
-msgstr ""
+msgstr "Саны:"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "General"
-msgstr ""
+msgstr "Жалпы"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Email"
-msgstr ""
+msgstr "Электрондық почта"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Active"
-msgstr ""
+msgstr "Белсенді"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Yes,No"
-msgstr ""
+msgstr "Иа,Жоқ"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Superuser"
-msgstr ""
+msgstr "Суперпайдаланушы"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
-msgstr ""
+msgstr "Дұрыс,Қате"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Staff"
-msgstr ""
+msgstr "Қызметкер"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Last login"
-msgstr ""
+msgstr "Соңғы кіру"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date joined"
-msgstr ""
+msgstr "Қосылу күні"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
-msgstr ""
+msgstr "Қаралған өнімдер"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of orders"
-msgstr ""
+msgstr "Тапсырыс нөмері"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Number of ordered items"
-msgstr ""
+msgstr "Тапсырыс өнімінің саны"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total spent"
-msgstr ""
+msgstr "Жалпы жұмсалғаны"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
-msgstr ""
+msgstr "Жазылған пікірлер"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
-msgstr ""
+msgstr "Құпия сөзді қайта қалпына келтіру үшін хабарлама жіберу"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
-msgstr ""
+msgstr "Адрестер"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Reviews"
-msgstr ""
+msgstr "Пікірлер"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
-msgstr ""
+msgstr "Тапсырыс нөмірі"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
-msgstr ""
+msgstr "Элементтер саны"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
-msgstr ""
+msgstr "Жалпы құны"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date placed"
-msgstr ""
+msgstr "Орналасқан күні"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not placed any orders yet."
-msgstr ""
+msgstr "Бұл тұтынушы әзірге ешқандай тапсырыс орналастырған жоқ."
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
-msgstr ""
+msgstr "Бұл тұтынушы мекен-жайды сақтамады."
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
-msgstr ""
+msgstr "Өнім ID"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Score"
-msgstr ""
+msgstr "Ұпайлар"
 
 #: templates/oscar/dashboard/users/detail.html
 msgctxt "Product review title"
 msgid "Title"
-msgstr ""
+msgstr "Атауы"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Body"
-msgstr ""
+msgstr "Дене"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Date created"
-msgstr ""
+msgstr "Құрылған күні"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."
-msgstr ""
+msgstr "Бұл тұтынушы әзірге ешқандай пікір қалдырмады."

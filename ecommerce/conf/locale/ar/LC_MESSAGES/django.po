@@ -4,16 +4,18 @@
 #
 # Translators:
 # Ahmed Jazzar <ajazzar@qrf.org>, 2015
+# Ahmed Jazzar <ajazzar@qrf.org>, 2016
 # may <may@qordoba.com>, 2015
 # Nabeel El-Dughailib <nabeel@qordoba.com>, 2015
-# Soha Assali <soha+transifex@qordoba.com>, 2015
+# omarithawi <oithawi@qrf.org>, 2016
+# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 22:20-0400\n"
-"PO-Revision-Date: 2015-12-17 03:37+0000\n"
-"Last-Translator: Soha Assali <soha+transifex@qordoba.com>\n"
+"POT-Creation-Date: 2016-01-28 19:00-0500\n"
+"PO-Revision-Date: 2016-08-04 10:00+0000\n"
+"Last-Translator: Ahmed Jazzar <ajazzar@qrf.org>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,13 +36,124 @@ msgid "Important dates"
 msgstr "تواريخ مهمّة"
 
 #: core/models.py
+msgid "LMS base url for custom site/microsite"
+msgstr "رابط قاعدة نظام إدارة التعلّم ’LMS‘ للموقع الخاص/الموقع المخصّص"
+
+#: core/models.py
+msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
+msgstr ""
+"رابط الجذر لموقع نظام إدارة التعلّم هذا (مثال https://courses.stage.edx.org)"
+
+#: core/models.py
+msgid "Path to custom site theme"
+msgstr "مسار سمة الموقع المخصّصة"
+
+#: core/models.py
+msgid "Path to scss files of the custom site theme"
+msgstr "مسار ملفات التنسيق ’scss‘ لسمة الموقع المخصّصة"
+
+#: core/models.py
+msgid "Payment processors"
+msgstr "معالجات الدفعات"
+
+#: core/models.py
+msgid "Comma-separated list of processor names: 'cybersource,paypal'"
+msgstr "قائمة، مفصولة بفواصل، باسماء المعالجات: 'cybersource,paypal'"
+
+#: core/models.py
 msgid "Full Name"
 msgstr "الاسم الكامل"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon does not exist"
+msgstr "القسيمة غير موجودة"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Coupon expired"
+msgstr "القسيمة منتهية الصلاحية"
+
+#: coupons/tests/test_views.py
+msgid "This coupon has already been used"
+msgstr "سبق أن جرى استخدام هذه القسيمة"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "رمز القسيمة غير صحيح"
+
+#: coupons/tests/test_views.py
+msgid "edX Demonstration Course"
+msgstr "مساق edX إيضاحي"
+
+#: coupons/tests/test_views.py
+msgid "COUPONTEST"
+msgstr "قسيمة تجريبية"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Code not provided"
+msgstr "لم يجري تزويد الرمز"
+
+#: coupons/tests/test_views.py
+msgid "Basket total not $0, current value = $50.00"
+msgstr "إجمالي قيمة عناصر السلّة ليس $0، القيمة الحاليّة = $50.00"
+
+#: coupons/tests/test_views.py coupons/views.py
+msgid "Error when trying to redeem code"
+msgstr "حدث خطأ عند محاولة استخدام خصم الرمز"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Product [{product}] not available for purchase."
+msgstr "المنتج [{product}] غير متوفّر للشراء."
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Could not get course information. [{error}]"
+msgstr "تعذّر الحصول على معلومات المساق. [{error}]"
+
+#: coupons/views.py
+#, python-brace-format
+msgid "Basket total not $0, current value = ${basket_price}"
+msgstr "إجمالي قيمة عناصر السلّة ليس $0، القيمة الحاليّة = ${basket_price}"
 
 #: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "آخر تاريخ/توقيت يمكن تقديم توثيق لهذا المنتج فيه."
+
+#: courses/publishers.py
+#, python-brace-format
+msgid "Failed to publish commerce data for {course_id} to LMS."
+msgstr ""
+"فشلت عملية نشر البيانات التجارية للمساق {course_id} إلى نظام إدارة التعلّم "
+"’LMS‘"
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
+msgstr ""
+"نأسف لحدوث خطأ. تعذّر التأكد من أهليتك للحصول على ساعة معتمدة للمساق. يُرجى "
+"إعادة محاولة إجراء العمليّة مرّة أخرى."
+
+#: credit/views.py
+msgid "No credit seat is available for this course."
+msgstr "لا يتوفّر مقعد معتمد متاح لهذا المساق."
+
+#: credit/views.py
+msgid ""
+"An error has occurred. We could not confirm that the institution you "
+"selected offers this course credit. Try the transaction again."
+msgstr ""
+"حدث خطأ. لم نتمكّن من التأكّد من أن المؤسسة التعليمية التي اخترتها تقدّم "
+"مساقًا معتمدًا. حاول تنفيذ العمليّة من جديد."
+
+#: credit/views.py
+msgid ""
+"All payment options are currently unavailable. Try the transaction again in "
+"a few minutes."
+msgstr ""
+"جميع خيارات سداد الدفعات غير متوفرة في الوقت الحالي. حاول إعادة العملية "
+"مجدّدًا بعد عدّة دقائق."
 
 #: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
@@ -72,6 +185,26 @@ msgstr "يجب أن تحدّد المنتجات فيما إذا كان توثي�
 #: extensions/api/serializers.py
 msgid "Products must have a price."
 msgstr "يجب أن يكون للمنتجات سعر"
+
+#: extensions/api/serializers.py
+#, python-brace-format
+msgid ""
+"Course [{course_id}] was not published to LMS because the switch "
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
+msgstr ""
+"لم يُنشر المساق [{course_id}] إلى نظام إدارة التعلّم ’LMS‘ نظرًا لإلغاء "
+"تفعيل التبديل [publish_course_modes_to_lms]. لم يجري حفظ البيانات لتفادي "
+"كودات التخزين التعريفية الزائفة."
+
+#: extensions/basket/models.py
+msgid "Site"
+msgstr "الموقع"
+
+#: extensions/basket/models.py
+#, python-brace-format
+msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
+msgstr "السلّة {id} - {status} (المالك: {owner}، الأسطر: {num_lines})"
 
 #: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
@@ -131,9 +264,17 @@ msgstr "عذرًا، لقد فشلنا في استرجاع بيانات التس
 msgid "Payment Processor"
 msgstr "معالج الدفعات"
 
-#: extensions/payment/admin.py extensions/payment/models.py
-msgid "Basket"
-msgstr "السلّة"
+#: extensions/partner/admin.py
+msgid "Click 'Save and Continue Editing' to add stock records"
+msgstr "انقر على ’حفظ ومتابعة التحرير‘ لإضافة سجّلات المخزون"
+
+#: extensions/partner/models.py
+msgid "Partner"
+msgstr "الشريك"
+
+#: extensions/partner/models.py settings/_oscar.py
+msgid "Partners"
+msgstr "الشركاء"
 
 #: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
@@ -142,6 +283,10 @@ msgstr "عذرًا، لا ندعم خيار الدفع الذي اخترته."
 #: extensions/payment/models.py
 msgid "Transaction ID"
 msgstr "رقم تعريف العملية"
+
+#: extensions/payment/models.py
+msgid "Basket"
+msgstr "السلّة"
 
 #: extensions/payment/models.py
 msgid "Payment Processor Response"
@@ -194,6 +339,51 @@ msgstr "رصيد الخط (باستثناء الضريبة)"
 msgid "Quantity"
 msgstr "الكمّية"
 
+#: extensions/voucher/utils.py
+msgid "Name"
+msgstr "الاسم"
+
+#: extensions/voucher/utils.py
+msgid "Code"
+msgstr "الرمز"
+
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/order_detail.html
+msgid "Discount"
+msgstr "الخصومات"
+
+#: extensions/voucher/utils.py
+msgid "URL"
+msgstr "الرابط"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{percentage} %"
+msgstr "النسبة {percentage} %"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "{amount} {currency}"
+msgstr "القيمة {amount} بعملة {currency}"
+
+#: extensions/voucher/utils.py
+#, python-brace-format
+msgid "Range for {catalog_name}"
+msgstr "نطاق {catalog_name}"
+
+#: extensions/voucher/views.py
+#, python-brace-format
+msgid "Coupon Report for {coupon_name}"
+msgstr "تقرير القسائم من أجل {coupon_name}"
+
+#: invoice/models.py
+msgid "Not Paid"
+msgstr "غير مدفوع"
+
+#: invoice/models.py
+msgid "Paid"
+msgstr "مدفوع"
+
 #: settings/_oscar.py templates/oscar/dashboard/index.html
 #: templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/orders/order_list.html
@@ -241,10 +431,6 @@ msgstr "الطلبيات"
 msgid "Statistics"
 msgstr "الإحصائيات"
 
-#: settings/_oscar.py
-msgid "Partners"
-msgstr "الشركاء"
-
 #: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
 #: templates/oscar/dashboard/partials/refund_table.html
 #: templates/oscar/dashboard/refunds/refund_detail.html
@@ -263,33 +449,110 @@ msgid "Stock alert requests"
 msgstr "طلبات تنبيه بالنسبة للمخزون"
 
 #: settings/_oscar.py
+msgid "Offers"
+msgstr "عروض"
+
+#: settings/_oscar.py
+msgid "Vouchers"
+msgstr "القسائم"
+
+#: settings/_oscar.py
 msgid "Reports"
 msgstr "التقارير"
+
+#: templates/coupons/_offer_error.html
+msgid "If you need assistance, contact edX support."
+msgstr "يُرجى التواصل مع فريق دعم edX في حال احتجت للمساعدة"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"Enrollment code applied to course price. To redeem the enrollment code, "
+"enroll in the course."
+msgstr ""
+"جرى تطبيق رمز التسجيل على سعر المساق. سجّل في المساق للاستفادة من حسم رمز "
+"التسجيل."
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and pursue a verified certificate in the following course."
+msgstr "سجّل واطلب شهادة موثّقة للمساق التالي."
+
+#: templates/coupons/_offer_success.html
+msgid "FREE"
+msgstr "مجاني"
+
+#: templates/coupons/_offer_success.html
+msgid "Total: $0"
+msgstr "الإجمالي: $0"
+
+#: templates/coupons/_offer_success.html
+msgid "Enroll and Redeem Code"
+msgstr "سجّل واستفد من خصم الرمز"
+
+#: templates/coupons/_offer_success.html
+msgid "Note:"
+msgstr "ملاحظة:"
+
+#: templates/coupons/_offer_success.html
+msgid ""
+"You must verify your identity using a webcam and a government-issued photo "
+"ID before the course ends."
+msgstr ""
+"يجب تأكيد صحّة هويّتك باستخدام كاميرا وبطاقة هويّة حكومية تحمل صورة شخصيّة "
+"قبل انتهاء المساق."
+
+#: templates/coupons/_offer_success.html templates/edx/credit/checkout.html
+msgid "Questions?"
+msgstr "ألديك أسئلة؟"
+
+#: templates/coupons/_offer_success.html
+msgid "Read our FAQs for answers to common questions about our certificates."
+msgstr ""
+"يُرجى قراءة الأسئلة المتكررة الخاصة بموقعنا للحصول على إجابات للأسئلة "
+"الشائعة حول شهاداتنا."
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Codes"
+msgstr "رموز القسائم"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle navigation"
+msgstr "تبديل طريقة التصفّح"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Code Administration"
+msgstr "إدارة رموز القسائم"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Dashboard for:"
+msgstr "لوحة المعلومات لـ:"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html
+msgid "Toggle Dropdown"
+msgstr "آلية تفعيل القائمة المنسدلة"
+
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/base.html templates/edx/base.html.py
+msgid "Login"
+msgstr "تسجيل الدخول"
+
+#: templates/coupons/coupon_app.html
+msgid "Coupon Administration Tool"
+msgstr "أداة إدارة القسائم"
+
+#: templates/coupons/offer.html
+msgid "Redeem"
+msgstr "استرداد الخصم"
 
 #: templates/courses/course_app.html
 msgid "Courses"
 msgstr "المساقات"
 
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle navigation"
-msgstr "تبديل طريقة التصفّح"
-
 #: templates/courses/course_app.html
 msgid "Course Administration"
 msgstr "إدارة المساق"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Dashboard for:"
-msgstr "لوحة المعلومات لـ:"
-
-#: templates/courses/course_app.html templates/edx/base.html
-msgid "Toggle Dropdown"
-msgstr "آلية تفعيل القائمة المنسدلة"
-
-#: templates/courses/course_app.html templates/edx/base.html
-#: templates/edx/base.html.py
-msgid "Login"
-msgstr "تسجيل الدخول"
 
 #: templates/courses/course_app.html
 #, python-format
@@ -314,13 +577,11 @@ msgstr "تسجيل الخروج"
 
 #: templates/customer/email_base.html
 #, python-format
-msgid "Copyright © 2015 %(platform_name)s, All Rights. Reserved."
-msgstr "جميع حقوق النشر والطبع محفوظة للمنصّة %(platform_name)s  © 2015."
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
+msgstr "جميع حقوق النشر والطبع محفوظة للمنصّة %(platform_name)s © %(year)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr "مرحبًا %(full_name)s،"
@@ -333,7 +594,7 @@ msgid ""
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
 msgstr ""
-"نشكرك لاشتراك وسداد قيمة المساقات %(course_title)s. ستظهر التعرفة المبيّنة "
+"نشكرك للاشتراك وسداد قيمة المساقات %(course_title)s. ستظهر التعرفة المبيّنة "
 "أدناه مرفقةً باسم المنصّة  %(platform_name)s ضمن البيان التفصيلي القادم "
 "لبطائة الدائن/المدين خاصتّك."
 
@@ -368,7 +629,6 @@ msgid "%(platform_name)s team "
 msgstr "فريق %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
@@ -378,19 +638,15 @@ msgstr ""
 " الذي تقدّمه %(platform_name)s."
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Receipt Confirmation for: "
 msgstr "إقرار استلام من أجل:"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "%(platform_name)s team"
 msgstr "فريق %(platform_name)s"
 
 #: templates/customer/emails/commtype_course_purchased_body.txt
-#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "The edX team"
 msgstr "فريق edX"
 
@@ -399,134 +655,236 @@ msgid "Order Placed"
 msgstr "جرى وضع الطلب قيد التنفيذ."
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation"
-msgstr "إقرار استلام."
+msgid "Payment Confirmation"
+msgstr "تأكيد سداد دفعة"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "Receipt Confirmation for:"
-msgstr "إقرار استلام من أجل:"
+msgid "Payment confirmation for:"
+msgstr "تأكيد سداد دفعة لـصالح:"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Receipt"
-msgstr "عرض الإيصال"
+msgid "View Payment Information"
+msgstr "عرض معلومات الدفع"
 
 #: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "مرحباً %(full_name)s،"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
+msgstr ""
+"\n"
+"نشكرك لاشتراكك وسداد قيمة الساعات %(credit_hours)s المعتمدة المقدّمة من قبل  %(credit_provider)s للمساق %(course_title)s. ستظهر التعرفة المبيّنة أدناه مرفقةً باسم المنصّة %(platform_name)s، ضمن البيان التفصيلي القادم لبطاقة الدائن/ المدين خاصّتك."
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
+msgstr ""
+"للحصول على ساعة معتمدة لمساقك، يجب أن تطلب ساعة معتمدة من خلال موقع "
+"%(credit_provider)s الإلكتروني أيضًا. للحصول على رابط لطلب ساعة معتمدة من "
+"%(credit_provider)s، أو لمعرفة حالة طلب الساعة المعتمدة الذي قدّمته، قم "
+"بزيارة لوحة المعلومات الرئيسية الخاصة بك من المنصّة %(platform_name)s."
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
+msgstr ""
+"يُمكنك زيارة موقع %(platform_name)s الإلكتروني للاطلاع على مساقات أخرى "
+"تستوجب حضور المادّة المعتمدة. نحن نضيف مساقات جديدة باستمرار!"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr "نشكر مشاركتك ونأمل أن تستمتع بالمساق!"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr "فريق %(platform_name)s"
+
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr ""
+"\n"
+"لقد تلقيت هذه الرسالة لأنك قد اشتريت ساعات معتمدة لمساق %(course_title)s، وهو مساق مقدّم من المنصّة %(platform_name)s."
+
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "Payment confirmation for: "
+msgstr "تأكيد سداد دفعة لصالح:"
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
-"نشكرك لاشتراكك وسداد قيمة الساعات %(credit_hours)s المعتمدة لمادة المساق "
-"%(course_title)s المزّودة من قبل %(credit_provider)s. ستظهر التعرفة المبيّنة"
-" أدناه مرفقةً باسم المنصّة %(platform_name)s، ضمن البيان التفصيلي القادم "
-"لبطاقة الدائن/ المدين خاصّتك."
+"نشكرك لاشتراكك وسداد قيمة الساعات %(credit_hours)s المعتمدة المقدّمة من قبل "
+"%(credit_provider)s لمادة المساق %(course_title)s. ستظهر التعرفة المبيّنة "
+"أدناه مرفقةً باسم المنصّة %(platform_name)s، ضمن البيان التفصيلي لبطاقة "
+"الدائن/ المدين خاصّتك."
 
-#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr "لعرض معلومات سداد الدفعة، يُرجى زيارة الموقع الإلكتروني التالي."
+
 #: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
-"You can see the status the status of your credit request or complete the "
-"credit request process on your %(platform_name)s dashboard"
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
 msgstr ""
-"يمكنك أن تتابع وضع طلب المادة أو إتمام عملية طلب المادة باستخدام لوحة "
-"معلومات المنصّة %(platform_name)s."
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#, python-format
-msgid ""
-"To browse other credit-eligible courses visit the %(platform_name)s website."
-" More courses are added all the time."
-msgstr ""
-"يُمكنك زيارة موقع %(platform_name)s لاستكشاف مساقات أخرى تستوجب حضور "
-"المادّة. تُضاف مساقات جديدة كل يوم."
-
-#: templates/customer/emails/commtype_credit_receipt_body.html
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"Thank you and congratulation on your achievement. We hope you enjoy the "
-"course!"
-msgstr "نشكر مشاركتك ونهنّئك بإنجازك. نأمل أن تكون قد استمتعت بحضور المساق!"
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid ""
-"To browse other credit-eligible courses visit the edX website. More courses "
-"are added all the time."
-msgstr ""
-"يُمكنك زيارة موقع edX لاستكشاف مساقات أخرى تستوجب حضور المادّة. تُضاف مساقات"
-" جديدة كل يوم."
-
-#: templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view receipt please visit the link below"
-msgstr "يُرجى زيارة الرابط المبيّن أدناه لعرض الإيصال."
+"لقد وصلتك هذه الرسالة لأنك قد اشتريت ساعات معتمدة لمساق %(course_title)s، "
+"وهو مساق مقدّم من المنصّة %(platform_name)s."
 
 #: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
 msgstr "إيصال الطلب"
 
+#: templates/edx/credit/_provider_detail.html
+msgid "Select"
+msgstr "اختيار"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Credits: "
+msgstr "الساعات المعتمدة:"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "Price: "
+msgstr "السعر:"
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Learn more about %(display_name)s credit?\n"
+"                "
+msgstr ""
+"\n"
+"أتودّ معرفة المزيد عن ساعات %(display_name)s المعتمدة؟\n"
+"                "
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        You can purchase credit through %(display_name)s for this course for up to one year\n"
+"                        after the course end date. You can use the credit at %(display_name)s or transfer the\n"
+"                        credit to another institution that accepts the credit.\n"
+"                    "
+msgstr ""
+"\n"
+"يمكنك شراء ساعة معتمدة لهذا المساق من خلال %(display_name)s لمدّة تصل لسنة كاملة بعد تاريخ انتهاء المساق. يمكنك استخدام الساعة المعتمدة عند %(display_name)s  أو تحويل الساعة المعتمدة إلى مؤسسة تعليمية أخرى تقبل الساعة المعتمدة."
+
+#: templates/edx/credit/_provider_detail.html
+msgid "To purchase course credit:"
+msgstr "لشراء ساعات معتمدة للمساق:"
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On this page, select a checkout option."
+msgstr "يُرجى اختيار أحد خيارات الحجز في هذه الصفحة."
+
+#: templates/edx/credit/_provider_detail.html
+msgid "On the payment page, enter your payment information."
+msgstr "يُرجى إدخال معلومات سداد الدفعة في صفحة الدفع."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            When your payment is complete, follow the link to the %(display_name)s website.\n"
+"                        "
+msgstr ""
+"\n"
+"اتبع الرابط إلى موقع %(display_name)s الإلكتروني عند إكمال عملية سداد دفعتك."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                            On the %(display_name)s website, enter all required information to request your course\n"
+"                            credit.\n"
+"                        "
+msgstr ""
+"\n"
+"أدخل، من خلال موقع %(display_name)s الإلكتروني، جميع المعلومات المطلوبة لطلب ساعة معتمدة للمساق."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                        After %(display_name)s approves your credit, you can request an official transcript from\n"
+"                        %(display_name)s.\n"
+"                    "
+msgstr ""
+"\n"
+"يمكنك، بعد أن يُقرّ %(display_name)s ساعتك المعتمدة، طلب نص مدوّن رسمي من %(display_name)s."
+
+#: templates/edx/credit/_provider_detail.html
+#, python-format
+msgid ""
+"\n"
+"                    Credit available until %(date)s\n"
+"                "
+msgstr ""
+"\n"
+"تتوفر الساعة المعتمدة لغاية %(date)s."
+
 #: templates/edx/credit/checkout.html
-msgid "Credit Checkout"
-msgstr "التحقق من الرصيد"
+#, python-format
+msgid "Purchase Credit for %(course_name)s"
+msgstr "اشتري ساعة معتمدة من أجل %(course_name)s"
 
 #: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Purchase 1 credit from %(provider)s for:\n"
-"                        "
-msgid_plural ""
+"                                Purchase Credit for %(course_name)s\n"
+"                            "
+msgstr ""
 "\n"
-"                        Purchase %(hours)s credits from %(provider)s for:\n"
-"                    "
-msgstr[0] ""
-"\n"
-"شراء %(hours)s ساعة للمادّة من %(provider)s من أجل:\n"
-"                    "
-msgstr[1] ""
-"\n"
-"شراء 1 ساعة للمادّة من %(provider)s من أجل:\n"
-"                    "
-msgstr[2] ""
-"\n"
-"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
-"                    "
-msgstr[3] ""
-"\n"
-"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
-"                    "
-msgstr[4] ""
-"\n"
-"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
-"                    "
-msgstr[5] ""
-"\n"
-"شراء %(hours)s ساعات للمادّة من %(provider)s من أجل:\n"
-"                    "
+"اشتري ساعة معتمدة من أجل %(course_name)s"
 
 #: templates/edx/credit/checkout.html
-msgid "Something went wrong! Please try again later."
-msgstr "حدث خطأ! الرجاء المحاولة مرّة أخرى لاحقًا."
+#, python-format
+msgid ""
+"\n"
+"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                        You must purchase your credit before %(date)s.\n"
+"                        Select one of the following institutions to purchase your credit.\n"
+"                    "
+msgstr ""
+"\n"
+"تهانينا! أنت مؤهّل لشراء ساعة مساق أكاديمي معتمدة لهذا المساق.\n"
+"يجب أن تشتري ساعة مساقك المعتمدة قبل %(date)s.\n"
+"اختر أحد المؤسسات التعليمية التالية لشراء مادتك المعتمدة."
 
 #: templates/edx/credit/checkout.html
 msgid "Total:"
 msgstr "الإجمالي:"
 
 #: templates/edx/credit/checkout.html
-#, python-format
-msgid ""
-"\n"
-"                                Credit eligibility expires on %(date)s\n"
-"                            "
-msgstr ""
-"\n"
-"                                ينتهي استحقاق المادّة بتاريخ %(date)s\n"
-"                            "
-
-#: templates/edx/credit/checkout.html
-msgid "You deserved it."
-msgstr "لقد استحققتها."
+msgid "You deserve it."
+msgstr "أنت تستحقها."
 
 #: templates/edx/credit/checkout.html
 msgid ""
@@ -545,8 +903,8 @@ msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr ""
-"بشكل عام، تقل تكلفة المادّة المتاحة من خلال منصّة edX عن تكلفة المادّة ذاتها"
-" في معظم المؤسّسات التعليمية."
+"بشكل عام، تقل تكلفة الساعة المعتمدة المتاحة من خلال منصّة edX عن تكلفة "
+"الساعة ذاتها في معظم المؤسّسات التعليمية."
 
 #: templates/edx/credit/checkout.html
 msgid "It opens doors."
@@ -561,19 +919,14 @@ msgstr ""
 "النجاح!"
 
 #: templates/edx/credit/checkout.html
-msgid "Questions?"
-msgstr "ألديك أسئلة؟"
-
-#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                Please read %(link)s\n"
-"            "
+"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                "
 msgstr ""
 "\n"
-"                يُرجى مطالعة %(link)s\n"
-"            "
+"يُرجى قراءة %(link_start)s الأسئلة المتكررة الخاصة بموقعنا للاطلاع على الأسئلة الشائعة حول شهاداتنا %(link_end)s"
 
 #: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
@@ -807,10 +1160,6 @@ msgid "View"
 msgstr "استعراض"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-msgid "Discount"
-msgstr "الخصومات"
-
-#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
 msgstr "إجمالي السلّة (باستثناء الخصومات)"
 
@@ -989,7 +1338,6 @@ msgid "Instructions"
 msgstr "التعليمات"
 
 #: templates/oscar/dashboard/orders/order_detail.html
-#: templates/oscar/dashboard/orders/order_list.html
 msgid "Billing address"
 msgstr "عنوان الفوترة"
 
@@ -1107,10 +1455,6 @@ msgstr "المجموع متضمّنًا الضريبة"
 #: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
 msgstr "عدد المواد"
-
-#: templates/oscar/dashboard/orders/order_list.html
-msgid "Shipping address"
-msgstr "عنوان الشحن"
 
 #: templates/oscar/dashboard/orders/order_list.html
 #: templates/oscar/dashboard/refunds/refund_list.html
@@ -1291,7 +1635,7 @@ msgstr "التقييمات المكتوبة"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
-msgstr "أرسل بريد إلكتروني بتعليمات تغيير كلمة السر"
+msgstr "أرسل بريد إلكتروني بتعليمات تغيير كلمة المرور"
 
 #: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
