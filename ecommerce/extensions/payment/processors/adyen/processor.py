@@ -344,7 +344,7 @@ class Adyen(BasePaymentProcessor):
         source = order.sources.first()
         refund = order.refunds.get(status__in=[REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION])
         amount = refund.total_credit_excl_tax
-        if notification.get('success'):
+        if notification.get('success') == 'true':
             source.refund(amount, reference=transaction_id)
             revoke_fulfillment = refund.status == REFUND.PENDING_WITH_REVOCATION
             refund.set_status(REFUND.PAYMENT_REFUNDED)

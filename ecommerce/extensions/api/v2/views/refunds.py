@@ -99,7 +99,7 @@ class RefundProcessView(generics.UpdateAPIView):
 
         if action in (APPROVE, APPROVE_PAYMENT_ONLY):
             revoke_fulfillment = action == APPROVE
-            result = refund.approve(request.site, revoke_fulfillment=revoke_fulfillment)
+            result = refund.approve(revoke_fulfillment=revoke_fulfillment)
         elif action == DENY:
             result = refund.deny()
 
