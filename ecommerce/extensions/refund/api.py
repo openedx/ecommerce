@@ -37,7 +37,7 @@ def find_orders_associated_with_course(user, course_id):
     return list(orders)
 
 
-def create_refunds(orders, course_id):
+def create_refunds(course_id):
     """
     Creates refunds for the given list of orders.
 
