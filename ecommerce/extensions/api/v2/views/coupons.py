@@ -42,6 +42,7 @@ Voucher = get_model('voucher', 'Voucher')
 CATALOG_QUERY = 'catalog_query'
 CLIENT = 'client'
 COURSE_SEAT_TYPES = 'course_seat_types'
+EMAIL_DOMAINS = 'email_domains'
 INVOICE_DISCOUNT_TYPE = 'invoice_discount_type'
 INVOICE_DISCOUNT_VALUE = 'invoice_discount_value'
 INVOICE_NUMBER = 'invoice_number'
@@ -130,6 +131,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             max_uses = request.data.get('max_uses')
             catalog_query = request.data.get(CATALOG_QUERY)
             course_seat_types = request.data.get(COURSE_SEAT_TYPES)
+            email_domains = request.data.get(EMAIL_DOMAINS)
 
             if code:
                 try:
@@ -191,7 +193,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 'note': note,
                 'max_uses': max_uses,
                 'catalog_query': catalog_query,
-                'course_seat_types': course_seat_types
+                'course_seat_types': course_seat_types,
+                'email_domains': email_domains
             }
 
             coupon_product = self.create_coupon_product(title, price, data)
@@ -226,6 +229,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 - max_uses (int)
                 - catalog_query (str)
                 - course_seat_types (str)
+                - email_domains (str)
 
         Returns:
             A coupon product object.
@@ -251,7 +255,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             voucher_type=data['voucher_type'],
             max_uses=data['max_uses'],
             catalog_query=data['catalog_query'],
-            course_seat_types=data['course_seat_types']
+            course_seat_types=data['course_seat_types'],
+            email_domains=data['email_domains']
         )
 
         coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
@@ -380,6 +385,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if note is not None:
             coupon.attr.note = note
             coupon.save()
+
+        email_domains = request.data.get(EMAIL_DOMAINS)
+        # Need to update for individual vouchers because in case of multiple
+        # multi-use voucher each voucher will have individual offer.
+        for voucher in vouchers.all():
+            voucher.offers.update(email_domains=email_domains)
 
         self.update_invoice_data(coupon, request.data)
 

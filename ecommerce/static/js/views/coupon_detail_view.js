@@ -56,7 +56,7 @@ define([
                     invoice_discount_type = this.model.get('invoice_discount_type'),
                     invoice_discount_value = this.model.get('invoice_discount_value'),
                     tax_deducted_source = this.model.get('tax_deducted_source');
-                
+
                 if (invoice_discount_value === null) {
                     invoice_discount_type = null;
                 } else  {
@@ -107,6 +107,7 @@ define([
                 var html,
                     category = this.model.get('categories')[0].name,
                     invoice_data = this.formatInvoiceData(),
+                    emailDomains = this.model.get('email_domains'),
                     template_data,
                     price = null;
 
@@ -123,7 +124,8 @@ define([
                     lastEdited: this.formatLastEditedData(this.model.get('last_edited')),
                     price: price,
                     startDateTime: this.formatDateTime(this.model.get('start_date')),
-                    usage: this.usageLimitation()
+                    usage: this.usageLimitation(),
+                    emailDomains: emailDomains
                 };
 
                 $.extend(template_data, invoice_data);

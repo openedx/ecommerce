@@ -177,6 +177,9 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
+        if not voucher.offers.first().is_email_valid(request.user.email):
+            return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
+
         if request.user.is_user_already_enrolled(request, product):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})
 
