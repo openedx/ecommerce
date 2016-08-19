@@ -12,11 +12,11 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import get_range_catalog_query_results
-from ecommerce.courses.models import Course
 from ecommerce.extensions.api import serializers
 
 
 Catalog = get_model('catalogue', 'Catalog')
+Product = get_model('catalogue', 'Product')
 logger = logging.getLogger(__name__)
 
 
@@ -55,14 +55,18 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
                 )
                 results = response['results']
                 course_ids = [result['key'] for result in results]
-                courses = serializers.CourseSerializer(
-                    Course.objects.filter(id__in=course_ids),
+                seats = serializers.ProductSerializer(
+                    Product.objects.filter(
+                        course_id__in=course_ids,
+                        attributes__name='certificate_type',
+                        attribute_values__value_text__in=seat_types
+                    ),
                     many=True,
                     context={'request': request}
                 ).data
                 data = {
                     'next': response['next'],
-                    'courses': [course for course in courses if course['type'] in seat_types]
+                    'seats': seats
                 }
                 return Response(data=data)
             except (ConnectionError, SlumberBaseException, Timeout):
