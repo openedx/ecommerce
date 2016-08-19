@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import GatewayError, PaymentError
 from oscar.core.loading import get_class
 from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
@@ -145,44 +145,66 @@ class Refund(StatusMixin, TimeStampedModel):
     @property
     def can_approve(self):
         """Returns a boolean indicating if this Refund can be approved."""
-        return self.status not in (REFUND.COMPLETE, REFUND.DENIED)
+        return self.status in (
+            REFUND.OPEN,
+            REFUND.PAYMENT_REFUND_ERROR,
+            REFUND.PAYMENT_REFUNDED,
+            REFUND.REVOCATION_ERROR
+        )
 
     @property
     def can_deny(self):
         """Returns a boolean indicating if this Refund can be denied."""
         return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
-    def _issue_credit(self, revoke_fulfillment):
+    def _issue_credit(self, revoke_fulfillment=False):
         """Issue a credit to the purchaser via the payment processor used for the original order."""
         try:
             # TODO Update this if we ever support multiple payment sources for a single order.
             source = self.order.sources.first()
             site_configuration = self.order.site.siteconfiguration
             processor = site_configuration.get_payment_processor_by_name(source.source_type.name)
-            is_complete = processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
 
-            audit_log_name = 'credit_issued'
-            if is_complete:
+            credit_status = processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+
+            if credit_status == processor.CREDIT_ISSUED:
+                audit_log_title = 'credit_issued'
                 self.set_status(REFUND.PAYMENT_REFUNDED)
-            elif revoke_fulfillment:
-                audit_log_name = 'credit_issue_pending_with_revocation'
-                self.set_status(REFUND.PENDING_WITH_REVOCATION)
+                self.complete(revoke_fulfillment)
+            elif credit_status == processor.CREDIT_PENDING:
+                if revoke_fulfillment:
+                    audit_log_title = 'credit_issue_pending_with_revocation'
+                    self.set_status(REFUND.PENDING_WITH_REVOCATION)
+                else:
+                    audit_log_title = 'credit_issue_pending_without_revocation'
+                    self.set_status(REFUND.PENDING_WITHOUT_REVOCATION)
             else:
-                audit_log_name = 'credit_issue_pending_without_revocation'
-                self.set_status(REFUND.PENDING_WITHOUT_REVOCATION)
+                logger.error(
+                    'Attempt to issue credit with payment processor [%s] returned with unknown status [%s].',
+                    processor.NAME,
+                    credit_status
+                )
+                raise GatewayError
 
             audit_log(
-                audit_log_name,
+                audit_log_title,
                 amount=self.total_credit_excl_tax,
                 currency=self.currency,
                 processor_name=processor.NAME,
                 refund_id=self.id,
                 user_id=self.user.id
             )
+
+            return True
         except AttributeError:
             # Order has no sources, resulting in an exception when trying to access `source_type`.
             # This occurs when attempting to refund free orders.
             logger.info("No payments to credit for Refund [%d]", self.id)
+            return False
+        except GatewayError:
+            logger.exception('Failed to issue credit for refund [%d].', self.id)
+            self.set_status(REFUND.PAYMENT_REFUND_ERROR)
+            return False
 
     def _revoke_lines(self):
         """Revoke fulfillment for the lines in this Refund."""
@@ -197,16 +219,7 @@ class Refund(StatusMixin, TimeStampedModel):
             logger.debug('Refund [%d] cannot be approved.', self.id)
             return False
         elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
-            try:
-                self._issue_credit(revoke_fulfillment)
-                if self.status == REFUND.OPEN:
-                    self.set_status(REFUND.PAYMENT_REFUNDED)
-            except PaymentError:
-                logger.exception('Failed to issue credit for refund [%d].', self.id)
-                self.set_status(REFUND.PAYMENT_REFUND_ERROR)
-                return False
-
-        return self.complete(revoke_fulfillment)
+            return self._issue_credit(revoke_fulfillment)
 
     def complete(self, revoke_fulfillment=True):
         if revoke_fulfillment and self.status in (REFUND.PAYMENT_REFUNDED, REFUND.REVOCATION_ERROR):

@@ -7,7 +7,7 @@ from urlparse import urljoin
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined
+from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
 from oscar.core.loading import get_class, get_model
 import requests
 
@@ -44,6 +44,7 @@ class Adyen(BasePaymentProcessor):
     ACCEPTED_NOTIFICATION_RESPONSE = '[accepted]'
     BASKET_TEMPLATE = 'adyen/basket.html'
     CONFIGURATION_MODEL = 'ecommerce.extensions.payment.processors.adyen.models.AdyenConfiguration'
+    EXPECTED_REFUND_REQUEST_RESPONSE = '[cancelOrRefund-received]'
     NAME = 'adyen'
 
     @property
@@ -118,27 +119,33 @@ class Adyen(BasePaymentProcessor):
             }
         )
 
-        adyen_response = response.json()
-
-        try:
-            if response.status_code == requests.codes.ok:
-                self.record_processor_response(
-                    response.json(),
-                    transaction_id=adyen_response['pspReference'],
-                    basket=order.basket
-                )
-                if adyen_response['response'] != '[cancelOrRefund-received]':
-                    raise GatewayError
-            else:
-                raise GatewayError
-        except GatewayError:
-            msg = 'An error occurred while attempting to issue a credit (via Adyen) for order [{}].'.format(
+        if response.status_code != requests.codes.OK:
+            logger.error(
+                'Adyen refund request failed with status [%d] for basket [%s].',
+                response.status_code,
                 order.number
             )
-            logger.exception(msg)
-            raise GatewayError(msg)
+            raise GatewayError
 
-        return False
+        adyen_response = response.json()
+        transaction_id = adyen_response.get('pspReference')
+        refund_response = adyen_response.get('response')
+        payment_processor_response = self.record_processor_response(adyen_response, transaction_id)
+
+        logger.info(
+            'Received Adyen refund request response with refund response [%s] for transaction [%s], '
+            'associated with basket [%s]. '
+            'The payment processor response was recorded in record [%d].',
+            refund_response,
+            transaction_id,
+            order.number,
+            payment_processor_response.id
+        )
+
+        if refund_response != self.EXPECTED_REFUND_REQUEST_RESPONSE:
+            raise GatewayError
+
+        return self.CREDIT_PENDING
 
     def process_notification(self, notification_data):
         """
@@ -148,7 +155,7 @@ class Adyen(BasePaymentProcessor):
             notification_items = self._parse_notification_items(notification_data)
         except NotificationParserError:
             payment_processor_response = self.record_processor_response(notification_data)
-            logger.error(
+            logger.exception(
                 'Received invalid Adyen notification. '
                 'The payment processor response was recorded in record [%d].',
                 payment_processor_response.id
@@ -162,7 +169,7 @@ class Adyen(BasePaymentProcessor):
                 order_number = notification['merchantReference']
             except KeyError:
                 payment_processor_response = self.record_processor_response(notification_item, transaction_id)
-                logger.error(
+                logger.exception(
                     'Received invalid Adyen notification for transaction [%s].'
                     'The payment processor response was recorded in record [%d].',
                     transaction_id,
@@ -185,7 +192,7 @@ class Adyen(BasePaymentProcessor):
                 basket = Basket.objects.get(id=int(basket_id))
             except IndexError:
                 payment_processor_response = self.record_processor_response(notification, transaction_id)
-                logger.error(
+                logger.exception(
                     'Received Adyen notification for transaction [%s], associated with unknown order [%s].'
                     'The payment processor response was recorded in record [%d].',
                     transaction_id,
@@ -195,7 +202,7 @@ class Adyen(BasePaymentProcessor):
                 continue
             except ObjectDoesNotExist:
                 payment_processor_response = self.record_processor_response(notification, transaction_id)
-                logger.error(
+                logger.exception(
                     'Received Adyen notification for transaction [%s], associated with unknown basket [%s].'
                     'The payment processor response was recorded in record [%d].',
                     transaction_id,
@@ -276,9 +283,9 @@ class Adyen(BasePaymentProcessor):
             logger.error(
                 'Adyen payment authorization failed with status [%d] for basket [%s].',
                 response.status_code,
-                basket.order_number,
+                basket.order_number
             )
-            raise PaymentError
+            raise GatewayError
 
         adyen_response = response.json()
         transaction_id = adyen_response.get('pspReference')
@@ -342,9 +349,20 @@ class Adyen(BasePaymentProcessor):
         order = basket.order_set.first()
         # TODO Update this if we ever support multiple payment sources for a single order.
         source = order.sources.first()
-        refund = order.refunds.get(status__in=[REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION])
-        amount = refund.total_credit_excl_tax
+
+        try:
+            refund = order.refunds.get(status__in=[REFUND.PENDING_WITH_REVOCATION, REFUND.PENDING_WITHOUT_REVOCATION])
+        except ObjectDoesNotExist:
+            # The order does not have a Refund associated with it, so the refund must have been
+            # initiated from the Adyen admin portal and not Otto.
+            logger.exception(
+                'Received Adyen refund notification for order [%s], but could not find a matching Refund.',
+                order.number
+            )
+            return
+
         if notification.get('success') == 'true':
+            amount = refund.total_credit_excl_tax
             source.refund(amount, reference=transaction_id)
             revoke_fulfillment = refund.status == REFUND.PENDING_WITH_REVOCATION
             refund.set_status(REFUND.PAYMENT_REFUNDED)
@@ -359,6 +377,7 @@ class Adyen(BasePaymentProcessor):
             )
         else:
             logger.error('Adyen refund request failed for order [%s]', order.number)
+            refund.set_status(REFUND.PAYMENT_REFUND_ERROR)
 
     def _is_signature_valid(self, notification):
         try:

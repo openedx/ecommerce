@@ -15,6 +15,8 @@ class BasePaymentProcessor(object):  # pragma: no cover
     BASKET_TEMPLATE = None
     CHECKOUT_BUTTON_LABEL = _('Checkout')
     CONFIGURATION_MODEL = None
+    CREDIT_ISSUED = 'Credit Issued'
+    CREDIT_PENDING = 'Credit Pending'
     NAME = None
     URLS_MODULE = None
 

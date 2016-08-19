@@ -317,7 +317,7 @@ class Cybersource(BasePaymentProcessor):
                 'Complete response has been recorded in entry [{response_id}]'.format(
                     order_number=order.number, response_id=ppr.id))
 
-        return True
+        return self.CREDIT_ISSUED
 
     def process_notification(self, notification_data):
         raise NotImplementedError

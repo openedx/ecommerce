@@ -316,7 +316,7 @@ class Paypal(BasePaymentProcessor):
                                                                                     response_id=entry.id)
             raise GatewayError(msg)
 
-        return True
+        return self.CREDIT_ISSUED
 
     def process_notification(self, notification_data):
         raise NotImplementedError
