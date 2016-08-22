@@ -1,5 +1,7 @@
 from datetime import date
 
+CODE = 'ABCD'
+
 # cybersource data
 CYBERSOURCE_DATA1 = {
     'country': 'US',

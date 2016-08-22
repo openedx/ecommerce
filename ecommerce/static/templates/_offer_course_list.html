@@ -49,7 +49,7 @@
                                 </p>
                             </div>
                             <div class="pull-right">
-                                <% if (course.isEnrollmentCode) { %>
+                                <% if (isEnrollmentCode) { %>
                                 <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
                                    id="RedeemEnrollment"
                                    class="btn btn-success"><%- gettext('Enroll Now') %></a>

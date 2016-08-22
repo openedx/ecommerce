@@ -4,7 +4,7 @@ import ddt
 from bok_choy.web_app_test import WebAppTest
 
 from acceptance_tests.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
-from acceptance_tests.constants import CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
+from acceptance_tests.constants import CODE, CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
 from acceptance_tests.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
                                      LogistrationMixin, UnenrollmentMixin, PaymentMixin)
 from acceptance_tests.pages.basket import BasketPage
@@ -35,7 +35,7 @@ class CouponCheckoutTests(CouponMixin, UnenrollmentMixin, EcommerceApiMixin, Enr
         self.prepare_coupon(is_discount)
 
         # Get the redeem URL for the coupon's detail page and go to it.
-        redeem_url = self.coupons_details_page.get_redeem_url()
+        redeem_url = self.coupons_details_page.get_redeem_url(CODE)
         self.browser.get(redeem_url)
         self.assertTrue(self.redeem_voucher_page.is_browser_on_page())
 

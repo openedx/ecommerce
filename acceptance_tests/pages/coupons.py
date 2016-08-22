@@ -8,8 +8,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.config import VERIFIED_COURSE_ID
-from acceptance_tests.constants import DEFAULT_END_DATE, DEFAULT_START_DATE
+from acceptance_tests.config import ECOMMERCE_URL_ROOT, VERIFIED_COURSE_ID
+from acceptance_tests.constants import CODE, DEFAULT_END_DATE, DEFAULT_START_DATE
 from acceptance_tests.expected_conditions import option_selected
 from acceptance_tests.pages.ecommerce import EcommerceAppPage
 
@@ -64,15 +64,19 @@ class CouponsCreatePage(EcommerceAppPage):
         verified_option_selected = option_selected(select, 'Verified')
         wait.until(verified_option_selected)
 
+        select = Select(self.browser.find_element_by_css_selector('select[name="code_type"]'))
+        select.select_by_value('Discount code')
+
+        wait = WebDriverWait(self.browser, 2)
+        benefit_input_present = EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="benefit_value"]'))
+        wait.until(benefit_input_present)
+
+        self.q(css="input[name='code']").fill(CODE)
+
         if is_discount:
-            select = Select(self.browser.find_element_by_css_selector('select[name="code_type"]'))
-            select.select_by_value('Discount code')
-
-            wait = WebDriverWait(self.browser, 2)
-            benefit_input_present = EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="benefit_value"]'))
-            wait.until(benefit_input_present)
-
             self.q(css="input[name='benefit_value']").fill('50')
+        else:
+            self.q(css="input[name='benefit_value']").fill('100')
 
         self.q(css="input[name='invoice_number']").fill('1001')
         self.q(css="input[name='invoice_payment_date']").fill(str(DEFAULT_END_DATE))
@@ -97,8 +101,8 @@ class CouponsDetailsPage(EcommerceAppPage):
         return self.browser.title.endswith('- View Coupon')
 
     @wait_for_js
-    def get_redeem_url(self):
-        return self.q(css='table#vouchersTable tbody tr td')[1].text
+    def get_redeem_url(self, code):
+        return '{}/coupons/offer/?code={}'.format(ECOMMERCE_URL_ROOT, code)
 
     @wait_for_js
     def go_to_edit_coupon_form_page(self):
