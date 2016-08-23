@@ -18,7 +18,6 @@ from rest_framework import status
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -230,9 +229,10 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         """Test the order creation."""
         self.create_coupon(partner=self.partner)
 
-        self.assertEqual(self.response_data[AC.KEYS.BASKET_ID], 1)
-        self.assertEqual(self.response_data[AC.KEYS.ORDER], 1)
-        self.assertEqual(self.response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
+        self.assertDictEqual(
+            self.response_data,
+            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 3}
+        )
 
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(Order.objects.first().status, 'Complete')
@@ -243,7 +243,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         """Test the update data dictionary"""
         data = {}
 
-        for field in AC.UPDATEABLE_VOUCHER_FIELDS:
+        for field in CouponVouchers.UPDATEABLE_VOUCHER_FIELDS:
             CouponViewSet().create_update_data_dict(
                 request_data=self.coupon_data,
                 request_data_key=field['request_data_key'],
@@ -333,10 +333,10 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """Test the response data given after the order was created."""
         self.assertEqual(self.response.status_code, 200)
         response_data = json.loads(self.response.content)
-        self.assertEqual(response_data[AC.KEYS.COUPON_ID], 5)
-        self.assertEqual(response_data[AC.KEYS.BASKET_ID], 1)
-        self.assertEqual(response_data[AC.KEYS.ORDER], 1)
-        self.assertEqual(response_data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME], 'Invoice')
+        self.assertDictEqual(
+            response_data,
+            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 5}
+        )
 
     def test_order(self):
         """Test the order data after order creation."""
@@ -394,7 +394,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """Test updating a coupon's title."""
         data = {
             'id': self.coupon.id,
-            AC.KEYS.TITLE: 'New title'
+            'title': 'New title'
         }
         response_data = self.get_response_json(
             'PUT',
@@ -412,8 +412,8 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """Test that updating a coupons date updates all of it's voucher dates."""
         data = {
             'id': self.coupon.id,
-            AC.KEYS.START_DATE: '2030-01-01',
-            AC.KEYS.END_DATE: '2035-01-01'
+            'start_date': '2030-01-01',
+            'end_date': '2035-01-01'
         }
         response_data = self.get_response_json(
             'PUT',
@@ -433,7 +433,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
         data = {
             'id': self.coupon.id,
-            AC.KEYS.BENEFIT_VALUE: 50
+            'benefit_value': 50
         }
         self.client.put(path, json.dumps(data), 'application/json')
 
@@ -447,7 +447,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
         data = {
             'id': self.coupon.id,
-            AC.KEYS.CATEGORY_IDS: [category.id]
+            'category_ids': [category.id]
         }
         self.client.put(path, json.dumps(data), 'application/json')
 
@@ -461,7 +461,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         client = 'Člient 123'
         data = {
             'id': self.coupon.id,
-            AC.KEYS.CLIENT: client
+            'client': client
         }
         self.client.put(path, json.dumps(data), 'application/json')
 
@@ -475,7 +475,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
         data = {
             'id': self.coupon.id,
-            AC.KEYS.PRICE: 77
+            'price': 77
         }
         self.client.put(path, json.dumps(data), 'application/json')
 
@@ -489,7 +489,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         note = 'Thiš iš the tešt note.'
         data = {
             'id': self.coupon.id,
-            AC.KEYS.NOTE: note
+            'note': note
         }
         self.client.put(path, json.dumps(data), 'application/json')
 

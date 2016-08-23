@@ -14,7 +14,6 @@ from rest_framework.response import Response
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
@@ -134,11 +133,11 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             basket = Basket.create_basket(request.site, request.user)
             basket_id = basket.id
 
-            requested_products = request.data.get(AC.KEYS.PRODUCTS)
+            requested_products = request.data.get('products')
             if requested_products:
                 for requested_product in requested_products:
                     # Ensure the requested products exist
-                    sku = requested_product.get(AC.KEYS.SKU)
+                    sku = requested_product.get('sku')
                     if sku:
                         try:
                             product = data_api.get_product(sku)
@@ -173,9 +172,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                     api_exceptions.PRODUCT_OBJECTS_MISSING_USER_MESSAGE
                 )
 
-        if request.data.get(AC.KEYS.CHECKOUT) is True:
+        if request.data.get('checkout') is True:
             # Begin the checkout process, if requested, with the requested payment processor.
-            payment_processor_name = request.data.get(AC.KEYS.PAYMENT_PROCESSOR_NAME)
+            payment_processor_name = request.data.get('payment_processor_name')
             if payment_processor_name:
                 try:
                     payment_processor = get_processor_class_by_name(payment_processor_name)
@@ -229,20 +228,20 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
         response_data = self._generate_basic_response(basket)
 
-        if basket.total_excl_tax == AC.FREE:
+        if basket.total_excl_tax == 0:
             order = self.place_free_order(basket)
 
             # Note: Our order serializer could be used here, but in an effort to pare down the information
             # returned by this endpoint, simply returning the order number will suffice for now.
-            response_data[AC.KEYS.ORDER] = {AC.KEYS.ORDER_NUMBER: order.number}
+            response_data['order'] = {'number': order.number}
         else:
             parameters = payment_processor.get_transaction_parameters(basket, request=self.request)
             payment_page_url = parameters.pop('payment_page_url')
 
-            response_data[AC.KEYS.PAYMENT_DATA] = {
-                AC.KEYS.PAYMENT_PROCESSOR_NAME: payment_processor.NAME,
-                AC.KEYS.PAYMENT_FORM_DATA: parameters,
-                AC.KEYS.PAYMENT_PAGE_URL: payment_page_url,
+            response_data['payment_data'] = {
+                'payment_processor_name': payment_processor.NAME,
+                'payment_form_data': parameters,
+                'payment_page_url': payment_page_url,
             }
 
         return response_data
@@ -261,9 +260,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         # Note: A basket serializer could be used here, but in an effort to pare down the information
         # returned by this endpoint, simply returning the basket ID will suffice for now.
         response_data = {
-            AC.KEYS.BASKET_ID: basket.id,
-            AC.KEYS.ORDER: None,
-            AC.KEYS.PAYMENT_DATA: None,
+            'id': basket.id,
+            'order': None,
+            'payment_data': None,
         }
 
         return response_data
@@ -284,7 +283,7 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
     """Allow the viewing of Orders by Basket. """
     permission_classes = (IsAuthenticated,)
     serializer_class = OrderSerializer
-    lookup_field = AC.KEYS.ORDER_NUMBER
+    lookup_field = 'number'
     queryset = Order.objects.all()
 
     def dispatch(self, request, *args, **kwargs):

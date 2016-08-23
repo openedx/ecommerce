@@ -19,7 +19,6 @@ from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.api.constants import APIConstants as AC
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory
 
@@ -121,15 +120,15 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         """Issue a POST request to the basket creation endpoint."""
         request_data = {}
         if skus:
-            request_data[AC.KEYS.PRODUCTS] = []
+            request_data['products'] = []
             for sku in skus:
-                request_data[AC.KEYS.PRODUCTS].append({AC.KEYS.SKU: sku})
+                request_data['products'].append({'sku': sku})
 
         if checkout:
-            request_data[AC.KEYS.CHECKOUT] = checkout
+            request_data['checkout'] = checkout
 
         if payment_processor_name:
-            request_data[AC.KEYS.PAYMENT_PROCESSOR_NAME] = payment_processor_name
+            request_data['payment_processor_name'] = payment_processor_name
 
         if auth:
             response = self.client.post(
@@ -173,16 +172,16 @@ class BasketCreationMixin(UserMixin, JwtMixin):
                 ))
 
                 if requires_payment:
-                    self.assertIsNone(response.data[AC.KEYS.ORDER])
-                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PROCESSOR_NAME])
-                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_FORM_DATA])
-                    self.assertIsNotNone(response.data[AC.KEYS.PAYMENT_DATA][AC.KEYS.PAYMENT_PAGE_URL])
+                    self.assertIsNone(response.data['order'])
+                    self.assertIsNotNone(response.data['payment_data']['payment_processor_name'])
+                    self.assertIsNotNone(response.data['payment_data']['payment_form_data'])
+                    self.assertIsNotNone(response.data['payment_data']['payment_page_url'])
                 else:
-                    self.assertEqual(response.data[AC.KEYS.ORDER][AC.KEYS.ORDER_NUMBER], Order.objects.get().number)
-                    self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
+                    self.assertEqual(response.data['order']['number'], Order.objects.get().number)
+                    self.assertIsNone(response.data['payment_data'])
             else:
-                self.assertIsNone(response.data[AC.KEYS.ORDER])
-                self.assertIsNone(response.data[AC.KEYS.PAYMENT_DATA])
+                self.assertIsNone(response.data['order'])
+                self.assertIsNone(response.data['payment_data'])
 
 
 class BusinessIntelligenceMixin(object):

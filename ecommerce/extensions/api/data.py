@@ -4,7 +4,6 @@ import logging
 from oscar.core.loading import get_model, get_class
 
 from ecommerce.extensions.api import exceptions
-from ecommerce.extensions.api.constants import APIConstants as AC
 
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
@@ -39,10 +38,10 @@ def get_order_metadata(basket):
     total = OrderTotalCalculator().calculate(basket, shipping_charge)
 
     metadata = {
-        AC.KEYS.ORDER_NUMBER: basket.order_number,
-        AC.KEYS.SHIPPING_METHOD: shipping_method,
-        AC.KEYS.SHIPPING_CHARGE: shipping_charge,
-        AC.KEYS.ORDER_TOTAL: total,
+        'number': basket.order_number,
+        'shipping_method': shipping_method,
+        'shipping_charge': shipping_charge,
+        'total': total,
     }
 
     return metadata
