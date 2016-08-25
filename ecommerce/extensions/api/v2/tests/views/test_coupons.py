@@ -649,16 +649,27 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         )
         self.assert_invoice_serialized_data(updated_coupon)
 
-    def test_coupon_with_email_domains(self):
-        """ Verify a coupon is created with specified email domains. """
-        email_domains = 'example.com'
+    def create_coupon_with_email_domains(self, email_domains):
+        """ Helper function to create a new coupon with email domains set.
+
+        Args:
+            email_domains: comma-separated list of email domains.
+
+        Returns:
+            JSON of the coupon details.
+        """
         self.data.update({'email_domains': email_domains})
 
         response = self.client.post(COUPONS_LINK, data=self.data, format='json')
         coupon_id = json.loads(response.content)['coupon_id']
 
         details_response = self.client.get(reverse('api:v2:coupons-detail', args=[coupon_id]))
-        details = json.loads(details_response.content)
+        return json.loads(details_response.content)
+
+    def test_coupon_with_email_domains(self):
+        """ Verify a coupon is created with specified email domains. """
+        email_domains = 'example.com'
+        details = self.create_coupon_with_email_domains(email_domains)
         self.assertEqual(details['email_domains'], email_domains)
 
     def test_update_email_domains(self):
@@ -672,6 +683,19 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
 
         response = self.get_response_json('PUT', path, self.data)
         self.assertEqual(response['email_domains'], email_domains)
+
+    def test_not_update_email_domains(self):
+        """ Verify the email domains are not deleted when updated. """
+        email_domains = 'example.com'
+        details = self.create_coupon_with_email_domains(email_domains)
+        offer = Product.objects.get(id=details['id']).attr.coupon_vouchers.vouchers.first().offers.first()
+        self.assertEqual(details['email_domains'], email_domains)
+        self.assertEqual(offer.email_domains, email_domains)
+
+        self.data.pop('email_domains', None)
+        path = reverse('api:v2:coupons-detail', args=[details['id']])
+        self.get_response_json('PUT', path, self.data)
+        self.assertEqual(offer.email_domains, email_domains)
 
 
 class CouponCategoriesListViewTests(TestCase):

@@ -360,11 +360,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon.attr.note = note
             coupon.save()
 
-        email_domains = request.data.get('email_domains')
-        # Need to update for individual vouchers because in case of multiple
-        # multi-use voucher each voucher will have individual offer.
-        for voucher in vouchers.all():
-            voucher.offers.update(email_domains=email_domains)
+        if 'email_domains' in request.data:
+            email_domains = request.data.get('email_domains')
+            # Need to update for individual vouchers because in case of multiple
+            # multi-use voucher each voucher will have individual offer.
+            for voucher in vouchers.all():
+                voucher.offers.update(email_domains=email_domains)
 
         self.update_invoice_data(coupon, request.data)
 
