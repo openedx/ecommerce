@@ -219,6 +219,9 @@ define([
             },
 
             save: function (attributes, options) {
+                // Remove all saved models from store, which prevents Duplicate id errors
+                Backbone.Relational.store.reset();
+
                 _.defaults(options || (options = {}), {
                     // The API requires a CSRF token for all POST requests using session authentication.
                     headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
