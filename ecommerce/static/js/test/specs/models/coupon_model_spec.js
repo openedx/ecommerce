@@ -1,11 +1,13 @@
 define([
         'jquery',
+        'js-cookie',
         'moment',
         'underscore',
         'models/coupon_model',
         'test/mock_data/coupons'
     ],
     function ($,
+              Cookies,
               moment,
               _,
               Coupon,
@@ -135,6 +137,8 @@ define([
                     expect(ajaxData.benefit_type).toEqual('Percentage');
                     expect(ajaxData.benefit_value).toEqual(100);
                     expect(ajaxData.quantity).toEqual(1);
+                    expect(model.get('start_datetime')).toEqual(moment.utc(model.get('start_date')));
+                    expect(model.get('end_datetime')).toEqual(moment.utc(model.get('end_date')));
                 });
 
                 it('should POST discount data', function () {
@@ -146,21 +150,40 @@ define([
                     args = $.ajax.calls.argsFor(0);
                     ajaxData = JSON.parse(args[0].data);
                     expect(ajaxData.quantity).toEqual(1);
+                    expect(model.get('start_datetime')).toEqual(moment.utc(model.get('start_date')));
+                    expect(model.get('end_datetime')).toEqual(moment.utc(model.get('end_date')));
                 });
 
                 it('should format start and end date if they are patch updated', function () {
-                    var model = Coupon.findOrCreate(discountCodeData, {parse: true});
-                    spyOn(moment, 'utc');
+                    var end_date = '2016-11-11T00:00:00Z',
+                        model = Coupon.findOrCreate(discountCodeData, {parse: true}),
+                        start_date = '2015-11-11T00:00:00Z',
+                        title = 'Coupon title';
+                    spyOn(Backbone.RelationalModel.prototype, 'save');
                     model.save(
                         {
-                            start_date: '2015-11-11T00:00:00Z',
-                            end_date: '2016-11-11T00:00:00Z'
+                            end_date: end_date,
+                            start_date: start_date,
+                            title: title
                         },
                         {patch: true}
                     );
 
-                    expect(moment.utc).toHaveBeenCalledWith('2015-11-11T00:00:00Z');
-                    expect(moment.utc).toHaveBeenCalledWith('2016-11-11T00:00:00Z');
+                    expect(Backbone.RelationalModel.prototype.save).toHaveBeenCalledWith(
+                        {
+                            end_date: end_date,
+                            end_datetime: moment.utc(end_date),
+                            name: title,
+                            start_date: start_date,
+                            start_datetime: moment.utc(start_date),
+                            title: title
+                        },
+                        {
+                            patch: true,
+                            headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')},
+                            contentType: 'application/json'
+                        }
+                    );
                 });
             });
 
