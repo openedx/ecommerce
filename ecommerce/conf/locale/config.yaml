@@ -16,6 +16,7 @@ locales:
     - da  # Danish
     - de_DE  # German (Germany)
     - el  # Greek
+    - en  # English
     - en_GB  # English (United Kingdom)
     # Don't pull these until we figure out why pages randomly display in these locales,
     # when the user's browser is in English and the user is not logged in.
@@ -90,6 +91,9 @@ ignore_dirs:
     - src
     - i18n
     - assets
+    - node_modules
+    - static/bower_components
+    - static/build
 
 generate_merge:
     django.po:
