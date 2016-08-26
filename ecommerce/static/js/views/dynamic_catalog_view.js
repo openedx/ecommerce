@@ -29,11 +29,21 @@ define(['jquery',
                 event.stopPropagation();
             },
 
-            getRowData: function (course) {
+            getRowData: function (seat) {
+                var course_key_attr = _.find(seat.attribute_values, function(attr) {
+                    if (attr.name === 'course_key'){
+                        return attr;
+                    }
+                });
+                var certificate_type = _.find(seat.attribute_values, function(attr) {
+                    if (attr.name === 'certificate_type'){
+                        return attr;
+                    }
+                });
                 return {
-                    id: course.id,
-                    name: course.name,
-                    type: _s(course.type).capitalize().value()
+                    id: course_key_attr.value,
+                    name: seat.title,
+                    type: _s(certificate_type.value).capitalize().value()
                 };
             },
 
@@ -41,10 +51,10 @@ define(['jquery',
                 this.limit = 10;
                 this.offset = 0;
                 event.preventDefault();
-                if (!$.fn.dataTable.isDataTable('#coursesTable') || 
+                if (!$.fn.dataTable.isDataTable('#seatsTable') ||
                     (this.used_query !== this.query || this.used_seat_types !== this.seat_types)
                 ) {
-                    this.table = this.$('#coursesTable').DataTable({
+                    this.table = this.$('#seatsTable').DataTable({
                         autoWidth: false,
                         destroy: true,
                         info: true,
@@ -57,7 +67,7 @@ define(['jquery',
                                 data: 'id'
                             },
                             {
-                                title: gettext('Course name'),
+                                title: gettext('Seat title'),
                                 data: 'name'
                             },
                             {
@@ -88,7 +98,7 @@ define(['jquery',
             },
 
             onSuccess: function(data) {
-                var tableData = data.courses.map(this.getRowData, this);
+                var tableData = data.seats.map(this.getRowData, this);
                 this.table.rows.add(tableData).draw();
                 if (data.next) {
                     this.offset += this.limit;
