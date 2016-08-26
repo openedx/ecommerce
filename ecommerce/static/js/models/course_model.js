@@ -301,7 +301,7 @@ define([
              * to external systems, in an atomic fashion. This is desirable to
              * avoid synchronization issues across systems.
              */
-            save: function (options) {
+            save: function (attributes, options) {
                 var verificationDeadline,
                     honorMode,
                     honorSeatClass,
