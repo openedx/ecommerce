@@ -9,6 +9,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model, get_class
 from rest_framework import serializers
 from rest_framework.reverse import reverse
@@ -277,6 +278,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         course_verification_deadline = self.validated_data.get('verification_deadline')
         products = self.validated_data['products']
         partner = self.get_partner()
+        organization_list = partner.organization_list
+        course_org = CourseKey.from_string(course_id).org
 
         try:
             if not waffle.switch_is_active('publish_course_modes_to_lms'):
@@ -287,12 +290,21 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 ).format(course_id=course_id)
 
                 raise Exception(message)
+            elif organization_list and organization_list.find(course_org) == -1:
+                # if partner has organizations list, and course is not from organizations
+                message = _(
+                    u'Course [{course_id}] is not saved. '
+                    u'Courses only from organization {partner_org_list} will be saved.'
+                ).format(course_id=course_id, partner_org_list=organization_list)
+
+                raise Exception(message)
 
             # Explicitly delimit operations which will be rolled back if an exception is raised.
             with transaction.atomic():
                 course, created = Course.objects.get_or_create(id=course_id)
                 course.name = course_name
                 course.verification_deadline = course_verification_deadline
+                course.organization = course_org
                 course.save()
 
                 for product in products:
