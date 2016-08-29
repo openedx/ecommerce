@@ -7,8 +7,6 @@ from django.db import models
 from oscar.apps.offer.abstract_models import AbstractConditionalOffer, AbstractRange
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.coupons.utils import get_seats_from_query
-
 
 class ConditionalOffer(AbstractConditionalOffer):
     email_domains = models.CharField(max_length=255, blank=True, null=True)
@@ -85,10 +83,6 @@ class Range(AbstractRange):
         return len(self.all_products())
 
     def all_products(self):
-        request = get_current_request()
-        if self.catalog_query and self.course_seat_types:
-            products = get_seats_from_query(request.site, self.catalog_query, self.course_seat_types)
-            return products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call
         if self.catalog:
             catalog_products = [record.product for record in self.catalog.stock_records.all()]
             return catalog_products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call
