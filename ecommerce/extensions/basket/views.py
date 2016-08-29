@@ -108,7 +108,7 @@ class BasketSummaryView(BasketView):
             try:
                 course = get_course_info_from_catalog(self.request.site, course_key)
                 description = course['short_description']
-                image_url = course.get('image', '').get('src', '')
+                image_url = course['image'].get('src', ''),
                 short_description = description if description else ''
                 course_name = course['title']
             except (ConnectionError, SlumberBaseException, Timeout):
