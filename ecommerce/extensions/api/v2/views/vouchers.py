@@ -191,9 +191,9 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         return {
             'benefit': serializers.BenefitSerializer(benefit).data,
             'contains_verified': is_verified,
-            'course_start_date': course_info['start'],
+            'course_start_date': course_info.get('start', ''),
             'id': course.id,
-            'image_url': course_info['image']['src'],
+            'image_url': course_info.get('image', {}).get('src', ''),
             'organization': CourseKey.from_string(course.id).org,
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,

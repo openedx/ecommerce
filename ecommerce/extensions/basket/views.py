@@ -107,8 +107,8 @@ class BasketSummaryView(BasketView):
             short_description = None
             try:
                 course = get_course_info_from_lms(course_key)
-                image_url = get_lms_url(course['media']['course_image']['uri'])
-                short_description = course['short_description']
+                image_url = course.get('media', '{}').get('image', '{}').get('raw', '')
+                short_description = course.get('short_description', '')
                 course_name = course['name']
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
