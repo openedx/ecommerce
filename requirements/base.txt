@@ -2,7 +2,9 @@ analytics-python==1.1.0
 Django==1.8.14
 django-appconf==0.6
 django-compressor==2.0
+django-countries==3.4.1
 django_extensions==1.5.5
+django-fernet-fields==0.4
 django-filter==0.11.0
 django-libsass==0.5
 django-oscar==1.1.1
@@ -17,7 +19,7 @@ edx-auth-backends==0.5.2
 edx-django-release-util==0.1.0
 edx-django-sites-extensions==1.0.0
 edx-drf-extensions==1.0.0
-edx-ecommerce-worker==0.5.0
+edx-ecommerce-worker==0.6.0
 edx-opaque-keys==0.3.1
 edx-rest-api-client==1.6.0
 jsonfield==1.0.3

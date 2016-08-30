@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from requests.exceptions import ConnectionError, Timeout
 from opaque_keys.edx.keys import CourseKey
@@ -11,7 +11,7 @@ from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.coupons.views import get_voucher_and_products_from_code
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_lms, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
@@ -99,6 +99,7 @@ class BasketSummaryView(BasketView):
         lines_data = []
         is_verification_required = is_bulk_purchase = False
         switch_link_text = partner_sku = ''
+        site_configuration = self.request.site.siteconfiguration
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
@@ -113,7 +114,7 @@ class BasketSummaryView(BasketView):
             except (ConnectionError, SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
 
-            if self.request.site.siteconfiguration.enable_enrollment_codes:
+            if site_configuration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
                 switch_link_text, partner_sku = get_basket_switch_data(line.product)
                 if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
@@ -143,7 +144,7 @@ class BasketSummaryView(BasketView):
             context.update({
                 'analytics_data': prepare_analytics_data(
                     self.request.user,
-                    self.request.site.siteconfiguration.segment_key,
+                    site_configuration.segment_key,
                     unicode(course_key)
                 ),
             })
@@ -156,7 +157,10 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
+            'payment_processors': site_configuration.get_payment_processors(),
+            'receipt_page_url': get_lms_url(settings.RECEIPT_PAGE_PATH),
+            'error_page_url': get_lms_url(settings.ERROR_PAGE_PATH),
+            'cancel_page_url': get_lms_url(settings.CANCEL_PAGE_PATH),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
@@ -167,3 +171,18 @@ class BasketSummaryView(BasketView):
         })
 
         return context
+
+    def get_template_names(self):
+        """
+        Returns a list of template names to be used for the request. Must return
+        a list. May not be called if render_to_response is overridden.
+        """
+        template_names = []
+        for processor in self.request.site.siteconfiguration.get_payment_processors().values():
+            template = processor.BASKET_TEMPLATE
+            if template:
+                template_names.append(template)
+
+        template_names.extend(super(BasketSummaryView, self).get_template_names())
+
+        return template_names

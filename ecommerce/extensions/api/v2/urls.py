@@ -38,8 +38,21 @@ BASKET_URLS = [
 ]
 
 PAYMENT_URLS = [
-    url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(),
-        name='list_processors'),
+    url(
+        r'^processors/payment_authorization/$',
+        payment_views.PaymentAuthorizationView.as_view(),
+        name='payment_authorization'
+    ),
+    url(
+        r'^processors/notification/$',
+        payment_views.PaymentProcessorNotificationView.as_view(),
+        name='payment_processor_notification'
+    ),
+    url(
+        r'^processors/$',
+        payment_views.PaymentProcessorListView.as_view(),
+        name='list_processors'
+    ),
 ]
 
 REFUND_URLS = [

@@ -7,7 +7,7 @@ from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 
 @admin.register(SiteConfiguration)
 class SiteConfigurationAdmin(admin.ModelAdmin):
-    list_display = ('site', 'partner', 'lms_url_root', 'theme_scss_path', 'payment_processors')
+    list_display = ('site', 'partner', 'lms_url_root')
     search_fields = ['site__name']
 
 

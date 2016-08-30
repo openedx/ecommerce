@@ -1,0 +1,27 @@
+{% load i18n %}
+
+<div class="pull-right payment-buttons checkout" data-basket-id="{{ basket.id }}">
+    {% if free_basket %}
+    <a  href="{% url 'checkout:free-checkout' %}"
+        data-track-type="click"
+        data-track-event="edx.bi.ecommerce.basket.free_checkout"
+        data-track-category="checkout"
+        data-course-id="{{ course.id }}"
+        class="btn btn-success checkout-button">
+        {% trans "Place Order" %}
+    </a>
+    {% else %}
+        {% for processor_name, processor in payment_processors.items %}
+            <button data-track-type="click"
+                    data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                    data-track-category="checkout"
+                    data-processor-name="{{ processor_name }}"
+                    data-course-id="{{ course.id }}"
+                    class="btn payment-button"
+                    value="{{ processor_name }}"
+                    id="{{ processor_name }}">
+                {{ processor.CHECKOUT_BUTTON_LABEL }}
+            </button>
+        {% endfor %}
+    {% endif %}
+</div>

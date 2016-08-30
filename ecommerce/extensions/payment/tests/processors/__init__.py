@@ -1,4 +1,4 @@
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors.base import BasePaymentProcessor
 
 
 class DummyProcessor(BasePaymentProcessor):
@@ -7,7 +7,7 @@ class DummyProcessor(BasePaymentProcessor):
     def get_transaction_parameters(self, basket, request=None):
         pass
 
-    def handle_processor_response(self, response, basket=None):
+    def handle_payment_authorization_response(self, response, basket=None):
         pass
 
     def is_signature_valid(self, response):

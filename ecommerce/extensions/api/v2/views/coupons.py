@@ -21,7 +21,7 @@ from ecommerce.extensions.api.serializers import CategorySerializer, CouponSeria
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import generate_sku, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment.processors.invoice import InvoicePayment
+from ecommerce.extensions.payment.processors.invoice_payment.processor import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers, update_voucher_offer
 from ecommerce.invoice.models import Invoice
@@ -274,7 +274,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Invoice payment processor invocation.
         payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(
+        payment_processor().handle_payment_authorization_response(
             response={}, order=order, business_client=client, invoice_data=invoice_data
         )
         response_data['payment_data'] = {

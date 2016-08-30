@@ -29,6 +29,7 @@ default.db
 media/cache/
 assets/
 node_modules/
+ecommerce/adyen/static/adyen/css
 ecommerce/static/bower_components/
 ecommerce/static/build/
 npm-debug.log

@@ -1,6 +1,8 @@
 require.config({
     baseUrl: '/static/',
     paths: {
+        'adyen': 'adyen/js',
+        'adyen/encrypt': 'bower_components/adyen-cse-js/js/adyen.encrypt',
         'backbone': 'bower_components/backbone/backbone',
         'backbone.relational': 'bower_components/backbone-relational/backbone-relational',
         'backbone.route-filter': 'bower_components/backbone-route-filter/backbone-route-filter',
@@ -9,6 +11,7 @@ require.config({
         'backbone.validation': 'bower_components/backbone-validation/dist/backbone-validation-amd',
         'bootstrap': 'bower_components/bootstrap-sass/assets/javascripts/bootstrap',
         'bootstrap_accessibility': 'bower_components/bootstrapaccessibilityplugin/plugins/js/bootstrap-accessibility',
+        'bootstrap_validator': 'bower_components/bootstrap-validator/js/validator',
         'collections': 'js/collections',
         'datatables.net': 'bower_components/datatables/media/js/jquery.dataTables',
         'dataTablesBootstrap': 'bower_components/datatables/media/js/dataTables.bootstrap',
@@ -34,6 +37,9 @@ require.config({
             deps: ['jquery']
         },
         bootstrap_accessibility: {
+            deps: ['bootstrap']
+        },
+        bootstrap_validator: {
             deps: ['bootstrap']
         },
         'datatables.net': {

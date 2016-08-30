@@ -259,6 +259,7 @@ DJANGO_APPS = [
     'django_filters',
     'rest_framework_swagger',
     'release_util',
+    'django_countries',
 ]
 
 # Apps specific to this project go here.
@@ -266,6 +267,10 @@ LOCAL_APPS = [
     'ecommerce.core',
     'ecommerce.courses',
     'ecommerce.invoice',
+    'ecommerce.extensions.payment.processors.adyen.apps.AdyenConfig',
+    'ecommerce.extensions.payment.processors.cybersource.apps.CybersourceConfig',
+    'ecommerce.extensions.payment.processors.invoice_payment.apps.InvoicePaymentConfig',
+    'ecommerce.extensions.payment.processors.paypal.apps.PaypalConfig',
     'ecommerce.referrals',
 
     # Theming app for customizing visual and behavioral attributes of a site
@@ -503,6 +508,12 @@ THEME_SCSS = 'sass/themes/default.scss'
 
 # Link to the support site
 SUPPORT_URL = 'SET-ME-PLEASE'
+
+# Path to the cancel page
+CANCEL_PAGE_PATH = '/commerce/checkout/cancel/'
+
+# Path to the error page
+ERROR_PAGE_PATH = '/commerce/checkout/error/'
 
 # Path to the receipt page
 RECEIPT_PAGE_PATH = '/commerce/checkout/receipt/'

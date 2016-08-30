@@ -52,12 +52,6 @@ class Command(BaseCommand):
                             type=str,
                             required=True,
                             help='Root URL of LMS (e.g. https://localhost:8000)')
-        parser.add_argument('--theme-scss-path',
-                            action='store',
-                            dest='theme_scss_path',
-                            type=str,
-                            default='',
-                            help='Path to theme SCSS relative to STATIC_DIR (e.g. sass/themes/edx.scss)')
         parser.add_argument('--payment-processors',
                             action='store',
                             dest='payment_processors',
@@ -132,7 +126,6 @@ class Command(BaseCommand):
             defaults={
                 'partner': partner,
                 'lms_url_root': lms_url_root,
-                'theme_scss_path': options['theme_scss_path'],
                 'payment_processors': options['payment_processors'],
                 'segment_key': segment_key,
                 'from_email': from_email,

@@ -20,7 +20,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
 
         self.partner = 'fake'
         self.lms_url_root = 'http://fake.server'
-        self.theme_scss_path = 'sass/themes/edx.scss'
         self.payment_processors = 'cybersource,paypal'
         self.client_id = 'ecommerce-key'
         self.client_secret = 'ecommerce-secret'
@@ -32,7 +31,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.site, site)
         self.assertEqual(site_configuration.partner, partner)
         self.assertEqual(site_configuration.lms_url_root, self.lms_url_root)
-        self.assertEqual(site_configuration.theme_scss_path, self.theme_scss_path)
         self.assertEqual(site_configuration.payment_processors, self.payment_processors)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'], self.client_id)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
@@ -62,8 +60,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             command_args.append('--site-name={site_name}'.format(site_name=site_name))
         if partner_name:
             command_args.append('--partner-name={partner_name}'.format(partner_name=partner_name))
-        if theme_scss_path:
-            command_args.append('--theme-scss-path={theme_scss_path}'.format(theme_scss_path=theme_scss_path))
         if payment_processors:
             command_args.append('--payment-processors={payment_processors}'.format(
                 payment_processors=payment_processors
@@ -84,7 +80,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             site_domain=site_domain,
             partner_code=self.partner,
             lms_url_root=self.lms_url_root,
-            theme_scss_path=self.theme_scss_path,
             payment_processors=self.payment_processors,
             client_id=self.client_id,
             client_secret=self.client_secret,
@@ -111,7 +106,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             site_name=updated_site_name,
             partner_code=self.partner,
             lms_url_root=self.lms_url_root,
-            theme_scss_path=self.theme_scss_path,
             payment_processors=self.payment_processors,
             client_id=self.client_id,
             client_secret=self.client_secret,

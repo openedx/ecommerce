@@ -12,13 +12,12 @@ class ProcessorNotFoundError(Exception):
     pass
 
 
+class NotificationParserError(Exception):
+    """Raised when a payment processor notification cannot be parsed."""
+
+
 class InvalidSignatureError(GatewayError):
     """The signature of the payment processor's response is invalid."""
-    pass
-
-
-class InvalidCybersourceDecision(GatewayError):
-    """The decision returned by CyberSource was not recognized."""
     pass
 
 

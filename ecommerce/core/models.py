@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -17,8 +16,8 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
-from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
+from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError, PROCESSOR_NOT_FOUND_DEVELOPER_MESSAGE
+from ecommerce.extensions.payment.processors.base import BasePaymentProcessor
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +38,7 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False
     )
+    # TODO: The theme_scss_path field is deprecated and will be removed in a subsequent release.
     theme_scss_path = models.CharField(
         verbose_name=_('Path to custom site theme'),
         help_text=_('Path to scss files of the custom site theme'),
@@ -46,6 +46,7 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False
     )
+    # TODO: The payment_processors field is deprecated and will be removed in a subsequent release.
     payment_processors = models.CharField(
         verbose_name=_('Payment processors'),
         help_text=_("Comma-separated list of processor names: 'cybersource,paypal'"),
@@ -91,59 +92,33 @@ class SiteConfiguration(models.Model):
     class Meta(object):
         unique_together = ('site', 'partner')
 
-    @property
-    def payment_processors_set(self):
-        """
-        Returns a set of enabled payment processor keys
-        Returns:
-            set[string]: Returns a set of enabled payment processor keys
-        """
-        return {raw_processor_value.strip() for raw_processor_value in self.payment_processors.split(',')}
-
-    def _clean_payment_processors(self):
-        """
-        Validates payment_processors field value
-
-        Raises:
-            ValidationError: If `payment_processors` field contains invalid/unknown payment_processor names
-        """
-        value = self.payment_processors.strip()
-        if not value:
-            raise ValidationError('Invalid payment processors field: must not consist only of whitespace characters')
-
-        processor_names = value.split(',')
-        for name in processor_names:
-            try:
-                get_processor_class_by_name(name.strip())
-            except ProcessorNotFoundError as exc:
-                log.exception(
-                    "Exception validating site configuration for site `%s` - payment processor %s could not be found",
-                    self.site.id,
-                    name
-                )
-                raise ValidationError(exc.message)
-
     def get_payment_processors(self):
         """
         Returns payment processor classes enabled for the corresponding Site
 
         Returns:
-            list[BasePaymentProcessor]: Returns payment processor classes enabled for the corresponding Site
+            dict[str, BasePaymentProcessor]: Returns dict of payment processor classes enabled for the
+                                             corresponding Site keyed by payment processor name
         """
-        all_processors = [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
-        all_processor_names = {processor.NAME for processor in all_processors}
+        payment_processors = {}
+        for processor_class in BasePaymentProcessor.__subclasses__():
+            processor = processor_class(self.site)
+            if processor.is_enabled:
+                payment_processors[processor.NAME] = processor
 
-        missing_processor_configurations = self.payment_processors_set - all_processor_names
-        if missing_processor_configurations:
-            processor_config_repr = ", ".join(missing_processor_configurations)
-            log.warning(
-                'Unknown payment processors [%s] are configured for site %s', processor_config_repr, self.site.id
-            )
+        return payment_processors
 
-        return [
-            processor for processor in all_processors
-            if processor.NAME in self.payment_processors_set and processor.is_enabled()
-        ]
+    def get_payment_processor_by_name(self, name):
+        for processor_name, processor in self.get_payment_processors().iteritems():
+            if processor_name == name:
+                return processor
+
+        raise ProcessorNotFoundError(
+            PROCESSOR_NOT_FOUND_DEVELOPER_MESSAGE.format(name=name)
+        )
+
+    def get_default_payment_processor(self):
+        return self.get_payment_processors()[0]
 
     def get_from_email(self):
         """
@@ -154,11 +129,6 @@ class SiteConfiguration(models.Model):
             string: Returns sender address for use in customer emails/alerts
         """
         return self.from_email or settings.OSCAR_FROM_EMAIL
-
-    def clean_fields(self, exclude=None):
-        """ Validates model fields """
-        if not exclude or 'payment_processors' not in exclude:
-            self._clean_payment_processors()
 
     @cached_property
     def segment_client(self):
@@ -327,9 +297,3 @@ class BusinessClient(models.Model):
 
     def __str__(self):
         return self.name
-
-
-def validate_configuration():
-    """ Validates all existing SiteConfiguration models """
-    for config in SiteConfiguration.objects.all():
-        config.clean_fields()

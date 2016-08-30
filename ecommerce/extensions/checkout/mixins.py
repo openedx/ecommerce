@@ -23,12 +23,15 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 class EdxOrderPlacementMixin(OrderPlacementMixin):
     """ Mixin for edX-specific order placement. """
 
-    # Instance of a payment processor with which to handle payment. Subclasses should set this value.
-    payment_processor = None
-
     order_placement_failure_msg = 'Payment was received, but an order for basket [%d] could not be placed.'
 
     __metaclass__ = abc.ABCMeta
+
+    @property
+    def payment_processor(self):
+        # Instance of a payment processor with which to handle payment.
+        # Subclasses should implement this property.
+        raise NotImplementedError
 
     def add_payment_event(self, event):  # pylint: disable = arguments-differ
         """ Record a payment event for creation once the order is placed. """
@@ -45,7 +48,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
-        source, payment_event = self.payment_processor.handle_processor_response(response, basket=basket)
+        source, payment_event = self.payment_processor.handle_payment_authorization_response(response, basket=basket)
 
         self.add_payment_source(source)
         self.add_payment_event(payment_event)

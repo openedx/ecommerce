@@ -6,6 +6,16 @@ from oscar.apps.payment.abstract_models import AbstractSource
 from ecommerce.extensions.payment.constants import CARD_TYPE_CHOICES
 
 
+class PaymentProcessorConfiguration(models.Model):
+    active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    site = models.OneToOneField('sites.Site', null=False, blank=False)
+
+    class Meta:
+        abstract = True
+
+
 class PaymentProcessorResponse(models.Model):
     """ Auditing model used to save all responses received from payment processors. """
 
@@ -24,11 +34,6 @@ class PaymentProcessorResponse(models.Model):
 
 class Source(AbstractSource):
     card_type = models.CharField(max_length=255, choices=CARD_TYPE_CHOICES, null=True, blank=True)
-
-
-class PaypalWebProfile(models.Model):
-    id = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
 
 
 # noinspection PyUnresolvedReferences
