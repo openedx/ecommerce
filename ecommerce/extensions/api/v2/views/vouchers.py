@@ -183,17 +183,21 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             course (Course): Course associated with a voucher
             course_info (dict): Course info fetched from an API (LMS or Course Catalog)
             is_verified (bool): Indicated whether or not the voucher's range of products contains a verified course seat
-            stock_record (StocRecord): Stock record associated with the course seat
+            stock_record (StockRecord): Stock record associated with the course seat
             voucher (Voucher): Voucher for which the course offer data is being fetched
         Returns:
             dict: Course offer data
         """
+        try:
+            image = course_info['image']['src']
+        except (KeyError, TypeError):
+            image = ''
         return {
             'benefit': serializers.BenefitSerializer(benefit).data,
             'contains_verified': is_verified,
             'course_start_date': course_info.get('start', ''),
             'id': course.id,
-            'image_url': course_info.get('image', {}).get('src', ''),
+            'image_url': image,
             'organization': CourseKey.from_string(course.id).org,
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,

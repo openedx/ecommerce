@@ -107,7 +107,10 @@ class BasketSummaryView(BasketView):
             short_description = None
             try:
                 course = get_course_info_from_lms(course_key)
-                image_url = course.get('media', '{}').get('image', '{}').get('raw', '')
+                try:
+                    image_url = course['media']['image']['raw']
+                except (KeyError, TypeError):
+                    image_url = ''
                 short_description = course.get('short_description', '')
                 course_name = course['name']
             except (ConnectionError, SlumberBaseException, Timeout):

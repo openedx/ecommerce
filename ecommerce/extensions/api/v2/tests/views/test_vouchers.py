@@ -297,7 +297,6 @@ class VoucherViewOffersEndpointTests(
         request = self.prepare_offers_listing_request(voucher.code)
         offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
         first_offer = offers[0]
-
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
@@ -358,10 +357,11 @@ class VoucherViewOffersEndpointTests(
         benefit = BenefitFactory()
         course, seat = self.create_course_and_seat()
         course_info = {
+            'start': None,
+            'image': None,
         }
         stock_record = seat.stockrecords.first()
         voucher = VoucherFactory()
-
         offer = VoucherViewSet().get_course_offer_data(
             benefit=benefit,
             course=course,
@@ -372,4 +372,4 @@ class VoucherViewOffersEndpointTests(
         )
 
         self.assertEqual(offer['image_url'], '')
-        self.assertEqual(offer['course_start_date'], '')
+        self.assertEqual(offer['course_start_date'], None)
