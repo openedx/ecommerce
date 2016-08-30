@@ -352,3 +352,24 @@ class VoucherViewOffersEndpointTests(
             'title': course.name,
             'voucher_end_date': voucher.end_datetime
         })
+
+    def test_get_course_offer_verify_null_fields(self):
+        """ Verify that the course offers data is properly formatted. """
+        benefit = BenefitFactory()
+        course, seat = self.create_course_and_seat()
+        course_info = {
+        }
+        stock_record = seat.stockrecords.first()
+        voucher = VoucherFactory()
+
+        offer = VoucherViewSet().get_course_offer_data(
+            benefit=benefit,
+            course=course,
+            course_info=course_info,
+            is_verified=True,
+            stock_record=stock_record,
+            voucher=voucher
+        )
+
+        self.assertEqual(offer['image_url'], '')
+        self.assertEqual(offer['course_start_date'], '')

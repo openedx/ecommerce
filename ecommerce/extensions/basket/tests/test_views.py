@@ -397,3 +397,18 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, LmsApiMockMixin, ApiMockMix
         self.assertEqual(response.status_code, 200)
         cached_course_after = cache.get(cache_hash)
         self.assertEqual(cached_course_after['name'], self.course.name)
+
+    def test_empty_course_api_response(self):
+        """ Check to see if we can handle empty response from the course api """
+        seat = self.create_seat(self.course)
+        self.create_basket_and_add_product(seat)
+        course_id = 'course-v1:test+test+test'
+        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
+        course_info_json = json.dumps('{}')
+        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        line_data = response.context['formset_lines_data'][0][1]
+        self.assertEqual(line_data.get('image_url'), None)
+        self.assertEqual(line_data.get('course_short_description'), None)
