@@ -1,9 +1,11 @@
 """Offer Utility Methods. """
 from decimal import Decimal
 
-from django.utils.translation import ugettext_lazy as _
+from babel.numbers import format_currency
+
+from django.conf import settings
+from django.utils.translation import get_language, to_locale, ugettext_lazy as _
 from oscar.core.loading import get_model
-from oscar.templatetags.currency_filters import currency
 
 Benefit = get_model('offer', 'Benefit')
 
@@ -35,5 +37,8 @@ def format_benefit_value(benefit):
     if benefit.type == Benefit.PERCENTAGE:
         benefit_value = _('{benefit_value}%'.format(benefit_value=benefit_value))
     else:
-        benefit_value = _('{benefit_value}'.format(benefit_value=currency(benefit_value)))
+        converted_benefit = format_currency(
+            Decimal(benefit.value), settings.OSCAR_DEFAULT_CURRENCY, format=u'#,##0.00',
+            locale=to_locale(get_language()))
+        benefit_value = _('${benefit_value}'.format(benefit_value=converted_benefit))
     return benefit_value
