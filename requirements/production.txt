@@ -4,6 +4,8 @@
 django-ses==0.7.0
 MySQL-python==1.2.5
 PyYAML==3.11
-gunicorn==19.2.1
+gunicorn==19.6.0
+# Later versions of gevent wrap Python's __import__ in a way that breaks Oscar imports.
+# For more, see https://github.com/edx/ecommerce/pull/920.
 gevent==1.0.2
 nodeenv==0.13.6
