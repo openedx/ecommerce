@@ -6,6 +6,7 @@ from django.core.management import call_command, CommandError
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -20,6 +21,12 @@ class DeleteOrderedBasketsCommandTests(TestCase):
         # Create baskets with and without orders
         self.orders = [factories.create_order() for __ in range(0, 2)]
         self.unordered_baskets = [factories.BasketFactory() for __ in range(0, 3)]
+
+        # Create invoiced baskets.
+        self.invoiced_orders = [factories.create_order() for __ in range(0, 2)]
+        self.invoiced_baskets = [order.basket for order in self.invoiced_orders]
+        for order in self.invoiced_orders:
+            Invoice.objects.create(basket=order.basket, order=order)
 
     def test_without_commit(self):
         """ Verify the command does not delete baskets if the commit flag is not set. """
@@ -40,19 +47,22 @@ class DeleteOrderedBasketsCommandTests(TestCase):
     def test_with_commit(self):
         """ Verify the command, when called with the commit flag, deletes baskets with orders. """
         # Verify we have baskets with orders
-        self.assertEqual(Basket.objects.filter(order__isnull=False).count(), len(self.orders))
+        self.assertEqual(Basket.objects.filter(order__isnull=False).count(), len(self.orders + self.invoiced_orders))
+
+        # Verify we have invoiced baskets
+        self.assertEqual(Basket.objects.filter(invoice__isnull=False).count(), len(self.invoiced_baskets))
 
         # Call the command with the commit flag
         out = StringIO()
         call_command(self.command, commit=True, stderr=out)
 
-        # Verify baskets with orders deleted
-        self.assertEqual(list(Basket.objects.all()), self.unordered_baskets)
+        # Verify baskets with orders deleted, except for those which are invoiced
+        self.assertEqual(list(Basket.objects.all()), self.unordered_baskets + self.invoiced_baskets)
 
         # Verify info was output to stderr
         actual = out.getvalue().strip()
-        self.assertTrue(actual.startswith('Deleting [{}] baskets...'.format(len(self.orders))))
-        self.assertTrue(actual.endswith('Done.'))
+        self.assertTrue(actual.startswith('Deleting [{}] baskets.'.format(len(self.orders))))
+        self.assertTrue(actual.endswith('All baskets deleted.'))
 
     def test_commit_without_baskets(self):
         """ Verify the command does nothing if there are no baskets to delete. """
