@@ -1,8 +1,11 @@
 from decimal import Decimal
 import ddt
 
+from babel.numbers import format_currency
+
+from django.conf import settings
+from django.utils.translation import get_language, to_locale
 from oscar.core.loading import get_model
-from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.courses.tests.factories import CourseFactory
@@ -33,7 +36,10 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(benefit_value, '35%')
 
         benefit_value = format_benefit_value(self.value_benefit)
-        self.assertEqual(benefit_value, currency(self.seat_price - 10))
+        expected_benefit = format_currency(
+            Decimal((self.seat_price - 10)), settings.OSCAR_DEFAULT_CURRENCY, format=u'#,##0.00',
+            locale=to_locale(get_language()))
+        self.assertEqual(benefit_value, '${expected_benefit}'.format(expected_benefit=expected_benefit))
 
     @ddt.data(
         ('1.0', '1'),
