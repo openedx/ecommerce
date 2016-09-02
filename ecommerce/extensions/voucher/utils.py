@@ -208,7 +208,7 @@ def generate_coupon_report(coupon_vouchers):
 
     for coupon_voucher in coupon_vouchers:
         coupon = coupon_voucher.coupon
-        client = Invoice.objects.get(order__basket__lines__product=coupon).business_client.name
+        client = Invoice.objects.get(order__lines__product=coupon).business_client.name
         rows.append(_get_info_for_coupon_report(coupon, coupon_voucher.vouchers.first()))
         rows[0]['Client'] = client
 
