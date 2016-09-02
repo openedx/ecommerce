@@ -35,7 +35,8 @@ define([
                         courses: this.collection,
                         code: this.code,
                         isEnrollmentCode: this.isEnrollmentCode,
-                        page: this.page
+                        page: this.page,
+                        isCredit: this.isCredit
                     })
                 );
                 this.renderPagination();
@@ -52,6 +53,7 @@ define([
                             code: this.code,
                             isEnrollmentCode: this.isEnrollmentCode,
                             page: this.collection.goToPage(this.collection.page),
+                            isCredit: this.isCredit,
                         })
                     );
                     this.renderPagination();
@@ -65,6 +67,8 @@ define([
 
                 this.isEnrollmentCode = benefit_data.type === 'Percentage' && Math.round(benefit_data.value) === 100;
                 _.each(this.collection.models, this.formatValues, this);
+
+                this.isCredit = this.collection.at(0).get('credit');
             },
 
             checkVerified: function(course) {

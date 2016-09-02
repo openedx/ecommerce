@@ -15,11 +15,12 @@ from oscar.test.utils import RequestFactory
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.coupons.views import get_voucher_and_products_from_code, voucher_is_valid
+from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 

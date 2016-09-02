@@ -49,20 +49,32 @@
                                 </p>
                             </div>
                             <div class="pull-right">
-                                <% if (isEnrollmentCode) { %>
-                                <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
-                                   id="RedeemEnrollment"
-                                   class="btn btn-success"><%- gettext('Enroll Now') %></a>
-                                <% } else { %>
-                                <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
-                                   id="PurchaseCertificate"
-                                   class="btn btn-success btn-purchase"
-                                   data-track-type="click"
-                                   data-track-event="edx.bi.ecommerce.coupons.accept_offer"
-                                   data-track-category="coupon-codes"
-                                   data-course-id="<%= course.attributes.id %>">
-                                    <%- gettext('Checkout') %>
-                                </a>
+                                    <% if (isCredit) { %>
+                                        <a href="/credit/checkout/<%= course.attributes.id %>/?code=<%= code %>"
+                                           id="PurchaseCredit"
+                                           class="btn btn-success btn-purchase"
+                                           data-track-type="click"
+                                           data-track-event="edx.bi.ecommerce.coupons.accept_offer"
+                                           data-track-category="coupon-codes"
+                                           data-course-id="<%= course.attributes.id %>">
+                                            <%- gettext('Buy Credit') %>
+                                        </a>
+                                    <% } else { %>
+                                        <% if (isEnrollmentCode) { %>
+                                        <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
+                                           id="RedeemEnrollment"
+                                           class="btn btn-success"><%- gettext('Enroll Now') %></a>
+                                        <% } else { %>
+                                            <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
+                                               id="PurchaseCertificate"
+                                               class="btn btn-success btn-purchase"
+                                               data-track-type="click"
+                                               data-track-event="edx.bi.ecommerce.coupons.accept_offer"
+                                               data-track-category="coupon-codes"
+                                               data-course-id="<%= course.attributes.id %>">
+                                                <%- gettext('Checkout') %>
+                                            </a>
+                                        <% } %>
                                 <% } %>
                             </div>
                         </div>

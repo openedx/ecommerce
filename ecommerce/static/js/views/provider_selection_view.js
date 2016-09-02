@@ -17,7 +17,6 @@ define([
 
             onProviderSelection: function () {
                 var $selectedProvider = this.$el.find('input[name=provider]:checked').closest('.provider');
-
                 this.trigger('productSelected', {
                     sku: $selectedProvider.data('sku'),
                     price: $selectedProvider.data('price')

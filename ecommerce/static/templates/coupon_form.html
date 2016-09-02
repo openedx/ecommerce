@@ -187,10 +187,20 @@
         <div class="form-group course-seat-types">
             <label for="course-seat-types"><%= gettext('Seat Types:') %> *</label>
             <div class="checkboxes">
-                <input id="verified" type="checkbox" name="course_seat_types" value="verified">
-                <label for="verified"><%= gettext('Verified') %></label>
-                <input id="professional" type="checkbox" name="course_seat_types" value="professional">
-                <label for="professional"><%= gettext('Professional') %></label>
+                <div class="credit-radio">
+                    <input id="non-credit" type="radio" name="credit_radio" value="non-credit">
+                    <label for="non-credit"><%= gettext('Non-credit') %></label>
+                </div>
+                <div class="non-credit-seats">
+                    <input id="verified" type="checkbox" name="course_seat_types" value="verified">
+                    <label for="verified"><%= gettext('Verified') %></label>
+                    <input id="professional" type="checkbox" name="course_seat_types" value="professional">
+                    <label for="professional"><%= gettext('Professional') %></label>
+                </div>
+                <div class="credit-radio">
+                    <input id="credit" type="radio" name="credit_radio" value="credit">
+                    <label for="credit"><%= gettext('Credit') %></label>
+                </div>
                 <p class="help-block"></p>
             </div>
             <div class="catalog_buttons"></div>

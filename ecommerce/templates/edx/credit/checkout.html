@@ -48,18 +48,13 @@
                             </div>
                         </div>
                         <div id="payment-buttons" class="row checkout-controls center-block text-right">
-                            <div class="col-sm-12">
-                                {% for processor_name, button_text in payment_processors.items %}
-                                    <button data-track-type="click"
-                                            data-track-event="edx.bi.ecommerce.credit.payment_selected"
-                                            data-track-category="{{ processor_name }}"
-                                            data-processor-name="{{ processor_name }}"
-                                            data-course-id="{{ course.id }}"
-                                            class="btn btn-primary payment-button">
-                                        {{ button_text }}
-                                    </button>
-                                {% endfor %}
-                            </div>
+                            <a data-track-type="click"
+                               data-track-event="edx.bi.ecommerce.credit.payment_selected"
+                               data-course-id="{{ course.id }}"
+                               class="btn btn-primary payment-button"
+                               href="/basket/single-item/?code={{code}}&sku=">
+                               Checkout
+                            </a>
                         </div>
                     </div>
                 {% endif %}

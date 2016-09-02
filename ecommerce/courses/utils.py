@@ -40,7 +40,8 @@ def get_certificate_type_display_value(certificate_type):
         'audit': _('Audit'),
         'verified': _('Verified'),
         'professional': _('Professional'),
-        'honor': _('Honor')
+        'honor': _('Honor'),
+        'credit': _('Credit')
     }
 
     if certificate_type not in display_values:

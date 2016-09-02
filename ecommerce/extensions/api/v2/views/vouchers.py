@@ -26,6 +26,7 @@ from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
+Order = get_model('order', 'Order')
 Voucher = get_model('voucher', 'Voucher')
 
 
@@ -105,6 +106,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         catalog_query = benefit.range.catalog_query
         next_page = None
         offers = []
+        credit = False
         if catalog_query:
             response = get_range_catalog_query_results(
                 limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
@@ -125,11 +127,20 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 if not request.strategy.fetch_for_product(product).availability.is_available_to_buy:
                     logger.info('%s is unavailable to buy. Omitting it from the results.', product)
                     continue
+
                 course_id = product.course_id
                 course_catalog_data = next(
                     (result for result in response['results'] if result['key'] == course_id),
                     None
                 )
+                # Omit credit seats for which the user is not eligible or which the user already bought.
+                if product.attr.certificate_type == 'credit':
+                    if request.user.is_eligible(product.attr.course_key):
+                        credit = True
+                        if Order.objects.filter(user=request.user, lines__product=product).exists():
+                            continue
+                    else:
+                        continue
 
                 try:
                     stock_record = stock_records.get(product__id=product.id)
@@ -150,7 +161,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         course_info=course_catalog_data,
                         is_verified=contains_verified_course,
                         stock_record=stock_record,
-                        voucher=voucher
+                        voucher=voucher,
+                        credit=credit
                     ))
         else:
             product_range = voucher.offers.first().benefit.range
@@ -164,6 +176,9 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             stock_record = get_object_or_404(StockRecord, product__id=product.id)
             course_info = get_course_info_from_lms(course_id)
 
+            if product.attr.certificate_type == 'credit':
+                credit = True
+
             if course_info:
                 course_info['image'] = {'src': get_lms_url(course_info['media']['course_image']['uri'])}
 
@@ -173,11 +188,13 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     course_info=course_info,
                     is_verified=(course.type == 'verified'),
                     stock_record=stock_record,
-                    voucher=voucher
+                    voucher=voucher,
+                    credit=credit
                 ))
+
         return {'next': next_page, 'results': offers}
 
-    def get_course_offer_data(self, benefit, course, course_info, is_verified, stock_record, voucher):
+    def get_course_offer_data(self, benefit, course, course_info, is_verified, stock_record, voucher, credit):
         """
         Gets course offer data.
         Arguments:
@@ -205,4 +222,5 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
+            'credit': credit
         }
