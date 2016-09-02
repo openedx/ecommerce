@@ -39,9 +39,11 @@
             <div class="heading"><%= gettext('Discount Value:') %></div>
             <div class="value"><%= discountValue %></div>
         </div>
+        <% if (coupon.seats) {%>
         <div class="info-item grid-item course-info">
             <div class="heading"><%= gettext('Valid for courses:') %></div>
         </div>
+        <%}%>
         <% if(coupon.catalog_query) {%>
         <div class="info-item grid-item catalog-query">
             <div class="heading"><%= gettext('Catalog Query:') %></div>

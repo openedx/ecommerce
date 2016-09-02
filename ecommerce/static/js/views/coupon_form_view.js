@@ -592,8 +592,12 @@ define([
                     this.$('.catalog-query').removeClass('editing');
                 }
 
-                this.setLimitToElement(this.$('[name=invoice_discount_value]'), 100, 1);
-                this.setLimitToElement(this.$('[name=benefit_value]'), 100, 1);
+                if (this.$('[name=invoice_discount_type]').val() === 'Percentage') {
+                    this.setLimitToElement(this.$('[name=invoice_discount_value]'), 100, 1);
+                }
+                if (this.$('[name=benefit_type]').val() === 'Percentage') {
+                    this.setLimitToElement(this.$('[name=benefit_value]'), 100, 1);
+                }
 
                 // Add date picker
                 Utils.addDatePicker(this);
