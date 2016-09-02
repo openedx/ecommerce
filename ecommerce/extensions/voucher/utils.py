@@ -423,7 +423,9 @@ def create_vouchers(
     # offer because the usage is tied to the offer so that a usage on one voucher would
     # mean all vouchers will have their usage decreased by one, hence each voucher needs
     # its own offer to keep track of its own usages without interfering with others.
-    multi_offer = True if quantity > 1 and max_uses > 1 else False
+    multi_offer = True if (
+        voucher_type == Voucher.MULTI_USE or voucher_type == Voucher.ONCE_PER_CUSTOMER
+    ) else False
     num_of_offers = quantity if multi_offer else 1
     for num in range(num_of_offers):
         offer = _get_or_create_offer(
