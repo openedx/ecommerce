@@ -95,6 +95,24 @@ define([
                 });
             });
 
+            describe('toggle credit seats', function() {
+                it('should hide non-credit seats and uncheck them.', function() {
+                    view.$('#credit').prop('checked', true).trigger('change');
+                    expect(view.$('input[id=verified]').is(':checked')).toBe(false);
+                    expect(view.$('input[id=professional]').is(':checked')).toBe(false);
+                    expect(view.$('.non-credit-seats').hasClass('hidden')).toBe(true);
+                    expect(view.model.get('course_seat_types')[0]).toBe('credit');
+                });
+
+                it('should show non-credit seats.', function() {
+                    view.$('#non-credit').prop('checked', true).trigger('change');
+                    expect(view.$('.non-credit-seats').hasClass('hidden')).toBe(false);
+
+                    view.$('input[id=verified]').prop('checked', true).trigger('change');
+                    expect(view.model.get('course_seat_types')[0]).toBe('verified');
+                });
+            });
+
             describe('routing', function() {
                 it('should route to external link.', function() {
                     var href = 'http://www.google.com/';

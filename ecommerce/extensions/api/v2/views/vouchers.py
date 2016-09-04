@@ -92,6 +92,23 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
         return Response(data=offers_data)
 
+    def retrieve_objects(self, results):
+        """ Helper method to retrieve all the courses, products and stock_records
+        from course IDs in course catalog response results.
+
+        Args:
+            results(dict): Course catalog response results.
+
+        Returns:
+            Querysets of courses, products and stock records retrieved from results.
+        """
+        course_ids = [result['key'] for result in results]
+        courses = Course.objects.filter(id__in=course_ids)
+        products = Product.objects.filter(course__in=courses)
+        stock_records = StockRecord.objects.filter(product__in=products)
+
+        return courses, products, stock_records
+
     def get_offers(self, request, voucher):
         """
         Get the course offers associated with the voucher.
@@ -115,10 +132,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 site=request.site
             )
             next_page = response['next']
-            course_ids = [result['key'] for result in response['results']]
-            courses = Course.objects.filter(id__in=course_ids)
-            products = Product.objects.filter(course__in=courses)
-            stock_records = StockRecord.objects.filter(product__in=products)
+            courses, products, stock_records = self.retrieve_objects(response['results'])
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
 
             for product in products:
@@ -175,9 +189,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             course = get_object_or_404(Course, id=course_id)
             stock_record = get_object_or_404(StockRecord, product__id=product.id)
             course_info = get_course_info_from_lms(course_id)
-
-            if product.attr.certificate_type == 'credit':
-                credit = True
+            credit = False  # Credit seats can only be in dynamic coupons.
 
             if course_info:
                 course_info['image'] = {'src': get_lms_url(course_info['media']['course_image']['uri'])}
@@ -204,6 +216,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             is_verified (bool): Indicated whether or not the voucher's range of products contains a verified course seat
             stock_record (StockRecord): Stock record associated with the course seat
             voucher (Voucher): Voucher for which the course offer data is being fetched
+            credit (bool): True for credit seats
         Returns:
             dict: Course offer data
         """

@@ -19,7 +19,8 @@ define([
                 model,
                 enrollment_code_data = Mock_Coupons.enrollmentCodeCouponData,
                 discount_code_data = Mock_Coupons.discountCodeCouponData,
-                invoice_coupon_data = Mock_Coupons.couponWithInvoiceData;
+                invoice_coupon_data = Mock_Coupons.couponWithInvoiceData,
+                dynamic_coupon = Mock_Coupons.dynamicCouponData;
 
             describe('edit enrollment code', function () {
                 beforeEach(function () {
@@ -69,6 +70,28 @@ define([
                     expect(view.$el.find('[name=benefit_type]').val()).toEqual(model.get('benefit_type'));
                     expect(view.$el.find('[name=benefit_value]').val()).toEqual(model.get('benefit_value').toString());
                     expect(view.$el.find('[name=code]').val()).toEqual(model.get('code'));
+                });
+            });
+
+            describe('Editing dynamic coupon', function() {
+                beforeEach(function() {
+                    model = Coupon.findOrCreate(dynamic_coupon);
+                    model.updateSeatData();
+                    view = new CouponCreateEditView({model: model, editing: true}).render();
+                });
+
+                it('should display dynamic catalog information.', function() {
+                    expect(view.$('#catalog-query').val()).toEqual(model.get('catalog_query'));
+                    expect(view.$('#non-credit').is(':checked')).toEqual(true);
+                    expect(view.$('#verified').is(':checked')).toEqual(true);
+                    expect(view.$('#professional').is(':checked')).toEqual(true);
+                });
+
+                it('should hide checkboxes if credit seat type.', function() {
+                    var credit_seat_type = ['credit'];
+                    model.set('course_seat_types', credit_seat_type);
+                    view.render();
+                    expect(view.$('.non-credit-seats').hasClass('hidden')).toEqual(true);
                 });
             });
 

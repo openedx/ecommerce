@@ -384,7 +384,7 @@ define([
                 if (tax_deduction === 'Yes') {
                     this.formGroup('[name=tax_deducted_source_value]').removeClass(this.hiddenClass);
                 } else if (tax_deduction === 'No') {
-                    this.hideField('[name=tax_deducted_source_value]', 'No');
+                    this.hideField('[name=tax_deducted_source_value]', null);
                 }
             },
 
@@ -555,7 +555,6 @@ define([
                 e.stopPropagation();
                 window.open(e.currentTarget.href);
             },
-
 
             /**
              * Override default renderAlert to display a custom message.

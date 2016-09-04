@@ -3,6 +3,8 @@ from datetime import datetime
 from django.utils.timezone import now
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.courses.tests.factories import CourseFactory
+
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Voucher = get_model('voucher', 'Voucher')
@@ -51,7 +53,8 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
                     benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE, max_usage=None):
     """ Helper function to create a voucher and add an offer to it that contains a product. """
     if _range is None:
-        product = ProductFactory(title='Test product')
+        course = CourseFactory()
+        product = course.create_or_update_seat('verified', True, 50, PartnerFactory())
         _range = RangeFactory(products=[product, ])
     elif _range.num_products() > 0:
         product = _range.all_products()[0]

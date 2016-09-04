@@ -248,6 +248,31 @@ define([], function(){
             }
         ]
     },
+    dynamicCouponData = {
+        'id': 12,
+        'title': 'Test Dynamic Code',
+        'coupon_type': 'Enrollment code',
+        'last_edited': lastEditData,
+        'seats': [],
+        'client': 'Client Name',
+        'price': '100.00',
+        'categories': [
+            {
+                'id': 4,
+                'name': 'TESTCAT'
+            }
+        ],
+        'start_date': '2015-01-01T00:00:00Z',
+        'end_date': '2017-01-01T00:00:00Z',
+        'voucher_type': 'Single use',
+        'benefit_type': 'Percentage',
+        'benefit_value': 10,
+        'catalog_type': 'Multiple courses',
+        'catalog_query': 'org:edX',
+        'course_seat_types': [
+            'verified', 'professional'
+        ]
+    },
     couponWithInvoiceData = {
         id: 2,
         title: 'Test Enrollment',
@@ -296,6 +321,7 @@ define([], function(){
         'percentageDiscountCodeVoucher': percentageDiscountCodeVoucher,
         'valueDiscountCodeVoucher': valueDiscountCodeVoucher,
         'verifiedSeat': verifiedSeat,
+        'dynamicCouponData': dynamicCouponData,
         'couponWithInvoiceData': couponWithInvoiceData
     };
 });

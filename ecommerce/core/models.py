@@ -342,9 +342,9 @@ class User(AbstractUser):
                 oauth_access_token=self.access_token
             )
             response = api.eligibility().get(**query_strings)
-        except (ConnectionError, SlumberBaseException, Timeout) as ex:
+        except (ConnectionError, SlumberBaseException, Timeout) as ex:  # pragma: no cover
             log.exception(
-                'Failed to retrieve enrollment details for [%s] in course [%s], Because of [%s]',
+                'Failed to retrieve eligibility details for [%s] in course [%s], Because of [%s]',
                 self.username,
                 course_key,
                 ex,

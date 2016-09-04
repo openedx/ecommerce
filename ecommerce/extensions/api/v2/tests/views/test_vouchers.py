@@ -11,7 +11,9 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
-from oscar.test.factories import BenefitFactory, ConditionalOfferFactory, RangeFactory, VoucherFactory
+from oscar.test.factories import (
+    BenefitFactory, ConditionalOfferFactory, OrderLineFactory, OrderFactory, RangeFactory, VoucherFactory
+)
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
@@ -36,7 +38,7 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCase):
+class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ Tests for the VoucherViewSet view set. """
     path = reverse('api:v2:vouchers-list')
 
@@ -66,44 +68,53 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['results'][0]['code'], COUPON_CODE)
 
-    # NOTE (VK): This unit test is added here because it results in a segmentation fault if
+    def prepare_get_offers_response(self, quantity=1, seat_type='verified'):
+        """Helper method for creating response the voucher offers endpoint.
+
+        Args:
+            quantity (int): Number of course runs
+
+        Returns:
+            The products, request and vouchers created.
+        """
+        course_run_info = {
+            'count': quantity,
+            'next': 'path/to/the/next/page',
+            'results': []
+        }
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        for _ in range(quantity):
+            course, seat = self.create_course_and_seat(seat_type=seat_type)
+            course_run_info['results'].append({
+                'key': course.id,
+                'title': course.name,
+                'start': '2016-05-01T00:00:00Z',
+                'image': {
+                    'src': 'path/to/the/course/image'
+                }
+            })
+            new_range.add_product(seat)
+
+        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run_info=course_run_info)
+        voucher, __ = prepare_voucher(_range=new_range)
+
+        voucher, products = get_voucher_and_products_from_code(voucher.code)
+        factory = APIRequestFactory()
+        request = factory.get('/?code={}&page_size=6'.format(voucher.code))
+        request.site = self.site
+        request.user = self.user
+        request.strategy = DefaultStrategy()
+
+        return products, request, voucher
+
+    # NOTE (vkaracic): This unit test is added here because it results in a segmentation fault if
     # added to the test class below.
     @httpretty.activate
     @mock_course_catalog_api_client
     def test_omitting_unavailable_seats(self):
         """ Verify an unavailable seat is omitted from offer page results. """
-        course1, seat1 = self.create_course_and_seat()
-        course2, seat2 = self.create_course_and_seat()
-        course_run_info = {
-            'count': 2,
-            'next': 'path/to/the/next/page',
-            'results': [{
-                'key': course1.id,
-                'title': course1.name,
-                'start': '2016-05-01T00:00:00Z',
-                'image': {
-                    'src': 'path/to/the/course/image'
-                }
-            }, {
-                'key': course2.id,
-                'title': course2.name,
-                'start': '2016-05-01T00:00:00Z',
-                'image': {
-                    'src': 'path/to/the/course/image'
-                }
-            }]
-        }
+        products, request, voucher = self.prepare_get_offers_response(quantity=2)
 
-        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run_info=course_run_info)
-        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
-        new_range.add_product(seat1)
-        new_range.add_product(seat2)
-        voucher, __ = prepare_voucher(_range=new_range)
-        voucher, products = get_voucher_and_products_from_code(voucher.code)
-        factory = APIRequestFactory()
-        request = factory.get('/?code={}&page_size=6'.format(voucher.code))
-        request.site = self.site
-        request.strategy = DefaultStrategy()
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 2)
 
@@ -111,6 +122,33 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         product.expires = pytz.utc.localize(datetime.datetime.min)
         product.save()
 
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        self.assertEqual(len(offers), 1)
+
+    @httpretty.activate
+    @mock_course_catalog_api_client
+    def test_omitting_already_bought_credit_seat(self):
+        """ Verify a seat that the user bought is omitted from offer page results. """
+        products, request, voucher = self.prepare_get_offers_response(quantity=2, seat_type='credit')
+        self.mock_eligibility_api(request, self.user, 'a/b/c', eligible=True)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        self.assertEqual(len(offers), 2)
+
+        order = OrderFactory(user=self.user)
+        order.lines.add(OrderLineFactory(product=products[0]))
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        self.assertEqual(len(offers), 1)
+
+    @httpretty.activate
+    @mock_course_catalog_api_client
+    def test_omitting_uneligible_credit_seat(self):
+        """ Verify a seat that the user is not eligible for is omitted from offer page results. """
+        products, request, voucher = self.prepare_get_offers_response(quantity=2, seat_type='credit')
+        self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=True)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        self.assertEqual(len(offers), 2)
+
+        self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=False)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
 
@@ -282,7 +320,8 @@ class VoucherViewOffersEndpointTests(
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
             'title': course.name,
-            'voucher_end_date': voucher.end_datetime
+            'voucher_end_date': voucher.end_datetime,
+            'credit': False
         })
 
     @mock_course_catalog_api_client
@@ -311,7 +350,8 @@ class VoucherViewOffersEndpointTests(
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
             'title': course.name,
-            'voucher_end_date': voucher.end_datetime
+            'voucher_end_date': voucher.end_datetime,
+            'credit': False
         })
 
     def test_get_course_offer_data(self):
@@ -333,7 +373,8 @@ class VoucherViewOffersEndpointTests(
             course_info=course_info,
             is_verified=True,
             stock_record=stock_record,
-            voucher=voucher
+            voucher=voucher,
+            credit=False
         )
 
         self.assertDictEqual(offer, {
@@ -349,7 +390,8 @@ class VoucherViewOffersEndpointTests(
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
-            'voucher_end_date': voucher.end_datetime
+            'voucher_end_date': voucher.end_datetime,
+            'credit': False
         })
 
     def test_get_course_offer_verify_null_fields(self):
@@ -368,7 +410,8 @@ class VoucherViewOffersEndpointTests(
             course_info=course_info,
             is_verified=True,
             stock_record=stock_record,
-            voucher=voucher
+            voucher=voucher,
+            credit=False
         )
 
         self.assertEqual(offer['image_url'], '')
