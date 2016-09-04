@@ -135,22 +135,19 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_creating_multi_offer_coupon(self):
         """Test the creation of a multi-offer coupon."""
-        ordinary_max_uses = 1
-        ordinary_coupon = self.create_coupon(quantity=2, max_uses=ordinary_max_uses)
+        ordinary_coupon = self.create_coupon(quantity=2)
         ordinary_coupon_vouchers = ordinary_coupon.attr.coupon_vouchers.vouchers.all()
         self.assertEqual(
             ordinary_coupon_vouchers[0].offers.first(),
             ordinary_coupon_vouchers[1].offers.first()
         )
-        self.assertEqual(ordinary_coupon_vouchers[0].offers.first().max_global_applications, ordinary_max_uses)
 
-        multi_offer_coupon = self.create_coupon(quantity=2, max_uses=2)
+        multi_offer_coupon = self.create_coupon(quantity=2, voucher_type=Voucher.MULTI_USE)
         multi_offer_coupon_vouchers = multi_offer_coupon.attr.coupon_vouchers.vouchers.all()
         first_offer = multi_offer_coupon_vouchers[0].offers.first()
         second_offer = multi_offer_coupon_vouchers[1].offers.first()
 
         self.assertNotEqual(first_offer, second_offer)
-        self.assertEqual(first_offer.max_global_applications, second_offer.max_global_applications)
 
     def test_custom_code_string(self):
         """Test creating a coupon with custom voucher code."""
