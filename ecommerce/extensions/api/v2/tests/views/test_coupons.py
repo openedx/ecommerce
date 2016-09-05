@@ -507,7 +507,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(invoice.business_client.name, client_username)
 
     def test_update_invoice_data(self):
-        invoice = Invoice.objects.get(order__basket__lines__product=self.coupon)
+        invoice = Invoice.objects.get(order__lines__product=self.coupon)
         self.assertEqual(invoice.discount_type, Invoice.PERCENTAGE)
         CouponViewSet().update_invoice_data(
             coupon=self.coupon,
@@ -516,7 +516,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             }
         )
 
-        invoice = Invoice.objects.get(order__basket__lines__product=self.coupon)
+        invoice = Invoice.objects.get(order__lines__product=self.coupon)
         self.assertEqual(invoice.discount_type, Invoice.FIXED)
 
     @ddt.data('audit', 'honor')
@@ -593,7 +593,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """ Verify an invoice is created with the proper data. """
         self.update_prepaid_invoice_data()
         response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
-        invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
+        invoice = Invoice.objects.get(order__lines__product__id=response['coupon_id'])
         self.assertEqual(invoice.type, self.data['invoice_type'])
         self.assertEqual(invoice.number, self.data['invoice_number'])
         self.assertEqual(invoice.payment_date.isoformat(), self.data['invoice_payment_date'])
