@@ -495,7 +495,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return offer.condition.range.catalog_query
 
     def get_client(self, obj):
-        return Invoice.objects.get(order__basket__lines__product=obj).business_client.name
+        return Invoice.objects.get(order__lines__product=obj).business_client.name
 
     def get_code(self, obj):
         if self.retrieve_quantity(obj) == 1:
@@ -544,7 +544,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         Currently only invoices are supported, in the event of adding another
         payment processor append it to the response dictionary.
         """
-        invoice = Invoice.objects.filter(order__basket__lines__product=obj).first()
+        invoice = Invoice.objects.filter(order__lines__product=obj).first()
         response = {'Invoice': InvoiceSerializer(invoice).data}
         return response
 
