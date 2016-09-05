@@ -104,11 +104,14 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         request = factory.get('/?code={}&page_size=6'.format(voucher.code))
         request.site = self.site
         request.strategy = DefaultStrategy()
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 2)
 
-        products[1].expires = pytz.utc.localize(datetime.datetime.min)
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
+        product = products[1]
+        product.expires = pytz.utc.localize(datetime.datetime.min)
+        product.save()
+
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
 
 
@@ -162,7 +165,7 @@ class VoucherViewOffersEndpointTests(
         # If no seat is associated with the voucher range, Bad Request status should be returned
         new_range.remove_product(seat)
         response = self.endpointView(request)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
 
     @ddt.data((ConnectionError,), (Timeout,), (SlumberBaseException,))
     @ddt.unpack
@@ -232,11 +235,10 @@ class VoucherViewOffersEndpointTests(
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range)
-        voucher, products = get_voucher_and_products_from_code(voucher.code)
         request = self.prepare_offers_listing_request(voucher.code)
 
         with mock.patch(method, mock.Mock(return_value=return_value)):
-            offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
+            offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
             self.assertEqual(len(offers), 0)
 
     @mock_course_catalog_api_client
@@ -260,11 +262,10 @@ class VoucherViewOffersEndpointTests(
         course, seat = self.create_course_and_seat()
         new_range = RangeFactory(products=[seat, ])
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
-        voucher, products = get_voucher_and_products_from_code(voucher.code)
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
         self.mock_course_api_response(course=course)
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
 
         self.assertEqual(len(offers), 1)
@@ -292,10 +293,9 @@ class VoucherViewOffersEndpointTests(
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
-        voucher, products = get_voucher_and_products_from_code(voucher.code)
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
-        offers = VoucherViewSet().get_offers(products=products, request=request, voucher=voucher)['results']
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {

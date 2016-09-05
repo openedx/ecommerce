@@ -50,7 +50,7 @@ def get_voucher_and_products_from_code(code):
     """
     voucher = Voucher.objects.get(code=code)
 
-    products = voucher.offers.all()[0].benefit.range.all_products()
+    products = voucher.offers.first().benefit.range.all_products()
 
     if products:
         return voucher, products

@@ -18,13 +18,13 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_lms
 from ecommerce.coupons.utils import get_range_catalog_query_results
-from ecommerce.coupons.views import get_voucher_and_products_from_code
-from ecommerce.extensions.api import exceptions, serializers
+from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 
 
 logger = logging.getLogger(__name__)
+Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -66,21 +66,18 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         code = request.GET.get('code', '')
 
         try:
-            voucher, products = get_voucher_and_products_from_code(code)
+            voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
             logger.error('Voucher with code %s not found.', code)
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        except exceptions.ProductNotFoundError:
-            logger.error('No product(s) are associated with this code.')
-            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            offers_data = self.get_offers(products, request, voucher)
+            offers_data = self.get_offers(request, voucher)
         except (ConnectionError, SlumberBaseException, Timeout):
             logger.error('Could not get course information.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Http404:
-            logger.error('Could not get information for product %s.', products[0].title)
+            logger.error('Could not get product information for voucher with code %s.', code)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         next_page = offers_data['next']
@@ -94,11 +91,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
         return Response(data=offers_data)
 
-    def get_offers(self, products, request, voucher):
+    def get_offers(self, request, voucher):
         """
         Get the course offers associated with the voucher.
         Arguments:
-            products (List): List of Products associated with the voucher
             request (HttpRequest): Request data
             voucher (Voucher): Oscar Voucher for which the offers are returned
         Returns:
@@ -117,8 +113,9 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 site=request.site
             )
             next_page = response['next']
-            course_ids = [product.course_id for product in products]
+            course_ids = [result['key'] for result in response['results']]
             courses = Course.objects.filter(id__in=course_ids)
+            products = Product.objects.filter(course__in=courses)
             stock_records = StockRecord.objects.filter(product__in=products)
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
 
@@ -156,7 +153,12 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         voucher=voucher
                     ))
         else:
-            product = products[0]
+            product_range = voucher.offers.first().benefit.range
+            products = product_range.all_products()
+            if products:
+                product = products[0]
+            else:
+                raise Http404()
             course_id = product.course_id
             course = get_object_or_404(Course, id=course_id)
             stock_record = get_object_or_404(StockRecord, product__id=product.id)
