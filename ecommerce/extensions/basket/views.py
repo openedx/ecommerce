@@ -159,7 +159,7 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
+            'payment_processors': self.request.site.siteconfiguration.get_payment_processors().values(),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,

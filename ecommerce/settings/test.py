@@ -89,7 +89,16 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
-        'invoice': {}
+        'invoice': {},
+        'adyen': {
+            'web_service_username': 'fake-client-id',
+            'web_service_password': 'fake-client-secret',
+            'merchant_account_code': 'fake-merchant-id',
+            'cse_js_url': 'https://replace-me/',
+            'payment_api_url': 'http://pal-test.adyen.com/pal/servlet/Payment/v12/',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+        },
     },
     'other': {
         'cybersource': {
@@ -112,7 +121,16 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
-        'invoice': {}
+        'invoice': {},
+        'adyen': {
+            'web_service_username': 'other-fake-client-id',
+            'web_service_password': 'other-fake-client-secret',
+            'merchant_account_code': 'other-fake-merchant-id',
+            'cse_js_url': 'https://replace-me/',
+            'payment_api_url': 'http://pal-test.adyen.com/pal/servlet/Payment/v12/',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+        },
     }
 }
 

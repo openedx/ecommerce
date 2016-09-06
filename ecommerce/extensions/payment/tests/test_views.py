@@ -14,10 +14,16 @@ from testfixtures import LogCapture
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin
-from ecommerce.extensions.payment.views import CybersourceNotifyView, PaypalPaymentExecutionView
+from ecommerce.extensions.payment.processors.adyen import Adyen
+from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, CybersourceMixin, PaypalMixin, AdyenMixin
+from ecommerce.extensions.payment.views import (
+    CybersourceNotifyView,
+    PaypalPaymentExecutionView,
+    AdyenPaymentView,
+)
 from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.tests.testcases import TestCase
+
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
@@ -27,6 +33,119 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 SourceType = get_model('payment', 'SourceType')
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
+
+
+@ddt.ddt
+class AdyenPaymentViewTests(AdyenMixin, PaymentEventsMixin, TestCase):
+    """ Test processing of Adyen payment view. """
+
+    def setUp(self):
+        super(AdyenPaymentViewTests, self).setUp()
+
+        self.user = factories.UserFactory()
+        self.basket = factories.create_basket()
+        self.basket.owner = self.user
+        self.basket.freeze()
+
+        # Dummy request from which an HTTP Host header can be extracted during
+        # construction of absolute URLs
+        self.request = RequestFactory().post('/')
+        self.request.basket = self.basket
+
+        self.processor = Adyen()
+        self.processor_name = self.processor.NAME
+
+    @httpretty.activate
+    def _assert_execution(self):
+        """Verify payment execution."""
+
+        # Create a payment record the view can use to retrieve a basket
+        self.mock_payment_creation_response()
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+
+        creation_response = self.mock_payment_creation_response()
+        self.request.POST.update(self.POST_DATA)
+        adyen_payment_view = AdyenPaymentView()
+        payment_response = adyen_payment_view.post(request=self.request)
+
+        return creation_response, payment_response
+
+    @httpretty.activate
+    def _assert_execution_redirect(self, url_redirect=None):
+        """Verify redirection to the configured receipt page after attempted payment execution."""
+        creation_response, payment_response = self._assert_execution()
+        self.assertRedirects(
+            payment_response,
+            url_redirect or u'{}?orderNum={}'.format(self.processor.receipt_page_url, self.basket.order_number),
+            fetch_redirect_response=False
+        )
+
+        return creation_response
+
+    @httpretty.activate
+    def _assert_execution_failure(self):
+        """Verify server error after attempted payment execution failed due to
+        order placement failure.
+        """
+        creation_response, payment_response = self._assert_execution()
+        self.assertEqual(payment_response.status_code, 500)
+
+        return creation_response
+
+    def _assert_order_placement_failure(self, error_message):
+        """Verify that order placement fails gracefully."""
+        logger_name = 'ecommerce.extensions.payment.views'
+        with LogCapture(logger_name) as l:
+            execution_response = self._assert_execution_failure()
+
+            # Verify that the payment execution response was recorded despite the error
+            self.assert_processor_response_recorded(
+                self.processor_name,
+                self.ADYEN_PAYMENT_REFERENCE,
+                execution_response,
+                basket=self.basket
+            )
+
+            l.check(
+                (
+                    logger_name,
+                    'INFO',
+                    'Received Adyen authorization response for transaction [%s], associated with basket [%d].' % (
+                        self.ADYEN_PAYMENT_REFERENCE,
+                        self.basket.id
+                    )
+                ),
+                (logger_name, 'ERROR', error_message)
+            )
+
+    def test_payment_execution(self):
+        """Verify that a user who has approved payment is redirected to the configured receipt page."""
+        self._assert_execution_redirect()
+        # even if an exception occurs during handling of the payment notification, we still redirect the
+        # user to the receipt page.  Therefore in addition to checking that the response had the correct
+        # redirection, we also need to check that the order was actually created.
+        self.get_order(self.basket)
+
+    def test_unable_to_place_order(self):
+        """ When payment is accepted, but an order cannot be placed, log an error and return HTTP 500. """
+
+        # Verify that anticipated errors are handled gracefully.
+        with mock.patch.object(AdyenPaymentView, 'handle_order_placement',
+                               side_effect=UnableToPlaceOrder) as fake_handle_order_placement:
+            error_message = 'Payment was received, but an order for basket [{basket_id}] could not be placed.'.format(
+                basket_id=self.basket.id,
+            )
+            self._assert_order_placement_failure(error_message)
+            self.assertTrue(fake_handle_order_placement.called)
+
+        # Verify that unanticipated errors are also handled gracefully.
+        with mock.patch.object(AdyenPaymentView, 'handle_order_placement',
+                               side_effect=KeyError) as fake_handle_order_placement:
+            error_message = 'Payment was received, but an order for basket [{basket_id}] could not be placed.'.format(
+                basket_id=self.basket.id,
+            )
+            self._assert_order_placement_failure(error_message)
+            self.assertTrue(fake_handle_order_placement.called)
 
 
 @ddt.ddt

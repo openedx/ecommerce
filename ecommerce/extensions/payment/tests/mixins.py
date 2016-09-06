@@ -49,7 +49,7 @@ class PaymentEventsMixin(object):
         amount = basket.total_incl_tax
         self.assert_valid_payment_event_fields(payment_event, amount, payment_event_type, processor_name, reference)
 
-    def assert_basket_matches_source(self, basket, source, source_type, reference, label, card_type=None):
+    def assert_basket_matches_source(self, basket, source, source_type, reference, label='', card_type=None):
         """
         Validates that the Source has the correct SourceType and that currency and amounts match the given Basket.
         """
@@ -389,3 +389,111 @@ class PaypalMixin(object):
         root = u'https://api.sandbox.paypal.com' if mode == 'sandbox' else u'https://api.paypal.com'
 
         return urljoin(root, path)
+
+
+class AdyenMixin(object):
+    """ Mixin with helper methods for testing Adyen notifications. """
+    PAYMENT_CREATION_STATE = u'created'
+    PAYMENT_EXECUTION_STATE = u'approved'
+
+    PAYMENT_REFERENCE = u'PAY-123ABC'
+    ADYEN_PAYMENT_REFERENCE = u'ADYEN-PAY-UUID'
+    ADYEN_REDUND_REFERENCE = u'ADYEN-REUND-UUID'
+    MERCHANT_ACCOUNT = u'DummyEdxMerchant'
+    DUMMY_ADYEN_PAYMENT_DATA = {
+        'additionalData': {
+            'card.encrypted.json': 'adyenjs_0_1_18$aran4h8FhkovuZ8gBc9MOA+30....'
+        },
+        'amount': {
+            'value': 250,
+            'currency': 'USD'
+        },
+        'reference': PAYMENT_REFERENCE,
+        'merchantAccount': 'DummyEdxMerchant',
+    }
+    ADYEN_PAYMENT_AUTHORISED = {
+        'pspReference': ADYEN_PAYMENT_REFERENCE,
+        'eventCode': 'AUTHORISATION',
+        'resultCode': 'Authorised',
+        'authCode': '17355',
+    }
+    ADYEN_PAYMENT_INVALID_RESPONSE = {
+        'eventCode': 'INVALID_EVENT',
+        'authCode': '17355',
+    }
+    ADYEN_PAYMENT_INVALID_EVENT = {
+        'pspReference': ADYEN_PAYMENT_REFERENCE,
+        'eventCode': 'INVALID_EVENT',
+        'resultCode': 'Authorised',
+        'authCode': '17355',
+    }
+    ADYEN_PAYMENT_REFUSED = {
+        'pspReference': ADYEN_PAYMENT_REFERENCE,
+        'eventCode': 'AUTHORISATION',
+        'refusalReason': 'Refused',
+        'resultCode': 'Refused',
+    }
+    # refund response with code 200
+    ADYEN_REFUND_RECEIVED = {
+        'pspReference': ADYEN_REDUND_REFERENCE,
+        'response': '[cancelOrRefund-received]',
+    }
+    # refund response with invalid response key
+    ADYEN_REFUND_INVALID_RESPONSE = {
+        'pspReference': ADYEN_REDUND_REFERENCE,
+        'response': '[invalid-response-key]',
+    }
+    # refund validation error response with code 422
+    ADYEN_REFUND_ERROR = {
+        'status': 422,
+        'errorCode': '167',
+        'message': 'Original pspReference required for this operation',
+        'errorType': 'validation',
+    }
+    POST_DATA = {
+        u'adyen-encrypted-data': 'adyenjs_0_1_18$aran4h8FhkovuZ8gBc9MOA+30....',
+    }
+
+    def mock_api_response(self, body, post=True):
+        assert httpretty.is_enabled()
+        url = settings.PAYMENT_PROCESSOR_CONFIG['edx']['adyen']['payment_api_url']
+        url = urljoin(url, 'authorise')
+
+        httpretty.register_uri(
+            httpretty.POST if post else httpretty.GET,
+            url,
+            body=json.dumps(body),
+            status=200
+        )
+
+    def mock_api_refund_response(self, body, status_code=200):
+        assert httpretty.is_enabled()
+        url = settings.PAYMENT_PROCESSOR_CONFIG['edx']['adyen']['payment_api_url']
+        url = urljoin(url, 'cancelOrRefund')
+
+        httpretty.register_uri(
+            httpretty.POST,
+            url,
+            body=json.dumps(body),
+            content_type='application/json',
+            status=status_code
+        )
+
+    def mock_payment_creation_response(self, payment_refused=False, payment_creation_response=None):
+        if payment_creation_response is None:
+            payment_creation_response = self.ADYEN_PAYMENT_REFUSED
+            if not payment_refused:
+                payment_creation_response = self.ADYEN_PAYMENT_AUTHORISED
+
+        self.mock_api_response(payment_creation_response)
+
+        return payment_creation_response
+
+    def mock_refund_creation_response(self, refund_refused=False, refund_response=None, status_code=200):
+        if refund_response is None:
+            refund_response = self.ADYEN_REFUND_ERROR
+            if not refund_refused:
+                refund_response = self.ADYEN_REFUND_RECEIVED
+
+        self.mock_api_refund_response(refund_response, status_code)
+        return refund_response
