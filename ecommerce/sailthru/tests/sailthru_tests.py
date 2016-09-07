@@ -11,6 +11,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.sailthru.signals import process_checkout_complete, process_basket_addition
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.tests.factories import SiteConfigurationFactory
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         self.user = UserFactory.create(username='test', email=TEST_EMAIL)
 
         toggle_switch('sailthru_enable', True)
+        toggle_switch('sailthru_edx_only', True)
 
         # create some test course objects
         self.course_id = 'edX/toy/2012_Fall'
@@ -47,6 +49,20 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         self.assertFalse(mock_log_error.called)
 
         process_basket_addition(None)
+        self.assertFalse(mock_log_error.called)
+
+    @patch('ecommerce.sailthru.signals.logger.error')
+    def test_just_return_not_edx(self, mock_log_error):
+        """
+        Ensure that non edx just returns
+        """
+        site_configuration = SiteConfigurationFactory(partner__name='TestX')
+        self.request.site.siteconfiguration = site_configuration
+        process_basket_addition(None, request=self.request)
+
+        seat, order = self._create_order(99)
+        order.site.siteconfiguration = site_configuration
+        process_checkout_complete(None, order=order)
         self.assertFalse(mock_log_error.called)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
@@ -119,6 +135,40 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
                                 user=self.user,
                                 product=seat)
         self.assertFalse(mock_update_course_enrollment.called)
+
+    @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
+    def test_save_campaign_id(self, mock_update_course_enrollment):
+        """
+        Test that basket addition saves the campaign id
+        """
+
+        seat, order = self._create_order(99)
+        process_basket_addition(None, request=self.request,
+                                user=self.user,
+                                product=seat, basket=order.basket)
+        self.assertTrue(mock_update_course_enrollment.called)
+        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
+                                                         self.course_url,
+                                                         True,
+                                                         seat.attr.certificate_type,
+                                                         course_id=self.course_id,
+                                                         currency=order.currency,
+                                                         message_id='cookie_bid',
+                                                         site_code='edX',
+                                                         unit_cost=order.total_excl_tax)
+
+        # now call checkout_complete with the same basket to see if campaign id saved and restored
+        process_checkout_complete(None, order=order, request=None)
+        self.assertTrue(mock_update_course_enrollment.called)
+        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
+                                                         self.course_url,
+                                                         False,
+                                                         seat.attr.certificate_type,
+                                                         course_id=self.course_id,
+                                                         currency=order.currency,
+                                                         message_id='cookie_bid',
+                                                         site_code='edX',
+                                                         unit_cost=order.total_excl_tax)
 
     def _create_order(self, price):
         seat = self.course.create_or_update_seat('verified', False, price, self.partner, None)

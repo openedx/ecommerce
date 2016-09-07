@@ -53,7 +53,7 @@ def prepare_basket(request, product, voucher=None):
 
     # Call signal handler to notify listeners that something has been added to the basket
     basket_addition = get_class('basket.signals', 'basket_addition')
-    basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request)
+    basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request, basket=basket)
 
     return basket
 
