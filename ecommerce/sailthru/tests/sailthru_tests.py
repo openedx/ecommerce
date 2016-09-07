@@ -60,7 +60,7 @@ class SailthruTests(CourseCatalogTestMixin, TestCase):
         self.request.site.siteconfiguration = site_configuration
         process_basket_addition(None, request=self.request)
 
-        seat, order = self._create_order(99)
+        __, order = self._create_order(99)
         order.site.siteconfiguration = site_configuration
         process_checkout_complete(None, order=order)
         self.assertFalse(mock_log_error.called)

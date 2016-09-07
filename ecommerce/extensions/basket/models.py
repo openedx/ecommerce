@@ -60,6 +60,10 @@ class Basket(AbstractBasket):
             num_lines=self.num_lines)
 
 
+# noinspection PyUnresolvedReferences
+from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+
+
 class BasketAttributeType(models.Model):
     """
     Used to keep attribute types for BasketAttribute (see basket.constants.py)
@@ -77,7 +81,3 @@ class BasketAttribute(TimeStampedModel):
     basket = models.ForeignKey('basket.Basket', verbose_name=_("Basket"))
     attribute_type = models.ForeignKey('basket.BasketAttributeType', verbose_name=_("Attribute Type"))
     value_text = models.TextField(_("Text Attribute"), blank=True)
-
-
-# noinspection PyUnresolvedReferences
-from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
