@@ -418,7 +418,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         invoice_data = self.create_update_data_dict(data=data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
         if invoice_data:
-            Invoice.objects.filter(order__basket__lines__product=coupon).update(**invoice_data)
+            Invoice.objects.filter(order__lines__product=coupon).update(**invoice_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:

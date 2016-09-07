@@ -106,7 +106,7 @@ class CouponMixin(object):
 
     def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
                       benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
-                      course_seat_types=None, email_domains=None):
+                      course_seat_types=None, email_domains=None, voucher_type=Voucher.SINGLE_USE):
         """Helper method for creating a coupon.
 
         Arguments:
@@ -141,7 +141,7 @@ class CouponMixin(object):
             'code': code,
             'quantity': quantity,
             'start_datetime': datetime.date(2015, 1, 1),
-            'voucher_type': Voucher.SINGLE_USE,
+            'voucher_type': voucher_type,
             'categories': [self.category],
             'note': note,
             'max_uses': max_uses,

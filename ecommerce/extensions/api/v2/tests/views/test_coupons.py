@@ -135,22 +135,19 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_creating_multi_offer_coupon(self):
         """Test the creation of a multi-offer coupon."""
-        ordinary_max_uses = 1
-        ordinary_coupon = self.create_coupon(quantity=2, max_uses=ordinary_max_uses)
+        ordinary_coupon = self.create_coupon(quantity=2)
         ordinary_coupon_vouchers = ordinary_coupon.attr.coupon_vouchers.vouchers.all()
         self.assertEqual(
             ordinary_coupon_vouchers[0].offers.first(),
             ordinary_coupon_vouchers[1].offers.first()
         )
-        self.assertEqual(ordinary_coupon_vouchers[0].offers.first().max_global_applications, ordinary_max_uses)
 
-        multi_offer_coupon = self.create_coupon(quantity=2, max_uses=2)
+        multi_offer_coupon = self.create_coupon(quantity=2, voucher_type=Voucher.MULTI_USE)
         multi_offer_coupon_vouchers = multi_offer_coupon.attr.coupon_vouchers.vouchers.all()
         first_offer = multi_offer_coupon_vouchers[0].offers.first()
         second_offer = multi_offer_coupon_vouchers[1].offers.first()
 
         self.assertNotEqual(first_offer, second_offer)
-        self.assertEqual(first_offer.max_global_applications, second_offer.max_global_applications)
 
     def test_custom_code_string(self):
         """Test creating a coupon with custom voucher code."""
@@ -510,7 +507,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(invoice.business_client.name, client_username)
 
     def test_update_invoice_data(self):
-        invoice = Invoice.objects.get(order__basket__lines__product=self.coupon)
+        invoice = Invoice.objects.get(order__lines__product=self.coupon)
         self.assertEqual(invoice.discount_type, Invoice.PERCENTAGE)
         CouponViewSet().update_invoice_data(
             coupon=self.coupon,
@@ -519,7 +516,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             }
         )
 
-        invoice = Invoice.objects.get(order__basket__lines__product=self.coupon)
+        invoice = Invoice.objects.get(order__lines__product=self.coupon)
         self.assertEqual(invoice.discount_type, Invoice.FIXED)
 
     @ddt.data('audit', 'honor')
@@ -596,7 +593,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         """ Verify an invoice is created with the proper data. """
         self.update_prepaid_invoice_data()
         response = self.get_response_json('POST', COUPONS_LINK, data=self.data)
-        invoice = Invoice.objects.get(order__basket__lines__product__id=response['coupon_id'])
+        invoice = Invoice.objects.get(order__lines__product__id=response['coupon_id'])
         self.assertEqual(invoice.type, self.data['invoice_type'])
         self.assertEqual(invoice.number, self.data['invoice_number'])
         self.assertEqual(invoice.payment_date.isoformat(), self.data['invoice_payment_date'])
