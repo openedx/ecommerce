@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
+from oscar.models.fields import AutoSlugField
+from django_extensions.db.models import TimeStampedModel
 
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
@@ -58,5 +60,24 @@ class Basket(AbstractBasket):
             num_lines=self.num_lines)
 
 
+class BasketAttributeType(models.Model):
+    """
+    Used to keep attribute types for BasketAttribute (see basket.constants.py)
+    """
+    name = models.CharField(_("Name"), max_length=128, unique=True)
+    code = AutoSlugField(_("Code"), max_length=128, unique=True, populate_from='name')
+
+
+class BasketAttribute(TimeStampedModel):
+    """
+    Used to add fields to basket without modifying basket directly.  Fields
+    can be added by defining new types.  Currently only supports text fields,
+    but could be extended
+    """
+    basket = models.ForeignKey('basket.Basket', verbose_name=_("Basket"))
+    attribute_type = models.ForeignKey('basket.BasketAttributeType', verbose_name=_("Attribute Type"))
+    value_text = models.TextField(_("Text Attribute"), blank=True)
+
+
 # noinspection PyUnresolvedReferences
-from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+from oscar.apps.basket.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order
