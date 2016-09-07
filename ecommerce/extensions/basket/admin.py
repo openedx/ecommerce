@@ -1,5 +1,7 @@
 from oscar.apps.basket.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.extensions.basket.models import BasketAttribute, BasketAttributeType
+
 Basket = get_model('basket', 'basket')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -17,13 +19,29 @@ class PaymentProcessorResponseInline(admin.TabularInline):
         return False
 
 
+class BasketAttributeInLine(admin.TabularInline):
+    model = BasketAttribute
+    readonly_fields = ('id', 'attribute_type', 'value_text',)
+    extra = 0
+
+    def has_add_permission(self, request):
+        # Users are not allowed to add BasketAttribute objects
+        return False
+
+
 @admin.register(Basket)
 class BasketAdminExtended(BasketAdmin):
     raw_id_fields = ('vouchers', )
-    inlines = (LineInline, PaymentProcessorResponseInline,)
+    inlines = (LineInline, PaymentProcessorResponseInline, BasketAttributeInLine,)
     show_full_result_count = False
 
 
 @admin.register(Line)
 class LineAdminExtended(LineAdmin):
     show_full_result_count = False
+
+
+@admin.register(BasketAttributeType)
+class BasketAttributeTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name',)
+    readonly_fields = ('id', 'name',)

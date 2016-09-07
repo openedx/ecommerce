@@ -1,18 +1,22 @@
 import logging
 
 from django.dispatch import receiver
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 import waffle
 
 from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
-from ecommerce.extensions.analytics.utils import silence_exceptions
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
+from ecommerce.extensions.analytics.utils import silence_exceptions
 
 
 logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
 basket_addition = get_class('basket.signals', 'basket_addition')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
+SAILTHRU_CAMPAIGN = 'sailthru_bid'
 
 
 @receiver(post_checkout)
@@ -28,9 +32,22 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
     if not waffle.switch_is_active('sailthru_enable'):
         return
 
+    partner = order.site.siteconfiguration.partner
+    if not partner.enable_sailthru:
+        return
+
+    # get campaign id from cookies, or saved value in basket
     message_id = None
     if request:
         message_id = request.COOKIES.get('sailthru_bid')
+
+    if not message_id:
+        saved_id = BasketAttribute.objects.filter(
+            basket=order.basket,
+            attribute_type=_get_attribute_type()
+        )
+        if len(saved_id) > 0:
+            message_id = saved_id[0].value_text
 
     # loop through lines in order
     #  If multi product orders become common it may be worthwhile to pass an array of
@@ -41,24 +58,26 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
         # get product
         product = line.product
 
-        # get price
-        price = line.line_price_excl_tax
+        # ignore everything except course seats.  no support for coupons as of yet
+        product_class_name = product.get_product_class().name
+        if product_class_name == SEAT_PRODUCT_CLASS_NAME:
 
-        course_id = product.course_id
+            price = line.line_price_excl_tax
 
-        # figure out course url
-        course_url = _build_course_url(course_id)
+            course_id = product.course_id
 
-        # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
-        update_course_enrollment.delay(order.user.email, course_url, False, mode_for_seat(product),
-                                       unit_cost=price, course_id=course_id, currency=order.currency,
-                                       site_code=order.site.siteconfiguration.partner.short_code,
-                                       message_id=message_id)
+            # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
+            update_course_enrollment.delay(order.user.email, _build_course_url(course_id),
+                                           False, mode_for_seat(product),
+                                           unit_cost=price, course_id=course_id, currency=order.currency,
+                                           site_code=partner.short_code,
+                                           message_id=message_id)
 
 
 @receiver(basket_addition)
 @silence_exceptions("Failed to call Sailthru upon basket addition.")
-def process_basket_addition(sender, product=None, user=None, request=None, **kwargs):  # pylint: disable=unused-argument
+def process_basket_addition(sender, product=None, user=None, request=None, basket=None,
+                            **kwargs):  # pylint: disable=unused-argument
     """Tell Sailthru when payment started.
 
     Arguments:
@@ -68,28 +87,50 @@ def process_basket_addition(sender, product=None, user=None, request=None, **kwa
     if not waffle.switch_is_active('sailthru_enable'):
         return
 
-    course_id = product.course_id
-
-    # figure out course url
-    course_url = _build_course_url(course_id)
-
-    # get price & currency
-    stock_record = product.stockrecords.first()
-    if stock_record:
-        price = stock_record.price_excl_tax
-        currency = stock_record.price_currency
-
-    # return if no price, no need to add free items to shopping cart
-    if not price:
+    partner = request.site.siteconfiguration.partner
+    if not partner.enable_sailthru:
         return
 
-    # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
-    update_course_enrollment.delay(user.email, course_url, True, mode_for_seat(product),
-                                   unit_cost=price, course_id=course_id, currency=currency,
-                                   site_code=request.site.siteconfiguration.partner.short_code,
-                                   message_id=request.COOKIES.get('sailthru_bid'))
+    # ignore everything except course seats.  no support for coupons as of yet
+    product_class_name = product.get_product_class().name
+    if product_class_name == SEAT_PRODUCT_CLASS_NAME:
+
+        course_id = product.course_id
+
+        stock_record = product.stockrecords.first()
+        if stock_record:
+            price = stock_record.price_excl_tax
+            currency = stock_record.price_currency
+
+        # return if no price, no need to add free items to shopping cart
+        if not price:
+            return
+
+        # save Sailthru campaign ID, if there is one
+        message_id = request.COOKIES.get('sailthru_bid')
+        if message_id and basket:
+            BasketAttribute.objects.update_or_create(
+                basket=basket,
+                attribute_type=_get_attribute_type(),
+                value_text=message_id
+            )
+
+        # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
+        update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_seat(product),
+                                       unit_cost=price, course_id=course_id, currency=currency,
+                                       site_code=partner.short_code,
+                                       message_id=message_id)
 
 
 def _build_course_url(course_id):
     """Build a course url from a course id and the host"""
     return get_lms_url('courses/{}/info'.format(course_id))
+
+
+def _get_attribute_type():
+    """ Read attribute type for Sailthru campaign id"""
+    try:
+        attribute_type = BasketAttributeType.objects.get(name=SAILTHRU_CAMPAIGN)
+    except BasketAttributeType.DoesNotExist:
+        attribute_type = BasketAttributeType.objects.create(name=SAILTHRU_CAMPAIGN)
+    return attribute_type
