@@ -492,7 +492,8 @@ CELERY_IMPORTS = (
 )
 
 CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'},
-                 'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'}}
+                 'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'},
+                 'ecommerce_worker.payment.v1.tasks.process_notification': {'queue': 'payment'}}
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
 # See http://celery.readthedocs.org/en/latest/configuration.html#celeryd-hijack-root-logger.
