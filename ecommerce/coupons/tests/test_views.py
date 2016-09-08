@@ -238,7 +238,7 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
             URL to its offer landing page.
         """
         __, credit_seat = self.create_course_and_seat(seat_type='credit')
-        _range = RangeFactory(products=[credit_seat, ])
+        _range = RangeFactory(products=[credit_seat, ], course_seat_types='credit')
         prepare_voucher(code=code, _range=_range)
 
         url = '{}?code={}'.format(self.path, code)
