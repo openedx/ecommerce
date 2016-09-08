@@ -17,11 +17,11 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
+from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
-from ecommerce.coupons.decorators import login_required_for_credit
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')

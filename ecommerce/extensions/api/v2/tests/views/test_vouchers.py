@@ -21,13 +21,13 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
-from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 from ecommerce.tests.mixins import Catalog, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -38,6 +38,7 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 
 
+@ddt.ddt
 class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     """ Tests for the VoucherViewSet view set. """
     path = reverse('api:v2:vouchers-list')
@@ -86,12 +87,12 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
         for _ in range(quantity):
             course, seat = self.create_course_and_seat(seat_type=seat_type)
             course_run_info['results'].append({
-                'key': course.id,
-                'title': course.name,
-                'start': '2016-05-01T00:00:00Z',
                 'image': {
                     'src': 'path/to/the/course/image'
-                }
+                },
+                'key': course.id,
+                'start': '2016-05-01T00:00:00Z',
+                'title': course.name,
             })
             new_range.add_product(seat)
 
@@ -141,16 +142,14 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
 
     @httpretty.activate
     @mock_course_catalog_api_client
-    def test_omitting_uneligible_credit_seat(self):
+    @ddt.data((1, True), (0, False))
+    @ddt.unpack
+    def test_omitting_uneligible_credit_seat(self, offer_num, eligible):
         """ Verify a seat that the user is not eligible for is omitted from offer page results. """
-        products, request, voucher = self.prepare_get_offers_response(quantity=2, seat_type='credit')
-        self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=True)
+        products, request, voucher = self.prepare_get_offers_response(quantity=1, seat_type='credit')
+        self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=eligible)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
-        self.assertEqual(len(offers), 2)
-
-        self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=False)
-        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
-        self.assertEqual(len(offers), 1)
+        self.assertEqual(len(offers), offer_num)
 
 
 @ddt.ddt
@@ -314,6 +313,7 @@ class VoucherViewOffersEndpointTests(
             },
             'contains_verified': True,
             'course_start_date': '2013-02-05T05:00:00Z',
+            'credit': False,
             'id': course.id,
             'image_url': get_lms_url('/asset-v1:test+test+test+type@asset+block@images_course_image.jpg'),
             'organization': CourseKey.from_string(course.id).org,
@@ -321,7 +321,6 @@ class VoucherViewOffersEndpointTests(
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
-            'credit': False
         })
 
     @mock_course_catalog_api_client
@@ -344,6 +343,7 @@ class VoucherViewOffersEndpointTests(
             },
             'contains_verified': False,
             'course_start_date': '2016-05-01T00:00:00Z',
+            'credit': False,
             'id': course.id,
             'image_url': 'path/to/the/course/image',
             'organization': CourseKey.from_string(course.id).org,
@@ -351,7 +351,6 @@ class VoucherViewOffersEndpointTests(
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
-            'credit': False
         })
 
     def test_get_course_offer_data(self):
@@ -371,10 +370,10 @@ class VoucherViewOffersEndpointTests(
             benefit=benefit,
             course=course,
             course_info=course_info,
+            credit=False,
             is_verified=True,
             stock_record=stock_record,
-            voucher=voucher,
-            credit=False
+            voucher=voucher
         )
 
         self.assertDictEqual(offer, {
@@ -384,6 +383,7 @@ class VoucherViewOffersEndpointTests(
             },
             'contains_verified': True,
             'course_start_date': course_info['start'],
+            'credit': False,
             'id': course.id,
             'image_url': course_info['image']['src'],
             'organization': CourseKey.from_string(course.id).org,
@@ -391,7 +391,6 @@ class VoucherViewOffersEndpointTests(
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
-            'credit': False
         })
 
     def test_get_course_offer_verify_null_fields(self):
@@ -408,10 +407,10 @@ class VoucherViewOffersEndpointTests(
             benefit=benefit,
             course=course,
             course_info=course_info,
+            credit=False,
             is_verified=True,
             stock_record=stock_record,
             voucher=voucher,
-            credit=False
         )
 
         self.assertEqual(offer['image_url'], '')

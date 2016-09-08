@@ -32,11 +32,11 @@ define([
             changePage: function() {
                 this.$el.html(
                     this.template({
-                        courses: this.collection,
                         code: this.code,
+                        courses: this.collection,
+                        isCredit: this.isCredit,
                         isEnrollmentCode: this.isEnrollmentCode,
-                        page: this.page,
-                        isCredit: this.isCredit
+                        page: this.page
                     })
                 );
                 this.renderPagination();
@@ -49,11 +49,11 @@ define([
                     this.refreshData();
                     this.$el.html(
                         this.template({
-                            courses: this.collection,
                             code: this.code,
+                            courses: this.collection,
+                            isCredit: this.isCredit,
                             isEnrollmentCode: this.isEnrollmentCode,
                             page: this.collection.goToPage(this.collection.page),
-                            isCredit: this.isCredit,
                         })
                     );
                     this.renderPagination();

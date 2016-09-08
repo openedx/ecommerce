@@ -1,7 +1,6 @@
 import datetime
 import urllib
 
-import ddt
 import httpretty
 import pytz
 from django.conf import settings
@@ -177,7 +176,6 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
 
 
 @httpretty.activate
-@ddt.ddt
 class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
     path_with_code = '{path}?code={code}'.format(path=path, code=COUPON_CODE)
@@ -241,7 +239,7 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         _range = RangeFactory(products=[credit_seat, ], course_seat_types='credit')
         prepare_voucher(code=code, _range=_range)
 
-        url = '{}?code={}'.format(self.path, code)
+        url = '{path}?code={code}'.format(path=self.path, code=code)
         return url
 
     def test_redirect_to_login(self):

@@ -24,9 +24,9 @@ from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 
 
 logger = logging.getLogger(__name__)
+Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
-Order = get_model('order', 'Order')
 Voucher = get_model('voucher', 'Voucher')
 
 
@@ -92,7 +92,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
         return Response(data=offers_data)
 
-    def retrieve_objects(self, results):
+    def retrieve_course_objects(self, results):
         """ Helper method to retrieve all the courses, products and stock records
         from course IDs in course catalog response results.
 
@@ -120,10 +120,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                   a List of course offers where each offer is represented as a dictionary
         """
         benefit = voucher.offers.first().benefit
+        credit = False
         catalog_query = benefit.range.catalog_query
         next_page = None
         offers = []
-        credit = False
         if catalog_query:
             response = get_range_catalog_query_results(
                 limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
@@ -132,7 +132,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 site=request.site
             )
             next_page = response['next']
-            courses, products, stock_records = self.retrieve_objects(response['results'])
+            courses, products, stock_records = self.retrieve_course_objects(response['results'])
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
 
             for product in products:
@@ -173,10 +173,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         benefit=benefit,
                         course=course,
                         course_info=course_catalog_data,
+                        credit=credit,
                         is_verified=contains_verified_course,
                         stock_record=stock_record,
-                        voucher=voucher,
-                        credit=credit
+                        voucher=voucher
                     ))
         else:
             product_range = voucher.offers.first().benefit.range
@@ -197,25 +197,25 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     benefit=benefit,
                     course=course,
                     course_info=course_info,
+                    credit=False,  # Credit seats can only be in dynamic coupons.
                     is_verified=(course.type == 'verified'),
                     stock_record=stock_record,
-                    voucher=voucher,
-                    credit=False  # Credit seats can only be in dynamic coupons.
+                    voucher=voucher
                 ))
 
         return {'next': next_page, 'results': offers}
 
-    def get_course_offer_data(self, benefit, course, course_info, is_verified, stock_record, voucher, credit):
+    def get_course_offer_data(self, benefit, course, course_info, credit, is_verified, stock_record, voucher):
         """
         Gets course offer data.
         Arguments:
             benefit (Benefit): Benefit associated with a voucher
             course (Course): Course associated with a voucher
             course_info (dict): Course info fetched from an API (LMS or Course Catalog)
+            credit (bool): True for credit seats
             is_verified (bool): Indicated whether or not the voucher's range of products contains a verified course seat
             stock_record (StockRecord): Stock record associated with the course seat
             voucher (Voucher): Voucher for which the course offer data is being fetched
-            credit (bool): True for credit seats
         Returns:
             dict: Course offer data
         """
@@ -227,12 +227,12 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'benefit': serializers.BenefitSerializer(benefit).data,
             'contains_verified': is_verified,
             'course_start_date': course_info.get('start', ''),
+            'credit': credit,
             'id': course.id,
             'image_url': image,
             'organization': CourseKey.from_string(course.id).org,
             'seat_type': course.type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
-            'voucher_end_date': voucher.end_datetime,
-            'credit': credit
+            'voucher_end_date': voucher.end_datetime
         }

@@ -89,21 +89,24 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.mock_enrollment_api(self.request, user, course_id2, is_active=False, mode=mode)
         self.assertFalse(user.is_user_already_enrolled(self.request, not_enrolled_seat))
 
+    def prepare_eligibility_info(self, eligible=True):
+        """ Helper method for setting up LMS eligibility info. """
+        user = self.create_user()
+        course_key = 'a/b/c'
+        self.mock_eligibility_api(self.request, user, course_key, eligible=eligible)
+        return user, course_key
+
     @httpretty.activate
     def test_user_is_eligible(self):
         """ Verify the method returns eligibility information. """
-        user = self.create_user()
-        course_key = 'a/b/c'
-        self.mock_eligibility_api(self.request, user, course_key, eligible=True)
+        user, course_key = self.prepare_eligibility_info()
         self.assertEqual(user.is_eligible(course_key)[0]['username'], user.username)
         self.assertEqual(user.is_eligible(course_key)[0]['course_key'], course_key)
 
     @httpretty.activate
     def test_user_is_not_eligible(self):
         """ Verify method returns false (empty list) if user is not eligible. """
-        user = self.create_user()
-        course_key = 'a/b/c'
-        self.mock_eligibility_api(self.request, user, course_key, eligible=False)
+        user, course_key = self.prepare_eligibility_info(eligible=False)
         self.assertFalse(user.is_eligible(course_key))
 
 

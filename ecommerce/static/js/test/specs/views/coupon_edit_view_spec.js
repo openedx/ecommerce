@@ -4,7 +4,7 @@ define([
         'views/coupon_create_edit_view',
         'models/coupon_model',
         'test/mock_data/coupons',
-
+        'test/custom-matchers'
     ],
     function (_s,
               Utils,
@@ -82,16 +82,14 @@ define([
 
                 it('should display dynamic catalog information.', function() {
                     expect(view.$('#catalog-query').val()).toEqual(model.get('catalog_query'));
-                    expect(view.$('#non-credit').is(':checked')).toEqual(true);
-                    expect(view.$('#verified').is(':checked')).toEqual(true);
-                    expect(view.$('#professional').is(':checked')).toEqual(true);
+                    expect(view.$('#non-credit, #verified, #professional').is(':checked')).toEqual(true);
                 });
 
                 it('should hide checkboxes if credit seat type.', function() {
                     var credit_seat_type = ['credit'];
                     model.set('course_seat_types', credit_seat_type);
                     view.render();
-                    expect(view.$('.non-credit-seats').hasClass('hidden')).toEqual(true);
+                    expect(view.$('.non-credit-seats')).not.toBeVisible();
                 });
             });
 

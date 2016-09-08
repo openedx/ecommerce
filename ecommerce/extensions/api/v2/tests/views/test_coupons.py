@@ -670,6 +670,13 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.get_response_json('PUT', path, self.data)
         self.assertEqual(offer.email_domains, email_domains)
 
+    def test_credit_seat_type_exclusiveness(self):
+        """ Verify credit seat types cannot be paired with other seat types. """
+        course_seat_types = ['credit', 'verified']
+        self.data.update({'course_seat_types': course_seat_types})
+        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response.status_code, 400)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """

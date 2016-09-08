@@ -311,9 +311,11 @@ define([], function(){
     };
     return {
         'couponAPIResponseData': couponAPIResponseData,
+        'couponWithInvoiceData': couponWithInvoiceData,
         'courseData': courseData,
         'discountCodeCouponData': discountCodeCouponData,
         'discountCodeCouponModelData': discountCodeCouponModelData,
+        'dynamicCouponData': dynamicCouponData,
         'enrollmentCodeCouponData': enrollmentCodeCouponData,
         'enrollmentCodeCouponModelData': enrollmentCodeCouponModelData,
         'enrollmentCodeVoucher': enrollmentCodeVoucher,
@@ -321,7 +323,5 @@ define([], function(){
         'percentageDiscountCodeVoucher': percentageDiscountCodeVoucher,
         'valueDiscountCodeVoucher': valueDiscountCodeVoucher,
         'verifiedSeat': verifiedSeat,
-        'dynamicCouponData': dynamicCouponData,
-        'couponWithInvoiceData': couponWithInvoiceData
     };
 });

@@ -275,8 +275,7 @@ define([
             toggleCreditSeats: function() {
                 var nonCreditSeatsField = this.$('.non-credit-seats');
                 if (this.$('#credit').is(':checked')) {
-                    this.$('input[id=verified]').attr('checked', false);
-                    this.$('input[id=professional]').attr('checked', false);
+                    this.$('input[id=verified], input[id=professional]').attr('checked', false);
                     nonCreditSeatsField.addClass(this.hiddenClass);
                     this.model.set('course_seat_types', ['credit']);
                 } else if (this.$('#non-credit').is(':checked')) {

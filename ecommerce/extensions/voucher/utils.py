@@ -13,8 +13,8 @@ from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 import pytz
 
-from ecommerce.extensions.api import exceptions
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.api import exceptions
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)

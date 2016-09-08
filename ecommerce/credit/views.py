@@ -77,6 +77,7 @@ class Checkout(TemplateView):
             return context
 
         context.update({
+            'code': self.request.GET.get('code'),
             'course': course,
             'deadline': deadline,
             'providers': providers,
@@ -84,8 +85,7 @@ class Checkout(TemplateView):
                 self.request.user,
                 self.request.site.siteconfiguration.segment_key,
                 course.id
-            ),
-            'code': self.request.GET.get('code')
+            )
         })
 
         return context

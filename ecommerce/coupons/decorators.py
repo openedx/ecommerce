@@ -19,9 +19,8 @@ def login_required_for_credit(function):
             voucher = Voucher.objects.get(code=code)
             if voucher.offers.first().condition.range.course_seat_types == 'credit':
                 if not request.user.is_authenticated():
-                    params = request.META.get('QUERY_STRING')
                     # The next url needs to have the coupon code as a query parameter.
-                    next_url = '{}?{}'.format(request.path, params)
+                    next_url = '{}?{}'.format(request.path, request.META.get('QUERY_STRING'))
                     return redirect_to_login(next_url)
         except (Voucher.DoesNotExist, exceptions.ProductNotFoundError):
             pass
