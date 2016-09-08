@@ -93,7 +93,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         return Response(data=offers_data)
 
     def retrieve_objects(self, results):
-        """ Helper method to retrieve all the courses, products and stock_records
+        """ Helper method to retrieve all the courses, products and stock records
         from course IDs in course catalog response results.
 
         Args:
@@ -189,7 +189,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             course = get_object_or_404(Course, id=course_id)
             stock_record = get_object_or_404(StockRecord, product__id=product.id)
             course_info = get_course_info_from_lms(course_id)
-            credit = False  # Credit seats can only be in dynamic coupons.
 
             if course_info:
                 course_info['image'] = {'src': get_lms_url(course_info['media']['course_image']['uri'])}
@@ -201,7 +200,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     is_verified=(course.type == 'verified'),
                     stock_record=stock_record,
                     voucher=voucher,
-                    credit=credit
+                    credit=False  # Credit seats can only be in dynamic coupons.
                 ))
 
         return {'next': next_page, 'results': offers}

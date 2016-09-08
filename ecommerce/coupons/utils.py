@@ -58,12 +58,12 @@ def get_seats_from_query(site, query, seat_types):
     query_products = []
     for course in results:
         try:
-            products = Product.objects.filter(
+            product = Product.objects.get(
                 course_id=course['key'],
                 attributes__name='certificate_type',
                 attribute_values__value_text__in=seat_types.split(',')
             )
-            query_products.extend(list(products))
+            query_products.append(product)
         except Product.DoesNotExist:
             pass
     return query_products
