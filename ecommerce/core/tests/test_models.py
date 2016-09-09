@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
+from requests.exceptions import ConnectionError
 
 from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
 from ecommerce.core.tests import toggle_switch
@@ -88,6 +89,20 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         )
         self.mock_enrollment_api(self.request, user, course_id2, is_active=False, mode=mode)
         self.assertFalse(user.is_user_already_enrolled(self.request, not_enrolled_seat))
+
+    @httpretty.activate
+    def test_user_details(self):
+        """ Verify user details are returned. """
+        user = self.create_user()
+        user_details = {'is_active': True}
+        self.mock_account_api(self.request, user.username, data=user_details)
+        self.assertDictEqual(user.account_details(self.request), user_details)
+
+    def test_no_user_details(self):
+        """ Verify False is returned when there is a connection error. """
+        user = self.create_user()
+        with self.assertRaises(ConnectionError):
+            self.assertFalse(user.account_details(self.request))
 
 
 class BusinessClientTests(TestCase):
