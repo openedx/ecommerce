@@ -250,14 +250,15 @@ class SiteMixin(object):
 
         Site.objects.all().delete()
         site_configuration = SiteConfigurationFactory(
-            partner__name='edX',
-            site__id=settings.SITE_ID,
-            site__domain=domain,
-            segment_key='fake_segment_key',
+            from_email='from@example.com',
             oauth_settings={
                 'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
                 'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
-            }
+            },
+            partner__name='edX',
+            segment_key='fake_segment_key',
+            site__domain=domain,
+            site__id=settings.SITE_ID
         )
         self.partner = site_configuration.partner
         self.site = site_configuration.site
@@ -266,6 +267,18 @@ class SiteMixin(object):
         self.request.session = None
         self.request.site = self.site
         set_thread_variable('request', self.request)
+
+    def mock_access_token_response(self, status=200):
+        """ Mock the response from the OAuth provider's access token endpoint. """
+        url = '{root}/access_token'.format(root=self.site.siteconfiguration.oauth2_provider_url)
+        token = 'abc123'
+        body = json.dumps({
+            'access_token': token,
+            'expires_in': 3600,
+        })
+        httpretty.register_uri(httpretty.POST, url, body=body, content_type='application/json', status=status)
+
+        return token
 
 
 class TestServerUrlMixin(object):
