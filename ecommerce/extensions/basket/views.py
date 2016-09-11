@@ -41,7 +41,7 @@ class BasketSingleItemView(View):
             return HttpResponseBadRequest(_('No SKU provided.'))
 
         if code:
-        	voucher = Voucher.objects.get(code=code)
+            voucher = Voucher.objects.get(code=code)
         else:
             voucher = None
 
