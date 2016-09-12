@@ -187,7 +187,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 payment_processor = get_default_processor_class()
 
             try:
-                response_data = self._checkout(basket, payment_processor())
+                response_data = self._checkout(basket, payment_processor(), request)
             except Exception as ex:  # pylint: disable=broad-except
                 basket.delete()
                 logger.exception('Failed to initiate checkout for Basket [%d]. The basket has been deleted.', basket_id)
@@ -198,7 +198,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    def _checkout(self, basket, payment_processor):
+    def _checkout(self, basket, payment_processor, request=None):
         """Perform checkout operations for the given basket.
 
         If the contents of the basket are free, places an order immediately. Otherwise,
@@ -229,7 +229,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         response_data = self._generate_basic_response(basket)
 
         if basket.total_excl_tax == 0:
-            order = self.place_free_order(basket)
+            order = self.place_free_order(basket, request)
 
             # Note: Our order serializer could be used here, but in an effort to pare down the information
             # returned by this endpoint, simply returning the order number will suffice for now.
