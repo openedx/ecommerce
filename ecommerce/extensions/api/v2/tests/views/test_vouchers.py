@@ -99,7 +99,6 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         new_range.add_product(seat1)
         new_range.add_product(seat2)
         voucher, __ = prepare_voucher(_range=new_range)
-        voucher, products = get_voucher_and_products_from_code(voucher.code)
         factory = APIRequestFactory()
         request = factory.get('/?code={}&page_size=6'.format(voucher.code))
         request.site = self.site
@@ -107,9 +106,8 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 2)
 
-        product = products[1]
-        product.expires = pytz.utc.localize(datetime.datetime.min)
-        product.save()
+        seat1.expires = pytz.utc.localize(datetime.datetime.min)
+        seat1.save()
 
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
