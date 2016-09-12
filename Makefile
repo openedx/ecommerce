@@ -92,13 +92,14 @@ accept:
 	nosetests --with-ignore-docstrings -v acceptance_tests --with-xunit --xunit-file=acceptance_tests/xunit.xml
 
 extract_translations:
-	cd ecommerce && i18n_tool extract -v
+	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
+	python manage.py makemessages -l en -v1 -d djangojs --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
 
 dummy_translations:
-	cd ecommerce && i18n_tool dummy -v
+	cd ecommerce && i18n_tool dummy
 
 compile_translations:
-	cd ecommerce && i18n_tool generate -v
+	python manage.py compilemessages
 
 fake_translations: extract_translations dummy_translations compile_translations
 
