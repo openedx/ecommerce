@@ -138,7 +138,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             users (list): list of users
         """
         order = OrderFactory(number=order_num)
-        order_line = OrderLineFactory(product=voucher.offers.first().condition.range.all_products()[0])
+        order_line = OrderLineFactory(product=self.verified_seat)
         order.lines.add(order_line)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})

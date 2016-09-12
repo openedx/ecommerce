@@ -120,8 +120,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.mock_dynamic_catalog_course_runs_api(query='key:*', course_run=course)
         self.range.catalog_query = 'key:*'
         self.range.course_seat_types = 'verified'
-        self.assertEqual(len(self.range.all_products()), 2)
-        self.assertTrue(seat in self.range.all_products())
+        self.assertEqual(len(self.range.all_products()), 0)
 
 
 class ConditionalOfferTests(TestCase):
