@@ -104,21 +104,23 @@ class CouponMixin(object):
 
         return pc
 
-    def create_coupon(self, title='Test coupon', price=100, client=None, partner=None, catalog=None, code='',
-                      benefit_value=100, note=None, max_uses=None, quantity=5, catalog_query=None,
-                      course_seat_types=None, email_domains=None, voucher_type=Voucher.SINGLE_USE):
+    def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None,
+                      catalog_query=None, client=None, code='', course_seat_types=None, email_domains=None,
+                      max_uses=None, note=None, partner=None, price=100, quantity=5, title='Test coupon',
+                      voucher_type=Voucher.SINGLE_USE):
         """Helper method for creating a coupon.
 
         Arguments:
-            title(str): Title of the coupon
-            price(int): Price of the coupon
-            partner(Partner): Partner used for creating a catalog
-            catalog(Catalog): Catalog of courses for which the coupon applies
-            code(str): Custom coupon code
+            benefit_type(str): The voucher benefit type
             benefit_value(int): The voucher benefit value
+            catalog(Catalog): Catalog of courses for which the coupon applies
             catalog_query(str): Course query string
+            code(str): Custom coupon code
             course_seat_types(str): A string of comma-separated list of seat types
             email_domains(str): A comma seperated list of email domains
+            partner(Partner): Partner used for creating a catalog
+            price(int): Price of the coupon
+            title(str): Title of the coupon
 
         Returns:
             coupon (Coupon)
@@ -134,7 +136,7 @@ class CouponMixin(object):
             quantity = 1
         data = {
             'partner': partner,
-            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_type': benefit_type,
             'benefit_value': benefit_value,
             'catalog': catalog,
             'end_datetime': datetime.date(2020, 1, 1),

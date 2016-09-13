@@ -4,7 +4,9 @@ define([
         'underscore',
         'underscore.string',
         'moment',
+        'text!templates/_alert_div.html',
         'text!templates/coupon_detail.html',
+        'utils/alert_utils',
         'views/dynamic_catalog_view',
     ],
     function ($,
@@ -12,7 +14,9 @@ define([
               _,
               _s,
               moment,
+              AlertDivTemplate,
               CouponDetailTemplate,
+              AlertUtils,
               DynamicCatalogView) {
         'use strict';
 
@@ -24,6 +28,10 @@ define([
             },
 
             template: _.template(CouponDetailTemplate),
+
+            initialize: function() {
+                this.alertViews = [];
+            },
 
             formatDateTime: function(dateTime) {
                 return moment.utc(dateTime).format('MM/DD/YYYY h:mm A');
@@ -143,6 +151,10 @@ define([
                 this.dynamic_catalog_view.$el = this.$('.catalog_buttons');
                 this.dynamic_catalog_view.render();
                 this.dynamic_catalog_view.delegateEvents();
+
+                this.$('.coupon-information').before(AlertDivTemplate);
+                this.$alerts = this.$el.find('.alerts');
+
                 return this;
             },
 
@@ -159,11 +171,22 @@ define([
             },
 
             downloadCouponReport: function (event) {
-                var url = _s.sprintf('/api/v2/coupons/coupon_reports/%d', this.model.id);
+                var url = _s.sprintf('/api/v2/coupons/coupon_reports/%d', this.model.id),
+                    _this = this;
 
-                event.preventDefault();
-                window.open(url, '_blank');
-                return this;
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(){
+                        event.preventDefault();
+                        window.open(url, '_blank');
+                        return _this;
+                    },
+                    error: function(data) {
+                        AlertUtils.clearAlerts(_this);
+                        AlertUtils.renderAlert('danger', '', data.responseText, _this);
+                    }
+                });
             }
         });
     }
