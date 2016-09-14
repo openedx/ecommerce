@@ -541,10 +541,11 @@ def get_voucher_and_products_from_code(code):
         ProductNotFoundError: When no products are associated with the voucher.
     """
     voucher = Voucher.objects.get(code=code)
+    voucher_range = voucher.offers.first().benefit.range
+    products = voucher_range.all_products()
 
-    products = voucher.offers.all()[0].benefit.range.all_products()
-
-    if products:
+    if products or voucher_range.catalog_query:
+        # List of products is empty in case of Multi-course coupon
         return voucher, products
     else:
         raise exceptions.ProductNotFoundError()
