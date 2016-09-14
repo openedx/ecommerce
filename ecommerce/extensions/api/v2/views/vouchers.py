@@ -89,25 +89,25 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 path=request.path,
                 query=next_page_query,
             )
-
         return Response(data=offers_data)
 
-    def retrieve_course_objects(self, results):
+    def retrieve_course_objects(self, results, course_seat_types):
         """ Helper method to retrieve all the courses, products and stock records
         from course IDs in course catalog response results.
 
         Args:
             results(dict): Course catalog response results.
+            course_seat_types(str): Comma-separated list of accepted seat types.
 
         Returns:
-            Querysets of courses, products and stock records retrieved from results.
+            Querysets of products and stock records retrieved from results.
         """
         course_ids = [result['key'] for result in results]
-        courses = Course.objects.filter(id__in=course_ids)
+        courses = [course for course in Course.objects.filter(id__in=course_ids) if course.type in course_seat_types]
         products = Product.objects.filter(course__in=courses)
         stock_records = StockRecord.objects.filter(product__in=products)
 
-        return courses, products, stock_records
+        return products, stock_records
 
     def get_offers(self, request, voucher):
         """
@@ -132,9 +132,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 site=request.site
             )
             next_page = response['next']
-            courses, products, stock_records = self.retrieve_course_objects(response['results'])
+            products, stock_records = self.retrieve_course_objects(
+                response['results'], benefit.range.course_seat_types
+            )
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
-
             for product in products:
                 # Omit unavailable seats from the offer results so that one seat does not cause an
                 # error message for every seat in the query result.
@@ -163,7 +164,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     logger.error('Stock Record for product %s not found.', product.id)
 
                 try:
-                    course = courses.get(id=course_id)
+                    course = Course.objects.get(id=course_id)
                 except Course.DoesNotExist:
                     course = None
                     logger.error('Course %s not found.', course_id)
