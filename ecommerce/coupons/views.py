@@ -14,6 +14,8 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
@@ -126,6 +128,10 @@ class CouponOfferView(TemplateView):
             except exceptions.ProductNotFoundError:
                 return {
                     'error': _('The voucher is not applicable to your current basket.'),
+                }
+            except (ConnectionError, SlumberBaseException, Timeout):
+                return {
+                    'error': _('Coupon information not available at this time. Please try again later.'),
                 }
             valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
