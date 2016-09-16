@@ -13,7 +13,6 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.views import get_voucher_and_products_from_code
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_lms, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
@@ -41,7 +40,7 @@ class BasketSingleItemView(View):
             return HttpResponseBadRequest(_('No SKU provided.'))
 
         if code:
-            voucher, __ = get_voucher_and_products_from_code(code=code)
+            voucher = Voucher.objects.get(code=code)
         else:
             voucher = None
 

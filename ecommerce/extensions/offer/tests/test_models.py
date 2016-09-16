@@ -107,22 +107,6 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         response = self.range.contains_product(seat)
         self.assertTrue(response)
 
-    @httpretty.activate
-    @mock_course_catalog_api_client
-    def test_query_range_all_products(self):
-        """
-        all_products() should return seats from the query.
-        """
-        course, seat = self.create_course_and_seat()
-        self.assertEqual(len(self.range.all_products()), 1)
-        self.assertFalse(seat in self.range.all_products())
-
-        self.mock_dynamic_catalog_course_runs_api(query='key:*', course_run=course)
-        self.range.catalog_query = 'key:*'
-        self.range.course_seat_types = 'verified'
-        self.assertEqual(len(self.range.all_products()), 2)
-        self.assertTrue(seat in self.range.all_products())
-
 
 class ConditionalOfferTests(TestCase):
     """Tests for custom ConditionalOffer model."""
