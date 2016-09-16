@@ -4,16 +4,14 @@ define([
         'underscore',
         'underscore.string',
         'moment',
-        'text!templates/_offer_course_list.html',
-        'text!templates/_offer_error.html'
+        'text!templates/_offer_course_list.html'
     ],
     function ($,
               Backbone,
               _,
               _s,
               moment,
-              OfferCourseListTemplate,
-              OfferErrorTemplate) {
+              OfferCourseListTemplate) {
 
         'use strict';
 
@@ -60,14 +58,6 @@ define([
                     );
                     this.renderPagination();
                     this.delegateEvents();
-                } else {
-                    var error_msg = 'No offers to display';
-                    this.template = _.template(OfferErrorTemplate);
-                    this.$el.html(
-                        this.template({
-                            error: error_msg
-                        })
-                    );
                 }
                 return this;
             },
