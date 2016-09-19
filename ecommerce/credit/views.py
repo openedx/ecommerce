@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from edx_rest_api_client.client import EdxRestApiClient
+from oscar.core.loading import get_model
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.url_utils import get_lms_url
@@ -18,6 +19,7 @@ from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
 logger = logging.getLogger(__name__)
+Voucher = get_model('voucher', 'Voucher')
 
 
 class Checkout(TemplateView):
@@ -129,6 +131,12 @@ class Checkout(TemplateView):
         Returns:
             A list of dictionaries with provider(s) detail.
         """
+        code = self.request.GET.get('code')
+        if code:
+            voucher = Voucher.objects.get(code=code)
+            discount_type = voucher.benefit.type
+            discount_value = voucher.benefit.value
+
         providers = self._get_providers_from_lms(credit_seats)
         if not providers:
             return None
@@ -140,10 +148,22 @@ class Checkout(TemplateView):
         partner = get_partner_for_site(self.request)
         for seat in credit_seats:
             stockrecord = seat.stockrecords.filter(partner=partner).first()
+            new_price = None
+            discount = None
+            if code:
+                if discount_type == 'Percentage':
+                    discount = '{}%'.format(int(discount_value))
+                    new_price = stockrecord.price_excl_tax - (stockrecord.price_excl_tax * (discount_value / 100))
+                else:
+                    discount = '${}'.format(discount_value)
+                    new_price = stockrecord.price_excl_tax - discount_value
+                new_price = '{0:.2f}'.format(new_price)
             providers_dict[seat.attr.credit_provider].update({
                 'price': stockrecord.price_excl_tax,
                 'sku': stockrecord.partner_sku,
-                'credit_hours': seat.attr.credit_hours
+                'credit_hours': seat.attr.credit_hours,
+                'discount': discount,
+                'new_price': new_price
             })
 
         return providers_dict.values()

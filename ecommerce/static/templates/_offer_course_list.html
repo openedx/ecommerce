@@ -38,6 +38,13 @@
                         <p class="course-start"><%= course.attributes.course_start_date_text %></p>
 
                         <div class="discount-mc-price-group clearfix">
+                            <% if (course.attributes.multiple_credit_providers) { %>
+                            <div class="pull-left">
+                                <p class="course-new-price">
+                                    <span><%= course.attributes.benefit_value %> <%- gettext('discount') %></span>
+                                </p>
+                            </div>
+                            <% } else { %>
                             <div class="pull-left">
                                 <p class="course-price">
                                     <span>$<%= course.attributes.stockrecords.price_excl_tax %></span>
@@ -48,6 +55,7 @@
                                     <span><%- gettext('Now') %> $<%= course.attributes.new_price %></span>
                                 </p>
                             </div>
+                            <% } %>
                             <div class="pull-right">
                                     <% if (isCredit) { %>
                                         <a href="/credit/checkout/<%= course.attributes.id %>/?code=<%= code %>"

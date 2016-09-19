@@ -138,7 +138,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             )
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
             for product in products:
-                credit = False
                 # Omit unavailable seats from the offer results so that one seat does not cause an
                 # error message for every seat in the query result.
                 if not request.strategy.fetch_for_product(product).availability.is_available_to_buy:
@@ -150,28 +149,21 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     (result for result in response['results'] if result['key'] == course_id),
                     None
                 )
-                # Omit credit seats for which the user is not eligible or which the user already bought.
                 if product.attr.certificate_type == 'credit':
+                    # Omit credit seats for which the user is not eligible or which the user already bought.
                     if request.user.is_eligible(product.attr.course_key):
-                        credit = True
                         if Order.objects.filter(user=request.user, lines__product=product).exists():
-                            print "ALREADY BOUGHT!"
                             continue
                     else:
                         continue
 
                     credit_seats = Product.objects.filter(parent=product.parent, attributes__name='credit_provider')
-                    print "CREDIT SEATS: ", credit_seats
 
                     if credit_seats.count() > 1:
-                        print "MORE THAN ONE"
                         multiple_credit_providers = True
                         credit_provider_price = None
                     else:
-                        print "ONE OR LESS"
                         multiple_credit_providers = False
-                        print "#" * 5
-                        print credit_seats
                         credit_provider_price = StockRecord.objects.get(product=credit_seats.first()).price_excl_tax
 
                 try:
@@ -191,7 +183,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         benefit=benefit,
                         course=course,
                         course_info=course_catalog_data,
-                        credit=credit,
                         credit_provider_price=credit_provider_price,
                         multiple_credit_providers=multiple_credit_providers,
                         is_verified=contains_verified_course,
@@ -217,7 +208,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     benefit=benefit,
                     course=course,
                     course_info=course_info,
-                    credit=False,  # Credit seats can only be in dynamic coupons.
                     credit_provider_price=None,
                     multiple_credit_providers=False,
                     is_verified=(course.type == 'verified'),
@@ -227,14 +217,13 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
         return {'next': next_page, 'results': offers}
 
-    def get_course_offer_data(self, benefit, course, course_info, credit, credit_provider_price, is_verified, multiple_credit_providers, stock_record, voucher):
+    def get_course_offer_data(self, benefit, course, course_info, credit_provider_price, is_verified, multiple_credit_providers, stock_record, voucher):
         """
         Gets course offer data.
         Arguments:
             benefit (Benefit): Benefit associated with a voucher
             course (Course): Course associated with a voucher
             course_info (dict): Course info fetched from an API (LMS or Course Catalog)
-            credit (bool): True for credit seats
             is_verified (bool): Indicated whether or not the voucher's range of products contains a verified course seat
             stock_record (StockRecord): Stock record associated with the course seat
             voucher (Voucher): Voucher for which the course offer data is being fetched
@@ -249,7 +238,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'benefit': serializers.BenefitSerializer(benefit).data,
             'contains_verified': is_verified,
             'course_start_date': course_info.get('start', ''),
-            'credit': credit,
             'id': course.id,
             'image_url': image,
             'multiple_credit_providers': multiple_credit_providers,

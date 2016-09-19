@@ -19,7 +19,9 @@ define([
                 var $selectedProvider = this.$el.find('input[name=provider]:checked').closest('.provider');
                 this.trigger('productSelected', {
                     sku: $selectedProvider.data('sku'),
-                    price: $selectedProvider.data('price')
+                    price: $selectedProvider.data('price'),
+                    discount: $selectedProvider.data('discount'),
+                    new_price: $selectedProvider.data('new-price'),
                 });
 
                 // toggle 'selected' class for background color
