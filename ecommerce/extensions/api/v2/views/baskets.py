@@ -165,6 +165,11 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
                     basket.add_product(product)
                     logger.info('Added product with SKU [%s] to basket [%d]', sku, basket_id)
+
+                    # Call signal handler to notify listeners that something has been added to the basket
+                    basket_addition = get_class('basket.signals', 'basket_addition')
+                    basket_addition.send(sender=basket_addition, product=product, user=request.user,
+                                         request=request, basket=basket)
             else:
                 # If no products were included in the request, we cannot checkout.
                 return self._report_bad_request(

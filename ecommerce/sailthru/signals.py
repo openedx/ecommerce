@@ -66,7 +66,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
 
             course_id = product.course_id
 
-            # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
+            # Tell Sailthru that the purchase is complete asynchronously
             update_course_enrollment.delay(order.user.email, _build_course_url(course_id),
                                            False, mode_for_seat(product),
                                            unit_cost=price, course_id=course_id, currency=order.currency,
@@ -102,10 +102,6 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
             price = stock_record.price_excl_tax
             currency = stock_record.price_currency
 
-        # return if no price, no need to add free items to shopping cart
-        if not price:
-            return
-
         # save Sailthru campaign ID, if there is one
         message_id = request.COOKIES.get('sailthru_bid')
         if message_id and basket:
@@ -115,11 +111,15 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
                 value_text=message_id
             )
 
-        # pass event to ecommerce_worker.sailthru.v1.tasks to handle asynchronously
-        update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_seat(product),
-                                       unit_cost=price, course_id=course_id, currency=currency,
-                                       site_code=partner.short_code,
-                                       message_id=message_id)
+        # inform sailthru if there is a price.  The purpose of this call is to tell Sailthru when
+        # an item has been added to the shopping cart so that an abandoned cart message can be sent
+        # later if the purchase is not completed.  Abandoned cart support is only for purchases, not
+        # for free enrolls
+        if price:
+            update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_seat(product),
+                                           unit_cost=price, course_id=course_id, currency=currency,
+                                           site_code=partner.short_code,
+                                           message_id=message_id)
 
 
 def _build_course_url(course_id):

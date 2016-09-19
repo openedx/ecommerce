@@ -206,8 +206,33 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                                                          site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 
-    def _create_order(self, price):
-        seat = self.course.create_or_update_seat('verified', False, price, self.partner, None)
+    @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
+    def test_save_campaign_id_audit(self, mock_update_course_enrollment):
+        """
+        Verify the Sailthru campaign ID is saved as a basket attribute for audit enroll
+        """
+
+        seat, order = self._create_order(0, 'audit')
+        process_basket_addition(None, request=self.request,
+                                user=self.user,
+                                product=seat, basket=order.basket)
+        self.assertFalse(mock_update_course_enrollment.called)
+
+        # now call checkout_complete with the same basket to see if campaign id saved and restored
+        process_checkout_complete(None, order=order, request=None)
+        self.assertTrue(mock_update_course_enrollment.called)
+        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
+                                                         self.course_url,
+                                                         False,
+                                                         seat.attr.certificate_type,
+                                                         course_id=self.course_id,
+                                                         currency=order.currency,
+                                                         message_id=CAMPAIGN_COOKIE,
+                                                         site_code='edX',
+                                                         unit_cost=order.total_excl_tax)
+
+    def _create_order(self, price, mode='verified'):
+        seat = self.course.create_or_update_seat(mode, False, price, self.partner, None)
 
         basket = BasketFactory()
         basket.add_product(seat, 1)
