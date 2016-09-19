@@ -2,7 +2,6 @@
 import logging
 from urlparse import urlparse
 
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 import django_filters
 from opaque_keys.edx.keys import CourseKey
@@ -76,7 +75,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         except (ConnectionError, SlumberBaseException, Timeout):
             logger.error('Could not get course information.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        except Http404:
+        except Product.DoesNotExist:
             logger.error('Could not get product information for voucher with code %s.', code)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -103,9 +102,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         """
         benefit = voucher.offers.first().benefit
         catalog_query = benefit.range.catalog_query
+        course_seat_types = benefit.range.course_seat_types
         next_page = None
         offers = []
-        if catalog_query:
+        if catalog_query and course_seat_types:
             response = get_range_catalog_query_results(
                 limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
                 offset=request.GET.get('offset'),
@@ -115,9 +115,13 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             next_page = response['next']
             course_ids = [result['key'] for result in response['results']]
             courses = Course.objects.filter(id__in=course_ids)
-            products = Product.objects.filter(course__in=courses)
+            products = Product.objects.filter(
+                attributes__name='certificate_type',
+                attribute_values__value_text__in=course_seat_types.split(','),
+                course__in=courses
+            )
             stock_records = StockRecord.objects.filter(product__in=products)
-            contains_verified_course = (benefit.range.course_seat_types == 'verified')
+            contains_verified_course = course_seat_types == 'verified'
 
             for product in products:
                 # Omit unavailable seats from the offer results so that one seat does not cause an
@@ -158,7 +162,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             if products:
                 product = products[0]
             else:
-                raise Http404()
+                raise Product.DoesNotExist
             course_id = product.course_id
             course = get_object_or_404(Course, id=course_id)
             stock_record = get_object_or_404(StockRecord, product__id=product.id)
