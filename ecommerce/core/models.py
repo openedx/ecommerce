@@ -87,6 +87,12 @@ class SiteConfiguration(models.Model):
         blank=True,
         default="support@example.com"
     )
+    payment_support_url = models.CharField(
+        verbose_name=_('Payment support url'),
+        help_text=_('URL for payment support issues.'),
+        max_length=255,
+        blank=True
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
