@@ -91,7 +91,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             )
         return Response(data=offers_data)
 
-    def retrieve_course_objects(self, results, course_seat_types):
+    def retrieve_course_objects(self, results):
         """ Helper method to retrieve all the courses, products and stock records
         from course IDs in course catalog response results.
 
@@ -103,8 +103,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             Querysets of products and stock records retrieved from results.
         """
         course_ids = [result['key'] for result in results]
-        courses = [course for course in Course.objects.filter(id__in=course_ids) if course.type in course_seat_types]
-        products = Product.objects.filter(course__in=courses)
+        courses = Course.objects.filter(id__in=course_ids)
+        products = Product.objects.filter(course_id__in=course_ids)
         stock_records = StockRecord.objects.filter(product__in=products)
 
         return products, stock_records
@@ -133,9 +133,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 site=request.site
             )
             next_page = response['next']
-            products, stock_records = self.retrieve_course_objects(
-                response['results'], benefit.range.course_seat_types
-            )
+            products, stock_records = self.retrieve_course_objects(response['results'])
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
             for product in products:
                 # Omit unavailable seats from the offer results so that one seat does not cause an
@@ -149,7 +147,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     (result for result in response['results'] if result['key'] == course_id),
                     None
                 )
-                if product.attr.certificate_type == 'credit':
+                if benefit.range.course_seat_types == 'credit':
                     # Omit credit seats for which the user is not eligible or which the user already bought.
                     if request.user.is_eligible(product.attr.course_key):
                         if Order.objects.filter(user=request.user, lines__product=product).exists():
@@ -186,6 +184,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         credit_provider_price=credit_provider_price,
                         multiple_credit_providers=multiple_credit_providers,
                         is_verified=contains_verified_course,
+                        product=product,
                         stock_record=stock_record,
                         voucher=voucher
                     ))
@@ -211,13 +210,17 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     credit_provider_price=None,
                     multiple_credit_providers=False,
                     is_verified=(course.type == 'verified'),
+                    product=product,
                     stock_record=stock_record,
                     voucher=voucher
                 ))
 
         return {'next': next_page, 'results': offers}
 
-    def get_course_offer_data(self, benefit, course, course_info, credit_provider_price, is_verified, multiple_credit_providers, stock_record, voucher):
+    def get_course_offer_data(
+        self, benefit, course, course_info, credit_provider_price, is_verified,
+        multiple_credit_providers, product, stock_record, voucher
+    ):
         """
         Gets course offer data.
         Arguments:
@@ -243,7 +246,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'multiple_credit_providers': multiple_credit_providers,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': credit_provider_price,
-            'seat_type': course.type,
+            'seat_type': product.attr.certificate_type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime
