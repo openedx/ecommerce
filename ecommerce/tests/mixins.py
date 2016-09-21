@@ -334,3 +334,17 @@ class LmsApiMockMixin(object):
             course_id=course_id
         )
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+
+    def mock_eligibility_api(self, request, user, course_key, eligible=True):
+        """ Mock eligibility API endpoint. Returns eligibility data. """
+        eligibility_data = [{
+            'username': user.username,
+            'course_key': course_key,
+            'deadline': '2030-09-02T07:51:38Z'
+        }] if eligible else []
+        url = '{host}/eligibility/?username={username}&course_key={course_key}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/credit/v1'),
+            username=user.username,
+            course_key=course_key
+        )
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type='application/json')

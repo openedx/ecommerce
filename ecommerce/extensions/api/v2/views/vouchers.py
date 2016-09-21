@@ -24,6 +24,7 @@ from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 
 
 logger = logging.getLogger(__name__)
+Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -88,8 +89,25 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 path=request.path,
                 query=next_page_query,
             )
-
         return Response(data=offers_data)
+
+    def retrieve_course_objects(self, results):
+        """ Helper method to retrieve all the courses, products and stock records
+        from course IDs in course catalog response results.
+
+        Args:
+            results(dict): Course catalog response results.
+            course_seat_types(str): Comma-separated list of accepted seat types.
+
+        Returns:
+            Querysets of products and stock records retrieved from results.
+        """
+        course_ids = [result['key'] for result in results]
+        courses = Course.objects.filter(id__in=course_ids)
+        products = Product.objects.filter(course_id__in=course_ids)
+        stock_records = StockRecord.objects.filter(product__in=products)
+
+        return products, stock_records
 
     def get_offers(self, request, voucher):
         """
@@ -104,6 +122,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         benefit = voucher.offers.first().benefit
         catalog_query = benefit.range.catalog_query
         next_page = None
+        multiple_credit_providers = False
+        credit_provider_price = None
         offers = []
         if catalog_query:
             response = get_range_catalog_query_results(
@@ -113,23 +133,36 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 site=request.site
             )
             next_page = response['next']
-            course_ids = [result['key'] for result in response['results']]
-            courses = Course.objects.filter(id__in=course_ids)
-            products = Product.objects.filter(course__in=courses)
-            stock_records = StockRecord.objects.filter(product__in=products)
+            products, stock_records = self.retrieve_course_objects(response['results'])
             contains_verified_course = (benefit.range.course_seat_types == 'verified')
-
             for product in products:
                 # Omit unavailable seats from the offer results so that one seat does not cause an
                 # error message for every seat in the query result.
                 if not request.strategy.fetch_for_product(product).availability.is_available_to_buy:
                     logger.info('%s is unavailable to buy. Omitting it from the results.', product)
                     continue
+
                 course_id = product.course_id
                 course_catalog_data = next(
                     (result for result in response['results'] if result['key'] == course_id),
                     None
                 )
+                if benefit.range.course_seat_types == 'credit':
+                    # Omit credit seats for which the user is not eligible or which the user already bought.
+                    if request.user.is_eligible(product.attr.course_key):
+                        if Order.objects.filter(user=request.user, lines__product=product).exists():
+                            continue
+                    else:
+                        continue
+
+                    credit_seats = Product.objects.filter(parent=product.parent, attributes__name='credit_provider')
+
+                    if credit_seats.count() > 1:
+                        multiple_credit_providers = True
+                        credit_provider_price = None
+                    else:
+                        multiple_credit_providers = False
+                        credit_provider_price = StockRecord.objects.get(product=credit_seats.first()).price_excl_tax
 
                 try:
                     stock_record = stock_records.get(product__id=product.id)
@@ -138,7 +171,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     logger.error('Stock Record for product %s not found.', product.id)
 
                 try:
-                    course = courses.get(id=course_id)
+                    course = Course.objects.get(id=course_id)
                 except Course.DoesNotExist:
                     course = None
                     logger.error('Course %s not found.', course_id)
@@ -148,7 +181,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         benefit=benefit,
                         course=course,
                         course_info=course_catalog_data,
+                        credit_provider_price=credit_provider_price,
+                        multiple_credit_providers=multiple_credit_providers,
                         is_verified=contains_verified_course,
+                        product=product,
                         stock_record=stock_record,
                         voucher=voucher
                     ))
@@ -171,13 +207,20 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     benefit=benefit,
                     course=course,
                     course_info=course_info,
+                    credit_provider_price=None,
+                    multiple_credit_providers=False,
                     is_verified=(course.type == 'verified'),
+                    product=product,
                     stock_record=stock_record,
                     voucher=voucher
                 ))
+
         return {'next': next_page, 'results': offers}
 
-    def get_course_offer_data(self, benefit, course, course_info, is_verified, stock_record, voucher):
+    def get_course_offer_data(
+        self, benefit, course, course_info, credit_provider_price, is_verified,
+        multiple_credit_providers, product, stock_record, voucher
+    ):
         """
         Gets course offer data.
         Arguments:
@@ -200,9 +243,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'course_start_date': course_info.get('start', ''),
             'id': course.id,
             'image_url': image,
+            'multiple_credit_providers': multiple_credit_providers,
             'organization': CourseKey.from_string(course.id).org,
-            'seat_type': course.type,
+            'credit_provider_price': credit_provider_price,
+            'seat_type': product.attr.certificate_type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
-            'voucher_end_date': voucher.end_datetime,
+            'voucher_end_date': voucher.end_datetime
         }

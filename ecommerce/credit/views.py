@@ -1,10 +1,8 @@
 from __future__ import unicode_literals
 
 import logging
-from collections import OrderedDict
 
 from dateutil.parser import parse
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -12,15 +10,16 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
 from edx_rest_api_client.client import EdxRestApiClient
+from oscar.core.loading import get_model
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.extensions.payment.helpers import get_processor_class
 
 logger = logging.getLogger(__name__)
+Voucher = get_model('voucher', 'Voucher')
 
 
 class Checkout(TemplateView):
@@ -79,36 +78,16 @@ class Checkout(TemplateView):
             })
             return context
 
-        # Make button text for each processor which will be shown to user.
-        processors_dict = OrderedDict()
-        for path in settings.PAYMENT_PROCESSORS:
-            processor_class = get_processor_class(path)
-            if not processor_class.is_enabled():
-                continue
-            processor = processor_class.NAME.lower()
-            if processor == 'cybersource':
-                processors_dict[processor] = 'Checkout'
-            elif processor == 'paypal':
-                processors_dict[processor] = 'Checkout with PayPal'
-            else:
-                processors_dict[processor] = 'Checkout with {}'.format(processor)
-        if len(processors_dict) == 0:
-            context.update({
-                'error': _(
-                    'All payment options are currently unavailable. Try the transaction again in a few minutes.'
-                )
-            })
-
         context.update({
+            'code': self.request.GET.get('code'),
             'course': course,
-            'payment_processors': processors_dict,
             'deadline': deadline,
             'providers': providers,
             'analytics_data': prepare_analytics_data(
                 self.request.user,
                 self.request.site.siteconfiguration.segment_key,
                 course.id
-            ),
+            )
         })
 
         return context
@@ -152,6 +131,12 @@ class Checkout(TemplateView):
         Returns:
             A list of dictionaries with provider(s) detail.
         """
+        code = self.request.GET.get('code')
+        if code:
+            voucher = Voucher.objects.get(code=code)
+            discount_type = voucher.benefit.type
+            discount_value = voucher.benefit.value
+
         providers = self._get_providers_from_lms(credit_seats)
         if not providers:
             return None
@@ -163,10 +148,22 @@ class Checkout(TemplateView):
         partner = get_partner_for_site(self.request)
         for seat in credit_seats:
             stockrecord = seat.stockrecords.filter(partner=partner).first()
+            new_price = None
+            discount = None
+            if code:
+                if discount_type == 'Percentage':
+                    discount = '{}%'.format(int(discount_value))
+                    new_price = stockrecord.price_excl_tax - (stockrecord.price_excl_tax * (discount_value / 100))
+                else:
+                    discount = '${}'.format(discount_value)
+                    new_price = stockrecord.price_excl_tax - discount_value
+                new_price = '{0:.2f}'.format(new_price)
             providers_dict[seat.attr.credit_provider].update({
                 'price': stockrecord.price_excl_tax,
                 'sku': stockrecord.partner_sku,
-                'credit_hours': seat.attr.credit_hours
+                'credit_hours': seat.attr.credit_hours,
+                'discount': discount,
+                'new_price': new_price
             })
 
         return providers_dict.values()

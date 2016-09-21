@@ -42,24 +42,30 @@
                                 {% include "edx/credit/_provider_detail.html" %}
                             {% endfor %}
                             <div class="row center-block text-right">
-                                <div class="col-sm-12 total-price text-right">
-                                    {% trans "Total:" %} $<span></span>
+                                {% if code %}
+                                <div class="col-sm-2 col-sm-offset-10 price text-left">
+                                    <span>{% trans "Price:" %}</span>
+                                    <span class="pull-right">$<span class="price"></span></span>
+                                </div>
+                                <div class="col-sm-2 col-sm-offset-10 discount text-left">
+                                    <span>{% trans "Discount:" %} </span>
+                                    <span class="pull-right"><span class="discount"></span></span>
+                                </div>
+                                {% endif %}
+                                <div class="col-sm-2 col-sm-offset-10  total-price text-left">
+                                    <span>{% trans "Total:" %} <span>
+                                    <span class="pull-right">$<span class="total-price"></span></span>
                                 </div>
                             </div>
                         </div>
                         <div id="payment-buttons" class="row checkout-controls center-block text-right">
-                            <div class="col-sm-12">
-                                {% for processor_name, button_text in payment_processors.items %}
-                                    <button data-track-type="click"
-                                            data-track-event="edx.bi.ecommerce.credit.payment_selected"
-                                            data-track-category="{{ processor_name }}"
-                                            data-processor-name="{{ processor_name }}"
-                                            data-course-id="{{ course.id }}"
-                                            class="btn btn-primary payment-button">
-                                        {{ button_text }}
-                                    </button>
-                                {% endfor %}
-                            </div>
+                            <a data-track-type="click"
+                               data-track-event="edx.bi.ecommerce.credit.payment_selected"
+                               data-course-id="{{ course.id }}"
+                               class="btn btn-primary payment-button"
+                               href="/basket/single-item/?code={{code}}&sku=">
+                               Checkout
+                            </a>
                         </div>
                     </div>
                 {% endif %}

@@ -106,6 +106,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
             if course_seat_types:
+                if len(course_seat_types) > 1 and 'credit' in course_seat_types:
+                    return Response(
+                        'Credit seat types cannot be paired with other seat types.',
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
                 course_seat_types = prepare_course_seat_types(course_seat_types)
 
             # Maximum number of uses can be set for each voucher type and disturb

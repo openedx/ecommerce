@@ -129,12 +129,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset({'course': self.course}, response.context)
 
-        # Verify that the payment processors are returned
-        self.assertEqual(
-            sorted(response.context['payment_processors'].keys()),
-            sorted([get_processor_class(path).NAME.lower() for path in settings.PAYMENT_PROCESSORS])
-        )
-
         self.assertContains(
             response,
             'Congratulations! You are eligible to purchase academic course credit for this course.'
@@ -225,50 +219,6 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self._mock_providers_api(body=self.provider_data)
 
         self._assert_success_checkout_page()
-
-    @ddt.data(
-        (settings.PAYMENT_PROCESSORS, {
-            'payment_processors': {},
-            'error': u'All payment options are currently unavailable. Try the transaction again in a few minutes.'
-        }),
-        (('ecommerce.extensions.payment.processors.paypal.Paypal',), {
-            'payment_processors': {
-                'cybersource': 'Checkout'
-            }
-        }),
-        ((), {
-            'payment_processors': {
-                'cybersource': 'Checkout',
-                'paypal': 'Checkout with PayPal'
-            }
-        })
-    )
-    @ddt.unpack
-    @httpretty.activate
-    def test_disabled_providers(self, disabled_processors, expected_context):
-        """ Verify that payment processors can be disabled with their Waffle
-        switches, and that an error is shown if none are available.
-        """
-        self._enable_payment_providers()
-
-        for path in disabled_processors:
-            processor_class = get_processor_class(path)
-            switch, __ = Switch.objects.get_or_create(
-                name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor_class.NAME
-            )
-            switch.active = False
-            switch.save()
-
-        self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
-        )
-
-        self._mock_eligibility_api(body=self.eligibilities)
-        self._mock_providers_api(body=self.provider_data)
-
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(expected_context, response.context)
 
     @httpretty.activate
     def test_seat_unavailable(self):

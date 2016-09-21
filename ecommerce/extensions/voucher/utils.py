@@ -14,6 +14,7 @@ from oscar.templatetags.currency_filters import currency
 import pytz
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.api import exceptions
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -522,3 +523,29 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         max_uses=max_uses,
         email_domains=email_domains
     )
+
+
+def get_voucher_and_products_from_code(code):
+    """
+    Returns a voucher and product for a given code.
+
+    Arguments:
+        code (str): The code of a coupon voucher.
+
+    Returns:
+        voucher (Voucher): The Voucher for the passed code.
+        products (list): List of Products associated with the Voucher.
+
+    Raises:
+        Voucher.DoesNotExist: When no vouchers with provided code exist.
+        ProductNotFoundError: When no products are associated with the voucher.
+    """
+    voucher = Voucher.objects.get(code=code)
+    voucher_range = voucher.offers.first().benefit.range
+    products = voucher_range.all_products()
+
+    if products or voucher_range.catalog_query:
+        # List of products is empty in case of Multi-course coupon
+        return voucher, products
+    else:
+        raise exceptions.ProductNotFoundError()

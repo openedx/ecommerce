@@ -3,7 +3,8 @@ define([
         'views/course_create_edit_view',
         'views/alert_view',
         'test/spec-utils',
-        'models/course_model'
+        'models/course_model',
+        'test/custom-matchers'
     ],
     function ($,
               CourseCreateEditView,
@@ -40,14 +41,12 @@ define([
                 var bulk_enrollment_seat_types = ['verified', 'professional', 'credit'];
                 view.model.set('type', 'audit');
                 view.formView.toggleBulkEnrollmentField();
-                expect(SpecUtils.visibleElement(view, '[name=create_enrollment_code]', '.form-group')).toBe(false);
+                expect(SpecUtils.formGroup(view, '[name=create_enrollment_code]')).not.toBeVisible();
 
                 _.each(bulk_enrollment_seat_types, function(seat) {
                     view.model.set('type', seat);
                     view.formView.toggleBulkEnrollmentField();
-                    expect(SpecUtils.visibleElement(
-                        view, '[name=create_enrollment_code]', '.form-group')
-                    ).toBe(true);
+                    expect(SpecUtils.formGroup(view, '[name=create_enrollment_code]')).toBeVisible();
                 }, this);
             });
 

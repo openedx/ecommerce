@@ -31,26 +31,10 @@ define([
             },
 
             /**
-             * Returns a Boolean value that indicates whether a DOM element has a specific class.
-             */
-            toHaveClass: function () {
-                return {
-                    compare: function (actual, className) {
-                        return { pass: $(actual).hasClass(className) };
-                    }
-                };
-            },
-
-            /**
-              * Helper function to check if a form field is visible.
+              * Helper function to return the closest form group.
               */
-            visibleElement: function(view, selector, groupSelector) {
-                var formGroup = view.$(selector).closest(groupSelector);
-                if (formGroup.length > 0) {
-                    return !formGroup.hasClass('hidden');
-                } else {
-                    return false;
-                }
+            formGroup: function(view, selector) {
+                return view.$(selector).closest('.form-group');
             }
         };
     }

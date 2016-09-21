@@ -64,9 +64,6 @@ define([
             describe('disableElementWhileRunning', function () {
 
                 beforeEach(function () {
-                    jasmine.addMatchers({
-                        toHaveClass: SpecUtils.toHaveClass
-                    });
                     ecommerce.coupons = {
                         categories: Mock_Categories
                     };

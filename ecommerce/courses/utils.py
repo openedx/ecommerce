@@ -38,9 +38,10 @@ def get_course_info_from_lms(course_key):
 def get_certificate_type_display_value(certificate_type):
     display_values = {
         'audit': _('Audit'),
-        'verified': _('Verified'),
+        'credit': _('Credit'),
+        'honor': _('Honor'),
         'professional': _('Professional'),
-        'honor': _('Honor')
+        'verified': _('Verified')
     }
 
     if certificate_type not in display_values:

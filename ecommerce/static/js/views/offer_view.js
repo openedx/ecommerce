@@ -32,8 +32,9 @@ define([
             changePage: function() {
                 this.$el.html(
                     this.template({
-                        courses: this.collection,
                         code: this.code,
+                        courses: this.collection,
+                        isCredit: this.isCredit,
                         isEnrollmentCode: this.isEnrollmentCode,
                         page: this.page
                     })
@@ -48,8 +49,9 @@ define([
                     this.refreshData();
                     this.$el.html(
                         this.template({
-                            courses: this.collection,
                             code: this.code,
+                            courses: this.collection,
+                            isCredit: this.isCredit,
                             isEnrollmentCode: this.isEnrollmentCode,
                             page: this.collection.goToPage(this.collection.page),
                         })
@@ -65,6 +67,8 @@ define([
 
                 this.isEnrollmentCode = benefit_data.type === 'Percentage' && Math.round(benefit_data.value) === 100;
                 _.each(this.collection.models, this.formatValues, this);
+
+                this.isCredit = this.collection.at(0).get('seat_type') === 'credit';
             },
 
             checkVerified: function(course) {
@@ -104,7 +108,13 @@ define([
             setNewPrice: function(course) {
                 var benefit = course.get('benefit'),
                     new_price,
+                    price;
+
+                if (course.get('seat_type') === 'credit' && !course.multiple_credit_providers) {
+                    price = parseFloat(course.get('credit_provider_price')).toFixed(2);
+                } else {
                     price = parseFloat(course.get('stockrecords').price_excl_tax).toFixed(2);
+                }
 
                 if (benefit.type === 'Percentage') {
                     new_price = price - (price * (benefit.value / 100));
