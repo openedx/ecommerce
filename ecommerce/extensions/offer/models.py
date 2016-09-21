@@ -3,6 +3,7 @@ import hashlib
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import models
 from oscar.apps.offer.abstract_models import AbstractConditionalOffer, AbstractRange
 from threadlocals.threadlocals import get_current_request
@@ -29,6 +30,11 @@ class ConditionalOffer(AbstractConditionalOffer):
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
 
+def validate_credit_seat_type(value):
+    if len(value.split(',')) > 1 and 'credit' in value:
+        raise ValidationError('Credit seat types cannot be paired with other seat types.')
+
+
 class Range(AbstractRange):
     UPDATABLE_RANGE_FIELDS = [
         'catalog_query',
@@ -36,7 +42,12 @@ class Range(AbstractRange):
     ]
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
     catalog_query = models.CharField(max_length=255, blank=True, null=True)
-    course_seat_types = models.CharField(max_length=255, blank=True, null=True)
+    course_seat_types = models.CharField(
+        max_length=255,
+        validators=[validate_credit_seat_type],
+        blank=True,
+        null=True
+    )
 
     def run_catalog_query(self, product):
         """
