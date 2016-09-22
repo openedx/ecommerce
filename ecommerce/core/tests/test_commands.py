@@ -26,6 +26,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.client_secret = 'ecommerce-secret'
         self.segment_key = 'test-segment-key'
         self.from_email = 'site_from_email@example.com'
+        self.payment_support_email = 'support@example.com'
+        self.payment_support_url = 'http://fake.server/support'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -41,7 +43,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
 
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, theme_scss_path=None,
-                      payment_processors=None, segment_key=None, enable_enrollment_codes=False):
+                      payment_processors=None, segment_key=None, enable_enrollment_codes=False,
+                      payment_support_email=None, payment_support_url=None):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -73,6 +76,14 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         if enable_enrollment_codes:
             command_args.append('--enable-enrollment-codes={enable_enrollment_codes}'.format(
                 enable_enrollment_codes=enable_enrollment_codes
+            ))
+        if payment_support_email:
+            command_args.append('--payment-support-email={payment_support_email}'.format(
+                payment_support_email=payment_support_email
+            ))
+        if payment_support_url:
+            command_args.append('--payment-support-url={payment_support_url}'.format(
+                payment_support_url=payment_support_url
             ))
         call_command(self.command_name, *command_args)
 
@@ -117,7 +128,9 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             client_secret=self.client_secret,
             segment_key=self.segment_key,
             from_email=self.from_email,
-            enable_enrollment_codes=True
+            enable_enrollment_codes=True,
+            payment_support_email=self.payment_support_email,
+            payment_support_url=self.payment_support_url
         )
 
         site = Site.objects.get(id=site.id)
@@ -127,6 +140,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site.name, updated_site_name)
         self._check_site_configuration(site, partner)
         self.assertTrue(site.siteconfiguration.enable_enrollment_codes)
+        self.assertEqual(site.siteconfiguration.payment_support_email, self.payment_support_email)
+        self.assertEqual(site.siteconfiguration.payment_support_url, self.payment_support_url)
 
     @data(
         ['--site-id=1'],

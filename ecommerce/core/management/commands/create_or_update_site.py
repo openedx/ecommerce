@@ -94,6 +94,18 @@ class Command(BaseCommand):
                             type=bool,
                             required=False,
                             help='Enable the creation of enrollment codes.')
+        parser.add_argument('--payment-support-email',
+                            action='store',
+                            dest='payment_support_email',
+                            type=str,
+                            required=False,
+                            help='Email address displayed to user for payment support')
+        parser.add_argument('--payment-support-url',
+                            action='store',
+                            dest='payment_support_url',
+                            type=str,
+                            required=False,
+                            help='URL displayed to user for payment support')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -107,6 +119,8 @@ class Command(BaseCommand):
         segment_key = options.get('segment_key')
         from_email = options.get('from_email')
         enable_enrollment_codes = True if options.get('enable_enrollment_codes') else False
+        payment_support_email = options.get('payment_support_email', '')
+        payment_support_url = options.get('payment_support_url', '')
 
         try:
             site = Site.objects.get(id=site_id)
@@ -127,22 +141,28 @@ class Command(BaseCommand):
             partner.save()
             logger.info('Partner created with code %s', partner_code)
 
+        site_configuration_defaults = {
+            'partner': partner,
+            'lms_url_root': lms_url_root,
+            'theme_scss_path': options['theme_scss_path'],
+            'payment_processors': options['payment_processors'],
+            'segment_key': segment_key,
+            'from_email': from_email,
+            'enable_enrollment_codes': enable_enrollment_codes,
+            'oauth_settings': {
+                'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),
+                'SOCIAL_AUTH_EDX_OIDC_KEY': client_id,
+                'SOCIAL_AUTH_EDX_OIDC_SECRET': client_secret,
+                'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': client_secret,
+                'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [lms_url_root]
+            }
+        }
+        if payment_support_email:
+            site_configuration_defaults['payment_support_email'] = payment_support_email
+        if payment_support_url:
+            site_configuration_defaults['payment_support_url'] = payment_support_url
+
         SiteConfiguration.objects.update_or_create(
             site=site,
-            defaults={
-                'partner': partner,
-                'lms_url_root': lms_url_root,
-                'theme_scss_path': options['theme_scss_path'],
-                'payment_processors': options['payment_processors'],
-                'segment_key': segment_key,
-                'from_email': from_email,
-                'enable_enrollment_codes': enable_enrollment_codes,
-                'oauth_settings': {
-                    'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),
-                    'SOCIAL_AUTH_EDX_OIDC_KEY': client_id,
-                    'SOCIAL_AUTH_EDX_OIDC_SECRET': client_secret,
-                    'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': client_secret,
-                    'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [lms_url_root]
-                }
-            }
+            defaults=site_configuration_defaults
         )
