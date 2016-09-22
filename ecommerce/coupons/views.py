@@ -14,8 +14,6 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
-from requests.exceptions import ConnectionError, Timeout
-from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
@@ -51,10 +49,11 @@ def get_voucher_and_products_from_code(code):
         ProductNotFoundError: When no products are associated with the voucher.
     """
     voucher = Voucher.objects.get(code=code)
+    voucher_range = voucher.offers.first().benefit.range
+    products = voucher_range.all_products()
 
-    products = voucher.offers.first().benefit.range.all_products()
-
-    if products:
+    if products or voucher_range.catalog_query:
+        # List of products is empty in case of Multi-course coupon
         return voucher, products
     else:
         raise exceptions.ProductNotFoundError()
@@ -128,10 +127,6 @@ class CouponOfferView(TemplateView):
             except exceptions.ProductNotFoundError:
                 return {
                     'error': _('The voucher is not applicable to your current basket.'),
-                }
-            except (ConnectionError, SlumberBaseException, Timeout):
-                return {
-                    'error': _('Coupon information not available at this time. Please try again later.'),
                 }
             valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
