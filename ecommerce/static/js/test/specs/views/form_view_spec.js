@@ -1,10 +1,12 @@
 define([
         'jquery',
         'backbone',
+        'text!templates/_alert_div.html',
         'views/form_view'
     ],
     function ($,
               Backbone,
+              AlertDivTemplate,
               FormView) {
         'use strict';
 
@@ -19,13 +21,13 @@ define([
                 TestModel = Backbone.Model.extend({ url: 'fake/url' });
                 model = new TestModel();
                 view = new FormView({ model: model });
-                view.$el.prepend('<div class="alerts" tabindex="-1" aria-live="polite"></div>');
+                view.$el.prepend(AlertDivTemplate);
                 view.render();
                 courseId = 'course-v1:edX+DemoX+Demo_Course';
             });
 
             it('should throw an error if submitted with blank fields', function () {
-                errorHTML = '<strong>Error!</strong> You must complete all required fields.';
+                errorHTML = '<strong></strong> Please complete all required fields.';
                 spyOn(model, 'isValid').and.returnValue(false);
                 view.submit($.Event('click'));
                 expect(view.$el.find('.alert').length).toBe(1);

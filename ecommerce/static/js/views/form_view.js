@@ -5,7 +5,7 @@ define([
         'backbone.validation',
         'underscore',
         'underscore.string',
-        'views/alert_view',
+        'utils/alert_utils',
         'utils/utils',
     ],
     function ($,
@@ -14,7 +14,7 @@ define([
               BackboneValidation,
               _,
               _s,
-              AlertView,
+              AlertUtils,
               Utils) {
         'use strict';
 
@@ -39,35 +39,13 @@ define([
             remove: function () {
                 Backbone.Validation.unbind(this);
 
-                this.clearAlerts();
+                AlertUtils.clearAlerts(this);
                 return this._super();
             },
 
             render: function () {
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.
                 this.$alerts = this.$el.find('.alerts');
-                return this;
-            },
-
-            /**
-             * Renders alerts that will appear at the top of the page.
-             *
-             * @param {String} level - Severity of the alert. This should be one of success, info, warning, or danger.
-             * @param {Sring} message - Message to display to the user.
-             */
-            renderAlert: function (level, title, message) {
-                var view = new AlertView({level: level, title: title, message: message});
-
-                view.render();
-                this.$alerts.append(view.el);
-                this.alertViews.push(view);
-
-                $('body').animate({
-                    scrollTop: this.$alerts.offset().top
-                }, 500);
-
-                this.$alerts.focus();
-
                 return this;
             },
 
@@ -95,31 +73,19 @@ define([
                     async: false,
                     success: function (data) {
                         if(data.id === courseId) {
-                            _this.clearAlerts();
-                            _this.renderAlert('danger', gettext('Error!'), message);
+                            AlertUtils.clearAlerts(_this);
+                            AlertUtils.renderAlert('danger', gettext('Error!'), message, _this);
                             courseIDFound = true;
                         }
                     },
                     error: function (response) {
                         if (response.status === 404) {
-                            _this.clearAlerts();
+                            AlertUtils.clearAlerts(_this);
                         }
                     }
                 });
                 return courseIDFound;
 
-            },
-            /**
-             * Remove all alerts currently on display.
-             */
-            clearAlerts: function () {
-                _.each(this.alertViews, function (view) {
-                    view.remove();
-                });
-
-                this.alertViews = [];
-
-                return this;
             },
 
             /**
@@ -161,8 +127,8 @@ define([
 
                 // Validate the input and display a message, if necessary.
                 if (!this.model.isValid(true)) {
-                    this.clearAlerts();
-                    this.renderAlert('danger', gettext('Error!'), gettext('You must complete all required fields.'));
+                    AlertUtils.clearAlerts(self);
+                    AlertUtils.renderAlert('danger', '', gettext('Please complete all required fields.'), self);
                     return;
                 }
                 // Check if the courseID already exists.
@@ -201,9 +167,8 @@ define([
                         console.error(response.responseText);
                     }
 
-                    self.clearAlerts();
-                    self.renderAlert('danger', gettext('Error!'), message);
-                    self.$el.animate({scrollTop: 0}, 'slow');
+                    AlertUtils.clearAlerts(self);
+                    AlertUtils.renderAlert('danger', gettext('Error!'), message, self);
                 };
 
                 if (this.editing && _.has(this, 'editableAttributes')) {

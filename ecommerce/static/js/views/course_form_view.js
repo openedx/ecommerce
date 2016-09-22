@@ -10,6 +10,7 @@ define([
         'underscore',
         'underscore.string',
         'collections/product_collection',
+        'text!templates/_alert_div.html',
         'text!templates/course_form.html',
         'text!templates/_course_type_radio_field.html',
         'views/course_seat_form_fields/audit_course_seat_form_field_view',
@@ -29,6 +30,7 @@ define([
               _,
               _s,
               ProductCollection,
+              AlertDivTemplate,
               CourseFormTemplate,
               CourseTypeRadioTemplate,
               AuditCourseSeatFormFieldView,
@@ -201,6 +203,7 @@ define([
                 this.renderVerificationDeadline();
                 this.renderHonorMode();
                 this.disableHonorMode();
+                this.$('.fields:first').before(AlertDivTemplate);
 
                 this.stickit();
 

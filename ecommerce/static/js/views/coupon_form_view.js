@@ -10,6 +10,7 @@ define([
         'underscore',
         'underscore.string',
         'utils/utils',
+        'text!templates/_alert_div.html',
         'text!templates/coupon_form.html',
         'models/course_model',
         'collections/course_collection',
@@ -25,6 +26,7 @@ define([
               _,
               _s,
               Utils,
+              AlertDivTemplate,
               CouponFormTemplate,
               Course,
               Courses,
@@ -541,17 +543,6 @@ define([
                 window.open(e.currentTarget.href);
             },
 
-
-            /**
-             * Override default renderAlert to display a custom message.
-             */
-            renderAlert: function (level, title, message) {
-                if (!this.model.isValid(true)) {
-                    message = 'Please complete all required fields.';
-                }
-                this._super(level, title='', message);
-            },
-
             render: function () {
                 // Render the parent form/template
                 this.$el.html(this.template(this.model.attributes));
@@ -560,8 +551,7 @@ define([
                 this.toggleCatalogTypeField();
                 this.dynamic_catalog_view.setElement(this.$('.catalog_buttons')).render();
 
-                // Avoid the need to create this jQuery object every time an alert has to be rendered.
-                this.$alerts = this.$('.alerts');
+                this.$('.row:first').before(AlertDivTemplate);
 
                 if (this.editing) {
                     this.disableNonEditableFields();

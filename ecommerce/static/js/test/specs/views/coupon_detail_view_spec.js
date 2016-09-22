@@ -2,6 +2,7 @@ define([
         'jquery',
         'underscore.string',
         'models/coupon_model',
+        'utils/alert_utils',
         'views/coupon_detail_view',
         'test/mock_data/coupons',
         'test/spec-utils'
@@ -9,6 +10,7 @@ define([
     function ($,
               _s,
               Coupon,
+              AlertUtils,
               CouponDetailView,
               Mock_Coupons,
               SpecUtils) {
@@ -235,12 +237,28 @@ define([
             it('should download voucher report in the new tab', function () {
                 var e = $.Event('click'),
                     url = _s.sprintf('/api/v2/coupons/coupon_reports/%d', model.id);
+                spyOn($, 'ajax').and.callFake(function (options) {
+                    options.success();
+                });
                 spyOn(e, 'preventDefault');
                 spyOn(window, 'open');
                 view.downloadCouponReport(e);
                 expect(e.preventDefault).toHaveBeenCalled();
                 expect(window.open).toHaveBeenCalledWith(url, '_blank');
             });
+
+            it('should display error when download voucher fails', function () {
+                var e = $.Event('click');
+                spyOn($, 'ajax').and.callFake(function (options) {
+                    options.error(data);
+                });
+                spyOn(AlertUtils, 'clearAlerts');
+                spyOn(AlertUtils, 'renderAlert');
+                view.downloadCouponReport(e);
+                expect(AlertUtils.clearAlerts).toHaveBeenCalled();
+                expect(AlertUtils.renderAlert).toHaveBeenCalled();
+            });
+
         });
     }
 );

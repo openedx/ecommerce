@@ -61,3 +61,12 @@ class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, LmsApiMockMix
         self.mock_course_api_response(course=self.course)
         self.request_specific_voucher_report(self.coupon1)
         self.request_specific_voucher_report(self.coupon2)
+
+    def test_report_missing_stockrecord_raises_http404(self):
+        """ Verify that Http404 is raised when no StockRecord for coupon """
+        StockRecord.objects.get(product=self.coupon1).delete()
+        request = RequestFactory().get('')
+        response = CouponReportCSVView().get(request, self.coupon1.id)
+        self.assertEqual(response.content,
+                         'Failed to find a matching stock record for coupon, report download canceled.')
+        self.assertEqual(response.status_code, 404)

@@ -277,13 +277,22 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             voucher (Voucher): Voucher associated with the Coupon
         """
         offer = voucher.offers.first()
-        discount_data = get_voucher_discount_info(
-            offer.benefit,
-            offer.condition.range.catalog.stock_records.first().price_excl_tax
-        )
-        coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
-        discount_percentage = _("{percentage} %").format(percentage=discount_data['discount_percentage'])
-        discount_amount = currency(discount_data['discount_value'])
+        if offer.condition.range.catalog:
+            discount_data = get_voucher_discount_info(
+                offer.benefit,
+                offer.condition.range.catalog.stock_records.first().price_excl_tax
+            )
+            coupon_type = _('Discount') if discount_data['is_discounted'] else _('Enrollment')
+            discount_percentage = _('{percentage} %').format(percentage=discount_data['discount_percentage'])
+            discount_amount = currency(discount_data['discount_value'])
+        else:
+            if offer.benefit.type == Benefit.PERCENTAGE:
+                coupon_type = _('Discount') if offer.benefit.value < 100 else _('Enrollment')
+            else:
+                coupon_type = None
+            discount_amount = None
+            discount_percentage = _('{percentage} %').format(
+                percentage=offer.benefit.value) if offer.benefit.type == Benefit.PERCENTAGE else None
 
         self.assertEqual(row['Coupon Type'], coupon_type)
         self.assertEqual(row['Category'], ProductCategory.objects.get(product=coupon).category.name)
@@ -373,6 +382,24 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertNotIn('Course Seat Types', field_names)
         self.assertNotIn('Redeemed For Course ID', field_names)
 
+    def test_report_for_dynamic_coupon_with_fixed_benefit_type(self):
+        """ Verify the coupon report contains correct data for coupon with fixed benefit type. """
+        dynamic_coupon = self.create_coupon(
+            benefit_type=Benefit.FIXED,
+            benefit_value=50,
+            catalog_query='*:*',
+            course_seat_types='verified',
+            max_uses=1,
+            note='Tešt note',
+            quantity=1,
+            title='Tešt product'
+        )
+        dynamic_coupon.history.all().update(history_user=self.user)
+        coupon_voucher = CouponVouchers.objects.get(coupon=dynamic_coupon)
+        __, rows = generate_coupon_report([coupon_voucher])
+        voucher = coupon_voucher.vouchers.first()
+        self.assert_report_first_row(rows[0], dynamic_coupon, voucher)
+
     def test_report_for_inactive_coupons(self):
         """ Verify the coupon report show correct status for inactive coupons. """
         coupon_title = self.coupon.title
@@ -406,10 +433,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
 
         empty_fields = (
-            'Coupon Type',
             'Discount Amount',
-            'Discount Percentage',
-            'Invoiced Amount',
             'Price',
         )
         for field in empty_fields:

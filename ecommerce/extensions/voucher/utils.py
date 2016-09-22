@@ -87,10 +87,10 @@ def _get_info_for_coupon_report(coupon, voucher):
         note = ''
 
     offer = voucher.offers.first()
+    coupon_stockrecord = StockRecord.objects.get(product=coupon)
+    invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
     if offer.condition.range.catalog:
         seat_stockrecord = offer.condition.range.catalog.stock_records.first()
-        coupon_stockrecord = StockRecord.objects.get(product=coupon)
-        invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
         course_id = seat_stockrecord.product.attr.course_key
         course_organization = CourseKey.from_string(course_id).org
         price = currency(seat_stockrecord.price_excl_tax)
@@ -99,12 +99,17 @@ def _get_info_for_coupon_report(coupon, voucher):
     else:
         # Note (multi-courses): Need to account for multiple seats.
         catalog_query = offer.condition.range.catalog_query
-        course_seat_types = offer.condition.range.course_seat_types
+        if offer.benefit.type == Benefit.PERCENTAGE:
+            coupon_type = _('Discount') if offer.benefit.value < 100 else _('Enrollment')
+        else:
+            coupon_type = None
         course_id = None
-        invoiced_amount = None
         course_organization = None
+        course_seat_types = offer.condition.range.course_seat_types
+        discount_amount = None
+        discount_percentage = _('{percentage} %').format(
+            percentage=offer.benefit.value) if offer.benefit.type == Benefit.PERCENTAGE else None
         price = None
-        coupon_type, discount_percentage, discount_amount = None, None, None
 
     coupon_data = {
         'Code': 'This row applies to all vouchers',
