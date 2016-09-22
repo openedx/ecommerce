@@ -12,15 +12,18 @@ from oscar.test.factories import (
     ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 )
 from oscar.test.utils import RequestFactory
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberBaseException
 
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.coupons.views import get_voucher_and_products_from_code, voucher_is_valid
+from ecommerce.coupons.views import CouponOfferView, get_voucher_and_products_from_code, voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
-from ecommerce.tests.mixins import LmsApiMockMixin
+from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -175,7 +178,7 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
 
 @httpretty.activate
 @ddt.ddt
-class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
     path_with_code = '{path}?code={code}'.format(path=path, code=COUPON_CODE)
 
@@ -227,6 +230,21 @@ class CouponOfferViewTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         url = self.path + '?code={}'.format('NOPRODUCT')
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
+
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    @mock_course_catalog_api_client
+    def test_course_discovery_not_available(self, error):
+        self.mock_api_error(error=error, url='{}course_runs/?q=*:*'.format(settings.COURSE_CATALOG_API_URL))
+        self.create_coupon(
+            catalog_query='*:*',
+            course_seat_types='verified',
+            code=COUPON_CODE
+        )
+        request = RequestFactory().get(self.path + self.path_with_code)
+        coupon_offer_view = CouponOfferView()
+        coupon_offer_view.request = request
+        response = coupon_offer_view.get_context_data()
+        self.assertEqual(response['error'], _('Coupon information not available at this time. Please try again later.'))
 
 
 class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
