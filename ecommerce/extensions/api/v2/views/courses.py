@@ -1,8 +1,10 @@
 """HTTP endpoints for interacting with courses."""
+from django.db.models import Prefetch
 from rest_framework import status
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from oscar.core.loading import get_model
 import waffle
 
 from ecommerce.core.constants import COURSE_ID_REGEX
@@ -10,10 +12,24 @@ from ecommerce.courses.models import Course
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 from ecommerce.extensions.api import serializers
 
+Product = get_model('catalogue', 'Product')
+ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+
 
 class CourseViewSet(NonDestroyableModelViewSet):
+    product_attribute_value_prefetch = Prefetch(
+        'products__attribute_values',
+        queryset=ProductAttributeValue.objects.select_related('attribute').all()
+    )
+
+    products_prefetch = Prefetch(
+        'products',
+        queryset=Product.objects.select_related('parent__product_class').all()
+    )
     lookup_value_regex = COURSE_ID_REGEX
-    queryset = Course.objects.all()
+    queryset = Course.objects.all().prefetch_related(
+        products_prefetch, product_attribute_value_prefetch, 'products__stockrecords'
+    ).all()
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
 
