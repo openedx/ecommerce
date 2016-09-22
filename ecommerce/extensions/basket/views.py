@@ -13,7 +13,7 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_lms, mode_for_seat
+from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -104,15 +104,15 @@ class BasketSummaryView(BasketView):
             image_url = None
             short_description = None
             try:
-                course = get_course_info_from_lms(course_key)
+                course = get_course_info_from_catalog(self.request.site, course_key)
                 try:
-                    image_url = course['media']['image']['raw']
+                    image_url = course['image']['src']
                 except (KeyError, TypeError):
                     image_url = ''
                 short_description = course.get('short_description', '')
-                course_name = course['name']
+                course_name = course.get('title', '')
             except (ConnectionError, SlumberBaseException, Timeout):
-                logger.exception('Failed to retrieve data from Course API for course [%s].', course_key)
+                logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
 
             if self.request.site.siteconfiguration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
