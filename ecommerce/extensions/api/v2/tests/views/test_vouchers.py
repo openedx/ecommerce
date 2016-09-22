@@ -95,7 +95,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, TestCa
         }
 
         self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run_info=course_run_info)
-        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat1)
         new_range.add_product(seat2)
         voucher, __ = prepare_voucher(_range=new_range)
@@ -159,10 +159,8 @@ class VoucherViewOffersEndpointTests(
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
         request = self.prepare_offers_listing_request(voucher.code)
         response = self.endpointView(request)
-
         self.assertEqual(response.status_code, 200)
 
-        # If no seat is associated with the voucher range, Bad Request status should be returned
         new_range.remove_product(seat)
         response = self.endpointView(request)
         self.assertEqual(response.status_code, 404)
@@ -232,7 +230,7 @@ class VoucherViewOffersEndpointTests(
         """
         course, seat = self.create_course_and_seat()
         self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
-        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range)
         request = self.prepare_offers_listing_request(voucher.code)
@@ -246,7 +244,7 @@ class VoucherViewOffersEndpointTests(
         """ Verify the endpoint returns offers data for single product range. """
         course, seat = self.create_course_and_seat()
         self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
-        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range)
         voucher, __ = get_voucher_and_products_from_code(voucher.code)
@@ -290,7 +288,7 @@ class VoucherViewOffersEndpointTests(
         """ Verify that the course offers data is returned for a multiple courses voucher. """
         course, seat = self.create_course_and_seat()
         self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
-        new_range, __ = Range.objects.get_or_create(catalog_query='*:*')
+        new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
         benefit = voucher.offers.first().benefit
@@ -303,7 +301,7 @@ class VoucherViewOffersEndpointTests(
                 'type': benefit.type,
                 'value': benefit.value
             },
-            'contains_verified': False,
+            'contains_verified': True,
             'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
             'image_url': 'path/to/the/course/image',
