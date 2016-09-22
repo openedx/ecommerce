@@ -22,9 +22,14 @@ define([
 
                 this.listenTo(providerSelectionView, 'productSelected', function (data) {
                     paymentButtonView.setSku(data.sku);
-
                     // Update the display of the checkout total.
-                    this.$el.find('.total-price span').text(data.price);
+                    if (data.discount === 'None') {
+                        this.$('span.total-price').text(data.price);
+                    } else {
+                        this.$('span.price').text(data.price);
+                        this.$('span.discount').text(data.discount);
+                        this.$('span.total-price').text(data.new_price);
+                    }
                 });
 
                 // Render the payment buttons first, since the rendering of the provider selection will

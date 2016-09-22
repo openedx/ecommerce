@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
+import datetime
 import json
 from decimal import Decimal
 
@@ -349,3 +350,17 @@ class LmsApiMockMixin(object):
         )
         body = json.dumps(data)
         httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
+
+    def mock_eligibility_api(self, request, user, course_key, eligible=True):
+        """ Mock eligibility API endpoint. Returns eligibility data. """
+        eligibility_data = [{
+            'username': user.username,
+            'course_key': course_key,
+            'deadline': str(datetime.datetime.now() + datetime.timedelta(days=1))
+        }] if eligible else []
+        url = '{host}/eligibility/?username={username}&course_key={course_key}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/credit/v1'),
+            username=user.username,
+            course_key=course_key
+        )
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type='application/json')
