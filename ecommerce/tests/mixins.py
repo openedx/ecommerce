@@ -334,3 +334,18 @@ class LmsApiMockMixin(object):
             course_id=course_id
         )
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+
+    def mock_account_api(self, request, username, data):
+        """ Mock the account LMS API endpoint for a user.
+
+        Args:
+            request (WSGIRequest): The request from which the host URL is constructed.
+            username (string): The username of the user.
+            data (dict): Dictionary of data the account API should return.
+        """
+        url = '{host}/accounts/{username}'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/user/v1'),
+            username=username,
+        )
+        body = json.dumps(data)
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')

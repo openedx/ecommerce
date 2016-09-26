@@ -309,7 +309,7 @@ class User(AbstractUser):
             status = api.enrollment(','.join([self.username, course_key])).get()
         except (ConnectionError, SlumberBaseException, Timeout) as ex:
             log.exception(
-                'Failed to retrieve enrollment details for [%s] in course [%s], Because of [%s]',
+                'Failed to retrieve enrollment details for [%s] in course [%s], because of [%s]',
                 self.username,
                 course_key,
                 ex,
@@ -320,6 +320,35 @@ class User(AbstractUser):
         if status and status.get('mode') == seat_type and status.get('is_active'):
             return True
         return False
+
+    def account_details(self, request):
+        """ Returns the account details from LMS.
+
+        Args:
+            request (WSGIRequest): The request from which the LMS account API endpoint is created.
+
+        Returns:
+            A dictionary of account details.
+
+        Raises:
+            ConnectionError, SlumberBaseException and Timeout for failures in establishing a
+            connection with the LMS account API endpoint.
+        """
+        try:
+            api = EdxRestApiClient(
+                request.site.siteconfiguration.build_lms_url('/api/user/v1'),
+                oauth_access_token=self.access_token,
+                append_slash=False
+            )
+            response = api.accounts(self.username).get()
+            return response
+        except (ConnectionError, SlumberBaseException, Timeout) as ex:
+            log.exception(
+                'Failed to retrieve account details for [%s], because of [%s]',
+                self.username,
+                ex,
+            )
+            raise ex
 
 
 class Client(User):
