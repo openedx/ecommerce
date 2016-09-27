@@ -227,6 +227,7 @@ define([
                 'change [name=invoice_discount_type]': 'changeLimitForInvoiceDiscountValue',
                 'change [name=invoice_type]': 'toggleInvoiceFields',
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
+                'change [name=credit_radio]': 'toggleCreditSeats',
                 'click .external-link': 'routeToLink'
             },
 
@@ -271,6 +272,17 @@ define([
                 this.listenTo(this.model, 'change:course_seat_types', this.updateCourseSeatTypes);
 
                 this._super();
+            },
+
+            toggleCreditSeats: function() {
+                var nonCreditSeatsField = this.$('.non-credit-seats');
+                if (this.$('#credit').is(':checked')) {
+                    this.$('input[id=verified], input[id=professional]').attr('checked', false);
+                    nonCreditSeatsField.addClass(this.hiddenClass);
+                    this.model.set('course_seat_types', ['credit']);
+                } else if (this.$('#non-credit').is(':checked')) {
+                    nonCreditSeatsField.removeClass(this.hiddenClass);
+                }
             },
 
             setLimitToElement: function(element, max_value, min_value) {
@@ -463,13 +475,15 @@ define([
                 course.listenTo(course, 'sync', _.bind(function () {
                     this.seatTypes = _.map(course.seats(), function (seat) {
                         var name = seat.getSeatTypeDisplayName();
-                        return $('<option></option>')
-                            .text(name)
-                            .val(name)
-                            .data({
-                                price: seat.get('price'),
-                                stockrecords: _.map(seat.get('stockrecords'), parseId)
-                            });
+                        if (name !== 'Credit') {
+                            return $('<option></option>')
+                                .text(name)
+                                .val(name)
+                                .data({
+                                    price: seat.get('price'),
+                                    stockrecords: _.map(seat.get('stockrecords'), parseId)
+                                });
+                        }
                     });
                     // update field
                     this.$('[name=seat_type]')
@@ -554,6 +568,12 @@ define([
                 this.$('.row:first').before(AlertDivTemplate);
 
                 if (this.editing) {
+                    if (this.model.get('course_seat_types')[0] === 'credit') {
+                        this.$('#credit').attr('checked', true);
+                        this.$('.non-credit-seats').addClass(this.hiddenClass);
+                    } else {
+                        this.$('#non-credit').attr('checked', true);
+                    }
                     this.disableNonEditableFields();
                     this.toggleCouponTypeField();
                     this.toggleVoucherTypeField();
@@ -578,6 +598,7 @@ define([
                         'invoice_type': 'Prepaid',
                         'tax_deduction': 'No',
                     });
+                    this.$('#non-credit').attr('checked', true);
                     this.$('button[type=submit]').html(gettext('Create Coupon'));
                     this.$('.catalog-query').removeClass('editing');
                 }

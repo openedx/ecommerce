@@ -3,6 +3,7 @@ import hashlib
 import httpretty
 import mock
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -10,6 +11,7 @@ from oscar.test import factories
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.offer.models import validate_credit_seat_type
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -121,6 +123,16 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.catalog_query = 'key:*'
         self.range.course_seat_types = 'verified'
         self.assertEqual(len(self.range.all_products()), 0)
+
+    def test_credit_seat_type_validator(self):
+        """
+        Verify the validator raises error for combination of credit and another seat type.
+        """
+        self.assertIsNone(validate_credit_seat_type('verified,professional'))
+        self.assertIsNone(validate_credit_seat_type('credit'))
+
+        with self.assertRaises(ValidationError):
+            validate_credit_seat_type('credit,verified')
 
 
 class ConditionalOfferTests(TestCase):
