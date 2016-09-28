@@ -6,6 +6,7 @@ import logging
 import uuid
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
@@ -14,6 +15,7 @@ from oscar.templatetags.currency_filters import currency
 import pytz
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.api import exceptions
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -527,3 +529,52 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         max_uses=max_uses,
         email_domains=email_domains
     )
+
+
+def get_cached_voucher(code):
+    """
+    Returns a voucher from cache if one is stored to cache, if not the voucher
+    is retrieved from database and stored to cache.
+
+    Arguments:
+        code (str): The code of a coupon voucher.
+
+    Returns:
+        voucher (Voucher): The Voucher for the passed code.
+
+    Raises:
+        Voucher.DoesNotExist: When no vouchers with provided code exist.
+    """
+    cache_key = 'voucher_{code}'.format(code=code)
+    cache_hash = hashlib.md5(cache_key).hexdigest()
+    voucher = cache.get(cache_key)
+    if not voucher:
+        voucher = Voucher.objects.get(code=code)
+        cache.set(cache_hash, voucher, settings.VOUCHER_CACHE_TIMEOUT)
+    return voucher
+
+
+def get_voucher_and_products_from_code(code):
+    """
+    Returns a voucher and product for a given code.
+
+    Arguments:
+        code (str): The code of a coupon voucher.
+
+    Returns:
+        voucher (Voucher): The Voucher for the passed code.
+        products (list): List of Products associated with the Voucher.
+
+    Raises:
+        Voucher.DoesNotExist: When no vouchers with provided code exist.
+        ProductNotFoundError: When no products are associated with the voucher.
+    """
+    voucher = get_cached_voucher(code)
+    voucher_range = voucher.offers.first().benefit.range
+    products = voucher_range.all_products()
+
+    if products or voucher_range.catalog_query:
+        # List of products is empty in case of Multi-course coupon
+        return voucher, products
+    else:
+        raise exceptions.ProductNotFoundError()

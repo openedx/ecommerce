@@ -11,16 +11,21 @@ import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from oscar.core.loading import get_model
+from oscar.test.factories import RangeFactory
 from waffle.models import Switch
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
+from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import JwtMixin
 from ecommerce.tests.testcases import TestCase
 
+
 JSON = 'application/json'
+Benefit = get_model('offer', 'Benefit')
 
 
 @ddt.ddt
@@ -239,3 +244,25 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
             site_name=self.site.name
         )
         self.assertEqual(response.context['error'], expected)
+
+    @httpretty.activate
+    @ddt.data(
+        (Benefit.PERCENTAGE, '100%'), (Benefit.FIXED, '$100.00')
+    )
+    @ddt.unpack
+    def test_provider_fields(self, benefit_type, discount):
+        code = 'TEST'
+        seat = self.course.create_or_update_seat(
+            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+        )
+        new_range = RangeFactory(products=[seat, ])
+        prepare_voucher(code=code, _range=new_range, benefit_value=100, benefit_type=benefit_type)
+        self._mock_eligibility_api(body=self.eligibilities)
+        self._mock_providers_api(body=self.provider_data)
+
+        response = self.client.get('{}?code={}'.format(self.path, code))
+        self.assertEqual(response.status_code, 200)
+        provider_info = response.context['providers'][0]
+
+        self.assertEqual(provider_info['new_price'], '0.00')
+        self.assertEqual(provider_info['discount'], discount)

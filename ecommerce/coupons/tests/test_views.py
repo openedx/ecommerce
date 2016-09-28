@@ -1,6 +1,6 @@
 import datetime
+import urllib
 
-import ddt
 import httpretty
 import pytz
 from django.conf import settings
@@ -15,11 +15,12 @@ from oscar.test.utils import RequestFactory
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.coupons.views import get_voucher_and_products_from_code, voucher_is_valid
+from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -148,6 +149,21 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         self.assertFalse(valid)
         self.assertEqual(msg, error_msg)
 
+    def test_once_per_customer_voucher(self):
+        """ Verify the coupon is valid for anonymous users. """
+        voucher, product = prepare_voucher(usage=Voucher.ONCE_PER_CUSTOMER)
+        request = RequestFactory().request()
+        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=request)
+        self.assertTrue(valid)
+        self.assertEqual(msg, '')
+
+    def test_usage_exceeded_coupon(self):
+        """ Verify voucher_is_valid() assess that the voucher exceeded it's usage limit. """
+        voucher, product = prepare_voucher(code=COUPON_CODE, usage=Voucher.ONCE_PER_CUSTOMER, max_usage=1)
+        user = self.create_user()
+        error_msg = _('This coupon code is no longer available.')
+        self.assert_error_messages(voucher, product, user, error_msg)
+
     def test_used_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is unavailable. """
         voucher, product = prepare_voucher(code=COUPON_CODE)
@@ -157,24 +173,8 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         error_msg = _('This coupon has already been used')
         self.assert_error_messages(voucher, product, user, error_msg)
 
-    def test_usage_exceeded_coupon(self):
-        """ Verify voucher_is_valid() assess that the voucher exceeded it's usage limit. """
-        voucher, product = prepare_voucher(code=COUPON_CODE, usage=Voucher.ONCE_PER_CUSTOMER, max_usage=1)
-        user = self.create_user()
-        error_msg = _('This coupon code is no longer available.')
-        self.assert_error_messages(voucher, product, user, error_msg)
-
-    def test_once_per_customer_voucher(self):
-        """ Verify the coupon is valid for anonymous users. """
-        voucher, product = prepare_voucher(usage=Voucher.ONCE_PER_CUSTOMER)
-        request = RequestFactory().request()
-        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=request)
-        self.assertTrue(valid)
-        self.assertEqual(msg, '')
-
 
 @httpretty.activate
-@ddt.ddt
 class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
     path_with_code = '{path}?code={code}'.format(path=path, code=COUPON_CODE)
@@ -227,6 +227,38 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
         url = self.path + '?code={}'.format('NOPRODUCT')
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
+
+    def prepare_url_for_credit_seat(self, code='CREDIT'):
+        """Helper method for creating a credit seat and construct the URL to its offer landing page.
+        Returns:
+            URL to its offer landing page.
+        """
+        __, credit_seat = self.create_course_and_seat(seat_type='credit')
+        # Make sure to always pair `course_seat_types` and `catalog_query` parameters because
+        # if one of them is missing it could result in a SEGFAULT error when running tests
+        # with migrations enabled.
+        _range = RangeFactory(products=[credit_seat, ], course_seat_types='credit', catalog_query='*:*')
+        prepare_voucher(code=code, _range=_range)
+
+        url = '{path}?code={code}'.format(path=self.path, code=code)
+        return url
+
+    def test_redirect_to_login(self):
+        """ Verify anonymous user gets redirected to login page. """
+        self.client.logout()
+        url = self.prepare_url_for_credit_seat()
+        response = self.client.get(url)
+
+        testserver_login_url = self.get_full_url(reverse('login'))
+        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(url))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, expected_url, target_status_code=302)
+
+    def test_credit_seat_response(self):
+        """ Verify a logged in user does not get redirected. """
+        url = self.prepare_url_for_credit_seat()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
 
 class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):

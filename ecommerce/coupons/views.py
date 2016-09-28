@@ -17,9 +17,11 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
+from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -31,32 +33,6 @@ Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
-
-
-def get_voucher_and_products_from_code(code):
-    """
-    Returns a voucher and product for a given code.
-
-    Arguments:
-        code (str): The code of a coupon voucher.
-
-    Returns:
-        voucher (Voucher): The Voucher for the passed code.
-        products (list): List of Products associated with the Voucher.
-
-    Raises:
-        Voucher.DoesNotExist: When no vouchers with provided code exist.
-        ProductNotFoundError: When no products are associated with the voucher.
-    """
-    voucher = Voucher.objects.get(code=code)
-    voucher_range = voucher.offers.first().benefit.range
-    products = voucher_range.all_products()
-
-    if products or voucher_range.catalog_query:
-        # List of products is empty in case of Multi-course coupon
-        return voucher, products
-    else:
-        raise exceptions.ProductNotFoundError()
 
 
 def voucher_is_valid(voucher, products, request):
@@ -140,6 +116,7 @@ class CouponOfferView(TemplateView):
             'error': _('This coupon code is invalid.'),
         }
 
+    @method_decorator(login_required_for_credit)
     def get(self, request, *args, **kwargs):
         """Get method for coupon redemption page."""
         return super(CouponOfferView, self).get(request, *args, **kwargs)
