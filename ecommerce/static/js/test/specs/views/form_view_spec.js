@@ -47,7 +47,7 @@ define([
             });
 
             it('should validate if course id is duplicate', function () {
-                 var courseDataSuccess =  {
+                 var courseDataSuccess = {
                         id: courseId,
                         name: 'Demo Course',
                         type: 'audit'

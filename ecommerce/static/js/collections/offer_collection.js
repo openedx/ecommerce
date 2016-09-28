@@ -13,10 +13,19 @@ define([
             url: '/api/v2/vouchers/offers/',
 
             initialize: function() {
+                this.empty = false;
                 this.page = 1;
                 this.perPage = 6;
                 this.updateLimits();
                 this.on('update', this.updateNumberOfPages);
+            },
+
+            parse: function(response) {
+                this._super(response);
+                if (response.results.length === 0) {
+                    this.empty = true;
+                }
+                return response.results;
             },
 
             updateNumberOfPages: function() {

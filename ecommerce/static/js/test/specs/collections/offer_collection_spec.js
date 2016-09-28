@@ -1,5 +1,6 @@
 define([
-        'collections/offer_collection'
+        'collections/offer_collection',
+        'backbone.super'
     ],
     function(OfferCollection) {
         'use strict';
@@ -7,6 +8,7 @@ define([
             response = {
                 count: 4,
                 page: 1,
+                empty: false,
                 next: null,
                 previous: null,
                 results: [
@@ -29,6 +31,12 @@ define([
 
             it('should return the results list in the response', function() {
                 expect(collection.parse(response)).toEqual(response.results);
+            });
+
+            it('should set the collection is empty when no results are fetched', function() {
+                response.results = [];
+                collection.parse(response);
+                expect(collection.empty).toBeTruthy();
             });
 
             it('should fetch the next page of results', function() {
