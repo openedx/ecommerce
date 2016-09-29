@@ -4,19 +4,22 @@ define([
         'underscore',
         'underscore.string',
         'moment',
-        'text!templates/_offer_course_list.html'
+        'text!templates/_offer_course_list.html',
+        'text!templates/_offer_error.html'
     ],
     function ($,
               Backbone,
               _,
               _s,
               moment,
-              OfferCourseListTemplate) {
+              OfferCourseListTemplate,
+              OfferErrorTemplate) {
 
         'use strict';
 
         return Backbone.View.extend({
             template: _.template(OfferCourseListTemplate),
+            errorTemplate: _.template(OfferErrorTemplate),
 
             events: {
                 'click .prev': 'previous',
@@ -25,7 +28,7 @@ define([
             },
 
             initialize: function (options) {
-                this.listenTo(this.collection, 'update', this.render);
+                this.listenTo(this.collection, 'sync', this.render);
                 this.code = options.code;
             },
 
@@ -44,7 +47,9 @@ define([
             },
 
             render: function() {
-                if (this.collection.length > 0) {
+                if (this.collection.empty) {
+                    this.showEmptyOfferErrorMessage();
+                } else if (this.collection.length > 0) {
                     this.showVerifiedCertificate();
                     this.refreshData();
                     this.$el.html(
@@ -60,6 +65,12 @@ define([
                     this.delegateEvents();
                 }
                 return this;
+            },
+
+            showEmptyOfferErrorMessage: function() {
+                this.$el.html(this.errorTemplate(
+                    {error_msg: 'This coupon is not valid for any currently available course seats.'}
+                ));
             },
 
             refreshData: function() {
