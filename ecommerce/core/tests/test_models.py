@@ -1,5 +1,3 @@
-import json
-
 import ddt
 import httpretty
 import mock
@@ -133,18 +131,6 @@ class BusinessClientTests(TestCase):
 
 @ddt.ddt
 class SiteConfigurationTests(TestCase):
-    def mock_access_token_response(self, status=200):
-        """ Mock the response from the OAuth provider's access token endpoint. """
-        url = '{root}/access_token'.format(root=self.site.siteconfiguration.oauth2_provider_url)
-        token = 'abc123'
-        body = json.dumps({
-            'access_token': token,
-            'expires_in': 3600,
-        })
-        httpretty.register_uri(httpretty.POST, url, body=body, content_type='application/json', status=status)
-
-        return token
-
     @ddt.data(
         ("paypal", {"paypal"}),
         ("paypal ", {"paypal"}),

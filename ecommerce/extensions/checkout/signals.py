@@ -3,13 +3,12 @@ import logging
 from django.conf import settings
 from django.dispatch import receiver
 from oscar.core.loading import get_class
-from threadlocals import threadlocals
 import waffle
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
-from ecommerce.extensions.checkout.utils import get_provider_data
+from ecommerce.extensions.checkout.utils import get_credit_provider_details
 from ecommerce.notifications.notifications import send_notification
 
 
@@ -68,14 +67,18 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
         # We do not currently support email sending for orders with more than one item.
         if len(order.lines.all()) == ORDER_LINE_COUNT:
             product = order.lines.first().product
-            provider_id = getattr(product.attr, 'credit_provider', None)
-            if not provider_id:
+            credit_provider_id = getattr(product.attr, 'credit_provider', None)
+            if not credit_provider_id:
                 logger.error(
-                    'Failed to send credit receipt notification. Credit seat product [%s] has not provider.', product.id
+                    'Failed to send credit receipt notification. Credit seat product [%s] has no provider.', product.id
                 )
                 return
             elif product.get_product_class().name == 'Seat':
-                provider_data = get_provider_data(provider_id)
+                provider_data = get_credit_provider_details(
+                    access_token=order.site.siteconfiguration.access_token,
+                    credit_provider_id=credit_provider_id,
+                    site_configuration=order.site.siteconfiguration
+                )
                 if provider_data:
                     send_notification(
                         order.user,
@@ -88,7 +91,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                             'credit_hours': product.attr.credit_hours,
                             'credit_provider': provider_data['display_name'],
                         },
-                        threadlocals.get_current_request().site
+                        order.site
                     )
 
         else:

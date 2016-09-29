@@ -1,40 +1,28 @@
 import logging
-import requests
 
-from django.conf import settings
-
-from ecommerce.core.url_utils import get_lms_url
+from edx_rest_api_client.client import EdxRestApiClient
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 
 logger = logging.getLogger(__name__)
 
 
-def get_provider_data(provider_id):
-    """Get the provider information for provider id provider.
+def get_credit_provider_details(access_token, credit_provider_id, site_configuration):
+    """ Returns the credit provider details from LMS.
 
     Args:
-        provider_id(str): Identifier for the provider
+        access_token (str): JWT access token
+        credit_provider_id (str): Identifier for the provider
+        site_configuration (SiteConfiguration): Ecommerce Site Configuration
 
     Returns: dict
     """
-    provider_info_url = get_lms_url('api/credit/v1/providers/{}'.format(provider_id))
-    timeout = settings.PROVIDER_DATA_PROCESSING_TIMEOUT
-    headers = {
-        'Content-Type': 'application/json',
-        'X-Edx-Api-Key': settings.EDX_API_KEY
-    }
     try:
-        response = requests.get(provider_info_url, headers=headers, timeout=timeout)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            logger.error(
-                'Failed retrieve provider information for %s provider. Provider API returned status code %d. Error: %s',
-                provider_id, response.status_code, response.text)
-            return None
-    except requests.exceptions.ConnectionError:
-        logger.exception('Connection error occurred during getting data for %s provider', provider_id)
-        return None
-    except requests.Timeout:
-        logger.exception('Failed to retrieve data for %s provider, connection timeout', provider_id)
+        return EdxRestApiClient(
+            site_configuration.build_lms_url('api/credit/v1/'),
+            oauth_access_token=access_token
+        ).providers(credit_provider_id).get()
+    except (ConnectionError, SlumberHttpBaseException, Timeout):
+        logger.exception('Failed to retrieve credit provider details for provider [%s].', credit_provider_id)
         return None

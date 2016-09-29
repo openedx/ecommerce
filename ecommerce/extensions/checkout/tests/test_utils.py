@@ -1,43 +1,74 @@
+import json
+
 import ddt
 import httpretty
 import mock
 import requests
 from requests import ConnectionError, Timeout
 
-from ecommerce.core.url_utils import get_lms_url
-from ecommerce.extensions.checkout.utils import get_provider_data
+from ecommerce.extensions.checkout.utils import get_credit_provider_details
 from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
 class UtilTests(TestCase):
-    @httpretty.activate
-    def test_get_provider_data(self):
+    def setUp(self):
+        super(UtilTests, self).setUp()
+        self.credit_provider_id = 'HGW'
+        self.credit_provider_name = 'Hogwarts'
+        self.body = {'display_name': self.credit_provider_name}
+
+    def get_credit_provider_details_url(self, credit_provider_id):
         """
-        Check if correct data returns on the full filled request.
+        Formats the relative path to the credit provider details API endpoint.
+
+        Args:
+            credit_provider_id (str): Credit provider ID for which the details are fetched
+
+        Returns:
+            Relative URL to the LMS Credit Provider details API endpoint.
         """
-        httpretty.register_uri(
-            httpretty.GET, get_lms_url('api/credit/v1/providers/ASU'),
-            body='{"display_name": "Arizona State University"}',
-            content_type="application/json"
-        )
-        provider_data = get_provider_data('ASU')
-        self.assertDictEqual(provider_data, {"display_name": "Arizona State University"})
+        return 'api/credit/v1/providers/{credit_provider_id}/'.format(credit_provider_id=credit_provider_id)
 
     @httpretty.activate
-    def test_get_provider_data_unavailable_request(self):
-        """
-        Check if None return on the bad request
-        """
+    def test_get_credit_provider_details(self):
+        """ Check that credit provider details are returned. """
         httpretty.register_uri(
-            httpretty.GET, get_lms_url('api/credit/v1/providers/ABC'),
+            httpretty.GET,
+            self.site.siteconfiguration.build_lms_url(self.get_credit_provider_details_url(self.credit_provider_id)),
+            body=json.dumps(self.body),
+            content_type="application/json"
+        )
+        provider_data = get_credit_provider_details(
+            self.access_token,
+            self.credit_provider_id,
+            self.site.siteconfiguration
+        )
+        self.assertDictEqual(provider_data, self.body)
+
+    @httpretty.activate
+    def test_get_credit_provider_details_unavailable_request(self):
+        """ Check that None is returned on Bad Request response. """
+        httpretty.register_uri(
+            httpretty.GET,
+            self.site.siteconfiguration.build_lms_url(self.get_credit_provider_details_url(self.credit_provider_id)),
             status=400
         )
-        provider_data = get_provider_data('ABC')
+        provider_data = get_credit_provider_details(
+            self.access_token,
+            self.credit_provider_id,
+            self.site.siteconfiguration
+        )
         self.assertEqual(provider_data, None)
 
     @ddt.data(ConnectionError, Timeout)
     def test_exceptions(self, exception):
         """ Verify the function returns None when a request exception is raised. """
         with mock.patch.object(requests, 'get', mock.Mock(side_effect=exception)):
-            self.assertIsNone(get_provider_data('ABC'))
+            self.assertIsNone(
+                get_credit_provider_details(
+                    self.access_token,
+                    self.credit_provider_id,
+                    self.site.siteconfiguration
+                )
+            )
