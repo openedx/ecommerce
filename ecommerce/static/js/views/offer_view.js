@@ -47,7 +47,7 @@ define([
             },
 
             render: function() {
-                if (this.collection.empty) {
+                if (this.collection.populated && this.collection.length === 0) {
                     this.showEmptyOfferErrorMessage();
                 } else if (this.collection.length > 0) {
                     this.showVerifiedCertificate();

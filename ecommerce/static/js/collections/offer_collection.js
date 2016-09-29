@@ -8,22 +8,24 @@ define([
               OfferModel) {
         'use strict';
 
-        return PaginatedCollection.extend({
+        return Backbone.Collection.extend({
             model: OfferModel,
             url: '/api/v2/vouchers/offers/',
 
             initialize: function() {
-                this.empty = false;
                 this.page = 1;
                 this.perPage = 6;
+                this.populated = false;
                 this.updateLimits();
                 this.on('update', this.updateNumberOfPages);
             },
 
             parse: function(response) {
-                this._super(response);
-                if (response.results.length === 0) {
-                    this.empty = true;
+                if (response.next) {
+                    this.url = response.next;
+                    this.fetch({remove: false});
+                } else {
+                    this.populated = true;
                 }
                 return response.results;
             },

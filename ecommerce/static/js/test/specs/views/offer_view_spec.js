@@ -249,9 +249,10 @@ define([
                 expect(view.changePage).toHaveBeenCalled();
             });
 
-            it('should call emptyOffer when a collection is empty.', function() {
+            it('should call showEmptyOfferErrorMessage when a collection is empty and populated.', function() {
                 spyOn(view, 'showEmptyOfferErrorMessage').and.callThrough();
-                collection.empty = true;
+                collection.reset();
+                collection.populated = true;
                 view.render();
                 expect(view.showEmptyOfferErrorMessage).toHaveBeenCalled();
             });

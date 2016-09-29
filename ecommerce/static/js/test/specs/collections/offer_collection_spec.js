@@ -8,7 +8,6 @@ define([
             response = {
                 count: 4,
                 page: 1,
-                empty: false,
                 next: null,
                 previous: null,
                 results: [
@@ -33,10 +32,19 @@ define([
                 expect(collection.parse(response)).toEqual(response.results);
             });
 
-            it('should set the collection is empty when no results are fetched', function() {
-                response.results = [];
+            it('should set collection to be populated after it is populated', function() {
                 collection.parse(response);
-                expect(collection.empty).toBeTruthy();
+                expect(collection.populated).toBeTruthy();
+            });
+
+            it('should fetch the next page.', function() {
+                var test_url = 'example.com';
+                response.next = test_url;
+                spyOn(collection, 'fetch');
+
+                collection.parse(response);
+                expect(collection.fetch).toHaveBeenCalled();
+                expect(collection.url).toBe(test_url);
             });
 
             it('should fetch the next page of results', function() {
