@@ -1,5 +1,6 @@
 # noinspection PyUnresolvedReferences
 import hashlib
+import re
 
 from django.conf import settings
 from django.core.cache import cache
@@ -15,10 +16,43 @@ class ConditionalOffer(AbstractConditionalOffer):
     def is_email_valid(self, email):
         """
         Check if the email is within the email_domains if email_domains are set,
-        else return True.
+        else return True. If there is a domain with a sub domain in the list of
+        valid email domains then the user's email needs to match exactly the
+        domain and sub domain. If there is only a domain (without sub domains) in
+        the list of valid email domains then the user's domain needs to match
+        regardless of the subdomain.
+
+        Examples:
+
+            1)
+                email_domains value: 'example.com'
+                valid user email domains:
+                    'example.com', 'sub1.example.com', 'sub2.example.com' etc.
+                invalid user email domains:
+                    'other.com' etc.
+
+            2)
+                email_domains value: 'sub.example.com'
+                valid user email domain:
+                    'sub.example.com'
+                invalid user email domains:
+                    'sub1.example.com', 'example.com' etc.
+
+        Args:
+            email (str): Email of the user.
+
+        Returns:
+            True if the email is valid or when there are no valid email domains set,
+            False otherwise.
         """
-        domain = email.split('@')[1]
-        return domain in self.email_domains if self.email_domains else True  # pylint: disable=unsupported-membership-test
+        if self.email_domains:
+            for domain in self.email_domains.split(','):
+                pattern = r'(?P<username>.+)@(?P<subdomain>\w+\.)*{domain}'.format(domain=domain)
+                match = re.match(pattern, email)
+                if match and match.group(0) == email:
+                    return True
+            return False
+        return True
 
     def is_condition_satisfied(self, basket):
         """

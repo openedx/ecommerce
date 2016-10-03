@@ -140,7 +140,12 @@ class ConditionalOfferTests(TestCase):
     def setUp(self):
         super(ConditionalOfferTests, self).setUp()
 
-        self.email_domains = 'example.com'
+        self.valid_domain = 'example.com'
+        self.valid_sub_domain = 'sub.example2.com'
+        self.email_domains = '{domain1},{domain2}'.format(
+            domain1=self.valid_domain,
+            domain2=self.valid_sub_domain
+        )
         self.product = factories.ProductFactory()
         _range = factories.RangeFactory(products=[self.product, ])
 
@@ -160,7 +165,7 @@ class ConditionalOfferTests(TestCase):
     def test_condition_satisfied(self):
         """Verify a condition is satisfied."""
         self.assertEqual(self.offer.email_domains, self.email_domains)
-        email = 'test@{}'.format(self.email_domains)
+        email = 'test@{domain}'.format(domain=self.valid_domain)
         basket = self.create_basket(email=email)
         self.assertTrue(self.offer.is_condition_satisfied(basket))
 
@@ -175,8 +180,19 @@ class ConditionalOfferTests(TestCase):
         invalid_email = 'invalid@email.fake'
         self.assertFalse(self.offer.is_email_valid(invalid_email))
 
-        valid_email = 'valid@{}'.format(self.email_domains)
+        valid_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
         self.assertTrue(self.offer.is_email_valid(valid_email))
 
         no_email_offer = factories.ConditionalOffer()
         self.assertTrue(no_email_offer.is_email_valid(invalid_email))
+
+    def test_is_email_with_sub_domain_valid(self):
+        """Verify method returns True for valid email domains with sub domain."""
+        invalid_email = 'test@test{domain}'.format(domain=self.valid_sub_domain)  # test@testsub.example2.com
+        self.assertFalse(self.offer.is_email_valid(invalid_email))
+
+        valid_email = 'test@{domain}'.format(domain=self.valid_sub_domain)
+        self.assertTrue(self.offer.is_email_valid(valid_email))
+
+        valid_email_2 = 'test@sub2.{domain}'.format(domain=self.valid_domain)
+        self.assertTrue(self.offer.is_email_valid(valid_email_2))
