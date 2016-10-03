@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import csv
 import logging
+import time
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -21,6 +22,8 @@ from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -161,11 +164,22 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == 0:
-            self.place_free_order(basket)
-        else:
-            return HttpResponseRedirect(reverse('basket:summary'))
+            order = self.place_free_order(basket)
 
-        return HttpResponseRedirect(request.site.siteconfiguration.student_dashboard_url)
+            # Waiting for the order to finish its async fulfillment.
+            # Every 2 seconds the order status is checked. If after five checks
+            # it's not complete or the status is an error, user is redirected
+            # to the checkout error page.
+            for __ in range(5):  # pragma: no cover
+                order.refresh_from_db()
+                if order.status == ORDER.COMPLETE:
+                    return HttpResponseRedirect(get_receipt_page_url(self.request.site.siteconfiguration, order.number))
+                elif order.status == ORDER.FULFILLMENT_ERROR:
+                    return HttpResponseRedirect(reverse('checkout:error'))
+                time.sleep(2)  # pragma: no cover
+
+            return HttpResponseRedirect(reverse('checkout:error'))
+        return HttpResponseRedirect(reverse('basket:summary'))
 
 
 class EnrollmentCodeCsvView(View):
