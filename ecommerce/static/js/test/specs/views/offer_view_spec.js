@@ -150,6 +150,19 @@ define([
                 expect(view.collection.previousPage).toHaveBeenCalled();
             });
 
+            it('should disable the enrollment button', function() {
+                var ev = $.Event('click');
+                $('body').append('<a class="btn-success redeem-enrollment"></a>');
+                view.disableReedemEnrollmentBtn(ev);
+                expect(ev.isDefaultPrevented()).toBeFalsy();
+                expect($('.redeem-enrollment').attr('disabled')).toEqual('disabled');
+                expect($('.redeem-enrollment').hasClass('btn-default')).toBeTruthy();
+                expect($('.redeem-enrollment').hasClass('btn-success')).toBeFalsy();
+
+                view.disableReedemEnrollmentBtn(ev);
+                expect(ev.isDefaultPrevented()).toBeTruthy();
+            });
+
             it('should create list item', function() {
                 var value = view.createListItem(1, false),
                     string = '<li class="page-item">' +
