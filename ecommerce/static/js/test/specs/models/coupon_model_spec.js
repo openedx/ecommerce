@@ -112,6 +112,30 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
                 });
+
+                it('should validate email domain.', function() {
+                    var invalid_domains = [
+                            '-invalid.com', 'invalid', 'invalid-.com', 'invalid.c',
+                            'valid.com,', 'invalid.photography1', 'valid.com,invalid',
+                            'valid.com,invalid-.com', 'valid.com,-invalid.com', 'in--valid.com',
+                            'in..valid.com', 'valid.com,invalid.c', 'invalid,valid.com'
+                        ],
+                        valid_domains = [
+                            'valid.com', 'valid.co', 'valid-domain.com',
+                            'valid.photography', 'valid.com,valid.co'
+                        ];
+
+                    _.each(invalid_domains, function(domain) {
+                        model.set('email_domains', domain);
+                        model.validate();
+                        expect(model.isValid()).toBeFalsy();
+                    });
+                    _.each(valid_domains, function(domain) {
+                        model.set('email_domains', domain);
+                        model.validate();
+                        expect(model.isValid()).toBeTruthy();
+                    });
+                });
             });
 
             describe('test model methods', function () {

@@ -108,7 +108,11 @@ define([
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
-                email_domains: {required: false},
+                email_domains: {
+                    pattern: 
+                    /^((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(,((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,})*$/,
+                    required: false
+                },
                 start_date: function (val) {
                     var startDate,
                         endDate;
