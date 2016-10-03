@@ -4,23 +4,27 @@
 
 {% block title %}
     {% trans "Checkout Error" %}
-{% endblock title %}
+{% endblock %}
 
 {% block navbar %}
     {% include 'edx/partials/_student_navbar.html' %}
-{% endblock navbar %}
+{% endblock %}
 
 {% block content %}
-    <div class="container content-wrapper receipt-cancel-error">
-        <h1>{% trans "Checkout Error" %}</h1>
-        <p>{% blocktrans %} An error has occurred with your payment. <b>You have not been charged.</b>
-        {% endblocktrans %}</p>
-
-        <p>{% with "<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe as start_link %}
-            {% blocktrans with end_link="</a>"|safe %}
-            Please try to submit your payment again. If this problem persists, contact {{ start_link }}
-            {{ payment_support_email }}{{ end_link }}.
-            {% endblocktrans %}
-        {% endwith %}</p>
+    <div id="error-message">
+        <div class="container">
+            <div class="depth depth-2 message-error-content">
+                <h1>{% trans "Checkout Error" %}</h1>
+                <h3>{{ error }}</h3>
+                <p>{% blocktrans %} An error has occurred with your payment. <b>You have not been charged.</b>
+                {% endblocktrans %}</p>
+                <p>{% with "<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe as start_link %}
+                    {% blocktrans with end_link="</a>"|safe %}
+                    Please try to submit your payment again. If this problem persists, contact {{ start_link }}
+                    {{ payment_support_email }}{{ end_link }}.
+                    {% endblocktrans %}
+                {% endwith %}</p>
+            </div>
+        </div>
     </div>
-{% endblock content %}
+{% endblock %}
