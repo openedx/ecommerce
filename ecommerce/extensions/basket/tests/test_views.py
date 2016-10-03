@@ -42,6 +42,7 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Product = get_model('catalogue', 'Product')
+ProductAttribute = get_model('catalogue', 'ProductAttribute')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -427,6 +428,28 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data.get('image_url'), '')
         self.assertEqual(line_data.get('course_short_description'), None)
+
+    @ddt.data(
+        ('verified', True),
+        ('credit', False)
+    )
+    @ddt.unpack
+    def test_verification_message(self, cert_type, ver_req):
+        """ Verify the variable for verification requirement is False for credit seats. """
+        seat = self.create_seat(self.course, cert_type=cert_type)
+        self.create_basket_and_add_product(seat)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['is_verification_required'], ver_req)
+
+    def test_verification_attribute_missing(self):
+        """ Verify the variable for verification requirement is False when the attribute is missing. """
+        seat = self.create_seat(self.course)
+        ProductAttribute.objects.filter(name='id_verification_required').delete()
+        self.create_basket_and_add_product(seat)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['is_verification_required'], False)
 
 
 class VoucherAddMessagesViewTests(TestCase):
