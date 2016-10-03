@@ -24,12 +24,25 @@ define([
             events: {
                 'click .prev': 'previous',
                 'click .next': 'next',
-                'click .page-number': 'goToPage'
+                'click .page-number': 'goToPage',
+                'click .redeem-enrollment': 'disableReedemEnrollmentBtn'
             },
 
             initialize: function (options) {
                 this.listenTo(this.collection, 'sync', this.render);
                 this.code = options.code;
+            },
+
+            disableReedemEnrollmentBtn: function(event) {
+                var btn = $('.redeem-enrollment');
+                if (btn.attr('disabled')) {
+                    event.preventDefault();
+                } else {
+                    btn.text('Enrolling...')
+                        .attr('disabled', true)
+                        .removeClass('btn-success')
+                        .addClass('btn-default');
+                }
             },
 
             changePage: function() {

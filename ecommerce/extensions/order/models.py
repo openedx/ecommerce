@@ -21,6 +21,9 @@ class Order(AbstractOrder):
         return any(line.product.get_product_class().name == 'Coupon' for line in
                    self.basket.all_lines())
 
+    class Meta(object):
+        get_latest_by = 'date_placed'
+
 
 class PaymentEvent(AbstractPaymentEvent):
     processor_name = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)

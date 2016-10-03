@@ -74,8 +74,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         content = json.loads(response.content)
 
         self.assertEqual(content['count'], 2)
-        self.assertEqual(content['results'][0]['number'], unicode(order_2.number))
-        self.assertEqual(content['results'][1]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+        self.assertEqual(content['results'][1]['number'], unicode(order_2.number))
 
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
