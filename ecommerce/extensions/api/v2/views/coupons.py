@@ -71,28 +71,15 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             429 if the client has made requests at a rate exceeding that allowed by the configured rate limit.
             500 if an error occurs when attempting to create a coupon.
         """
+        category_data = request.data.get('category')
+        code = request.data.get('code')
+        course_seat_types = request.data.get('course_seat_types')
+        max_uses = request.data.get('max_uses')
+        partner = request.site.siteconfiguration.partner
+        stock_record_ids = request.data.get('stock_record_ids')
+        voucher_type = request.data.get('voucher_type')
+
         with transaction.atomic():
-            benefit_type = request.data.get('benefit_type')
-            benefit_value = request.data.get('benefit_value')
-            catalog_query = request.data.get('catalog_query')
-            category_data = request.data.get('category')
-            client_username = request.data.get('client')
-            code = request.data.get('code')
-            course_seat_types = request.data.get('course_seat_types')
-            email_domains = request.data.get('email_domains')
-            end_datetime = dateutil.parser.parse(request.data.get('end_datetime'))
-            max_uses = request.data.get('max_uses')
-            note = request.data.get('note')
-            partner = request.site.siteconfiguration.partner
-            price = request.data.get('price')
-            quantity = request.data.get('quantity')
-            start_datetime = dateutil.parser.parse(request.data.get('start_datetime'))
-            stock_record_ids = request.data.get('stock_record_ids')
-            title = request.data.get('title')
-            voucher_type = request.data.get('voucher_type')
-
-            client, __ = BusinessClient.objects.get_or_create(name=client_username)
-
             if code:
                 try:
                     Voucher.objects.get(code=code)
@@ -102,8 +89,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     )
                 except Voucher.DoesNotExist:
                     pass
-
-            invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
             if course_seat_types:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
@@ -149,28 +134,30 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 coupon_catalog = None
 
             coupon_product = create_coupon_product(
-                benefit_type=benefit_type,
-                benefit_value=benefit_value,
+                benefit_type=request.data.get('benefit_type'),
+                benefit_value=request.data.get('benefit_value'),
                 catalog=coupon_catalog,
-                catalog_query=catalog_query,
+                catalog_query=request.data.get('catalog_query'),
                 category=category,
                 code=code,
                 course_seat_types=course_seat_types,
-                email_domains=email_domains,
-                end_datetime=end_datetime,
+                email_domains=request.data.get('email_domains'),
+                end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),
                 max_uses=max_uses,
-                note=note,
+                note=request.data.get('note'),
                 partner=partner,
-                price=price,
-                quantity=quantity,
-                start_datetime=start_datetime,
-                title=title,
+                price=request.data.get('price'),
+                quantity=request.data.get('quantity'),
+                start_datetime=dateutil.parser.parse(request.data.get('start_datetime')),
+                title=request.data.get('title'),
                 voucher_type=voucher_type
             )
 
             basket = prepare_basket(request, coupon_product)
 
             # Create an order now since payment is handled out of band via an invoice.
+            client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
+            invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
             response_data = self.create_order_for_invoice(
                 basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data, request=request
             )
