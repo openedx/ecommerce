@@ -151,7 +151,8 @@ class BasketSummaryView(BasketView):
 
             # Check product attributes to determine if ID verification is required for this basket
             try:
-                is_verification_required = is_verification_required or line.product.attr.id_verification_required
+                is_verification_required = line.product.attr.id_verification_required \
+                    and line.product.attr.certificate_type != 'credit'
             except AttributeError:
                 pass
 
