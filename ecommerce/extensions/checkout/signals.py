@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from oscar.core.loading import get_class
 import waffle
 
-from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
 from ecommerce.extensions.checkout.utils import get_credit_provider_details
@@ -85,7 +85,12 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                         '{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
                     )
                 else:
-                    receipt_page_url = get_lms_url('{}?orderNum={}'.format('/commerce/checkout/receipt', order.number))
+                    receipt_page_url = order.site.siteconfiguration.build_lms_url(
+                        '{}?orderNum={}'.format(
+                            '/commerce/checkout/receipt',
+                            order.number
+                        )
+                    )
 
                 if provider_data:
                     send_notification(

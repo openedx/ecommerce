@@ -9,8 +9,8 @@ define([
         return Page.extend({
             title: gettext('Receipt'),
 
-            initialize: function () {
-                this.view = new ReceiptView();
+            initialize: function (options) {
+                this.view = new ReceiptView(options);
                 this.view.render();
             }
         });

@@ -19,7 +19,7 @@ def remove_switch(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0017_siteconfiguration_payment_support_email'),
+        ('core', '0019_auto_20161012_1404'),
         ('waffle', '0001_initial')
     ]
     operations = [

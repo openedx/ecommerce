@@ -206,7 +206,7 @@ class OrderSerializer(serializers.ModelSerializer):
             discount = obj.discounts.all()[0]
             return str(discount.amount)
         except IndexError:
-            return None
+            return '0'
 
     class Meta(object):
         model = Order
@@ -651,3 +651,14 @@ class SiteConfigurationSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = SiteConfiguration
+
+
+class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    id = serializers.CharField()
+    display_name = serializers.CharField()
+    url = serializers.CharField()
+    status_url = serializers.CharField()
+    description = serializers.CharField()
+    enable_integration = serializers.BooleanField()
+    fulfillment_instructions = serializers.CharField()
+    thumbnail_url = serializers.CharField()

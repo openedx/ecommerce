@@ -1,15 +1,16 @@
 from decimal import Decimal
 
-from django.core.urlresolvers import reverse
-from django.conf import settings
 import ddt
 import httpretty
+from django.core.urlresolvers import reverse
+from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Order = get_model('order', 'Order')
@@ -142,7 +143,7 @@ class CheckoutErrorViewTests(TestCase):
 
 
 @ddt.ddt
-class ReceiptViewTests(TestCase):
+class ReceiptViewTests(RefundTestMixin, TestCase):
     """
     Tests for the receipt view.
     """
@@ -159,6 +160,53 @@ class ReceiptViewTests(TestCase):
         self.client.logout()
         response = self.client.post(self.path)
         self.assertEqual(response.status_code, 302)
+
+    def test_get_receipt_for_nonexisting_order(self):
+        order_number = 'ABC123'
+        response = self.client.get('{path}?order_number={order_number}'.format(
+            order_number=order_number,
+            path=self.path
+        ))
+        self.assertEqual(response.status_code, 200)
+        context_data = {
+            'error_text': 'Order {order_number} not found.'.format(order_number=order_number),
+            'for_help_text': '',
+            'is_payment_complete': False,
+            'page_title': 'Order not found'
+        }
+        self.assertDictContainsSubset(context_data, response.context_data)
+
+    def test_get_receipt_for_existing_order(self):
+        order = self.create_order()
+        response = self.client.get('{path}?order_number={order_number}'.format(
+            order_number=order.number,
+            path=self.path
+        ))
+
+        seat = order.lines.first().product
+        receipt_data = {
+            'billed_to': None,
+            'email': order.user.email,
+            'is_refunded': False,
+            'items': [{
+                'description': line.description,
+                'cost': '${price}'.format(price=line.line_price_excl_tax),
+                'quantity': line.quantity
+            } for line in order.lines.all()],
+            'order_number': str(order.number),
+            'payment_processor': None
+        }
+        context_data = {
+            'course_key': seat.attr.course_key,
+            'is_verification_required': seat.attr.id_verification_required,
+            'lms_url': order.site.siteconfiguration.lms_url_root,
+            'provider_data': None,
+            'verified': seat.attr.certificate_type == 'verified'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(receipt_data, response.context_data['receipt'])
+        self.assertDictContainsSubset(context_data, response.context_data)
 
     @httpretty.activate
     def post_to_receipt_page(self, post_data):

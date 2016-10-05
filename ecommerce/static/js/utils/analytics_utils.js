@@ -25,7 +25,6 @@ define([
             userModel: new UserModel(),
 
             analyticsSetUp: function() {
-
                 /* jshint ignore:start */
                 // initModelData is set by the Django template at render time.
                 this.trackingModel.set(initModelData.tracking);
@@ -39,24 +38,21 @@ define([
                     courseModel: this.courseModel
                 });
 
-                console.log(JSON.stringify(this.trackingModel));
-
                 this.instrumentClickEvents();
             },
 
             instrumentClickEvents: function() {
-                var self = this;
                 // instrument the click events
                 _($('[data-track-type="click"]')).each(function (track) {
                     var properties = Utils.getNodeProperties(track.attributes,
                         'data-track-', ['data-track-event']);
                     new ClickableView({
-                        model: self.trackingModel,
+                        model: this.trackingModel,
                         trackEventType: $(track).attr('data-track-event'),
                         trackProperties: properties,
                         el: track
                     });
-                });
+                }, this);
             }
         };
     }

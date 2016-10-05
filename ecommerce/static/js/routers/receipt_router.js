@@ -12,11 +12,11 @@ define([
             root: '/checkout/',
 
             routes: {
-                'receipt/?order_number=:order': 'showReceiptPage'
+                'receipt/?order_number=:orderNumber': 'showReceiptPage'
             },
 
-            showReceiptPage: function() {
-                var page = new ReceiptPage();
+            showReceiptPage: function(orderNumber) {
+                var page = new ReceiptPage({orderNumber: orderNumber});
                 this.currentView = page;
             }
         });

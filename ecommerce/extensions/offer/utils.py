@@ -23,6 +23,34 @@ def _remove_exponent_and_trailing_zeros(decimal):
     return decimal.quantize(Decimal(1)) if decimal == decimal.to_integral() else decimal.normalize()
 
 
+def get_discount_percentage(discount_value, product_price):
+    """
+    Get discount percentage of discount value applied to a product price.
+
+    Arguments:
+        discount_value (float): Discount value
+        product_price (float): Price of a product the discount is used on
+
+    Returns:
+        float: Discount percentage
+    """
+    return discount_value / product_price * 100
+
+
+def get_discount_value(discount_percentage, product_price):
+    """
+    Get discount value of discount percentage applied to a product price.
+
+    Arguments:
+        discount_percentage (float): Discount percentage
+        product_price (float): Price of a product the discount is used on
+
+    Returns:
+        float: Discount value
+    """
+    return discount_percentage * product_price / 100.0
+
+
 def format_benefit_value(benefit):
     """
     Format benefit value for display based on the benefit type
