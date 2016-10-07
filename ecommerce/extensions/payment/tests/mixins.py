@@ -109,6 +109,7 @@ class CybersourceMixin(object):
         total = unicode(basket.total_incl_tax)
         auth_amount = auth_amount or total
         notification = {
+            u'req_transaction_type': u'sale',
             u'decision': decision,
             u'req_reference_number': req_reference_number,
             u'transaction_id': u'123456',
