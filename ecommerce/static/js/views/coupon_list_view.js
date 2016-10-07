@@ -35,6 +35,9 @@ define([
 
             getRowData: function (coupon) {
                 return {
+                    categoryName: coupon.get('category').name,
+                    client: coupon.get('client'),
+                    code: coupon.get('code'),
                     id: coupon.get('id'),
                     title: coupon.get('title')
                 };
@@ -73,6 +76,18 @@ define([
                                 fnCreatedCell: _.bind(function (nTd, sData, oData) {
                                     $(nTd).html(this.linkTpl(oData));
                                 }, this)
+                            },
+                            {
+                                title: gettext('Custom Code'),
+                                data: 'code'
+                            },
+                            {
+                                title: gettext('Client'),
+                                data: 'client'
+                            },
+                            {
+                                title: gettext('Category'),
+                                data: 'categoryName'
                             },
                             {
                                 title: gettext('Coupon Report'),
