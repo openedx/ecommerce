@@ -31,6 +31,8 @@ function ($, AjaxRetry, Backbone, _, Currency, StringUtils, AnalyticsUtils, Cook
             AnalyticsUtils.instrumentClickEvents();
             // Fire analytics event that order has completed
             // this.trackPurchase(data);
+            // TODO: remove console log and uncomment the line above
+            console.log(data);
             return this;
         },
 
@@ -50,7 +52,7 @@ function ($, AjaxRetry, Backbone, _, Currency, StringUtils, AnalyticsUtils, Cook
         render: function () {
             if (this.orderNumber) {
                 // Get the order details
-                self.$el.removeClass('hidden');
+                this.$el.removeClass('hidden');
             } else {
                 this.renderError();
             }
@@ -60,7 +62,7 @@ function ($, AjaxRetry, Backbone, _, Currency, StringUtils, AnalyticsUtils, Cook
          * Completes the process of getting credit for the course.
          *
          */
-        getCredit: function (event) {     // jshint ignore:line
+        getCredit: function (event) {
             try {
                 event.preventDefault();
             } catch (err) {
@@ -111,4 +113,4 @@ function ($, AjaxRetry, Backbone, _, Currency, StringUtils, AnalyticsUtils, Cook
             });
         }
     });
-});     // jshint ignore:line
+});
