@@ -3,6 +3,7 @@ import json
 
 import ddt
 from django.test import override_settings
+from django.utils import timezone
 import httpretty
 import mock
 from oscar.core.loading import get_model
@@ -29,7 +30,7 @@ StockRecord = get_model('partner', 'StockRecord')
 class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
-        self.course = CourseFactory(verification_deadline=datetime.datetime.now() + datetime.timedelta(days=7))
+        self.course = CourseFactory(verification_deadline=timezone.now() + datetime.timedelta(days=7))
         self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.course.create_or_update_seat('verified', True, 50, self.partner)
         self.publisher = LMSPublisher()
@@ -263,3 +264,22 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             self.assertEqual(api_response, " ".join([self.error_message, expected_error_msg]))
         else:
             self.assertEqual(api_response, self.error_message, expected_error_msg)
+
+    @httpretty.activate
+    def test_verification_deadline(self):
+        """ Verify that upgrade deadline can't occur AFTER verification deadline. """
+        upgrade_deadline = timezone.now() + datetime.timedelta(days=10)
+        self.course.create_or_update_seat('verified', True, 50, self.partner, expires=upgrade_deadline)
+
+        self._mock_commerce_api(200)
+
+        with LogCapture(LOGGER_NAME) as l:
+            response = self.publisher.publish(self.course)
+            self.assertIsNotNone(response)
+
+            l.check((
+                LOGGER_NAME,
+                'ERROR',
+                'Failed to publish commerce data for [{}] to LMS. The verification '
+                'deadline must occur after the upgrade deadline.'.format(self.course.id)
+            ))
