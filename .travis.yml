@@ -21,13 +21,14 @@ before_install:
 install:
     - pip install -U codecov
     - pip install -U pip wheel
-    - pip install -r requirements/test.txt
-    - pip install -r requirements/docs.txt
-    - make requirements.js
+    - make requirements
 script:
     # Ensure documentation can be compiled
     - cd docs && make html
     - cd ..
+
+    # Check if translation files are up-to-date
+    - make validate_translations
 
     # Compile assets and run validation
     - make clean_static
