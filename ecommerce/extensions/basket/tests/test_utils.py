@@ -1,12 +1,17 @@
+import datetime
+import json
+import mock
+
 import ddt
 from django.test import RequestFactory
 from oscar.core.loading import get_model
-from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
+from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
+import pytz
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.utils import prepare_basket
+from ecommerce.extensions.basket.utils import prepare_basket, attribute_cookie_data
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
@@ -29,6 +34,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         self.request.COOKIES = {}
         self.request.user = self.create_user()
         site_configuration = SiteConfigurationFactory(partner__name='Tester')
+        site_configuration.utm_cookie_name = 'test.edx.utm'
         self.request.site = site_configuration.site
 
     def test_prepare_basket_with_voucher(self):
@@ -106,12 +112,19 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(basket.lines.first().product, product2)
         self.assertEqual(basket.product_quantity(product2), 1)
 
-    def test_prepare_basket_affiliate_cookie_lifecycle(self):
+    def test_prepare_basket_calls_attribution_method(self):
+        """ Verify a basket is returned and referral method called. """
+        with mock.patch('ecommerce.extensions.basket.utils.attribute_cookie_data') as mock_attr_method:
+            product = ProductFactory()
+            basket = prepare_basket(self.request, product)
+            mock_attr_method.assert_called_with(basket, self.request)
+
+    def test_attribute_cookie_data_affiliate_cookie_lifecycle(self):
         """ Verify a basket is returned and referral captured. """
-        product = ProductFactory()
         affiliate_id = 'test_affiliate'
         self.request.COOKIES['affiliate_id'] = affiliate_id
-        basket = prepare_basket(self.request, product)
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        attribute_cookie_data(basket, self.request)
 
         # test affiliate id from cookie saved in referral
         referral = Referral.objects.get(basket_id=basket.id)
@@ -120,7 +133,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         # update cookie
         new_affiliate_id = 'new_affiliate'
         self.request.COOKIES['affiliate_id'] = new_affiliate_id
-        basket = prepare_basket(self.request, product)
+        attribute_cookie_data(basket, self.request)
 
         # test new affiliate id saved
         referral = Referral.objects.get(basket_id=basket.id)
@@ -128,8 +141,135 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
 
         # expire cookie
         del self.request.COOKIES['affiliate_id']
-        basket = prepare_basket(self.request, product)
+        attribute_cookie_data(basket, self.request)
 
         # test referral record is deleted when no cookie set
+        with self.assertRaises(Referral.DoesNotExist):
+            Referral.objects.get(basket_id=basket.id)
+
+    def test_attribute_cookie_data_utm_cookie_lifecycle(self):
+        """ Verify a basket is returned and referral captured. """
+        utm_source = 'test-source'
+        utm_medium = 'test-medium'
+        utm_campaign = 'test-campaign'
+        utm_term = 'test-term'
+        utm_content = 'test-content'
+        utm_created_at = 1475590280823
+        expected_created_at = datetime.datetime.fromtimestamp(int(utm_created_at) / float(1000), tz=pytz.UTC)
+
+        utm_cookie = {
+            'utm_source': utm_source,
+            'utm_medium': utm_medium,
+            'utm_campaign': utm_campaign,
+            'utm_term': utm_term,
+            'utm_content': utm_content,
+            'created_at': utm_created_at,
+        }
+
+        self.request.COOKIES['test.edx.utm'] = json.dumps(utm_cookie)
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        attribute_cookie_data(basket, self.request)
+
+        # test utm data from cookie saved in referral
+        referral = Referral.objects.get(basket_id=basket.id)
+        self.assertEqual(referral.utm_source, utm_source)
+        self.assertEqual(referral.utm_medium, utm_medium)
+        self.assertEqual(referral.utm_campaign, utm_campaign)
+        self.assertEqual(referral.utm_term, utm_term)
+        self.assertEqual(referral.utm_content, utm_content)
+        self.assertEqual(referral.utm_created_at, expected_created_at)
+
+        # update cookie
+        utm_source = 'test-source-new'
+        utm_medium = 'test-medium-new'
+        utm_campaign = 'test-campaign-new'
+        utm_term = 'test-term-new'
+        utm_content = 'test-content-new'
+        utm_created_at = 1470590000000
+        expected_created_at = datetime.datetime.fromtimestamp(int(utm_created_at) / float(1000), tz=pytz.UTC)
+
+        new_utm_cookie = {
+            'utm_source': utm_source,
+            'utm_medium': utm_medium,
+            'utm_campaign': utm_campaign,
+            'utm_term': utm_term,
+            'utm_content': utm_content,
+            'created_at': utm_created_at,
+        }
+        self.request.COOKIES['test.edx.utm'] = json.dumps(new_utm_cookie)
+        attribute_cookie_data(basket, self.request)
+
+        # test new utm data saved
+        referral = Referral.objects.get(basket_id=basket.id)
+        self.assertEqual(referral.utm_source, utm_source)
+        self.assertEqual(referral.utm_medium, utm_medium)
+        self.assertEqual(referral.utm_campaign, utm_campaign)
+        self.assertEqual(referral.utm_term, utm_term)
+        self.assertEqual(referral.utm_content, utm_content)
+        self.assertEqual(referral.utm_created_at, expected_created_at)
+
+        # expire cookie
+        del self.request.COOKIES['test.edx.utm']
+        attribute_cookie_data(basket, self.request)
+
+        # test referral record is deleted when no cookie set
+        with self.assertRaises(Referral.DoesNotExist):
+            Referral.objects.get(basket_id=basket.id)
+
+    def test_attribute_cookie_data_multiple_cookies(self):
+        """ Verify a basket is returned and referral captured. """
+        utm_source = 'test-source'
+        utm_medium = 'test-medium'
+        utm_campaign = 'test-campaign'
+        utm_term = 'test-term'
+        utm_content = 'test-content'
+        utm_created_at = 1475590280823
+
+        utm_cookie = {
+            'utm_source': utm_source,
+            'utm_medium': utm_medium,
+            'utm_campaign': utm_campaign,
+            'utm_term': utm_term,
+            'utm_content': utm_content,
+            'created_at': utm_created_at,
+        }
+
+        affiliate_id = 'affiliate'
+
+        self.request.COOKIES['test.edx.utm'] = json.dumps(utm_cookie)
+        self.request.COOKIES['affiliate_id'] = affiliate_id
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        attribute_cookie_data(basket, self.request)
+
+        # test affiliate id & UTM data from cookie saved in referral
+        referral = Referral.objects.get(basket_id=basket.id)
+        expected_created_at = datetime.datetime.fromtimestamp(int(utm_created_at) / float(1000), tz=pytz.UTC)
+        self.assertEqual(referral.utm_source, utm_source)
+        self.assertEqual(referral.utm_medium, utm_medium)
+        self.assertEqual(referral.utm_campaign, utm_campaign)
+        self.assertEqual(referral.utm_term, utm_term)
+        self.assertEqual(referral.utm_content, utm_content)
+        self.assertEqual(referral.utm_created_at, expected_created_at)
+        self.assertEqual(referral.affiliate_id, affiliate_id)
+
+        # expire 1 cookie
+        del self.request.COOKIES['test.edx.utm']
+        attribute_cookie_data(basket, self.request)
+
+        # test affiliate id still saved in referral but utm data removed
+        referral = Referral.objects.get(basket_id=basket.id)
+        self.assertEqual(referral.utm_source, '')
+        self.assertEqual(referral.utm_medium, '')
+        self.assertEqual(referral.utm_campaign, '')
+        self.assertEqual(referral.utm_term, '')
+        self.assertEqual(referral.utm_content, '')
+        self.assertIsNone(referral.utm_created_at)
+        self.assertEqual(referral.affiliate_id, affiliate_id)
+
+        # expire other cookie
+        del self.request.COOKIES['affiliate_id']
+        attribute_cookie_data(basket, self.request)
+
+        # test referral record is deleted when no cookies are set
         with self.assertRaises(Referral.DoesNotExist):
             Referral.objects.get(basket_id=basket.id)

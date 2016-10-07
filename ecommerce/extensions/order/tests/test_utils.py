@@ -99,7 +99,7 @@ class OrderCreatorTests(TestCase):
 
     def create_referral(self, basket, affiliate_id):
         """ Returns a new Referral associated with the specified basket. """
-        return Referral.objects.create(basket=basket, affiliate_id=affiliate_id)
+        return Referral.objects.create(basket=basket, affiliate_id=affiliate_id, site=basket.site)
 
     def test_create_order_model_default_site(self):
         """
@@ -128,10 +128,12 @@ class OrderCreatorTests(TestCase):
 
     def test_create_order_model_basket_referral(self):
         """ Verify the create_order_model method associates the order with the basket's site. """
+        site_configuration = SiteConfigurationFactory(site__domain='star.fake', partner__name='star')
+        site = site_configuration.site
         affiliate_id = 'test affiliate'
 
         # Create the basket and associated referral
-        basket = self.create_basket(None)
+        basket = self.create_basket(site)
         self.create_referral(basket, affiliate_id)
 
         # Ensure the referral is now associated with the order and has the correct affiliate id

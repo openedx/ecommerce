@@ -1,8 +1,11 @@
+import datetime
+import json
 import logging
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
+import pytz
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.referrals.models import Referral
@@ -42,14 +45,7 @@ def prepare_basket(request, product, voucher=None):
         Applicator().apply(basket, request.user, request)
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
 
-    affiliate_id = request.COOKIES.get(settings.AFFILIATE_COOKIE_KEY)
-    if affiliate_id:
-        Referral.objects.update_or_create(
-            basket=basket,
-            defaults={'affiliate_id': affiliate_id}
-        )
-    else:
-        Referral.objects.filter(basket=basket).delete()
+    attribute_cookie_data(basket, request)
 
     # Call signal handler to notify listeners that something has been added to the basket
     basket_addition = get_class('basket.signals', 'basket_addition')
@@ -91,3 +87,67 @@ def get_basket_switch_data(product):
             partner_sku = stock_record.partner_sku
             break
     return switch_link_text, partner_sku
+
+
+def attribute_cookie_data(basket, request):
+    try:
+        referral = _referral_from_basket_site(basket, request.site)
+
+        _record_affiliate_basket_attribution(referral, request)
+        _record_utm_basket_attribution(referral, request)
+
+        # Save the record if any attribution attributes are set on it.
+        if any([getattr(referral, attribute) for attribute in Referral.ATTRIBUTION_ATTRIBUTES]):
+            referral.save()
+        # Clean up the record if no attribution attributes are set and it exists in the DB.
+        elif referral.pk:
+            referral.delete()
+        # Otherwise we can ignore the instantiated but unsaved referral
+
+    # Don't let attribution errors prevent users from creating baskets
+    except:  # pylint: disable=broad-except, bare-except
+        logger.exception('Error while attributing cookies to basket.')
+
+
+def _referral_from_basket_site(basket, site):
+    try:
+        referral = Referral.objects.get(basket=basket, site=site)
+    except Referral.DoesNotExist:
+        referral = Referral(basket=basket, site=site)
+    return referral
+
+
+def _record_affiliate_basket_attribution(referral, request):
+    """
+      Attribute this user's basket to the referring affiliate, if applicable.
+    """
+
+    # TODO: update this line to use site configuration once config in production (2016-10-04)
+    # affiliate_cookie_name = request.site.siteconfiguration.affiliate_cookie_name
+    # affiliate_id = request.COOKIES.get(affiliate_cookie_name)
+
+    affiliate_id = request.COOKIES.get(settings.AFFILIATE_COOKIE_KEY, "")
+    referral.affiliate_id = affiliate_id
+
+
+def _record_utm_basket_attribution(referral, request):
+    """
+      Attribute this user's basket to UTM data, if applicable.
+    """
+    utm_cookie_name = request.site.siteconfiguration.utm_cookie_name
+    utm_cookie = request.COOKIES.get(utm_cookie_name, "{}")
+    utm = json.loads(utm_cookie)
+
+    for attr_name in ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']:
+        setattr(referral, attr_name, utm.get(attr_name, ""))
+
+    created_at_unixtime = utm.get('created_at')
+    if created_at_unixtime:
+        # We divide by 1000 here because the javascript timestamp generated is in milliseconds not seconds.
+        # PYTHON: time.time()      => 1475590280.823698
+        # JS: new Date().getTime() => 1475590280823
+        created_at_datetime = datetime.datetime.fromtimestamp(int(created_at_unixtime) / float(1000), tz=pytz.UTC)
+    else:
+        created_at_datetime = None
+
+    referral.utm_created_at = created_at_datetime

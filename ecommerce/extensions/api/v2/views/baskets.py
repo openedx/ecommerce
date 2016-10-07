@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api, exceptions as api_exceptions
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.basket.utils import attribute_cookie_data
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import (get_default_processor_class, get_processor_class_by_name)
@@ -132,6 +133,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
         with transaction.atomic():
             basket = Basket.create_basket(request.site, request.user)
             basket_id = basket.id
+
+            attribute_cookie_data(basket, request)
 
             requested_products = request.data.get('products')
             if requested_products:
