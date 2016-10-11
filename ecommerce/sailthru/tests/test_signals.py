@@ -1,11 +1,10 @@
 """Tests of ecommerce sailthru signal handlers."""
 import logging
 
+from django.test.client import RequestFactory
 from mock import patch
-from oscar.core.loading import get_model
 from oscar.test.factories import create_order
 from oscar.test.newfactories import UserFactory, BasketFactory
-from django.test.client import RequestFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -21,13 +20,11 @@ TEST_EMAIL = "test@edx.org"
 CAMPAIGN_COOKIE = "cookie_bid"
 
 
-class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
-    """
-    Tests for the Sailthru signals class.
-    """
+class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+    """ Tests for the Sailthru signals. """
 
     def setUp(self):
-        super(SailthruTests, self).setUp()
+        super(SailthruSignalTests, self).setUp()
         self.request_factory = RequestFactory()
         self.request = self.request_factory.get("foo")
         self.request.COOKIES['sailthru_bid'] = CAMPAIGN_COOKIE
@@ -42,10 +39,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.course = Course.objects.create(id=self.course_id, name='Demo Course')
 
     @patch('ecommerce.sailthru.signals.logger.error')
-    def test_just_return_signals(self, mock_log_error):
-        """
-        Ensure that disabling Sailthru just returns
-        """
+    def test_signals_disabled(self, mock_log_error):
+        """ Verify Sailthru is not contacted if the signals are disabled. """
         toggle_switch('sailthru_enable', False)
         process_checkout_complete(None)
         self.assertFalse(mock_log_error.called)
@@ -55,10 +50,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     @patch('ecommerce.sailthru.signals.logger.error')
-    def test_just_return_if_partner_not_supported(self, mock_log_error, mock_update_course_enrollment):
-        """
-        Ensure that calls just return if enable_sailthru turned off for partner
-        """
+    def test_partner_not_supported(self, mock_log_error, mock_update_course_enrollment):
+        """ Verify Sailthru is not contacted if the Partner does not support Sailthru. """
         site_configuration = SiteConfigurationFactory(partner__name='TestX')
         site_configuration.partner.enable_sailthru = False
         self.request.site.siteconfiguration = site_configuration
@@ -74,10 +67,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     @patch('ecommerce.sailthru.signals.logger.error')
-    def test_just_return_not_course(self, mock_log_error, mock_update_course_enrollment):
-        """
-        Verify data for coupon-related orders is not sent to Sailthru.
-        """
+    def test_unsupported_product_class(self, mock_log_error, mock_update_course_enrollment):
+        """ Verify Sailthru is not contacted for non-seat products. """
         coupon = self.create_coupon()
         basket = BasketFactory()
         basket.add_product(coupon, 1)
@@ -94,9 +85,7 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_process_checkout_complete(self, mock_update_course_enrollment):
-        """
-        Test that the process_checkout signal handler properly calls the task routine
-        """
+        """ Verify the post_checkout receiver is called, and contacts Sailthru. """
 
         seat, order = self._create_order(99)
         process_checkout_complete(None, order=order, request=self.request)
@@ -112,10 +101,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                                                          unit_cost=order.total_excl_tax)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
-    def test_process_checkout_complete_no_request(self, mock_update_course_enrollment):
-        """
-        Test that the process_checkout signal handler properly handles null request
-        """
+    def test_process_checkout_complete_without_request(self, mock_update_course_enrollment):
+        """ Verify the post_checkout receiver can handle cases in which it is called without a request. """
 
         seat, order = self._create_order(99)
         process_checkout_complete(None, order=order)
@@ -131,10 +118,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                                                          unit_cost=order.total_excl_tax)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
-    def test_process_basket_addition(self, mock_update_course_enrollment):
-        """
-        Test that the process_basket_addition signal handler properly calls the task routine
-        """
+    def test_basket_addition(self, mock_update_course_enrollment):
+        """ Verify the basket_addition receiver is called, and contacts Sailthru. """
 
         seat, order = self._create_order(99)
         process_basket_addition(None, request=self.request,
@@ -152,10 +137,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                                                          unit_cost=order.total_excl_tax)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
-    def test_price_zero(self, mock_update_course_enrollment):
-        """
-        Test that a price of zero skips update_course_enrollment in process basket
-        """
+    def test_basket_addition_with_free_product(self, mock_update_course_enrollment):
+        """ Verify Sailthru is not contacted when free items are added to the basket. """
 
         seat = self._create_order(0)[0]
         process_basket_addition(None, request=self.request,
@@ -164,10 +147,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertFalse(mock_update_course_enrollment.called)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
-    def test_save_campaign_id(self, mock_update_course_enrollment):
-        """
-        Verify the Sailthru campaign ID is saved as a basket attribute.
-        """
+    def test_basket_attribute_update(self, mock_update_course_enrollment):
+        """ Verify the Sailthru campaign ID is saved as a basket attribute. """
 
         # force exception in _get_attribute_type for coverage
         BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -207,10 +188,8 @@ class SailthruTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                                                          unit_cost=order.total_excl_tax)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
-    def test_save_campaign_id_audit(self, mock_update_course_enrollment):
-        """
-        Verify the Sailthru campaign ID is saved as a basket attribute for audit enroll
-        """
+    def test_save_campaign_id_for_audit_enrollments(self, mock_update_course_enrollment):
+        """ Verify the Sailthru campaign ID is saved as a basket attribute for audit enrollments. """
 
         seat, order = self._create_order(0, 'audit')
         process_basket_addition(None, request=self.request,
