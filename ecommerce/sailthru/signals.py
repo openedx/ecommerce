@@ -106,7 +106,7 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
             BasketAttribute.objects.update_or_create(
                 basket=basket,
                 attribute_type=get_basket_attribute_type(),
-                value_text=message_id
+                defaults={'value_text': message_id}
             )
 
         # inform sailthru if there is a price.  The purpose of this call is to tell Sailthru when
