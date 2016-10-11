@@ -1,15 +1,14 @@
 import logging
 
-from django.dispatch import receiver
-from oscar.core.loading import get_class, get_model
 import waffle
-
+from django.dispatch import receiver
 from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
+from oscar.core.loading import get_class, get_model
+
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import silence_exceptions
-
 
 logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
@@ -44,7 +43,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
     if not message_id:
         saved_id = BasketAttribute.objects.filter(
             basket=order.basket,
-            attribute_type=_get_attribute_type()
+            attribute_type=get_basket_attribute_type()
         )
         if len(saved_id) > 0:
             message_id = saved_id[0].value_text
@@ -60,10 +59,9 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
 
         # ignore everything except course seats.  no support for coupons as of yet
         product_class_name = product.get_product_class().name
+
         if product_class_name == SEAT_PRODUCT_CLASS_NAME:
-
             price = line.line_price_excl_tax
-
             course_id = product.course_id
 
             # Tell Sailthru that the purchase is complete asynchronously
@@ -107,7 +105,7 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
         if message_id and basket:
             BasketAttribute.objects.update_or_create(
                 basket=basket,
-                attribute_type=_get_attribute_type(),
+                attribute_type=get_basket_attribute_type(),
                 value_text=message_id
             )
 
@@ -127,10 +125,10 @@ def _build_course_url(course_id):
     return get_lms_url('courses/{}/info'.format(course_id))
 
 
-def _get_attribute_type():
-    """ Read attribute type for Sailthru campaign id"""
-    try:
-        attribute_type = BasketAttributeType.objects.get(name=SAILTHRU_CAMPAIGN)
-    except BasketAttributeType.DoesNotExist:
-        attribute_type = BasketAttributeType.objects.create(name=SAILTHRU_CAMPAIGN)
-    return attribute_type
+def get_basket_attribute_type():
+    """ Returns `BasketAttributeType` for Sailthru campaign ID.
+
+    Returns:
+        BasketAttributeType
+    """
+    return BasketAttributeType.objects.get(name=SAILTHRU_CAMPAIGN)
