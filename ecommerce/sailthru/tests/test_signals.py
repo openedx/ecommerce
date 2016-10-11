@@ -3,6 +3,7 @@ import logging
 
 from django.test.client import RequestFactory
 from mock import patch
+from oscar.core.loading import get_model
 from oscar.test.factories import create_order
 from oscar.test.newfactories import UserFactory, BasketFactory
 
@@ -14,6 +15,7 @@ from ecommerce.sailthru.signals import process_checkout_complete, process_basket
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 log = logging.getLogger(__name__)
 
 TEST_EMAIL = "test@edx.org"
@@ -37,6 +39,8 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.course_id = 'edX/toy/2012_Fall'
         self.course_url = 'http://lms.testserver.fake/courses/edX/toy/2012_Fall/info'
         self.course = Course.objects.create(id=self.course_id, name='Demo Course')
+
+        self.basket_attribute_type, __ = BasketAttributeType.objects.get_or_create(name=SAILTHRU_CAMPAIGN)
 
     @patch('ecommerce.sailthru.signals.logger.error')
     def test_signals_disabled(self, mock_log_error):
@@ -149,15 +153,6 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_basket_attribute_update(self, mock_update_course_enrollment):
         """ Verify the Sailthru campaign ID is saved as a basket attribute. """
-
-        # force exception in _get_attribute_type for coverage
-        BasketAttributeType = get_model('basket', 'BasketAttributeType')
-        try:
-            basket_attribute = BasketAttributeType.objects.get(name=SAILTHRU_CAMPAIGN)
-            self.assertEqual(unicode(basket_attribute), SAILTHRU_CAMPAIGN)
-            basket_attribute.delete()
-        except BasketAttributeType.DoesNotExist:
-            pass
 
         seat, order = self._create_order(99)
         process_basket_addition(None, request=self.request,
