@@ -182,6 +182,23 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
                                                          site_code='edX',
                                                          unit_cost=order.total_excl_tax)
 
+    def test_basket_attribute_update_with_existing_attribute(self):
+        """ Verify existing BasketAttribute values are updated if a user is modifying an existing basket. """
+        campaign_id = 'attempt-1'
+        seat, order = self._create_order(99)
+        basket = order.basket
+        self.request.COOKIES['sailthru_bid'] = campaign_id
+        process_basket_addition(None, request=self.request, user=self.user, product=seat, basket=basket)
+        self.assertEqual(basket.basketattribute_set.get(attribute_type=self.basket_attribute_type).value_text,
+                         campaign_id)
+
+        # Call again to trigger another attempt to create an attribute
+        campaign_id = 'attempt-2'
+        self.request.COOKIES['sailthru_bid'] = campaign_id
+        process_basket_addition(None, request=self.request, user=self.user, product=seat, basket=basket)
+        self.assertEqual(basket.basketattribute_set.get(attribute_type=self.basket_attribute_type).value_text,
+                         campaign_id)
+
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_save_campaign_id_for_audit_enrollments(self, mock_update_course_enrollment):
         """ Verify the Sailthru campaign ID is saved as a basket attribute for audit enrollments. """
