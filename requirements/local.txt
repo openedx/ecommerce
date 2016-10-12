@@ -6,4 +6,4 @@ django-debug-toolbar==1.4
 
 # i18n
 transifex-client==0.11
-edx-i18n-tools==0.3.3
+edx-i18n-tools==0.3.4
