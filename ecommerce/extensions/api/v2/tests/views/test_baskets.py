@@ -88,6 +88,17 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         """Test that a variety of product combinations can be added to the basket and purchased."""
         self.assert_successful_basket_creation(skus, checkout, payment_processor_name, requires_payment)
 
+    @ddt.data(
+        ([FREE_SKU], False),
+        ([PAID_SKU], True),
+    )
+    @ddt.unpack
+    def test_basket_creation_with_attribution(self, skus, requires_payment):
+        """ Verify a basket is returned and referral method called. """
+        with mock.patch('ecommerce.extensions.api.v2.views.baskets.attribute_cookie_data') as mock_attr_method:
+            self.assert_successful_basket_creation(skus, False, None, requires_payment)
+            self.assertTrue(mock_attr_method.called)
+
     def test_multiple_baskets(self):
         """ Test that basket operations succeed if the user has editable baskets. The endpoint should
         ALWAYS create a new basket. """

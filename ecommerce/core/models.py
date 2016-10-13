@@ -94,6 +94,20 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
+    utm_cookie_name = models.CharField(
+        verbose_name=_('UTM Cookie Name'),
+        help_text=_('Name of cookie storing UTM data.'),
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    affiliate_cookie_name = models.CharField(
+        verbose_name=_('Affiliate Cookie Name'),
+        help_text=_('Name of cookie storing affiliate data.'),
+        max_length=255,
+        blank=True,
+        default="",
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
