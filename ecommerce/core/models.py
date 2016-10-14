@@ -402,10 +402,6 @@ class User(AbstractUser):
         return response
 
 
-class Client(User):
-    pass
-
-
 class BusinessClient(models.Model):
     """The model for the business client."""
 

@@ -2,6 +2,7 @@ import django_filters
 from django.db.models import Q
 
 from oscar.core.loading import get_model
+from ecommerce.core.models import BusinessClient
 
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -29,3 +30,12 @@ class OrderFilter(django_filters.FilterSet):
     class Meta(object):
         model = Order
         fields = ('username',)
+
+
+class ClientFilter(django_filters.FilterSet):
+    """ Filter clients via query string parameter. """
+    name = django_filters.CharFilter(name='name', lookup_type='iexact')
+
+    class Meta(object):
+        model = BusinessClient
+        fields = ('name',)
