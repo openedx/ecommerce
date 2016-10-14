@@ -68,13 +68,23 @@ class CourseCatalogMockMixin(object):
                 }],
             }
         course_run_info_json = json.dumps(course_run_info)
-        course_run_url = '{}course_runs/?q={}'.format(
+        course_run_url_with_query = '{}course_runs/?q={}'.format(
             settings.COURSE_CATALOG_API_URL,
             query if query else 'id:course*'
         )
         httpretty.register_uri(
-            httpretty.GET, course_run_url,
+            httpretty.GET, course_run_url_with_query,
             body=course_run_info_json,
+            content_type='application/json'
+        )
+
+        course_run_url_with_key = '{}course_runs/{}/'.format(
+            settings.COURSE_CATALOG_API_URL,
+            course_run.id if course_run else 'course-v1:test+test+test'
+        )
+        httpretty.register_uri(
+            httpretty.GET, course_run_url_with_key,
+            body=json.dumps(course_run_info['results'][0]),
             content_type='application/json'
         )
 

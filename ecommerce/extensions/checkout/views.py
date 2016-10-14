@@ -19,6 +19,7 @@ from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import add_currency, get_credit_provider_details
 from ecommerce.extensions.offer.utils import get_discount_percentage
+from ecommerce.extensions.payment.models import PaymentProcessorResponse
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -150,6 +151,7 @@ class ReceiptResponseView(TemplateView):
                 return self.render_to_response(context)
 
             seat = order.lines.first().product
+            course = self.request.site.siteconfiguration.course_catalog_api_client.course_runs(seat.attr.course_key).get()
             provider_data = None
             if seat.attr.certificate_type == 'credit':
                 provider_data = get_credit_provider_details(
@@ -163,8 +165,16 @@ class ReceiptResponseView(TemplateView):
             total_cost = float(order_data['total_excl_tax'])
             original_cost = discount_value + total_cost
 
+            try:
+                recipient_info = PaymentProcessorResponse.objects.filter(
+                    basket=order.basket
+                ).latest().response['payer']
+            except (PaymentProcessorResponse.DoesNotExist, KeyError):
+                recipient_info = None
+
             receipt = {
-                'billed_to': None,
+                'billed_to': recipient_info,
+                'currency': settings.OSCAR_DEFAULT_CURRENCY,
                 'discount': add_currency(discount_value),
                 'discount_percentage': get_discount_percentage(
                     discount_value=discount_value,
@@ -186,7 +196,7 @@ class ReceiptResponseView(TemplateView):
             }
 
             context.update({
-                'course_key': seat.attr.course_key,
+                'course': course,
                 'is_verification_required': seat.attr.id_verification_required,
                 'lms_url': order.site.siteconfiguration.lms_url_root,
                 'provider_data': provider_data,
@@ -200,6 +210,7 @@ class ReceiptResponseView(TemplateView):
                 'is_payment_complete': False,
                 'page_title': _('Invalid order number')
             })
+
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument

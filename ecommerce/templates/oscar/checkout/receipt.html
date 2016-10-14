@@ -52,93 +52,61 @@
             <div class="list-info">
               <div class="info-item payment-info row">
                 <div class="copy col-md-8">
-                <div class="confirm-message">{% trans "Your order was processed successfully. Print this page for your records; it serves as your receipt. You will also receive a confirmation email with the same information at" %}
-                <a class="nav-link" href="mailto:{{ receipt.email }}">{{ receipt.email }}</a>.</div>
-                {% if receipt.billed_to %}
-                    <div class="addressed-to">
-                          <span class="name-first">{{ receipt.billed_to.firstName }}</span>
-                          <span class="name-last">{{ receipt.billed_to.lastName }}</span><br />
-                          <span class="address-city">{{ receipt.billed_to.city }}</span>,
-                          <span class="address-state">{{ receipt.billed_to.state }}</span>
-                          <span class="address-postalcode">{{ receipt.billed_to.postalCode }}</span><br />
-                          <span class="address-country">{{ receipt.billed_to.country }}</span><br />
-                    </div>
-                {% elif receipt.shipping_address %}
-                    <div class="addressed-to"><address>
-                    {% for address in receipt.shipping_address %}
-                          {{ address }} <br/>
-                    {% endfor %}
-                    </address></div>
-                {% endif %}
-
-                </div>
-                <div class="order-headers order-summary col-md-4">
-                    <span class="order-number-heading">{% trans "Order Number" %}:</span>
-                    <div class="order-info">{{ receipt.order_number }}</div>
-                    {% if receipt.payment_processor  %}
-                        <span class="order-payment-heading">{% trans "Payment Method" %}:</span>
-                        <div class="order-info">{{ receipt.payment_processor }}</div>
-                    {% endif %}
-
-                    <span class="order-date-heading">{% trans "Order Date" %}:</span>
-                    <div class="order-info">{{ receipt.purchased_datetime }}</div>
+                    <div class="confirm-message">
+                        {% trans "Your order was processed successfully. Print this page for your records; it serves as your receipt. You will also receive a confirmation email with the same information at" %}
+                        <a class="nav-link" href="mailto:{{ receipt.email }}">{{ receipt.email }}</a>.
                     </div>
                 </div>
 
-                <div class="wrapper-report">
-                  <div class="order-headers order-details">{% trans "Order Details" %}</div>
-                  <div class="table-responsive">
-                  <table class="table">
-                    <thead class="order-columns">
-                      <tr>
-                        <th scope="col" >{% trans "Qty" %}.</th> <!-- Translators: Abbreviation for quantity.-->
-                        <th scope="col" >{% trans "Description" %}</th>
-                        <th class="order-amount" scope="col" >{% trans "Amount" %}</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {% for item in receipt.items %}
-                          <tr class="order-line-data">
-                            <td>{{ item.quantity }}</td>
-                            <td>{{ item.description }}<div class="partner">
+                <div class="wrapper-report col-xs-12">
+                    <h4 class="order-headers">{% trans "Order Summary" %}</h4>
+                    <div class="order-details">
+                        <p class="order-details-text">{% trans "Order" %} {{ receipt.order_number }}</p>
+                        <p class="order-details-text">{% trans "Date ordered:" %} {{ receipt.purchased_datetime }}</p>
+                        {% for voucher in receipt.vouchers %}
+                            <p class="order-details-text">{% trans "Code applied" %} {{ voucher.code }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table">
+                          <tbody>
+                            {% for item in receipt.items %}
+                              <tr>
+                                <td>{{ item.description }}</td>
+                                <td class="price">{{ item.cost }} ({{ receipt.currency }})</td>
+                              </tr>
+                            {% endfor %}
+                            <tr class="final-price">
+                                <td>{% trans "Total" %}</td>
+                                <td class="price">{{ receipt.total_cost }} ({{ receipt.currency }})</td>
+                            </tr>
+                          </tbody>
+                      </table>
+                    </div>
+                    {% if receipt.billed_to %}
+                        <div class="payment-summary row">
+                            <div class="payment-card-detailss col-sm-4">
+                                <h4 class="order-headers">{% trans "Payment Summary" %}</h4>
+                                <div class="payment-data">
+                                    <p class="payment-user-data">{{ receipt.billed_to.payer_info.shipping_address.recipient_name }}</p>
+                                    <p class="payment-user-data">{{ receipt.billed_to.payer_info.shipping_address.line1 }}</p>
+                                    <p class="payment-user-data">{{ receipt.billed_to.payer_info.shipping_address.city }}, {{ receipt.billed_to.payer_info.shipping_address.state }} {{ receipt.billed_to.payer_info.shipping_address.postal_code }}</p>
+                                </div>
                             </div>
-                            {% for voucher in receipt.vouchers %}
-                                <div class="voucher-info">{% trans "Coupon applied" %}:
-                                     <span class="voucher-code">{{ voucher.code }}
-                                     {{ receipt.discount_percentage }}% off</span>
-                                     <span class="discount">-{{ receipt.discount }}</span>
-                               </div>
-                           {% endfor %}
-                            </td>
-                            {% if receipt.discount %}
-                                <td><div class="old-price">{{ receipt.original_cost }}</div>
-                                <div class="final-price">{{ item.cost }}</div></td>
-                            {% else  %}
-                                <td class="final-price">{{ item.cost }}</td>
-                            {% endif %}
-                          </tr>
-                      {% endfor %}
-                    </tbody>
-
-                    <tfoot>
-                      <tr class="order-total">
-                        <td colspan="3">
-                        <div class="total-value"> {% trans "Total: " %}
-                          <span class="value-amount">{{ receipt.total_cost }}</span>
+                            <!-- TO  DO
+                            <div class="payment-card-details col-sm-8">
+                                <p class="payment-card-number">Paid via Mastercard (xxxx-xxxx-xxxx-1234)</p>
+                            </div>
+                            -->
                         </div>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                  </div>
+                    {% endif %}
                   {% if receipt.is_refunded %}
-                  <div class="msg msg-refunds">
-                    <h4 class="title sr">{% trans "Please Note" %}: </h4>
-                    <div class="copy">
-                      <p>{% trans "Crossed out items have been refunded." %}</p>
-                    </div>
-                  </div>
+                      <div class="msg msg-refunds">
+                        <h4 class="title sr">{% trans "Please Note" %}: </h4>
+                        <div class="copy">
+                          <p>{% trans "Crossed out items have been refunded." %}</p>
+                        </div>
+                      </div>
                   {% endif %}
                 </div>
 
@@ -166,11 +134,11 @@
                     </div>
                       <a id="credit-button"
                         class="complete-course btn-neutral"
-                        data-course-key="{{ course_key }}"
+                        data-course-key="{{ course.key }}"
                         data-provider="{{ provider_data.id }}"
                         data-track-category="credit"
                         data-track-event="edx.bi.credit.clicked_complete_credit"
-                        data-track-label="{{ course_key }}"
+                        data-track-label="{{ course.key }}"
                         data-track-type="click"
                         data-username="{{ username }}"
                         href="{{ provider_data.url }}">
@@ -185,32 +153,39 @@
                 <p class="no-content">{% trans "No receipt available" %}</p>
             {% endif %}
 
-            <div class="nav-wizard is-ready row">
+            <div class="nav-wizard row">
                 {% if not is_verification_required or verified %}
                     <div id="verify_choices"><a class="verify-later nav-link" href="{{ lms_url }}/dashboard">
                     {% trans "Go to Dashboard" %}</a></div>
                 {% else %}
-                  <div id="verify_message" class="col-md-9">{% trans "Before you can receive a verified certificate for this course, you must verify your identity" %}</div>
-                  <div id="verify_choices" class="right col-md-3">
-                    <div id="verify_now">
-                      <a id="verify_now_button"
-                        class="next action-primary"
-                        data-track-category="verification"
-                        data-track-event="edx.bi.user.verification.deferred"
-                        data-track-type="click"
-                        href="{{ lms_url }}/verify_student/verify-now/{{ course_key }}/">
-                        {% trans "Verify Now" %}
-                      </a>
+                    <div class="col-md-9">
+                        <p class="verify-message-header">{% trans "Don't Forget! You still need to verify." %}</p>
+                        <p class="verify-message">
+                            {% blocktrans %}
+                            Before you start your course, you will need to verify your identity using your <span class="bolded-text">webcam</span> and an <span class="bolded-text">official photo identification</span> (drivers license, government ID, passport).
+                            {% endblocktrans %}
+                        </p>
                     </div>
-                    <a id="verify_later_button"
-                      class="verify-later"
-                      data-track-category="verification"
-                      data-track-event="edx.bi.user.verification.immediate"
-                      data-track-type="click"
-                      href="{{ lms_url }}/dashboard">
-                      {% trans "Take me to dashboard" %}
-                    </a>
-                  </div>
+                    <div id="verify_choices" class="right col-md-3">
+                        <div id="verify_now">
+                          <a id="verify_now_button"
+                            class="next action-primary"
+                            data-track-category="verification"
+                            data-track-event="edx.bi.user.verification.deferred"
+                            data-track-type="click"
+                            href="{{ lms_url }}/verify_student/verify-now/{{ course.key }}/">
+                            {% trans "Verify Now" %}
+                          </a>
+                        </div>
+                        <a id="verify_later_button"
+                          class="verify-later"
+                          data-track-category="verification"
+                          data-track-event="edx.bi.user.verification.immediate"
+                          data-track-type="click"
+                          href="{{ lms_url }}/dashboard">
+                          {% trans "Go to my Dashboard and verify later" %}
+                        </a>
+                    </div>
                 {% endif %}
             </div>
           </article>

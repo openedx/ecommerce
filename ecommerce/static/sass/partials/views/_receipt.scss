@@ -4,17 +4,23 @@
     line-height: 1em;
 
     .action-primary {
-        background: #006d01 none repeat scroll 0 0;
+        background: palette(primary, base) none repeat scroll 0 0;
         border: 0 none;
-        box-shadow: 0 2px 1px 0 #005201;
+        border-radius: 2px;
+        box-shadow: 0 2px 1px 0 palette(primary, dark);
         color: #fff;
         text-decoration: none;
 
         &:hover, &:focus {
-            background: #60bc61 none repeat scroll 0 0;
+            background: palette(primary, accent) none repeat scroll 0 0;
+            border-bottom-color: palette(primary, accent);
             color: #fff;
             text-decoration: none;
         }
+    }
+
+    .bolded-text {
+        font-weight: bold;
     }
 
     .content-container {
@@ -32,7 +38,7 @@
         }
     }
 
-    .discount, .final-price {
+    .final-price {
         color: black;
         font-weight: 700;
     }
@@ -61,10 +67,6 @@
         overflow: hidden;
     }
 
-    .is-ready {
-        background: #e8f6fc none repeat scroll 0 0;
-    }
-
     .nav-link {
         border-bottom: none;
         text-decoration: none !important;
@@ -75,13 +77,15 @@
     }
 
     .nav-wizard {
-        padding: 15px 20px 5px;
+        padding: 15px 20px 10px;
         margin: 0;
         overflow: hidden;
-        box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.2) inset;
+        border-top: 4px solid rgb(255, 192, 31);
+        box-shadow: 0 1px 1px 2px rgba(0, 0, 0, 0.2);
 
         .verify-later {
             line-height: 20px;
+            font-size: 13px;
         }
 
         #verify_now {
@@ -94,28 +98,31 @@
             text-align: center;
         }
 
-        #verify_message {
-            padding-top: 25px;
-            font-weight: 700;
+        .verify-message {
+            color: #434242;
+            font-weight: 500;
+            line-height: 1.4em;
+        }
+
+        .verify-message-header {
+            margin: 0;
+            padding: 10px 0;
+            color: #434242;
+            font-size: 18px;
+            font-weight: bold;
         }
 
         #verify_now_button {
             display: block;
-            width: 80%;
+            width: 100%;
             margin: 0 auto;
-            padding: 7px 35px;
+            padding: 13px 35px;
             text-align: center;
 
             &:hover {
                 text-decoration: none;
             }
         }
-    }
-
-    .old-price {
-        color: #7c7c7c;
-        font-weight: 600;
-        text-decoration: line-through;
     }
 
     .order-amount {
@@ -129,13 +136,20 @@
     }
 
     .order-details {
-        margin-bottom: 20px;
+        color: #6f7074;
+        font-size: 12px;
+        font-weight: 100;
+
+        .order-details-text {
+            display: inline-block;
+            margin: 0 30px 10px 0;
+        }
     }
 
     .order-headers {
-        color: rgb(0, 121, 188);
-        font-size: 22px;
-        font-weight: 500;
+        margin-bottom: 10px;
+        font-size: 18px;
+        font-weight: 700;
     }
 
     .order-info {
@@ -145,32 +159,24 @@
         font-size: 18px;
     }
 
-    .order-line-data {
-        color: rgb(29, 29, 29);
-        font-size: 20px;
-
-        > td {
-            padding-bottom: 1.5em;
-            padding-top: 1.25em;
-            line-height: 1.5em !important;
-        }
-    }
-
-    .order-total {
-        background-color: rgb(249, 249, 249);
-        border-width: 1px;
-        border-color: rgb(235, 235, 235);
-        color: #000;
-        font-size: 1em;
-    }
-
     p, address {
         color: #6f7074;
     }
 
-    .partner {
-        color: #7c7c7c;
-        font-size: 16px;
+    .payment-summary {
+        margin: 20px -15px 40px;
+
+        .payment-card-number {
+            padding: 30px 0;
+        }
+
+        .payment-data {
+            padding-left: 30px;
+
+            .payment-user-data {
+                margin-bottom: 10px;
+            }
+        }
     }
 
     /* Styling for the provider area; uses edX Pattern Library utils */
@@ -210,42 +216,36 @@
         font-weight: 600;
     }
 
+    .table {
+        border: 1px solid #ddd;
 
-    .table tr {
-        > td, > th {
-            padding-left: 1.25em;
-            border-left: 2px solid rgb(235, 235, 235);
+        tbody {
+            font-size: 1em;
+            background-color: rgb(245, 245, 245);
         }
 
-        td:first-child, th:first-child {
-            border-left: none;
-        }
-
-        .total-value {
-            float: right;
-            width: 14%;
-            color: rgb(51, 122, 183);
-            font-size: 22px;
-            font-weight: 700;
+        tr {
+            > td {
+                padding: 25px 0 25px 20px;
+            }
+            > td.price {
+                padding-right: 20px;
+                text-align: right;
+            }
         }
     }
 
     .thank-you {
         margin-bottom: 10px;
-        color: rgb(0, 121, 188);
-        font-size: 38px;
-    }
-
-    .voucher-code {
-        margin-right: 20px;
-        color:  #7c7c7c;
-    }
-
-    .voucher-info {
-         font-size: 16px;
+        font-size: 24px;
+        font-weight: bold;
     }
 
     .wrapper-content-main {
         margin-bottom: 20px;
+
+        .wrapper-report{
+            padding-top: 30px;
+        }
     }
 }

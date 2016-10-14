@@ -8,7 +8,11 @@ from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
+from ecommerce.courses.models import Course
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -143,7 +147,7 @@ class CheckoutErrorViewTests(TestCase):
 
 
 @ddt.ddt
-class ReceiptViewTests(RefundTestMixin, TestCase):
+class ReceiptViewTests(CourseCatalogMockMixin, RefundTestMixin, TestCase):
     """
     Tests for the receipt view.
     """
@@ -176,8 +180,13 @@ class ReceiptViewTests(RefundTestMixin, TestCase):
         }
         self.assertDictContainsSubset(context_data, response.context_data)
 
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_get_receipt_for_existing_order(self):
         order = self.create_order()
+        seat = order.basket.lines.first().product
+        course = Course.objects.get(id=seat.attr.course_key)
+        self.mock_dynamic_catalog_course_runs_api(course_run=course)
         response = self.client.get('{path}?order_number={order_number}'.format(
             order_number=order.number,
             path=self.path
@@ -197,7 +206,14 @@ class ReceiptViewTests(RefundTestMixin, TestCase):
             'payment_processor': None
         }
         context_data = {
-            'course_key': seat.attr.course_key,
+            'course': {
+                'key': course.id,
+                'title': course.name,
+                'start': '2016-05-01T00:00:00Z',
+                'image': {
+                    'src': 'path/to/the/course/image'
+                }
+            },
             'is_verification_required': seat.attr.id_verification_required,
             'lms_url': order.site.siteconfiguration.lms_url_root,
             'provider_data': None,
