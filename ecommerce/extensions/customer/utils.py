@@ -33,6 +33,7 @@ class Dispatcher(Dispatcher):
         if messages['subject'] and (messages['body'] or messages['html']):
             self.send_user_email_messages(user, messages, site)
         if messages['sms']:
+            print 'a'
             self.send_text_message(user, messages['sms'])
 
     def send_user_email_messages(self, user, messages, site=None):  # pylint: disable=arguments-differ
