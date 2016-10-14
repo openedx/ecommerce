@@ -44,8 +44,8 @@
           data-lms-url="{{ lms_url }}">
         <div class="wrapper-content-main">
           <article class="content-main">
-            <h3 class="thank-you">
-              {% trans "Thank you!" %}
+            <h3 class="title">
+              {% trans "Order Complete" %}
             </h3>
 
             {% if receipt %}
@@ -53,7 +53,7 @@
               <div class="info-item payment-info row">
                 <div class="copy col-md-8">
                     <div class="confirm-message">
-                        {% trans "Your order was processed successfully. Print this page for your records; it serves as your receipt. You will also receive a confirmation email with the same information at" %}
+                        {% trans "Your order is now complete. This page serves as your receipt. You will also receive a confirmation message at" %}
                         <a class="nav-link" href="mailto:{{ receipt.email }}">{{ receipt.email }}</a>.
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                             </div>
                             <!-- TO  DO
                             <div class="payment-card-details col-sm-8">
-                                <p class="payment-card-number">Paid via Mastercard (xxxx-xxxx-xxxx-1234)</p>
+                                <p class="payment-card-number">Paid with Mastercard (xxxx-xxxx-xxxx-1234)</p>
                             </div>
                             -->
                         </div>
@@ -154,15 +154,12 @@
             {% endif %}
 
             <div class="nav-wizard row">
-                {% if not is_verification_required or verified %}
-                    <div id="verify_choices"><a class="verify-later nav-link" href="{{ lms_url }}/dashboard">
-                    {% trans "Go to Dashboard" %}</a></div>
-                {% else %}
+                {% if is_verification_required or verified %}
                     <div class="col-md-9">
-                        <p class="verify-message-header">{% trans "Don't Forget! You still need to verify." %}</p>
+                        <p class="verify-message-header">{% trans "Identity Verification Required." %}</p>
                         <p class="verify-message">
                             {% blocktrans %}
-                            Before you start your course, you will need to verify your identity using your <span class="bolded-text">webcam</span> and an <span class="bolded-text">official photo identification</span> (drivers license, government ID, passport).
+                            Before you can receive a certificate for this course, you must verify your identity using a <span class="bolded-text">webcam</span> and a <span class="bolded-text">government-issued photo identification</span>, such as a driver’s license or passport. Different courses have different verification deadlines, so edX encourages you to complete this step as soon as possible.
                             {% endblocktrans %}
                         </p>
                     </div>
@@ -174,7 +171,7 @@
                             data-track-event="edx.bi.user.verification.deferred"
                             data-track-type="click"
                             href="{{ lms_url }}/verify_student/verify-now/{{ course.key }}/">
-                            {% trans "Verify Now" %}
+                            {% trans "Verify ID Now" %}
                           </a>
                         </div>
                         <a id="verify_later_button"
@@ -183,9 +180,12 @@
                           data-track-event="edx.bi.user.verification.immediate"
                           data-track-type="click"
                           href="{{ lms_url }}/dashboard">
-                          {% trans "Go to my Dashboard and verify later" %}
+                          {% trans "Verify later" %}
                         </a>
                     </div>
+                {% else %}
+                    <div id="verify_choices"><a class="verify-later nav-link" href="{{ lms_url }}/dashboard">
+                    {% trans "Go to Dashboard" %}</a></div>
                 {% endif %}
             </div>
           </article>
