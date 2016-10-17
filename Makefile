@@ -34,7 +34,7 @@ requirements.js:
 	$(NODE_BIN)/bower install
 
 requirements: requirements.js
-	pip install -qr requirements/local.txt --exists-action w
+	pip install -r requirements/local.txt --exists-action w
 
 migrate:
 	python manage.py migrate
