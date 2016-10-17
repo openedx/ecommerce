@@ -11,6 +11,7 @@ cache:
     - node_modules
     - ecommerce/static/bower_components
 addons:
+    firefox: latest
     apt:
         packages:
             - lcov

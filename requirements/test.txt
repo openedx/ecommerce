@@ -11,6 +11,6 @@ mock-django==0.6.9
 nose-ignore-docstring==0.2
 pep8==1.6.2
 pylint==1.5.0
-selenium>=2.53.1
+selenium>=3.0.1
 testfixtures==4.5.0
 diff-cover==0.9.6
