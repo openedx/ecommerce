@@ -57,7 +57,7 @@ validate_js:
 	$(NODE_BIN)/gulp jscs
 
 validate_python: clean
-	REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+	PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 	make quality
