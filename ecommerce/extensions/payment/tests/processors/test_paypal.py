@@ -20,7 +20,7 @@ from paypalrestsdk.resource import Resource
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaypalMixin
@@ -82,6 +82,10 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         actual = self.processor.get_transaction_parameters(self.basket, request=self.request)
         self.assertEqual(actual, expected)
 
+    def _get_receipt_url(self):
+        """DRY helper for getting receipt page URL."""
+        return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
+
     def _assert_payment_event_and_source(self, payer_info):
         """DRY helper for verifying a payment event and source."""
         source, payment_event = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
@@ -107,8 +111,22 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
         last_request_body = json.loads(httpretty.last_request().body)
-        expected = urljoin(get_ecommerce_url(), reverse('paypal_execute'))
+        expected = urljoin(self.site.siteconfiguration.build_ecommerce_url(), reverse('paypal_execute'))
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
+
+    def test_switch_enabled_otto_url(self):
+        """
+        Ensures that when the otto_receipt_page waffle switch is enabled, the processor uses the new receipt page.
+        """
+        self.site.siteconfiguration.enable_otto_receipt_page = True
+        assert self._get_receipt_url() == self.site.siteconfiguration.build_ecommerce_url(settings.RECEIPT_PAGE_PATH)
+
+    def test_switch_disabled_lms_url(self):
+        """
+        Ensures that when the otto_receipt_page waffle switch is disabled, the processor uses the LMS receipt page.
+        """
+        self.site.siteconfiguration.enable_otto_receipt_page = False
+        assert self._get_receipt_url() == self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt')
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')

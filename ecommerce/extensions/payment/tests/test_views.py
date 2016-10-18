@@ -11,6 +11,7 @@ from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
@@ -35,6 +36,8 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
 
     def setUp(self):
         super(CybersourceNotifyViewTests, self).setUp()
+
+        self.site.siteconfiguration.enable_otto_receipt_page = True
 
         self.user = factories.UserFactory()
         self.billing_address = self.make_billing_address()
@@ -301,6 +304,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         self.basket = factories.create_basket()
         self.basket.owner = factories.UserFactory()
+        self.basket.site = self.site
         self.basket.freeze()
 
         self.processor = Paypal()
@@ -312,7 +316,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
     @httpretty.activate
     def _assert_execution_redirect(self, payer_info=None, url_redirect=None):
-        """Verify redirection to the configured receipt page after attempted payment execution."""
+        """Verify redirection to Otto receipt page after attempted payment execution."""
         self.mock_oauth2_response()
 
         # Create a payment record the view can use to retrieve a basket
@@ -325,7 +329,10 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
         self.assertRedirects(
             response,
-            url_redirect or u'{}?orderNum={}'.format(self.processor.receipt_url, self.basket.order_number),
+            url_redirect or get_receipt_page_url(
+                order_number=self.basket.order_number,
+                site_configuration=self.basket.site.siteconfiguration
+            ),
             fetch_redirect_response=False
         )
 
@@ -356,6 +363,30 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 ),
                 (logger_name, 'ERROR', error_message)
             )
+
+    @httpretty.activate
+    def test_execution_redirect_to_lms(self):
+        """
+        Verify redirection to LMS receipt page after attempted payment execution if Otto receipt page waffle
+        switch is disabled.
+        """
+        self.site.siteconfiguration.enable_otto_receipt_page = False
+        self.mock_oauth2_response()
+
+        # Create a payment record the view can use to retrieve a basket
+        self.mock_payment_creation_response(self.basket)
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        self.mock_payment_execution_response(self.basket)
+
+        response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
+        self.assertRedirects(
+            response,
+            get_receipt_page_url(
+                order_number=self.basket.order_number,
+                site_configuration=self.basket.site.siteconfiguration
+            ),
+            fetch_redirect_response=False
+        )
 
     @ddt.data(
         None,  # falls back to PaypalMixin.PAYER_INFO, a fully-populated payer_info object

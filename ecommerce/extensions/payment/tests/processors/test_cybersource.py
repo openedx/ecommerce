@@ -17,6 +17,7 @@ from oscar.test import factories
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError
 )
@@ -38,6 +39,11 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     processor_class = Cybersource
     processor_name = 'cybersource'
 
+    def setUp(self):
+        super(CybersourceTests, self).setUp()
+        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.basket.site = self.site
+
     def get_expected_transaction_parameters(self, transaction_uuid, include_level_2_3_details=True):
         """
         Builds expected transaction parameters dictionary
@@ -58,8 +64,10 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
             'amount': unicode(self.basket.total_incl_tax),
             'currency': self.basket.currency,
             'consumer_id': self.basket.owner.username,
-            'override_custom_receipt_page': '{}?orderNum={}'.format(self.processor.receipt_page_url,
-                                                                    self.basket.order_number),
+            'override_custom_receipt_page': get_receipt_page_url(
+                order_number=self.basket.order_number,
+                site_configuration=self.basket.site.siteconfiguration
+            ),
             'override_custom_cancel_page': self.processor.cancel_page_url,
             'merchant_defined_data1': self.course.id,
             'merchant_defined_data2': self.CERTIFICATE_TYPE,

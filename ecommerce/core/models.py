@@ -108,6 +108,12 @@ class SiteConfiguration(models.Model):
         blank=True,
         default="",
     )
+    enable_otto_receipt_page = models.BooleanField(
+        verbose_name=_('Enable Otto receipt page'),
+        help_text=_('Enable the usage of Otto receipt page.'),
+        blank=True,
+        default=False
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')

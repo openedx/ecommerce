@@ -10,7 +10,7 @@ from oscar.core.loading import get_model
 import paypalrestsdk
 import waffle
 
-from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.models import PaypalWebProfile
@@ -58,10 +58,6 @@ class Paypal(BasePaymentProcessor):
             'client_id': self.configuration['client_id'],
             'client_secret': self.configuration['client_secret']
         })
-
-    @property
-    def receipt_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
 
     @property
     def cancel_url(self):

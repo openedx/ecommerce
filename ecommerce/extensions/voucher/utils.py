@@ -16,6 +16,7 @@ import pytz
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.api import exceptions
+from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -479,17 +480,17 @@ def get_voucher_discount_info(benefit, price):
         if benefit.type == Benefit.PERCENTAGE:
             return {
                 'discount_percentage': benefit_value,
-                'discount_value': benefit_value * price / 100.0,
+                'discount_value': get_discount_value(discount_percentage=benefit_value, product_price=price),
                 'is_discounted': True if benefit.value < 100 else False
             }
         else:
-            discount_percentage = benefit_value / price * 100.0
+            discount_percentage = get_discount_percentage(discount_value=benefit_value, product_price=price)
             if discount_percentage > 100:
                 discount_percentage = 100.00
                 discount_value = price
             else:
-                discount_percentage = float(discount_percentage)
-                discount_value = benefit.value
+                discount_percentage = discount_percentage
+                discount_value = benefit_value
             return {
                 'discount_percentage': discount_percentage,
                 'discount_value': float(discount_value),
