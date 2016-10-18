@@ -6,8 +6,9 @@ from django.test import override_settings
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
+from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.dashboard.orders.views import queryset_orders_for_user
@@ -49,7 +50,10 @@ class OrderListViewTests(OrderViewTestsMixin, RefundTestMixin, LiveServerTestCas
         if os.environ.get('DISABLE_ACCEPTANCE_TESTS') == 'True':
             raise SkipTest
 
-        cls.selenium = WebDriver()
+        caps = DesiredCapabilities.FIREFOX
+        caps['marionette'] = True
+        caps['binary'] = '/usr/bin/firefox'
+        cls.selenium = webdriver.Firefox(capabilities=caps)
         super(OrderListViewTests, cls).setUpClass()
 
     @classmethod
