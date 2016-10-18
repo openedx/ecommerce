@@ -19,6 +19,7 @@ before_install:
     - "export DISPLAY=:99.0"
     - "sh -e /etc/init.d/xvfb start"
     - "export DJANGO_SETTINGS_MODULE=ecommerce.settings.test"
+    - "export PATH=$PATH:$(which firefox)"
 install:
     - pip install -U codecov
     - pip install -U pip wheel
