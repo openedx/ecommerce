@@ -12,7 +12,6 @@ from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.courses.models import Course
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase

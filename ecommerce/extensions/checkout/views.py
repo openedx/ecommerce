@@ -151,7 +151,9 @@ class ReceiptResponseView(TemplateView):
                 return self.render_to_response(context)
 
             seat = order.lines.first().product
-            course = self.request.site.siteconfiguration.course_catalog_api_client.course_runs(seat.attr.course_key).get()
+            course = self.request.site.siteconfiguration.course_catalog_api_client.course_runs(
+                seat.attr.course_key
+            ).get()
             provider_data = None
             if seat.attr.certificate_type == 'credit':
                 provider_data = get_credit_provider_details(
