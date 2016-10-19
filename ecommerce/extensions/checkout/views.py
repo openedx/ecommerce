@@ -166,9 +166,30 @@ class ReceiptResponseView(TemplateView):
             original_cost = discount_value + total_cost
 
             try:
-                recipient_info = PaymentProcessorResponse.objects.filter(
-                    basket=order.basket
-                ).latest().response['payer']
+                processor_response = PaymentProcessorResponse.objects.filter(basket=order.basket).latest()
+                if processor_response and processor_response.processor_name == 'paypal':
+                    payer_info = processor_response.response['payer']['payer_info']
+                    shipping_address = payer_info.get('shipping_address')
+                    recipient_info = {
+                        'first_name': payer_info.get('first_name'),
+                        'last_name': payer_info.get('last_name'),
+                        'city': shipping_address.get('city'),
+                        'state': shipping_address.get('state'),
+                        'postal_code': shipping_address.get('postal_code'),
+                        'country': shipping_address.get('country_code')
+                    }
+                elif processor_response and processor_response.processor_name == 'cybersource':
+                    response = processor_response.response
+                    recipient_info = {
+                        'first_name': response.get('req_bill_to_forename'),
+                        'last_name': response.get('req_bill_to_surname'),
+                        'city': response.get('req_bill_to_address_city'),
+                        'state': response.get('req_bill_to_address_state'),
+                        'postal_code': response.get('req_bill_to_address_postal_code'),
+                        'country': response.get('req_bill_to_address_country')
+                    }
+                else:
+                    recipient_info = None
             except (PaymentProcessorResponse.DoesNotExist, KeyError):
                 recipient_info = None
 
