@@ -2,6 +2,7 @@ from datetime import date
 from unittest import skipUnless
 
 from bok_choy.web_app_test import WebAppTest
+import ddt
 
 from acceptance_tests.config import ENABLE_COUPON_ADMIN_TESTS
 from acceptance_tests.constants import DEFAULT_END_DATE, DEFAULT_START_DATE
@@ -10,6 +11,7 @@ from acceptance_tests.pages.coupons import CouponsCreatePage, CouponsDetailsPage
 
 
 @skipUnless(ENABLE_COUPON_ADMIN_TESTS, 'Coupon admin tests are disabled.')
+@ddt.ddt
 class CouponAdministrationTests(CouponMixin, LogistrationMixin, WebAppTest):
     def setUp(self):
         """ Instantiate the page objects. """
@@ -20,8 +22,8 @@ class CouponAdministrationTests(CouponMixin, LogistrationMixin, WebAppTest):
         self.coupons_list_page = CouponsListPage(self.browser)
         self.login_with_lms()
 
-    def create_coupon(self):
-        """ Create a coupon via UI. """
+    def create_coupon(self, is_dynamic=False):
+        """ Create a single-course and dynamic coupon via UI. """
         # Verify we reach the coupons list page.
         self.coupons_list_page.visit()
         self.assertTrue(self.coupons_list_page.is_browser_on_page())
@@ -30,7 +32,7 @@ class CouponAdministrationTests(CouponMixin, LogistrationMixin, WebAppTest):
         # Verify we reach the coupons create / edit page.
         self.assertTrue(self.coupons_create_edit_page.is_browser_on_page())
 
-        self.coupons_create_edit_page.fill_create_coupon_form(is_discount=False)
+        self.coupons_create_edit_page.fill_create_coupon_form(is_discount=False, is_dynamic=is_dynamic)
 
         # Verify we reach the coupons details page.
         self.assertTrue(self.coupons_details_page.is_browser_on_page())
@@ -47,9 +49,10 @@ class CouponAdministrationTests(CouponMixin, LogistrationMixin, WebAppTest):
         self.assertEqual(start_date, expected_start_date.strftime('%m/%d/%Y %I:%M %p'))
         self.assertEqual(end_date, expected_end_date.strftime('%m/%d/%Y %I:%M %p'))
 
-    def test_create_coupon(self):
+    @ddt.data(True, False)
+    def test_create_coupon(self, is_dynamic):
         """ Test creating a new coupon. """
-        self.create_coupon()
+        self.create_coupon(is_dynamic)
 
     def test_update_coupon_dates(self):
         """ Test updating the dates on a coupon. """
