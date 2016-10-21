@@ -379,7 +379,7 @@ class CouponMixin(EcommerceApiMixin):
         Get all coupons created in the acceptance tests and delete those
         and all associated stock records and vouchers.
         """
-        # Tear-down's after every test cause the server to return 429 errors,
+        # Teardowns after every test cause the server to return 429 errors,
         # Therefor there needs to be a cooling period between them.
         time.sleep(10)
         coupons = self.ecommerce_api_client.coupons.get(title=partial_title)['results']
