@@ -20,7 +20,7 @@ from paypalrestsdk.resource import Resource
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaypalMixin
@@ -109,6 +109,20 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         last_request_body = json.loads(httpretty.last_request().body)
         expected = urljoin(get_ecommerce_url(), reverse('paypal_execute'))
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
+
+    def test_switch_enabled_otto_url(self):
+        """
+        Ensures that when the otto_receipt_page waffle switch is enabled, the processor uses the new receipt page.
+        """
+        toggle_switch('otto_receipt_page', True)
+        assert self.processor.receipt_url == get_ecommerce_url(settings.RECEIPT_PAGE_PATH)
+
+    def test_switch_disabled_lms_url(self):
+        """
+        Ensures that when the otto_receipt_page waffle switch is disabled, the processor uses the LMS receipt page.
+        """
+        toggle_switch('otto_receipt_page', False)
+        assert self.processor.receipt_url == get_lms_url('/commerce/checkout/receipt')
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')

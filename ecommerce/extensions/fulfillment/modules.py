@@ -7,6 +7,7 @@ import abc
 import datetime
 import json
 import logging
+import waffle
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -446,6 +447,12 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         # Note (multi-courses): Change from a course_name to a list of course names.
         product = order.lines.first().product
         course = Course.objects.get(id=product.attr.course_key)
+        if waffle.switch_is_active('otto_receipt_page'):
+            receipt_page_url = get_ecommerce_url(
+                '{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
+            )
+        else:
+            receipt_page_url = get_lms_url('{}?orderNum={}'.format('/commerce/checkout/receipt', order.number))
         send_notification(
             order.user,
             'ORDER_WITH_CSV',
@@ -457,7 +464,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 'order_number': order.number,
                 'partner_name': order.site.siteconfiguration.partner.name,
                 'lms_url': get_lms_url(),
-                'receipt_page_url': get_lms_url('{}?orderNum={}'.format(settings.RECEIPT_PAGE_PATH, order.number)),
+                'receipt_page_url': receipt_page_url,
             },
             site=order.site
         )

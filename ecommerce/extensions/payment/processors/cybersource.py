@@ -6,6 +6,8 @@ import logging
 import uuid
 from decimal import Decimal
 
+import waffle
+
 from django.conf import settings
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
@@ -65,7 +67,9 @@ class Cybersource(BasePaymentProcessor):
 
     @property
     def receipt_page_url(self):
-        return get_lms_url(self.configuration['receipt_path'])
+        if not waffle.switch_is_active('otto_receipt_page'):
+            return get_lms_url('/commerce/checkout/receipt')
+        return get_ecommerce_url(self.configuration['receipt_path'])
 
     @property
     def cancel_page_url(self):
@@ -85,6 +89,10 @@ class Cybersource(BasePaymentProcessor):
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
+        if waffle.switch_is_active('otto_receipt_page'):
+            override_receipt_page_url = '{}?order_number={}'.format(self.receipt_page_url, basket.order_number)
+        else:
+            override_receipt_page_url = '{}?orderNum={}'.format(self.receipt_page_url, basket.order_number)
         parameters = {
             'access_key': self.access_key,
             'profile_id': self.profile_id,
@@ -98,7 +106,7 @@ class Cybersource(BasePaymentProcessor):
             'amount': str(basket.total_incl_tax),
             'currency': basket.currency,
             'consumer_id': basket.owner.username,
-            'override_custom_receipt_page': '{}?orderNum={}'.format(self.receipt_page_url, basket.order_number),
+            'override_custom_receipt_page': override_receipt_page_url,
             'override_custom_cancel_page': self.cancel_page_url,
         }
 

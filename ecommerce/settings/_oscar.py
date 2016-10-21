@@ -104,7 +104,7 @@ PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.paypal.Paypal',
 )
 
-PAYMENT_PROCESSOR_RECEIPT_PATH = '/commerce/checkout/receipt/'
+PAYMENT_PROCESSOR_RECEIPT_PATH = '/checkout/receipt/'
 PAYMENT_PROCESSOR_CANCEL_PATH = '/checkout/cancel-checkout/'
 PAYMENT_PROCESSOR_ERROR_PATH = '/checkout/error/'
 

@@ -136,3 +136,5 @@ COMPREHENSIVE_THEME_DIRS = [
 ]
 
 DEFAULT_SITE_THEME = "test-theme"
+
+PLATFORM_NAME = 'My Platform'

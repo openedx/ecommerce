@@ -12,6 +12,7 @@ from ecommerce.extensions.api.v2.views import (
     partners as partner_views,
     payments as payment_views,
     products as product_views,
+    providers as provider_views,
     publication as publication_views,
     refunds as refund_views,
     siteconfiguration as siteconfiguration_views,
@@ -65,11 +66,16 @@ ATOMIC_PUBLICATION_URLS = [
     ),
 ]
 
+PROVIDER_URLS = [
+    url(r'^$', provider_views.ProviderViewSet.as_view(), name='list_providers')
+]
+
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^checkout/$', include(CHECKOUT_URLS, namespace='checkout')),
     url(r'^coupons/', include(COUPON_URLS, namespace='coupons')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
+    url(r'^providers/', include(PROVIDER_URLS, namespace='providers')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
 ]

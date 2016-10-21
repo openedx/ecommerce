@@ -1,0 +1,262 @@
+.receipt {
+    background-color: #ffffff;
+    font-family: $font-family-sans-serif;
+    line-height: 1em;
+
+    .action-primary {
+        background: palette(primary, base) none repeat scroll 0 0;
+        border: 0 none;
+        box-shadow: 0 2px 1px 0 palette(primary, dark);
+        color: #fff;
+        text-decoration: none;
+
+        &:hover, &:focus {
+            background: palette(primary, accent) none repeat scroll 0 0;
+            color: #fff;
+            text-decoration: none;
+        }
+    }
+
+    .content-container {
+        padding: 15px 30px 40px;
+    }
+
+    .copy {
+        > div {
+            margin-bottom: 15px;
+            line-height: 22px;
+        }
+
+        .addressed-to {
+            margin-bottom: 35px;
+        }
+    }
+
+    .discount, .final-price {
+        color: black;
+        font-weight: 700;
+    }
+
+    #error-container {
+        padding: 15px;
+        background: #fbf4f7 none repeat scroll 0 0;
+        border-bottom: 4px solid #b20610;
+
+        .error-message {
+            background: inherit;
+
+            .title {
+                margin-bottom: 5px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .final-price {
+        margin: 1.25em 1em 1.25em 1em;
+        font-size: 1em;
+    }
+
+    .info-item {
+        overflow: hidden;
+    }
+
+    .is-ready {
+        background: #e8f6fc none repeat scroll 0 0;
+    }
+
+    .nav-link {
+        border-bottom: none;
+        text-decoration: none !important;
+
+        &:active, &:hover, &:focus {
+            border-bottom: 1px dotted #0079bc;
+        }
+    }
+
+    .nav-wizard {
+        padding: 15px 20px 10px;
+        margin: 0;
+        overflow: hidden;
+        border-top: 4px solid rgb(255, 192, 31);
+        box-shadow: 0 1px 1px 2px rgba(0, 0, 0, 0.2);
+
+        .verify-later {
+            line-height: 20px;
+            font-size: 13px;
+        }
+
+        #verify_now {
+            margin-bottom: 10px;
+        }
+
+        #verify_choices {
+            margin-bottom: 10px;
+            padding-top: 10px;
+            text-align: center;
+        }
+
+        .verify-message {
+            color: #434242;
+            font-weight: 500;
+            line-height: 1.4em;
+        }
+
+        .verify-message-header {
+            margin: 0;
+            padding: 10px 0;
+            color: #434242;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #verify_now_button {
+            display: block;
+            width: 100%;
+            margin: 0 auto;
+            padding: 13px 35px;
+            text-align: center;
+
+            &:hover {
+                text-decoration: none;
+            }
+        }
+    }
+
+    .old-price {
+        color: #7c7c7c;
+        font-weight: 600;
+        text-decoration: line-through;
+    }
+
+    .order-amount {
+        width: 10%;
+    }
+
+    .order-columns {
+        background-color: rgb(249, 249, 249);
+        color: #000;
+        font-size: 1em;
+    }
+
+    .order-details {
+        margin-bottom: 20px;
+    }
+
+    .order-headers {
+        color: rgb(0, 121, 188);
+        font-size: 22px;
+        font-weight: 500;
+    }
+
+    .order-info {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        color: rgb(29, 29, 29);
+        font-size: 18px;
+    }
+
+    .order-line-data {
+        color: rgb(29, 29, 29);
+        font-size: 20px;
+
+        > td {
+            padding-bottom: 1.5em;
+            padding-top: 1.25em;
+            line-height: 1.5em !important;
+        }
+    }
+
+    .order-total {
+        background-color: rgb(249, 249, 249);
+        border-width: 1px;
+        border-color: rgb(235, 235, 235);
+        color: #000;
+        font-size: 1em;
+    }
+
+    p, address {
+        color: #6f7074;
+    }
+
+    .partner {
+        color: #7c7c7c;
+        font-size: 16px;
+    }
+
+    /* Styling for the provider area; uses edX Pattern Library utils */
+    .report-receipt-provider {
+        @include clearfix;
+        margin: 0 0 20px 0;
+        padding: 15px 20px;
+        border: 1px solid rgb(221,221,221);
+        border-radius: 3px;
+        box-shadow: 0 1px 2px 1px rgba(0,0,0,0.1);
+        background: rgb(255,255,255);
+
+        .provider-wrapper {
+            @include float(left);
+            padding: 10px;
+
+            .provider-info {
+                margin-bottom: 20px;
+                font-weight: 600;
+            }
+        }
+
+        .provider-buttons-logos {
+            padding: 10px;
+            @include text-align(center);
+
+            .provider-logo img {
+                max-width: 160px;
+                margin-bottom: 10px;
+            }
+        }
+    }
+
+    .summary {
+        margin: 0 0 15px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+
+    .table tr {
+        > td, > th {
+            padding-left: 1.25em;
+            border-left: 2px solid rgb(235, 235, 235);
+        }
+
+        td:first-child, th:first-child {
+            border-left: none;
+        }
+
+        .total-value {
+            float: right;
+            width: 14%;
+            color: rgb(51, 122, 183);
+            font-size: 22px;
+            font-weight: 700;
+        }
+    }
+
+    .thank-you {
+        margin-bottom: 10px;
+        color: rgb(0, 121, 188);
+        font-size: 38px;
+    }
+
+    .voucher-code {
+        margin-right: 20px;
+        color:  #7c7c7c;
+    }
+
+    .voucher-info {
+         font-size: 16px;
+    }
+
+    .wrapper-content-main {
+        margin-bottom: 20px;
+    }
+}
