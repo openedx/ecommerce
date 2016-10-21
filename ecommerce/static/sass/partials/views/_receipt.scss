@@ -1,0 +1,292 @@
+.receipt {
+
+    background-color: #ffffff;
+    font-family: $font-family-sans-serif;
+    line-height: 1em;
+
+    .action-primary {
+        background: #006d01 none repeat scroll 0 0;
+        border: 0 none;
+        box-shadow: 0 2px 1px 0 #005201;
+        color: #fff;
+        text-decoration: none;
+
+        &:hover, &:focus {
+            background: #60bc61 none repeat scroll 0 0;
+            color: #fff;
+            text-decoration: none;
+        }
+    }
+
+    .content-container {
+        padding: 15px 30px 40px;
+    }
+
+    .copy {
+        float: left;
+        width: 60%;
+        > div {
+            margin-bottom: 15px;
+            line-height: 22px;
+        }
+
+        .addressed-to {
+            margin-bottom: 35px;
+        }
+    }
+
+    .discount, .final-price {
+        color: black;
+        font-weight: 700;
+    }
+
+    #error-container {
+        background: #fbf4f7 none repeat scroll 0 0;
+        border-bottom: 4px solid #b20610;
+        padding: 15px;
+
+        .error-message {
+            background: inherit;
+
+            .title {
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+        }
+    }
+
+    .final-price {
+        font-size: 1em;
+        margin: 1.25em 1em 1.25em 1em;
+    }
+
+    .info-item {
+        overflow: hidden;
+    }
+
+    .is-ready {
+        background: #e8f6fc none repeat scroll 0 0;
+    }
+
+    .nav-link {
+
+        border-bottom: none;
+        text-decoration: none !important;
+
+        &:active, &:hover, &:focus {
+            border-bottom: 1px dotted #0079bc;
+        }
+    }
+
+    .nav-wizard {
+        box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.2) inset;
+        overflow: hidden;
+        padding: 15px 20px 5px;
+
+        .verify-later {
+            float: left;
+            line-height: 20px;
+            margin-bottom: 15px;
+            margin-top: 15px;
+        }
+        .right {
+            float: right;
+            width: 20%;
+            
+            a {
+                display: block;
+            }
+        }
+
+        #verify_later_button {
+            width: 80%;
+            border-bottom: none;
+            text-decoration: none;
+
+            &:active, &:hover, &:focus {
+                border-bottom: none;
+            }
+        }
+
+        #verify_message {
+            float: left;
+            font-weight: 700;
+            padding-top: 25px;
+            width: 80%;
+        }
+        #verify_now_button {
+            padding: 7px 35px;
+            text-align: center;
+            width: 80%;
+        }
+    }
+
+    .old-price {
+        color: #7c7c7c;
+        font-weight: 600;
+        text-decoration: line-through;
+    }
+
+    .order-amount {
+        width: 10%;
+    }
+
+    .order-columns {
+        background-color: rgb(249, 249, 249);
+        color: #000;
+        font-size: 1em;
+    }
+
+    .order-details {
+        margin-bottom: 20px;
+    }
+
+    .order-headers {
+        color: rgb(0, 121, 188);
+        font-size: 22px;
+        font-weight: 500;
+    }
+
+    .order-info {
+        color: rgb(29, 29, 29);
+        font-size: 18px;
+        margin-bottom: 20px;
+        margin-top: 10px;
+    }
+
+    .order-line-data {
+        color: rgb(29, 29, 29);
+        font-size: 20px;
+
+        > td {
+            line-height: 1.5em !important;
+            padding-bottom: 1.5em;
+            padding-top: 1.25em;
+        }
+    }
+
+    .order-summary {
+        float: left;
+        padding-left: 60px;
+        width: 40%;
+    }
+
+    .order-total {
+        background-color: rgb(249, 249, 249);
+        border-width: 1px;
+        border-color: rgb(235, 235, 235);
+        color: #000;
+        font-size: 1em;
+    }
+
+    p, address {
+        color: #6f7074;
+    }
+
+    .partner {
+        color: #7c7c7c;
+        font-size: 16px;
+    }
+
+    /* Styling for the provider area; uses edX Pattern Library utils */
+    .report-receipt-provider {
+        @include clearfix;
+        border-radius: 3px;
+        box-shadow: 0 1px 2px 1px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        border: 1px solid rgb(221,221,221);
+        background: rgb(255,255,255);
+        padding: ($baseline*0.75) $baseline;
+
+        .provider-wrapper {
+          width: 70%;
+          @include float(left);
+
+          .provider-info {
+            margin-bottom: $baseline;
+            font-weight: 600;
+          }
+        }
+
+        .provider-buttons-logos {
+          @include float(right);
+          @include text-align(center);
+
+          .provider-logo img {
+              max-width: 160px;
+              margin-bottom: $baseline * 0.5;
+          }
+
+          .complete-order {
+            @include text-align(center);
+
+            button {
+              @include box-sizing(border-box);
+              @extend %t-copy-base;
+              letter-spacing: 0; // reset letterspacing from elsewhere
+              @extend %btn-primary;
+              border: 1px solid darken(rgb(18,111,154), 10%);
+              border-radius: 3px;
+              padding: 8px $baseline;
+              text-align: center;
+
+              &:hover,
+              &:focus {
+                border: 1px solid transparent;
+                background-color: rgb(18,111,154);
+                color: rgb(255,255,255);
+                text-decoration: none;
+              }
+              background-color: darken(rgb(18,111,154),10%);
+              color: rgb(255,255,255);
+              white-space: nowrap;
+            }
+          }
+        }
+    }
+
+    .summary {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 15px;
+    }
+
+
+    .table tr {
+        > td, > th {
+            border-left: 2px solid rgb(235, 235, 235);
+            padding-left: 1.25em;
+        }
+
+        td:first-child, th:first-child {
+            border-left: none;
+        }
+
+        .total-value {
+            color: rgb(51, 122, 183);
+            float: right;
+            font-size: 22px;
+            font-weight: 700;
+            width: 14%;
+        }
+    }
+
+    .thank-you {
+        color: rgb(0, 121, 188);
+        font-size: 38px;
+        margin-bottom: 10px;
+    }
+
+    .voucher-code {
+        color:  #7c7c7c;
+        margin-right: 20px;
+    }
+
+    .voucher-info {
+         font-size: 16px;
+    }
+
+    .wrapper-content-main {
+        margin-bottom: 20px;
+    }
+}
