@@ -310,6 +310,30 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         coupon_data = json.loads(response.content)['results'][0]
         self.assertEqual(coupon_data['title'], self.data['title'])
+        self.assertEqual(coupon_data['category']['name'], self.data['category']['name'])
+        self.assertEqual(coupon_data['client'], self.data['client'])
+
+    def test_list_and_details_endpoint_return_custom_code(self):
+        """Test that the list and details endpoints return the correct code."""
+        self.data.update({
+            'benefit_value': 50,
+            'code': '123456',
+            'quantity': 1,
+            'title': 'Tešt čoupon 2'
+        })
+        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        coupon = Product.objects.get(title=self.data['title'])
+        details_response = self.get_response_json(
+            'GET',
+            reverse('api:v2:coupons-detail', args=[coupon.id]),
+            data=self.data
+        )
+        self.assertEqual(details_response['code'], self.data['code'])
+        self.assertEqual(details_response['coupon_type'], 'Discount code')
+
+        list_response = self.client.get(COUPONS_LINK)
+        coupon_data = json.loads(list_response.content)['results'][0]
+        self.assertEqual(coupon_data['code'], self.data['code'])
 
     def test_already_existing_code(self):
         """Test custom coupon code duplication."""

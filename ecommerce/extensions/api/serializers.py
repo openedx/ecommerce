@@ -43,6 +43,51 @@ COURSE_DETAIL_VIEW = 'api:v2:course-detail'
 PRODUCT_DETAIL_VIEW = 'api:v2:product-detail'
 
 
+def is_custom_code(obj):
+    """Helper method to check if the voucher contains custom code. """
+    return not is_enrollment_code(obj) and retrieve_quantity(obj) == 1
+
+
+def is_enrollment_code(obj):
+    benefit = retrieve_voucher(obj).benefit
+    return benefit.type == Benefit.PERCENTAGE and benefit.value == 100
+
+
+def retrieve_benefit(obj):
+    """Helper method to retrieve the benefit from voucher. """
+    return retrieve_voucher(obj).benefit
+
+
+def retrieve_end_date(obj):
+    """Helper method to retrieve the voucher end datetime. """
+    return retrieve_voucher(obj).end_datetime
+
+
+def retrieve_offer(obj):
+    """Helper method to retrieve the offer from coupon. """
+    return retrieve_voucher(obj).offers.first()
+
+
+def retrieve_quantity(obj):
+    """Helper method to retrieve number of vouchers. """
+    return obj.attr.coupon_vouchers.vouchers.count()
+
+
+def retrieve_start_date(obj):
+    """Helper method to retrieve the voucher start datetime. """
+    return retrieve_voucher(obj).start_datetime
+
+
+def retrieve_voucher(obj):
+    """Helper method to retrieve the first voucher from coupon. """
+    return obj.attr.coupon_vouchers.vouchers.first()
+
+
+def retrieve_voucher_usage(obj):
+    """Helper method to retrieve usage from voucher. """
+    return retrieve_voucher(obj).usage
+
+
 class ProductPaymentInfoMixin(serializers.ModelSerializer):
     """ Mixin class used for retrieving price information from products. """
     price = serializers.SerializerMethodField()
@@ -424,9 +469,24 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CouponListSerializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
+    code = serializers.SerializerMethodField()
+
+    def get_category(self, obj):
+        category = ProductCategory.objects.filter(product=obj).first().category
+        return CategorySerializer(category).data
+
+    def get_client(self, obj):
+        return Invoice.objects.get(order__lines__product=obj).business_client.name
+
+    def get_code(self, obj):
+        if is_custom_code(obj):
+            return retrieve_voucher(obj).code
+
     class Meta(object):
         model = Product
-        fields = ('id', 'title',)
+        fields = ('category', 'client', 'code', 'id', 'title')
 
 
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
@@ -452,78 +512,56 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     email_domains = serializers.SerializerMethodField()
 
-    def retrieve_benefit(self, obj):
-        """Helper method to retrieve the benefit from voucher. """
-        return self.retrieve_voucher(obj).benefit
-
-    def retrieve_end_date(self, obj):
-        """Helper method to retrieve the voucher end datetime. """
-        return self.retrieve_voucher(obj).end_datetime
-
-    def retrieve_offer(self, obj):
-        """Helper method to retrieve the offer from coupon. """
-        return self.retrieve_voucher(obj).offers.first()
-
-    def retrieve_start_date(self, obj):
-        """Helper method to retrieve the voucher start datetime. """
-        return self.retrieve_voucher(obj).start_datetime
-
-    def retrieve_voucher(self, obj):
-        """Helper method to retrieve the first voucher from coupon. """
-        return obj.attr.coupon_vouchers.vouchers.first()
-
-    def retrieve_voucher_usage(self, obj):
-        """Helper method to retrieve usage from voucher. """
-        return self.retrieve_voucher(obj).usage
-
-    def retrieve_quantity(self, obj):
-        """Helper method to retrieve number from vouchers. """
-        return obj.attr.coupon_vouchers.vouchers.count()
-
     def get_benefit_type(self, obj):
-        return self.retrieve_benefit(obj).type
+        return retrieve_benefit(obj).type
 
     def get_benefit_value(self, obj):
-        return self.retrieve_benefit(obj).value
-
-    def get_coupon_type(self, obj):
-        benefit = self.retrieve_benefit(obj)
-        if benefit.type == Benefit.PERCENTAGE and benefit.value == 100:
-            return _('Enrollment code')
-        return _('Discount code')
+        return retrieve_benefit(obj).value
 
     def get_catalog_query(self, obj):
-        offer = self.retrieve_offer(obj)
-        return offer.condition.range.catalog_query
+        return retrieve_offer(obj).condition.range.catalog_query
+
+    def get_category(self, obj):
+        category = ProductCategory.objects.filter(product=obj).first().category
+        return CategorySerializer(category).data
+
+    def get_coupon_type(self, obj):
+        if is_enrollment_code(obj):
+            return _('Enrollment code')
+        return _('Discount code')
 
     def get_client(self, obj):
         return Invoice.objects.get(order__lines__product=obj).business_client.name
 
     def get_code(self, obj):
-        if self.retrieve_quantity(obj) == 1:
-            return self.retrieve_voucher(obj).code
+        if retrieve_quantity(obj) == 1:
+            return retrieve_voucher(obj).code
 
     def get_code_status(self, obj):
-        start_date = self.retrieve_start_date(obj)
-        end_date = self.retrieve_end_date(obj)
+        start_date = retrieve_start_date(obj)
+        end_date = retrieve_end_date(obj)
         current_datetime = timezone.now()
-        in_time_interval = (start_date < current_datetime) and (end_date > current_datetime)
+        in_time_interval = start_date < current_datetime < end_date
         return _('ACTIVE') if in_time_interval else _('INACTIVE')
 
     def get_course_seat_types(self, obj):
-        offer = self.retrieve_offer(obj)
+        offer = retrieve_offer(obj)
         course_seat_types = offer.condition.range.course_seat_types
         return course_seat_types.split(',') if course_seat_types else course_seat_types
 
+    def get_email_domains(self, obj):
+        offer = retrieve_offer(obj)
+        return offer.email_domains
+
     def get_end_date(self, obj):
-        return self.retrieve_end_date(obj)
+        return retrieve_end_date(obj)
 
     def get_last_edited(self, obj):
         history = obj.history.latest()
         return history.history_user.username, history.history_date
 
     def get_max_uses(self, obj):
-        offer = self.retrieve_offer(obj)
+        offer = retrieve_offer(obj)
         return offer.max_global_applications
 
     def get_note(self, obj):
@@ -533,12 +571,8 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             return None
 
     def get_num_uses(self, obj):
-        offer = self.retrieve_offer(obj)
+        offer = retrieve_offer(obj)
         return offer.num_applications
-
-    def get_email_domains(self, obj):
-        offer = self.retrieve_offer(obj)
-        return offer.email_domains
 
     def get_payment_information(self, obj):
         """
@@ -551,16 +585,13 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return response
 
     def get_quantity(self, obj):
-        return self.retrieve_quantity(obj)
+        return retrieve_quantity(obj)
 
     def get_start_date(self, obj):
-        return self.retrieve_start_date(obj)
-
-    def get_voucher_type(self, obj):
-        return self.retrieve_voucher_usage(obj)
+        return retrieve_start_date(obj)
 
     def get_seats(self, obj):
-        offer = self.retrieve_offer(obj)
+        offer = retrieve_offer(obj)
         _range = offer.condition.range
         request = self.context['request']
         if _range.catalog:
@@ -571,9 +602,8 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         else:
             return None
 
-    def get_category(self, obj):
-        category = ProductCategory.objects.filter(product=obj).first().category
-        return CategorySerializer(category).data
+    def get_voucher_type(self, obj):
+        return retrieve_voucher_usage(obj)
 
     class Meta(object):
         model = Product
