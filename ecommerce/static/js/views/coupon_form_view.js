@@ -421,7 +421,8 @@ define([
             },
 
             toggleVoucherTypeField: function () {
-                var voucherType = this.model.get('voucher_type');
+                var maxUsesFieldSelector = '[name=max_uses]',
+                    voucherType = this.model.get('voucher_type');
                 if (!this.editing) {
                     this.emptyCodeField();
                 }
@@ -429,13 +430,23 @@ define([
                 *  Show the code field only for discount coupons and when the quantity is 1 to avoid
                 *  integrity issues.
                 */
-                if (voucherType !== 'Single use') {
+                if (voucherType === 'Single use') {
+                    this.hideField(maxUsesFieldSelector, 1);
+                } else {
                     if (this.model.get('coupon_type') === 'Discount code' && this.$('[name=quantity]').val() === 1) {
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);
                     }
-                    this.formGroup('[name=max_uses]').removeClass(this.hiddenClass);
-                } else {
-                    this.hideField('[name=max_uses]', 1);
+                    this.formGroup(maxUsesFieldSelector).removeClass(this.hiddenClass);
+                    /* For coupons that can be used multiple times by multiple users, the max_uses
+                     * field needs to be empty by default and the minimum can not be less than 2.
+                     */
+                    if (voucherType === 'Multi-use') {
+                        this.model.set('max_uses', null);
+                        this.$(maxUsesFieldSelector).attr('min', 2);
+                    } else {
+                        this.model.set('max_uses', 1);
+                        this.$(maxUsesFieldSelector).attr('min', 1);
+                    }
                 }
             },
 
