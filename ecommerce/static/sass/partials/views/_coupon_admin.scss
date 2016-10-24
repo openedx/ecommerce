@@ -124,7 +124,7 @@
             @include margin-right(2%);
             margin-bottom: 50px;
             width: 48%;
-            height: 75px;
+            height: $coupon-grid-item-height;
         }
 
         .total-paid {
@@ -150,6 +150,11 @@
             .heading {
                 margin-bottom: 10px;
             }
+        }
+
+        .catalog-query {
+            height: auto;
+            min-height: $coupon-grid-item-height;
         }
     }
 }
