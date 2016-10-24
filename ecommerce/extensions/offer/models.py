@@ -75,7 +75,7 @@ class Range(AbstractRange):
         'course_seat_types',
     ]
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
-    catalog_query = models.CharField(max_length=255, blank=True, null=True)
+    catalog_query = models.TextField(blank=True, null=True)
     course_seat_types = models.CharField(
         max_length=255,
         validators=[validate_credit_seat_type],
