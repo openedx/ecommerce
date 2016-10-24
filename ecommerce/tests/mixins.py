@@ -284,6 +284,12 @@ class SiteMixin(object):
 
         return token
 
+    def toggle_ecommerce_receipt_page(self, enable_otto_receipt_page):
+        """ Enables Ecommerce Receipt Page. """
+        site_configuration = self.site.siteconfiguration
+        site_configuration.enable_otto_receipt_page = enable_otto_receipt_page
+        site_configuration.save()
+
 
 class TestServerUrlMixin(object):
     def get_full_url(self, path, site=None):

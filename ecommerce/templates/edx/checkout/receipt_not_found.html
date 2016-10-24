@@ -1,0 +1,40 @@
+{% extends 'edx/base.html' %}
+{% load core_extras %}
+{% load i18n %}
+
+{% block title %}
+  {% trans "Order Not Found" %}
+{% endblock title %}
+
+{% block navbar %}
+  {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+  <div class="receipt">
+    <div id="error-container">
+      <div class="error-message container">
+          <h3 class="title">
+            <span class="sr">{% blocktrans %} {{ error_summary }} {% endblocktrans %}</span>
+            {{ error_summary }}
+          </h3>
+          <div class="copy">
+            <p>{% trans "The specified order could not be located. Please ensure that the URL is correct, and try again." %}</p>
+            <br/>
+          </div>
+          <div class="msg">
+            <p>
+              {% captureas link_start %}
+                <a href="{{ order_history_url }}">
+              {% endcaptureas %}
+
+              {% blocktrans with link_end="</a>" %}
+                You may also view your previous orders on the {{ link_start }}Account Settings{{ link_end }}
+                page.
+              {% endblocktrans %}
+            </p>
+          </div>
+        </div>
+    </div>
+  </div>
+{% endblock content %}

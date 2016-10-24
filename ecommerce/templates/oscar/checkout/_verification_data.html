@@ -1,0 +1,33 @@
+{% load i18n %}
+
+<div class="col-md-9">
+  <p class="header">{% trans "Verify Your Identity" %}</p>
+  <p class="message">
+    {% blocktrans %}
+      To receive a verified certificate, you have to verify your identity using your <strong>webcam</strong> and
+      an <strong>official government-issued photo identification</strong> before the verification deadline for this
+      course.
+    {% endblocktrans %}
+  </p>
+</div>
+
+<div id="verify_choices" class="right col-md-3">
+  <div id="verify_now">
+    <a id="verify_now_button"
+       class="next action-primary"
+       data-track-category="verification"
+       data-track-event="edx.bi.user.verification.immediate"
+       data-track-type="click"
+       href="{{ verify_url }}{{ course_id }}/">
+       {% trans "Verify Now" %}
+    </a>
+  </div>
+  <a id="verify_later_button"
+    class="dashboard-link"
+    data-track-category="verification"
+    data-track-event="edx.bi.user.verification.immediate"
+    data-track-type="click"
+    href="{{ lms_dashboard_url }}">
+    {% trans "Go to my dashboard and verify later" %}
+  </a>
+</div>

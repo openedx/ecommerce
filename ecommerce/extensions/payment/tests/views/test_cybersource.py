@@ -42,7 +42,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
     def setUp(self):
         super(CybersourceNotifyViewTests, self).setUp()
 
-        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.toggle_ecommerce_receipt_page(True)
 
         self.user = factories.UserFactory()
         self.billing_address = self.make_billing_address()

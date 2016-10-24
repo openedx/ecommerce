@@ -22,7 +22,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
         super(SignalTests, self).setUp()
         self.user = self.create_user()
         self.request.user = self.user
-        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.toggle_ecommerce_receipt_page(True)
         toggle_switch('ENABLE_NOTIFICATIONS', True)
 
     def prepare_order(self, seat_type, credit_provider_id=None):
@@ -90,7 +90,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                 credit_provider_name=credit_provider_name,
                 platform_name=self.site.name,
                 receipt_url=self.site.siteconfiguration.build_ecommerce_url(
-                    '{}{}'.format(settings.RECEIPT_PAGE_PATH, order.number)
+                    '{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
                 )
             )
         )

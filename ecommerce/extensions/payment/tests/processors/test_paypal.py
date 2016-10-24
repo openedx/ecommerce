@@ -171,7 +171,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         """
         Ensures that when the otto_receipt_page waffle switch is enabled, the processor uses the new receipt page.
         """
-        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.toggle_ecommerce_receipt_page(True)
         assert self._get_receipt_url() == self.site.siteconfiguration.build_ecommerce_url(settings.RECEIPT_PAGE_PATH)
 
     def test_switch_disabled_lms_url(self):

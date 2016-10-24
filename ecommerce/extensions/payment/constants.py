@@ -2,22 +2,23 @@
 from __future__ import unicode_literals
 
 import six
+from django.utils.translation import ugettext_lazy as _
 
 CARD_TYPES = {
     'american_express': {
-        'display_name': 'American Express',
+        'display_name': _('American Express'),
         'cybersource_code': '003'
     },
     'discover': {
-        'display_name': 'Discover',
+        'display_name': _('Discover'),
         'cybersource_code': '004'
     },
     'mastercard': {
-        'display_name': 'MasterCard',
+        'display_name': _('MasterCard'),
         'cybersource_code': '002'
     },
     'visa': {
-        'display_name': 'Visa',
+        'display_name': _('Visa'),
         'cybersource_code': '001'
     },
 }
