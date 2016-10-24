@@ -16,6 +16,7 @@ from oscar.apps.payment.exceptions import PaymentError, UserCancelled, Transacti
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
@@ -225,7 +226,10 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         if not basket:
             return redirect(self.payment_processor.error_url)
 
-        receipt_url = u'{}?orderNum={}'.format(self.payment_processor.receipt_url, basket.order_number)
+        receipt_url = get_receipt_page_url(
+            order_number=basket.order_number,
+            site_configuration=basket.site.siteconfiguration
+        )
 
         try:
             with transaction.atomic():

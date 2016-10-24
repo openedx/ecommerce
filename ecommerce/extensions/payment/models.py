@@ -17,6 +17,7 @@ class PaymentProcessorResponse(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta(object):
+        get_latest_by = 'created'
         index_together = ('processor_name', 'transaction_id')
         verbose_name = _('Payment Processor Response')
         verbose_name_plural = _('Payment Processor Responses')
