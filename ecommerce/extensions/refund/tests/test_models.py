@@ -89,37 +89,54 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         with LogCapture(LOGGER_NAME) as l:
             refund = Refund.create_with_lines(order, list(order.lines.all()))
 
-            l.check(
-                (
-                    LOGGER_NAME,
-                    'INFO',
-                    'refund_created: amount="{}", currency="{}", order_number="{}", '
-                    'refund_id="{}", user_id="{}"'.format(
-                        refund.total_credit_excl_tax,
-                        refund.currency,
-                        order.number,
-                        refund.id,
-                        refund.user.id
-                    )
-                )
-            )
+            self.assert_refund_creation_logged(l, refund, order)
 
         self.assert_refund_matches_order(refund, order)
 
-    def test_create_with_lines_with_existing_refund(self):
+    def assert_refund_creation_logged(self, l, refund, order):
+        """
+        Asserts that refund creation is logged.
+        """
+        l.check(
+            (
+                LOGGER_NAME,
+                'INFO',
+                'refund_created: amount="{}", currency="{}", order_number="{}", '
+                'refund_id="{}", user_id="{}"'.format(
+                    refund.total_credit_excl_tax,
+                    refund.currency,
+                    order.number,
+                    refund.id,
+                    refund.user.id
+                )
+            )
+        )
+
+    @ddt.unpack
+    @ddt.data(
+        (REFUND.OPEN, False),
+        (REFUND.PAYMENT_REFUND_ERROR, False),
+        (REFUND.PAYMENT_REFUNDED, False),
+        (REFUND.REVOCATION_ERROR, False),
+        (REFUND.DENIED, True),
+        (REFUND.COMPLETE, False),
+    )
+    def test_create_with_lines_with_existing_refund(self, refund_status, refund_created):
         """
         Refund.create_with_lines should not create RefundLines for order lines
         which have already been refunded.
         """
         order = self.create_order(user=UserFactory())
         line = order.lines.first()
-        RefundLineFactory(order_line=line)
+        RefundLineFactory(order_line=line, status=refund_status)
 
         with LogCapture(LOGGER_NAME) as l:
             refund = Refund.create_with_lines(order, [line])
-            self.assertEqual(refund, None)
-
-            l.check()
+            self.assertEqual(isinstance(refund, Refund), refund_created)
+            if refund_created:
+                self.assert_refund_creation_logged(l, refund, order)
+            else:
+                l.check()
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule.revoke_line')
