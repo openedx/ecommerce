@@ -135,6 +135,9 @@
         <div id="card-holder-information" class="form-input-elements placeholder row">
             <fieldset>
                 <legend aria-label={% trans "Card holder information" %}>{% trans "CARD HOLDER INFORMATION" %}</legend>
+                {% if sdn_check %}
+                    <input type="hidden" name="sdn-check" value="enabled">
+                {% endif %}
                 {% crispy payment_form %}
             </fieldset>
         </div>

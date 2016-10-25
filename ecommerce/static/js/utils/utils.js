@@ -218,6 +218,14 @@ define([
                 });
 
                 return invalidDomain;
+            },
+
+            /**
+             * Redirects the page to the designated path.
+             * @param {String} path - The path to which to redirect.
+             */
+            redirect: function(path) {
+                window.location.href = path;
             }
         };
     }

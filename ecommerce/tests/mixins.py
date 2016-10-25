@@ -405,3 +405,11 @@ class LmsApiMockMixin(object):
             body=json.dumps(verification_data),
             content_type=CONTENT_TYPE
         )
+
+    def mock_deactivation_api(self, request, username, response):
+        """ Mock deactivation API endpoint. """
+        url = '{host}/accounts/{username}/deactivate/'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/user/v1'),
+            username=username
+        )
+        httpretty.register_uri(httpretty.POST, url, body=response, content_type=CONTENT_TYPE)
