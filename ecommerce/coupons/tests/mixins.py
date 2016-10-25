@@ -34,6 +34,7 @@ class CourseCatalogMockMixin(object):
                 "image": {
                     "src": "/path/to/image.jpg",
                 },
+                'enrollment_end': None
             }
 
         course_run_info_json = json.dumps(course_run_info)
@@ -61,10 +62,12 @@ class CourseCatalogMockMixin(object):
                     'start': '2016-05-01T00:00:00Z',
                     'image': {
                         'src': 'path/to/the/course/image'
-                    }
+                    },
+                    'enrollment_end': None
                 }] if course_run else [{
                     'key': 'test',
                     'title': 'Test course',
+                    'enrollment_end': None
                 }],
             }
         course_run_info_json = json.dumps(course_run_info)

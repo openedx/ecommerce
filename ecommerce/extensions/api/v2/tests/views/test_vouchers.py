@@ -9,6 +9,7 @@ import httpretty
 import pytz
 from django.core.urlresolvers import reverse
 from django.http import Http404
+from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.test.factories import (
@@ -93,6 +94,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
                     'key': seat.course_id,
                     'start': '2016-05-01T00:00:00Z',
                     'title': seat.title,
+                    'enrollment_end': None
                 })
                 new_range.add_product(seat)
         else:
@@ -105,6 +107,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
                     'key': course.id,
                     'start': '2016-05-01T00:00:00Z',
                     'title': course.name,
+                    'enrollment_end': None
                 })
                 new_range.add_product(seat)
                 products.append(seat)
@@ -179,6 +182,28 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
         for offer in offers:
             self.assertTrue(offer['multiple_credit_providers'])
             self.assertIsNone(offer['credit_provider_price'])
+
+    def test_omitting_expired_courses(self):
+        """Verify professional courses who's enrollment end datetime have passed are omitted."""
+        no_date_seat = CourseFactory().create_or_update_seat('professional', False, 100, partner=self.partner)
+        valid_seat = CourseFactory().create_or_update_seat('professional', False, 100, partner=self.partner)
+        expired_seat = CourseFactory().create_or_update_seat('professional', False, 100, partner=self.partner)
+
+        course_discovery_results = [{
+            'key': no_date_seat.attr.course_key,
+            'enrollment_end': None,
+        }, {
+            'key': valid_seat.attr.course_key,
+            'enrollment_end': str(now() + datetime.timedelta(days=1)),
+        }, {
+            'key': expired_seat.attr.course_key,
+            'enrollment_end': str(now() - datetime.timedelta(days=1)),
+        }]
+
+        products, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
+        self.assertIn(no_date_seat, products)
+        self.assertIn(valid_seat, products)
+        self.assertNotIn(expired_seat, products)
 
 
 @ddt.ddt
