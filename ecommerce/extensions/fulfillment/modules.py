@@ -237,12 +237,12 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     )
                     line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
             except ConnectionError:
-                logger.error(
+                logger.warning(
                     "Unable to fulfill line [%d] of order [%s] due to a network problem", line.id, order.number
                 )
                 line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
             except Timeout:
-                logger.error(
+                logger.warning(
                     "Unable to fulfill line [%d] of order [%s] due to a request time out", line.id, order.number
                 )
                 line.set_status(LINE.FULFILLMENT_TIMEOUT_ERROR)
@@ -288,9 +288,9 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     logger.info('Skipping revocation for line [%d]: %s', line.id, detail)
                     return True
                 else:
-                    logger.error('Failed to revoke fulfillment of Line [%d]: %s', line.id, detail)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
+                    logger.warning('Failed to revoke fulfillment of Line [%d]: %s', line.id, detail)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning('Failed to revoke fulfillment of Line [%d]. Details: %s', line.id, ex)
 
         return False
 

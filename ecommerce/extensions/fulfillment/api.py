@@ -72,7 +72,7 @@ def fulfill_order(order, lines):
         order_status = ORDER.COMPLETE
         for line in lines.all():
             if line.status != LINE.COMPLETE:
-                logger.error('There was an error while fulfilling order [%s]', order.number)
+                logger.error('Fulfilling order [%s] has been unsuccessful.', order.number)
                 order_status = ORDER.FULFILLMENT_ERROR
                 break
 
