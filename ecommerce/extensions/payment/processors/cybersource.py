@@ -12,7 +12,6 @@ from oscar.core.loading import get_model
 from suds.client import Client
 from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
@@ -82,6 +81,7 @@ class Cybersource(BasePaymentProcessor):
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
+        site = basket.site
         parameters = {
             'access_key': self.access_key,
             'profile_id': self.profile_id,
@@ -97,7 +97,7 @@ class Cybersource(BasePaymentProcessor):
             'consumer_id': basket.owner.username,
             'override_custom_receipt_page': get_receipt_page_url(
                 order_number=basket.order_number,
-                site_configuration=basket.site.siteconfiguration
+                site_configuration=site.siteconfiguration
             ),
             'override_custom_cancel_page': self.cancel_page_url,
         }
@@ -112,7 +112,7 @@ class Cybersource(BasePaymentProcessor):
 
         # Level 2/3 details
         if self.send_level_2_3_details:
-            parameters['amex_data_taa1'] = '{}'.format(get_current_request().site.name)
+            parameters['amex_data_taa1'] = '{}'.format(site.name)
             parameters['purchasing_level'] = '3'
             parameters['line_item_count'] = basket.lines.count()
             # Note (CCB): This field (purchase order) is required for Visa;
