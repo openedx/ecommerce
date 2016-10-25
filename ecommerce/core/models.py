@@ -131,6 +131,27 @@ class SiteConfiguration(models.Model):
         blank=True,
         default=False
     )
+    enable_sdn_check = models.BooleanField(
+        verbose_name=_('Enable SDN check'),
+        help_text=_('Enable SDN check at checkout.'),
+        default=False
+    )
+    sdn_api_url = models.CharField(
+        verbose_name=_('US Treasury SDN API URL'),
+        max_length=255,
+        blank=True
+    )
+    sdn_api_key = models.CharField(
+        verbose_name=_('US Treasury SDN API key'),
+        max_length=255,
+        blank=True
+    )
+    sdn_api_list = models.CharField(
+        verbose_name=_('SDN lists'),
+        help_text=_('A comma-seperated list of Treasury OFAC lists to check against.'),
+        max_length=255,
+        blank=True
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
@@ -349,6 +370,16 @@ class SiteConfiguration(models.Model):
         """
         return EdxRestApiClient(settings.ENTERPRISE_API_URL, jwt=self.access_token)
 
+    @cached_property
+    def user_api_client(self):
+        """
+        Returns the API client to access the user API endpoint on LMS.
+
+        Returns:
+            EdxRestApiClient: The client to access the LMS user API service.
+        """
+        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token)
+
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""
@@ -425,8 +456,8 @@ class User(AbstractUser):
         try:
             api = EdxRestApiClient(
                 request.site.siteconfiguration.build_lms_url('/api/user/v1'),
-                jwt=request.site.siteconfiguration.access_token,
-                append_slash=False
+                append_slash=False,
+                jwt=request.site.siteconfiguration.access_token
             )
             response = api.accounts(self.username).get()
             return response
@@ -511,6 +542,26 @@ class User(AbstractUser):
             msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
             log.exception(msg)
             raise VerificationStatusError(msg)
+
+    def deactivate_account(self, site_configuration):
+        """Deactive the user's account.
+
+        Args:
+            site_configuration (SiteConfiguration): The site configuration
+                from which the LMS account API endpoint is created.
+
+        Returns:
+            Response from the deactivation API endpoint.
+        """
+        try:
+            api = site_configuration.user_api_client
+            return api.accounts(self.username).deactivate().post()
+        except:  # pylint: disable=bare-except
+            log.exception(
+                'Failed to deactivate account for user [%s]',
+                self.username
+            )
+            raise
 
 
 class Client(User):

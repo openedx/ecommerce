@@ -12,3 +12,8 @@ class PaymentFailedView(TemplateView):
             'payment_support_email': self.request.site.siteconfiguration.payment_support_email
         })
         return context
+
+
+class SDNFailure(TemplateView):
+    """ Display an error page when the SDN check fails at checkout. """
+    template_name = 'checkout/sdn_failure.html'

@@ -15,6 +15,7 @@ from ecommerce.extensions.api.v2.views import (
     providers as provider_views,
     publication as publication_views,
     refunds as refund_views,
+    sdn as sdn_views,
     siteconfiguration as siteconfiguration_views,
     stockrecords as stockrecords_views,
     vouchers as voucher_views
@@ -70,6 +71,10 @@ PROVIDER_URLS = [
     url(r'^$', provider_views.ProviderViewSet.as_view(), name='list_providers')
 ]
 
+SDN_URLS = [
+    url(r'^search/$', sdn_views.SDNCheckViewSet.as_view(), name='search')
+]
+
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^checkout/$', include(CHECKOUT_URLS, namespace='checkout')),
@@ -78,6 +83,7 @@ urlpatterns = [
     url(r'^providers/', include(PROVIDER_URLS, namespace='providers')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
+    url(r'^sdn/', include(SDN_URLS, namespace='sdn'))
 ]
 
 router = ExtendedSimpleRouter()

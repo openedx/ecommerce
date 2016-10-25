@@ -244,6 +244,8 @@ CREDIT_PROVIDER_CACHE_TIMEOUT = 600
 
 VOUCHER_CACHE_TIMEOUT = 10  # Value is in seconds.
 
+SDN_CHECK_REQUEST_TIMEOUT = 5  # Value is in seconds.
+
 # APP CONFIGURATION
 DJANGO_APPS = [
     'django.contrib.admin',

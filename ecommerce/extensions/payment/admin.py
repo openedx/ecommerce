@@ -5,6 +5,8 @@ from oscar.apps.payment.admin import *  # noqa pylint: disable=wildcard-import,u
 from oscar.core.loading import get_model
 from solo.admin import SingletonModelAdmin
 
+from ecommerce.extensions.payment.models import SDNCheckFailure
+
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 PaypalProcessorConfiguration = get_model('payment', 'PaypalProcessorConfiguration')
 
@@ -34,5 +36,18 @@ class PaymentProcessorResponseAdmin(admin.ModelAdmin):
 
     formatted_response.allow_tags = True
 
+
+@admin.register(SDNCheckFailure)
+class SDNCheckFailureAdmin(admin.ModelAdmin):
+    search_fields = ('username', 'full_name')
+    list_display = ('username', 'full_name', 'country')
+    fields = ('username', 'full_name', 'country', 'formatted_response')
+    readonly_fields = ('username', 'full_name', 'country', 'formatted_response')
+
+    def formatted_response(self, obj):
+        pretty_response = pformat(obj.sdn_check_response)
+
+        # Use format_html() to escape user-provided inputs, avoiding an XSS vulnerability.
+        return format_html('<br><br><pre>{}</pre>', pretty_response)
 
 admin.site.register(PaypalProcessorConfiguration, SingletonModelAdmin)

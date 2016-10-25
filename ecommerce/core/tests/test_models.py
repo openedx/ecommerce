@@ -1,3 +1,5 @@
+import json
+
 import ddt
 import httpretty
 import mock
@@ -174,6 +176,26 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         httpretty.disable()
         with self.assertRaises(VerificationStatusError):
             user.is_verified(self.site)
+
+    @httpretty.activate
+    def test_deactivation(self):
+        """Verify the deactivation endpoint is called for the user."""
+        user = self.create_user()
+        expected_response = {'user_deactivated': True}
+        self.mock_deactivation_api(self.request, user.username, response=json.dumps(expected_response))
+        self.assertEqual(user.deactivate_account(self.request.site.siteconfiguration), expected_response)
+
+    def test_deactivation_exception_handling(self):
+        """Verify an error is logged if an exception happens."""
+        def callback(*args):  # pylint: disable=unused-argument
+            raise ConnectionError
+        user = self.create_user()
+        self.mock_deactivation_api(self.request, user.username, response=callback)
+
+        with self.assertRaises(ConnectionError):
+            with mock.patch('ecommerce.core.models.log.exception') as mock_logger:
+                user.deactivate_account(self.request.site.siteconfiguration)
+                self.assertTrue(mock_logger.called)
 
 
 class BusinessClientTests(TestCase):
