@@ -2,22 +2,25 @@ from __future__ import unicode_literals
 
 import logging
 
+import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
-from requests.exceptions import ConnectionError, Timeout
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.utils import redirect_to_referrer
+from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
+from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
+from ecommerce.extensions.payment.forms import PaymentForm
 
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
@@ -30,6 +33,7 @@ class BasketSingleItemView(View):
     View that adds a single product to a user's basket.
     An additional coupon code can be supplied so the offer is applied to the basket.
     """
+
     def get(self, request):
         partner = get_partner_for_site(request)
 
@@ -80,6 +84,7 @@ class BasketSummaryView(BasketView):
     """
     Display basket contents and checkout/payment options.
     """
+
     def _determine_seat_type(self, product):
         """
         Return the seat type based on the product class
@@ -98,6 +103,9 @@ class BasketSummaryView(BasketView):
         lines_data = []
         is_verification_required = is_bulk_purchase = False
         switch_link_text = partner_sku = ''
+        basket = self.request.basket
+        site = self.request.site
+        site_configuration = site.siteconfiguration
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
@@ -126,7 +134,7 @@ class BasketSummaryView(BasketView):
                     list(messages.get_messages(self.request))
 
             if line.has_discount:
-                benefit = self.request.basket.applied_offers().values()[0].benefit
+                benefit = basket.applied_offers().values()[0].benefit
                 benefit_value = format_benefit_value(benefit)
             else:
                 benefit_value = None
@@ -142,13 +150,33 @@ class BasketSummaryView(BasketView):
                 'line': line,
             })
 
+            user = self.request.user
             context.update({
                 'analytics_data': prepare_analytics_data(
-                    self.request.user,
+                    user,
                     self.request.site.siteconfiguration.segment_key,
                     unicode(course_key)
                 ),
+                'enable_client_side_checkout': False,
             })
+
+            if site_configuration.client_side_payment_processor \
+                    and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
+                payment_processor_class = site_configuration.get_client_side_payment_processor_class()
+
+                if payment_processor_class:
+                    payment_processor = payment_processor_class(site)
+
+                    context.update({
+                        'enable_client_side_checkout': True,
+                        'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
+                        'payment_url': payment_processor.client_side_payment_url,
+                    })
+                else:
+                    msg = 'Unable to load client-side payment processor [{processor}] for ' \
+                          'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
+                                                             sc=site_configuration.id)
+                    raise SiteConfigurationError(msg)
 
             # Check product attributes to determine if ID verification is required for this basket
             try:
@@ -159,7 +187,7 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': self.request.site.siteconfiguration.get_payment_processors(),
+            'payment_processors': site_configuration.get_payment_processors(),
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
@@ -177,6 +205,7 @@ class VoucherAddMessagesView(VoucherAddView):
     View that applies a voucher to basket.
     We change default messages oscar returns.
     """
+
     def form_valid(self, form):
         super(VoucherAddMessagesView, self).form_valid(form)
 
