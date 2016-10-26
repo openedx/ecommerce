@@ -1,8 +1,12 @@
+from __future__ import unicode_literals
+
 import abc
 
 import waffle
 from django.conf import settings
 from oscar.core.loading import get_model
+
+from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -23,16 +27,17 @@ class BasePaymentProcessor(object):  # pragma: no cover
         self.site = site
 
     @abc.abstractmethod
-    def get_transaction_parameters(self, basket, request=None):
+    def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
         Generate a dictionary of signed parameters required for this processor to complete a transaction.
 
         Arguments:
+            use_client_side_checkout:
             basket (Basket): The basket of products being purchased.
-
-        Keyword Arguments:
-            request (Request): A Request object which can be used to construct an absolute URL in
+            request (Request, optional): A Request object which can be used to construct an absolute URL in
                 cases where one is required.
+            use_client_side_checkout (bool, optional): Determines if client-side checkout should be used.
+            **kwargs: Additional parameters.
 
         Returns:
             dict: Payment processor-specific parameters required to complete a transaction. At a minimum,
@@ -69,6 +74,18 @@ class BasePaymentProcessor(object):  # pragma: no cover
         """
         partner_short_code = self.site.siteconfiguration.partner.short_code
         return settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()][self.NAME.lower()]
+
+    @property
+    def client_side_payment_url(self):
+        """
+        Returns the URL to which payment data, collected directly from the payment page, should be posted.
+
+        If the payment processor does not support client-side payments, ``None`` will be returned.
+
+        Returns:
+            str
+        """
+        return None
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         """

@@ -18,8 +18,10 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
-from ecommerce.extensions.payment.exceptions import (InvalidSignatureError, InvalidCybersourceDecision,
-                                                     PartialAuthorizationError)
+from ecommerce.extensions.payment.exceptions import (
+    InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
+    ProcessorMisconfiguredError
+)
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.transport import RequestsTransport
@@ -41,8 +43,8 @@ class Cybersource(BasePaymentProcessor):
     For reference, see
     http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
     """
-
     NAME = 'cybersource'
+    PCI_FIELDS = ('card_cvn', 'card_expiry_date', 'card_number', 'card_type',)
 
     def __init__(self, site):
         """
@@ -65,32 +67,86 @@ class Cybersource(BasePaymentProcessor):
         self.send_level_2_3_details = configuration.get('send_level_2_3_details', True)
         self.language_code = settings.LANGUAGE_CODE
 
+        # Silent Order POST parameters
+        self.sop_profile_id = configuration.get('sop_profile_id')
+        self.sop_access_key = configuration.get('sop_access_key')
+        self.sop_secret_key = configuration.get('sop_secret_key')
+        self.sop_payment_page_url = configuration.get('sop_payment_page_url')
+
     @property
     def cancel_page_url(self):
         return get_ecommerce_url(self.configuration['cancel_checkout_path'])
 
-    def get_transaction_parameters(self, basket, request=None):
+    @property
+    def client_side_payment_url(self):
+        return self.sop_payment_page_url
+
+    def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
         Generate a dictionary of signed parameters CyberSource requires to complete a transaction.
 
         Arguments:
+            use_client_side_checkout:
             basket (Basket): The basket of products being purchased.
+            request (Request, optional): A Request object which could be used to construct an absolute URL; not
+                used by this method.
+            use_client_side_checkout (bool, optional): Indicates if the Silent Order POST profile should be used.
+            **kwargs: Additional parameters.
 
         Keyword Arguments:
-            request (Request): A Request object which could be used to construct an absolute URL; not
-                used by this method.
+            extra_parameters (dict): Additional signed parameters that should be included in the signature
+                and returned dict. Note that these parameters will override any default values.
 
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
+        sop_config_values = (self.sop_access_key, self.sop_payment_page_url, self.sop_profile_id, self.sop_secret_key,)
+        if use_client_side_checkout and not all(sop_config_values):
+            raise ProcessorMisconfiguredError(
+                'CyberSource Silent Order POST cannot be used unless a profile ID, access key, '
+                'secret key, and payment page URL are ALL configured in settings.'
+            )
+
+        parameters = self._generate_parameters(basket, use_client_side_checkout, **kwargs)
+
+        # Sign all fields
+        parameters['signed_field_names'] = ','.join(sorted(parameters.keys()))
+        parameters['signature'] = self._generate_signature(parameters, use_client_side_checkout)
+
+        payment_page_url = self.sop_payment_page_url if use_client_side_checkout else self.payment_page_url
+        parameters['payment_page_url'] = payment_page_url
+
+        return parameters
+
+    def _generate_parameters(self, basket, use_sop_profile, **kwargs):
+        """ Generates the parameters dict.
+
+        A signature is NOT included in the parameters.
+
+         Arguments:
+            basket (Basket): Basket from which the pricing and item details are pulled.
+            use_sop_profile (bool, optional): Indicates if the Silent Order POST profile should be used.
+            **kwargs: Additional parameters to add to the generated dict.
+
+         Returns:
+             dict: Dictionary containing the payment parameters that should be sent to CyberSource.
+        """
         site = basket.site
+
+        access_key = self.access_key
+        profile_id = self.profile_id
+
+        if use_sop_profile:
+            access_key = self.sop_access_key
+            profile_id = self.sop_profile_id
+
         parameters = {
-            'access_key': self.access_key,
-            'profile_id': self.profile_id,
+            'access_key': access_key,
+            'profile_id': profile_id,
             'transaction_uuid': uuid.uuid4().hex,
             'signed_field_names': '',
             'unsigned_field_names': '',
-            'signed_date_time': self.utcnow().strftime(ISO_8601_FORMAT),
+            'signed_date_time': datetime.datetime.utcnow().strftime(ISO_8601_FORMAT),
             'locale': self.language_code,
             'transaction_type': 'sale',
             'reference_number': basket.order_number,
@@ -103,18 +159,9 @@ class Cybersource(BasePaymentProcessor):
             ),
             'override_custom_cancel_page': self.cancel_page_url,
         }
-
-        # XCOM-274: when internal reporting across all processors is
-        # operational, these custom fields will no longer be needed and should
-        # be removed.
-        single_seat = self.get_single_seat(basket)
-        if single_seat:
-            parameters['merchant_defined_data1'] = single_seat.attr.course_key
-            parameters['merchant_defined_data2'] = getattr(single_seat.attr, 'certificate_type', '')
-
         # Level 2/3 details
         if self.send_level_2_3_details:
-            parameters['amex_data_taa1'] = '{}'.format(site.name)
+            parameters['amex_data_taa1'] = site.name
             parameters['purchasing_level'] = '3'
             parameters['line_item_count'] = basket.lines.count()
             # Note (CCB): This field (purchase order) is required for Visa;
@@ -136,23 +183,16 @@ class Cybersource(BasePaymentProcessor):
                 parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
                 parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
 
-        # Sign all fields
-        signed_field_names = parameters.keys()
-        parameters['signed_field_names'] = ','.join(sorted(signed_field_names))
-        parameters['signature'] = self._generate_signature(parameters)
+        # Add the extra parameters
+        parameters.update(kwargs.get('extra_parameters', {}))
 
-        parameters['payment_page_url'] = self.payment_page_url
+        # Mitigate PCI compliance issues
+        signed_field_names = parameters.keys()
+        if any(pci_field in signed_field_names for pci_field in self.PCI_FIELDS):
+            raise PCIViolation('One or more PCI-related fields is contained in the payment parameters. '
+                               'This service is NOT PCI-compliant! Deactivate this service immediately!')
 
         return parameters
-
-    @staticmethod
-    def utcnow():
-        """
-        Returns the current datetime in UTC.
-
-        This is primarily here as a test helper, since we cannot mock datetime.datetime.
-        """
-        return datetime.datetime.utcnow()
 
     @staticmethod
     def get_single_seat(basket):
@@ -241,7 +281,7 @@ class Cybersource(BasePaymentProcessor):
 
         return source, event
 
-    def _generate_signature(self, parameters):
+    def _generate_signature(self, parameters, use_sop_profile):
         """
         Sign the contents of the provided transaction parameters dictionary.
 
@@ -255,20 +295,28 @@ class Cybersource(BasePaymentProcessor):
 
         Arguments:
             parameters (dict): A dictionary of transaction parameters.
+            use_sop_profile (bool): Indicates if the Silent Order POST profile should be used.
 
         Returns:
             unicode: the signature for the given parameters
         """
         keys = parameters['signed_field_names'].split(',')
+        secret_key = self.sop_secret_key if use_sop_profile else self.secret_key
+
         # Generate a comma-separated list of keys and values to be signed. CyberSource refers to this
         # as a 'Version 1' signature in their documentation.
         message = ','.join(['{key}={value}'.format(key=key, value=parameters.get(key)) for key in keys])
 
-        return sign(message, self.secret_key)
+        return sign(message, secret_key)
 
     def is_signature_valid(self, response):
         """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
-        return response and (self._generate_signature(response) == response.get('signature'))
+        req_profile_id = response.get('req_profile_id')
+        if not req_profile_id:
+            return False
+
+        use_sop_profile = req_profile_id == self.sop_profile_id
+        return response and (self._generate_signature(response, use_sop_profile) == response.get('signature'))
 
     def issue_credit(self, source, amount, currency):
         order = source.order

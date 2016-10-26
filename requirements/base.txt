@@ -31,4 +31,5 @@ python-dateutil==2.4.2
 pytz==2015.7
 requests==2.9.1
 sailthru-client==2.2.3
+six==1.10.0
 suds==0.4

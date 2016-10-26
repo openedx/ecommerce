@@ -58,6 +58,10 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
         """Test that the name constant on the processor class is correct."""
         self.assertEqual(self.processor.NAME, self.processor_name)
 
+    def test_client_side_payment_url(self):
+        """ Verify the property returns the client-side payment URL. """
+        self.assertIsNone(self.processor.client_side_payment_url)
+
     def test_get_transaction_parameters(self):
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
         raise NotImplementedError

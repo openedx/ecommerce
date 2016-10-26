@@ -1,15 +1,22 @@
 """ Views for interacting with the payment processor. """
-from cStringIO import StringIO
+from __future__ import unicode_literals
+
 import logging
 import os
+from cStringIO import StringIO
 
+import six
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import FormView
 from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
@@ -18,9 +25,9 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError
+from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +41,100 @@ OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
+class CybersourceSubmitView(FormView):
+    """ Starts CyberSource payment process.
+
+    This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
+    `Basket` ID. The specified basket is frozen, and CyberSource parameters are returned as a JSON object.
+    """
+    FIELD_MAPPINGS = {
+        'city': 'bill_to_address_city',
+        'country': 'bill_to_address_country',
+        'address_line1': 'bill_to_address_line1',
+        'address_line2': 'bill_to_address_line2',
+        'postal_code': 'bill_to_address_postal_code',
+        'state': 'bill_to_address_state',
+        'first_name': 'bill_to_forename',
+        'last_name': 'bill_to_surname',
+    }
+    form_class = PaymentForm
+    http_method_names = ['post', 'options']
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(CybersourceSubmitView, self).dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super(CybersourceSubmitView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def _basket_error_response(self, error_msg):
+        data = {
+            'error': error_msg,
+        }
+        return JsonResponse(data, status=400)
+
+    def form_invalid(self, form):
+        errors = {field: error[0] for field, error in form.errors.iteritems()}
+        logger.debug(errors)
+
+        if errors.get('basket'):
+            error_msg = _('There was a problem retrieving your basket. Refresh the page to try again.')
+            return self._basket_error_response(error_msg)
+
+        return JsonResponse({'field_errors': errors}, status=400)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        basket = data['basket']
+        request = self.request
+        user = request.user
+
+        # Ensure we aren't attempting to purchase a basket that has already been purchased, frozen,
+        # or merged with another basket.
+        if basket.status != Basket.OPEN:
+            logger.debug('Basket %d must be in the "Open" state. It is currently in the "%s" state.',
+                         basket.id, basket.status)
+            error_msg = _('Your basket may have been modified or already purchased. Refresh the page to try again.')
+            return self._basket_error_response(error_msg)
+
+        basket.strategy = request.strategy
+        Applicator().apply(basket, user, self.request)
+
+        # Add extra parameters for Silent Order POST
+        extra_parameters = {
+            'payment_method': 'card',
+            'unsigned_field_names': ','.join(Cybersource.PCI_FIELDS),
+            'bill_to_email': user.email,
+            'device_fingerprint_id': request.session.session_key,
+        }
+
+        for source, destination in six.iteritems(self.FIELD_MAPPINGS):
+            extra_parameters[destination] = data[source]
+
+        parameters = Cybersource(self.request.site).get_transaction_parameters(
+            basket,
+            use_client_side_checkout=True,
+            extra_parameters=extra_parameters
+        )
+
+        # This parameter is only used by the Web/Mobile flow. It is not needed for for Silent Order POST.
+        parameters.pop('payment_page_url', None)
+
+        # Ensure that the response can be properly rendered so that we
+        # don't have to deal with thawing the basket in the event of an error.
+        response = JsonResponse({'form_fields': parameters})
+
+        # Freeze the basket since the user is paying for it now.
+        basket.freeze()
+
+        return response
+
+
 class CybersourceNotifyView(EdxOrderPlacementMixin, View):
     """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
+
     @property
     def payment_processor(self):
         return Cybersource(self.request.site)
@@ -175,6 +274,7 @@ class CybersourceNotifyView(EdxOrderPlacementMixin, View):
 
 class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     """Execute an approved PayPal payment and place an order for paid products as appropriate."""
+
     @property
     def payment_processor(self):
         return Paypal(self.request.site)
@@ -271,7 +371,6 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
 
 class PaypalProfileAdminView(View):
-
     ACTIONS = ('list', 'create', 'show', 'update', 'delete', 'enable', 'disable')
 
     def dispatch(self, request, *args, **kwargs):

@@ -195,6 +195,30 @@ class SiteConfigurationTests(TestCase):
         site_config.payment_processors = "irrelevant-get_processor_by_name-is-patched"
         site_config.clean_fields(exclude={"payment_processors"})
 
+    @ddt.data(None, '', ' ')
+    def test_clean_client_side_payment_processor_with_empty_value(self, value):
+        """ Verify validation succeeds if no value is set for the client_side_payment_processor field. """
+        site_config = _make_site_config('paypal')
+        site_config.client_side_payment_processor = value
+        site_config.clean_fields()
+
+    def test_clean_client_side_payment_processor_with_invalid_processor(self):
+        """ Verify an error is raised if the value client_side_payment_processor is not in the list
+        of available payment processors. """
+        site_config = _make_site_config('paypal')
+        site_config.client_side_payment_processor = 'bad-value'
+
+        with self.assertRaises(ValidationError):
+            site_config.clean_fields()
+
+    def test_clean_client_side_payment_processor(self):
+        """ Verify no error is raised if the value of client_side_payment_processor is in the
+        list of available payment processors. """
+        processor = 'paypal'
+        site_config = _make_site_config(processor)
+        site_config.client_side_payment_processor = processor
+        site_config.clean_fields()
+
     @staticmethod
     def _enable_processor_switches(processors):
         for processor in processors:
@@ -248,6 +272,17 @@ class SiteConfigurationTests(TestCase):
 
         result = site_config.get_payment_processors()
         self.assertEqual(result, expected_result)
+
+    def test_get_client_side_payment_processor(self):
+        """ Verify the method returns the client-side payment processor. """
+        PROCESSOR_NAME = 'cybersource'
+        site_config = _make_site_config(PROCESSOR_NAME)
+
+        site_config.client_side_payment_processor = None
+        self.assertIsNone(site_config.get_client_side_payment_processor_class())
+
+        site_config.client_side_payment_processor = PROCESSOR_NAME
+        self.assertEqual(site_config.get_client_side_payment_processor_class().NAME, PROCESSOR_NAME)
 
     def test_get_from_email(self):
         """
