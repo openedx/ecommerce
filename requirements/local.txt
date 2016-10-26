@@ -2,8 +2,8 @@
 -r test.txt
 -r docs.txt
 
-django-debug-toolbar==1.4
+django-debug-toolbar==1.6
 
 # i18n
-transifex-client==0.11
+transifex-client==0.12.2
 edx-i18n-tools==0.3.4
