@@ -43,7 +43,7 @@ class InvoicePayment(BasePaymentProcessor):
             invoice.save()
         return source, event
 
-    def get_transaction_parameters(self, basket, request=None):
+    def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         return None
 
     def issue_credit(self, source, amount, currency):

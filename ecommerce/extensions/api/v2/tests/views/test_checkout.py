@@ -18,7 +18,7 @@ class DummyProcessorWithUrl(DummyProcessor):
     """ Dummy payment processor class that has a test payment page url. """
     NAME = 'dummy_with_url'
 
-    def get_transaction_parameters(self, basket, request=None):
+    def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         dummy_values = {
             'payment_page_url': 'test_processor.edx',
             'transaction_param': 'test_trans_param'

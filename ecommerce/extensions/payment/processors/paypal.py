@@ -70,15 +70,15 @@ class Paypal(BasePaymentProcessor):
     def error_url(self):
         return get_ecommerce_url(self.configuration['error_path'])
 
-    def get_transaction_parameters(self, basket, request=None):
+    def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
         Create a new PayPal payment.
 
         Arguments:
             basket (Basket): The basket of products being purchased.
-
-        Keyword Arguments:
-            request (Request): A Request object which is used to construct PayPal's `return_url`.
+            request (Request, optional): A Request object which is used to construct PayPal's `return_url`.
+            use_client_side_checkout (bool, optional): This value is not used.
+            **kwargs: Additional parameters; not used by this method.
 
         Returns:
             dict: PayPal-specific parameters required to complete a transaction. Must contain a URL

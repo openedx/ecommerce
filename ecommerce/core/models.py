@@ -54,6 +54,13 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False
     )
+    client_side_payment_processor = models.CharField(
+        verbose_name=_('Payment processors'),
+        help_text=_('Processor that will be used for client-side payments'),
+        max_length=255,
+        null=True,
+        blank=True
+    )
     oauth_settings = JSONField(
         verbose_name=_('OAuth settings'),
         help_text=_('JSON string containing OAuth backend settings.'),
@@ -150,6 +157,25 @@ class SiteConfiguration(models.Model):
                 )
                 raise ValidationError(exc.message)
 
+    def _clean_client_side_payment_processor(self):
+        """
+        Validates the client_side_payment_processor field value.
+
+
+        Raises:
+            ValidationError: If the field contains the name of a payment processor NOT found in the
+            payment_processors field list.
+        """
+        value = (self.client_side_payment_processor or '').strip()
+        if value and value not in self.payment_processors_set:
+            raise ValidationError('Processor [{processor}] must be in the payment_processors field in order to '
+                                  'be configured as a client-side processor.'.format(processor=value))
+
+    def _all_payment_processors(self):
+        """ Returns all processor classes declared in settings. """
+        all_processors = [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
+        return all_processors
+
     def get_payment_processors(self):
         """
         Returns payment processor classes enabled for the corresponding Site
@@ -157,7 +183,7 @@ class SiteConfiguration(models.Model):
         Returns:
             list[BasePaymentProcessor]: Returns payment processor classes enabled for the corresponding Site
         """
-        all_processors = [get_processor_class(path) for path in settings.PAYMENT_PROCESSORS]
+        all_processors = self._all_payment_processors()
         all_processor_names = {processor.NAME for processor in all_processors}
 
         missing_processor_configurations = self.payment_processors_set - all_processor_names
@@ -171,6 +197,21 @@ class SiteConfiguration(models.Model):
             processor for processor in all_processors
             if processor.NAME in self.payment_processors_set and processor.is_enabled()
         ]
+
+    def get_client_side_payment_processor_class(self):
+        """ Returns the payment processor class to be used for client-side payments.
+
+        If no processor is set, returns None.
+
+         Returns:
+             BasePaymentProcessor
+        """
+        if self.client_side_payment_processor:
+            for processor in self._all_payment_processors():
+                if processor.NAME == self.client_side_payment_processor:
+                    return processor
+
+        return None
 
     def get_from_email(self):
         """
@@ -186,6 +227,9 @@ class SiteConfiguration(models.Model):
         """ Validates model fields """
         if not exclude or 'payment_processors' not in exclude:
             self._clean_payment_processors()
+
+        if not exclude or 'client_side_payment_processor' not in exclude:
+            self._clean_client_side_payment_processor()
 
     @cached_property
     def segment_client(self):

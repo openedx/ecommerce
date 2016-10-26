@@ -1,4 +1,7 @@
 """Payment processor constants."""
+from __future__ import unicode_literals
+
+import six
 
 CARD_TYPES = {
     'american_express': {
@@ -19,7 +22,9 @@ CARD_TYPES = {
     },
 }
 
-CARD_TYPE_CHOICES = ((key, value['display_name']) for key, value in CARD_TYPES.iteritems())
+CARD_TYPE_CHOICES = ((key, value['display_name']) for key, value in six.iteritems(CARD_TYPES))
 CYBERSOURCE_CARD_TYPE_MAP = {
-    value['cybersource_code']: key for key, value in CARD_TYPES.iteritems() if 'cybersource_code' in value
+    value['cybersource_code']: key for key, value in six.iteritems(CARD_TYPES) if 'cybersource_code' in value
 }
+
+CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'

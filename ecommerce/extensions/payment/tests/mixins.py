@@ -1,18 +1,24 @@
+from __future__ import unicode_literals
+
+import datetime
 import json
 import os
 from urlparse import urljoin
 
-from django.conf import settings
 import httpretty
 import mock
+from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test import newfactories
 from suds.sudsobject import Factory
 
+from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
 
-CURRENCY = u'USD'
+CURRENCY = 'USD'
 Order = get_model('order', 'Order')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
@@ -79,9 +85,9 @@ class CybersourceMixin(object):
 
     def generate_signature(self, secret_key, data):
         """ Generate a signature for the given data dict. """
-        keys = data[u'signed_field_names'].split(u',')
+        keys = data['signed_field_names'].split(',')
 
-        message = u','.join([u'{key}={value}'.format(key=key, value=data[key]) for key in keys])
+        message = ','.join(['{key}={value}'.format(key=key, value=data[key]) for key in keys])
         return sign(message, secret_key)
 
     def make_billing_address(self, overrides=None):
@@ -101,43 +107,43 @@ class CybersourceMixin(object):
         kwargs.update(overrides or {})
         return newfactories.BillingAddressFactory(**kwargs)
 
-    def generate_notification(self, secret_key, basket, decision=u'ACCEPT', billing_address=None, auth_amount=None,
-                              **kwargs):
+    def generate_notification(self, basket, decision='ACCEPT', billing_address=None, auth_amount=None, **kwargs):
         """ Generates a dict containing the API reply fields expected to be received from CyberSource. """
 
         req_reference_number = kwargs.get('req_reference_number', basket.order_number)
         total = unicode(basket.total_incl_tax)
         auth_amount = auth_amount or total
         notification = {
-            u'decision': decision,
-            u'req_reference_number': req_reference_number,
-            u'transaction_id': u'123456',
-            u'auth_amount': auth_amount,
-            u'req_amount': total,
-            u'req_tax_amount': u'0.00',
-            u'req_currency': basket.currency,
-            u'req_card_number': u'xxxxxxxxxxxx1111',
-            u'req_card_type': CARD_TYPES[self.DEFAULT_CARD_TYPE]['cybersource_code']
+            'decision': decision,
+            'req_reference_number': req_reference_number,
+            'transaction_id': '123456',
+            'auth_amount': auth_amount,
+            'req_amount': total,
+            'req_tax_amount': '0.00',
+            'req_currency': basket.currency,
+            'req_card_number': 'xxxxxxxxxxxx1111',
+            'req_card_type': CARD_TYPES[self.DEFAULT_CARD_TYPE]['cybersource_code'],
+            'req_profile_id': self.processor.profile_id,
         }
 
         if billing_address:
             notification.update({
-                u'req_bill_to_forename': billing_address.first_name,
-                u'req_bill_to_surname': billing_address.last_name,
-                u'req_bill_to_address_line1': billing_address.line1,
-                u'req_bill_to_address_city': billing_address.line4,
-                u'req_bill_to_address_postal_code': billing_address.postcode,
-                u'req_bill_to_address_country': billing_address.country.iso_3166_1_a2
+                'req_bill_to_forename': billing_address.first_name,
+                'req_bill_to_surname': billing_address.last_name,
+                'req_bill_to_address_line1': billing_address.line1,
+                'req_bill_to_address_city': billing_address.line4,
+                'req_bill_to_address_postal_code': billing_address.postcode,
+                'req_bill_to_address_country': billing_address.country.iso_3166_1_a2
             })
 
             # handle optional address fields
             if billing_address.line2:
-                notification[u'req_bill_to_address_line2'] = billing_address.line2
+                notification['req_bill_to_address_line2'] = billing_address.line2
             if billing_address.state:
-                notification[u'req_bill_to_address_state'] = billing_address.state
+                notification['req_bill_to_address_state'] = billing_address.state
 
-        notification[u'signed_field_names'] = u','.join(notification.keys())
-        notification[u'signature'] = self.generate_signature(secret_key, notification)
+        notification['signed_field_names'] = ','.join(notification.keys())
+        notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
         return notification
 
     def mock_cybersource_wsdl(self):
@@ -172,34 +178,98 @@ class CybersourceMixin(object):
 
         return CybersourceSoapMock
 
+    def get_expected_transaction_parameters(self, basket, transaction_uuid, include_level_2_3_details=True,
+                                            processor=None, use_sop_profile=False, **kwargs):
+        """
+        Builds expected transaction parameters dictionary.
+
+        Note:
+            Callers should separately validate the transaction_uuid parameter to ensure it is a valid UUID.
+        """
+        processor = processor or Cybersource(self.site)
+        configuration = settings.PAYMENT_PROCESSOR_CONFIG['edx'][processor.NAME]
+        access_key = configuration['sop_access_key'] if use_sop_profile else configuration['access_key']
+        profile_id = configuration['sop_profile_id'] if use_sop_profile else configuration['profile_id']
+        secret_key = configuration['sop_secret_key'] if use_sop_profile else configuration['secret_key']
+
+        expected = {
+            'access_key': access_key,
+            'profile_id': profile_id,
+            'transaction_uuid': transaction_uuid,
+            'signed_field_names': '',
+            'unsigned_field_names': '',
+            'signed_date_time': datetime.datetime.utcnow().strftime(ISO_8601_FORMAT),
+            'locale': settings.LANGUAGE_CODE,
+            'transaction_type': 'sale',
+            'reference_number': basket.order_number,
+            'amount': unicode(basket.total_incl_tax),
+            'currency': basket.currency,
+            'consumer_id': basket.owner.username,
+            'override_custom_receipt_page': get_receipt_page_url(
+                order_number=basket.order_number,
+                site_configuration=basket.site.siteconfiguration
+            ),
+            'override_custom_cancel_page': processor.cancel_page_url,
+        }
+
+        if include_level_2_3_details:
+            expected.update({
+                'line_item_count': basket.lines.count(),
+                'amex_data_taa1': basket.site.name,
+                'purchasing_level': '3',
+                'user_po': 'BLANK',
+            })
+
+            for index, line in enumerate(basket.lines.all()):
+                expected['item_{}_code'.format(index)] = line.product.get_product_class().slug
+                expected['item_{}_discount_amount '.format(index)] = str(line.discount_value)
+                expected['item_{}_gross_net_indicator'.format(index)] = 'Y'
+                expected['item_{}_name'.format(index)] = line.product.title
+                expected['item_{}_quantity'.format(index)] = line.quantity
+                expected['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
+                expected['item_{}_tax_amount'.format(index)] = str(line.line_tax)
+                expected['item_{}_tax_rate'.format(index)] = '0'
+                expected['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
+                expected['item_{}_unit_of_measure'.format(index)] = 'ITM'
+                expected['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+
+        # Add the extra parameters
+        expected.update(kwargs.get('extra_parameters', {}))
+
+        # Generate a signature
+        expected['signed_field_names'] = ','.join(sorted(expected.keys()))
+        expected['signature'] = self.generate_signature(secret_key, expected)
+
+        return expected
+
 
 class PaypalMixin(object):
     """Mixin with helper methods for mocking PayPal API responses."""
-    APPROVAL_URL = u'https://api.sandbox.paypal.com/fake-approval-url'
-    EMAIL = u'test-buyer@paypal.com'
-    PAYER_ID = u'PAYERID'
-    PAYMENT_ID = u'PAY-123ABC'
-    PAYMENT_CREATION_STATE = u'created'
-    PAYMENT_EXECUTION_STATE = u'approved'
+    APPROVAL_URL = 'https://api.sandbox.paypal.com/fake-approval-url'
+    EMAIL = 'test-buyer@paypal.com'
+    PAYER_ID = 'PAYERID'
+    PAYMENT_ID = 'PAY-123ABC'
+    PAYMENT_CREATION_STATE = 'created'
+    PAYMENT_EXECUTION_STATE = 'approved'
     PAYER_INFO = {
-        u'email': EMAIL,
-        u'first_name': u'test',
-        u'last_name': u'buyer',
-        u'payer_id': u'123ABC',
-        u'shipping_address': {
-            u'city': u'San Jose',
-            u'country_code': u'US',
-            u'line1': u'1 Main St',
-            u'postal_code': u'95131',
-            u'recipient_name': u'test buyer',
-            u'state': u'CA'
+        'email': EMAIL,
+        'first_name': 'test',
+        'last_name': 'buyer',
+        'payer_id': '123ABC',
+        'shipping_address': {
+            'city': 'San Jose',
+            'country_code': 'US',
+            'line1': '1 Main St',
+            'postal_code': '95131',
+            'recipient_name': 'test buyer',
+            'state': 'CA'
         }
     }
     RETURN_DATA = {
-        u'paymentId': PAYMENT_ID,
-        u'PayerID': PAYER_ID
+        'paymentId': PAYMENT_ID,
+        'PayerID': PAYER_ID
     }
-    SALE_ID = u'789XYZ'
+    SALE_ID = '789XYZ'
 
     def mock_api_response(self, path, body, post=True):
         assert httpretty.is_enabled()
@@ -214,11 +284,11 @@ class PaypalMixin(object):
 
     def mock_oauth2_response(self):
         oauth2_response = {
-            u'scope': u'https://api.paypal.com/v1/payments/.*',
-            u'access_token': u'fake-access-token',
-            u'token_type': u'Bearer',
-            u'app_id': u'APP-123ABC',
-            u'expires_in': 28800
+            'scope': 'https://api.paypal.com/v1/payments/.*',
+            'access_token': 'fake-access-token',
+            'token_type': 'Bearer',
+            'app_id': 'APP-123ABC',
+            'expires_in': 28800
         }
 
         self.mock_api_response('/v1/oauth2/token', oauth2_response)
@@ -227,58 +297,58 @@ class PaypalMixin(object):
                                        find=False):
         total = unicode(basket.total_incl_tax)
         payment_creation_response = {
-            u'create_time': u'2015-05-04T18:18:27Z',
-            u'id': self.PAYMENT_ID,
-            u'intent': u'sale',
-            u'links': [
+            'create_time': '2015-05-04T18:18:27Z',
+            'id': self.PAYMENT_ID,
+            'intent': 'sale',
+            'links': [
                 {
-                    u'href': u'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(self.PAYMENT_ID),
-                    u'method': u'GET',
-                    u'rel': u'self'
+                    'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(self.PAYMENT_ID),
+                    'method': 'GET',
+                    'rel': 'self'
                 },
                 {
-                    u'href': u'https://api.sandbox.paypal.com/v1/payments/payment/{}/execute'.format(self.PAYMENT_ID),
-                    u'method': u'POST',
-                    u'rel': u'execute'
+                    'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}/execute'.format(self.PAYMENT_ID),
+                    'method': 'POST',
+                    'rel': 'execute'
                 }
             ],
-            u'payer': {
-                u'payer_info': {u'shipping_address': {}},
-                u'payment_method': u'paypal'
+            'payer': {
+                'payer_info': {'shipping_address': {}},
+                'payment_method': 'paypal'
             },
-            u'redirect_urls': {
-                u'cancel_url': u'http://fake-cancel-page',
-                u'return_url': u'http://fake-return-url'
+            'redirect_urls': {
+                'cancel_url': 'http://fake-cancel-page',
+                'return_url': 'http://fake-return-url'
             },
-            u'state': state,
-            u'transactions': [{
-                u'amount': {
-                    u'currency': CURRENCY,
-                    u'details': {u'subtotal': total},
-                    u'total': total
+            'state': state,
+            'transactions': [{
+                'amount': {
+                    'currency': CURRENCY,
+                    'details': {'subtotal': total},
+                    'total': total
                 },
-                u'item_list': {
-                    u'items': [
+                'item_list': {
+                    'items': [
                         {
-                            u'quantity': line.quantity,
-                            u'name': line.product.title,
-                            u'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
-                            u'currency': line.stockrecord.price_currency,
+                            'quantity': line.quantity,
+                            'name': line.product.title,
+                            'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
+                            'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
                     ],
                 },
-                u'invoice_number': basket.order_number,
-                u'related_resources': []
+                'invoice_number': basket.order_number,
+                'related_resources': []
             }],
-            u'update_time': u'2015-05-04T18:18:27Z'
+            'update_time': '2015-05-04T18:18:27Z'
         }
 
         if approval_url:
-            payment_creation_response[u'links'].append({
-                u'href': approval_url,
-                u'method': u'REDIRECT',
-                u'rel': u'approval_url'
+            payment_creation_response['links'].append({
+                'href': approval_url,
+                'method': 'REDIRECT',
+                'rel': 'approval_url'
             })
 
         if find:
@@ -297,84 +367,84 @@ class PaypalMixin(object):
             payer_info = self.PAYER_INFO
         total = unicode(basket.total_incl_tax)
         payment_execution_response = {
-            u'create_time': u'2015-05-04T15:55:27Z',
-            u'id': self.PAYMENT_ID,
-            u'intent': u'sale',
-            u'links': [{
-                u'href': u'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(self.PAYMENT_ID),
-                u'method': u'GET',
-                u'rel': u'self'
+            'create_time': '2015-05-04T15:55:27Z',
+            'id': self.PAYMENT_ID,
+            'intent': 'sale',
+            'links': [{
+                'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(self.PAYMENT_ID),
+                'method': 'GET',
+                'rel': 'self'
             }],
-            u'payer': {
-                u'payer_info': payer_info,
-                u'payment_method': u'paypal'
+            'payer': {
+                'payer_info': payer_info,
+                'payment_method': 'paypal'
             },
-            u'redirect_urls': {
-                u'cancel_url': u'http://fake-cancel-page',
-                u'return_url': u'http://fake-return-url'
+            'redirect_urls': {
+                'cancel_url': 'http://fake-cancel-page',
+                'return_url': 'http://fake-return-url'
             },
-            u'state': state,
-            u'transactions': [{
-                u'amount': {
-                    u'currency': CURRENCY,
-                    u'details': {u'subtotal': total},
-                    u'total': total
+            'state': state,
+            'transactions': [{
+                'amount': {
+                    'currency': CURRENCY,
+                    'details': {'subtotal': total},
+                    'total': total
                 },
-                u'item_list': {
-                    u'items': [
+                'item_list': {
+                    'items': [
                         {
-                            u'quantity': line.quantity,
-                            u'name': line.product.title,
-                            u'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
-                            u'currency': line.stockrecord.price_currency,
+                            'quantity': line.quantity,
+                            'name': line.product.title,
+                            'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
+                            'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
                     ],
                 },
-                u'invoice_number': basket.order_number,
-                u'related_resources': [{
-                    u'sale': {
-                        u'amount': {
-                            u'currency': CURRENCY,
-                            u'total': total
+                'invoice_number': basket.order_number,
+                'related_resources': [{
+                    'sale': {
+                        'amount': {
+                            'currency': CURRENCY,
+                            'total': total
                         },
-                        u'create_time': u'2015-05-04T15:55:27Z',
-                        u'id': self.SALE_ID,
-                        u'links': [
+                        'create_time': '2015-05-04T15:55:27Z',
+                        'id': self.SALE_ID,
+                        'links': [
                             {
-                                u'href': u'https://api.sandbox.paypal.com/v1/payments/sale/{}'.format(self.SALE_ID),
-                                u'method': u'GET',
-                                u'rel': u'self'
+                                'href': 'https://api.sandbox.paypal.com/v1/payments/sale/{}'.format(self.SALE_ID),
+                                'method': 'GET',
+                                'rel': 'self'
                             },
                             {
-                                u'href': u'https://api.sandbox.paypal.com/v1/payments/sale/{}/refund'.format(
+                                'href': 'https://api.sandbox.paypal.com/v1/payments/sale/{}/refund'.format(
                                     self.SALE_ID
                                 ),
-                                u'method': u'POST',
-                                u'rel': u'refund'
+                                'method': 'POST',
+                                'rel': 'refund'
                             },
                             {
-                                u'href': u'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(
+                                'href': 'https://api.sandbox.paypal.com/v1/payments/payment/{}'.format(
                                     self.PAYMENT_ID
                                 ),
-                                u'method': u'GET',
-                                u'rel': u'parent_payment'
+                                'method': 'GET',
+                                'rel': 'parent_payment'
                             }
                         ],
-                        u'parent_payment': self.PAYMENT_ID,
-                        u'payment_mode': u'INSTANT_TRANSFER',
-                        u'protection_eligibility': u'ELIGIBLE',
-                        u'protection_eligibility_type': u'ITEM_NOT_RECEIVED_ELIGIBLE,UNAUTHORIZED_PAYMENT_ELIGIBLE',
-                        u'state': u'completed',
-                        u'transaction_fee': {
-                            u'currency': CURRENCY,
-                            u'value': u'0.50'
+                        'parent_payment': self.PAYMENT_ID,
+                        'payment_mode': 'INSTANT_TRANSFER',
+                        'protection_eligibility': 'ELIGIBLE',
+                        'protection_eligibility_type': 'ITEM_NOT_RECEIVED_ELIGIBLE,UNAUTHORIZED_PAYMENT_ELIGIBLE',
+                        'state': 'completed',
+                        'transaction_fee': {
+                            'currency': CURRENCY,
+                            'value': '0.50'
                         },
-                        u'update_time': u'2015-05-04T15:58:47Z'
+                        'update_time': '2015-05-04T15:58:47Z'
                     }
                 }]
             }],
-            u'update_time': u'2015-05-04T15:58:47Z'
+            'update_time': '2015-05-04T15:58:47Z'
         }
 
         self.mock_api_response(
@@ -386,6 +456,6 @@ class PaypalMixin(object):
 
     def _create_api_url(self, path):
         mode = settings.PAYMENT_PROCESSOR_CONFIG['edx']['paypal']['mode']
-        root = u'https://api.sandbox.paypal.com' if mode == 'sandbox' else u'https://api.paypal.com'
+        root = 'https://api.sandbox.paypal.com' if mode == 'sandbox' else 'https://api.paypal.com'
 
         return urljoin(root, path)

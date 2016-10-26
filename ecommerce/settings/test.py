@@ -80,6 +80,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'send_level_2_3_details': True,
+            'sop_profile_id': 'sop-fake-profile-id',
+            'sop_access_key': 'sop-fake-access-key',
+            'sop_secret_key': 'sop-fake-secret-key',
+            'sop_payment_page_url': 'https://sop-replace-me/',
         },
         'paypal': {
             'mode': 'sandbox',
