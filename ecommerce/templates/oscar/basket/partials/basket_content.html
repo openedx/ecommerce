@@ -3,6 +3,7 @@
 {% load currency_filters %}
 {% load purchase_info_tags %}
 {% load widget_tweaks %}
+{% load crispy_forms_tags %}
 
 {% if not is_bulk_purchase %}
     {% include 'partials/alert_messages.html' %}
@@ -151,6 +152,68 @@
                     </div>
                 {% endif %}
 
+                {% if enable_client_side_checkout %}
+
+                    <form class="payment-form form-horizontal" method="post" action="{{ payment_url }}"
+                          data-signing-url="{% url 'cybersource_submit' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <fieldset>
+                                    <legend>{% trans "Billing Information" %}</legend>
+                                    {{ payment_form|crispy }}
+                                </fieldset>
+                            </div>
+                            <div class="col-sm-offset-2 col-sm-4">
+                                <fieldset>
+                                    <legend>{% trans "Payment Details" %}</legend>
+                                    <div class="pci-fields">
+                                        <div class="form-group">
+                                            <label for="id_card_type" class="control-label">
+                                                {% trans "Card Type" %}
+                                            </label>
+                                            <select id="id_card_type" name="card_type" class="form-control pci-field">
+                                                <option>{% trans "(Select a card type)" %}</option>
+                                                <option value="001">{% trans "Visa" %}</option>
+                                                <option value="002">{% trans "MasterCard" %}</option>
+                                                <option value="003">{% trans "American Express" %}</option>
+                                                <option value="003">{% trans "Discover" %}</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_card_number" class="control-label">
+                                                {% trans "Card Number" %}
+                                            </label>
+                                            <input id="id_card_number" name="card_number" class="form-control pci-field"
+                                                   maxlength="20"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_card_expiry_date" class="control-label">
+                                                {% trans "Expiration Date" %} (MM-YYYY)
+                                            </label>
+                                            <input id="id_card_expiry_date" name="card_expiry_date"
+                                                   class="form-control pci-field" maxlength="7"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_card_cvn" class="control-label">
+                                                {% trans "CVV" %}
+                                            </label>
+                                            <input id="id_card_cvn" name="card_cvn" class="form-control pci-field"
+                                                   maxlength="4"/>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-large" data-track-type="click"
+                                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                            data-track-category="checkout" data-processor-name="cybersource_sop"
+                                            data-course-id="{{ course.id }}">
+                                        {% trans "Checkout" %}
+                                    </button>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
                 <div class="pull-right payment-buttons" data-basket-id="{{ basket.id }}">
                     {% if free_basket %}
                         <a href="{% url 'checkout:free-checkout' %}"

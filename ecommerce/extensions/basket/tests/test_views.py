@@ -18,9 +18,10 @@ from oscar.test import newfactories as factories
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
+from waffle.testutils import override_flag
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-from ecommerce.core.models import SiteConfiguration
+from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
@@ -31,6 +32,9 @@ from ecommerce.extensions.basket.utils import get_basket_switch_data
 from ecommerce.extensions.basket.views import VoucherAddMessagesView
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
+from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
+from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import StockRecordFactory
@@ -214,7 +218,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
 
 @httpretty.activate
 @ddt.ddt
-@override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
 class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
@@ -224,7 +227,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='BasketSummaryTest')
-        site_configuration = SiteConfiguration.objects.get(site__id=1)
+        site_configuration = self.site.siteconfiguration
 
         old_payment_processors = site_configuration.payment_processors
         site_configuration.payment_processors = DummyProcessor.NAME
@@ -349,6 +352,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
     )
     @ddt.unpack
     @mock_course_catalog_api_client
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_response_success(self, benefit_type, benefit_value):
         """ Verify a successful response is returned. """
         seat = self.create_seat(self.course, 500)
@@ -453,9 +457,41 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['is_verification_required'], False)
 
+    @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
+    def test_client_side_checkout(self):
+        """ Verify the view returns the data necessary to initiate client-side checkout. """
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+
+        response = self.client.get(self.get_full_url(self.path))
+        self.assertEqual(response.status_code, 200)
+        expected = {
+            'enable_client_side_checkout': True,
+            'payment_url': Cybersource(self.site).client_side_payment_url,
+        }
+        self.assertDictContainsSubset(expected, response.context)
+
+        payment_form = response.context['payment_form']
+        self.assertIsInstance(payment_form, PaymentForm)
+        self.assertEqual(payment_form.initial['basket'], basket)
+
+    @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
+    def test_client_side_checkout_with_invalid_configuration(self):
+        """ Verify an error is raised if a payment processor is defined as the client-side processor,
+        but is not active in the system."""
+        self.site.siteconfiguration.client_side_payment_processor = 'blah'
+        self.site.siteconfiguration.save()
+
+        seat = self.create_seat(self.course)
+        self.create_basket_and_add_product(seat)
+
+        with self.assertRaises(SiteConfigurationError):
+            self.client.get(self.get_full_url(self.path))
+
 
 class VoucherAddMessagesViewTests(TestCase):
     """ VoucherAddMessagesView view tests. """
+
     def setUp(self):
         super(VoucherAddMessagesViewTests, self).setUp()
         self.user = self.create_user()

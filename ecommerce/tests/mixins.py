@@ -258,7 +258,8 @@ class SiteMixin(object):
             partner__name='edX',
             segment_key='fake_segment_key',
             site__domain=domain,
-            site__id=settings.SITE_ID
+            site__id=settings.SITE_ID,
+            client_side_payment_processor='cybersource'
         )
         self.partner = site_configuration.partner
         self.site = site_configuration.site

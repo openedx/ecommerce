@@ -260,6 +260,7 @@ DJANGO_APPS = [
     'django_filters',
     'rest_framework_swagger',
     'release_util',
+    'crispy_forms',
 ]
 
 # Apps specific to this project go here.
@@ -550,3 +551,5 @@ ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(w
 
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
