@@ -136,6 +136,30 @@ define([
                         expect(model.isValid()).toBeTruthy();
                     });
                 });
+
+                it('should validate max_uses value', function() {
+                    model.set('max_uses', 'abc');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+
+                    model.set('max_uses', 1);
+                    model.set('voucher_type', 'Multi-use');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+
+                    model.set('max_uses', 2);
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+
+                    model.unset('max_uses');
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+
+                    model.set('max_uses', 1);
+                    model.set('voucher_type', 'Once per customer');
+                    model.validate();
+                    expect(model.isValid()).toBeTruthy();
+                });
             });
 
             describe('test model methods', function () {

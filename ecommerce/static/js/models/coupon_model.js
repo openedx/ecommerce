@@ -46,7 +46,25 @@ define([
             },
 
             validation: {
+                benefit_value: {
+                    pattern: 'number',
+                    required: function () {
+                        return this.get('coupon_type') === 'Discount code';
+                    }
+                },
+                catalog_query: {
+                    required: function () {
+                        return this.get('catalog_type') === 'Multiple courses';
+                    }
+                },
                 category: {required: true},
+                client: {required: true},
+                code: {
+                    pattern: /^[a-zA-Z0-9]+$/,
+                    required: false,
+                    rangeLength: [1, 16],
+                    msg: gettext('This field must be empty or contain 1-16 alphanumeric characters.')
+                },
                 course_id: {
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required'),
@@ -54,29 +72,38 @@ define([
                         return this.get('catalog_type') === 'Single course';
                     }
                 },
-                title: {required: true},
-                client: {required: true},
-                // seat_type is for validation only, stock_record_ids holds the values
-                seat_type: {
-                    required: function () {
-                        return this.get('catalog_type') === 'Single course';
+                course_seat_types: function (val) {
+                    if (this.get('catalog_type') === 'Multiple courses' && val.length === 0) {
+                        return Backbone.Validation.messages.seat_types;
                     }
                 },
-                quantity: {pattern: 'number'},
-                benefit_value: {
+                email_domains: {
+                    pattern:
+                    /^((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(,((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,})*$/,
+                    required: false
+                },
+                end_date: function (val) {
+                    var startDate,
+                        endDate;
+                    if (_.isEmpty(val)) {
+                        return Backbone.Validation.messages.required;
+                    }
+                    endDate = moment(new Date(val));
+                    if (!endDate.isValid()) {
+                        return Backbone.Validation.messages.date;
+                    }
+                    startDate = moment(new Date(this.get('start_date')));
+                    if (startDate && endDate.isBefore(startDate)) {
+                        return gettext('Must occur after start date');
+                    }
+                },
+                invoice_discount_value: {
                     pattern: 'number',
                     required: function () {
-                        return this.get('coupon_type') === 'Discount code';
+                        return this.get('invoice_type') === 'Postpaid';
                     }
                 },
-                invoice_type: {required: true},
                 invoice_number: {
-                    required: function() {
-                        return this.isPrepaidInvoiceType();
-                    }
-                },
-                price: {
-                    pattern: 'number',
                     required: function() {
                         return this.isPrepaidInvoiceType();
                     }
@@ -86,32 +113,27 @@ define([
                         return this.isPrepaidInvoiceType();
                     }
                 },
-                invoice_discount_value: {
+                invoice_type: {required: true},
+                max_uses: function(val) {
+                    var numberPattern = new RegExp('[0-9]+');
+                    if (val && !numberPattern.test(val)) {
+                        return Backbone.Validation.messages.number;
+                    } else if (val && val < 2 && this.get('voucher_type') === 'Multi-use') {
+                        return gettext('Max uses for multi-use coupons must be higher than 2.');
+                    }
+                },
+                price: {
                     pattern: 'number',
+                    required: function() {
+                        return this.isPrepaidInvoiceType();
+                    }
+                },
+                quantity: {pattern: 'number'},
+                // seat_type is for validation only, stock_record_ids holds the values
+                seat_type: {
                     required: function () {
-                        return this.get('invoice_type') === 'Postpaid';
+                        return this.get('catalog_type') === 'Single course';
                     }
-                },
-                code: {
-                    pattern: /^[a-zA-Z0-9]+$/,
-                    required: false,
-                    rangeLength: [1, 16],
-                    msg: gettext('This field must be empty or contain 1-16 alphanumeric characters.')
-                },
-                catalog_query: {
-                    required: function () {
-                        return this.get('catalog_type') === 'Multiple courses';
-                    }
-                },
-                course_seat_types: function (val) {
-                    if (this.get('catalog_type') === 'Multiple courses' && val.length === 0) {
-                        return Backbone.Validation.messages.seat_types;
-                    }
-                },
-                email_domains: {
-                    pattern: 
-                    /^((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(,((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,})*$/,
-                    required: false
                 },
                 start_date: function (val) {
                     var startDate,
@@ -128,21 +150,7 @@ define([
                         return gettext('Must occur before end date');
                     }
                 },
-                end_date: function (val) {
-                    var startDate,
-                        endDate;
-                    if (_.isEmpty(val)) {
-                        return Backbone.Validation.messages.required;
-                    }
-                    endDate = moment(new Date(val));
-                    if (!endDate.isValid()) {
-                        return Backbone.Validation.messages.date;
-                    }
-                    startDate = moment(new Date(this.get('start_date')));
-                    if (startDate && endDate.isBefore(startDate)) {
-                        return gettext('Must occur after start date');
-                    }
-                }
+                title: {required: true},
             },
 
             initialize: function () {

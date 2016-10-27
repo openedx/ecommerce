@@ -41,11 +41,11 @@ define([
 
                 beforeEach(function () {
                     jasmine.clock().install();
-                    seatType = view.$el.find('[name=seat_type]');
+                    seatType = view.$('[name=seat_type]');
                     spyOn($, 'ajax').and.callFake(function (options) {
                         options.success(courseData);
                     });
-                    view.$el.find('[name=course_id]').val(courseId).trigger('input');
+                    view.$('[name=course_id]').val(courseId).trigger('input');
                     // event is debounced, override _.now to trigger immediately
                     spyOn(_, 'now').and.returnValue(Date.now() + 110);
                     jasmine.clock().tick(110);
@@ -79,7 +79,7 @@ define([
 
             describe('enrollment code', function () {
                 beforeEach(function () {
-                    view.$el.find('[name=code_type]').val('enrollment').trigger('change');
+                    view.$('[name=code_type]').val('enrollment').trigger('change');
                 });
 
                 it('should show the price field', function () {
@@ -127,7 +127,7 @@ define([
                 ];
 
                 beforeEach(function () {
-                    view.$el.find('[name=code_type]').val('Discount code').trigger('change');
+                    view.$('[name=code_type]').val('Discount code').trigger('change');
                 });
 
                 it('should show the discount field', function () {
@@ -135,10 +135,10 @@ define([
                 });
 
                 it('should indicate the benefit type', function () {
-                    view.$el.find('[name=code_type]').val('enrollment').trigger('change');
-                    expect(view.$el.find('.benefit-addon').html()).toBe('%');
-                    view.$el.find('[name=benefit_type]').val('Absolute').trigger('change');
-                    expect(view.$el.find('.benefit-addon').html()).toBe('$');
+                    view.$('[name=code_type]').val('enrollment').trigger('change');
+                    expect(view.$('.benefit-addon').html()).toBe('%');
+                    view.$('[name=benefit_type]').val('Absolute').trigger('change');
+                    expect(view.$('.benefit-addon').html()).toBe('$');
                 });
 
                 it('should toggle limit on the benefit value input', function () {
@@ -166,59 +166,70 @@ define([
                 });
 
                 it('should show the code field for once-per-customer and singe-use vouchers', function () {
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    view.$('[name=voucher_type]').val('Single use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
-                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    view.$('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
                 });
 
-                it('should show the usage number field only for once-per-customer vouchers', function () {
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                it('should show the max_uses field only for once-per-customer and multi-use vouchers', function () {
+                    view.$('[name=voucher_type]').val('Single use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=max_uses]')).not.toBeVisible();
-                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    view.$('[name=voucher_type]').val('Once per customer').trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).toBeVisible();
+                    view.$('[name=voucher_type]').val('Multi-use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=max_uses]')).toBeVisible();
                 });
 
+                it('should set different values for max_uses field for different voucher types', function() {
+                    view.$('[name=voucher_type]').val('Once per customer').trigger('change');
+                    expect(view.$('[name=max_uses]').val()).toBe('1');
+                    expect(view.$('[name=max_uses]').attr('min')).toBe('1');
+                    view.$('[name=voucher_type]').val('Multi-use').trigger('change');
+                    expect(view.$('[name=max_uses]').val()).toBe('');
+                    expect(view.$('[name=max_uses]').attr('min')).toBe('2');
+                });
+
                 it('should hide quantity field when code entered', function () {
-                    view.$el.find('[name=code]').val('E34T4GR342').trigger('input');
+                    view.$('[name=code]').val('E34T4GR342').trigger('input');
                     expect(SpecUtils.formGroup(view, '[name=quantity]')).not.toBeVisible();
-                    view.$el.find('[name=code]').val('').trigger('input');
+                    view.$('[name=code]').val('').trigger('input');
                     expect(SpecUtils.formGroup(view, '[name=quantity]')).toBeVisible();
                 });
 
                 it('should hide code field when quantity not 1', function () {
-                    view.$el.find('[name=quantity]').val(21).trigger('change');
+                    view.$('[name=quantity]').val(21).trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
-                    view.$el.find('[name=quantity]').val(1).trigger('change');
+                    view.$('[name=quantity]').val(1).trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
                 });
 
                 it('should hide code field for every voucher type if quantity is not 1.', function() {
-                    view.$el.find('[name=quantity]').val(2).trigger('change');
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    view.$('[name=quantity]').val(2).trigger('change');
+                    view.$('[name=voucher_type]').val('Single use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
 
-                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    view.$('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
 
-                    view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
+                    view.$('[name=voucher_type]').val('Multi-use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
                 });
 
                 it('should show the code field for every voucher type if quantity is 1.', function() {
-                    view.$el.find('[name=quantity]').val(1).trigger('change');
-                    view.$el.find('[name=voucher_type]').val('Single use').trigger('change');
+                    view.$('[name=quantity]').val(1).trigger('change');
+                    view.$('[name=voucher_type]').val('Single use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
 
-                    view.$el.find('[name=voucher_type]').val('Once per customer').trigger('change');
+                    view.$('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
 
-                    view.$el.find('[name=voucher_type]').val('Multi-use').trigger('change');
+                    view.$('[name=voucher_type]').val('Multi-use').trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
                 });
 
                 it('should show prepaid invoice fields when changing to Prepaid invoice type.', function() {
-                    view.$el.find('#already-invoiced').prop('checked', true).trigger('change');
+                    view.$('#already-invoiced').prop('checked', true).trigger('change');
                     _.each(prepaid_invoice_fields, function(field) {
                         expect(SpecUtils.formGroup(view, field)).toBeVisible();
                     });
@@ -226,7 +237,7 @@ define([
                 });
 
                 it('should show postpaid invoice fields when changing to Postpaid invoice type.', function() {
-                    view.$el.find('#invoice-after-redemption').prop('checked', true).trigger('change');
+                    view.$('#invoice-after-redemption').prop('checked', true).trigger('change');
                     _.each(prepaid_invoice_fields, function(field) {
                         expect(SpecUtils.formGroup(view, field)).not.toBeVisible();
                     });
@@ -234,7 +245,7 @@ define([
                 });
 
                 it('should hide all invoice fields when changing to Not applicable invoice type.', function() {
-                    view.$el.find('#not-applicable').prop('checked', true).trigger('change');
+                    view.$('#not-applicable').prop('checked', true).trigger('change');
                     _.each(prepaid_invoice_fields, function(field) {
                         expect(SpecUtils.formGroup(view, field)).not.toBeVisible();
                     });
@@ -242,9 +253,9 @@ define([
                 });
 
                 it('should show tax deduction source field when TSD is selected.', function() {
-                    view.$el.find('#tax-deducted').prop('checked', true).trigger('change');
+                    view.$('#tax-deducted').prop('checked', true).trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=tax_deducted_source_value]')).toBeVisible();
-                    view.$el.find('#non-tax-deducted').prop('checked', true).trigger('change');
+                    view.$('#non-tax-deducted').prop('checked', true).trigger('change');
                     expect(SpecUtils.formGroup(view, '[name=tax_deducted_source_value]')).not.toBeVisible();
                 });
             });
