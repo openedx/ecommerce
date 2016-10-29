@@ -38,7 +38,7 @@ class CheckoutView(APIView):
 
         # Return the payment info
         try:
-            payment_processor = get_processor_class_by_name(payment_processor)()
+            payment_processor = get_processor_class_by_name(payment_processor)(request.site)
         except ProcessorNotFoundError:
             logger.exception('Failed to get payment processor [%s].', payment_processor)
             return HttpResponseBadRequest(

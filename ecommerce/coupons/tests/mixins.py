@@ -201,7 +201,10 @@ class CouponMixin(object):
 
         self.basket = prepare_basket(request, coupon)
 
-        self.response_data = CouponViewSet().create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
+        view = CouponViewSet()
+        view.request = request
+
+        self.response_data = view.create_order_for_invoice(self.basket, coupon_id=coupon.id, client=client)
         coupon.client = client
 
         return coupon

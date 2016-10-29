@@ -159,12 +159,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
             invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
             response_data = self.create_order_for_invoice(
-                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data, request=request
+                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
             )
 
             return Response(response_data, status=status.HTTP_200_OK)
 
-    def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None, request=None):
+    def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
         order_metadata = data_api.get_order_metadata(basket)
 
@@ -181,7 +181,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             billing_address=None,
             order_number=order_metadata['number'],
             order_total=order_metadata['total'],
-            request=request,
+            request=self.request,
             shipping_address=None,
             shipping_charge=order_metadata['shipping_charge'],
             shipping_method=order_metadata['shipping_method'],
@@ -190,7 +190,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Invoice payment processor invocation.
         payment_processor = InvoicePayment
-        payment_processor().handle_processor_response(
+        payment_processor(self.request.site).handle_processor_response(
             response={}, order=order, business_client=client, invoice_data=invoice_data
         )
         response_data['payment_data'] = {

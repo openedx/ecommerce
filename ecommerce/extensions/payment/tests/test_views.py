@@ -46,7 +46,7 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         self.basket.owner = self.user
         self.basket.freeze()
 
-        self.processor = Cybersource()
+        self.processor = Cybersource(self.site)
         self.processor_name = self.processor.NAME
 
     def _assert_payment_data_recorded(self, notification):
@@ -307,7 +307,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.basket.site = self.site
         self.basket.freeze()
 
-        self.processor = Paypal()
+        self.processor = Paypal(self.site)
         self.processor_name = self.processor.NAME
 
         # Dummy request from which an HTTP Host header can be extracted during

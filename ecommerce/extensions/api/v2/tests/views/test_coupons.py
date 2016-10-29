@@ -104,7 +104,9 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         request.site = self.site
         request.COOKIES = {}
 
-        response = CouponViewSet().create(request)
+        view = CouponViewSet()
+        view.request = request
+        response = view.create(request)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(
