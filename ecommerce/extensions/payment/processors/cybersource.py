@@ -44,7 +44,7 @@ class Cybersource(BasePaymentProcessor):
 
     NAME = 'cybersource'
 
-    def __init__(self):
+    def __init__(self, site):
         """
         Constructs a new instance of the CyberSource processor.
 
@@ -52,6 +52,8 @@ class Cybersource(BasePaymentProcessor):
             KeyError: If no settings configured for this payment processor
             AttributeError: If LANGUAGE_CODE setting is not set.
         """
+
+        super(Cybersource, self).__init__(site)
         configuration = self.configuration
         self.soap_api_url = configuration['soap_api_url']
         self.merchant_id = configuration['merchant_id']

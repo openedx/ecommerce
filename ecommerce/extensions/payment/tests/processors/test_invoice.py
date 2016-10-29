@@ -33,7 +33,7 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
 
         order = factories.OrderFactory()
         business_client = BusinessClient.objects.create(name='Test client')
-        source, payment_event = self.processor_class().handle_processor_response({}, order, business_client)
+        source, payment_event = self.processor_class(self.site).handle_processor_response({}, order, business_client)
 
         # Validate PaymentEvent
         self.assertEqual(payment_event.event_type.name, PaymentEventTypeName.PAID)
@@ -46,12 +46,12 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
         """
         Tests that transaction parameters are always None
         """
-        params = self.processor_class().get_transaction_parameters(self.basket)
+        params = self.processor_class(self.site).get_transaction_parameters(self.basket)
         self.assertIsNone(None, params)
 
     def test_issue_credit(self):
         """Test issue credit"""
-        self.assertRaises(NotImplementedError, self.processor_class().issue_credit, None, 0, 'USD')
+        self.assertRaises(NotImplementedError, self.processor_class(self.site).issue_credit, None, 0, 'USD')
 
     def test_issue_credit_error(self):
         """ Tests that Invoice payment processor does not support issuing credit """
@@ -68,7 +68,7 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
             'tax_deducted_source': 25,
         }
 
-        self.processor_class().handle_processor_response({}, order, business_client, invoice_data)
+        self.processor_class(self.site).handle_processor_response({}, order, business_client, invoice_data)
         invoice = Invoice.objects.latest()
         self.assertEqual(invoice.order, order)
         self.assertEqual(invoice.business_client, business_client)
