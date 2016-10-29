@@ -112,7 +112,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         # Patch the datetime object so that we can validate the signed_date_time field
         with mock.patch.object(Cybersource, 'utcnow', return_value=self.PI_DAY):
             # NOTE (CCB): Instantiate a new processor object to ensure we reload any overridden settings.
-            actual = self.processor_class().get_transaction_parameters(self.basket)
+            actual = self.processor_class(self.site).get_transaction_parameters(self.basket)
 
         expected = self.get_expected_transaction_parameters(actual['transaction_uuid'], include_level_2_3_details)
         self.assertDictContainsSubset(expected, actual)

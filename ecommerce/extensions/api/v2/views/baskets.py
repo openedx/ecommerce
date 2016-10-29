@@ -195,7 +195,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                 payment_processor = get_default_processor_class()
 
             try:
-                response_data = self._checkout(basket, payment_processor(), request)
+                response_data = self._checkout(basket, payment_processor(request.site), request)
             except Exception as ex:  # pylint: disable=broad-except
                 basket.delete()
                 logger.exception('Failed to initiate checkout for Basket [%d]. The basket has been deleted.', basket_id)

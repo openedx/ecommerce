@@ -1,21 +1,22 @@
 """ PayPal payment processing. """
-from decimal import Decimal
+from __future__ import unicode_literals
+
 import logging
+from decimal import Decimal
 from urlparse import urljoin
 
+import paypalrestsdk
+import waffle
 from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
-import paypalrestsdk
-import waffle
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.models import PaypalWebProfile
+from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.utils import middle_truncate
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +35,18 @@ class Paypal(BasePaymentProcessor):
     For reference, see https://developer.paypal.com/docs/api/.
     """
 
-    NAME = u'paypal'
+    NAME = 'paypal'
     DEFAULT_PROFILE_NAME = 'default'
 
-    def __init__(self):
+    def __init__(self, site):
         """
         Constructs a new instance of the PayPal processor.
 
         Raises:
             KeyError: If a required setting is not configured for this payment processor
         """
+        super(Paypal, self).__init__(site)
+
         # Number of times payment execution is retried after failure.
         self.retry_attempts = self.configuration.get('retry_attempts', 1)
 
@@ -124,25 +127,41 @@ class Paypal(BasePaymentProcessor):
         except PaypalWebProfile.DoesNotExist:
             pass
 
-        payment = paypalrestsdk.Payment(data, api=self.paypal_api)
-        payment.create()
+        available_attempts = 1
+        if waffle.switch_is_active('PAYPAL_RETRY_ATTEMPTS'):
+            available_attempts = self.retry_attempts
 
-        # Raise an exception for payments that were not successfully created. Consuming code is
-        # responsible for handling the exception.
-        if not payment.success():
-            error = self._get_error(payment)
-            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)  # pylint: disable=unsubscriptable-object
-
-            logger.error(
-                u"Failed to create PayPal payment for basket [%d]. PayPal's response was recorded in entry [%d].",
-                basket.id,
-                entry.id
-            )
-
-            raise GatewayError(error)
+        for i in range(1, available_attempts + 1):
+            payment = paypalrestsdk.Payment(data, api=self.paypal_api)
+            payment.create()
+            # Raise an exception for payments that were not successfully created. Consuming code is
+            # responsible for handling the exception.
+            if not payment.success():
+                if i < available_attempts:
+                    logger.warning(
+                        u"Creating paypal payment for basket [%d] unsuccessful. Will retry",
+                        basket.id,
+                        exc_info=True
+                    )
+                else:
+                    error = self._get_error(payment)
+                    error = self._get_error(payment)
+                    # pylint: disable=unsubscriptable-object
+                    entry = self.record_processor_response(
+                        error,
+                        transaction_id=error['debug_id'],
+                        basket=basket
+                    )
+                    logger.error(
+                        u"Failed to create PayPal payment for basket [%d]. PayPal's response was recorded in entry [%d].",
+                        basket.id,
+                        entry.id,
+                        exc_info=True
+                    )
+                    raise GatewayError(error)
 
         entry = self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
-        logger.info(u"Successfully created PayPal payment [%s] for basket [%d].", payment.id, basket.id)
+        logger.info("Successfully created PayPal payment [%s] for basket [%d].", payment.id, basket.id)
 
         for link in payment.links:
             if link.rel == 'approval_url':
@@ -150,7 +169,7 @@ class Paypal(BasePaymentProcessor):
                 break
         else:
             logger.error(
-                u"Approval URL missing from PayPal payment [%s]. PayPal's response was recorded in entry [%d].",
+                "Approval URL missing from PayPal payment [%s]. PayPal's response was recorded in entry [%d].",
                 payment.id,
                 entry.id
             )
@@ -201,11 +220,12 @@ class Paypal(BasePaymentProcessor):
             # Raise an exception for payments that were not successfully executed. Consuming code is
             # responsible for handling the exception
             error = self._get_error(payment)
-            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)  # pylint: disable=unsubscriptable-object
+            # pylint: disable=unsubscriptable-object
+            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
 
             logger.warning(
-                u"Failed to execute PayPal payment on attempt [%d]. "
-                u"PayPal's response was recorded in entry [%d].",
+                "Failed to execute PayPal payment on attempt [%d]. "
+                "PayPal's response was recorded in entry [%d].",
                 attempt_count,
                 entry.id
             )
@@ -213,15 +233,15 @@ class Paypal(BasePaymentProcessor):
             # After utilizing all retry attempts, raise the exception 'GatewayError'
             if attempt_count == available_attempts:
                 logger.error(
-                    u"Failed to execute PayPal payment [%s]. "
-                    u"PayPal's response was recorded in entry [%d].",
+                    "Failed to execute PayPal payment [%s]. "
+                    "PayPal's response was recorded in entry [%d].",
                     payment.id,
                     entry.id
                 )
                 raise GatewayError
 
         self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
-        logger.info(u"Successfully executed PayPal payment [%s] for basket [%d].", payment.id, basket.id)
+        logger.info("Successfully executed PayPal payment [%s] for basket [%d].", payment.id, basket.id)
 
         # Get or create Source used to track transactions related to PayPal
         source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
@@ -269,7 +289,7 @@ class Paypal(BasePaymentProcessor):
             for related_resource in transaction.related_resources:
                 try:
                     return related_resource.sale
-                except Exception:   # pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except
                     continue
 
         return None

@@ -156,7 +156,7 @@ class Refund(StatusMixin, TimeStampedModel):
         try:
             # TODO Update this if we ever support multiple payment sources for a single order.
             source = self.order.sources.first()
-            processor = get_processor_class_by_name(source.source_type.name)()
+            processor = get_processor_class_by_name(source.source_type.name)(self.order.site)
             processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
 
             audit_log(
