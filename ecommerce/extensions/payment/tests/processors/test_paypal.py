@@ -12,7 +12,6 @@ import mock
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
-import httpretty
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 import paypalrestsdk
@@ -20,6 +19,7 @@ from paypalrestsdk.resource import Resource
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.processors.paypal import Paypal
@@ -113,6 +113,42 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         last_request_body = json.loads(httpretty.last_request().body)
         expected = urljoin(self.site.siteconfiguration.build_ecommerce_url(), reverse('paypal_execute'))
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
+
+    @httpretty.activate
+    def test_get_transaction_parameters_with_retry(self):
+        """Verify the processor returns the appropriate parameters required to complete a transaction after a retry"""
+        toggle_switch('PAYPAL_RETRY_ATTEMPTS', True)
+        self.mock_oauth2_response()
+        response_error = self.get_payment_creation_error_response_mock()
+        response_success = self.get_payment_creation_response_mock(self.basket)
+        self.mock_api_responses('/v1/payments/payment', [response_error, response_success])
+        self.processor.retry_attempts = 2
+        logger_name = 'ecommerce.extensions.payment.processors.paypal'
+
+        with LogCapture(logger_name) as paypal_logger:
+            self._assert_transaction_parameters()
+            self.assert_processor_response_recorded(
+                self.processor.NAME,
+                self.PAYMENT_ID,
+                response_success,
+                basket=self.basket
+            )
+
+            last_request_body = json.loads(httpretty.last_request().body)
+            expected = urljoin(self.site.siteconfiguration.build_ecommerce_url(), reverse('paypal_execute'))
+            self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
+            paypal_logger.check(
+                (
+                    logger_name,
+                    'WARNING',
+                    'Creating paypal payment for basket [{}] unsuccessful. Will retry'.format(self.basket.id)
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    'Successfully created PayPal payment [{}] for basket [{}].'.format(self.PAYMENT_ID, self.basket.id)
+                )
+            )
 
     def test_switch_enabled_otto_url(self):
         """
