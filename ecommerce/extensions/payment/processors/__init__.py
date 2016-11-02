@@ -11,6 +11,11 @@ class BasePaymentProcessor(object):  # pragma: no cover
     """Base payment processor class."""
     __metaclass__ = abc.ABCMeta
 
+    # NOTE: Ensure that, if passed to a Django template, Django does not attempt to instantiate this class
+    # or its children. Doing so without a Site object will cause issues.
+    # See https://docs.djangoproject.com/en/1.8/ref/templates/api/#variables-and-lookups
+    do_not_call_in_templates = True
+
     NAME = None
 
     def __init__(self, site):
