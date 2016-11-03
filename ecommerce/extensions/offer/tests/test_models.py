@@ -61,6 +61,20 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.assertIn(self.product, self.range_with_catalog.all_products())
         self.assertEqual(len(self.range_with_catalog.all_products()), 1)
 
+    def test_large_query(self):
+        """Verify the range can store large queries."""
+        large_query = """
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+            cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+            non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        """
+        self.range.catalog_query = large_query
+        self.range.save()
+        self.assertEqual(self.range.catalog_query, large_query)
+
     @mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=None))
     def test_run_catalog_query_no_request(self):
         """

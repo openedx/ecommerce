@@ -289,6 +289,17 @@ define([
                     expect(view.dynamic_catalog_view.query).toEqual(undefined);
                     expect(view.dynamic_catalog_view.seat_types).toEqual([ ]);
                 });
+
+                it('should update the query length indicator', function() {
+                    var query_1 = 'example query',
+                        query_2 = 'a larger example query';
+
+                    view.$('textarea[name=catalog_query]').val(query_1).trigger('input');
+                    expect(view.$('span.query_length').text()).toEqual(String(query_1.length));
+
+                    view.$('textarea[name=catalog_query]').val(query_2).trigger('input');
+                    expect(view.$('span.query_length').text()).toEqual(String(query_2.length));
+                });
             });
         });
     }

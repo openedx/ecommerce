@@ -224,6 +224,7 @@ define([
             events: {
                 'input [name=course_id]': 'fillFromCourse',
                 'input [name=quantity]': 'changeTotalValue',
+                'input [name=catalog_query]': 'updateCatalogQueryLength',
 
                 // catch value after autocomplete
                 'blur [name=course_id]': 'fillFromCourse',
@@ -277,6 +278,11 @@ define([
                 this.listenTo(this.model, 'change:course_seat_types', this.updateCourseSeatTypes);
 
                 this._super();
+            },
+
+            updateCatalogQueryLength: function() {
+                var query_length = this.$('textarea[name=catalog_query]').val().length;
+                this.$('.query_length').text(query_length);
             },
 
             toggleCreditSeats: function() {
