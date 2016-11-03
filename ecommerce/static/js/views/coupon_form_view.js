@@ -282,7 +282,7 @@ define([
 
             updateCatalogQueryLength: function() {
                 var query_length = this.$('textarea[name=catalog_query]').val().length;
-                this.$('span.query_length').text(query_length);
+                this.$('.query_length').text(query_length);
             },
 
             toggleCreditSeats: function() {
