@@ -282,6 +282,24 @@ class PaypalMixin(object):
             status=200
         )
 
+    def mock_api_responses(self, path, body_array, post=True):
+        assert httpretty.is_enabled()
+
+        url = self._create_api_url(path)
+
+        response_array = []
+        for body in body_array:
+            response_array.append(
+                httpretty.Response(body=json.dumps(body), status=200)
+            )
+
+        httpretty.register_uri(
+            httpretty.POST if post else httpretty.GET,
+            url,
+            responses=response_array,
+            status=200
+        )
+
     def mock_oauth2_response(self):
         oauth2_response = {
             'scope': 'https://api.paypal.com/v1/payments/.*',
@@ -293,8 +311,9 @@ class PaypalMixin(object):
 
         self.mock_api_response('/v1/oauth2/token', oauth2_response)
 
-    def mock_payment_creation_response(self, basket, state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL,
-                                       find=False):
+    def get_payment_creation_response_mock(self, basket,
+                                           state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL):
+
         total = unicode(basket.total_incl_tax)
         payment_creation_response = {
             'create_time': '2015-05-04T18:18:27Z',
@@ -350,6 +369,11 @@ class PaypalMixin(object):
                 'method': 'REDIRECT',
                 'rel': 'approval_url'
             })
+        return payment_creation_response
+
+    def mock_payment_creation_response(self, basket, state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL,
+                                       find=False):
+        payment_creation_response = self.get_payment_creation_response_mock(basket, state, approval_url)
 
         if find:
             self.mock_api_response(
@@ -361,6 +385,26 @@ class PaypalMixin(object):
             self.mock_api_response('/v1/payments/payment', payment_creation_response)
 
         return payment_creation_response
+
+    def get_payment_creation_error_response_mock(self):
+        payment_creation_error_response = {
+            u'error': {
+                'debug_id': '23432',
+                'message': '500 server error'
+            },
+            u'intent': u'sale',
+            u'payer': {
+                u'payer_info': {u'shipping_address': {}},
+                u'payment_method': u'paypal'
+            },
+            u'redirect_urls': {
+                u'cancel_url': u'http://fake-cancel-page',
+                u'return_url': u'http://fake-return-url'
+            },
+            u'state': 'failed',
+            u'transactions': []
+        }
+        return payment_creation_error_response
 
     def mock_payment_execution_response(self, basket, state=PAYMENT_EXECUTION_STATE, payer_info=None):
         if payer_info is None:

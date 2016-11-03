@@ -127,23 +127,37 @@ class Paypal(BasePaymentProcessor):
         except PaypalWebProfile.DoesNotExist:
             pass
 
-        payment = paypalrestsdk.Payment(data, api=self.paypal_api)
-        payment.create()
+        available_attempts = 1
+        if waffle.switch_is_active('PAYPAL_RETRY_ATTEMPTS'):
+            available_attempts = self.retry_attempts
 
-        # Raise an exception for payments that were not successfully created. Consuming code is
-        # responsible for handling the exception.
-        if not payment.success():
-            error = self._get_error(payment)
-            # pylint: disable=unsubscriptable-object
-            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
-
-            logger.error(
-                "Failed to create PayPal payment for basket [%d]. PayPal's response was recorded in entry [%d].",
-                basket.id,
-                entry.id
-            )
-
-            raise GatewayError(error)
+        for i in range(1, available_attempts + 1):
+            payment = paypalrestsdk.Payment(data, api=self.paypal_api)
+            payment.create()
+            # Raise an exception for payments that were not successfully created. Consuming code is
+            # responsible for handling the exception.
+            if not payment.success():
+                if i < available_attempts:
+                    logger.warning(
+                        u"Creating paypal payment for basket [%d] unsuccessful. Will retry",
+                        basket.id,
+                        exc_info=True
+                    )
+                else:
+                    error = self._get_error(payment)
+                    # pylint: disable=unsubscriptable-object
+                    entry = self.record_processor_response(
+                        error,
+                        transaction_id=error['debug_id'],
+                        basket=basket
+                    )
+                    logger.error(
+                        u"Failed to create PayPal payment for basket [%d]. PayPal's response recorded in entry [%d].",
+                        basket.id,
+                        entry.id,
+                        exc_info=True
+                    )
+                    raise GatewayError(error)
 
         entry = self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
         logger.info("Successfully created PayPal payment [%s] for basket [%d].", payment.id, basket.id)
