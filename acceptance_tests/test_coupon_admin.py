@@ -23,7 +23,7 @@ class CouponAdministrationTests(CouponMixin, LogistrationMixin, WebAppTest):
         self.login_with_lms()
 
     def create_coupon(self, is_dynamic=False):
-        """ Create a single-course and dynamic coupon via UI. """
+        """ Create a coupon via UI. """
         # Verify we reach the coupons list page.
         self.coupons_list_page.visit()
         self.assertTrue(self.coupons_list_page.is_browser_on_page())

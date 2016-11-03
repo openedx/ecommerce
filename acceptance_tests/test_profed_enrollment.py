@@ -28,7 +28,7 @@ class ProfessionalEducationEnrollmentTests(EnrollmentApiMixin, LogistrationMixin
             course_about_page.q(css='.js-enroll-btn').first.click()
             WebDriverWait(self.browser, 10).until(on_basket_page)
         else:
-            # Clicking on the enroll button the user gets redirected to the ecommerce basket.
+            # Clicking on the enroll button redirects the user to the ecommerce basket.
             ecommerce_url = '{}/basket/'.format(ECOMMERCE_URL_ROOT)
             lms_course_page = LMSCourseAboutPage(self.browser, PROFESSIONAL_COURSE_ID).visit()
             lms_course_page.q(css='.add-to-cart').click()
