@@ -282,21 +282,21 @@ class PaypalMixin(object):
             status=200
         )
 
-    def mock_api_responses(self, path, body_array, post=True):
+    def mock_api_responses(self, path, response_array, post=True):
         assert httpretty.is_enabled()
 
         url = self._create_api_url(path)
 
-        response_array = []
-        for body in body_array:
-            response_array.append(
-                httpretty.Response(body=json.dumps(body), status=200)
+        httpretty_response_array = []
+        for response in response_array:
+            httpretty_response_array.append(
+                httpretty.Response(body=json.dumps(response['body']), status=response['status'])
             )
 
         httpretty.register_uri(
             httpretty.POST if post else httpretty.GET,
             url,
-            responses=response_array,
+            responses=httpretty_response_array,
             status=200
         )
 

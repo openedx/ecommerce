@@ -261,6 +261,7 @@ DJANGO_APPS = [
     'rest_framework_swagger',
     'release_util',
     'crispy_forms',
+    'solo',
 ]
 
 # Apps specific to this project go here.
