@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-08 22:10-0500\n"
+"POT-Creation-Date: 2016-11-21 10:52-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,260 +17,258 @@ msgstr ""
 "Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ecommerce/core/admin.py
+#: core/admin.py
 msgid "Personal info"
 msgstr "Pérsönäl ïnfö Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/core/admin.py
+#: core/admin.py
 msgid "Permissions"
 msgstr "Pérmïssïöns Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/core/admin.py
+#: core/admin.py
 msgid "Important dates"
 msgstr "Ìmpörtänt dätés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "LMS base url for custom site/microsite"
 msgstr ""
 "LMS ßäsé ürl för çüstöm sïté/mïçrösïté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr ""
 "Rööt ÛRL öf thïs sïté's LMS (é.g. https://çöürsés.stägé.édx.örg) Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Path to custom site theme"
 msgstr "Päth tö çüstöm sïté thémé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Path to scss files of the custom site theme"
 msgstr ""
 "Päth tö sçss fïlés öf thé çüstöm sïté thémé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Payment processors"
 msgstr "Päýmént pröçéssörs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr ""
 "Çömmä-sépärätéd lïst öf pröçéssör nämés: 'çýßérsöürçé,päýpäl' Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Client-side payment processor"
 msgstr "Çlïént-sïdé päýmént pröçéssör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Processor that will be used for client-side payments"
 msgstr ""
 "Pröçéssör thät wïll ßé üséd för çlïént-sïdé päýménts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "OAuth settings"
 msgstr "ÖÀüth séttïngs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "JSON string containing OAuth backend settings."
 msgstr ""
 "JSÖN strïng çöntäïnïng ÖÀüth ßäçkénd séttïngs. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя α#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Segment key"
 msgstr "Ségmént kéý Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Segment write/API key."
 msgstr "Ségmént wrïté/ÀPÌ kéý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "From email"
 msgstr "Fröm émäïl Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Address from which emails are sent."
 msgstr ""
 "Àddréss fröm whïçh émäïls äré sént. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Enable enrollment codes"
 msgstr "Énäßlé énröllmént çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Enable the creation of enrollment codes."
 msgstr ""
 "Énäßlé thé çréätïön öf énröllmént çödés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Payment support email"
 msgstr "Päýmént süppört émäïl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Contact email for payment support issues."
 msgstr ""
 "Çöntäçt émäïl för päýmént süppört ïssüés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Payment support url"
 msgstr "Päýmént süppört ürl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "URL for payment support issues."
 msgstr "ÛRL för päýmént süppört ïssüés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "UTM Cookie Name"
 msgstr "ÛTM Çöökïé Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Name of cookie storing UTM data."
 msgstr ""
 "Nämé öf çöökïé störïng ÛTM dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Affiliate Cookie Name"
 msgstr "Àffïlïäté Çöökïé Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Name of cookie storing affiliate data."
 msgstr ""
 "Nämé öf çöökïé störïng äffïlïäté dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Enable Otto receipt page"
 msgstr "Énäßlé Öttö réçéïpt pägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Enable the usage of Otto receipt page."
 msgstr ""
 "Énäßlé thé üsägé öf Öttö réçéïpt pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/core/models.py
+#: core/models.py
 msgid "Full Name"
 msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/core/models.py ecommerce/extensions/basket/models.py
+#: core/models.py extensions/basket/models.py
 msgid "Name"
 msgstr "Nämé Ⱡ'σяєм ι#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/tests/test_views.py
-#: ecommerce/coupons/views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "Coupon does not exist"
 msgstr "Çöüpön döés nöt éxïst Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/tests/test_views.py
-#: ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "This coupon code has expired."
 msgstr "Thïs çöüpön çödé häs éxpïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "This coupon code is not yet valid."
 msgstr ""
 "Thïs çöüpön çödé ïs nöt ýét välïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "This coupon code is no longer available."
 msgstr ""
 "Thïs çöüpön çödé ïs nö löngér äväïläßlé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/coupons/tests/test_views.py
+#: coupons/tests/test_views.py
 msgid "This coupon has already been used"
 msgstr ""
 "Thïs çöüpön häs älréädý ßéén üséd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "This coupon code is invalid."
 msgstr "Thïs çöüpön çödé ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "The voucher is not applicable to your current basket."
 msgstr ""
 "Thé vöüçhér ïs nöt äpplïçäßlé tö ýöür çürrént ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт"
 " αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "Code not provided."
 msgstr "Çödé nöt prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "SKU not provided."
 msgstr "SKÛ nöt prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/coupons/tests/test_views.py ecommerce/coupons/views.py
+#: coupons/tests/test_views.py coupons/views.py
 msgid "The product does not exist."
 msgstr "Thé prödüçt döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
-#: ecommerce/coupons/views.py
+#: coupons/views.py
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr ""
 "Prödüçt [{product}] nöt äväïläßlé för pürçhäsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
 " ¢σηѕє¢тєтυя #"
 
-#: ecommerce/coupons/views.py
+#: coupons/views.py
 msgid "You are not eligible to use this coupon."
 msgstr ""
 "Ýöü äré nöt élïgïßlé tö üsé thïs çöüpön. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/coupons/views.py
+#: coupons/views.py
 msgid "You need to activate your account in order to redeem this coupon."
 msgstr ""
 "Ýöü nééd tö äçtïväté ýöür äççöünt ïn ördér tö rédéém thïs çöüpön. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/coupons/views.py
+#: coupons/views.py
 msgid "You are already enrolled in the course."
 msgstr ""
 "Ýöü äré älréädý énrölléd ïn thé çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/courses/models.py
+#: courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr ""
 "Läst däté/tïmé ön whïçh vérïfïçätïön för thïs prödüçt çän ßé süßmïttéd. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
-#: ecommerce/courses/publishers.py
+#: courses/publishers.py
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr ""
 "Fäïléd tö püßlïsh çömmérçé dätä för {course_id} tö LMS. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/courses/utils.py
+#: courses/utils.py
 msgid "Audit"
 msgstr "Àüdït Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/courses/utils.py
+#: courses/utils.py
 msgid "Credit"
 msgstr "Çrédït Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/courses/utils.py
+#: courses/utils.py
 msgid "Honor"
 msgstr "Hönör Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/courses/utils.py
+#: courses/utils.py
 msgid "Professional"
 msgstr "Pröféssïönäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/courses/utils.py
+#: courses/utils.py
 msgid "Verified"
 msgstr "Vérïfïéd Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/credit/views.py
+#: credit/views.py
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
@@ -278,7 +276,7 @@ msgstr ""
 "Àn érrör häs öççürréd. Wé çöüld nöt çönfïrm thät ýöü äré élïgïßlé för çöürsé"
 " çrédït. Trý thé tränsäçtïön ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/credit/views.py
+#: credit/views.py
 #, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
@@ -295,7 +293,7 @@ msgstr ""
 "єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє "
 "νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя#"
 
-#: ecommerce/credit/views.py
+#: credit/views.py
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
@@ -303,13 +301,13 @@ msgstr ""
 "Àn érrör häs öççürréd. Wé çöüld nöt çönfïrm thät thé ïnstïtütïön ýöü "
 "séléçtéd öfférs thïs çöürsé çrédït. Trý thé tränsäçtïön ägäïn. Ⱡ#"
 
-#: ecommerce/extensions/api/exceptions.py
+#: extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
 msgstr ""
 "Ýöü çän't çhéçk öüt wïth än émptý ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/extensions/api/exceptions.py
+#: extensions/api/exceptions.py
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
@@ -317,36 +315,36 @@ msgstr ""
 "Wé çöüldn't löçäté thé ïdéntïfïçätïön çödé néçéssärý tö fïnd öné öf ýöür "
 "prödüçts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/extensions/api/exceptions.py
+#: extensions/api/exceptions.py
 msgid "We couldn't find one of the products you're looking for."
 msgstr ""
 "Wé çöüldn't fïnd öné öf thé prödüçts ýöü'ré löökïng för. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/api/exceptions.py
+#: extensions/api/exceptions.py
 msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 "Öné öf thé prödüçts ýöü'ré trýïng tö ördér ïs ünäväïläßlé. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 "Ìnvälïd prödüçt çläss [{product_class}] réqüéstéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 "Prödüçts müst ïndïçäté whéthér ÌD vérïfïçätïön ïs réqüïréd. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 msgid "Products must have a price."
 msgstr "Prödüçts müst hävé ä prïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -362,198 +360,188 @@ msgstr ""
 "νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт "
 "¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 msgid "Enrollment code"
 msgstr "Énröllmént çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 msgid "Discount code"
 msgstr "Dïsçöünt çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 msgid "ACTIVE"
 msgstr "ÀÇTÌVÉ Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/extensions/api/serializers.py
+#: extensions/api/serializers.py
 msgid "INACTIVE"
 msgstr "ÌNÀÇTÌVÉ Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/basket/models.py
+#: extensions/basket/models.py
 msgid "Site"
 msgstr "Sïté Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/basket/models.py
+#: extensions/basket/models.py
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr ""
 "{id} - {status} ßäskét (öwnér: {owner}, lïnés: {num_lines}) Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/extensions/basket/models.py
-#: ecommerce/extensions/payment/models.py
-#: ecommerce/templates/oscar/basket/basket.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: extensions/basket/models.py extensions/payment/models.py
+#: templates/oscar/basket/basket.html templates/oscar/checkout/thank_you.html
 msgid "Basket"
 msgstr "Bäskét Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/extensions/basket/models.py
+#: extensions/basket/models.py
 msgid "Attribute Type"
 msgstr "Àttrïßüté Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/extensions/basket/models.py
+#: extensions/basket/models.py
 msgid "Text Attribute"
 msgstr "Téxt Àttrïßüté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
 "Çöüpön çödé '{code}' döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 "Ýöü hävé älréädý äddéd çöüpön çödé '{code}' tö ýöür ßäskét. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 "Çöüpön çödé '{code}' häs éxpïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 "Çöüpön çödé '{code}' äddéd tö ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєт#"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 "Ýöür ßäskét döés nöt qüälïfý för ä çöüpön çödé dïsçöünt. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 "Çöüpön çödé '{code}' häs älréädý ßéén rédééméd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
 " ¢σηѕє¢тєтυя #"
 
-#: ecommerce/extensions/basket/tests/test_views.py
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/tests/test_views.py extensions/basket/views.py
 #, python-brace-format
 msgid "Coupon code '{code}' is invalid."
 msgstr "Çöüpön çödé '{code}' ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/extensions/basket/utils.py
+#: extensions/basket/utils.py
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr ""
 "Çlïçk héré tö jüst pürçhäsé än énröllmént för ýöürsélf Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/basket/utils.py
+#: extensions/basket/utils.py
 msgid "Click here to purchase multiple seats in this course"
 msgstr ""
 "Çlïçk héré tö pürçhäsé mültïplé séäts ïn thïs çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 msgid "No SKU provided."
 msgstr "Nö SKÛ prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr "SKÛ [{sku}] döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr ""
 "Prödüçt [{product}] nöt äväïläßlé tö ßüý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєт#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "You are already enrolled in {course}."
 msgstr ""
 "Ýöü äré älréädý énrölléd ïn {course}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 msgid ""
 "An error occurred while retrieving enrollment details. Please try again."
 msgstr ""
 "Àn érrör öççürréd whïlé rétrïévïng énröllmént détäïls. Pléäsé trý ägäïn. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "No voucher found with code '{code}'"
 msgstr ""
 "Nö vöüçhér föünd wïth çödé '{code}' Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "You have already added the '{code}' voucher to your basket"
 msgstr ""
 "Ýöü hävé älréädý äddéd thé '{code}' vöüçhér tö ýöür ßäskét Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "The '{code}' voucher has expired"
 msgstr "Thé '{code}' vöüçhér häs éxpïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 #, python-brace-format
 msgid "Voucher '{code}' added to basket"
 msgstr "Vöüçhér '{code}' äddéd tö ßäskét Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 msgid "Your basket does not qualify for a voucher discount"
 msgstr ""
 "Ýöür ßäskét döés nöt qüälïfý för ä vöüçhér dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/basket/views.py
+#: extensions/basket/views.py
 msgid "This voucher has already been used"
 msgstr ""
 "Thïs vöüçhér häs älréädý ßéén üséd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/extensions/catalogue/models.py
+#: extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
 msgstr ""
 "Läst däté/tïmé ön whïçh thïs prödüçt çän ßé pürçhäséd. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/dashboard/forms.py
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: extensions/dashboard/forms.py
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Username"
 msgstr "Ûsérnämé Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/dashboard/forms.py
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: extensions/dashboard/forms.py templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Email"
 msgstr "Émäïl Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/extensions/dashboard/orders/views.py
+#: extensions/dashboard/orders/views.py
 #, python-brace-format
 msgid ""
 "{link_start}Refund #{refund_id}{link_end} created! Click "
@@ -563,7 +551,7 @@ msgstr ""
 "{link_start}héré{link_end} tö vïéw ït. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/dashboard/orders/views.py
+#: extensions/dashboard/orders/views.py
 msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
@@ -571,148 +559,154 @@ msgstr ""
 "À réfünd çännöt ßé çréätéd för thésé lïnés. Théý mäý hävé älréädý ßéén "
 "réfündéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/extensions/dashboard/refunds/config.py
+#: extensions/dashboard/refunds/config.py
 msgid "Refunds Dashboard"
 msgstr "Réfünds Däshßöärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/extensions/dashboard/refunds/forms.py
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
+#: extensions/dashboard/refunds/forms.py
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Refund ID"
 msgstr "Réfünd ÌD Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/extensions/dashboard/refunds/forms.py
-#: ecommerce/extensions/refund/models.py ecommerce/extensions/refund/models.py
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: extensions/dashboard/refunds/forms.py extensions/refund/models.py
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Status"
 msgstr "Stätüs Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/extensions/dashboard/users/views.py
+#: extensions/dashboard/users/views.py
 msgid "Failed to retrieve enrollment data."
 msgstr ""
 "Fäïléd tö rétrïévé énröllmént dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/extensions/offer/utils.py
+#: extensions/offer/models.py
+#, python-brace-format
+msgid "Unrecognised benefit type {type}"
+msgstr "Ûnréçögnïséd ßénéfït týpé {type} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: extensions/offer/models.py extensions/voucher/utils.py
+msgid "Benefit value must be a positive number or 0."
+msgstr ""
+"Bénéfït välüé müst ßé ä pösïtïvé nümßér ör 0. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: extensions/offer/utils.py
 #, python-brace-format
 msgid "{benefit_value}%"
 msgstr "{benefit_value}% Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/offer/utils.py
+#: extensions/offer/utils.py
 #, python-brace-format
 msgid "${benefit_value}"
 msgstr "${benefit_value} Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/order/models.py ecommerce/extensions/payment/models.py
+#: extensions/order/models.py extensions/payment/models.py
 msgid "Payment Processor"
 msgstr "Päýmént Pröçéssör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/extensions/partner/admin.py
+#: extensions/partner/admin.py
 msgid "Click 'Save and Continue Editing' to add stock records"
 msgstr ""
 "Çlïçk 'Sävé änd Çöntïnüé Édïtïng' tö ädd stöçk réçörds Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/partner/models.py
+#: extensions/partner/models.py
 msgid "Enable Sailthru Reporting"
 msgstr "Énäßlé Säïlthrü Répörtïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/extensions/partner/models.py
+#: extensions/partner/models.py
 msgid "Determines if purchases/enrolls should be reported to Sailthru."
 msgstr ""
 "Détérmïnés ïf pürçhäsés/énrölls shöüld ßé répörtéd tö Säïlthrü. Ⱡ'σяєм ιρѕυм"
 " ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/partner/models.py
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: extensions/partner/models.py
+#: templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Partner"
 msgstr "Pärtnér Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/extensions/partner/models.py ecommerce/settings/_oscar.py
+#: extensions/partner/models.py settings/_oscar.py
 msgid "Partners"
 msgstr "Pärtnérs Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/payment/exceptions.py
+#: extensions/payment/exceptions.py
 msgid "We don't support the payment option you selected."
 msgstr ""
 "Wé dön't süppört thé päýmént öptïön ýöü séléçtéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "First Name"
 msgstr "Fïrst Nämé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "Last Name"
 msgstr "Läst Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/extensions/payment/forms.py
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: extensions/payment/forms.py templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Address"
 msgstr "Àddréss Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "Address (continued)"
 msgstr "Àddréss (çöntïnüéd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "City"
 msgstr "Çïtý Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "State/Province"
 msgstr "Stäté/Prövïnçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "Zip/Postal Code"
 msgstr "Zïp/Pöstäl Çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "Country"
 msgstr "Çöüntrý Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/extensions/payment/forms.py ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid "This field is required."
 msgstr "Thïs fïéld ïs réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
 msgstr ""
 "{state} ïs nöt ä välïd stäté/prövïnçé ïn {country}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/extensions/payment/forms.py
+#: extensions/payment/forms.py
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
 msgstr ""
 "Pöstäl çödés för thé Û.S. änd Çänädä äré lïmïtéd tö nïné (9) çhäräçtérs. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
-#: ecommerce/extensions/payment/models.py
+#: extensions/payment/models.py
 msgid "Transaction ID"
 msgstr "Tränsäçtïön ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/extensions/payment/models.py
+#: extensions/payment/models.py
 msgid "Payment Processor Response"
 msgstr "Päýmént Pröçéssör Réspönsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/extensions/payment/models.py
+#: extensions/payment/models.py
 msgid "Payment Processor Responses"
 msgstr "Päýmént Pröçéssör Réspönsés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
-#: ecommerce/extensions/payment/models.py
+#: extensions/payment/models.py
 msgid ""
 "Number of times to retry failing Paypal client actions (e.g., payment "
 "creation, payment execution)"
@@ -724,18 +718,18 @@ msgstr ""
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py
+#: extensions/payment/utils.py
 msgid "..."
 msgstr "... Ⱡ'σяєм#"
 
-#: ecommerce/extensions/payment/views.py
+#: extensions/payment/views.py
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr ""
 "Théré wäs ä prößlém rétrïévïng ýöür ßäskét. Réfrésh thé pägé tö trý ägäïn. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
 
-#: ecommerce/extensions/payment/views.py
+#: extensions/payment/views.py
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
@@ -743,402 +737,360 @@ msgstr ""
 "Ýöür ßäskét mäý hävé ßéén mödïfïéd ör älréädý pürçhäséd. Réfrésh thé pägé tö"
 " trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
-#: ecommerce/extensions/refund/models.py
+#: extensions/refund/models.py
 msgid "Order"
 msgstr "Ördér Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/extensions/refund/models.py
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "User"
 msgstr "Ûsér Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/refund/models.py
+#: extensions/refund/models.py
 msgid "Total Credit (excl. tax)"
 msgstr "Tötäl Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/extensions/refund/models.py
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: extensions/refund/models.py
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Currency"
 msgstr "Çürrénçý Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/refund/models.py
+#: extensions/refund/models.py
 msgid "Refund"
 msgstr "Réfünd Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/extensions/refund/models.py
+#: extensions/refund/models.py
 msgid "Order Line"
 msgstr "Ördér Lïné Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/extensions/refund/models.py
+#: extensions/refund/models.py
 msgid "Line Credit (excl. tax)"
 msgstr "Lïné Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
-#: ecommerce/extensions/refund/models.py
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: extensions/refund/models.py
+#: templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity"
 msgstr "Qüäntïtý Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/tests/test_utils.py extensions/voucher/utils.py
 msgid "Redeemed"
 msgstr "Rédééméd Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: extensions/voucher/tests/test_utils.py extensions/voucher/utils.py
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discount"
 msgstr "Dïsçöünt Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/tests/test_utils.py extensions/voucher/utils.py
 msgid "Enrollment"
 msgstr "Énröllmént Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/tests/test_utils.py extensions/voucher/utils.py
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} % Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/tests/test_utils.py extensions/voucher/utils.py
 msgid "Inactive"
 msgstr "Ìnäçtïvé Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: extensions/voucher/utils.py templates/oscar/dashboard/users/detail.html
 msgid "Active"
 msgstr "Àçtïvé Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Code"
 msgstr "Çödé Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Coupon Name"
 msgstr "Çöüpön Nämé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Maximum Coupon Usage"
 msgstr "Mäxïmüm Çöüpön Ûsägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Redemption Count"
 msgstr "Rédémptïön Çöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Coupon Type"
 msgstr "Çöüpön Týpé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "URL"
 msgstr "ÛRL Ⱡ'σяєм#"
 
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Course ID"
 msgstr "Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Catalog Query"
 msgstr "Çätälög Qüérý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Course Seat Types"
 msgstr "Çöürsé Séät Týpés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Organization"
 msgstr "Örgänïzätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Client"
 msgstr "Çlïént Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: extensions/voucher/utils.py
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Category"
 msgstr "Çätégörý Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Note"
 msgstr "Nöté Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: extensions/voucher/utils.py
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Price"
 msgstr "Prïçé Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Invoiced Amount"
 msgstr "Ìnvöïçéd Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Discount Percentage"
 msgstr "Dïsçöünt Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Discount Amount"
 msgstr "Dïsçöünt Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: extensions/voucher/utils.py templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
 msgstr "Ördér Nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Redeemed By Username"
 msgstr "Rédééméd Bý Ûsérnämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Redeemed For Course ID"
 msgstr "Rédééméd För Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Created By"
 msgstr "Çréätéd Bý Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Create Date"
 msgstr "Çréäté Däté Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Coupon Start Date"
 msgstr "Çöüpön Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Coupon Expiry Date"
 msgstr "Çöüpön Éxpïrý Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 msgid "Email Domains"
 msgstr "Émäïl Dömäïns Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: extensions/voucher/utils.py
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr "Rängé för çöüpön [{coupon_id}] Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/extensions/voucher/views.py
+#: extensions/voucher/views.py
 #, python-brace-format
 msgid "Coupon Report for {coupon_name}"
 msgstr "Çöüpön Répört för {coupon_name} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/extensions/voucher/views.py
+#: extensions/voucher/views.py
 msgid ""
 "Failed to find a matching stock record for coupon, report download canceled."
 msgstr ""
 "Fäïléd tö fïnd ä mätçhïng stöçk réçörd för çöüpön, répört döwnlöäd çänçéléd."
 " Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Not Paid"
 msgstr "Nöt Päïd Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Paid"
 msgstr "Päïd Ⱡ'σяєм ι#"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Prepaid"
 msgstr "Prépäïd Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Postpaid"
 msgstr "Pöstpäïd Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Not applicable"
 msgstr "Nöt äpplïçäßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Percentage"
 msgstr "Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/invoice/models.py
+#: invoice/models.py
 msgid "Fixed"
 msgstr "Fïxéd Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "Affiliate ID"
 msgstr "Àffïlïäté ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "UTM Source"
 msgstr "ÛTM Söürçé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "UTM Medium"
 msgstr "ÛTM Médïüm Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "UTM Campaign"
 msgstr "ÛTM Çämpäïgn Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "UTM Term"
 msgstr "ÛTM Térm Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "UTM Content"
 msgstr "ÛTM Çöntént Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/referrals/models.py
+#: referrals/models.py
 msgid "UTM Created At"
 msgstr "ÛTM Çréätéd Àt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/settings/_oscar.py
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: settings/_oscar.py templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Dashboard"
 msgstr "Däshßöärd Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Catalogue"
 msgstr "Çätälögüé Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/settings/_oscar.py
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: settings/_oscar.py templates/oscar/dashboard/catalogue/product_update.html
 msgid "Products"
 msgstr "Prödüçts Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Product Types"
 msgstr "Prödüçt Týpés Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/settings/_oscar.py
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: settings/_oscar.py templates/oscar/dashboard/catalogue/product_update.html
 msgid "Categories"
 msgstr "Çätégörïés Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Ranges"
 msgstr "Rängés Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Low stock alerts"
 msgstr "Löw stöçk älérts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Fulfillment"
 msgstr "Fülfïllmént Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/settings/_oscar.py
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: settings/_oscar.py templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Orders"
 msgstr "Ördérs Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Statistics"
 msgstr "Stätïstïçs Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/settings/_oscar.py
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: settings/_oscar.py templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Refunds"
 msgstr "Réfünds Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/settings/_oscar.py ecommerce/settings/_oscar.py
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: settings/_oscar.py templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Customers"
 msgstr "Çüstömérs Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Stock alert requests"
 msgstr "Stöçk älért réqüésts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/settings/_oscar.py ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Offers"
 msgstr "Öfférs Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Vouchers"
 msgstr "Vöüçhérs Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/settings/_oscar.py
+#: settings/_oscar.py
 msgid "Reports"
 msgstr "Répörts Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/coupons/_offer_error.html
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/_offer_error.html templates/coupons/offer.html
 msgid "Redeem"
 msgstr "Rédéém Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/coupons/_offer_error.html
-msgid "If you need assistance, contact edX support."
-msgstr ""
-"Ìf ýöü nééd ässïstänçé, çöntäçt édX süppört. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя #"
-
-#: ecommerce/templates/coupons/coupon_app.html
+#: templates/coupons/coupon_app.html
 msgid "Coupon Codes"
 msgstr "Çöüpön Çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/partials/_base_navbar.html
 msgid "Toggle navigation"
 msgstr "Tögglé nävïgätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/coupons/coupon_app.html
+#: templates/coupons/coupon_app.html
 msgid "E-Commerce Code Administration"
 msgstr "É-Çömmérçé Çödé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/partials/_base_navbar.html
 msgid "Dashboard for:"
 msgstr "Däshßöärd för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/partials/_base_navbar.html
 msgid "Toggle Dropdown"
 msgstr "Tögglé Dröpdöwn Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
+#: templates/coupons/coupon_app.html templates/courses/course_app.html
+#: templates/edx/partials/_base_navbar.html
 msgid "Login"
 msgstr "Lögïn Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/offer.html
 msgid ""
 "Earn a verified certificate in one of our popular courses to advance your "
 "career, showcase your accomplishments or enhance your college application."
@@ -1152,11 +1104,11 @@ msgstr ""
 "¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
 "ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм#"
 
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/offer.html
 msgid "Why buy a verified certificate?"
 msgstr "Whý ßüý ä vérïfïéd çértïfïçäté? Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/offer.html
 msgid ""
 "A verified certificate (digital) confirming that a user has completed the "
 "course on a specified date. The certificate includes edX's logo and the "
@@ -1172,7 +1124,7 @@ msgstr ""
 "єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт "
 "єηιм #"
 
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/offer.html
 msgid ""
 "A verified certificate demonstrates to future employers that you've mastered"
 " the course material."
@@ -1180,7 +1132,7 @@ msgstr ""
 "À vérïfïéd çértïfïçäté démönsträtés tö fütüré émplöýérs thät ýöü'vé mästéréd"
 " thé çöürsé mätérïäl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/offer.html
 msgid ""
 "The certificate is officially signed and stamped by the institution that "
 "offers the course."
@@ -1188,7 +1140,7 @@ msgstr ""
 "Thé çértïfïçäté ïs öffïçïällý sïgnéd änd stämpéd ßý thé ïnstïtütïön thät "
 "öfférs thé çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/templates/coupons/offer.html
+#: templates/coupons/offer.html
 msgid ""
 "You're twelve times more likely to complete the course if you're working "
 "toward a verified certificate."
@@ -1196,49 +1148,49 @@ msgstr ""
 "Ýöü'ré twélvé tïmés möré lïkélý tö çömplété thé çöürsé ïf ýöü'ré wörkïng "
 "töwärd ä vérïfïéd çértïfïçäté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_administration_menu.html
+#: templates/courses/course_app.html
+#: templates/edx/partials/_administration_menu.html
 msgid "Courses"
 msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/courses/course_app.html
+#: templates/courses/course_app.html
 msgid "E-Commerce Administration"
 msgstr "É-Çömmérçé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/courses/course_app.html
+#: templates/courses/course_app.html
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
 msgstr ""
 "%(platform_name)s Çöürsé Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢т#"
 
-#: ecommerce/templates/courses/menu_options.html
+#: templates/courses/menu_options.html
 msgid "Student Dashboard"
 msgstr "Stüdént Däshßöärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/courses/menu_options.html
+#: templates/courses/menu_options.html
 msgid "Course Admin Tool"
 msgstr "Çöürsé Àdmïn Tööl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/courses/menu_options.html
+#: templates/courses/menu_options.html
 msgid "E-Commerce Dashboard"
 msgstr "É-Çömmérçé Däshßöärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/customer/email_base.html
+#: templates/customer/email_base.html
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
 msgstr ""
 "Çöpýrïght © %(year)s %(platform_name)s. Àll rïghts résérvéd. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid "Hi %(full_name)s,"
 msgstr "Hï %(full_name)s, Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
@@ -1249,8 +1201,8 @@ msgstr ""
 "ýöür néxt çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf "
 "%(platform_name)s. Ⱡ'#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "You can access your course and complete your verification (if required) on "
@@ -1259,8 +1211,8 @@ msgstr ""
 "Ýöü çän äççéss ýöür çöürsé änd çömplété ýöür vérïfïçätïön (ïf réqüïréd) ön "
 "ýöür %(platform_name)s däshßöärd.  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
@@ -1269,19 +1221,19 @@ msgstr ""
 "Tö éxplöré öthér gréät çöürsés, vïsït thé %(platform_name)s wéßsïté. Möré "
 "çöürsés äré äddéd évérý däý! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Thank you. We hope you enjoy the course!"
 msgstr ""
 "Thänk ýöü. Wé höpé ýöü énjöý thé çöürsé! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid "%(platform_name)s team "
 msgstr "%(platform_name)s téäm  Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
+#: templates/customer/emails/commtype_course_purchased_body.html
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
@@ -1291,44 +1243,44 @@ msgstr ""
 "%(platform_name)s çöürsé %(course_title)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тє#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "Receipt Confirmation for: "
 msgstr "Réçéïpt Çönfïrmätïön för:  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid "%(platform_name)s team"
 msgstr "%(platform_name)s téäm Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: templates/customer/emails/commtype_course_purchased_body.txt
 msgid "The edX team"
 msgstr "Thé édX téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_course_purchased_subject.txt
+#: templates/customer/emails/commtype_course_purchased_subject.txt
 msgid "Order Placed"
 msgstr "Ördér Pläçéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Payment Confirmation"
 msgstr "Päýmént Çönfïrmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Payment confirmation for:"
 msgstr "Päýmént çönfïrmätïön för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.html
 msgid "View Payment Information"
 msgstr "Vïéw Päýmént Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 #, python-format
 msgid "Dear %(full_name)s,"
 msgstr "Déär %(full_name)s, Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "\n"
@@ -1339,8 +1291,8 @@ msgstr ""
 "                            Thänk ýöü för pürçhäsïng %(credit_hours)s çrédït höürs fröm %(credit_provider)s för %(course_title)s. À çhärgé wïll äppéär ön ýöür çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf \"%(platform_name)s\".\n"
 "                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢α#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "To receive your course credit, you must also request credit at the "
@@ -1358,8 +1310,8 @@ msgstr ""
 "яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
 "ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρя#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "To explore other credit-eligible courses, visit the %(platform_name)s "
@@ -1368,20 +1320,20 @@ msgstr ""
 "Tö éxplöré öthér çrédït-élïgïßlé çöürsés, vïsït thé %(platform_name)s "
 "wéßsïté. Wé ädd néw çöürsés fréqüéntlý! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Thank you. We hope you enjoyed your course!"
 msgstr ""
 "Thänk ýöü. Wé höpé ýöü énjöýéd ýöür çöürsé! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid "The %(platform_name)s team"
 msgstr "Thé %(platform_name)s téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
+#: templates/customer/emails/commtype_credit_receipt_body.html
 #, python-format
 msgid ""
 "\n"
@@ -1392,11 +1344,11 @@ msgstr ""
 "                            Ýöü réçéïvéd thïs méssägé ßéçäüsé ýöü pürçhäséd çrédït höürs för %(course_title)s, än %(platform_name)s çöürsé.\n"
 "                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łαв#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "Payment confirmation for: "
 msgstr "Päýmént çönfïrmätïön för:  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
@@ -1413,13 +1365,13 @@ msgstr ""
 "¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
 "ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηι#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 msgid "To view your payment information, visit the following website."
 msgstr ""
 "Tö vïéw ýöür päýmént ïnförmätïön, vïsït thé föllöwïng wéßsïté. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+#: templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You received this message because you purchased credit hours for "
@@ -1429,23 +1381,23 @@ msgstr ""
 "%(course_title)s, än %(platform_name)s çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢т#"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_subject.txt
+#: templates/customer/emails/commtype_credit_receipt_subject.txt
 msgid "Order Receipt"
 msgstr "Ördér Réçéïpt Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.html
 msgid "Order Confirmation"
 msgstr "Ördér Çönfïrmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.html
 msgid "Order confirmation for"
 msgstr "Ördér çönfïrmätïön för Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.html
 msgid "View Order Information"
 msgstr "Vïéw Ördér Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.html
 #, python-format
 msgid ""
 "Thank you for purchasing access to %(course_name)s.\n"
@@ -1456,34 +1408,34 @@ msgstr ""
 "                    Pléäsé çlïçk <a href=\"%(download_csv_link)s\">HÉRÉ</a> tö döwnlöäd ä ÇSV fïlé wïth thé énröllmént çödés för thïs çöürsé.\n"
 "                    Önçé ýöü hävé thé çödés ýöü çän dïstrïßüté thém tö ýöür téäm.  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σł#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.html
 #, python-format
 msgid "To view your payment information, please visit %(receipt_page_url)s."
 msgstr ""
 "Tö vïéw ýöür päýmént ïnförmätïön, pléäsé vïsït %(receipt_page_url)s. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 #, python-format
 msgid "To explore other courses, please visit %(lms_url)s."
 msgstr ""
 "Tö éxplöré öthér çöürsés, pléäsé vïsït %(lms_url)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 msgid "Thank you,"
 msgstr "Thänk ýöü, Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 #, python-format
 msgid "The %(partner_name)s team"
 msgstr "Thé %(partner_name)s téäm Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.html
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 #, python-format
 msgid ""
 "You received this message because you purchased enrollment codes for "
@@ -1494,11 +1446,11 @@ msgstr ""
 "%(course_name)s ön %(lms_url)s. Ìf ýöü hävé äný qüéstïöns, pléäsé vïsït "
 "%(contact_url)s. Ⱡ'σяєм #"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 msgid "Order confirmation for: "
 msgstr "Ördér çönfïrmätïön för:  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
+#: templates/customer/emails/commtype_order_with_csv_body.txt
 #, python-format
 msgid ""
 "Thank you for purchasing access to %(course_name)s. Please go to "
@@ -1515,30 +1467,30 @@ msgstr ""
 "¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
 "ηση ρяσι∂єηт#"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt
+#: templates/customer/emails/commtype_order_with_csv_subject.txt
 #, python-format
 msgid "%(partner_name)s: Order Confirmation: [%(order_number)s]"
 msgstr ""
 "%(partner_name)s: Ördér Çönfïrmätïön: [%(order_number)s] Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/edx/base_menu.html
+#: templates/edx/base_menu.html
 msgid "Sign Out"
 msgstr "Sïgn Öüt Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/edx/credit/_provider_detail.html
+#: templates/edx/credit/_provider_detail.html
 msgid "Select"
 msgstr "Séléçt Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/edx/credit/_provider_detail.html
+#: templates/edx/credit/_provider_detail.html
 msgid "Credits: "
 msgstr "Çrédïts:  Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/edx/credit/_provider_detail.html
+#: templates/edx/credit/_provider_detail.html
 msgid "Price: "
 msgstr "Prïçé:  Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/edx/credit/_provider_detail.html
+#: templates/edx/credit/_provider_detail.html
 #, python-format
 msgid ""
 "\n"
@@ -1549,7 +1501,7 @@ msgstr ""
 "                    Léärn möré äßöüt %(display_name)s çrédït?\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/edx/credit/_provider_detail.html
+#: templates/edx/credit/_provider_detail.html
 #, python-format
 msgid ""
 "\n"
@@ -1560,12 +1512,12 @@ msgstr ""
 "                    Çrédït äväïläßlé üntïl %(date)s\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 #, python-format
 msgid "Purchase Credit for %(course_name)s"
 msgstr "Pürçhäsé Çrédït för %(course_name)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
@@ -1576,7 +1528,7 @@ msgstr ""
 "                                Pürçhäsé Çrédït för %(course_name)s\n"
 "                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
@@ -1591,24 +1543,24 @@ msgstr ""
 "                        Séléçt öné öf thé föllöwïng ïnstïtütïöns tö pürçhäsé ýöür çrédït.\n"
 "                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid "Price:"
 msgstr "Prïçé: Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid "Discount:"
 msgstr "Dïsçöünt: Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/edx/credit/checkout.html
-#: ecommerce/templates/oscar/basket/partials/basket_totals.html
+#: templates/edx/credit/checkout.html
+#: templates/oscar/basket/partials/basket_totals.html
 msgid "Total:"
 msgstr "Tötäl: Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid "You deserve it."
 msgstr "Ýöü désérvé ït. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
@@ -1616,11 +1568,11 @@ msgstr ""
 "Thé härd wörk ïs övér - ýöü pässéd thé çöürsé! Nöw gét thé çrédït ýöü "
 "désérvé tö stärt ör çömplété ä dégréé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid "It's affordable."
 msgstr "Ìt's äffördäßlé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
@@ -1628,11 +1580,11 @@ msgstr ""
 "Thé çrédït öfféréd thröügh édX générällý çösts léss thän thé sämé çrédït ät "
 "möst ïnstïtütïöns. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid "It opens doors."
 msgstr "Ìt öpéns döörs. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
@@ -1640,11 +1592,11 @@ msgstr ""
 "Mäný öf tödäý's möst ïn-démänd jößs réqüïré ä çöllégé dégréé. Stärt ýöür "
 "päth tö süççéss! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 msgid "Questions?"
 msgstr "Qüéstïöns? Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/edx/credit/checkout.html
+#: templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
@@ -1655,30 +1607,36 @@ msgstr ""
 "                    Pléäsé réäd %(link_start)söür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés.%(link_end)s\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/edx/partials/_administration_menu.html
+#: templates/edx/error.html
+msgid "If you need assistance, contact edX support."
+msgstr ""
+"Ìf ýöü nééd ässïstänçé, çöntäçt édX süppört. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: templates/edx/partials/_administration_menu.html
 msgid "Coupons"
 msgstr "Çöüpöns Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Earn a valuable certificate to showcase the skills you learn in"
 msgstr ""
 "Éärn ä välüäßlé çértïfïçäté tö shöwçäsé thé skïlls ýöü léärn ïn Ⱡ'σяєм ιρѕυм"
 " ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Item Price"
 msgstr "Ìtém Prïçé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Updating..."
 msgstr "Ûpdätïng... Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Update"
 msgstr "Ûpdäté Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 #, python-format
 msgid ""
 "\n"
@@ -1689,7 +1647,7 @@ msgstr ""
 "                                                %(benefit_value)s öff\n"
 "                                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 #, python-format
 msgid ""
 "\n"
@@ -1700,81 +1658,80 @@ msgstr ""
 "                                            Çöüpön çödé %(voucher_code)s äpplïéd\n"
 "                                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Apply a coupon code"
 msgstr "Àpplý ä çöüpön çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Enter a coupon code"
 msgstr "Éntér ä çöüpön çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Applying..."
 msgstr "Àpplýïng... Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Apply"
 msgstr "Àpplý Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Billing Information"
 msgstr "Bïllïng Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Payment Details"
 msgstr "Päýmént Détäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Card Type"
 msgstr "Çärd Týpé Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "(Select a card type)"
 msgstr "(Séléçt ä çärd týpé) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Visa"
 msgstr "Vïsä Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "MasterCard"
 msgstr "MästérÇärd Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "American Express"
 msgstr "Àmérïçän Éxpréss Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Discover"
 msgstr "Dïsçövér Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Card Number"
 msgstr "Çärd Nümßér Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Expiration Date"
 msgstr "Éxpïrätïön Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "CVV"
 msgstr "ÇVV Ⱡ'σяєм#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Checkout"
 msgstr "Çhéçköüt Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Place Order"
 msgstr "Pläçé Ördér Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
 #. Translators: Do NOT translate the name PayPal.
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Checkout with PayPal"
 msgstr "Çhéçköüt wïth PäýPäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid ""
 "<b>Note:</b> To earn a verified certificate, you must verify your identity "
 "with a <b>webcam</b> and a <b>government-issued photo ID</b>. "
@@ -1788,7 +1745,7 @@ msgstr ""
 "¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
 "ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łαвσяυм#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid ""
 "<b>Note:</b> To complete your enrollment, select Checkout or Checkout with "
 "PayPal."
@@ -1796,23 +1753,23 @@ msgstr ""
 "<b>Nöté:</b> Tö çömplété ýöür énröllmént, séléçt Çhéçköüt ör Çhéçköüt wïth "
 "PäýPäl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Have questions?"
 msgstr "Hävé qüéstïöns? Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Please read our FAQs to view common questions about our certificates."
 msgstr ""
 "Pléäsé réäd öür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés. Ⱡ'σяєм"
 " ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 msgid "Your purchase could not be completed"
 msgstr ""
 "Ýöür pürçhäsé çöüld nöt ßé çömplétéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυ#"
 
-#: ecommerce/templates/oscar/basket/partials/basket_content.html
+#: templates/oscar/basket/partials/basket_content.html
 #, python-format
 msgid ""
 "\n"
@@ -1825,12 +1782,11 @@ msgstr ""
 "                ägäïn, ör %(support_link_start)sçöntäçt %(platform_name)s Süppört%(link_end)s.\n"
 "             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм #"
 
-#: ecommerce/templates/oscar/checkout/cancel_checkout.html
-#: ecommerce/templates/oscar/checkout/cancel_checkout.html
+#: templates/oscar/checkout/cancel_checkout.html
 msgid "Checkout Cancelled"
 msgstr "Çhéçköüt Çänçélléd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/oscar/checkout/cancel_checkout.html
+#: templates/oscar/checkout/cancel_checkout.html
 #, python-format
 msgid ""
 "\n"
@@ -1843,12 +1799,11 @@ msgstr ""
 "            %(payment_support_email)s%(end_link)s.\n"
 "             Ⱡ'σ#"
 
-#: ecommerce/templates/oscar/checkout/error.html
-#: ecommerce/templates/oscar/checkout/error.html
+#: templates/oscar/checkout/error.html
 msgid "Checkout Error"
 msgstr "Çhéçköüt Érrör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/checkout/error.html
+#: templates/oscar/checkout/error.html
 msgid ""
 " An error has occurred with your payment. <b>You have not been charged.</b>\n"
 "        "
@@ -1856,7 +1811,7 @@ msgstr ""
 " Àn érrör häs öççürréd wïth ýöür päýmént. <b>Ýöü hävé nöt ßéén çhärgéd.</b>\n"
 "         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/checkout/error.html
+#: templates/oscar/checkout/error.html
 #, python-format
 msgid ""
 "\n"
@@ -1869,8 +1824,7 @@ msgstr ""
 "            %(payment_support_email)s%(end_link)s.\n"
 "             Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 #, python-format
 msgid ""
 "\n"
@@ -1881,7 +1835,7 @@ msgstr ""
 "    Ördér %(number)s: çönfïrmätïön\n"
 "   Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 #, python-format
 msgid ""
 "\n"
@@ -1894,7 +1848,7 @@ msgstr ""
 "      <strong>%(number)s</strong>.\n"
 "     Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid ""
 "Please make a note of this reference or print this page and quote it in any "
 "communication with us regarding your order."
@@ -1902,43 +1856,39 @@ msgstr ""
 "Pléäsé mäké ä nöté öf thïs référénçé ör prïnt thïs pägé änd qüöté ït ïn äný "
 "çömmünïçätïön wïth üs régärdïng ýöür ördér. Ⱡ'σяєм ιρѕυм#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping"
 msgstr "Shïppïng Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Contact"
 msgstr "Çöntäçt Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Phone"
 msgstr "Phöné Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Instructions"
 msgstr "Ìnstrüçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "No shipping address required."
 msgstr "Nö shïppïng äddréss réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Shipping method"
 msgstr "Shïppïng méthöd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment"
 msgstr "Päýmént Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 #, python-format
 msgid ""
 "\n"
@@ -1949,7 +1899,7 @@ msgstr ""
 "                  Àllöçätïön öf %(amount)s fröm týpé %(type)s (référénçé: %(reference)s)\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 #, python-format
 msgid ""
 "\n"
@@ -1960,31 +1910,31 @@ msgstr ""
 "                  Àllöçätïön öf %(amount)s fröm týpé %(type)s\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "No payment was required for this order."
 msgstr ""
 "Nö päýmént wäs réqüïréd för thïs ördér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Billing address"
 msgstr "Bïllïng äddréss Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order contents"
 msgstr "Ördér çönténts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Items purchased"
 msgstr "Ìtéms pürçhäséd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Total"
 msgstr "Tötäl Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 #, python-format
 msgid ""
 "\n"
@@ -1995,101 +1945,101 @@ msgstr ""
 "                Éstïmätéd dïspätçh: <strong>%(date)s</strong>\n"
 "               Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Totals"
 msgstr "Tötäls Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Basket total (before discounts)"
 msgstr "Bäskét tötäl (ßéföré dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Basket total (after discounts)"
 msgstr "Bäskét tötäl (äftér dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total"
 msgstr "Bäskét tötäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Shipping charge (before discounts)"
 msgstr ""
 "Shïppïng çhärgé (ßéföré dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Shipping charge (after discounts)"
 msgstr ""
 "Shïppïng çhärgé (äftér dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Shipping charge"
 msgstr "Shïppïng çhärgé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Order tax"
 msgstr "Ördér täx Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Post order actions"
 msgstr "Pöst ördér äçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/checkout/thank_you.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order total"
 msgstr "Ördér tötäl Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Tracking your order"
 msgstr "Träçkïng ýöür ördér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "You can track the status of your order"
 msgstr ""
 "Ýöü çän träçk thé stätüs öf ýöür ördér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "View order status"
 msgstr "Vïéw ördér stätüs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Print this page"
 msgstr "Prïnt thïs pägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/checkout/thank_you.html
+#: templates/oscar/checkout/thank_you.html
 msgid "Continue shopping"
 msgstr "Çöntïnüé shöppïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/catalogue/category_row_actions.html
+#: templates/oscar/dashboard/catalogue/product_row_actions.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Actions"
 msgstr "Àçtïöns Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html
+#: templates/oscar/dashboard/catalogue/category_row_actions.html
 msgid "Edit category"
 msgstr "Édït çätégörý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html
+#: templates/oscar/dashboard/catalogue/category_row_actions.html
 msgid "Add child category"
 msgstr "Àdd çhïld çätégörý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html
+#: templates/oscar/dashboard/catalogue/category_row_actions.html
 msgid "Edit children"
 msgstr "Édït çhïldrén Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/catalogue/category_row_actions.html
+#: templates/oscar/dashboard/catalogue/product_row_actions.html
+#: templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Delete"
 msgstr "Délété Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
@@ -2100,7 +2050,7 @@ msgstr ""
 "                    Çréätéd prödüçt värïänt '%(name)s'.\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
@@ -2111,7 +2061,7 @@ msgstr ""
 "                    Çréätéd värïänt öf '%(parent_name)s'.\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
@@ -2122,7 +2072,7 @@ msgstr ""
 "                    Ûpdätéd prödüçt värïänt '%(name)s'.\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
@@ -2133,7 +2083,7 @@ msgstr ""
 "                    Ûpdätéd ä värïänt öf '%(parent_name)s'.\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
@@ -2144,7 +2094,7 @@ msgstr ""
 "                Çréätéd prödüçt '%(name)s'.\n"
 "             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
@@ -2155,17 +2105,17 @@ msgstr ""
 "                Ûpdätéd prödüçt '%(name)s'.\n"
 "             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#: templates/oscar/dashboard/catalogue/messages/product_saved.html
 msgid "Edit again"
 msgstr "Édït ägäïn Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/catalogue/product_row_actions.html
+#: templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Edit"
 msgstr "Édït Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 #, python-format
 msgid ""
 "\n"
@@ -2178,255 +2128,243 @@ msgstr ""
 "                            <a href=\"%(parent_url)s\">%(title)s</a>.\n"
 "                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łα#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Sections"
 msgstr "Séçtïöns Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Product details"
 msgstr "Prödüçt détäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Attributes"
 msgstr "Àttrïßütés Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Images"
 msgstr "Ìmägés Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Stock and pricing"
 msgstr "Stöçk änd prïçïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Variants"
 msgstr "Värïänts Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Upselling"
 msgstr "Ûpséllïng Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Product Type:"
 msgstr "Prödüçt Týpé: Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Upload, change or remove images"
 msgstr "Ûplöäd, çhängé ör rémövé ïmägés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "SKU"
 msgstr "SKÛ Ⱡ'σяєм#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Num in stock"
 msgstr "Nüm ïn stöçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Num allocated"
 msgstr "Nüm ällöçätéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Low stock threshold"
 msgstr "Löw stöçk thréshöld Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Cost price"
 msgstr "Çöst prïçé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Price (excl tax)"
 msgstr "Prïçé (éxçl täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Retail price"
 msgstr "Rétäïl prïçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Delete?"
 msgstr "Délété? Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Adding..."
 msgstr "Àddïng... Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Add variant"
 msgstr "Àdd värïänt Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Title"
 msgstr "Tïtlé Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Stock records"
 msgstr "Stöçk réçörds Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "This product does not have any variants."
 msgstr ""
 "Thïs prödüçt döés nöt hävé äný värïänts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "One can't add variants to this product at this point."
 msgstr ""
 "Öné çän't ädd värïänts tö thïs prödüçt ät thïs pöïnt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт"
 " αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "This is likely because this product still has stock records."
 msgstr ""
 "Thïs ïs lïkélý ßéçäüsé thïs prödüçt stïll häs stöçk réçörds. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Recommended products"
 msgstr "Réçömméndéd prödüçts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+#: templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Cancel"
 msgstr "Çänçél Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "or"
 msgstr "ör Ⱡ'σя#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Saving..."
 msgstr "Sävïng... Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Save and add another variant"
 msgstr "Sävé änd ädd änöthér värïänt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Save and continue editing"
 msgstr "Sävé änd çöntïnüé édïtïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: templates/oscar/dashboard/catalogue/product_update.html
 msgid "Save"
 msgstr "Sävé Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Your Store Statistics"
 msgstr "Ýöür Störé Stätïstïçs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total Orders"
 msgstr "Tötäl Ördérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "New Customers"
 msgstr "Néw Çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total Customers"
 msgstr "Tötäl Çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total Products"
 msgstr "Tötäl Prödüçts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Latest Orders (last 24 hours)"
 msgstr "Lätést Ördérs (läst 24 höürs) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Orders - Last 24 Hours"
 msgstr "Ördérs - Läst 24 Höürs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total orders"
 msgstr "Tötäl ördérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total lines"
 msgstr "Tötäl lïnés Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total revenue"
 msgstr "Tötäl révénüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Average order costs"
 msgstr "Àvérägé ördér çösts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Average (paid) order costs"
 msgstr "Àvérägé (päïd) ördér çösts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Manage"
 msgstr "Mänägé Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Orders - All Time"
 msgstr "Ördérs - Àll Tïmé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total <em>open</em> baskets"
 msgstr "Tötäl <em>öpén</em> ßäskéts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total customers"
 msgstr "Tötäl çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "New customers"
 msgstr "Néw çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "View Stock Alerts"
 msgstr "Vïéw Stöçk Àlérts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Catalogue and stock"
 msgstr "Çätälögüé änd stöçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Total products"
 msgstr "Tötäl prödüçts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "<em>Open</em> stock alerts"
 msgstr "<em>Öpén</em> stöçk älérts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "<em>Closed</em> stock alerts"
 msgstr "<em>Çlöséd</em> stöçk älérts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Offers, vouchers and promotions"
 msgstr "Öfférs, vöüçhérs änd prömötïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Active <em>Site</em> Offers"
 msgstr "Àçtïvé <em>Sïté</em> Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Active <em>Vouchers</em>"
 msgstr "Àçtïvé <em>Vöüçhérs</em> Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/index.html
+#: templates/oscar/dashboard/index.html
 msgid "Promotions"
 msgstr "Prömötïöns Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 #, python-format
 msgid ""
 "\n"
@@ -2437,312 +2375,298 @@ msgstr ""
 "        Ördér %(number)s - Lïné #%(id)s\n"
 "     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 #, python-format
 msgid "Line #%(id)s"
 msgstr "Lïné #%(id)s Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 #, python-format
 msgid "Order #%(number)s - Line #%(id)s"
 msgstr "Ördér #%(number)s - Lïné #%(id)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgctxt "Product title"
 msgid "Title"
 msgstr "Tïtlé Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Product Type"
 msgstr "Prödüçt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "UPC"
 msgstr "ÛPÇ Ⱡ'σяєм#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Product Options"
 msgstr "Prödüçt Öptïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Partner details"
 msgstr "Pärtnér détäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Partner SKU"
 msgstr "Pärtnér SKÛ Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Shipping details"
 msgstr "Shïppïng détäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Partner reference number"
 msgstr "Pärtnér référénçé nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Partner notes"
 msgstr "Pärtnér nötés Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Estimate dispatch date"
 msgstr "Éstïmäté dïspätçh däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Shipping status"
 msgstr "Shïppïng stätüs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "State"
 msgstr "Stäté Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "No shipping events have occurred."
 msgstr ""
 "Nö shïppïng événts hävé öççürréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Shipping events"
 msgstr "Shïppïng événts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Event"
 msgstr "Évént Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Reference"
 msgstr "Référénçé Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Date"
 msgstr "Däté Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "Payment events"
 msgstr "Päýmént événts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html
+#: templates/oscar/dashboard/orders/line_detail.html
 msgid "No payment events have occurred."
 msgstr ""
 "Nö päýmént événts hävé öççürréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order %(number)s"
 msgstr "Ördér %(number)s Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid "Order #%(number)s"
 msgstr "Ördér #%(number)s Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer Information"
 msgstr "Çüstömér Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Full name"
 msgstr "Füll nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Email address"
 msgstr "Émäïl äddréss Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Customer has deleted their account."
 msgstr ""
 "Çüstömér häs délétéd théïr äççöünt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order information"
 msgstr "Ördér ïnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Total"
 msgstr "Ördér Tötäl Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Date of purchase"
 msgstr "Däté öf pürçhäsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Time of purchase"
 msgstr "Tïmé öf pürçhäsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Order Details"
 msgstr "Ördér Détäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Discounts"
 msgstr "Dïsçöünts Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes"
 msgstr "Nötés Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Items ordered"
 msgstr "Ìtéms ördéréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Line ID"
 msgstr "Lïné ÌD Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product"
 msgstr "Prödüçt Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier"
 msgstr "Süpplïér Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Supplier SKU"
 msgstr "Süpplïér SKÛ Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Est. dispatch date"
 msgstr "Ést. dïspätçh däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price excl tax (before discounts)"
 msgstr ""
 "Prïçé éxçl täx (ßéföré dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Price inc tax (before discounts)"
 msgstr ""
 "Prïçé ïnç täx (ßéföré dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "View"
 msgstr "Vïéw Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (excl. discounts)"
 msgstr "Bäskét tötäl (éxçl. dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Basket total (inc. discounts)"
 msgstr "Bäskét tötäl (ïnç. dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (excl. discounts)"
 msgstr ""
 "Shïppïng tötäl (éxçl. dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total (inc. discounts)"
 msgstr "Shïppïng tötäl (ïnç. dïsçöünts) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping total"
 msgstr "Shïppïng tötäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
 msgstr "Wïth séléçtéd lïnés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Change line status to"
 msgstr "Çhängé lïné stätüs tö Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "choose new status"
 msgstr "çhöösé néw stätüs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create shipping event"
 msgstr "Çréäté shïppïng évént Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "choose event type"
 msgstr "çhöösé évént týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "with reference"
 msgstr "wïth référénçé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create payment event"
 msgstr "Çréäté päýmént évént Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "with amount"
 msgstr "wïth ämöünt Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Create refund"
 msgstr "Çréäté réfünd Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Go!"
 msgstr "Gö! Ⱡ'σяєм#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Change order status"
 msgstr "Çhängé ördér stätüs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Change status"
 msgstr "Çhängé stätüs Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "This order can't have its status changed."
 msgstr ""
 "Thïs ördér çän't hävé ïts stätüs çhängéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Shipping Events"
 msgstr "Shïppïng Événts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Lines"
 msgstr "Lïnés Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 #, python-format
 msgid ""
 "\n"
@@ -2753,187 +2677,180 @@ msgstr ""
 "                                              %(title)s (qüäntïtý %(event_qty)s/%(total_qty)s)\n"
 "                                             Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "No shipping events."
 msgstr "Nö shïppïng événts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Payment Events"
 msgstr "Päýmént Événts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Amount"
 msgstr "Àmöünt Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Product:"
 msgstr "Prödüçt: Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "quantity"
 msgstr "qüäntïtý Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "No payment events."
 msgstr "Nö päýmént événts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method name"
 msgstr "Méthöd nämé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Method code"
 msgstr "Méthöd çödé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (incl tax)"
 msgstr "Çhärgé (ïnçl täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Charge (excl tax)"
 msgstr "Çhärgé (éxçl täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Payment sources"
 msgstr "Päýmént söürçés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Source"
 msgstr "Söürçé Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Allocation"
 msgstr "Àllöçätïön Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount debited"
 msgstr "Àmöünt déßïtéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Amount refunded"
 msgstr "Àmöünt réfündéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "No payment sources found for this order."
 msgstr ""
 "Nö päýmént söürçés föünd för thïs ördér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
 msgstr "Tränsäçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Type"
 msgstr "Týpé Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"
 msgstr "Vöüçhér Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Offer name"
 msgstr "Öffér nämé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Frequency"
 msgstr "Fréqüénçý Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Message"
 msgstr "Méssägé Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "No discounts were applied to this order."
 msgstr ""
 "Nö dïsçöünts wéré äpplïéd tö thïs ördér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Admin"
 msgstr "Àdmïn Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "No notes available."
 msgstr "Nö nötés äväïläßlé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Save note"
 msgstr "Sävé nöté Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: templates/oscar/dashboard/orders/order_detail.html
 msgid "Notes are only editable for 5 minutes after being saved."
 msgstr ""
 "Nötés äré önlý édïtäßlé för 5 mïnütés äftér ßéïng sävéd. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Download selected orders as a CSV"
 msgstr ""
 "Döwnlöäd séléçtéd ördérs äs ä ÇSV Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
 msgstr "Döwnlöäd Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Order number"
 msgstr "Ördér nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
 msgstr "Tötäl ïnç täx Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Number of items"
 msgstr "Nümßér öf ïtéms Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Deleted"
 msgstr "Délétéd Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "Retry Fulfillment"
 msgstr "Rétrý Fülfïllmént Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+#: templates/oscar/dashboard/orders/order_list.html
 msgid "No orders found."
 msgstr "Nö ördérs föünd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/partials/enrollment_table.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Enrollments"
 msgstr "Énröllménts Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
+#: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Mode"
 msgstr "Mödé Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
+#: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "Active?"
 msgstr "Àçtïvé? Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
+#: templates/oscar/dashboard/partials/enrollment_table.html
 msgid "No enrollments found."
 msgstr "Nö énröllménts föünd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+#: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm Refund Processing"
 msgstr "Çönfïrm Réfünd Pröçéssïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+#: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid ""
 "Are you sure you want to issue a full refund and revoke student's "
 "enrollment?"
@@ -2941,7 +2858,7 @@ msgstr ""
 "Àré ýöü süré ýöü wänt tö ïssüé ä füll réfünd änd révöké stüdént's "
 "énröllmént? Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+#: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid ""
 "Are you sure you want to issue a full refund without revoking student's "
 "enrollment?"
@@ -2949,217 +2866,209 @@ msgstr ""
 "Àré ýöü süré ýöü wänt tö ïssüé ä füll réfünd wïthöüt révökïng stüdént's "
 "énröllmént? Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+#: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Are you sure you want to deny this refund request?"
 msgstr ""
 "Àré ýöü süré ýöü wänt tö déný thïs réfünd réqüést? Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+#: templates/oscar/dashboard/partials/refund_action_modal.html
 msgid "Confirm"
 msgstr "Çönfïrm Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html
+#: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve Credit and Revoke"
 msgstr "Àpprövé Çrédït änd Révöké Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html
+#: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Approve Credit Only"
 msgstr "Àpprövé Çrédït Önlý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html
+#: templates/oscar/dashboard/partials/refund_buttons.html
 msgid "Deny"
 msgstr "Déný Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Number of Items"
 msgstr "Nümßér öf Ìtéms Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Total Credit"
 msgstr "Tötäl Çrédït Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "Created"
 msgstr "Çréätéd Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/partials/refund_table.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_list.html
+#: templates/oscar/dashboard/partials/refund_table.html
+#: templates/oscar/dashboard/refunds/refund_list.html
 msgid "No refunds found."
 msgstr "Nö réfünds föünd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
+#: templates/oscar/dashboard/partials/search_form.html
 msgid "Search"
 msgstr "Séärçh Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
+#: templates/oscar/dashboard/partials/search_form.html
 msgid "Advanced Search"
 msgstr "Àdvänçéd Séärçh Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
+#: templates/oscar/dashboard/partials/search_form.html
 msgid "Close"
 msgstr "Çlösé Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/partials/search_form.html
+#: templates/oscar/dashboard/partials/search_form.html
 msgid "Searching..."
 msgstr "Séärçhïng... Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 #, python-format
 msgid "Refund #%(id)s"
 msgstr "Réfünd #%(id)s Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Overview"
 msgstr "Réfünd Övérvïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order"
 msgstr "Àssöçïätéd Ördér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Items"
 msgstr "Réfünd Ìtéms Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Refund Line ID"
 msgstr "Réfünd Lïné ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Associated Order Line"
 msgstr "Àssöçïätéd Ördér Lïné Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Credit (excl. tax)"
 msgstr "Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Processor"
 msgstr "Pröçéssör Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html
+#: templates/oscar/dashboard/refunds/refund_detail.html
 msgid "Quantity:"
 msgstr "Qüäntïtý: Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "General"
 msgstr "Généräl Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Yes,No"
 msgstr "Ýés,Nö Ⱡ'σяєм ιρѕυ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Superuser"
 msgstr "Süpérüsér Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "True,False"
 msgstr "Trüé,Fälsé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Staff"
 msgstr "Stäff Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Last login"
 msgstr "Läst lögïn Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Date joined"
 msgstr "Däté jöïnéd Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Products viewed"
 msgstr "Prödüçts vïéwéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Number of orders"
 msgstr "Nümßér öf ördérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Number of ordered items"
 msgstr "Nümßér öf ördéréd ïtéms Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Total spent"
 msgstr "Tötäl spént Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Reviews written"
 msgstr "Révïéws wrïttén Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Send password reset email"
 msgstr "Sénd pässwörd rését émäïl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Addresses"
 msgstr "Àddréssés Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Reviews"
 msgstr "Révïéws Ⱡ'σяєм ιρѕυм #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Num items"
 msgstr "Nüm ïtéms Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Total value"
 msgstr "Tötäl välüé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Date placed"
 msgstr "Däté pläçéd Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not placed any orders yet."
 msgstr ""
 "Thïs çüstömér häs nöt pläçéd äný ördérs ýét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not saved any addresses."
 msgstr ""
 "Thïs çüstömér häs nöt sävéd äný äddréssés. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Product ID"
 msgstr "Prödüçt ÌD Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Score"
 msgstr "Sçöré Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgctxt "Product review title"
 msgid "Title"
 msgstr "Tïtlé Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Body"
 msgstr "Bödý Ⱡ'σяєм ι#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "Date created"
 msgstr "Däté çréätéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/oscar/dashboard/users/detail.html
+#: templates/oscar/dashboard/users/detail.html
 msgid "This customer has not written any reviews yet."
 msgstr ""
 "Thïs çüstömér häs nöt wrïttén äný révïéws ýét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "

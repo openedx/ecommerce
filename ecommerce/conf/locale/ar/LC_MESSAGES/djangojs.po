@@ -4,19 +4,21 @@
 #
 # Translators:
 # Ahmed Jazzar <ajazzar@qrf.org>, 2015
+# AR C2 <e2f458fd4s512@outlook.com>, 2016
 # Bushra Sherif Galaleldin Hashem <purple.planet1996@gmail.com>, 2015
 # Fatimah Ahmad Abu Sarir <miss-fatimah@hotmail.com>, 2015
 # may <may@qordoba.com>, 2015
 # Nabeel El-Dughailib <nabeel@qordoba.com>, 2015
+# shefaa abu jabel <shefaa.aj@gmail.com>, 2016
 # Soha Assali <soha+transifex@qordoba.com>, 2015-2016
 # soliman osman <solimanosman@windowslive.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-28 19:00-0500\n"
-"PO-Revision-Date: 2016-07-26 14:03+0000\n"
-"Last-Translator: Soha Assali <soha+transifex@qordoba.com>\n"
+"POT-Creation-Date: 2016-10-10 13:26+0000\n"
+"PO-Revision-Date: 2016-11-08 08:13+0000\n"
+"Last-Translator: shefaa abu jabel <shefaa.aj@gmail.com>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,336 +26,371 @@ msgstr ""
 "Language: ar\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: static/js/models/coupon_model.js
-msgid "This field is required"
-msgstr "هذا الحقل مطلوب"
+#: ecommerce/static/js/models/coupon_model.js
+msgid "This field is required."
+msgstr "هذا الحقل مطلوب."
 
-#: static/js/models/coupon_model.js
-msgid "This value must be a number"
-msgstr "يجب أن تكون هذه القيمة عدديّة"
+#: ecommerce/static/js/models/coupon_model.js
+msgid "This value must be a number."
+msgstr "يجب أن تكون هذه القيمة عدديّة."
 
-#: static/js/models/coupon_model.js
-msgid "This value must be a date"
+#: ecommerce/static/js/models/coupon_model.js
+msgid "This value must be a date."
 msgstr "يجب أن تكون هذه القيمة تاريخًا."
 
-#: static/js/models/coupon_model.js
+#: ecommerce/static/js/models/coupon_model.js
+msgid "At least one seat type must be selected."
+msgstr "يجب تحديد مقعد واحد على الأقل."
+
+#: ecommerce/static/js/models/coupon_model.js
 msgid "A valid course ID is required"
 msgstr "الرقم التعريفي الصحيح للمساق مطلوب"
 
-#: static/js/models/coupon_model.js
+#: ecommerce/static/js/models/coupon_model.js
+msgid "This field must be empty or contain 1-16 alphanumeric characters."
+msgstr "يجب أن يكون هذا الحقل أو يحتوي على 1-16 حرفًا أبجديًا رقميًا."
+
+#: ecommerce/static/js/models/coupon_model.js
 msgid "Must occur before end date"
 msgstr "يجب حدوثه قبل تاريخ انتهاء المساق"
 
-#: static/js/models/coupon_model.js
+#: ecommerce/static/js/models/coupon_model.js
 msgid "Must occur after start date"
 msgstr "يجب حدوثه بعد تاريخ ابتداء المساق"
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "You must select a course type."
 msgstr "يجب أن تختار نوع المساق."
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "You must choose if an honor seat should be created."
 msgstr "يجب أن تختار فيما إذا كان يتوجّب إنشاء مقعد شرف."
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr ""
 "يجب أن يُحدّد الموعد النهائي للتحقّق من صحّة الشهادة بعد الموعد النهائي "
 "للترقية"
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "Product validation failed."
 msgstr "فشلت عملية مصادقة المنتج"
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
+#: ecommerce/static/js/views/dynamic_catalog_view.js
 msgid "Course ID"
 msgstr "رقم تعريف المساق "
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "Course Name"
 msgstr "اسم المساق"
 
-#: static/js/models/course_model.js static/js/views/course_list_view.js
+#: ecommerce/static/js/models/course_model.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Course Type"
 msgstr "نوع المساق"
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "Verification Deadline"
 msgstr "الموعد النهائي للتحقّق"
 
-#: static/js/models/course_model.js
+#: ecommerce/static/js/models/course_model.js
 msgid "Include Honor Seat"
 msgstr "شمل مقعد الشرف"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "All course seats must have a price."
 msgstr "يجب أن يكون لجميع مقاعد المساق سعر."
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr ""
 "يجب أن يُحدّد الموعد النهائي الترقية قبل الموعد النهائي للتحقّق من صحّة "
 "الشهادة."
 
-#: static/js/models/course_seats/course_seat.js
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid "Verified"
 msgstr "موثَّقة"
 
-#: static/js/models/course_seats/course_seat.js
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid "Credit"
 msgstr "مادّة دراسيّة"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "Professional"
 msgstr "مهنيّ"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "Honor"
 msgstr "ميثاق الشرف"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "Audit"
 msgstr "مستمع"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "Verified Certificate"
 msgstr "شهادة موثّقة"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "Professional Certificate"
 msgstr "شهادة مهنية"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "Honor Certificate"
 msgstr "شهادة الشرف الأكاديمي"
 
-#: static/js/models/course_seats/course_seat.js
+#: ecommerce/static/js/models/course_seats/course_seat.js
 msgid "No Certificate"
 msgstr "لا يوجد شهادة"
 
-#: static/js/models/course_seats/credit_seat.js
+#: ecommerce/static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must have a credit provider."
 msgstr "يجب أن يتوفّر لجميع مقاعد حضور المادّة الدراسيّة مزوّد للمادّة."
 
-#: static/js/models/course_seats/credit_seat.js
+#: ecommerce/static/js/models/course_seats/credit_seat.js
+msgid "Please select a valid credit provider."
+msgstr "يرجى اختيار مقدِّم مادة دراسية صالح."
+
+#: ecommerce/static/js/models/course_seats/credit_seat.js
 msgid "All credit seats must designate a number of credit hours."
 msgstr "يجب أن يُحدّد لجميع مقاعد حضور المادّة عدد ساعات حضور معتمدة."
 
-#: static/js/pages/coupon_create_page.js
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Problem occurred during checkout. Please contact support"
+msgstr "حدثت مشكلة أثناء الدفع. يُرجى الاتصال بالدعم."
+
+#: ecommerce/static/js/pages/coupon_create_page.js
 msgid "Create New Coupon"
 msgstr "إنشاء قسيمة جديدة"
 
-#: static/js/pages/coupon_detail_page.js
+#: ecommerce/static/js/pages/coupon_detail_page.js
 msgid "View Coupon"
 msgstr "عرض القسيمة"
 
-#: static/js/pages/coupon_edit_page.js
+#: ecommerce/static/js/pages/coupon_edit_page.js
 msgid "Edit Coupon"
 msgstr "تعديل القسيمة"
 
-#: static/js/pages/coupon_list_page.js
+#: ecommerce/static/js/pages/coupon_list_page.js
 msgid "Coupon Codes"
 msgstr "رموز القسائم"
 
-#: static/js/pages/course_create_page.js
+#: ecommerce/static/js/pages/course_create_page.js
 msgid "Create New Course"
 msgstr "إنشاء مساق جديد"
 
-#: static/js/pages/course_detail_page.js
+#: ecommerce/static/js/pages/course_detail_page.js
 msgid "View Course"
 msgstr "استعرض المساق "
 
-#: static/js/pages/course_edit_page.js
+#: ecommerce/static/js/pages/course_edit_page.js
 msgid "Edit Course"
 msgstr "تعديل المساق"
 
-#: static/js/pages/course_list_page.js
+#: ecommerce/static/js/pages/course_list_page.js
 msgid "Courses"
 msgstr "المساقات"
 
-#: static/js/views/coupon_detail_view.js
-msgid "ACTIVE"
-msgstr "فعّال"
+#: ecommerce/static/js/pages/offer_page.js
+msgid "Redeem"
+msgstr "استرداد الخصم"
 
-#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
-msgid "Enrollment Code"
-msgstr "رمز التسجيل"
+#: ecommerce/static/js/utils/validation_patterns.js
+msgid "The course ID is invalid."
+msgstr "مُعرف المقرر غير صحيح."
 
-#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/coupon_detail_view.js
+#: ecommerce/static/js/views/coupon_form_view.js
 msgid "Can be used once by one customer"
 msgstr "يمكن لزبون واحد استخدامه لمرّة واحدة"
 
-#: static/js/views/coupon_detail_view.js static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/coupon_detail_view.js
+#: ecommerce/static/js/views/coupon_form_view.js
 msgid "Can be used multiple times by multiple customers"
 msgstr "يمكن  لعدّة زبائن استخدامه لعدّة مرات"
 
-#: static/js/views/coupon_detail_view.js
-msgid "Can only be used once per customer"
-msgstr "يمكن لكل زبون استخدامه لمرّة واحدة"
-
-#: static/js/views/coupon_detail_view.js
-msgid "Code"
-msgstr "الرمز"
-
-#: static/js/views/coupon_detail_view.js
-msgid "Redemption URL"
-msgstr "رابط الاسترداد"
-
-#: static/js/views/coupon_form_view.js
-msgid "Discount Code"
-msgstr "رمز الخصم"
-
-#: static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/coupon_detail_view.js
+#: ecommerce/static/js/views/coupon_form_view.js
 msgid "Can be used once by multiple customers"
 msgstr "يمكن لعدّة زبائن استخدامه لمرّة واحدة"
 
-#: static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/coupon_form_view.js
+msgid "Enrollment Code"
+msgstr "رمز التسجيل"
+
+#: ecommerce/static/js/views/coupon_form_view.js
+msgid "Discount Code"
+msgstr "رمز الخصم"
+
+#: ecommerce/static/js/views/coupon_form_view.js
 msgid "Save Changes"
 msgstr "حفّظ التغييرات"
 
-#: static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/coupon_form_view.js
 msgid "Create Coupon"
 msgstr "إنشاء قسيمة"
 
-#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Search..."
 msgstr "بحث..."
 
-#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Next"
 msgstr "التالي"
 
-#: static/js/views/coupon_list_view.js static/js/views/course_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Previous"
 msgstr "السابق"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
 msgstr "عرض قسائم _START_ to _END_ of _TOTAL_ "
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
 msgid "(filtered from _MAX_ total coupons)"
 msgstr "(مرشّح من إجمالي _MAX_ قسيمة)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
 msgid "Display _MENU_ coupons"
 msgstr "عرض قسائم _MENU_"
 
-#: static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
 msgid "Name"
 msgstr "الاسم"
 
-#: static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/coupon_list_view.js
 msgid "Coupon Report"
 msgstr "تقرير القسيمة"
 
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid "Free (Audit)"
 msgstr "مجاني (مستمع)"
 
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid "Free audit track. No certificate."
 msgstr "مساق استماع مجاني. لا تُمنح شهادة."
 
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr "مسار نيل شهادة مدفوع ذا مصادقة مبدئيّة وشهادة موثّقة"
 
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid "Professional Education"
 msgstr "تعليم مهني"
 
-#: static/js/views/course_form_view.js
-msgid ""
-"Paid certificate track with initial verification and Professional Education "
-"Certificate"
-msgstr "مسار نيل شهادة مدفوع ذا مصادقة مبدئية وشهادة تعليم مهني"
+#: ecommerce/static/js/views/course_form_view.js
+msgid "Paid certificate track with initial verification and Professional "
+msgstr "مسار شهادة مدفوع مع مصادقة مبدئية وتعليم مهني"
 
-#: static/js/views/course_form_view.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
-"and option to purchase credit"
-msgstr ""
-"مسار نيل شهادة مدفوع ذا مصادقة مبدئية وشهادة موثّقة بالإضافة إلى خيار شراء "
-"مادّة دراسيّة"
+msgstr "مسار شهادة مدفوع مع مصادقة مبدئية وشهادة موثقة،"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: static/js/views/course_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
 msgstr "عرض _START_ to _END_ of _TOTAL_ المساقات"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: static/js/views/course_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "(filtered from _MAX_ total courses)"
 msgstr "(مرشّح من _MAX_ إجمالي المساقات)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: static/js/views/course_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Display _MENU_ courses"
 msgstr "عرض مساقات _MENU_"
 
-#: static/js/views/course_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Course"
 msgstr "مساق "
 
-#: static/js/views/course_list_view.js
+#: ecommerce/static/js/views/course_list_view.js
 msgid "Last Edited"
 msgstr "آخر مراجعة في"
 
-#: static/js/views/form_view.js
+#: ecommerce/static/js/views/dynamic_catalog_view.js
+msgid "Seat title"
+msgstr "اسم المقعد"
+
+#: ecommerce/static/js/views/dynamic_catalog_view.js
+msgid "Seat type"
+msgstr "نوع المقعد"
+
+#: ecommerce/static/js/views/form_view.js
+msgid "A course with the specified ID already exists."
+msgstr "توجد بالفعل دورة تدريبية تحمل المعرّف المحدد نفسه."
+
+#: ecommerce/static/js/views/form_view.js
 msgid "Error!"
 msgstr "حدث خطأ!"
 
-#: static/js/views/form_view.js
+#: ecommerce/static/js/views/form_view.js
 msgid "Saving..."
 msgstr "جاري الحفظ..."
 
-#: static/js/views/form_view.js
-msgid "You must complete all required fields."
-msgstr "يجب ملئ جميع الحقول المطلوبة."
+#: ecommerce/static/js/views/form_view.js
+msgid "Please complete all required fields."
+msgstr "يُرجى ملء جميع الحقول المطلوبة."
 
-#: static/js/views/form_view.js
+#: ecommerce/static/js/views/form_view.js
 msgid "An error occurred while saving the data."
 msgstr "حدث خطأ أثناء حفظ المعلومات."
 
-#: static/js/views/payment_button_view.js
-msgid "An error has occurred. Please try again."
-msgstr "نأسف لحدوث خطأ. يُرجى إعادة المحاولة."
+#: ecommerce/static/js/views/offer_view.js
+msgid "Ellipsis"
+msgstr "حذف"
 
-#: static/js/views/provider_selection_view.js
+#: ecommerce/static/js/views/offer_view.js
+msgid "Load the records for page "
+msgstr "تحميل السجلات للصفحة"
+
+#: ecommerce/static/js/views/offer_view.js
+msgid "Load the records for the next page"
+msgstr "تحميل السجلات للصفحة التالية"
+
+#: ecommerce/static/js/views/offer_view.js
+msgid "Load the records for the previous page"
+msgstr "تحميل السجلات للصفحة السابقة"
+
+#: ecommerce/static/js/views/provider_selection_view.js
 msgid "Select"
 msgstr "اختيار"
 
-#: static/js/views/provider_selection_view.js
+#: ecommerce/static/js/views/provider_selection_view.js
 msgid "Selected"
 msgstr "جرى انتقاؤه"
 
-#: static/vendor-extensions/oscar/js/order_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/order_list.js
 msgid "Order %(order_number)s has been fulfilled."
 msgstr "لقد استوفي %(order_number)s طلبًا."
 
-#: static/vendor-extensions/oscar/js/order_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/order_list.js
 msgid "Failed to fulfill order %(order_number)s: %(error)s"
 msgstr "تعذّر استيفاء الطلب %(order_number)s: %(error)s"
 
-#: static/vendor-extensions/oscar/js/refund_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js
 msgid "Refund #%(refund_id)s has been processed."
 msgstr "جرت معالجة طلبات استعادة المبلغ ذات الأرقام #%(refund_id)s"
 
-#: static/vendor-extensions/oscar/js/refund_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js
 msgid "Error"
 msgstr "حدث خطأ"
 
-#: static/vendor-extensions/oscar/js/refund_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
