@@ -113,20 +113,20 @@ class SquashDuplicateInvoicesCommandTests(TestCase):
 
     def assert_unique_invoice(self, product, invoice):
         """Helper method for asserting there is only one invoice for given product."""
-        invoice_qs = Invoice.objects.filter(order__basket__lines__product=product)
+        invoice_qs = Invoice.objects.filter(order__lines__product=product)
         self.assertEqual(invoice_qs.count(), 1)
         self.assertEqual(invoice_qs.first(), invoice)
 
     def test_squashing_invoices(self):
         """Verify after calling the command the duplicate invoices are squashed."""
         Invoice.objects.create(order=self.order)
-        self.assertEqual(Invoice.objects.filter(order__basket__lines__product=self.product).count(), 2)
+        self.assertEqual(Invoice.objects.filter(order__lines__product=self.product).count(), 2)
 
         call_command('squash_duplicate_invoices')
         self.assert_unique_invoice(self.product, self.invoice)
 
     def test_not_squashing_invoices(self):
         """Verify the non-duplicate invoices are left the same."""
-        self.assertEqual(Invoice.objects.filter(order__basket__lines__product=self.product).count(), 1)
+        self.assertEqual(Invoice.objects.filter(order__lines__product=self.product).count(), 1)
         call_command('squash_duplicate_invoices')
         self.assert_unique_invoice(self.product, self.invoice)
