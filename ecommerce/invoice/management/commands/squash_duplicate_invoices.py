@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for coupon in Product.objects.filter(product_class__name='Coupon'):
-            qs = Invoice.objects.filter(order__basket__lines__product=coupon).order_by('created')
+            qs = Invoice.objects.filter(order__lines__product=coupon).order_by('created')
             if qs.count() > 1:
                 qs.exclude(pk=qs.first().id).delete()
                 logger.info('Deleted douplicate invoices of coupon %s', coupon.id)
