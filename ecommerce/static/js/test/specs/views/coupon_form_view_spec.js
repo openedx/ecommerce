@@ -68,6 +68,11 @@ define([
                     expect(model.get('stock_record_ids')).toEqual([2]);
                 });
 
+                it('should remove whitespace from email domains', function() {
+                    view.$('[name=email_domains]').val('example1.com, example2.com').trigger('change');
+                    expect(model.get('email_domains')).toEqual('example1.com,example2.com');
+                });
+
                 it('changeTotalValue should call updateTotalValue', function () {
                     spyOn(view, 'updateTotalValue');
                     spyOn(view, 'getSeatData');
