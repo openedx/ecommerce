@@ -8,7 +8,7 @@ from oscar.core.loading import get_model
 Product = get_model('catalogue', 'Product')
 
 
-def get_range_catalog_query_results(limit, query, site, offset=None, ordering=None):
+def get_range_catalog_query_results(limit, query, site, offset=None):
     """
     Get catalog query results
 
@@ -17,22 +17,20 @@ def get_range_catalog_query_results(limit, query, site, offset=None, ordering=No
         query (str): ElasticSearch Query
         site (Site): Site object containing Site Configuration data
         offset (int): Page offset
-        ordering (str): Course Discovery results ordering (only start is enabled for now)
 
     Returns:
-        dict: Query search results received from Course Catalog API
+        dict: Query seach results received from Course Catalog API
     """
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = 'course_runs_{}_{}_{}_{}_{}'.format(query, limit, offset, partner_code, ordering)
+    cache_key = 'course_runs_{}_{}_{}_{}'.format(query, limit, offset, partner_code)
     cache_hash = hashlib.md5(cache_key).hexdigest()
     response = cache.get(cache_hash)
     if not response:
         response = site.siteconfiguration.course_catalog_api_client.course_runs.get(
             limit=limit,
             offset=offset,
-            ordering=ordering,
-            partner=partner_code,
             q=query,
+            partner=partner_code
         )
         cache.set(cache_hash, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response

@@ -82,29 +82,28 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
             'next': 'path/to/the/next/page',
             'results': []
         }
-        dates = ['2015-05-01T00:00:00Z', '2016-05-01T00:00:00Z', '2014-05-01T00:00:00Z']
         products = []
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types=seat_type)
         if seats:
-            for i, seat in enumerate(seats):
+            for seat in seats:
                 course_run_info['results'].append({
                     'image': {
                         'src': 'path/to/the/course/image'
                     },
                     'key': seat.course_id,
-                    'start': dates[i % 3],
+                    'start': '2016-05-01T00:00:00Z',
                     'title': seat.title,
                 })
                 new_range.add_product(seat)
         else:
-            for i in range(quantity):
+            for _ in range(quantity):
                 course, seat = self.create_course_and_seat(seat_type=seat_type)
                 course_run_info['results'].append({
                     'image': {
                         'src': 'path/to/the/course/image'
                     },
                     'key': course.id,
-                    'start': dates[i % 3],
+                    'start': '2016-05-01T00:00:00Z',
                     'title': course.name,
                 })
                 new_range.add_product(seat)
@@ -120,16 +119,6 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
         request.strategy = DefaultStrategy()
 
         return products, request, voucher
-
-    @httpretty.activate
-    @mock_course_catalog_api_client
-    def test_get_offers_return_sorted_offers(self):
-        """ Verify get_offers sorts the offers returned by start date """
-        __, request, voucher = self.prepare_get_offers_response(quantity=3)
-        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
-        self.assertTrue(
-            offers[0]['course_start_date'] < offers[1]['course_start_date'] < offers[2]['course_start_date']
-        )
 
     @httpretty.activate
     @mock_course_catalog_api_client

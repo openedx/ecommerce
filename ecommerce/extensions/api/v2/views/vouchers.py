@@ -109,14 +109,13 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         stock_records = StockRecord.objects.filter(product__in=products)
         return products, stock_records
 
-    def get_offers_from_query(self, request, voucher, catalog_query, ordering=None):
+    def get_offers_from_query(self, request, voucher, catalog_query):
         """ Helper method for collecting offers from catalog query.
 
         Args:
             request (WSGIRequest): Request data.
             voucher (Voucher): Oscar Voucher for which the offers are returned.
             catalog_query (str): The query for the Course Discovery.
-            ordering (str): Course Discovery results ordering (only start is enabled for now)
 
         Returns:
             A list of dictionaries with retrieved offers and a link to the next
@@ -131,9 +130,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         response = get_range_catalog_query_results(
             limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
             offset=request.GET.get('offset'),
-            ordering=ordering,
             query=catalog_query,
-            site=request.site,
+            site=request.site
         )
         next_page = response['next']
         products, stock_records = self.retrieve_course_objects(response['results'], course_seat_types)
@@ -191,7 +189,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     voucher=voucher
                 ))
 
-        return sorted(offers, key=lambda offer: offer['course_start_date']), next_page
+        return offers, next_page
 
     def get_offers(self, request, voucher):
         """
@@ -209,7 +207,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         offers = []
 
         if catalog_query:
-            offers, next_page = self.get_offers_from_query(request, voucher, catalog_query, ordering='start')
+            offers, next_page = self.get_offers_from_query(request, voucher, catalog_query)
         else:
             product_range = voucher.offers.first().benefit.range
             products = product_range.all_products()
