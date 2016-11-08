@@ -14,7 +14,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.models import PaypalWebProfile
+from ecommerce.extensions.payment.models import PaypalWebProfile, PaypalProcessorConfiguration
 from ecommerce.extensions.payment.processors import BasePaymentProcessor
 from ecommerce.extensions.payment.utils import middle_truncate
 
@@ -48,7 +48,7 @@ class Paypal(BasePaymentProcessor):
         super(Paypal, self).__init__(site)
 
         # Number of times payment execution is retried after failure.
-        self.retry_attempts = self.configuration.get('retry_attempts', 1)
+        self.retry_attempts = PaypalProcessorConfiguration.get_solo().retry_attempts
 
     @cached_property
     def paypal_api(self):
@@ -132,32 +132,50 @@ class Paypal(BasePaymentProcessor):
             available_attempts = self.retry_attempts
 
         for i in range(1, available_attempts + 1):
-            payment = paypalrestsdk.Payment(data, api=self.paypal_api)
-            payment.create()
-            # Raise an exception for payments that were not successfully created. Consuming code is
-            # responsible for handling the exception.
-            if not payment.success():
+            try:
+                payment = paypalrestsdk.Payment(data, api=self.paypal_api)
+                payment.create()
+                if payment.success():
+                    break
+                else:
+                    if i < available_attempts:
+                        logger.warning(
+                            u"Creating PayPal payment for basket [%d] was unsuccessful. Will retry.",
+                            basket.id,
+                            exc_info=True
+                        )
+                    else:
+                        error = self._get_error(payment)
+                        # pylint: disable=unsubscriptable-object
+                        entry = self.record_processor_response(
+                            error,
+                            transaction_id=error['debug_id'],
+                            basket=basket
+                        )
+                        logger.error(
+                            u"%s [%d], %s [%d].",
+                            "Failed to create PayPal payment for basket",
+                            basket.id,
+                            "PayPal's response recorded in entry",
+                            entry.id,
+                            exc_info=True
+                        )
+                        raise GatewayError(error)
+
+            except:  # pylint: disable=bare-except
                 if i < available_attempts:
                     logger.warning(
-                        u"Creating paypal payment for basket [%d] unsuccessful. Will retry",
+                        u"Creating PayPal payment for basket [%d] resulted in an exception. Will retry.",
                         basket.id,
                         exc_info=True
                     )
                 else:
-                    error = self._get_error(payment)
-                    # pylint: disable=unsubscriptable-object
-                    entry = self.record_processor_response(
-                        error,
-                        transaction_id=error['debug_id'],
-                        basket=basket
+                    logger.exception(
+                        u"After %d retries, creating PayPal payment for basket [%d] still experienced exception.",
+                        i,
+                        basket.id
                     )
-                    logger.error(
-                        u"Failed to create PayPal payment for basket [%d]. PayPal's response recorded in entry [%d].",
-                        basket.id,
-                        entry.id,
-                        exc_info=True
-                    )
-                    raise GatewayError(error)
+                    raise
 
         entry = self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
         logger.info("Successfully created PayPal payment [%s] for basket [%d].", payment.id, basket.id)

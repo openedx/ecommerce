@@ -3,8 +3,10 @@ from pprint import pformat
 from django.utils.html import format_html
 from oscar.apps.payment.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
 from oscar.core.loading import get_model
+from solo.admin import SingletonModelAdmin
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+PaypalProcessorConfiguration = get_model('payment', 'PaypalProcessorConfiguration')
 
 
 @admin.register(PaymentProcessorResponse)
@@ -23,3 +25,6 @@ class PaymentProcessorResponseAdmin(admin.ModelAdmin):
         return format_html('<br><br><pre>{}</pre>', pretty_response)
 
     formatted_response.allow_tags = True
+
+
+admin.site.register(PaypalProcessorConfiguration, SingletonModelAdmin)
