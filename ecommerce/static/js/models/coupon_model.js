@@ -80,6 +80,7 @@ define([
                 email_domains: {
                     pattern:
                     /^((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(,((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,})*$/,
+                    msg: gettext('Email domains are invalid.'),
                     required: false
                 },
                 end_date: function (val) {

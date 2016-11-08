@@ -169,7 +169,10 @@ define([
                     observe: 'course_seat_types'
                 },
                 'input[name=email_domains]': {
-                    observe: 'email_domains'
+                    observe: 'email_domains',
+                    onSet: function(val) {
+                        return val.replace(/\s/g, '');
+                    }
                 },
                 'input[name=invoice_type]': {
                     observe: 'invoice_type'
