@@ -2,8 +2,10 @@
 import logging
 from urlparse import urlparse
 
-from django.shortcuts import get_object_or_404
 import django_filters
+from dateutil import parser
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
@@ -91,7 +93,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
     def retrieve_course_objects(self, results, course_seat_types):
         """ Helper method to retrieve all the courses, products and stock records
-        from course IDs in course catalog response results.
+        from course IDs in course catalog response results. Professional courses
+        which have a set enrollment end date and which has passed are omitted.
 
         Args:
             results(dict): Course catalog response results.
@@ -100,12 +103,22 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         Returns:
             Querysets of products and stock records retrieved from results.
         """
-        course_ids = [result['key'] for result in results]
-        products = Product.objects.filter(
-            course_id__in=course_ids,
-            attributes__name='certificate_type',
-            attribute_values__value_text__in=course_seat_types.split(',')
-        )
+        all_course_ids = []
+        nonexpired_course_ids = []
+        for result in results:
+            all_course_ids.append(result['key'])
+            if not result['enrollment_end'] or (
+                    result['enrollment_end'] and parser.parse(result['enrollment_end']) > now()
+            ):
+                nonexpired_course_ids.append(result['key'])
+
+        products = []
+        for seat_type in course_seat_types.split(','):
+            products.extend(Product.objects.filter(
+                course_id__in=nonexpired_course_ids if seat_type == 'professional' else all_course_ids,
+                attributes__name='certificate_type',
+                attribute_values__value_text=seat_type
+            ))
         stock_records = StockRecord.objects.filter(product__in=products)
         return products, stock_records
 
