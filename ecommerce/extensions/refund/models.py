@@ -98,7 +98,8 @@ class Refund(StatusMixin, TimeStampedModel):
             None: If no unrefunded order lines have been provided.
             Refund: With RefundLines corresponding to each given unrefunded order line.
         """
-        unrefunded_lines = [line for line in lines if not line.refund_lines.exists()]
+        unrefunded_lines = [line for line in lines if not line.refund_lines.exclude(status=REFUND_LINE.DENIED).exists()]
+
         if unrefunded_lines:
             status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
             total_credit_excl_tax = sum([line.line_price_excl_tax for line in unrefunded_lines])
