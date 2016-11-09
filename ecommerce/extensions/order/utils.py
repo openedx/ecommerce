@@ -102,7 +102,7 @@ class OrderCreator(OscarOrderCreator):
         try:
             order = Order(**order_data)
             order.save()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to save Order [%s]', order_number)
 
         try:
