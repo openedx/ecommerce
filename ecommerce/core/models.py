@@ -372,14 +372,13 @@ class User(AbstractUser):
                 append_slash=False
             )
             status = api.enrollment(','.join([self.username, course_key])).get()
-        except (ConnectionError, SlumberBaseException, Timeout) as ex:
+        except (ConnectionError, SlumberBaseException, Timeout):
             log.exception(
-                'Failed to retrieve enrollment details for [%s] in course [%s], because of [%s]',
+                'Failed to retrieve enrollment details for [%s] in course [%s]',
                 self.username,
-                course_key,
-                ex,
+                course_key
             )
-            raise ex
+            raise
 
         seat_type = mode_for_seat(seat)
         if status and status.get('mode') == seat_type and status.get('is_active'):
@@ -407,13 +406,12 @@ class User(AbstractUser):
             )
             response = api.accounts(self.username).get()
             return response
-        except (ConnectionError, SlumberBaseException, Timeout) as ex:
+        except (ConnectionError, SlumberBaseException, Timeout):
             log.exception(
-                'Failed to retrieve account details for [%s], because of [%s]',
-                self.username,
-                ex,
+                'Failed to retrieve account details for [%s]',
+                self.username
             )
-            raise ex
+            raise
 
     def is_eligible_for_credit(self, course_key):
         """
@@ -441,15 +439,40 @@ class User(AbstractUser):
                 oauth_access_token=self.access_token
             )
             response = api.eligibility().get(**query_strings)
-        except (ConnectionError, SlumberBaseException, Timeout) as ex:  # pragma: no cover
+        except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
             log.exception(
-                'Failed to retrieve eligibility details for [%s] in course [%s], Because of [%s]',
+                'Failed to retrieve eligibility details for [%s] in course [%s]',
                 self.username,
-                course_key,
-                ex,
+                course_key
             )
-            raise ex
+            raise
         return response
+
+    def is_verified(self):
+        """
+        Check if a user has verified his/her identity.
+        Calls the LMS verification status API endpoint and returns the verification status information.
+
+        Returns:
+            True if the user is verified, false otherwise.
+
+        Raises:
+            ConnectionError, SlumberBaseException and Timeout for failures in
+            establishing a connection with the LMS verification status API endpoint.
+        """
+        try:
+            api = EdxRestApiClient(
+                get_lms_url('api/user/v1/'),
+                oauth_access_token=self.access_token
+            )
+            response = api.accounts(self.username).verification_status().get()
+            return response.get('is_verified', False)
+        except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
+            log.exception(
+                'Failed to retrieve verification status details for [%s]',
+                self.username
+            )
+            raise
 
 
 class Client(User):

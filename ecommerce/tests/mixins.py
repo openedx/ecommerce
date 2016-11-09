@@ -12,6 +12,7 @@ from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from django.utils.timezone import now
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -35,6 +36,8 @@ ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductClass = get_model('catalogue', 'ProductClass')
 User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
+
+CONTENT_TYPE = 'application/json'
 
 
 class UserMixin(object):
@@ -135,14 +138,14 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             response = self.client.post(
                 self.PATH,
                 data=json.dumps(request_data),
-                content_type='application/json',
+                content_type=CONTENT_TYPE,
                 HTTP_AUTHORIZATION='JWT {}'.format(token) if token else self.generate_jwt_token_header(self.user)
             )
         else:
             response = self.client.post(
                 self.PATH,
                 data=json.dumps(request_data),
-                content_type='application/json'
+                content_type=CONTENT_TYPE
             )
 
         return response
@@ -277,7 +280,7 @@ class SiteMixin(object):
             'access_token': token,
             'expires_in': 3600,
         })
-        httpretty.register_uri(httpretty.POST, url, body=body, content_type='application/json', status=status)
+        httpretty.register_uri(httpretty.POST, url, body=body, content_type=CONTENT_TYPE, status=status)
 
         return token
 
@@ -298,7 +301,7 @@ class ApiMockMixin(object):
     def mock_api_error(self, error, url):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type=CONTENT_TYPE)
 
 
 class LmsApiMockMixin(object):
@@ -326,7 +329,7 @@ class LmsApiMockMixin(object):
         course_info_json = json.dumps(course_info)
         course_id = course.id if course else 'course-v1:test+test+test'
         course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
-        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type='application/json')
+        httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type=CONTENT_TYPE)
 
     def mock_enrollment_api(self, request, user, course_id, is_active=True, mode='audit'):
         """ Returns a successful response indicating self.user is enrolled in the specified course mode. """
@@ -336,7 +339,7 @@ class LmsApiMockMixin(object):
             course_id=course_id
         )
         body = json.dumps({'mode': mode, 'is_active': is_active})
-        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type=CONTENT_TYPE)
 
     def mock_enrollment_api_error(self, request, user, course_id, error):
         """ Mock Enrollment api call which raises error when called """
@@ -348,7 +351,7 @@ class LmsApiMockMixin(object):
             username=user.username,
             course_id=course_id
         )
-        httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
+        httpretty.register_uri(httpretty.GET, url, body=callback, content_type=CONTENT_TYPE)
 
     def mock_account_api(self, request, username, data):
         """ Mock the account LMS API endpoint for a user.
@@ -363,7 +366,7 @@ class LmsApiMockMixin(object):
             username=username,
         )
         body = json.dumps(data)
-        httpretty.register_uri(httpretty.GET, url, body=body, content_type='application/json')
+        httpretty.register_uri(httpretty.GET, url, body=body, content_type=CONTENT_TYPE)
 
     def mock_eligibility_api(self, request, user, course_key, eligible=True):
         """ Mock eligibility API endpoint. Returns eligibility data. """
@@ -377,4 +380,17 @@ class LmsApiMockMixin(object):
             username=user.username,
             course_key=course_key
         )
-        httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type='application/json')
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type=CONTENT_TYPE)
+
+    def mock_verification_status_api(self, request, user, is_verified=True):
+        """ Mock verification API endpoint. Returns verfication status data. """
+        verification_data = {
+            'status': 'approved',
+            'expires': (now() + datetime.timedelta(days=1)).isoformat(),
+            'is_verified': is_verified
+        }
+        url = '{host}/accounts/{username}/verification_status/'.format(
+            host=request.site.siteconfiguration.build_lms_url('/api/user/v1'),
+            username=user.username
+        )
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps(verification_data), content_type=CONTENT_TYPE)

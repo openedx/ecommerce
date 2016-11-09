@@ -122,6 +122,14 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         user, course_key = self.prepare_credit_eligibility_info(eligible=False)
         self.assertFalse(user.is_eligible_for_credit(course_key))
 
+    @httpretty.activate
+    @ddt.data(True, False)
+    def test_user_verification_status(self, is_verified):
+        """ Verify the method returns correct response. """
+        user = self.create_user()
+        self.mock_verification_status_api(self.request, user, is_verified=is_verified)
+        self.assertEqual(user.is_verified(), is_verified)
+
 
 class BusinessClientTests(TestCase):
     def test_str(self):
