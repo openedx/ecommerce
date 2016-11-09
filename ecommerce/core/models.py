@@ -55,7 +55,7 @@ class SiteConfiguration(models.Model):
         blank=False
     )
     client_side_payment_processor = models.CharField(
-        verbose_name=_('Payment processors'),
+        verbose_name=_('Client-side payment processor'),
         help_text=_('Processor that will be used for client-side payments'),
         max_length=255,
         null=True,

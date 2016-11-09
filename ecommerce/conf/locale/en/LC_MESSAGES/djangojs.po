@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-10 13:26+0000\n"
+"POT-Creation-Date: 2016-11-08 22:10-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,20 +33,28 @@ msgstr ""
 msgid "At least one seat type must be selected."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:52
-msgid "A valid course ID is required"
-msgstr ""
-
-#: ecommerce/static/js/models/coupon_model.js:99
+#: ecommerce/static/js/models/coupon_model.js:66
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:128
-msgid "Must occur before end date"
+#: ecommerce/static/js/models/coupon_model.js:70
+msgid "A valid course ID is required"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:143
+#: ecommerce/static/js/models/coupon_model.js:83
+msgid "Email domains are invalid."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:98
 msgid "Must occur after start date"
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:123
+msgid "Max uses for multi-use coupons must be higher than 2."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:151
+msgid "Must occur before end date"
 msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:55
@@ -185,10 +193,6 @@ msgstr ""
 msgid "Redeem"
 msgstr ""
 
-#: ecommerce/static/js/utils/validation_patterns.js:15
-msgid "The course ID is invalid."
-msgstr ""
-
 #: ecommerce/static/js/views/coupon_detail_view.js:105
 #: ecommerce/static/js/views/coupon_form_view.js:60
 msgid "Can be used once by one customer"
@@ -212,49 +216,61 @@ msgstr ""
 msgid "Discount Code"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_form_view.js:588
+#: ecommerce/static/js/views/coupon_form_view.js:608
 msgid "Save Changes"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_form_view.js:603
+#: ecommerce/static/js/views/coupon_form_view.js:623
 msgid "Create Coupon"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_list_view.js:44
+#: ecommerce/static/js/views/coupon_list_view.js:47
 #: ecommerce/static/js/views/course_list_view.js:38
 msgid "Search..."
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_list_view.js:54
+#: ecommerce/static/js/views/coupon_list_view.js:57
 #: ecommerce/static/js/views/course_list_view.js:48
 msgid "Next"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_list_view.js:55
+#: ecommerce/static/js/views/coupon_list_view.js:58
 #: ecommerce/static/js/views/course_list_view.js:49
 msgid "Previous"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.
-#: ecommerce/static/js/views/coupon_list_view.js:59
+#: ecommerce/static/js/views/coupon_list_view.js:62
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
 msgstr ""
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:62
+#: ecommerce/static/js/views/coupon_list_view.js:65
 msgid "(filtered from _MAX_ total coupons)"
 msgstr ""
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:65
+#: ecommerce/static/js/views/coupon_list_view.js:68
 msgid "Display _MENU_ coupons"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_list_view.js:71
+#: ecommerce/static/js/views/coupon_list_view.js:74
 msgid "Name"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_list_view.js:78
+#: ecommerce/static/js/views/coupon_list_view.js:81
+msgid "Custom Code"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:85
+msgid "Client"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:89
+msgid "Category"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:93
 msgid "Coupon Report"
 msgstr ""
 
@@ -276,12 +292,15 @@ msgid "Professional Education"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:68
-msgid "Paid certificate track with initial verification and Professional "
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:74
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.
