@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
-from slumber.exceptions import SlumberBaseException
+from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
@@ -448,10 +448,13 @@ class User(AbstractUser):
             raise
         return response
 
-    def is_verified(self):
+    def is_verified(self, request):
         """
         Check if a user has verified his/her identity.
         Calls the LMS verification status API endpoint and returns the verification status information.
+
+        Args:
+            request (WSGIRequest): The request from which the LMS account API endpoint is created.
 
         Returns:
             True if the user is verified, false otherwise.
@@ -462,11 +465,13 @@ class User(AbstractUser):
         """
         try:
             api = EdxRestApiClient(
-                get_lms_url('api/user/v1/'),
+                request.site.siteconfiguration.build_lms_url('api/user/v1/'),
                 oauth_access_token=self.access_token
             )
             response = api.accounts(self.username).verification_status().get()
             return response.get('is_verified', False)
+        except HttpNotFoundError:
+            return False
         except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
             log.exception(
                 'Failed to retrieve verification status details for [%s]',
