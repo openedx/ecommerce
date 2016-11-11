@@ -23,7 +23,7 @@ class CheckoutView(APIView):
 
     def post(self, request):
         basket_id = request.data['basket_id']
-        payment_processor = request.data['payment_processor']
+        payment_processor_name = request.data['payment_processor']
 
         # Get the basket, and make sure it belongs to the current user.
         try:
@@ -38,11 +38,13 @@ class CheckoutView(APIView):
 
         # Return the payment info
         try:
-            payment_processor = get_processor_class_by_name(payment_processor)(request.site)
+            payment_processor = get_processor_class_by_name(payment_processor_name)(request.site)
         except ProcessorNotFoundError:
-            logger.exception('Failed to get payment processor [%s].', payment_processor)
+            logger.exception('Failed to get payment processor [%s]. basket id: [%s]. price: [%s]',
+                             payment_processor_name, basket_id, basket.total_excl_tax)
+
             return HttpResponseBadRequest(
-                'Payment processor [{}] not found.'.format(payment_processor)
+                'Payment processor [{}] not found.'.format(payment_processor_name)
             )
 
         parameters = payment_processor.get_transaction_parameters(basket, request=request)
