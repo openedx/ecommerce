@@ -6,8 +6,26 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
-from oscar.apps.offer.abstract_models import AbstractConditionalOffer, AbstractRange
+from django.utils.translation import ugettext_lazy as _
+from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditionalOffer, AbstractRange
 from threadlocals.threadlocals import get_current_request
+
+
+VALID_BENEFIT_TYPES = [AbstractBenefit.PERCENTAGE, AbstractBenefit.FIXED]
+
+
+class Benefit(AbstractBenefit):
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Benefit, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+
+    def clean(self):
+        self.clean_type()
+        super(Benefit, self).clean()  # pylint: disable=bad-super-call
+
+    def clean_type(self):
+        if self.type not in VALID_BENEFIT_TYPES:
+            raise ValidationError(_('Unrecognised benefit type {type}'.format(type=self.type)))
 
 
 class ConditionalOffer(AbstractConditionalOffer):

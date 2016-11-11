@@ -273,6 +273,13 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.assertEqual(response_data.status_code, expected_status_code)
 
+    @ddt.data('', 'Incorrect benefit type')
+    def test_create_coupon_product_invalid_benefit_type(self, benefit_type):
+        """Test creating coupon when provided benefit type is invalid."""
+        self.data.update({'benefit_type': benefit_type})
+        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response_data.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_response(self):
         """Test the response data given after the order was created."""
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)

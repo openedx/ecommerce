@@ -4,11 +4,12 @@ import logging
 
 import dateutil.parser
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
-from rest_framework import filters, generics, status, viewsets
+from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -20,6 +21,7 @@ from ecommerce.extensions.api.serializers import CategorySerializer, CouponSeria
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.offer.models import VALID_BENEFIT_TYPES
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import update_voucher_offer
@@ -79,90 +81,96 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         stock_record_ids = request.data.get('stock_record_ids')
         voucher_type = request.data.get('voucher_type')
 
-        with transaction.atomic():
-            if code:
-                try:
-                    Voucher.objects.get(code=code)
-                    return Response(
-                        'A coupon with code {code} already exists.'.format(code=code),
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                except Voucher.DoesNotExist:
-                    pass
-
-            if course_seat_types:
-                course_seat_types = prepare_course_seat_types(course_seat_types)
-
-            try:
-                category = Category.objects.get(name=category_data['name'])
-            except Category.DoesNotExist:
-                return Response(
-                    'Category {category_name} not found.'.format(category_name=category_data['name']),
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            except KeyError:
-                return Response('Invalid Coupon Category data.', status=status.HTTP_400_BAD_REQUEST)
-
-            # Maximum number of uses can be set for each voucher type and disturb
-            # the predefined behaviours of the different voucher types. Therefor
-            # here we enforce that the max_uses variable can't be used for SINGLE_USE
-            # voucher types.
-            if max_uses and voucher_type != Voucher.SINGLE_USE:
-                max_uses = int(max_uses)
-            else:
-                max_uses = None
-
-            # When a black-listed course mode is received raise an exception.
-            # Audit modes do not have a certificate type and therefore will raise
-            # an AttributeError exception.
-            if stock_record_ids:
-                seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
-                for seat in seats:
+        try:
+            with transaction.atomic():
+                if code:
                     try:
-                        if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                        Voucher.objects.get(code=code)
+                        return Response(
+                            'A coupon with code {code} already exists.'.format(code=code),
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    except Voucher.DoesNotExist:
+                        pass
+
+                if course_seat_types:
+                    course_seat_types = prepare_course_seat_types(course_seat_types)
+
+                try:
+                    category = Category.objects.get(name=category_data['name'])
+                except Category.DoesNotExist:
+                    return Response(
+                        'Category {category_name} not found.'.format(category_name=category_data['name']),
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+                except KeyError:
+                    return Response('Invalid Coupon Category data.', status=status.HTTP_400_BAD_REQUEST)
+
+                # Maximum number of uses can be set for each voucher type and disturb
+                # the predefined behaviours of the different voucher types. Therefor
+                # here we enforce that the max_uses variable can't be used for SINGLE_USE
+                # voucher types.
+                if max_uses and voucher_type != Voucher.SINGLE_USE:
+                    max_uses = int(max_uses)
+                else:
+                    max_uses = None
+
+                # When a black-listed course mode is received raise an exception.
+                # Audit modes do not have a certificate type and therefore will raise
+                # an AttributeError exception.
+                if stock_record_ids:
+                    seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
+                    for seat in seats:
+                        try:
+                            if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                                return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
+                        except AttributeError:
                             return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-                    except AttributeError:
-                        return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
 
-                stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-                coupon_catalog, __ = get_or_create_catalog(
-                    name='Catalog for stock records: {}'.format(stock_records_string),
+                    stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+                    coupon_catalog, __ = get_or_create_catalog(
+                        name='Catalog for stock records: {}'.format(stock_records_string),
+                        partner=partner,
+                        stock_record_ids=stock_record_ids
+                    )
+                else:
+                    coupon_catalog = None
+
+                coupon_product = create_coupon_product(
+                    benefit_type=request.data.get('benefit_type'),
+                    benefit_value=request.data.get('benefit_value'),
+                    catalog=coupon_catalog,
+                    catalog_query=request.data.get('catalog_query'),
+                    category=category,
+                    code=code,
+                    course_seat_types=course_seat_types,
+                    email_domains=request.data.get('email_domains'),
+                    end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),
+                    max_uses=max_uses,
+                    note=request.data.get('note'),
                     partner=partner,
-                    stock_record_ids=stock_record_ids
+                    price=request.data.get('price'),
+                    quantity=request.data.get('quantity'),
+                    start_datetime=dateutil.parser.parse(request.data.get('start_datetime')),
+                    title=request.data.get('title'),
+                    voucher_type=voucher_type
                 )
-            else:
-                coupon_catalog = None
 
-            coupon_product = create_coupon_product(
-                benefit_type=request.data.get('benefit_type'),
-                benefit_value=request.data.get('benefit_value'),
-                catalog=coupon_catalog,
-                catalog_query=request.data.get('catalog_query'),
-                category=category,
-                code=code,
-                course_seat_types=course_seat_types,
-                email_domains=request.data.get('email_domains'),
-                end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),
-                max_uses=max_uses,
-                note=request.data.get('note'),
-                partner=partner,
-                price=request.data.get('price'),
-                quantity=request.data.get('quantity'),
-                start_datetime=dateutil.parser.parse(request.data.get('start_datetime')),
-                title=request.data.get('title'),
-                voucher_type=voucher_type
+                basket = prepare_basket(request, coupon_product)
+
+                # Create an order now since payment is handled out of band via an invoice.
+                client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
+                invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
+                response_data = self.create_order_for_invoice(
+                    basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
+                )
+
+                return Response(response_data, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            logger.exception(
+                'Failed to create Benefit. Benefit type must be one of the following %s.', VALID_BENEFIT_TYPES
             )
-
-            basket = prepare_basket(request, coupon_product)
-
-            # Create an order now since payment is handled out of band via an invoice.
-            client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
-            invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
-            response_data = self.create_order_for_invoice(
-                basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
-            )
-
-            return Response(response_data, status=status.HTTP_200_OK)
+            raise serializers.ValidationError(e.message)
 
     def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
