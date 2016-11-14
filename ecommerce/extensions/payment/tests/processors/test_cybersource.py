@@ -13,7 +13,6 @@ from django.test import override_settings
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import UserCancelled, TransactionDeclined, GatewayError
 from oscar.core.loading import get_model
-from oscar.test import factories
 
 from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
@@ -190,47 +189,6 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         response = self.generate_notification(self.basket, auth_amount='0.00')
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
                           basket=self.basket)
-
-    def test_get_single_seat(self):
-        """
-        The single-seat helper for cybersource reporting should correctly
-        and return the first 'seat' product encountered in a basket.
-        """
-        get_single_seat = Cybersource.get_single_seat
-
-        # finds the seat when it's the only product in the basket.
-        self.assertEqual(get_single_seat(self.basket), self.product)
-
-        # finds the first seat added, when there's more than one.
-        basket = factories.create_basket(empty=True)
-        other_seat = factories.ProductFactory(
-            product_class=self.seat_product_class,
-            stockrecords__price_currency='USD',
-            stockrecords__partner__short_code='test',
-        )
-        basket.add_product(self.product)
-        basket.add_product(other_seat)
-        self.assertEqual(get_single_seat(basket), self.product)
-
-        # finds the seat when there's a mixture of product classes.
-        basket = factories.create_basket(empty=True)
-        other_product = factories.ProductFactory(
-            stockrecords__price_currency='USD',
-            stockrecords__partner__short_code='test2',
-        )
-        basket.add_product(other_product)
-        basket.add_product(self.product)
-        self.assertEqual(get_single_seat(basket), self.product)
-        self.assertNotEqual(get_single_seat(basket), other_product)
-
-        # returns None when there's no seats.
-        basket = factories.create_basket(empty=True)
-        basket.add_product(other_product)
-        self.assertIsNone(get_single_seat(basket))
-
-        # returns None for an empty basket.
-        basket = factories.create_basket(empty=True)
-        self.assertIsNone(get_single_seat(basket))
 
     @httpretty.activate
     def test_issue_credit(self):

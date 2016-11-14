@@ -194,25 +194,6 @@ class Cybersource(BasePaymentProcessor):
 
         return parameters
 
-    @staticmethod
-    def get_single_seat(basket):
-        """
-        Return the first product encountered in the basket with the product
-        class of 'seat'.  Return None if no such products were found.
-        """
-        try:
-            seat_class = ProductClass.objects.get(slug='seat')
-        except ProductClass.DoesNotExist:
-            # this occurs in test configurations where the seat product class is not in use
-            return None
-
-        for line in basket.lines.all():
-            product = line.product
-            if product.get_product_class() == seat_class:
-                return product
-
-        return None
-
     def handle_processor_response(self, response, basket=None):
         """
         Handle a response (i.e., "merchant notification") from CyberSource.
