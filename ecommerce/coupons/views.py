@@ -89,29 +89,24 @@ class CouponAppView(StaffOnlyMixin, TemplateView):
 
 
 class CouponOfferView(TemplateView):
-    template_name = 'edx/partials/_error.html'
+    template_name = 'coupons/_offer_error.html'
 
     def get_context_data(self, **kwargs):
         code = self.request.GET.get('code', None)
-        error_context = {'title': _('Coupon error')}
         if code is not None:
             try:
                 voucher, products = get_voucher_and_products_from_code(code=code)
             except Voucher.DoesNotExist:
-                error_context.update({'error': _('Coupon does not exist')})
-                return error_context
+                return {'error': _('Coupon does not exist')}
             except exceptions.ProductNotFoundError:
-                error_context.update({'error': _('The voucher is not applicable to your current basket.')})
-                return error_context
+                return {'error': _('The voucher is not applicable to your current basket.')}
             valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
                 self.template_name = 'coupons/offer.html'
                 return
 
-            error_context.update({'error': msg})
-            return error_context
-        error_context.update({'error': _('This coupon code is invalid.')})
-        return error_context
+            return {'error': msg}
+        return {'error': _('This coupon code is invalid.')}
 
     @method_decorator(login_required_for_credit)
     def get(self, request, *args, **kwargs):
@@ -127,47 +122,42 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         then applies the voucher and if the basket total is FREE places the order and
         enrolls the user in the course.
         """
-        template_name = 'edx/partials/_error.html'
+        template_name = 'coupons/_offer_error.html'
         code = request.GET.get('code')
         sku = request.GET.get('sku')
-        error_context = {'title': _('Redemption error')}
 
         if not code:
-            error_context.update({'error': _('Code not provided.')})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': _('Code not provided.')})
         if not sku:
-            error_context.update({'error': _('SKU not provided.')})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': _('SKU not provided.')})
 
         try:
             voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
             msg = 'No voucher found with code {code}'.format(code=code)
-            error_context.update({'error': _(msg)})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': _(msg)})
 
         try:
             product = StockRecord.objects.get(partner_sku=sku).product
         except StockRecord.DoesNotExist:
-            error_context.update({'error': _('The product does not exist.')})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': _('The product does not exist.')})
 
         valid_voucher, msg = voucher_is_valid(voucher, [product], request)
         if not valid_voucher:
-            error_context.update({'error': msg})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': msg})
 
         if not voucher.offers.first().is_email_valid(request.user.email):
-            error_context.update({'error': _('You are not eligible to use this coupon.')})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
         if not request.user.account_details(request)['is_active']:
-            error_context.update({'error': _('You need to activate your account in order to redeem this coupon.')})
-            return render(request, template_name, error_context)
+            return render(
+                request,
+                template_name,
+                {'error': _('You need to activate your account in order to redeem this coupon.')}
+            )
 
         if request.user.is_user_already_enrolled(request, product):
-            error_context.update({'error': _('You are already enrolled in the course.')})
-            return render(request, template_name, error_context)
+            return render(request, template_name, {'error': _('You are already enrolled in the course.')})
 
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == 0:

@@ -317,7 +317,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         response = self.client.get(url_without_sku)
         self.assertEqual(response.context['error'], _('SKU not provided.'))
 
-    def test_invalid_code_voucher(self):
+    def test_invalid_voucher_code(self):
         """ Verify an error is returned when voucher does not exist. """
         code = 'DOESNTEXIST'
         url = self.redeem_url + '?code={}&sku={}'.format(code, self.stock_record.partner_sku)
@@ -332,7 +332,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The product does not exist.'))
 
-    def test_invalid_voucher(self):
+    def test_expired_voucher(self):
         """ Verify an error is returned for expired coupon. """
         start_datetime = now() - datetime.timedelta(days=20)
         end_datetime = now() - datetime.timedelta(days=10)
@@ -340,7 +340,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         __, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
         url = self.redeem_url + '?code={}&sku={}'.format(code, StockRecord.objects.get(product=product).partner_sku)
         response = self.client.get(url)
-        self.assertEqual(response.context['title'], _('Redemption error'))
         self.assertEqual(response.context['error'], _('This coupon code has expired.'))
 
     @httpretty.activate
