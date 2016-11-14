@@ -12,6 +12,7 @@ from oscar.test.factories import (
     ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 )
 from oscar.test.utils import RequestFactory
+from rest_framework import status
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -263,7 +264,6 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
 
 class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     redeem_url = reverse('coupons:redeem')
-    HTTP_MOVED = 301
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
@@ -317,7 +317,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         response = self.client.get(url_without_sku)
         self.assertEqual(response.context['error'], _('SKU not provided.'))
 
-    def test_invalid_voucher(self):
+    def test_invalid_voucher_code(self):
         """ Verify an error is returned when voucher does not exist. """
         code = 'DOESNTEXIST'
         url = self.redeem_url + '?code={}&sku={}'.format(code, self.stock_record.partner_sku)
@@ -332,6 +332,16 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The product does not exist.'))
 
+    def test_expired_voucher(self):
+        """ Verify an error is returned for expired coupon. """
+        start_datetime = now() - datetime.timedelta(days=20)
+        end_datetime = now() - datetime.timedelta(days=10)
+        code = 'INVALID'
+        __, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
+        url = self.redeem_url + '?code={}&sku={}'.format(code, StockRecord.objects.get(product=product).partner_sku)
+        response = self.client.get(url)
+        self.assertEqual(response.context['error'], _('This coupon code has expired.'))
+
     @httpretty.activate
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
@@ -345,9 +355,9 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to LMS when an enrollment code is provided. """
         self.create_and_test_coupon()
-        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=self.HTTP_MOVED)
+        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=status.HTTP_301_MOVED_PERMANENTLY)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        self.assert_redemption_page_redirects(self.student_dashboard_url, target=self.HTTP_MOVED)
+        self.assert_redemption_page_redirects(self.student_dashboard_url, target=status.HTTP_301_MOVED_PERMANENTLY)
 
     @httpretty.activate
     def test_multiple_vouchers(self):
@@ -356,8 +366,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=COUPON_CODE))
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=self.HTTP_MOVED)
-        self.assert_redemption_page_redirects(self.student_dashboard_url, target=self.HTTP_MOVED)
+        httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=status.HTTP_301_MOVED_PERMANENTLY)
+        self.assert_redemption_page_redirects(self.student_dashboard_url, target=status.HTTP_301_MOVED_PERMANENTLY)
 
     @httpretty.activate
     def test_already_enrolled_rejection(self):

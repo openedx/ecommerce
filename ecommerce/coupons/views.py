@@ -97,24 +97,16 @@ class CouponOfferView(TemplateView):
             try:
                 voucher, products = get_voucher_and_products_from_code(code=code)
             except Voucher.DoesNotExist:
-                return {
-                    'error': _('Coupon does not exist'),
-                }
+                return {'error': _('Coupon does not exist')}
             except exceptions.ProductNotFoundError:
-                return {
-                    'error': _('The voucher is not applicable to your current basket.'),
-                }
+                return {'error': _('The voucher is not applicable to your current basket.')}
             valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
                 self.template_name = 'coupons/offer.html'
                 return
 
-            return {
-                'error': msg,
-            }
-        return {
-            'error': _('This coupon code is invalid.'),
-        }
+            return {'error': msg}
+        return {'error': _('This coupon code is invalid.')}
 
     @method_decorator(login_required_for_credit)
     def get(self, request, *args, **kwargs):
@@ -158,9 +150,11 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
         if not request.user.account_details(request)['is_active']:
-            return render(request, template_name, {
-                'error': _('You need to activate your account in order to redeem this coupon.')
-            })
+            return render(
+                request,
+                template_name,
+                {'error': _('You need to activate your account in order to redeem this coupon.')}
+            )
 
         if request.user.is_user_already_enrolled(request, product):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})

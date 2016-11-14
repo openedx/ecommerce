@@ -1,0 +1,12 @@
+#error-message {
+  padding-top: $container-padding-top;
+  padding-bottom: $container-padding-bottom;
+}
+
+.message-error-content {
+  border-top: 4px solid #B20610;
+  h3 {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+}
