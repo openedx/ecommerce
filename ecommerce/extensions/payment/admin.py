@@ -8,6 +8,14 @@ from solo.admin import SingletonModelAdmin
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 PaypalProcessorConfiguration = get_model('payment', 'PaypalProcessorConfiguration')
 
+admin.site.unregister(Source)
+
+
+@admin.register(Source)
+class SourceAdminExtended(SourceAdmin):
+    raw_id_fields = ('order',)
+    show_full_result_count = False
+
 
 @admin.register(PaymentProcessorResponse)
 class PaymentProcessorResponseAdmin(admin.ModelAdmin):
