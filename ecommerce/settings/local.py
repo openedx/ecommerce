@@ -6,8 +6,10 @@ from ecommerce.settings.logger import get_logger_config
 
 
 # DEBUG CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#debug and
+# https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 DEBUG = True
+ALLOWED_HOSTS = ['*']
 # END DEBUG CONFIGURATION
 
 # EMAIL CONFIGURATION
