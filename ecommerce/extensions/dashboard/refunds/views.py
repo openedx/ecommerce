@@ -22,7 +22,7 @@ class RefundListView(FilterFieldsMixin, ListView):
         fields.update({
             'status': {
                 'query_filter': 'status__in',
-                'exposed': False,
+                'exposed': True,
             }
         })
         return fields
@@ -30,7 +30,7 @@ class RefundListView(FilterFieldsMixin, ListView):
     def get_queryset(self):
         queryset = super(RefundListView, self).get_queryset()
         queryset = queryset.prefetch_related('lines')
-        queryset = sort_queryset(queryset, self.request, ['id'], 'id')
+        queryset = sort_queryset(queryset, self.request, ['id', 'created'], 'id')
 
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():
