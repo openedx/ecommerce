@@ -2,7 +2,7 @@
 -r base.txt
 
 bok-choy==0.4.7
-coverage==4.0.2
+coverage==4.2
 ddt==1.0.0
 django-nose==1.4.2
 freezegun==0.3.7
