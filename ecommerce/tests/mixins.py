@@ -382,7 +382,7 @@ class LmsApiMockMixin(object):
         )
         httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type=CONTENT_TYPE)
 
-    def mock_verification_status_api(self, request, user, status=200, is_verified=True):
+    def mock_verification_status_api(self, site, user, status=200, is_verified=True):
         """ Mock verification API endpoint. Returns verfication status data. """
         verification_data = {
             'status': 'approved',
@@ -390,7 +390,7 @@ class LmsApiMockMixin(object):
             'is_verified': is_verified
         }
         url = '{host}/accounts/{username}/verification_status/'.format(
-            host=request.site.siteconfiguration.build_lms_url('/api/user/v1'),
+            host=site.siteconfiguration.build_lms_url('/api/user/v1'),
             username=user.username
         )
         httpretty.register_uri(

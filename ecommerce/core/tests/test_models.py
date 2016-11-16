@@ -8,6 +8,7 @@ from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
 
+from ecommerce.core.exceptions import VerificationStatusError
 from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -132,8 +133,14 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     def test_user_verification_status(self, status_code, is_verified):
         """ Verify the method returns correct response. """
         user = self.create_user()
-        self.mock_verification_status_api(self.request, user, status=status_code, is_verified=is_verified)
-        self.assertEqual(user.is_verified(self.request), is_verified)
+        self.mock_verification_status_api(self.site, user, status=status_code, is_verified=is_verified)
+        self.assertEqual(user.is_verified(self.site), is_verified)
+
+    def test_user_verification_connection_error(self):
+        """ Verify verification status exception is raised for connection issues. """
+        user = self.create_user()
+        with self.assertRaises(VerificationStatusError):
+            user.is_verified(self.site)
 
 
 class BusinessClientTests(TestCase):

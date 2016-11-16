@@ -16,6 +16,7 @@ from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
+from ecommerce.core.exceptions import VerificationStatusError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
@@ -448,13 +449,13 @@ class User(AbstractUser):
             raise
         return response
 
-    def is_verified(self, request):
+    def is_verified(self, site):
         """
         Check if a user has verified his/her identity.
         Calls the LMS verification status API endpoint and returns the verification status information.
 
         Args:
-            request (WSGIRequest): The request from which the LMS account API endpoint is created.
+            site (Site): The site object from which the LMS account API endpoint is created.
 
         Returns:
             True if the user is verified, false otherwise.
@@ -465,19 +466,17 @@ class User(AbstractUser):
         """
         try:
             api = EdxRestApiClient(
-                request.site.siteconfiguration.build_lms_url('api/user/v1/'),
+                site.siteconfiguration.build_lms_url('api/user/v1/'),
                 oauth_access_token=self.access_token
             )
             response = api.accounts(self.username).verification_status().get()
             return response.get('is_verified', False)
         except HttpNotFoundError:
             return False
-        except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
-            log.exception(
-                'Failed to retrieve verification status details for [%s]',
-                self.username
-            )
-            raise
+        except (ConnectionError, SlumberBaseException, Timeout):
+            msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
+            log.exception(msg)
+            raise VerificationStatusError(msg)
 
 
 class Client(User):
