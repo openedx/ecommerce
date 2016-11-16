@@ -232,8 +232,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                         reason = '(No detail provided.)'
 
                     logger.error(
-                        "Unable to fulfill line [%d] of order [%s] due to a server-side error: %s", line.id,
-                        order.number, reason
+                        "Fulfillment of line [%d] on order [%s] failed with status code [%d]: %s",
+                        line.id, order.number, response.status_code, reason
                     )
                     line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
             except ConnectionError:
