@@ -49,15 +49,15 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
         self.mock_dynamic_catalog_single_course_runs_api(course)
 
         cache_key = 'courses_api_detail_{}{}'.format(course.id, self.site.siteconfiguration.partner.short_code)
-        cache_hash = hashlib.md5(cache_key).hexdigest()
-        cached_course = cache.get(cache_hash)
+        cache_key = hashlib.md5(cache_key).hexdigest()
+        cached_course = cache.get(cache_key)
         self.assertIsNone(cached_course)
 
         response = get_course_info_from_catalog(self.request.site, course)
 
         self.assertEqual(response['title'], course.name)
 
-        cached_course = cache.get(cache_hash)
+        cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
     @ddt.data(

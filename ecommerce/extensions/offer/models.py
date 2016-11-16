@@ -116,8 +116,8 @@ class Range(AbstractRange):
         Retrieve the results from running the query contained in catalog_query field.
         """
         cache_key = 'catalog_query_contains [{}] [{}]'.format(self.catalog_query, product.course_id)
-        cache_hash = hashlib.md5(cache_key).hexdigest()
-        response = cache.get(cache_hash)
+        cache_key = hashlib.md5(cache_key).hexdigest()
+        response = cache.get(cache_key)
         if not response:  # pragma: no cover
             request = get_current_request()
             try:
@@ -126,7 +126,7 @@ class Range(AbstractRange):
                     course_run_ids=product.course_id,
                     partner=request.site.siteconfiguration.partner.short_code
                 )
-                cache.set(cache_hash, response, settings.COURSES_API_CACHE_TIMEOUT)
+                cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             except:  # pylint: disable=bare-except
                 raise Exception('Could not contact Course Catalog Service.')
 

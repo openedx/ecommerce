@@ -25,11 +25,11 @@ def get_course_info_from_catalog(site, course_key):
     api = site.siteconfiguration.course_catalog_api_client
     partner_short_code = site.siteconfiguration.partner.short_code
     cache_key = 'courses_api_detail_{}{}'.format(course_key, partner_short_code)
-    cache_hash = hashlib.md5(cache_key).hexdigest()
-    course_run = cache.get(cache_hash)
+    cache_key = hashlib.md5(cache_key).hexdigest()
+    course_run = cache.get(cache_key)
     if not course_run:  # pragma: no cover
         course_run = api.course_runs(course_key).get(partner=partner_short_code)
-        cache.set(cache_hash, course_run, settings.COURSES_API_CACHE_TIMEOUT)
+        cache.set(cache_key, course_run, settings.COURSES_API_CACHE_TIMEOUT)
     return course_run
 
 

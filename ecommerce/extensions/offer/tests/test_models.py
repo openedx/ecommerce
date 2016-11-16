@@ -96,14 +96,14 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.catalog_query = 'key:*'
 
         cache_key = 'catalog_query_contains [{}] [{}]'.format('key:*', seat.course_id)
-        cache_hash = hashlib.md5(cache_key).hexdigest()
-        cached_response = cache.get(cache_hash)
+        cache_key = hashlib.md5(cache_key).hexdigest()
+        cached_response = cache.get(cache_key)
         self.assertIsNone(cached_response)
 
         with mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=request)):
             response = self.range.run_catalog_query(seat)
             self.assertTrue(response['course_runs'][course.id])
-            cached_response = cache.get(cache_hash)
+            cached_response = cache.get(cache_key)
             self.assertEqual(response, cached_response)
 
     @httpretty.activate

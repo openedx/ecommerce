@@ -142,6 +142,27 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         with self.assertRaises(VerificationStatusError):
             user.is_verified(self.site)
 
+    @httpretty.activate
+    def test_user_verification_status_cache(self):
+        """ Verify the user verification status values are cached. """
+        user = self.create_user()
+        self.mock_verification_status_api(self.site, user)
+        self.assertTrue(user.is_verified(self.site))
+
+        httpretty.disable()
+        self.assertTrue(user.is_verified(self.site))
+
+    @httpretty.activate
+    def test_user_verification_status_not_cached(self):
+        """ Verify the user verification status values is not cached when user is not verified. """
+        user = self.create_user()
+        self.mock_verification_status_api(self.site, user, is_verified=False)
+        self.assertFalse(user.is_verified(self.site))
+
+        httpretty.disable()
+        with self.assertRaises(VerificationStatusError):
+            user.is_verified(self.site)
+
 
 class BusinessClientTests(TestCase):
     def test_str(self):
