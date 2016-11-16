@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from decimal import Decimal
 from hashlib import md5
 import logging
 
@@ -78,7 +77,7 @@ def create_coupon_product(
     try:
         create_vouchers(
             benefit_type=benefit_type,
-            benefit_value=Decimal(benefit_value),
+            benefit_value=benefit_value,
             catalog=catalog,
             catalog_query=catalog_query,
             code=code or None,
