@@ -3,7 +3,8 @@ import json
 import mock
 
 import ddt
-from django.test import RequestFactory
+from django.db import transaction
+from django.test import RequestFactory, TransactionTestCase
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
 import pytz
@@ -13,6 +14,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import prepare_basket, attribute_cookie_data
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.tests.mixins import UserMixin
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
@@ -273,3 +275,25 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         # test referral record is deleted when no cookies are set
         with self.assertRaises(Referral.DoesNotExist):
             Referral.objects.get(basket_id=basket.id)
+
+
+class BasketUtilsTranactionTests(UserMixin, TransactionTestCase):
+    def setUp(self):
+        super(BasketUtilsTranactionTests, self).setUp()
+        self.request = RequestFactory()
+        self.request.COOKIES = {}
+        self.request.user = self.create_user()
+        site_configuration = SiteConfigurationFactory(partner__name='Tester')
+        site_configuration.utm_cookie_name = 'test.edx.utm'
+        self.request.site = site_configuration.site
+
+    def test_attribution_atomic_transation(self):
+        with transaction.atomic():
+            basket = BasketFactory(owner=self.request.user, site=self.request.site)
+            StockRecord.objects.create(partner_sku="TEST123", product_id=1, partner_id=1)
+            with mock.patch('ecommerce.extensions.basket.utils._referral_from_basket_site') as mock_get_referral:
+                mock_get_referral.side_effect = AttributeError()
+                attribute_cookie_data(basket, self.request)
+
+        self.assertIsNotNone(Basket.objects.get(id=basket.id))
+        self.assertIsNotNone(StockRecord.objects.get(partner_sku="TEST123"))
