@@ -21,7 +21,6 @@ from ecommerce.extensions.api.serializers import CategorySerializer, CouponSeria
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.offer.models import VALID_BENEFIT_TYPES
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import update_voucher_offer
@@ -35,7 +34,7 @@ Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
-Range = Range = get_model('offer', 'Range')
+Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -167,9 +166,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
                 return Response(response_data, status=status.HTTP_200_OK)
         except ValidationError as e:
-            logger.exception(
-                'Failed to create Benefit. Benefit type must be one of the following %s.', VALID_BENEFIT_TYPES
-            )
             raise serializers.ValidationError(e.message)
 
     def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):

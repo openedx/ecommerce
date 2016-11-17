@@ -262,21 +262,29 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(details_response['coupon_type'], 'Enrollment code')
         self.assertEqual(details_response['code_status'], 'ACTIVE')
 
+    def test_create_coupon_product_invalid_category_data(self):
+        """Test creating coupon when provided category data is invalid."""
+        self.data.update({'category': {'id': 10000, 'name': 'Category Not Found'}})
+        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response_data.status_code, status.HTTP_404_NOT_FOUND)
+
     @ddt.data(
-        ({'category': {'a': 'a', 'b': 'b'}}, status.HTTP_400_BAD_REQUEST),
-        ({'category': {'id': 10000, 'name': 'Category Not Found'}}, status.HTTP_404_NOT_FOUND)
+        ('benefit_type', ['', 'Incorrect benefit type']),
+        ('benefit_value', ['', 'Incorrect benefit value', -1, 101]),
+        ('category', [{'a': 'a', 'b': 'b'}]),
     )
     @ddt.unpack
-    def test_create_coupon_product_invalid_category_data(self, category_data, expected_status_code):
-        """Test creating coupon when provided category data is invalid."""
-        self.data.update(category_data)
-        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        self.assertEqual(response_data.status_code, expected_status_code)
+    def test_create_coupon_product_invalid_data(self, key, values):
+        """Test creating coupon when provided data is invalid."""
+        for value in values:
+            self.data.update({key: value})
+            response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+            self.assertEqual(response_data.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @ddt.data('', 'Incorrect benefit type')
-    def test_create_coupon_product_invalid_benefit_type(self, benefit_type):
-        """Test creating coupon when provided benefit type is invalid."""
-        self.data.update({'benefit_type': benefit_type})
+    @ddt.data('benefit_type', 'benefit_value')
+    def test_create_coupon_product_no_data_provided(self, key):
+        """Test creating coupon when data is not provided in json."""
+        del self.data[key]
         response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.assertEqual(response_data.status_code, status.HTTP_400_BAD_REQUEST)
 

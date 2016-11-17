@@ -1,4 +1,5 @@
 """Voucher Utility Methods. """
+from decimal import Decimal, DecimalException
 import base64
 import datetime
 import hashlib
@@ -7,6 +8,7 @@ import uuid
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
@@ -290,12 +292,16 @@ def _get_or_create_offer(
         type=Condition.COUNT,
         value=1,
     )
-    offer_benefit, __ = Benefit.objects.get_or_create(
-        range=product_range,
-        type=benefit_type,
-        value=benefit_value,
-        max_affected_items=1,
-    )
+    try:
+        offer_benefit, __ = Benefit.objects.get_or_create(
+            range=product_range,
+            type=benefit_type,
+            value=Decimal(benefit_value),
+            max_affected_items=1,
+        )
+    except (TypeError, DecimalException):  # If the benefit_value parameter is not sent TypeError will be raised
+        logger.exception('Failed to create Benefit. Benefit value may not be empty or a string.')
+        raise ValidationError(_('Benefit value must be a positive number or 0.'))
 
     offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
     if offer_number:

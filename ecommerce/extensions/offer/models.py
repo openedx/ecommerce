@@ -1,5 +1,6 @@
 # noinspection PyUnresolvedReferences
 import hashlib
+import logging
 import re
 
 from django.conf import settings
@@ -10,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditionalOffer, AbstractRange
 from threadlocals.threadlocals import get_current_request
 
-
+logger = logging.getLogger(__name__)
 VALID_BENEFIT_TYPES = [AbstractBenefit.PERCENTAGE, AbstractBenefit.FIXED]
 
 
@@ -21,11 +22,20 @@ class Benefit(AbstractBenefit):
 
     def clean(self):
         self.clean_type()
+        self.clean_value()
         super(Benefit, self).clean()  # pylint: disable=bad-super-call
 
     def clean_type(self):
         if self.type not in VALID_BENEFIT_TYPES:
+            logger.exception(
+                'Failed to create Benefit. Benefit type must be one of the following %s.', VALID_BENEFIT_TYPES
+            )
             raise ValidationError(_('Unrecognised benefit type {type}'.format(type=self.type)))
+
+    def clean_value(self):
+        if self.value < 0:
+            logger.exception('Failed to create Benefit. Benefit value may not be a negative number.')
+            raise ValidationError(_('Benefit value must be a positive number or 0.'))
 
 
 class ConditionalOffer(AbstractConditionalOffer):
