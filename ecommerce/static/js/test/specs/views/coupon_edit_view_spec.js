@@ -20,7 +20,8 @@ define([
                 enrollment_code_data = Mock_Coupons.enrollmentCodeCouponData,
                 discount_code_data = Mock_Coupons.discountCodeCouponData,
                 invoice_coupon_data = Mock_Coupons.couponWithInvoiceData,
-                dynamic_coupon = Mock_Coupons.dynamicCouponData;
+                dynamic_coupon = Mock_Coupons.dynamicCouponData,
+                multi_use_coupon_data = Mock_Coupons.enrollmentMultiUseCouponData;
 
             describe('edit enrollment code', function () {
                 beforeEach(function () {
@@ -125,6 +126,18 @@ define([
                     formView.model.set('title', 'Test Title');
                     formView.submit($.Event('click'));
                     expect(model.save).toHaveBeenCalled();
+                });
+            });
+
+            describe('Editing Multi-use enrollment coupon', function() {
+                beforeEach(function() {
+                    model = Coupon.findOrCreate(multi_use_coupon_data, {parse: true});
+                    view = new CouponCreateEditView({model: model, editing: true}).render();
+                });
+
+                it('should display model max_uses value in max_uses field.', function() {
+                    expect(view.$('[name=max_uses]').val()).toEqual(model.get('max_uses'));
+                    expect(view.$('[name=voucher_type]').val()).toEqual(model.get('voucher_type'));
                 });
             });
         });
