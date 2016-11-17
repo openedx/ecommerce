@@ -405,13 +405,13 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.mock_dynamic_catalog_single_course_runs_api(self.course)
 
         cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.site.siteconfiguration.partner.short_code)
-        cache_hash = hashlib.md5(cache_key).hexdigest()
-        cached_course_before = cache.get(cache_hash)
+        cache_key = hashlib.md5(cache_key).hexdigest()
+        cached_course_before = cache.get(cache_key)
         self.assertIsNone(cached_course_before)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        cached_course_after = cache.get(cache_hash)
+        cached_course_after = cache.get(cache_key)
         self.assertEqual(cached_course_after['title'], self.course.name)
 
     @ddt.data({

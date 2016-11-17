@@ -553,11 +553,11 @@ def get_cached_voucher(code):
         Voucher.DoesNotExist: When no vouchers with provided code exist.
     """
     cache_key = 'voucher_{code}'.format(code=code)
-    cache_hash = hashlib.md5(cache_key).hexdigest()
+    cache_key = hashlib.md5(cache_key).hexdigest()
     voucher = cache.get(cache_key)
     if not voucher:
         voucher = Voucher.objects.get(code=code)
-        cache.set(cache_hash, voucher, settings.VOUCHER_CACHE_TIMEOUT)
+        cache.set(cache_key, voucher, settings.VOUCHER_CACHE_TIMEOUT)
     return voucher
 
 
