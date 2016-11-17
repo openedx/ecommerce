@@ -431,6 +431,7 @@ define([
 
             toggleVoucherTypeField: function () {
                 var maxUsesFieldSelector = '[name=max_uses]',
+                    multiUseMaxUsesValue = this.editing ? this.model.get('max_uses') : null,
                     voucherType = this.model.get('voucher_type');
                 if (!this.editing) {
                     this.emptyCodeField();
@@ -450,7 +451,7 @@ define([
                      * field needs to be empty by default and the minimum can not be less than 2.
                      */
                     if (voucherType === 'Multi-use') {
-                        this.model.set('max_uses', null);
+                        this.model.set('max_uses', multiUseMaxUsesValue);
                         this.$(maxUsesFieldSelector).attr('min', 2);
                     } else {
                         this.model.set('max_uses', 1);
