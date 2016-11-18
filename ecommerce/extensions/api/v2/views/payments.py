@@ -11,7 +11,13 @@ PAYMENT_PROCESSOR_CACHE_TIMEOUT = 60 * 30
 
 
 class PaymentProcessorListView(generics.ListAPIView):
-    """List the available payment processors"""
+    """List the available payment processors
+
+    Note:
+        This endpoint is *deprecated*. There is no use case for this given that the payment page
+        is served by this service (rather than LMS), and the new page loads payment processors
+        via server-side rendering (rather than client-side).
+    """
     pagination_class = None
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.PaymentProcessorSerializer

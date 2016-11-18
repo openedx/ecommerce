@@ -1,7 +1,7 @@
 import logging
 
 from django.conf import settings
-from django.core.cache import caches
+from django.core.cache import cache
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from waffle.models import Switch
@@ -23,5 +23,5 @@ def invalidate_processor_cache(*_args, **kwargs):
     if len(parts) == 2:
         processor = parts[1]
         logger.info('Switched payment processor [%s] %s.', processor, 'on' if switch.active else 'off')
-        caches['default'].delete(PAYMENT_PROCESSOR_CACHE_KEY)
+        cache.delete(PAYMENT_PROCESSOR_CACHE_KEY)
         logger.info('Invalidated payment processor cache after toggling [%s].', switch.name)
