@@ -4,20 +4,25 @@ from __future__ import unicode_literals
 import abc
 import logging
 
+import waffle
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
-import waffle
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
+from ecommerce.extensions.order.constants import PaymentEventTypeName
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
+PaymentEvent = get_model('order', 'PaymentEvent')
+PaymentEventType = get_model('order', 'PaymentEventType')
+Source = get_model('payment', 'Source')
+SourceType = get_model('payment', 'SourceType')
 
 
 class EdxOrderPlacementMixin(OrderPlacementMixin):
@@ -45,7 +50,24 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
-        source, payment_event = self.payment_processor.handle_processor_response(response, basket=basket)
+        handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
+        source_type, __ = SourceType.objects.get_or_create(name=self.payment_processor.NAME)
+        total = handled_processor_response.total
+        reference = handled_processor_response.transaction_id
+
+        source = Source(
+            source_type=source_type,
+            currency=handled_processor_response.currency,
+            amount_allocated=total,
+            amount_debited=total,
+            reference=reference,
+            label=handled_processor_response.card_number,
+            card_type=handled_processor_response.card_type
+        )
+
+        event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
+        payment_event = PaymentEvent(event_type=event_type, amount=total, reference=reference,
+                                     processor_name=self.payment_processor.NAME)
 
         self.add_payment_source(source)
         self.add_payment_event(payment_event)

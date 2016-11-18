@@ -3,19 +3,18 @@
 from __future__ import unicode_literals
 
 import json
-from urlparse import urljoin
-
 import logging
+from urlparse import urljoin
 
 import ddt
 import mock
+import paypalrestsdk
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
-import paypalrestsdk
-from paypalrestsdk.resource import Resource
+from paypalrestsdk.resource import Resource  # pylint:disable=ungrouped-imports
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
@@ -26,7 +25,6 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaypalMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
-
 
 log = logging.getLogger(__name__)
 
@@ -85,21 +83,6 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
     def _get_receipt_url(self):
         """DRY helper for getting receipt page URL."""
         return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
-
-    def _assert_payment_event_and_source(self, payer_info):
-        """DRY helper for verifying a payment event and source."""
-        source, payment_event = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
-
-        # Validate Source
-        source_type = SourceType.objects.get(code=self.processor.NAME)
-        reference = self.PAYMENT_ID
-        label = 'PayPal ({})'.format(payer_info['email']) if 'email' in payer_info else 'PayPal Account'
-        self.assert_basket_matches_source(self.basket, source, source_type, reference, label)
-
-        # Validate PaymentEvent
-        paid_type = PaymentEventType.objects.get(code='paid')
-        amount = self.basket.total_incl_tax
-        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
 
     def _assert_transaction_parameters_retry(self, response_success, failure_log_message):
         self.processor.retry_attempts = 2
@@ -284,10 +267,16 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
             log.info("Testing payer_info with email set to: %s", payer_info.get("email"))
             self.mock_oauth2_response()
             self.mock_payment_creation_response(self.basket, find=True)
-            response = self.mock_payment_execution_response(self.basket, payer_info=payer_info)
+            self.mock_payment_execution_response(self.basket, payer_info=payer_info)
 
-            self._assert_payment_event_and_source(payer_info)
-            self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
+            handled_response = self.processor.handle_processor_response(self.RETURN_DATA, basket=self.basket)
+            self.assertEqual(handled_response.currency, self.basket.currency)
+            self.assertEqual(handled_response.total, self.basket.total_incl_tax)
+            self.assertEqual(handled_response.transaction_id, self.PAYMENT_ID)
+            self.assertEqual(
+                handled_response.card_number,
+                'PayPal ({})'.format(payer_info['email']) if 'email' in payer_info else 'PayPal Account')
+            self.assertIsNone(handled_response.card_type)
 
     @httpretty.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
@@ -390,19 +379,11 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         })
         with mock.patch.object(paypalrestsdk.Payment, 'find', return_value=payment):
             with mock.patch.object(paypalrestsdk.Sale, 'refund', return_value=paypal_refund):
-                self.processor.issue_credit(source, amount, currency)
+                actual_transaction_id = self.processor.issue_credit(order, source.reference, amount, currency)
+                self.assertEqual(actual_transaction_id, transaction_id)
 
         # Verify PaymentProcessorResponse created
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id, {'id': transaction_id}, basket)
-
-        # Verify Source updated
-        self.assertEqual(source.amount_refunded, amount)
-
-        # Verify PaymentEvent created
-        paid_type = PaymentEventType.objects.get(code='refunded')
-        order = basket.order_set.first()
-        payment_event = order.payment_events.first()
-        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, transaction_id)
 
     def test_issue_credit_error(self):
         """
@@ -428,19 +409,16 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         # Test general exception
         with mock.patch.object(paypalrestsdk.Payment, 'find', return_value=payment):
             with mock.patch.object(paypalrestsdk.Sale, 'refund', side_effect=ValueError):
-                self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+                self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
                 self.assertEqual(source.amount_refunded, 0)
 
         # Test error response
         with mock.patch.object(paypalrestsdk.Payment, 'find', return_value=payment):
             with mock.patch.object(paypalrestsdk.Sale, 'refund', return_value=paypal_refund):
-                self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+                self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
 
         # Verify PaymentProcessorResponse created
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id, expected_response, basket)
-
-        # Verify Source unchanged
-        self.assertEqual(source.amount_refunded, 0)
 
     def assert_processor_multiple_response_recorded(self):
         """ Ensures a multiple PaymentProcessorResponse can store in db for the

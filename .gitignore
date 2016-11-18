@@ -83,3 +83,4 @@ override.cfg
 private.py
 docs/_build
 *.backup
+*.log

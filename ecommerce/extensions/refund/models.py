@@ -5,19 +5,21 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 from oscar.apps.payment.exceptions import PaymentError
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
+from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 
-
 logger = logging.getLogger(__name__)
 
+PaymentEvent = get_model('order', 'PaymentEvent')
+PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
 
 
@@ -155,14 +157,25 @@ class Refund(StatusMixin, TimeStampedModel):
     def _issue_credit(self):
         """Issue a credit to the purchaser via the payment processor used for the original order."""
         try:
-            # TODO Update this if we ever support multiple payment sources for a single order.
+            # NOTE: Update this if we ever support multiple payment sources for a single order.
             source = self.order.sources.first()
             processor = get_processor_class_by_name(source.source_type.name)(self.order.site)
-            processor.issue_credit(source, self.total_credit_excl_tax, self.currency)
+            amount = self.total_credit_excl_tax
+
+            refund_reference_number = processor.issue_credit(self.order, source.reference, amount, self.currency)
+            source.refund(amount, reference=refund_reference_number)
+            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
+            PaymentEvent.objects.create(
+                event_type=event_type,
+                order=self.order,
+                amount=amount,
+                reference=refund_reference_number,
+                processor_name=processor.NAME
+            )
 
             audit_log(
                 'credit_issued',
-                amount=self.total_credit_excl_tax,
+                amount=amount,
                 currency=self.currency,
                 processor_name=processor.NAME,
                 refund_id=self.id,

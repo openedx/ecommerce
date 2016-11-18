@@ -12,7 +12,6 @@ from django.conf import settings
 from django.test import override_settings
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import UserCancelled, TransactionDeclined, GatewayError
-from oscar.core.loading import get_model
 
 from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
@@ -22,9 +21,6 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource, sud
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
-
-PaymentEventType = get_model('order', 'PaymentEventType')
-SourceType = get_model('payment', 'SourceType')
 
 
 @ddt.ddt
@@ -140,25 +136,12 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
 
         response = self.generate_notification(self.basket)
-        reference = response['transaction_id']
-        source, payment_event = self.processor.handle_processor_response(response, basket=self.basket)
-
-        # Validate the Source
-        source_type = SourceType.objects.get(code=self.processor.NAME)
-        label = response['req_card_number']
-        self.assert_basket_matches_source(
-            self.basket,
-            source,
-            source_type,
-            reference,
-            label,
-            card_type=self.DEFAULT_CARD_TYPE
-        )
-
-        # Validate PaymentEvent
-        paid_type = PaymentEventType.objects.get(code='paid')
-        amount = self.basket.total_incl_tax
-        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, reference)
+        handled_response = self.processor.handle_processor_response(response, basket=self.basket)
+        self.assertEqual(handled_response.currency, self.basket.currency)
+        self.assertEqual(handled_response.total, self.basket.total_incl_tax)
+        self.assertEqual(handled_response.transaction_id, response['transaction_id'])
+        self.assertEqual(handled_response.card_number, response['req_card_number'])
+        self.assertEqual(handled_response.card_type, self.DEFAULT_CARD_TYPE)
 
     def test_handle_processor_response_invalid_signature(self):
         """
@@ -211,20 +194,13 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         cs_soap_mock = self.get_soap_mock(amount=amount, currency=currency, transaction_id=transaction_id,
                                           basket_id=basket.id)
         with mock.patch('suds.client.ServiceSelector', cs_soap_mock):
-            self.processor.issue_credit(source, amount, currency)
+            actual = self.processor.issue_credit(order, source.reference, amount, currency)
+            self.assertEqual(actual, transaction_id)
 
         # Verify PaymentProcessorResponse created
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id,
                                                 suds_response_to_dict(cs_soap_mock().runTransaction()),
                                                 basket)
-
-        # Verify Source updated
-        self.assertEqual(source.amount_refunded, amount)
-
-        # Verify PaymentEvent created
-        paid_type = PaymentEventType.objects.get(code='refunded')
-        payment_event = order.payment_events.first()
-        self.assert_valid_payment_event_fields(payment_event, amount, paid_type, self.processor.NAME, transaction_id)
 
     @httpretty.activate
     def test_issue_credit_error(self):
@@ -243,14 +219,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # Test for communication failure.
         with mock.patch('suds.client.ServiceSelector', mock.Mock(side_effect=Exception)):
-            self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+            self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
             self.assertEqual(source.amount_refunded, 0)
 
         # Test for declined transaction
         cs_soap_mock = self.get_soap_mock(amount=amount, currency=currency, transaction_id=transaction_id,
                                           basket_id=basket.id, decision='DECLINE')
         with mock.patch('suds.client.ServiceSelector', cs_soap_mock):
-            self.assertRaises(GatewayError, self.processor.issue_credit, source, amount, currency)
+            self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
             self.assert_processor_response_recorded(self.processor.NAME, transaction_id,
                                                     suds_response_to_dict(cs_soap_mock().runTransaction()),
                                                     basket)

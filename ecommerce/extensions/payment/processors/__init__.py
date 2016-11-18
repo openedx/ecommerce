@@ -1,14 +1,16 @@
 from __future__ import unicode_literals
 
 import abc
+from collections import namedtuple
 
 import waffle
 from django.conf import settings
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
-
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+
+HandledProcessorResponse = namedtuple('HandledProcessorResponse',
+                                      ['transaction_id', 'total', 'currency', 'card_number', 'card_type'])
 
 
 class BasePaymentProcessor(object):  # pragma: no cover
@@ -58,6 +60,9 @@ class BasePaymentProcessor(object):  # pragma: no cover
 
         Keyword Arguments:
             basket (Basket): Basket whose contents have been purchased via the payment processor
+
+        Returns:
+            HandledProcessorResponse
         """
         raise NotImplementedError
 
@@ -105,14 +110,19 @@ class BasePaymentProcessor(object):  # pragma: no cover
                                                        response=response, basket=basket)
 
     @abc.abstractmethod
-    def issue_credit(self, source, amount, currency):
+    def issue_credit(self, order, reference_number, amount, currency):
         """
         Issue a credit for the specified transaction.
 
         Arguments:
-            source (Source): Payment Source used for the original debit/purchase.
+            order (Order): Order being refunded.
+            reference_number (str): Reference number of the transaction being refunded.
             amount (Decimal): amount to be credited/refunded
             currency (string): currency of the amount to be credited
+
+        Returns:
+            str: Reference number of the *refund* transaction. Unless the payment processor groups related transactions,
+             this will *NOT* be the same as the `reference_number` argument.
         """
         raise NotImplementedError
 

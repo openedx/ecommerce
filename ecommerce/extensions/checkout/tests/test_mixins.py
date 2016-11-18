@@ -1,11 +1,10 @@
 """
 Tests for the ecommerce.extensions.checkout.mixins module.
 """
-from decimal import Decimal
 
-from mock import Mock, patch
 from django.core import mail
 from django.test import RequestFactory
+from mock import Mock, patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory, ProductFactory, UserFactory
@@ -16,6 +15,8 @@ from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
+from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
@@ -23,10 +24,12 @@ from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Basket = get_model('basket', 'Basket')
+PaymentEventType = get_model('order', 'PaymentEventType')
+SourceType = get_model('payment', 'SourceType')
 
 
 @patch.object(SegmentClient, 'track')
-class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
+class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin, RefundTestMixin, TestCase):
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
     """
@@ -39,44 +42,48 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, RefundTestMixin, Te
 
     def test_handle_payment_logging(self, __):
         """
-        Ensure that we emit a log entry upon receipt of a payment notification.
+        Ensure that we emit a log entry upon receipt of a payment notification, and create Source and PaymentEvent
+        objects.
         """
-        amount = Decimal('9.99')
-        basket_id = 'test-basket-id'
-        currency = 'USD'
-        processor_name = 'test-processor-name'
-        reference = 'test-reference'
-        user_id = '1'
+        user = factories.UserFactory()
+        basket = factories.create_basket()
+        basket.owner = user
+        basket.save()
 
-        mock_source = Mock(currency=currency)
-        mock_payment_event = Mock(
-            amount=amount,
-            processor_name=processor_name,
-            reference=reference
-        )
-        mock_handle_processor_response = Mock(return_value=(mock_source, mock_payment_event))
-        mock_payment_processor = Mock(handle_processor_response=mock_handle_processor_response)
+        mixin = EdxOrderPlacementMixin()
+        mixin.payment_processor = DummyProcessor(self.site)
+        processor_name = DummyProcessor.NAME
+        total = basket.total_incl_tax
+        reference = basket.id
 
-        with patch('ecommerce.extensions.checkout.mixins.EdxOrderPlacementMixin.payment_processor',
-                   mock_payment_processor):
-            mock_basket = Mock(id=basket_id, owner=Mock(id=user_id))
-            with LogCapture(LOGGER_NAME) as l:
-                EdxOrderPlacementMixin().handle_payment(Mock(), mock_basket)
-                l.check(
-                    (
-                        LOGGER_NAME,
-                        'INFO',
-                        'payment_received: amount="{}", basket_id="{}", currency="{}", '
-                        'processor_name="{}", reference="{}", user_id="{}"'.format(
-                            amount,
-                            basket_id,
-                            currency,
-                            processor_name,
-                            reference,
-                            user_id
-                        )
+        with LogCapture(LOGGER_NAME) as l:
+            mixin.handle_payment({}, basket)
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'payment_received: amount="{}", basket_id="{}", currency="{}", '
+                    'processor_name="{}", reference="{}", user_id="{}"'.format(
+                        total,
+                        basket.id,
+                        basket.currency,
+                        processor_name,
+                        reference,
+                        user.id
                     )
                 )
+            )
+
+        # pylint: disable=protected-access
+
+        # Validate a payment Source was created
+        source_type = SourceType.objects.get(code=processor_name)
+        label = user.username
+        self.assert_basket_matches_source(basket, mixin._payment_sources[-1], source_type, reference, label)
+
+        # Validate the PaymentEvent was created
+        paid_type = PaymentEventType.objects.get(code='paid')
+        self.assert_valid_payment_event_fields(mixin._payment_events[-1], total, paid_type, processor_name, reference)
 
     def test_handle_successful_order(self, mock_track):
         """
