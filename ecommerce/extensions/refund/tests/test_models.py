@@ -1,13 +1,14 @@
 import ddt
-from django.conf import settings
 import httpretty
 import mock
+from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_model, get_class
 from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
@@ -15,8 +16,10 @@ from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase
 
+PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
+Source = get_model('payment', 'Source')
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
@@ -197,6 +200,13 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         for line in refund.lines.all():
             self.assertEqual(line.status, status)
 
+    def assert_valid_payment_event_fields(self, payment_event, amount, payment_event_type, processor_name, reference):
+        """ Ensures the given PaymentEvent's fields match the specified values. """
+        self.assertEqual(payment_event.amount, amount)
+        self.assertEqual(payment_event.event_type, payment_event_type)
+        self.assertEqual(payment_event.reference, reference)
+        self.assertEqual(payment_event.processor_name, processor_name)
+
     def test_approve(self):
         """
         If payment refund and fulfillment revocation succeed, the method should update the status of the Refund and
@@ -204,6 +214,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         self.site.siteconfiguration.segment_key = None
         refund = self.create_refund()
+        source = refund.order.sources.first()
         with LogCapture(LOGGER_NAME) as l:
             self.approve(refund)
 
@@ -215,12 +226,22 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
                     'refund_id="{}", user_id="{}"'.format(
                         refund.total_credit_excl_tax,
                         refund.currency,
-                        refund.order.sources.first().source_type.name,
+                        source.source_type.name,
                         refund.id,
                         refund.user.id
                     )
                 )
             )
+
+        # Verify Source updated
+        source = Source.objects.get(pk=source.pk)
+        self.assertEqual(source.amount_refunded, refund.total_credit_excl_tax)
+
+        # Verify PaymentEvent created
+        paid_type = PaymentEventType.objects.get(code='refunded')
+        payment_event = refund.order.payment_events.first()
+        self.assert_valid_payment_event_fields(payment_event, refund.total_credit_excl_tax, paid_type,
+                                               DummyProcessor.NAME, DummyProcessor.REFUND_TRANSACTION_ID)
 
     def test_approve_payment_error(self):
         """

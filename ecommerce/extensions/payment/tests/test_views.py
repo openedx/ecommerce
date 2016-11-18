@@ -62,13 +62,13 @@ class CybersourceNotifyViewTests(CybersourceMixin, PaymentEventsMixin, TestCase)
         """ Ensure PaymentEvent, PaymentProcessorResponse, and Source objects are created for the basket. """
 
         # Ensure the response is stored in the database
-        self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
+        self.assert_processor_response_recorded(self.processor_name, notification['transaction_id'], notification,
                                                 basket=self.basket)
 
         # Validate a payment Source was created
-        reference = notification[u'transaction_id']
+        reference = notification['transaction_id']
         source_type = SourceType.objects.get(code=self.processor_name)
-        label = notification[u'req_card_number']
+        label = notification['req_card_number']
         self.assert_payment_source_exists(self.basket, source_type, reference, label)
 
         # Validate that PaymentEvents exist

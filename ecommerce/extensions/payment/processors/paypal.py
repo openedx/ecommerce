@@ -10,22 +10,13 @@ import waffle
 from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
-from oscar.core.loading import get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.models import PaypalWebProfile, PaypalProcessorConfiguration
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.utils import middle_truncate
 
 logger = logging.getLogger(__name__)
-
-PaymentEvent = get_model('order', 'PaymentEvent')
-PaymentEventType = get_model('order', 'PaymentEventType')
-PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-ProductClass = get_model('catalogue', 'ProductClass')
-Source = get_model('payment', 'Source')
-SourceType = get_model('payment', 'SourceType')
 
 
 class Paypal(BasePaymentProcessor):
@@ -214,6 +205,9 @@ class Paypal(BasePaymentProcessor):
         Raises:
             GatewayError: Indicates a general error or unexpected behavior on the part of PayPal which prevented
                 an approved payment from being executed.
+
+        Returns:
+            HandledProcessorResponse
         """
         data = {'payer_id': response.get('PayerID')}
 
@@ -226,7 +220,6 @@ class Paypal(BasePaymentProcessor):
             available_attempts = available_attempts + self.retry_attempts
 
         for attempt_count in range(1, available_attempts + 1):
-
             payment = paypalrestsdk.Payment.find(response.get('paymentId'), api=self.paypal_api)
             payment.execute(data)
 
@@ -260,8 +253,6 @@ class Paypal(BasePaymentProcessor):
         self.record_processor_response(payment.to_dict(), transaction_id=payment.id, basket=basket)
         logger.info("Successfully executed PayPal payment [%s] for basket [%d].", payment.id, basket.id)
 
-        # Get or create Source used to track transactions related to PayPal
-        source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
         currency = payment.transactions[0].amount.currency
         total = Decimal(payment.transactions[0].amount.total)
         transaction_id = payment.id
@@ -270,21 +261,13 @@ class Paypal(BasePaymentProcessor):
         email = payment.payer.payer_info.email
         label = 'PayPal ({})'.format(email) if email else 'PayPal Account'
 
-        source = Source(
-            source_type=source_type,
+        return HandledProcessorResponse(
+            transaction_id=transaction_id,
+            total=total,
             currency=currency,
-            amount_allocated=total,
-            amount_debited=total,
-            reference=transaction_id,
-            label=label,
+            card_number=label,
             card_type=None
         )
-
-        # Create PaymentEvent to track payment
-        event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
-        event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id, processor_name=self.NAME)
-
-        return source, event
 
     def _get_error(self, payment):
         """
@@ -311,11 +294,9 @@ class Paypal(BasePaymentProcessor):
 
         return None
 
-    def issue_credit(self, source, amount, currency):
-        order = source.order
-
+    def issue_credit(self, order, reference_number, amount, currency):
         try:
-            payment = paypalrestsdk.Payment.find(source.reference, api=self.paypal_api)
+            payment = paypalrestsdk.Payment.find(reference_number, api=self.paypal_api)
             sale = self._get_payment_sale(payment)
 
             if not sale:
@@ -337,14 +318,8 @@ class Paypal(BasePaymentProcessor):
         basket = order.basket
         if refund.success():
             transaction_id = refund.id
-
             self.record_processor_response(refund.to_dict(), transaction_id=transaction_id, basket=basket)
-
-            source.refund(amount, reference=transaction_id)
-
-            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
-            PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=transaction_id,
-                                        processor_name=self.NAME)
+            return transaction_id
         else:
             error = refund.error
             entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)

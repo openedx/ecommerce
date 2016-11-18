@@ -16,14 +16,13 @@ from suds.wsse import Security, UsernameToken
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
     ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.helpers import sign
-from ecommerce.extensions.payment.processors import BasePaymentProcessor
+from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.transport import RequestsTransport
 
 logger = logging.getLogger(__name__)
@@ -215,6 +214,9 @@ class Cybersource(BasePaymentProcessor):
             InvalidCyberSourceDecision: Indicates an unknown decision value.
                 Known values are ACCEPT, CANCEL, DECLINE, ERROR.
             PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
+
+        Returns:
+            HandledProcessorResponse
         """
 
         # Validate the signature
@@ -240,27 +242,19 @@ class Cybersource(BasePaymentProcessor):
         if response['auth_amount'] != response['req_amount']:
             raise PartialAuthorizationError
 
-        # Create Source to track all transactions related to this processor and order
-        source_type, __ = SourceType.objects.get_or_create(name=self.NAME)
         currency = response['req_currency']
         total = Decimal(response['req_amount'])
         transaction_id = response['transaction_id']
-        req_card_number = response['req_card_number']
+        card_number = response['req_card_number']
         card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
 
-        source = Source(source_type=source_type,
-                        currency=currency,
-                        amount_allocated=total,
-                        amount_debited=total,
-                        reference=transaction_id,
-                        label=req_card_number,
-                        card_type=card_type)
-
-        # Create PaymentEvent to track
-        event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
-        event = PaymentEvent(event_type=event_type, amount=total, reference=transaction_id, processor_name=self.NAME)
-
-        return source, event
+        return HandledProcessorResponse(
+            transaction_id=transaction_id,
+            total=total,
+            currency=currency,
+            card_number=card_number,
+            card_type=card_type
+        )
 
     def _generate_signature(self, parameters, use_sop_profile):
         """
@@ -299,12 +293,8 @@ class Cybersource(BasePaymentProcessor):
         use_sop_profile = req_profile_id == self.sop_profile_id
         return response and (self._generate_signature(response, use_sop_profile) == response.get('signature'))
 
-    def issue_credit(self, source, amount, currency):
-        order = source.order
-
+    def issue_credit(self, order, reference_number, amount, currency):
         try:
-            order_request_token = source.reference
-
             security = Security()
             token = UsernameToken(self.merchant_id, self.transaction_key)
             security.tokens.append(token)
@@ -314,14 +304,14 @@ class Cybersource(BasePaymentProcessor):
 
             credit_service = client.factory.create('ns0:CCCreditService')
             credit_service._run = 'true'  # pylint: disable=protected-access
-            credit_service.captureRequestID = source.reference
+            credit_service.captureRequestID = reference_number
 
             purchase_totals = client.factory.create('ns0:PurchaseTotals')
             purchase_totals.currency = currency
             purchase_totals.grandTotalAmount = unicode(amount)
 
             response = client.service.runTransaction(merchantID=self.merchant_id, merchantReferenceCode=order.number,
-                                                     orderRequestToken=order_request_token,
+                                                     orderRequestToken=reference_number,
                                                      ccCreditService=credit_service,
                                                      purchaseTotals=purchase_totals)
             request_id = response.requestID
@@ -334,10 +324,7 @@ class Cybersource(BasePaymentProcessor):
             raise GatewayError(msg)
 
         if response.decision == 'ACCEPT':
-            source.refund(amount, reference=request_id)
-            event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
-            PaymentEvent.objects.create(event_type=event_type, order=order, amount=amount, reference=request_id,
-                                        processor_name=self.NAME)
+            return request_id
         else:
             raise GatewayError(
                 'Failed to issue CyberSource credit for order [{order_number}]. '
