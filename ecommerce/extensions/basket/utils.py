@@ -3,6 +3,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 import pytz
@@ -91,18 +92,20 @@ def get_basket_switch_data(product):
 
 def attribute_cookie_data(basket, request):
     try:
-        referral = _referral_from_basket_site(basket, request.site)
+        # Required to prevent rolling back other atomic commits if exception is found
+        with transaction.atomic():
+            referral = _referral_from_basket_site(basket, request.site)
 
-        _record_affiliate_basket_attribution(referral, request)
-        _record_utm_basket_attribution(referral, request)
+            _record_affiliate_basket_attribution(referral, request)
+            _record_utm_basket_attribution(referral, request)
 
-        # Save the record if any attribution attributes are set on it.
-        if any([getattr(referral, attribute) for attribute in Referral.ATTRIBUTION_ATTRIBUTES]):
-            referral.save()
-        # Clean up the record if no attribution attributes are set and it exists in the DB.
-        elif referral.pk:
-            referral.delete()
-        # Otherwise we can ignore the instantiated but unsaved referral
+            # Save the record if any attribution attributes are set on it.
+            if any([getattr(referral, attribute) for attribute in Referral.ATTRIBUTION_ATTRIBUTES]):
+                referral.save()
+            # Clean up the record if no attribution attributes are set and it exists in the DB.
+            elif referral.pk:
+                referral.delete()
+            # Otherwise we can ignore the instantiated but unsaved referral
 
     # Don't let attribution errors prevent users from creating baskets
     except:  # pylint: disable=broad-except, bare-except
