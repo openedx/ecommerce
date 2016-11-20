@@ -1,6 +1,5 @@
 import json
 
-from django.conf import settings
 from django.core import mail
 import httpretty
 from oscar.test import factories
@@ -11,6 +10,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
@@ -89,8 +89,9 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                 credit_hours=2,
                 credit_provider_name=credit_provider_name,
                 platform_name=self.site.name,
-                receipt_url=self.site.siteconfiguration.build_ecommerce_url(
-                    '{}?order_number={}'.format(settings.RECEIPT_PAGE_PATH, order.number)
+                receipt_url=get_receipt_page_url(
+                    order_number=order.number,
+                    site_configuration=order.site.siteconfiguration
                 )
             )
         )
