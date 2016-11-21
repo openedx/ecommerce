@@ -1,0 +1,16 @@
+# This is only meant to be used for testing on travis-ci.org
+version: "2"
+
+services:
+  ecommerce:
+    image: edxops/ecommerce:latest
+
+    container_name: ecommerce_testing
+    volumes:
+      - ..:/edx/app/ecommerce/ecommerce
+      - $HOME/.cache/pip:/edx/app/ecommerce/.cache/pip
+    # The docker container produced from configuration.git does not currently
+    # run and expose a port for ecommerce.  This means that we need to run some
+    # command that keeps the ecommerce container alive while we run tests on it.
+    # We have not yet standardized on an init replacement which could be used instead.
+    command: tail -f /dev/null
