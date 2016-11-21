@@ -37,6 +37,7 @@ Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
+Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -251,6 +252,18 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         elif method == 'PUT':
             response = self.client.put(path, json.dumps(data), 'application/json')
         return json.loads(response.content)
+
+    def _get_voucher_range_with_updated_dynamic_catalog_values(self):
+        """Helper method for updating dynamic catalog values."""
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+        data = {
+            'catalog_query': '*:*',
+            'course_seat_types': ['verified'],
+        }
+        self.client.put(path, json.dumps(data), 'application/json')
+        new_coupon = Product.objects.get(id=self.coupon.id)
+        vouchers = new_coupon.attr.coupon_vouchers.vouchers
+        return vouchers.first().offers.first().benefit.range, data
 
     def test_create_serializer_data(self):
         """Test if coupon serializer creates data for details page"""
@@ -477,6 +490,21 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         self.assertEqual(new_coupon.attr.note, note)
+
+    def test_update_dynamic_range_values(self):
+        """ Verify dynamic range values are updated in case range has no catalog. """
+        voucher_range = self.coupon.attr.coupon_vouchers.vouchers.first().offers.first().benefit.range
+        Range.objects.filter(id=voucher_range.id).update(**{'catalog': None})
+        voucher_range, data = self._get_voucher_range_with_updated_dynamic_catalog_values()
+        self.assertEqual(voucher_range.catalog_query, data['catalog_query'])
+        self.assertEqual(voucher_range.course_seat_types, data['course_seat_types'][0])
+
+    def test_update_catalog_type(self):
+        """Test updating dynamic range values deletes catalog."""
+        voucher_range, data = self._get_voucher_range_with_updated_dynamic_catalog_values()
+        self.assertEqual(voucher_range.catalog, None)
+        self.assertEqual(voucher_range.catalog_query, data['catalog_query'])
+        self.assertEqual(voucher_range.course_seat_types, data['course_seat_types'][0])
 
     def test_update_coupon_benefit_value(self):
         vouchers = self.coupon.attr.coupon_vouchers.vouchers.all()

@@ -237,7 +237,8 @@ define([
                 'change [name=invoice_type]': 'toggleInvoiceFields',
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
                 'change [name=credit_radio]': 'toggleCreditSeats',
-                'click .external-link': 'routeToLink'
+                'click .external-link': 'routeToLink',
+                'click #cancel-button': 'cancelButtonClicked'
             },
 
             initialize: function (options) {
@@ -265,6 +266,9 @@ define([
                         'title',
                         'email_domains'
                     ];
+
+                    // Store initial model attribute values in order to revert to them when cancel button is clicked.
+                    this._initAttributes = $.extend(true, {}, this.model.attributes);
                 }
 
                 this.dynamic_catalog_view = new DynamicCatalogView({
@@ -281,6 +285,15 @@ define([
                 this.listenTo(this.model, 'change:course_seat_types', this.updateCourseSeatTypes);
 
                 this._super();
+            },
+
+            cancelButtonClicked: function() {
+                // Setting the model fields to init values will not unset catalog_query and course_seat_types
+                if (this._initAttributes.course_id !== this.model.get('course_id')) {
+                    this.model.unset('course_seat_types');
+                    this.model.unset('catalog_query');
+                }
+                this.model.set(this._initAttributes);
             },
 
             updateCatalogQueryLength: function() {
@@ -405,7 +418,7 @@ define([
 
             toggleCatalogTypeField: function() {
                 if (this.model.get('catalog_type') === 'Single course') {
-                    this.model.set('course_seat_types', []);
+                    this.model.unset('course_seat_types');
                     this.model.unset('catalog_query');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
@@ -418,6 +431,10 @@ define([
                     this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
+
+                    if (!this.model.get('course_seat_types')) {
+                        this.model.set('course_seat_types', []);
+                    }
                 }
             },
 
@@ -493,10 +510,13 @@ define([
             fillFromCourse: function () {
                 var courseId = this.$('[name=course_id]').val(),
                     course = Course.findOrCreate({id: courseId}),
-                    parseId = _.compose(parseInt, _.property('id'));
+                    parseId = _.compose(parseInt, _.property('id')),
+                    seatType = this.model.get('seat_type');
 
                 // stickit will not pick it up if this is a blur event
-                this.model.set('course_id', courseId);
+                if (courseId) {
+                    this.model.set('course_id', courseId);
+                }
 
                 course.listenTo(course, 'sync', _.bind(function () {
                     this.seatTypes = _.map(course.seats(), function (seat) {
@@ -516,9 +536,8 @@ define([
                         .html(this.seatTypes)
                         .trigger('change');
 
-                    if (this.editing) {
-                        this.$('[name=seat_type]')
-                            .val(_s.capitalize(this.model.get('seat_type')));
+                    if (this.editing && seatType) {
+                        this.$('[name=seat_type]').val(_s.capitalize(seatType));
                     }
                 }, this));
 
@@ -532,13 +551,11 @@ define([
                 var seatType = this.getSeatType(),
                     seatData = this.getSeatData();
 
-                if (!this.editing) {
-                    this.model.set('seat_type', seatType);
+                this.model.set('seat_type', seatType);
 
-                    if (seatType && !this.editing) {
-                        this.model.set('stock_record_ids', seatData.stockrecords);
-                        this.updateTotalValue(seatData);
-                    }
+                if (seatType) {
+                    this.model.set('stock_record_ids', seatData.stockrecords);
+                    this.updateTotalValue(seatData);
                 }
             },
 
@@ -594,11 +611,12 @@ define([
                 this.$('.row:first').before(AlertDivTemplate);
 
                 if (this.editing) {
-                    if (this.model.get('course_seat_types')[0] === 'credit') {
-                        this.$('#credit').attr('checked', true);
-                        this.$('.non-credit-seats').addClass(this.hiddenClass);
-                    } else {
-                        this.$('#non-credit').attr('checked', true);
+                    this.$('#non-credit').attr('checked', true);
+                    if (this.model.get('course_seat_types')) {
+                        if (this.model.get('course_seat_types')[0] === 'credit') {
+                            this.$('#credit').attr('checked', true);
+                            this.$('.non-credit-seats').addClass(this.hiddenClass);
+                        }
                     }
                     this.disableNonEditableFields();
                     this.toggleCouponTypeField();

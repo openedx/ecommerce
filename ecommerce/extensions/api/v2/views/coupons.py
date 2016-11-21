@@ -211,7 +211,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         return response_data
 
     def update(self, request, *args, **kwargs):
-        """Update start and end dates of all vouchers associated with the coupon."""
+        """Update coupon depending on request data sent."""
         super(CouponViewSet, self).update(request, *args, **kwargs)
 
         coupon = self.get_object()
@@ -226,6 +226,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         if range_data:
             voucher_range = vouchers.first().offers.first().benefit.range
+            # Remove catalog if switching from single course to dynamic query
+            if voucher_range.catalog:
+                range_data['catalog'] = None
             Range.objects.filter(id=voucher_range.id).update(**range_data)
 
         benefit_value = request.data.get('benefit_value')
@@ -288,7 +291,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             benefit_value (Decimal): Benefit value associated with a new offer
             coupon (Product): Coupon product associated with vouchers
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
-            coupon (Product): Coupon product associated with vouchers
         """
         voucher_offers = vouchers.first().offers
         voucher_offer = voucher_offers.first()

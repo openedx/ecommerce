@@ -129,7 +129,7 @@ define([
                 });
             });
 
-            describe('Editing Multi-use enrollment coupon', function() {
+            describe('Editing multi-use single course enrollment coupon', function() {
                 beforeEach(function() {
                     model = Coupon.findOrCreate(multi_use_coupon_data, {parse: true});
                     view = new CouponCreateEditView({model: model, editing: true}).render();
@@ -138,6 +138,18 @@ define([
                 it('should display model max_uses value in max_uses field.', function() {
                     expect(view.$('[name=max_uses]').val()).toEqual(model.get('max_uses'));
                     expect(view.$('[name=voucher_type]').val()).toEqual(model.get('voucher_type'));
+                });
+
+                it('should reset catalog related values to initial values when cancel button pressed', function() {
+                    var formView = view.formView;
+                    view.$('#multiple-courses').prop('checked', true).trigger('change');
+                    expect(view.model.get('catalog_type')).not.toBe(formView._initAttributes.catalog_type);
+                    expect(view.model.get('course_id')).not.toBe(formView._initAttributes.course_id);
+                    expect(view.model.get('seat_type')).not.toBe(formView._initAttributes.seat_type);
+                    view.$('#cancel-button').click();
+                    expect(view.model.get('catalog_type')).toBe(formView._initAttributes.catalog_type);
+                    expect(view.model.get('course_id')).toBe(formView._initAttributes.course_id);
+                    expect(view.model.get('seat_type')).toBe(formView._initAttributes.seat_type);
                 });
             });
         });
