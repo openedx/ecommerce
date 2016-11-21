@@ -3,7 +3,8 @@ import json
 import mock
 
 import ddt
-from django.test import RequestFactory
+from django.db import transaction
+from django.test import RequestFactory, TransactionTestCase
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
 import pytz
@@ -13,6 +14,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import prepare_basket, attribute_cookie_data
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.tests.mixins import UserMixin
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
@@ -120,12 +122,18 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             mock_attr_method.assert_called_with(basket, self.request)
 
     def test_attribute_cookie_data_affiliate_cookie_lifecycle(self):
-        """ Verify a basket is returned and referral captured. """
-        affiliate_id = 'test_affiliate'
-        self.request.COOKIES['affiliate_id'] = affiliate_id
+        """ Verify a basket is returned and referral captured if there is cookie info """
+
+        # If there is no cookie info, verify no referral is created.
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
         attribute_cookie_data(basket, self.request)
+        with self.assertRaises(Referral.DoesNotExist):
+            Referral.objects.get(basket=basket)
 
+        # If there is cookie info, verify a referral is captured
+        affiliate_id = 'test_affiliate'
+        self.request.COOKIES['affiliate_id'] = affiliate_id
+        attribute_cookie_data(basket, self.request)
         # test affiliate id from cookie saved in referral
         referral = Referral.objects.get(basket_id=basket.id)
         self.assertEqual(referral.affiliate_id, affiliate_id)
@@ -273,3 +281,59 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         # test referral record is deleted when no cookies are set
         with self.assertRaises(Referral.DoesNotExist):
             Referral.objects.get(basket_id=basket.id)
+
+
+class BasketUtilsTransactionTests(UserMixin, TransactionTestCase):
+    def setUp(self):
+        super(BasketUtilsTransactionTests, self).setUp()
+        self.request = RequestFactory()
+        self.request.COOKIES = {}
+        self.request.user = self.create_user()
+        site_configuration = SiteConfigurationFactory(partner__name='Tester')
+        site_configuration.utm_cookie_name = 'test.edx.utm'
+        self.request.site = site_configuration.site
+
+    def _setup_request_cookie(self):
+        utm_campaign = 'test-campaign'
+        utm_content = 'test-content'
+        utm_created_at = 1475590280823
+
+        utm_cookie = {
+            'utm_campaign': utm_campaign,
+            'utm_content': utm_content,
+            'created_at': utm_created_at,
+        }
+
+        affiliate_id = 'affiliate'
+
+        self.request.COOKIES['test.edx.utm'] = json.dumps(utm_cookie)
+        self.request.COOKIES['affiliate_id'] = affiliate_id
+
+    def test_attribution_atomic_transaction(self):
+        """
+        Verify that an IntegrityError raised while creating a referral
+        does not prevent a basket from being created.
+        """
+        self._setup_request_cookie()
+        product = ProductFactory()
+        existing_basket = Basket.get_basket(self.request.user, self.request.site)
+        existing_referral = Referral(basket=existing_basket, site=self.request.site)
+        # Let's save an existing referral object to force the duplication happen in database
+        existing_referral.save()
+
+        with transaction.atomic():
+            with mock.patch('ecommerce.extensions.basket.utils._referral_from_basket_site') as mock_get_referral:
+                # Mock to return a duplicated referral object, so when saved, a DB integrity error is raised
+                # Mocking with side_effect to raise IntegrityError will not roll back the DB transaction
+                # We actually would handle the exception in the attribute_cookie_data method.
+                # Only causing the true database conflict like what we are doing here, would cause the roll back
+                mock_get_referral.return_value = Referral(basket=existing_basket, site=self.request.site)
+                basket = prepare_basket(self.request, product)
+                referral = Referral.objects.filter(basket=basket)
+
+        self.assertEqual(len(referral), 1)
+        self.assertIsNotNone(basket)
+        self.assertTrue(basket.id > 0)
+        self.assertEqual(basket.status, Basket.OPEN)
+        self.assertEqual(basket.lines.count(), 1)
+        self.assertEqual(basket.lines.first().product, product)
