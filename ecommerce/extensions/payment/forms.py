@@ -32,12 +32,13 @@ class PaymentForm(forms.Form):
     basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
+    email_address = forms.EmailField(label=_('Email Address'))
     address_line1 = forms.CharField(max_length=29, label=_('Address'))
-    address_line2 = forms.CharField(max_length=29, required=False, label=_('Address (continued)'))
+    address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
-    postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
     country = forms.ChoiceField(choices=country_choices, label=_('Country'))
+    postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
 
     def clean(self):
         cleaned_data = super(PaymentForm, self).clean()

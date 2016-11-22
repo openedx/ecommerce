@@ -1,0 +1,166 @@
+{% load i18n %}
+{% load currency_filters %}
+{% load crispy_forms_tags %}
+
+<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}">
+    {% csrf_token %}
+    <div id="payment-information" class="col-sm-7">
+        <div id="payment-method-information" class="placeholder">
+            <fieldset>
+                <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
+                <div class="row">
+                    <!-- TODO: Enable choosing payment method -->
+                    <!-- Incorporate this below:
+                        <div class="form-group">
+                            <label for="id_card_type" class="control-label">{% trans "Card Type" %}*</label>
+                            <select id="id_card_type" name="card_type" class="form-control pci-field">
+                                <option>{% trans "(Select a card type)" %}</option>
+                                <option value="001">{% trans "Visa" %}</option>
+                                <option value="002">{% trans "MasterCard" %}</option>
+                                <option value="003">{% trans "American Express" %}</option>
+                                <option value="003">{% trans "Discover" %}</option>
+                            </select>
+                        </div>
+                    -->
+                    <div id="payment-method">
+                        <div id="payment-method-image"></div>
+                        <button>More</button>
+                    </div>
+                    <div id="payment-processor"></div>
+                </div>
+            </fieldset>
+        </div>
+        <div id="card-holder-information" class="form-input-elements placeholder">
+            <fieldset>
+                <legend>{% trans "CARD HOLDER INFORMATION" %}</legend>
+                {{ payment_form|crispy }}
+            </fieldset>
+        </div>
+        <div id="billing-information" class="form-input-elements placeholder">
+            <fieldset>
+                <legend>{% trans "BILLING INFORMATION" %}</legend>
+                <div class="pci-fields">
+                    <div id="div_id_card_number" class="form-group">
+                        <label for="id_card_number" class="control-label">{% trans "Card Number" %}*</label>
+                        <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20"/>
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                    </div>
+
+                    <div id="div_id_card_cvn" class="form-group">
+                        <label for="id_card_cvn" class="control-label">
+                            {% trans "Security Code" %}*
+                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                        </label>
+                        <input id="id_card_cvn" name="card_cvn" class="form-control pci-field" maxlength="4"/>
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                    </div>
+                    <label id="expiration-label" for="id_card_expiry_month" class="control-label">{% trans "Expiration" %}*</label>
+                    <div id="div_id_card_expiration_month" class="form-group">
+                        <select id="id_card_expiry_month" name="card_expiry_month" class="form-control pci-field">
+                            <option>{% trans "(Month)" %}</option>
+                            {% for month in months %}
+                                <option value="{{forloop.counter}}">{{month}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="div_id_card_expiration_year" class="form-group">
+                        <select id="id_card_expiry_year" name="card_expiry_year" class="form-control pci-field">
+                            <option>{% trans "(Year)" %}</option>
+                            {% for year in years %}
+                                <option value="{{year}}">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button id="payment-button" type="submit" class="btn btn-primary btn-large"
+                        data-track-type="click"
+                        data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                        data-track-category="checkout" data-processor-name="cybersource_sop"
+                        data-course-id="{{ course.id }}">
+                  {% trans "Pay" %}
+                </button>
+            </fieldset>
+        </div>
+    </div>
+    <div id="summary" class="col-sm-5">
+        <!-- Currently works only for the single item basket -->
+        {% for form, line_data in formset_lines_data %}
+            <div id="basket-information">
+                <fieldset>
+                    <legend>{% trans "SUMMARY" %}</legend>
+                    <div id="line-price" class="amount row">
+                        <div class="description">{% trans "Price" %}</div>
+                        <div class="price">{{line_data.line.price_incl_tax|currency:line_data.line.price_currency}}</div>
+                    </div>
+                    {% if basket.total_discount %}
+                        <div id="line-discount" class="amount row">
+                            <div class="description">{% trans "Discounts applied" %}</div>
+                            <div class="price">-{{basket.total_discount|currency:basket.currency}}</div>
+                        </div>
+                    {% endif %}
+                    <div id="basket-total" class="row">
+                        <div class="description">{% trans "TOTAL" %}</div>
+                        <div class="price">{{ order_total.incl_tax|currency:basket.currency }}</div>
+                    </div>
+                    <div id="voucher-information" class="row">
+                        {% if not is_bulk_purchase %}
+                            {% block vouchers %}
+                                {% if basket.contains_a_voucher %}
+                                    <div class="vouchers">
+                                        {% for voucher in basket.vouchers.all %}
+                                            <p class="voucher">
+                                                {% blocktrans with benefit_value=line_data.benefit_value voucher_code=voucher.code %}
+                                                    {{ benefit_value }} off {{ voucher_code }} has been applied
+                                                {% endblocktrans %}
+                                                <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button class="remove-voucher" type="submit">{% trans "Remove" %}</button>
+                                                </form>
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
+                                    {% if voucher_form %}
+                                        <div class="use-voucher col-sm-6">
+                                            <p id="voucher_form_link">
+                                                <a href="#voucher">{% trans "Add Coupon Code" %}</a>
+                                            </p>
+                                            {% include 'basket/partials/add_voucher_form.html' %}
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endblock vouchers %}
+                        {% endif %}
+                    </div>
+                </fieldset>
+                <div class="row">
+                    <p class="title">{% trans "IN YOUR CART" %}</p>
+                    <div id="course-seat-information">
+                        <div id="course-image">
+                            <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}"
+                                 alt="{{ line_data.course_name|default_if_none:'' }}"/>
+                        </div>
+                        <div id="course-additional-information">
+                            <p id="course-name">{{ line_data.course_name }}</p>
+                            <p id="seat-type">
+                                {% blocktrans with seat_type=line_data.seat_type %}
+                                    {{ seat_type }} Certificate
+                                {% endblocktrans %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <p class="title">{% trans "ORDER DETAILS" %}</p>
+                    <p>
+                        {% blocktrans with email_address=basket.owner.email %}
+                            Upon course completion, we will email your certificate to {{email_address}}
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</form>

@@ -6,220 +6,443 @@
             display: none;
         }
 
-        #basket_totals,
-        .price {
-            @include float(right);
+        .content-inner {
+            #basket_totals,
+            .price {
+                @include float(right);
+            }
+
+            .basket-items {
+                border-bottom: 1px solid #ddd;
+
+                .certificate_type {
+                    font-weight: bold;
+                }
+
+                .row {
+                    padding-bottom: 30px;
+
+                    .course_name,
+                    .old-price,
+                    .price {
+                        margin: 0;
+
+                        font-size: 20px;
+                        font-weight: bold;
+                    }
+
+                    .course_description {
+                        font-size: 14px;
+                    }
+
+                    .course_prices {
+                        @include text-align(right);
+                    }
+
+                   .checkout-quantity {
+                       .input-group {
+                           display: inline;
+                       }
+
+                       .quantity {
+                           display: inline-block;
+                           width: 35%;
+                           padding: 3px;
+                       }
+
+                       button.update-button {
+                           display: inline-block;
+                           vertical-align:top;
+                           margin-left: 5px;
+                           width: 40%;
+                       }
+                   }
+
+                    .course_image img {
+                        margin: 0 auto;
+                        width: 100%;
+                    }
+
+                    .benefit {
+                        display: inline-block;
+                        font-size: 20px;
+                    }
+
+                    .old-price,
+                    .price {
+                        display: inline-block;
+                    }
+
+                    .old-price {
+                        color: gray;
+                        text-decoration: line-through;
+                    }
+
+                    .price {
+                        padding: 0 0 0 15px;
+                    }
+
+                    .remove-code {
+                        display: none;
+                    }
+
+                    .discount {
+                        display: inline-block;
+                        margin-right: 30px;
+                        & > div {
+                            margin-right: 10px;
+                        }
+                    }
+                }
+
+                input[type=number]::-webkit-inner-spin-button,
+                input[type=number]::-webkit-outer-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+
+                .input-group-btn-vertical {
+                    position: relative;
+                    white-space: nowrap;
+                    width: 30px;
+                    vertical-align: middle;
+                    display: table-cell;
+                    float: left;
+
+                    .btn {
+                        display: block;
+                        float: none;
+                        width: 100%;
+                        max-width: 100%;
+                        padding: 8px;
+                        margin-left: -1px;
+                        position: relative;
+                        border-radius: 0;
+                        &:first-child {
+                            border-top-right-radius: 4px;
+                        }
+                        &:last-child {
+                            margin-top: -2px;
+                            border-bottom-right-radius: 4px;
+                        }
+                    }
+
+                    i {
+                        position: absolute;
+                        top: 0;
+                        left: 10px;
+                    }
+                }
+
+                .course-price-label {
+                    font-weight: normal;
+                    font-size: 0.84rem;
+                    + span {
+                        display: inline-block;
+                        margin-top: 8px;
+                    }
+                }
+            }
+
+            .total {
+                padding-top: 20px;
+                margin-bottom: 1.25rem;
+
+                p.voucher {
+                    @include float(left);
+
+                    margin: 0 20px;
+                    color: gray;
+                }
+
+                .remove-voucher {
+                    border: none;
+                    background: none;
+                    padding: 0;
+                    color: red;
+                }
+
+                .use-voucher {
+                    @include float(left);
+
+                    p {
+                        margin-bottom: 0;
+                    }
+
+                    #id_code {
+                        border: 1px solid #c8c8c8;
+                        border-radius: 4px;
+                        padding: 4.5px 12px;
+                    }
+                }
+
+                #basket_totals {
+                    @include text-align(right);
+
+                    color: #337ab7;
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+
+                #voucher_form_container {
+                    display: none;
+                }
+            }
+
+            .checkout-button {
+                @include float(right);
+            }
+
+            .basket-switch-link {
+                padding: 10px 10px 10px 0px;
+            }
+
+            .payment-buttons {
+                .payment-button {
+                    border-color: #1E8142;
+                    padding: spacing-vertical(small) spacing-horizontal(mid-large);
+                    background: #1E8142;
+                    color: #fcfcfc;
+                    font-size: 18px;
+
+                    &:hover,
+                    &.is-hovered,
+                    &:focus,
+                    &.is-focused {
+                        border-color: #25B85A;
+                        background: #25B85A;
+                    }
+                }
+            }
+
+            .verification-note {
+                margin-top: 20px;
+            }
+
+            .help {
+                margin-top: 20px;
+            }
         }
 
-        .basket-items {
-            border-bottom: 1px solid #ddd;
-
-            .certificate_type {
+        .payment-form {
+            legend, p.title {
+                color: #337ab7;
+                font-size: 16px;
                 font-weight: bold;
             }
 
             .row {
-                padding-bottom: 30px;
-
-                .course_name,
-                .old-price,
-                .price {
-                    margin: 0;
-
-                    font-size: 20px;
-                    font-weight: bold;
-                }
-
-                .course_description {
-                    font-size: 14px;
-                }
-
-                .course_prices {
-                    @include text-align(right);
-                }
-
-               .checkout-quantity {
-                   .input-group {
-                       display: inline;
-                   }
-
-                   .quantity {
-                       display: inline-block;
-                       width: 35%;
-                       padding: 3px;
-                   }
- 
-                   button.update-button {
-                       display: inline-block;
-                       vertical-align:top;
-                       margin-left: 5px;
-                       width: 40%;
-                   }
-               }
-
-                .course_image img {
-                    margin: 0 auto;
-                    width: 100%;
-                }
-
-                .benefit {
-                    display: inline-block;
-                    font-size: 20px;
-                }
-
-                .old-price,
-                .price {
-                    display: inline-block;
-                }
-
-                .old-price {
-                    color: gray;
-                    text-decoration: line-through;
-                }
-
-                .price {
-                    padding: 0 0 0 15px;
-                }
-
-                .remove-code {
-                    display: none;
-                }
-
-                .discount {
-                    display: inline-block;
-                    margin-right: 30px;
-                    & > div {
-                        margin-right: 10px;
-                    }
-                }
-            }
-
-            input[type=number]::-webkit-inner-spin-button,
-            input[type=number]::-webkit-outer-spin-button {
-                -webkit-appearance: none;
                 margin: 0;
             }
 
-            .input-group-btn-vertical {
-                position: relative;
-                white-space: nowrap;
-                width: 30px;
-                vertical-align: middle;
-                display: table-cell;
-                float: left;
+            #payment-information {
+                border-right: 1px solid palette(grayscale, base);
 
-                .btn {
-                    display: block;
-                    float: none;
-                    width: 100%;
-                    max-width: 100%;
-                    padding: 8px;
-                    margin-left: -1px;
-                    position: relative;
-                    border-radius: 0;
-                    &:first-child {
-                        border-top-right-radius: 4px;
+                #payment-method-information {
+                    padding-top: 0;
+                }
+
+                .placeholder {
+                    padding: 20px 0;
+                }
+
+                #payment-method {
+                    #payment-method-image, button {
+                        float: left;
+
+                        border: 1px solid palette(grayscale, base);
+
+                        height: 50px;
                     }
-                    &:last-child {
-                        margin-top: -2px;
-                        border-bottom-right-radius: 4px;
+
+
+                    #payment-method-image {
+                        border-bottom: 4px solid #337ab7;
+
+                        background-image: url('/static/images/CreditCard_options.png');
+                        background-position: center center;
+                        background-repeat: no-repeat;
+
+                        width: 150px;
+                    }
+
+                    button {
+                        position: relative;
+                        left: -1px;
+
+                        background-color: white;
+
+                        width: 100px;
+
+                        color: gray;
                     }
                 }
 
-                i {
-                    position: absolute;
-                    top: 0;
-                    left: 10px;
+                #payment-processor {
+                    float: left;
+
+                    margin-left: 50px;
+
+                    border: 1px solid palette(grayscale, base);
+                    border-radius: 5px;
+
+                    background-image: url('/static/images/paypal_logo.png');
+                    background-position: center center;
+                    background-repeat: no-repeat;
+
+                    width: 120px;
+                    height: 50px;
+                }
+
+                .form-input-elements
+                 {
+                    div {
+                        margin: 0;
+
+                        label {
+                            color: gray;
+                            font-weight: normal;
+                        }
+
+                        input, select {
+                            border: 1px solid palette(grayscale, base);
+                            border-radius: 0;
+                        }
+                    }
+
+                    #expiration-label {
+                        width: 100%;
+
+                        text-align: left;
+                    }
+
+                    #div_id_first_name,
+                    #div_id_address_line1,
+                    #div_id_city,
+                    #div_id_country,
+                    #div_id_card_number,
+                    #div_id_card_expiration_month {
+                        float: left;
+
+                        margin-right: 2%;
+
+                        width: 48%;
+                    }
+
+                    #div_id_last_name,
+                    #div_id_address_line2,
+                    #div_id_state,
+                    #div_id_postal_code,
+                    #div_id_card_cvn,
+                    #div_id_card_expiration_year {
+                        float: left;
+
+                        width: 48%;
+                    }
+
+                    #div_id_email_address {
+                        width: 48%;
+                    }
+
+                    #payment-button {
+                        margin-top: 20px;
+                        margin-left: 50%;
+
+                        width: 50%;
+                    }
+
+                    .fa-lock {
+                        position: relative;
+                        float: left;
+
+                        top: -25px;
+                        left: 92%;
+                    }
                 }
             }
 
-            .course-price-label {
-                font-weight: normal;
-                font-size: 0.84rem;
-                + span {
-                    display: inline-block;
-                    margin-top: 8px;
+            #summary {
+                padding-left: 40px;
+
+                #basket-information {
+                    .description {
+                        float: left;
+                    }
+
+                    .price {
+                        text-align: right;
+                    }
+
+                    .row {
+                        padding-bottom: 20px;
+                    }
+
+                    .amount {
+                        padding-bottom: 20px;
+
+                        color: palette(grayscale, base);
+                        font-size: 18px;
+
+                        .price {
+                            font-weight: bold;
+                        }
+                    }
+
+                    #basket-total {
+                        font-size: 24px;
+                        font-weight: bold;
+
+                        .price {
+                            color: #337ab7;
+                        }
+                    }
+
+                    #voucher-information {
+                        .use-voucher {
+                            padding: 0;
+                        }
+
+                        .voucher {
+                            float: left;
+                            font-size: 14px;
+
+                            button {
+                                border: 0;
+
+                                background-color: white;
+
+                                color: #337ab7;
+                            }
+                        }
+                    }
+
+                    #course-seat-information {
+                        #course-image {
+                            float: left;
+                            width: 150px;
+
+                            img {
+                                max-width: 150px;
+                                max-height: 100px;
+                            }
+                        }
+
+                        #course-additional-information {
+                            float: left;
+
+                            padding-left: 20px;
+
+                            #course-name {
+                                font-weight: bold;
+                            }
+
+                            #seat-type {
+                                color: palette(grayscale, base);
+                            }
+                        }
+                    }
                 }
             }
-        }
-
-        .total {
-            padding-top: 20px;
-            margin-bottom: 1.25rem;
-
-            p.voucher {
-                @include float(left);
-
-                margin: 0 20px;
-                color: gray;
-            }
-
-            .remove-voucher {
-                border: none;
-                background: none;
-                padding: 0;
-                color: red;
-            }
-
-            .use-voucher {
-                @include float(left);
-
-                p {
-                    margin-bottom: 0;
-                }
-
-                #id_code {
-                    border: 1px solid #c8c8c8;
-                    border-radius: 4px;
-                    padding: 4.5px 12px;
-                }
-            }
-
-            #basket_totals {
-                @include text-align(right);
-
-                color: #337ab7;
-                font-size: 18px;
-                font-weight: bold;
-            }
-
-            #voucher_form_container {
-                display: none;
-            }
-        }
-
-        .checkout-button {
-            @include float(right);
-        }
-
-        .basket-switch-link {
-            padding: 10px 10px 10px 0px;
-        }
-
-        .payment-buttons {
-            .payment-button {
-                border-color: #1E8142;
-                padding: spacing-vertical(small) spacing-horizontal(mid-large);
-                background: #1E8142;
-                color: #fcfcfc;
-                font-size: 18px;
-
-                &:hover,
-                &.is-hovered,
-                &:focus,
-                &.is-focused {
-                    border-color: #25B85A;
-                    background: #25B85A;
-                }
-            }
-        }
-
-        .verification-note {
-            margin-top: 20px;
-        }
-
-        .help {
-            margin-top: 20px;
         }
     }
 

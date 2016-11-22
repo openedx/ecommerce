@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
+import calendar
 import logging
+from datetime import datetime
 
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
@@ -96,6 +98,29 @@ class BasketSummaryView(BasketView):
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
+    def _get_course_data(self, course_key):
+        """
+        Helper method for getting Course data from Course Catalog service.
+
+        Arguments:
+            course_key (str): Course key of the Course the data is being fetched for
+
+        Returns:
+            (str, str, str): Course name, short description and image URL.
+                             In case an exception is caught, None values
+                             are returned instead.
+        """
+        try:
+            course = get_course_info_from_catalog(self.request.site, course_key)
+            try:
+                image_url = course['image']['src']
+            except (KeyError, TypeError):
+                image_url = ''
+            return course.get('title', ''), course.get('short_description', ''), image_url
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+            return None, None, None
+
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
@@ -109,19 +134,7 @@ class BasketSummaryView(BasketView):
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
-            course_name = None
-            image_url = None
-            short_description = None
-            try:
-                course = get_course_info_from_catalog(self.request.site, course_key)
-                try:
-                    image_url = course['image']['src']
-                except (KeyError, TypeError):
-                    image_url = ''
-                short_description = course.get('short_description', '')
-                course_name = course.get('title', '')
-            except (ConnectionError, SlumberBaseException, Timeout):
-                logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+            course_name, short_description, image_url = self._get_course_data(course_key)
 
             if self.request.site.siteconfiguration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
@@ -166,11 +179,15 @@ class BasketSummaryView(BasketView):
 
                 if payment_processor_class:
                     payment_processor = payment_processor_class(site)
+                    today = datetime.today()
 
                     context.update({
                         'enable_client_side_checkout': True,
+                        'months': calendar.month_name[1:],
                         'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
                         'payment_url': payment_processor.client_side_payment_url,
+                        # Assumption is that the credit card duration is 15 years
+                        'years': range(today.year, today.year + 16)
                     })
                 else:
                     msg = 'Unable to load client-side payment processor [{processor}] for ' \
