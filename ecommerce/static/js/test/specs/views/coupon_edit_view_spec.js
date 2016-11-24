@@ -4,13 +4,14 @@ define([
         'views/coupon_create_edit_view',
         'models/coupon_model',
         'test/mock_data/coupons',
-        'test/custom-matchers'
+        'test/spec-utils'
     ],
     function (_s,
               Utils,
               CouponCreateEditView,
               Coupon,
-              Mock_Coupons) {
+              Mock_Coupons,
+              SpecUtils) {
 
         'use strict';
 
@@ -54,6 +55,10 @@ define([
                     view = new CouponCreateEditView({model: model, editing: true}).render();
                 });
 
+                afterEach(function () {
+                    model.destroy();
+                });
+
                 it('should display coupon details in form fields', function () {
                     var voucherType = view.$el.find('[name=voucher_type]'),
                         startDate = Utils.stripTimezone(model.get('start_date')),
@@ -71,6 +76,20 @@ define([
                     expect(view.$el.find('[name=benefit_type]').val()).toEqual(model.get('benefit_type'));
                     expect(view.$el.find('[name=benefit_value]').val()).toEqual(model.get('benefit_value').toString());
                     expect(view.$el.find('[name=code]').val()).toEqual(model.get('code'));
+                });
+
+                it('should hide code field when quantity is greater than one', function () {
+                    view.model.set('quantity', 2);
+                    view.render();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=quantity]')).toBeVisible();
+                });
+
+                it('should hide quantity field when code is set', function () {
+                    view.model.set('code', 'RANDOMCODE');
+                    view.render();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=quantity]')).not.toBeVisible();
                 });
             });
 
