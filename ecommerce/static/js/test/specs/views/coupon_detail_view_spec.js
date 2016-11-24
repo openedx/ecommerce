@@ -38,6 +38,12 @@ define([
                 verifiedSeat = Mock_Coupons.verifiedSeat;
             });
 
+            afterEach(function() {
+                // Unset all attributes that could disrupt other tests
+                view.model.unset('catalog_query');
+                view.model.unset('course_seat_types');
+            });
+
             it('should compare view.model with model sent', function () {
                 expect(view.model).toBe(model);
             });

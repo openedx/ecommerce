@@ -278,7 +278,7 @@ define([
                     expect(view.dynamic_catalog_view.seat_types).toEqual(model.get('course_seat_types'));
                 });
 
-                it('should remove dynamic catalog values from fields when toggled to single course', function() {
+                it('should unset dynamic catalog values from fields when toggled to single course', function() {
                     var catalog_query = '*:*',
                         course_seat_types = ['verified'];
 
@@ -292,7 +292,7 @@ define([
                     view.$('#single-course').prop('checked', true);
                     view.toggleCatalogTypeField();
                     expect(view.dynamic_catalog_view.query).toEqual(undefined);
-                    expect(view.dynamic_catalog_view.seat_types).toEqual([ ]);
+                    expect(view.dynamic_catalog_view.seat_types).toEqual(undefined);
                 });
 
                 it('should update the query length indicator', function() {
@@ -304,6 +304,23 @@ define([
 
                     view.$('textarea[name=catalog_query]').val(query_2).trigger('input');
                     expect(view.$('span.query_length').text()).toEqual(String(query_2.length));
+                });
+
+                it('should reset model fields to _initAttributes values when cancelButtonClicked called', function() {
+                    view._initAttributes = {
+                        'catalog_type': 'single',
+                        'course_id': 'different from model course_id',
+                        'course_seat_types': []
+                    };
+                    view.model.set({
+                        'catalog_type': 'multy',
+                        'catalog_query': 'query',
+                        'course_seat_types': ['seat1','seat2']
+                    });
+                    view.cancelButtonClicked();
+                    expect(view.model.get('catalog_type')).toEqual(view._initAttributes.catalog_type);
+                    expect(view.model.get('catalog_query')).toEqual(view._initAttributes.catalog_query);
+                    expect(view.model.get('course_seat_types')).toEqual(view._initAttributes.course_seat_types);
                 });
             });
         });

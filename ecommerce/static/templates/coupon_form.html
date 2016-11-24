@@ -162,7 +162,7 @@
             <div class="form-inline catalog-type">
                 <input id="single-course" type="radio" class="non-editable" name="catalog_type" value="Single course">
                 <label for="single-course"><%= gettext('Single course') %></label>
-                <input id="multiple-courses" type="radio" class="non-editable" name="catalog_type" value="Multiple courses">
+                <input id="multiple-courses" type="radio" name="catalog_type" value="Multiple courses">
                 <label for="multiple-courses"><%= gettext('Multiple courses') %></label>
             </div>
             <p class="help-block"></p>
@@ -219,5 +219,5 @@
 
 <div class="form-actions">
     <button type="submit" class="btn btn-primary"></button>
-    <a class="btn btn-default" href="/coupons/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
+    <a id="cancel-button" class="btn btn-default" href="/coupons/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
 </div>
