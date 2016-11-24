@@ -155,7 +155,6 @@ define([
             },
 
             initialize: function () {
-                this.on('change:voucher_type', this.changeVoucherType, this);
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
@@ -163,15 +162,6 @@ define([
 
             isPrepaidInvoiceType: function() {
                 return this.get('invoice_type') === 'Prepaid';
-            },
-
-            /**
-             * When user selects the 'Single use' limitation option set quantity to '1'.
-             */
-            changeVoucherType: function (model, value) {
-                if (value === 'Single use') {
-                    this.set('quantity', 1);
-                }
             },
 
             getSeatPrice: function () {

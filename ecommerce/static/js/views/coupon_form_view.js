@@ -245,7 +245,6 @@ define([
                 this.alertViews = [];
                 this.editing = options.editing || false;
                 this.hiddenClass = 'hidden';
-
                 if (this.editing) {
                     this.editableAttributes = [
                         'benefit_value',
@@ -483,7 +482,7 @@ define([
              */
             toggleCodeField: function () {
                 if (this.model.get('coupon_type') === 'Discount code') {
-                    if (this.model.get('code') !== '') {
+                    if (this.model.get('code')) {
                         this.hideField('[name=quantity]', 1);
                     } else {
                         this.formGroup('[name=quantity]').removeClass(this.hiddenClass);
