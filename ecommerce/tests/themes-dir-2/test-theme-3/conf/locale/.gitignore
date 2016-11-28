@@ -1,1 +1,3 @@
-# this file is to add conf/local dir to git, currently there is no file to ignore.
+# this file is to add conf/local dir to git
+# it ignores translations generated for the test themes
+*
