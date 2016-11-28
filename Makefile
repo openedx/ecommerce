@@ -106,7 +106,7 @@ compile_translations:
 fake_translations: extract_translations dummy_translations compile_translations
 
 pull_translations:
-	cd ecommerce && tx pull -a
+	cd ecommerce && tx pull -af
 
 push_translations:
 	cd ecommerce && tx push -s
