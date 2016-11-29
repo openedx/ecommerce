@@ -23,7 +23,7 @@ export DJANGO_SETTINGS_MODULE=ecommerce.settings.test
 make validate_translations
 
 # Compile assets and run validation
-xvfb-run make clean_static
-xvfb-run make static
+make clean_static
+make static
 xvfb-run make validate_python
 xvfb-run make validate_js
