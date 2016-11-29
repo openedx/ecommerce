@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 
+from ecommerce.core.forms import BaseForm
+
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 
@@ -17,7 +19,7 @@ def country_choices():
     return ((country.alpha2, country.name) for country in pycountry.countries)
 
 
-class PaymentForm(forms.Form):
+class PaymentForm(BaseForm):
     """
     Payment form with billing details.
 
