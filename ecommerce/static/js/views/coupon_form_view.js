@@ -258,6 +258,7 @@ define([
                         'invoice_number',
                         'invoice_payment_date',
                         'invoice_type',
+                        'max_uses',
                         'note',
                         'price',
                         'start_date',
@@ -447,7 +448,8 @@ define([
 
             toggleVoucherTypeField: function () {
                 var maxUsesFieldSelector = '[name=max_uses]',
-                    multiUseMaxUsesValue = this.editing ? this.model.get('max_uses') : null,
+                    maxUsesModelValue = this.model.get('max_uses'),
+                    multiUseMaxUsesValue = this.editing ? maxUsesModelValue : null,
                     voucherType = this.model.get('voucher_type');
                 if (!this.editing) {
                     this.emptyCodeField();
@@ -457,6 +459,7 @@ define([
                 *  integrity issues.
                 */
                 if (voucherType === 'Single use') {
+                    this.setLimitToElement(this.$(maxUsesFieldSelector), '', '');
                     this.hideField(maxUsesFieldSelector, 1);
                 } else {
                     if (this.model.get('coupon_type') === 'Discount code' && this.$('[name=quantity]').val() === 1) {
@@ -468,10 +471,18 @@ define([
                      */
                     if (voucherType === 'Multi-use') {
                         this.model.set('max_uses', multiUseMaxUsesValue);
-                        this.$(maxUsesFieldSelector).attr('min', 2);
+                        if (this.editing) {
+                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', multiUseMaxUsesValue);
+                        } else {
+                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', 2);
+                        }
                     } else {
-                        this.model.set('max_uses', 1);
-                        this.$(maxUsesFieldSelector).attr('min', 1);
+                        if (this.editing) {
+                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', maxUsesModelValue);
+                        } else {
+                            this.model.set('max_uses', 1);
+                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', 1);
+                        }
                     }
                 }
             },
