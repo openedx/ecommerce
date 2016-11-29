@@ -7,7 +7,6 @@ apt install -y xvfb firefox gettext
 
 cd /edx/app/ecommerce/ecommerce
 
-pip install -U pip wheel
 # Make it so bower can run without sudo.
 # https://github.com/GeoNode/geonode/pull/1070
 echo '{ "allow_root": true }' > /root/.bowerrc
