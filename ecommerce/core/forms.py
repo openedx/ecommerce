@@ -10,5 +10,6 @@ class BaseForm(forms.Form):
         for bound_field in self:
             # https://www.w3.org/WAI/tutorials/forms/validation/#validating-required-input
             if hasattr(bound_field, 'field') and bound_field.field.required:
+                bound_field.label = '{label} (required)'.format(label=bound_field.label)
                 bound_field.field.widget.attrs['required'] = 'required'
                 bound_field.field.widget.attrs['aria-required'] = 'true'

@@ -40,22 +40,22 @@
                 <legend>{% trans "BILLING INFORMATION" %}</legend>
                 <div class="pci-fields">
                     <div id="div_id_card_number" class="form-group">
-                        <label for="id_card_number" class="control-label">{% trans "Card Number" %}*</label>
-                        <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20"/>
+                        <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}</label>
+                        <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                     </div>
 
                     <div id="div_id_card_cvn" class="form-group">
                         <label for="id_card_cvn" class="control-label">
-                            {% trans "Security Code" %}*
+                            {% trans "Security Code (required)" %}
                             <i class="fa fa-question-circle" aria-hidden="true"></i>
                         </label>
-                        <input id="id_card_cvn" name="card_cvn" class="form-control pci-field" maxlength="4"/>
+                        <input id="id_card_cvn" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                     </div>
-                    <label id="expiration-label" for="id_card_expiry_month" class="control-label">{% trans "Expiration" %}*</label>
+                    <label id="expiration-label" for="id_card_expiry_month" class="control-label">{% trans "Expiration (requried)" %}</label>
                     <div id="div_id_card_expiration_month" class="form-group">
-                        <select id="id_card_expiry_month" name="card_expiry_month" class="form-control pci-field">
+                        <select id="id_card_expiry_month" name="card_expiry_month" class="form-control pci-field" required aria-required="true">
                             <option>{% trans "(Month)" %}</option>
                             {% for month in months %}
                                 <option value="{{forloop.counter}}">{{month}}</option>
@@ -63,7 +63,7 @@
                         </select>
                     </div>
                     <div id="div_id_card_expiration_year" class="form-group">
-                        <select id="id_card_expiry_year" name="card_expiry_year" class="form-control pci-field">
+                        <select id="id_card_expiry_year" name="card_expiry_year" class="form-control pci-field" required aria-required="true">
                             <option>{% trans "(Year)" %}</option>
                             {% for year in years %}
                                 <option value="{{year}}">{{year}}</option>
