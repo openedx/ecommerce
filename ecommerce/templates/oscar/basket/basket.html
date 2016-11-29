@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="basket">
+    <div class="basket {% if enable_client_side_checkout %}basket-new{% endif %}">
         <div class="container">
             {# Use a partial template so that AJAX can be used to re-render basket #}
             {% if not basket.is_empty %}
