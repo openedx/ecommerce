@@ -229,10 +229,9 @@
                             <button data-track-type="click"
                                     data-track-event="edx.bi.ecommerce.basket.payment_selected"
                                     data-track-category="checkout"
-                                    data-processor-name="{{ processor.NAME }}"
+                                    data-processor-name="{{ processor.NAME|lower }}"
                                     data-course-id="{{ course.id }}"
                                     class="btn payment-button"
-                                    value="{{ processor.NAME|lower }}"
                                     id="{{ processor.NAME|lower }}">
                                 {% if processor.NAME == 'cybersource' %}
                                     {% trans "Checkout" %}
