@@ -48,7 +48,7 @@ def get_receipt_page_url(site_configuration, order_number=None):
         ))
     return site_configuration.build_lms_url(
         '{base_url}{order_number}'.format(
-            base_url='/commerce/checkout/receipt',
+            base_url='/commerce/checkout/receipt/',
             order_number='?orderNum={}'.format(order_number) if order_number else ''
         )
     )

@@ -131,6 +131,7 @@ class BasketSummaryView(BasketView):
         basket = self.request.basket
         site = self.request.site
         site_configuration = site.siteconfiguration
+        payment_processors_list = site_configuration.get_payment_processors()
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
@@ -179,10 +180,15 @@ class BasketSummaryView(BasketView):
 
                 if payment_processor_class:
                     payment_processor = payment_processor_class(site)
+                    # Excluding the client side payment processor from the processor list.
+                    # 'payment_processors_list' is a list of active payment processor classes
+                    # and 'payment_processor' is an object of a class hence the type().
+                    payment_processors_list.remove(type(payment_processor))
                     today = datetime.today()
 
                     context.update({
                         'enable_client_side_checkout': True,
+                        'client_side_payment_processor': payment_processor,
                         'months': calendar.month_name[1:],
                         'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
                         'payment_url': payment_processor.client_side_payment_url,
@@ -204,7 +210,7 @@ class BasketSummaryView(BasketView):
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': site_configuration.get_payment_processors(),
+            'payment_processors': payment_processors_list,
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,

@@ -25,7 +25,21 @@
                     <div id="payment-method">
                         <div id="payment-method-image"></div>
                     </div>
-                    <div id="payment-processor"></div>
+                    <div id="payment-processor" class="payment-buttons" data-basket-id="{{ basket.id }}">
+                    {% for processor in payment_processors %}
+                        <button data-track-type="click"
+                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                data-track-category="checkout"
+                                data-processor-name="{{ processor.NAME }}"
+                                data-course-id="{{ course.id }}"
+                                class="btn payment-button payment-processor-{{ processor.NAME|lower }}"
+                                value="{{ processor.NAME|lower }}"
+                                id="{{ processor.NAME|lower }}"
+                                type="button"
+                                role="button">
+                        </button>
+                    {% endfor %}
+                    </div>
                 </div>
             </fieldset>
         </div>
@@ -75,7 +89,8 @@
                 <button id="payment-button" type="submit" class="btn btn-primary btn-large"
                         data-track-type="click"
                         data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                        data-track-category="checkout" data-processor-name="cybersource_sop"
+                        data-track-category="checkout"
+                        data-processor-name="{{ client_side_payment_processor.NAME }}"
                         data-course-id="{{ course.id }}">
                   {% trans "Pay" %}
                 </button>
