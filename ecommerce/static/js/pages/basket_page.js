@@ -85,7 +85,7 @@ define([
                 var $btn = $(e.target),
                     deferred = new $.Deferred(),
                     promise = deferred.promise(),
-                    paymentProcessor = $btn.val(),
+                    paymentProcessor = $btn.data('processor-name'),
                     data = {
                         basket_id: basketId,
                         payment_processor: paymentProcessor
