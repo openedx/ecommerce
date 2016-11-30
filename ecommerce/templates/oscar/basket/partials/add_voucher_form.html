@@ -1,6 +1,7 @@
 {% load i18n %}
 
-<div id="voucher_form_container" class="hidden">
+
+<div id="voucher_form_container" class="voucher_form">
     <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
         {% csrf_token %}
         <div class="code">
