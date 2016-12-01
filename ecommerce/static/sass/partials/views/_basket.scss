@@ -387,6 +387,7 @@
                     #div_id_state,
                     #div_id_postal_code,
                     #div_id_card_cvn,
+                    #div_id_card_type,
                     #div_id_card_expiration_year {
                         float: left;
 
@@ -395,6 +396,11 @@
 
                     #div_id_email_address {
                         width: 48%;
+                    }
+
+                    /* Temporary bump */
+                    #div_id_card_type {
+                        margin-bottom: 16px;
                     }
 
                     #payment-button {
