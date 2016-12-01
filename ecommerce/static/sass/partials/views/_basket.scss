@@ -382,6 +382,10 @@
                         width: 48%;
                     }
 
+                    #div_id_card_number {
+                        height: 90px;
+                    }
+
                     #div_id_last_name,
                     #div_id_address_line2,
                     #div_id_state,
@@ -398,11 +402,6 @@
                         width: 48%;
                     }
 
-                    /* Temporary bump */
-                    #div_id_card_type {
-                        margin-bottom: 16px;
-                    }
-
                     #payment-button {
                         margin-top: 20px;
                         margin-left: 50%;
@@ -416,6 +415,14 @@
 
                         top: -25px;
                         left: 92%;
+                    }
+
+                    .card-type-icon {
+                        position: relative;
+                        float: left;
+
+                        top: -30px;
+                        left: 70%;
                     }
                 }
             }

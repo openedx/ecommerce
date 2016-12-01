@@ -48,17 +48,9 @@
                         <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}</label>
                         <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
+                        <img class="card-type-icon" src="">
                     </div>
-                    <div id="div_id_card_type" class="form-group">
-                        <label for="id_card_type" class="control-label">{% trans "Card Type (required)" %}</label>
-                        <select id="id_card_type" name="card_type" class="form-control pci-field" required aria-required="true">
-                            <option>{% trans "(Select a card type)" %}</option>
-                            <option value="001">{% trans "Visa" %}</option>
-                            <option value="002">{% trans "MasterCard" %}</option>
-                            <option value="003">{% trans "American Express" %}</option>
-                            <option value="003">{% trans "Discover" %}</option>
-                        </select>
-                    </div>
+                    <input type="hidden" name="card_type" value="" class="pci-field">
                     <div id="div_id_card_cvn" class="form-group">
                         <label for="id_card_cvn" class="control-label">
                             {% trans "Security Code (required)" %}

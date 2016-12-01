@@ -24,6 +24,37 @@ define([
                 value: value
             }).appendTo(form);
         },
+        getCreditCardType = function(cardNumber) {
+            var name, type;
+            if (/^5[1-5]/.test(cardNumber))
+            {
+              name = 'mastercard';
+              type = '002';
+            }
+
+            else if (/^4/.test(cardNumber))
+            {
+              name = 'visa';
+              type = '001';
+            }
+
+            else if (/^3[47]/.test(cardNumber))
+            {
+              name = 'amex';
+              type = '003';
+            }
+
+            else if (/^3[689]/.test(cardNumber))
+            {
+              name = 'dinners';
+              type = '005';
+            }
+
+            return {
+                'name': name,
+                'type': type
+            }
+        },
         checkoutPayment = function(data) {
             $.ajax({
                 url: '/api/v2/checkout/',
@@ -69,7 +100,8 @@ define([
         },
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
-                basketId = $paymentButtons.data('basket-id');
+                basketId = $paymentButtons.data('basket-id'),
+                iconPath = '/static/images/credit_cards';
 
             $('#voucher_form_link a').on('click', function(event) {
                 event.preventDefault();
@@ -79,6 +111,21 @@ define([
             $('#voucher_form_cancel').on('click', function(event) {
                 event.preventDefault();
                 hideVoucherForm();
+            });
+
+            $('#id_card_number').on('input', function() {
+                var cardNumber = $('#id_card_number').val(),
+                    card = getCreditCardType(cardNumber);
+
+                if (card.name === undefined) {
+                    $('.card-type-icon').attr('src', '');
+                } else {
+                    $('.card-type-icon').attr(
+                        'src',
+                        '/static/images/credit_cards/' + card.name + '.png'
+                    );
+                }
+                $('input[name=card_type]').val(card.type);
             });
 
             $paymentButtons.find('.payment-button').click(function (e) {
