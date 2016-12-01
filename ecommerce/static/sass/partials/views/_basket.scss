@@ -419,85 +419,96 @@
                     }
                 }
             }
+        }
 
-            #summary {
-                padding-left: 40px;
+        #summary {
+            legend, p.title {
+                color: #337ab7;
+                font-size: 16px;
+                font-weight: bold;
+            }
 
-                #basket-information {
-                    .description {
-                        float: left;
-                    }
+            .row {
+                margin: 0;
+            }
+
+            padding-left: 40px;
+
+            #basket-information {
+                .description {
+                    float: left;
+                }
+
+                .price {
+                    text-align: right;
+                }
+
+                .row {
+                    padding-bottom: 20px;
+                }
+
+                .amount {
+                    padding-bottom: 20px;
+
+                    color: palette(grayscale, base);
+                    font-size: 18px;
 
                     .price {
-                        text-align: right;
-                    }
-
-                    .row {
-                        padding-bottom: 20px;
-                    }
-
-                    .amount {
-                        padding-bottom: 20px;
-
-                        color: palette(grayscale, base);
-                        font-size: 18px;
-
-                        .price {
-                            font-weight: bold;
-                        }
-                    }
-
-                    #basket-total {
-                        font-size: 24px;
                         font-weight: bold;
+                    }
+                }
 
-                        .price {
+                #basket-total {
+                    font-size: 24px;
+                    font-weight: bold;
+
+                    .price {
+                        color: #337ab7;
+                    }
+                }
+
+                #voucher-information {
+                    .use-voucher {
+                        padding: 0;
+                    }
+
+                    .voucher {
+                        float: left;
+                        font-size: 14px;
+                        line-height: 22px;
+
+                        button {
+                            border: 0;
+
+                            background-color: white;
+
                             color: #337ab7;
                         }
                     }
+                }
 
-                    #voucher-information {
-                        .use-voucher {
-                            padding: 0;
-                        }
+                #course-seat-information {
+                    #course-image {
+                        float: left;
+                        width: 150px;
 
-                        .voucher {
-                            float: left;
-                            font-size: 14px;
-
-                            button {
-                                border: 0;
-
-                                background-color: white;
-
-                                color: #337ab7;
-                            }
+                        img {
+                            max-width: 150px;
+                            max-height: 100px;
                         }
                     }
 
-                    #course-seat-information {
-                        #course-image {
-                            float: left;
-                            width: 150px;
+                    #course-additional-information {
+                        float: left;
 
-                            img {
-                                max-width: 150px;
-                                max-height: 100px;
-                            }
+                        padding-left: 20px;
+
+                        #course-name {
+                            font-weight: bold;
                         }
 
-                        #course-additional-information {
-                            float: left;
-
-                            padding-left: 20px;
-
-                            #course-name {
-                                font-weight: bold;
-                            }
-
-                            #seat-type {
-                                color: palette(grayscale, base);
-                            }
+                        #seat-type {
+                            color: palette(grayscale, base);
                         }
                     }
                 }

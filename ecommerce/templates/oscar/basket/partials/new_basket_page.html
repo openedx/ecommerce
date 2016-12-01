@@ -106,18 +106,18 @@
             <fieldset>
                 <legend>{% trans "SUMMARY" %}</legend>
                 <div id="line-price" class="amount row">
-                    <div class="description">{% trans "Price" %}</div>
-                    <div class="price">{{line_data.line.price_incl_tax|currency:line_data.line.price_currency}}</div>
+                    <span class="description">{% trans "Price" %}</span>
+                    <span class="price">{{line_data.line.price_incl_tax|currency:line_data.line.price_currency}}</span>
                 </div>
                 {% if basket.total_discount %}
                     <div id="line-discount" class="amount row">
-                        <div class="description">{% trans "Discounts applied" %}</div>
-                        <div class="price">-{{basket.total_discount|currency:basket.currency}}</div>
+                        <span class="description">{% trans "Discounts applied" %}</span>
+                        <span class="price">-{{basket.total_discount|currency:basket.currency}}</span>
                     </div>
                 {% endif %}
                 <div id="basket-total" class="row">
-                    <div class="description">{% trans "TOTAL" %}</div>
-                    <div class="price">{{ order_total.incl_tax|currency:basket.currency }}</div>
+                    <span class="description">{% trans "TOTAL" %}</span>
+                    <span class="price">{{ order_total.incl_tax|currency:basket.currency }}</span>
                 </div>
                 <div id="voucher-information" class="row">
                     {% if not is_bulk_purchase %}
@@ -139,7 +139,7 @@
                             {% else %}
                                 {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                                 {% if voucher_form %}
-                                    <div class="use-voucher col-sm-6">
+                                    <div class="use-voucher">
                                         <p id="voucher_form_link">
                                             <a href="#voucher">{% trans "Add Coupon Code" %}</a>
                                         </p>
