@@ -25,7 +25,6 @@
                 .old-price,
                 .price {
                     margin: 0;
-
                     font-size: 20px;
                     font-weight: bold;
                 }
@@ -292,51 +291,40 @@
                 #payment-method {
                     #payment-method-image, button {
                         float: left;
-
                         border: 1px solid palette(grayscale, base);
-
                         height: 50px;
                     }
 
 
                     #payment-method-image {
                         border-bottom: 4px solid #337ab7;
-
                         background-image: url('/static/images/CreditCard_options.png');
                         background-position: center center;
                         background-repeat: no-repeat;
-
                         width: 150px;
                     }
 
                     button {
                         position: relative;
                         left: -1px;
-
                         background-color: white;
-
                         width: 100px;
-
                         color: gray;
                     }
                 }
 
                 #payment-processor {
                     float: left;
-
                     margin-left: 50px;
 
                     .payment-button {
                         border: 1px solid palette(grayscale, base);
                         border-radius: 5px;
-
                         background-position: center center;
                         background-repeat: no-repeat;
                         background-color: #fff;
-
                         width: 120px;
                         height: 50px;
-
                         &.payment-processor-paypal {
                             background-image: url('/static/images/paypal_logo.png');
                         }
@@ -365,7 +353,6 @@
 
                     #expiration-label {
                         width: 100%;
-
                         text-align: left;
                     }
 
@@ -376,9 +363,7 @@
                     #div_id_card_number,
                     #div_id_card_expiration_month {
                         float: left;
-
                         margin-right: 2%;
-
                         width: 48%;
                     }
 
@@ -394,7 +379,6 @@
                     #div_id_card_type,
                     #div_id_card_expiration_year {
                         float: left;
-
                         width: 48%;
                     }
 
@@ -405,14 +389,12 @@
                     #payment-button {
                         margin-top: 20px;
                         margin-left: 50%;
-
                         width: 50%;
                     }
 
                     .fa-lock {
                         position: relative;
                         float: left;
-
                         top: -25px;
                         left: 92%;
                     }
@@ -420,7 +402,6 @@
                     .card-type-icon {
                         position: relative;
                         float: left;
-
                         top: -30px;
                         left: 70%;
                     }
@@ -456,7 +437,6 @@
 
                 .amount {
                     padding-bottom: 20px;
-
                     color: palette(grayscale, base);
                     font-size: 18px;
 
@@ -482,14 +462,12 @@
                     .voucher {
                         float: left;
                         font-size: 14px;
-
                         margin: 0 10px 0 0;
                         line-height: 33px;
+
                         button {
                             border: 0;
-
                             background-color: white;
-
                             color: #337ab7;
                         }
                     }
@@ -508,7 +486,6 @@
 
                     #course-additional-information {
                         float: left;
-
                         padding-left: 20px;
 
                         #course-name {
