@@ -1,5 +1,6 @@
 import hashlib
 
+import ddt
 import httpretty
 import mock
 from django.core.cache import cache
@@ -16,8 +17,10 @@ from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+Range = get_model('offer', 'Range')
 
 
+@ddt.ddt
 class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
     def setUp(self):
         super(RangeTests, self).setUp()
@@ -72,6 +75,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
             non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         """
         self.range.catalog_query = large_query
+        self.range.course_seat_types = ['verified', ]
         self.range.save()
         self.assertEqual(self.range.catalog_query, large_query)
 
@@ -147,6 +151,38 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
 
         with self.assertRaises(ValidationError):
             validate_credit_seat_type('credit,verified')
+
+    @ddt.data(
+        {'catalog_query': '*:*'},
+        {'catalog_query': '', 'course_seat_types': ['verified']},
+        {'course_seat_types': ['verified']},
+    )
+    def test_creating_range_with_wrong_data(self, data):
+        """Verify creating range without catalog_query or catalog_seat_types raises ValidationError."""
+        with self.assertRaises(ValidationError):
+            Range.objects.create(**data)
+
+    @ddt.data(
+        {'catalog_query': '*:*'},
+        {'catalog_query': '*:*', 'course_seat_types': ['verified']},
+        {'course_seat_types': ['verified']}
+    )
+    def test_creating_range_with_catalog_and_dynamic_fields(self, data):
+        """Verify creating range with catalog and dynamic fields set will raise exception."""
+        data.update({'catalog': self.catalog})
+        with self.assertRaises(ValidationError):
+            Range.objects.create(**data)
+
+    def test_creating_dynamic_range(self):
+        """Verify creating range with catalog_query or catalog_seat_types creates range with those values."""
+        data = {
+            'catalog_query': 'id:testquery',
+            'course_seat_types': ['verified', 'professional']
+        }
+        new_range = Range.objects.create(**data)
+        self.assertEqual(new_range.catalog_query, data['catalog_query'])
+        self.assertEqual(new_range.course_seat_types, data['course_seat_types'])
+        self.assertEqual(new_range.catalog, None)
 
 
 class ConditionalOfferTests(TestCase):
