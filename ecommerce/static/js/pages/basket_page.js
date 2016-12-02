@@ -113,7 +113,7 @@ define([
                 basketId = $paymentButtons.data('basket-id'),
                 iconPath = '/static/images/credit_cards';
 
-            $('#voucher_form_link a').on('click', function(event) {
+            $('#voucher_form_link').on('click', function(event) {
                 event.preventDefault();
                 showVoucherForm();
             });
@@ -124,10 +124,10 @@ define([
             });
 
             $('#id_card_number').on('input', function() {
-                var cardNumber = $('#id_card_number').val(),
+                var cardNumber = $('#id_card_number').val().replace(/\s+/g, ''),
                     card = getCreditCardType(cardNumber);
 
-                if (cardNumber.length > 13 || cardNumber.length < 19){
+                if (cardNumber.length > 13 && cardNumber.length < 19){
                     var color = (isValidCardNumber(cardNumber)) ? 'black' : 'red';
                     $('#id_card_number').css('color', color);
                 }
