@@ -22,10 +22,14 @@ require([
             $paymentForm.submit(function (event) {
                 var $signedFields = $('input,select', $paymentForm).not('.pci-field');
 
-                // Format the date to a format that CyberSource accepts.
+                // Format the date to a format that CyberSource accepts (MM-YYYY).
                 var cardExpiryMonth = $('select[name=card_expiry_month]').val();
                 var cardExpiryYear = $('select[name=card_expiry_year]').val();
+                if (/^[0-9]$/.test(parseInt(cardExpiryMonth))) {
+                    cardExpiryMonth = '0' + cardExpiryMonth;
+                }
                 $('input[name=card_expiry_date]').val(cardExpiryMonth + '-' + cardExpiryYear);
+
 
                 // Post synchronously since we need the returned data.
                 $.ajax({
