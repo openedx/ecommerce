@@ -266,6 +266,18 @@
 
 .basket-new {
     .container {
+        #messages {
+            .alert-error {
+                color: #d2322d;
+            }
+
+            .alert-error {
+                background-color: #f2dede;
+                border-color: #ebccd1;
+                color: #a94442;
+            }
+        }
+
         .payment-form {
             legend, p.title {
                 color: #337ab7;

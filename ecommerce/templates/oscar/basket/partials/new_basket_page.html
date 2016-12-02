@@ -2,6 +2,8 @@
 {% load currency_filters %}
 {% load crispy_forms_tags %}
 
+{% include 'partials/alert_messages.html' %}
+
 <form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}">
     {% csrf_token %}
     <div id="payment-information" class="col-sm-7">
@@ -9,9 +11,6 @@
             <fieldset>
                 <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
                 <div class="row">
-                    <!-- TODO: Enable choosing payment method -->
-                    <!-- Incorporate this below:
-                    -->
                     <div id="payment-method">
                         <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
                     </div>
