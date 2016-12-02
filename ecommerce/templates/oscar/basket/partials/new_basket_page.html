@@ -13,12 +13,12 @@
                     <!-- Incorporate this below:
                     -->
                     <div id="payment-method">
-
-                        <div id="payment-method-image"></div>
+                        <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
                     </div>
                     <div id="payment-processor" class="payment-buttons" data-basket-id="{{ basket.id }}">
                     {% for processor in payment_processors %}
-                        <button data-track-type="click"
+                        <button aria-label="Pay with PayPal"
+                                data-track-type="click"
                                 data-track-event="edx.bi.ecommerce.basket.payment_selected"
                                 data-track-category="checkout"
                                 data-processor-name="{{ processor.NAME }}"
@@ -36,13 +36,13 @@
         </div>
         <div id="card-holder-information" class="form-input-elements placeholder">
             <fieldset>
-                <legend>{% trans "CARD HOLDER INFORMATION" %}</legend>
+                <legend aria-label="Card holder information">{% trans "CARD HOLDER INFORMATION" %}</legend>
                 {{ payment_form|crispy }}
             </fieldset>
         </div>
         <div id="billing-information" class="form-input-elements placeholder">
             <fieldset>
-                <legend>{% trans "BILLING INFORMATION" %}</legend>
+                <legend aria-label="Billing information">{% trans "BILLING INFORMATION" %}</legend>
                 <div class="pci-fields">
                     <div id="div_id_card_number" class="form-group">
                         <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}</label>
@@ -95,7 +95,7 @@
     <!-- Currently works only for the single item basket -->
     {% for form, line_data in formset_lines_data %}
         <div id="basket-information">
-            <fieldset>
+            <fieldset aria-live="polite">
                 <legend>{% trans "SUMMARY" %}</legend>
                 <div id="line-price" class="amount row">
                     <span class="description">{% trans "Price" %}</span>
@@ -107,8 +107,8 @@
                         <span class="price">-{{basket.total_discount|currency:basket.currency}}</span>
                     </div>
                 {% endif %}
-                <div id="basket-total" class="row">
-                    <span class="description">{% trans "TOTAL" %}</span>
+                <div id="basket-total" class="row" aria-describedby="total-price-desc">
+                    <span id="total-price-desc" class="description">{% trans "TOTAL" %}</span>
                     <span class="price">{{ order_total.incl_tax|currency:basket.currency }}</span>
                 </div>
                 <div id="voucher-information" class="row">
@@ -123,7 +123,7 @@
                                             {% endblocktrans %}
                                             <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
                                                 {% csrf_token %}
-                                                <button class="remove-voucher" type="submit">{% trans "Remove" %}</button>
+                                                <button class="btn btn-danger" type="submit">{% trans "Remove" %}</button>
                                             </form>
                                         </p>
                                     {% endfor %}
@@ -132,9 +132,9 @@
                                 {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                                 {% if voucher_form %}
                                     <div class="use-voucher">
-                                        <p id="voucher_form_link">
-                                            <a href="#voucher">{% trans "Add Coupon Code" %}</a>
-                                        </p>
+                                        <button type="button" class="btn btn-default" id="voucher_form_link">
+                                            {% trans "Add Coupon Code" %}
+                                        </button>
                                         {% include 'basket/partials/add_voucher_form.html' %}
                                     </div>
                                 {% endif %}
