@@ -93,6 +93,32 @@ define([
                 });
             });
 
+            describe('getCreditCardType', function() {
+                it('should recognize the right card', function() {
+                    var cardList = [
+                        {'number': '378282246310005', 'name': 'amex', 'type': '003'},
+                        {'number': '30569309025904', 'name': 'diners', 'type': '005'},
+                        {'number': '6011111111111117', 'name': 'discover', 'type': '004'},
+                        {'number': '3530111333300000', 'name': 'jcb', 'type': '007'},
+                        {'number': '5105105105105100', 'name': 'mastercard', 'type': '002'},
+                        {'number': '4111111111111111', 'name': 'visa', 'type': '001'},
+                        {'number': '6759649826438453', 'name': 'maestro', 'type': '042'}
+                    ];
+
+                    _.each(cardList, function(card) {
+                        var cardType = BasketPage.getCreditCardType(card.number);
+                        expect(cardType.name).toEqual(card.name);
+                        expect(cardType.type).toEqual(card.type);
+                    });
+                });
+
+                it('should not return anything for unrecognized credit cards', function() {
+                    var invalidNum = '123123123';
+                    var invalidCard = BasketPage.getCreditCardType(invalidNum);
+                    expect(typeof invalidCard).toEqual('undefined');
+                });
+            });
+
             describe('onReady', function () {
                 it('should toggle voucher form on click', function () {
                     BasketPage.onReady();

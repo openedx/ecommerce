@@ -162,6 +162,23 @@ define([
                         el.setAttribute('datepicker-initialized', 'true');
                     }
                 });
+            },
+            /**
+             * Most performant Luhn check
+             * https://jsperf.com/credit-card-validator/7
+             */
+            isValidCardNumber: function(cardNumber) {
+                var len = cardNumber.length,
+                    mul = 0,
+                    prodArr = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]],
+                    sum = 0;
+                
+                while (len--) {
+                    sum += prodArr[mul][parseInt(cardNumber.charAt(len), 10)];
+                    mul ^= 1;
+                }
+                
+                return sum % 10 === 0 && sum > 0;
             }
         };
     }
