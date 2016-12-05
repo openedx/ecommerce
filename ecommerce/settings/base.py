@@ -279,6 +279,9 @@ LOCAL_APPS = [
 
     # Sailthru email marketing integration
     'ecommerce.sailthru',
+
+    # Enterprise app for ecommerce
+    'ecommerce.enterprise',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
