@@ -36,7 +36,7 @@ define([
 
             updateLimits: function() {
                 this.lowerLimit = (this.page - 1) * this.perPage;
-                this.upperLimit = this.page * this.perPage;
+                this.upperLimit = this.onLastPage() ? this.length : this.page * this.perPage;
             },
 
             goToPage: function(pageNumber) {

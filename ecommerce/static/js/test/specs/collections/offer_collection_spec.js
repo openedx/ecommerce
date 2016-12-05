@@ -94,6 +94,14 @@ define([
                 expect(collection.page).toBe(1);
                 expect(collection.updateLimits).toHaveBeenCalled();
             });
+
+            it('should update upperLimit value to collection length on last pagination page', function() {
+                spyOn(collection, 'onLastPage').and.returnValue(true);
+                collection.length = 8;
+                collection.upperLimit = undefined;
+                collection.updateLimits();
+                expect(collection.upperLimit).toBe(collection.length);
+            });
         });
     }
 );
