@@ -111,6 +111,28 @@ class Range(AbstractRange):
         null=True
     )
 
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Range, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+
+    def clean(self):
+        """ Validation for model fields. """
+        if self.catalog and (self.catalog_query or self.course_seat_types):
+            logger.exception(
+                'Failed to create Range. Catalog and dynamic catalog fields may not be set in the same range.'
+            )
+            raise ValidationError(_('Catalog and dynamic catalog fields may not be set in the same range.'))
+
+        # Both catalog_query and course_seat_types must be set or empty
+        exception_msg = 'Failed to create Range. If catalog_query is set course_seat_types must be set as well.'
+        validation_error_msg = _('Both catalog_query and course_seat_types fields must be set.')
+        if self.catalog_query and not self.course_seat_types:
+            logger.exception(exception_msg)
+            raise ValidationError(validation_error_msg)
+        elif self.course_seat_types and not self.catalog_query:
+            logger.exception(exception_msg)
+            raise ValidationError(validation_error_msg)
+
     def run_catalog_query(self, product):
         """
         Retrieve the results from running the query contained in catalog_query field.
