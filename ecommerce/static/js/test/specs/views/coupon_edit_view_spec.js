@@ -170,6 +170,13 @@ define([
                     expect(view.model.get('course_id')).toBe(formView._initAttributes.course_id);
                     expect(view.model.get('seat_type')).toBe(formView._initAttributes.seat_type);
                 });
+
+                it('should not update price when editing coupon', function() {
+                    var formView = view.formView;
+                    spyOn(formView, 'updateTotalValue');
+                    formView.changeSeatType();
+                    expect(formView.updateTotalValue).not.toHaveBeenCalled();
+                });
             });
         });
     }
