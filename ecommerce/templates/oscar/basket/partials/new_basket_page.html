@@ -3,6 +3,32 @@
 {% load crispy_forms_tags %}
 
 {% include 'partials/alert_messages.html' %}
+<div id="payment-method-information" class="placeholder row">
+    <fieldset>
+        <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
+        <div class="col-sm-7">
+            <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
+                <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
+            </div>
+            <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
+            {% for processor in payment_processors %}
+                <button aria-label="Pay with PayPal"
+                        data-track-type="click"
+                        data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                        data-track-category="checkout"
+                        data-processor-name="{{ processor.NAME }}"
+                        data-course-id="{{ course.id }}"
+                        class="btn payment-button payment-processor-{{ processor.NAME|lower }}"
+                        value="{{ processor.NAME|lower }}"
+                        id="{{ processor.NAME|lower }}"
+                        type="button"
+                        role="button">
+                </button>
+            {% endfor %}
+            </div>
+        </div>
+    </fieldset>
+</div>
 
 <div id="summary" class="col-sm-5 col-sm-push-7">
     <!-- Currently works only for the single item basket -->
@@ -88,32 +114,6 @@
 <form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}">
     {% csrf_token %}
     <div id="payment-information" class="col-sm-7 col-sm-pull-5">
-        <div id="payment-method-information" class="placeholder">
-            <fieldset>
-                <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
-                <div class="row">
-                    <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
-                        <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
-                    </div>
-                    <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
-                    {% for processor in payment_processors %}
-                        <button aria-label="Pay with PayPal"
-                                data-track-type="click"
-                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                                data-track-category="checkout"
-                                data-processor-name="{{ processor.NAME }}"
-                                data-course-id="{{ course.id }}"
-                                class="btn payment-button payment-processor-{{ processor.NAME|lower }}"
-                                value="{{ processor.NAME|lower }}"
-                                id="{{ processor.NAME|lower }}"
-                                type="button"
-                                role="button">
-                        </button>
-                    {% endfor %}
-                    </div>
-                </div>
-            </fieldset>
-        </div>
         <div id="card-holder-information" class="form-input-elements placeholder row">
             <fieldset>
                 <legend aria-label="Card holder information">{% trans "CARD HOLDER INFORMATION" %}</legend>

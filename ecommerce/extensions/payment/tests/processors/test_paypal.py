@@ -179,7 +179,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         Ensures that when the otto_receipt_page waffle switch is disabled, the processor uses the LMS receipt page.
         """
         self.site.siteconfiguration.enable_otto_receipt_page = False
-        assert self._get_receipt_url() == self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt')
+        assert self._get_receipt_url() == self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt/')
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')

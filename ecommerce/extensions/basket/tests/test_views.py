@@ -462,6 +462,9 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         """ Verify the view returns the data necessary to initiate client-side checkout. """
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
+        self.site.siteconfiguration.payment_processors = 'cybersource'
+        self.site.siteconfiguration.save()
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + 'cybersource', True)
 
         response = self.client.get(self.get_full_url(self.path))
         self.assertEqual(response.status_code, 200)

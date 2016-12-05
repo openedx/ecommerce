@@ -180,6 +180,8 @@ class BasketSummaryView(BasketView):
 
                 if payment_processor_class:
                     payment_processor = payment_processor_class(site)
+                    print payment_processor
+                    print payment_processors_list
                     # Excluding the client side payment processor from the processor list.
                     # 'payment_processors_list' is a list of active payment processor classes
                     # and 'payment_processor' is an object of a class hence the type().

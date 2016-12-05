@@ -42,12 +42,13 @@ define([
             return sum % 10 === 0 && sum > 0;
         },
         getCreditCardType = function(cardNumber) {
-            var name, type,
-                matchers = {
+            var matchers = {
                     amex: [/^3[47]\d{13}$/, '003'],
                     diners: [/^3(?:0[0-59]|[689]\d)\d{11}$/, '005'],
                     discover: [
-                        /^(6011\d{2}|65\d{4}|64[4-9]\d{3}|62212[6-9]|6221[3-9]\d|622[2-8]\d{2}|6229[01]\d|62292[0-5])\d{10,13}$/,
+                        new RegExp (['^(6011\d{2}|65\d{4}|64[4-9]\d{3}|62212[6-9]|',
+                            '6221[3-9]\d|622[2-8]\d{2}|6229[01]\d|62292[0-5])',
+                            '\d{10,13}$'].join('')),
                         '004'
                     ],
                     jcb: [/^(?:2131|1800|35\d{3})\d{11}$/, '007'],
@@ -61,7 +62,7 @@ define([
                     return {
                         'name': key,
                         'type': matchers[key][1]
-                    }
+                    };
                 }
             }
         },
@@ -111,7 +112,7 @@ define([
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
                 basketId = $paymentButtons.data('basket-id'),
-                iconPath = '/static/images/credit_cards';
+                iconPath = '/static/images/credit_cards/';
 
             $('#voucher_form_link').on('click', function(event) {
                 event.preventDefault();
@@ -135,7 +136,7 @@ define([
                 if (typeof card !== 'undefined') {
                     $('.card-type-icon').attr(
                         'src',
-                        '/static/images/credit_cards/' + card.name + '.png'
+                        iconPath + card.name + '.png'
                     );
                     $('input[name=card_type]').val(card.type);
                 } else {
