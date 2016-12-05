@@ -227,43 +227,6 @@
     }
 }
 
-/* Small devices (tablets, 992px and lower) */
-@media (max-width: $screen-md-min - 1) {
-    .basket {
-        .container {
-            .basket-items {
-                .course-price-label {
-                    font-size: 20px;
-                    font-weight: bold;
-                    margin: 0px 20px 20px 0px;
-                }
-            }
-        }
-    }
-}
-
-/* extra Small devices (phones, 768px and lower) */
-@media (max-width: $screen-xs-max) {
-    .basket .container {
-        .payment-buttons {
-            .payment-button {
-                width: 100%;
-                margin-bottom: 2px;
-            }
-        }
-
-        .form-group {
-            margin-bottom: 0;
-            vertical-align: middle;
-            display: inline-block;
-        }
-
-        .course_prices {
-            margin-top: 30px;
-        }
-    }
-}
-
 .basket-new {
     .container {
         #messages {
@@ -307,7 +270,6 @@
                         height: 50px;
                     }
 
-
                     #payment-method-image {
                         border-bottom: 4px solid #337ab7;
                         background-image: url('/static/images/CreditCard_options.png');
@@ -326,9 +288,6 @@
                 }
 
                 #payment-processor {
-                    float: left;
-                    margin-left: 50px;
-
                     .payment-button {
                         border: 1px solid palette(grayscale, base);
                         border-radius: 5px;
@@ -365,43 +324,16 @@
 
                     #expiration-label {
                         width: 100%;
+                        margin-left: 15px;
                         text-align: left;
-                    }
-
-                    #div_id_first_name,
-                    #div_id_address_line1,
-                    #div_id_city,
-                    #div_id_country,
-                    #div_id_card_number,
-                    #div_id_card_expiration_month {
-                        float: left;
-                        margin-right: 2%;
-                        width: 48%;
                     }
 
                     #div_id_card_number {
                         height: 90px;
                     }
 
-                    #div_id_last_name,
-                    #div_id_address_line2,
-                    #div_id_state,
-                    #div_id_postal_code,
-                    #div_id_card_cvn,
-                    #div_id_card_type,
-                    #div_id_card_expiration_year {
-                        float: left;
-                        width: 48%;
-                    }
-
-                    #div_id_email_address {
-                        width: 48%;
-                    }
-
                     #payment-button {
                         margin-top: 20px;
-                        margin-left: 50%;
-                        width: 50%;
                     }
 
                     .fa-lock {
@@ -510,6 +442,60 @@
                     }
                 }
             }
+        }
+    }
+}
+
+
+/* Small devices (tablets, 992px and lower) */
+@media (max-width: $screen-md-min - 1) {
+    .basket {
+        .container {
+            .basket-items {
+                .course-price-label {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin: 0px 20px 20px 0px;
+                }
+            }
+        }
+    }
+}
+
+/* extra Small devices (phones, 768px and lower) */
+@media (max-width: $screen-xs-max) {
+    .basket .container {
+        .payment-buttons {
+            .payment-button {
+                width: 100%;
+                margin-bottom: 2px;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 0;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        .course_prices {
+            margin-top: 30px;
+        }
+    }
+
+    .basket-new .container {
+        padding: 20px 0 0 0;
+
+        .form-group {
+            display: block;
+        }
+
+        .payment-form #payment-information {
+            border-right: none;
+        }
+
+        #summary {
+            padding-left: 20px
         }
     }
 }

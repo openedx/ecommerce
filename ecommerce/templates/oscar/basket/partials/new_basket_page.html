@@ -4,93 +4,7 @@
 
 {% include 'partials/alert_messages.html' %}
 
-<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}">
-    {% csrf_token %}
-    <div id="payment-information" class="col-sm-7">
-        <div id="payment-method-information" class="placeholder">
-            <fieldset>
-                <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
-                <div class="row">
-                    <div id="payment-method">
-                        <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
-                    </div>
-                    <div id="payment-processor" class="payment-buttons" data-basket-id="{{ basket.id }}">
-                    {% for processor in payment_processors %}
-                        <button aria-label="Pay with PayPal"
-                                data-track-type="click"
-                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                                data-track-category="checkout"
-                                data-processor-name="{{ processor.NAME }}"
-                                data-course-id="{{ course.id }}"
-                                class="btn payment-button payment-processor-{{ processor.NAME|lower }}"
-                                value="{{ processor.NAME|lower }}"
-                                id="{{ processor.NAME|lower }}"
-                                type="button"
-                                role="button">
-                        </button>
-                    {% endfor %}
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-        <div id="card-holder-information" class="form-input-elements placeholder">
-            <fieldset>
-                <legend aria-label="Card holder information">{% trans "CARD HOLDER INFORMATION" %}</legend>
-                {{ payment_form|crispy }}
-            </fieldset>
-        </div>
-        <div id="billing-information" class="form-input-elements placeholder">
-            <fieldset>
-                <legend aria-label="Billing information">{% trans "BILLING INFORMATION" %}</legend>
-                <div class="pci-fields">
-                    <div id="div_id_card_number" class="form-group">
-                        <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}</label>
-                        <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
-                        <i class="fa fa-lock" aria-hidden="true"></i>
-                        <img class="card-type-icon" src="">
-                    </div>
-                    <input type="hidden" name="card_type" value="" class="pci-field">
-                    <div id="div_id_card_cvn" class="form-group">
-                        <label for="id_card_cvn" class="control-label">
-                            {% trans "Security Code (required)" %}
-                            <i class="fa fa-question-circle" aria-hidden="true"></i>
-                        </label>
-                        <input type="password" id="id_card_cvn" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true"/>
-                        <i class="fa fa-lock" aria-hidden="true"></i>
-                    </div>
-                    <label id="expiration-label" for="id_card_expiry_month" class="control-label">{% trans "Expiration (required)" %}</label>
-                    <div id="div_id_card_expiration_month" class="form-group">
-                        <select id="id_card_expiry_month" name="card_expiry_month" class="form-control pci-field" required aria-required="true">
-                            <option>{% trans "(Month)" %}</option>
-                            {% for month in months %}
-                                <option value="{{forloop.counter}}">{{month}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div id="div_id_card_expiration_year" class="form-group">
-                        <select id="id_card_expiry_year" name="card_expiry_year" class="form-control pci-field" required aria-required="true">
-                            <option>{% trans "(Year)" %}</option>
-                            {% for year in years %}
-                                <option value="{{year}}">{{year}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <input type="hidden" name="card_expiry_date" value="" class="pci-field">
-                </div>
-
-                <button id="payment-button" type="submit" class="btn btn-primary btn-large"
-                        data-track-type="click"
-                        data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                        data-track-category="checkout"
-                        data-processor-name="{{ client_side_payment_processor.NAME }}"
-                        data-course-id="{{ course.id }}">
-                  {% trans "Pay" %}
-                </button>
-            </fieldset>
-        </div>
-    </div>
-</form>
-<div id="summary" class="col-sm-5">
+<div id="summary" class="col-sm-5 col-sm-push-7">
     <!-- Currently works only for the single item basket -->
     {% for form, line_data in formset_lines_data %}
         <div id="basket-information">
@@ -170,3 +84,90 @@
         </div>
     {% endfor %}
 </div>
+
+<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}">
+    {% csrf_token %}
+    <div id="payment-information" class="col-sm-7 col-sm-pull-5">
+        <div id="payment-method-information" class="placeholder">
+            <fieldset>
+                <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
+                <div class="row">
+                    <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
+                        <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
+                    </div>
+                    <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
+                    {% for processor in payment_processors %}
+                        <button aria-label="Pay with PayPal"
+                                data-track-type="click"
+                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                data-track-category="checkout"
+                                data-processor-name="{{ processor.NAME }}"
+                                data-course-id="{{ course.id }}"
+                                class="btn payment-button payment-processor-{{ processor.NAME|lower }}"
+                                value="{{ processor.NAME|lower }}"
+                                id="{{ processor.NAME|lower }}"
+                                type="button"
+                                role="button">
+                        </button>
+                    {% endfor %}
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div id="card-holder-information" class="form-input-elements placeholder row">
+            <fieldset>
+                <legend aria-label="Card holder information">{% trans "CARD HOLDER INFORMATION" %}</legend>
+                {% crispy payment_form %}
+            </fieldset>
+        </div>
+        <div id="billing-information" class="form-input-elements placeholder">
+            <fieldset>
+                <legend aria-label="Billing information">{% trans "BILLING INFORMATION" %}</legend>
+                <div class="pci-fields row">
+                    <div id="div_id_card_number" class="form-group col-md-6">
+                        <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}</label>
+                        <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <img class="card-type-icon" src="">
+                    </div>
+                    <input type="hidden" name="card_type" value="" class="pci-field">
+                    <div id="div_id_card_cvn" class="form-group col-md-6">
+                        <label for="id_card_cvn" class="control-label">
+                            {% trans "Security Code (required)" %}
+                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                        </label>
+                        <input type="password" id="id_card_cvn" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true"/>
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                    </div>
+                    <label id="expiration-label" for="id_card_expiry_month" class="control-label">{% trans "Expiration (required)" %}</label>
+                    <div id="div_id_card_expiration_month" class="form-group col-md-6 col-xs-7">
+                        <select id="id_card_expiry_month" name="card_expiry_month" class="form-control pci-field" required aria-required="true">
+                            <option>{% trans "(Month)" %}</option>
+                            {% for month in months %}
+                                <option value="{{forloop.counter}}">{{month}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="div_id_card_expiration_year" class="form-group col-md-6 col-xs-5">
+                        <select id="id_card_expiry_year" name="card_expiry_year" class="form-control pci-field" required aria-required="true">
+                            <option>{% trans "(Year)" %}</option>
+                            {% for year in years %}
+                                <option value="{{year}}">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="card_expiry_date" value="" class="pci-field">
+                </div>
+
+                <button id="payment-button" type="submit" class="btn btn-primary btn-large col-sm-offset-6 col-sm-6 col-xs-12"
+                        data-track-type="click"
+                        data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                        data-track-category="checkout"
+                        data-processor-name="{{ client_side_payment_processor.NAME }}"
+                        data-course-id="{{ course.id }}">
+                  {% trans "Pay" %}
+                </button>
+            </fieldset>
+        </div>
+    </div>
+</form>
