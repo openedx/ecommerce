@@ -531,9 +531,7 @@ define([
                         }
                     });
                     // update field
-                    this.$('[name=seat_type]')
-                        .html(this.seatTypes)
-                        .trigger('change');
+                    this.$('[name=seat_type]').html(this.seatTypes).trigger('change');
 
                     if (this.editing && seatType) {
                         this.$('[name=seat_type]').val(_s.capitalize(seatType));
@@ -552,7 +550,8 @@ define([
 
                 this.model.set('seat_type', seatType);
 
-                if (seatType) {
+                // The price should not change when editing
+                if (seatType && !this.editing) {
                     this.model.set('stock_record_ids', seatData.stockrecords);
                     this.updateTotalValue(seatData);
                 }
