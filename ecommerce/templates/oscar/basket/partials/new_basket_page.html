@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% include 'partials/alert_messages.html' %}
+
 <div id="payment-method-information" class="placeholder row">
     <fieldset>
         <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
@@ -111,7 +112,7 @@
     {% endfor %}
 </div>
 
-<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}">
+<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}" aria-live="polite">
     {% csrf_token %}
     <div id="payment-information" class="col-sm-7 col-sm-pull-5">
         <div id="card-holder-information" class="form-input-elements placeholder row">
@@ -125,7 +126,7 @@
                 <legend aria-label="Billing information">{% trans "BILLING INFORMATION" %}</legend>
                 <div class="pci-fields row">
                     <div id="div_id_card_number" class="form-group col-md-6">
-                        <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}</label>
+                        <label for="id_card_number" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, Secure</span></label>
                         <input id="id_card_number" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                         <img class="card-type-icon" src="">
@@ -134,6 +135,7 @@
                     <div id="div_id_card_cvn" class="form-group col-md-6">
                         <label for="id_card_cvn" class="control-label">
                             {% trans "Security Code (required)" %}
+                            <span class="sr">, Secure</span>
                             <i class="fa fa-question-circle" aria-hidden="true"></i>
                         </label>
                         <input type="password" id="id_card_cvn" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true"/>
