@@ -57,8 +57,8 @@ class PaymentForm(forms.Form):
     address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
-    country = forms.ChoiceField(choices=country_choices, label=_('Country'))
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
+    country = forms.ChoiceField(choices=country_choices, label=_('Country'))
 
     def clean(self):
         cleaned_data = super(PaymentForm, self).clean()
