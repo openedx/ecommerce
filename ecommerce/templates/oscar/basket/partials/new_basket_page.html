@@ -8,7 +8,7 @@
         <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
         <div class="col-sm-7">
             <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
-                <div id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></div>
+                <a href="#payment-information" id="payment-method-image" aria-label="Pay with a Credit Card" role="button"></a>
             </div>
             <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
             {% for processor in payment_processors %}

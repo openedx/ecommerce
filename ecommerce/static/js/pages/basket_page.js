@@ -60,7 +60,6 @@ define([
                 success: onSuccess,
                 error: onFail
             });
-
         },
         hideVoucherForm = function() {
             $('#voucher_form_container').hide();
