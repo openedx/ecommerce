@@ -3,13 +3,13 @@ from unittest import skipUnless
 import ddt
 from bok_choy.web_app_test import WebAppTest
 
-from acceptance_tests.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
-from acceptance_tests.constants import CODE, CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
-from acceptance_tests.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
-                                     LogistrationMixin, UnenrollmentMixin, PaymentMixin)
-from acceptance_tests.pages.basket import BasketPage
-from acceptance_tests.pages.coupons import CouponsCreatePage, CouponsDetailsPage, CouponsListPage, RedeemVoucherPage
-from acceptance_tests.pages.ecommerce import EcommerceDashboardHomePage
+from e2e.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
+from e2e.constants import CODE, CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
+from e2e.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
+                        LogistrationMixin, UnenrollmentMixin, PaymentMixin)
+from e2e.pages.basket import BasketPage
+from e2e.pages.coupons import CouponsCreatePage, CouponsDetailsPage, CouponsListPage, RedeemVoucherPage
+from e2e.pages.ecommerce import EcommerceDashboardHomePage
 
 
 @ddt.ddt

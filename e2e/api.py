@@ -1,7 +1,7 @@
 import requests
 from requests.auth import AuthBase
 
-from acceptance_tests.config import ACCESS_TOKEN, ENROLLMENT_API_URL
+from e2e.config import ACCESS_TOKEN, ENROLLMENT_API_URL
 
 
 class BearerAuth(AuthBase):

@@ -1,7 +1,7 @@
 from bok_choy.web_app_test import WebAppTest
 
-from acceptance_tests.config import HONOR_COURSE_ID
-from acceptance_tests.mixins import LogistrationMixin, EcommerceApiMixin, EnrollmentApiMixin, UnenrollmentMixin
+from e2e.config import HONOR_COURSE_ID
+from e2e.mixins import LogistrationMixin, EcommerceApiMixin, EnrollmentApiMixin, UnenrollmentMixin
 
 
 class LoginEnrollmentTests(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, WebAppTest):

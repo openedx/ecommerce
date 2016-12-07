@@ -40,7 +40,7 @@ htmlcov
 .tox
 nosetests.xml
 unittests.xml
-acceptance_tests/xunit.xml
+e2e/xunit.xml
 
 ### Internationalization artifacts
 *.mo
@@ -67,8 +67,8 @@ diff_*.html
 report
 edx_ecommerce.log
 venv
-acceptance_tests.*.log
-acceptance_tests.*.png
+e2e.*.log
+e2e.*.png
 
 # Override config files
 override.cfg

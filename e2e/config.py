@@ -1,5 +1,5 @@
 import os
-from acceptance_tests.utils import str2bool
+from e2e.utils import str2bool
 
 
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')

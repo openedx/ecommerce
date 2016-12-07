@@ -1,7 +1,7 @@
 from bok_choy.page_object import PageObject
 
-from acceptance_tests.config import ECOMMERCE_URL_ROOT
-from acceptance_tests.pages.lms import LMSLoginPage
+from e2e.config import ECOMMERCE_URL_ROOT
+from e2e.pages.lms import LMSLoginPage
 
 
 class EcommerceAppPage(PageObject):  # pylint: disable=abstract-method

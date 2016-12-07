@@ -16,7 +16,7 @@ help:
 	@echo '    make quality                      run PEP8 and Pylint                            		'
 	@echo '    make validate                     Run Python and JavaScript unit tests and linting 		'
 	@echo '    make html_coverage                generate and view HTML coverage report         		'
-	@echo '    make accept                       run acceptance tests                           		'
+	@echo '    make e2e                          run end to end acceptance tests                		'
 	@echo '    make extract_translations         extract strings to be translated               		'
 	@echo '    make dummy_translations           generate dummy translations                    		'
 	@echo '    make compile_translations         generate translation files                     		'
@@ -68,8 +68,8 @@ fast_validate_python: clean
 	make quality
 
 quality:
-	pep8 --config=.pep8 ecommerce acceptance_tests
-	pylint --rcfile=pylintrc ecommerce acceptance_tests
+	pep8 --config=.pep8 ecommerce e2e
+	pylint --rcfile=pylintrc ecommerce e2e
 
 validate: validate_python validate_js
 
@@ -90,8 +90,8 @@ fast_diff_coverage:
 	coverage xml
 	diff-cover coverage.xml --compare-branch=$(DIFF_COVER_BASE_BRANCH)
 
-accept:
-	nosetests --with-ignore-docstrings -v acceptance_tests --with-xunit --xunit-file=acceptance_tests/xunit.xml
+e2e:
+	nosetests --with-ignore-docstrings -v e2e --with-xunit --xunit-file=e2e/xunit.xml
 
 extract_translations:
 	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
@@ -120,6 +120,6 @@ detect_changed_source_translations:
 validate_translations: fake_translations detect_changed_source_translations
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
-.PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage accept \
+.PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
 	push_translations update_translations fast_validate_python clean_static
