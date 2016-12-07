@@ -1,4 +1,8 @@
 .basket {
+    .close {
+        margin-top: -20px;
+    }
+
     .container {
         padding: 60px 20px 30px 20px;
 
@@ -12,6 +16,7 @@
         }
 
         .basket-items {
+            margin-top: 20px;
             border-bottom: 1px solid #ddd;
 
             .certificate_type {
@@ -21,7 +26,7 @@
             .row {
                 padding-bottom: 30px;
 
-                .course_name,
+                .product-title,
                 .old-price,
                 .price {
                     margin: 0;
@@ -30,11 +35,11 @@
                     font-weight: bold;
                 }
 
-                .course_description {
+                .product-description {
                     font-size: 14px;
                 }
 
-                .course_prices {
+                .product-prices {
                     @include text-align(right);
                 }
 
@@ -57,7 +62,7 @@
                    }
                }
 
-                .course_image img {
+                .product-image img {
                     margin: 0 auto;
                     width: 100%;
                 }
@@ -133,7 +138,7 @@
                 }
             }
 
-            .course-price-label {
+            .product-price-label {
                 font-weight: normal;
                 font-size: 0.84rem;
                 + span {
@@ -143,7 +148,7 @@
             }
         }
 
-        .total {
+        .total, #summary {
             padding-top: 20px;
             margin-bottom: 1.25rem;
 
@@ -158,6 +163,7 @@
                 border: none;
                 background: none;
                 padding: 0;
+                font-size: 14px;
                 color: red;
             }
 
@@ -228,12 +234,252 @@
     }
 }
 
+.basket-client-side {
+    .close {
+        margin-top: -20px;
+    }
+
+    legend, p.title {
+        color: #337ab7;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #payment-method-information {
+        padding-top: 0;
+    }
+
+    .placeholder {
+        padding: 20px 0;
+    }
+
+    .help-block {
+        height: 10px;
+        color: red;
+    }
+
+    .payment-methods {
+        padding-left: 0;
+    }
+
+    #payment-method {
+        #payment-method-image, button {
+            float: left;
+            border: 1px solid palette(grayscale, base);
+            border-radius: 5px;
+            height: 50px;
+        }
+
+        #payment-method-image {
+            border-bottom: 4px solid #337ab7;
+            width: 150px;
+            line-height: 40px;
+        }
+
+        button {
+            position: relative;
+            left: -1px;
+            background-color: white;
+            width: 100px;
+            color: gray;
+        }
+    }
+
+    #payment-processor {
+        .payment-button {
+            border: 1px solid palette(grayscale, base);
+            border-radius: 5px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-color: #fff;
+            width: 120px;
+            height: 50px;
+            &.payment-processor-paypal {
+                background-image: url('/static/images/paypal_logo.png');
+            }
+        }
+    }
+
+    #card-holder-information {
+        padding-top: 0;
+    }
+
+    .container {
+        #messages {
+            .alert-error {
+                color: #d2322d;
+            }
+
+            .alert-error {
+                background-color: #f2dede;
+                border-color: #ebccd1;
+                color: #a94442;
+            }
+        }
+
+        .payment-form {
+            .row {
+                margin: 0;
+            }
+
+            #payment-information {
+                border-left: 1px solid palette(grayscale, base);
+
+                legend {
+                    padding-left: 15px;
+                }
+
+                .credit-card-list {
+                    padding-left: 15px;
+                    margin-top: -20px;
+                }
+
+                .form-input-elements {
+                    div:not(.payment-button) {
+                        margin: 0;
+
+                        label {
+                            color: gray;
+                            font-weight: normal;
+                        }
+
+                        input, select {
+                            border: 1px solid palette(grayscale, base);
+                            border-radius: 0;
+                        }
+                    }
+
+                    .asteriskField {
+                        display: none;
+                    }
+
+                    #expiration-label {
+                        width: 100%;
+                        margin-left: 15px;
+                        text-align: left;
+                    }
+
+                    #card-number {
+                        height: 90px;
+                    }
+
+                    #payment-button {
+                        margin-top: 20px;
+                    }
+
+                    .fa-lock {
+                        position: relative;
+                        float: left;
+                        top: -25px;
+                        left: 92%;
+                        margin-right: -5%;
+                    }
+
+                    .card-type-icon {
+                        position: relative;
+                        float: left;
+                        top: -30px;
+                        left: 70%;
+                        margin-right: -15%;
+                    }
+                }
+            }
+        }
+
+        #summary {
+            padding-top: 0;
+
+            .row {
+                margin: 0;
+            }
+
+            fieldset > legend {
+                padding-top: 20px;
+            }
+
+            .description {
+                float: left;
+            }
+
+            .price {
+                text-align: right;
+            }
+
+            .row {
+                padding-bottom: 20px;
+            }
+
+            .amount {
+                padding-bottom: 20px;
+                color: palette(grayscale, base);
+                font-size: 18px;
+
+                .price {
+                    font-weight: bold;
+                }
+            }
+
+            #basket-total {
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            #voucher-information {
+                .use-voucher {
+                    padding: 0;
+
+                    > button {
+                        padding-left: 0;
+                        border: 0;
+                        background-color: white;
+                        color: #337ab7;
+                    }
+                }
+
+                .voucher {
+                    float: left;
+                    font-size: 14px;
+                    margin: 0 10px 0 0;
+                    line-height: 24px;
+                }
+            }
+
+            .product {
+                padding: 0;
+
+                .product-image {
+                    img {
+                        width: 100%;
+                        max-width: 150px;
+                        max-height: 150px;
+                    }
+                }
+
+                .product-information {
+                    .product-name {
+                        margin-bottom: 0;
+                        font-weight: bold;
+                    }
+
+                    #seat-type {
+                        color: palette(grayscale, base);
+                    }
+                }
+            }
+
+            .remove-voucher {
+                color: #337ab7;
+            }
+        }
+    }
+}
+
 /* Small devices (tablets, 992px and lower) */
 @media (max-width: $screen-md-min - 1) {
     .basket {
         .container {
             .basket-items {
-                .course-price-label {
+                .product-price-label {
                     font-size: 20px;
                     font-weight: bold;
                     margin: 0px 20px 20px 0px;
@@ -259,8 +505,46 @@
             display: inline-block;
         }
 
-        .course_prices {
+        .product-prices {
             margin-top: 30px;
+        }
+
+        .total p.voucher {
+            margin: 0;
+        }
+    }
+
+    .basket-client-side .container {
+        padding: 20px 0 0 0;
+
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .form-group {
+            display: block;
+        }
+
+        .payment-form #payment-information {
+            border-left: none;
+        }
+
+        .payment-methods {
+            padding-left: 0;
+
+            #payment-method {
+                padding-left: 0;
+            }
+        }
+
+        #summary #basket-information .product {
+            .product-image {
+                img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
         }
     }
 }

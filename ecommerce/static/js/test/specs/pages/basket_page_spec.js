@@ -7,7 +7,8 @@ define([
         'models/tracking_model',
         'models/user_model',
         'views/analytics_view',
-        'js-cookie'
+        'js-cookie',
+        'moment'
     ],
     function ($,
               _,
@@ -17,8 +18,8 @@ define([
               TrackingModel,
               UserModel,
               AnalyticsView,
-              Cookies
-              ) {
+              Cookies,
+              moment) {
         'use strict';
 
         describe('Basket Page', function () {
@@ -47,7 +48,11 @@ define([
                     'data-processor-name="cybersource"' +
                     'class="btn btn-success payment-button"' +
                     'value="cybersource"' +
-                    'id="cybersource"></button></div>'
+                    'id="cybersource"></button></div>' +
+                    '<div><input type="number" id="card-number-input" name="card_number">' +
+                    '<img class="card-type-icon" src>' +
+                    '<input type="hidden" name="card_type" value>' +
+                    '<p class="validation-error"></div>'
                 ).appendTo('body');
 
 
@@ -147,6 +152,227 @@ define([
                     $('input.quantity').first().val(1);
                     $('.spinner button.btn:last-of-type').trigger('click');
                     expect($('input.quantity').first().val()).toEqual('1');
+                });
+
+                it('should recognize the credit card', function() {
+                    var validCardList = [
+                        {'number': '378282246310005', 'name': 'amex', 'type': '003'},
+                        {'number': '30569309025904', 'name': 'diners', 'type': '005'},
+                        {'number': '6011111111111117', 'name': 'discover', 'type': '004'},
+                        {'number': '3530111333300000', 'name': 'jcb', 'type': '007'},
+                        {'number': '5105105105105100', 'name': 'mastercard', 'type': '002'},
+                        {'number': '4111111111111111', 'name': 'visa', 'type': '001'},
+                        {'number': '6759649826438453', 'name': 'maestro', 'type': '042'}
+                    ];
+                    BasketPage.onReady();
+
+                    $('#card-number-input').trigger('input');
+                    expect($('.card-type-icon').attr('src')).toEqual('');
+                    expect($('input[name=card_type]').val()).toEqual('');
+
+                    $('#card-number-input').val('123123123123123').trigger('input');
+                    expect($('.card-type-icon').attr('src')).toEqual('');
+                    expect($('input[name=card_type]').val()).toEqual('');
+
+                    _.each(validCardList, function(card) {
+                        $('#card-number-input').val(card.number).trigger('input');
+                        expect($('.card-type-icon').attr('src')).toEqual(
+                            '/static/images/credit_cards/' + card.name + '.png'
+                        );
+                        expect($('input[name=card_type]').val()).toEqual(card.type);
+                    });
+                });
+            });
+
+            describe('clientSideCheckoutValidation', function() {
+                    var currentYear = moment().year(),
+                        lastMonth = moment().subtract(1, 'month').month();
+
+                beforeEach(function() {
+                    $(
+                        '<fieldset>' +
+                        '<div class="form-item"><div><input name="first_name"></div>' +
+                        '<p class="help-block"></p></div>' +
+                        '<div class="form-item"><div><input name="last_name"></div>' +
+                        '<p class="help-block"></p></div>' +
+                        '<div class="form-item"><div><input name="address_line1"></div>' +
+                        '<p class="help-block"></p></div>' +
+                        '<div class="form-item"><div><input name="city"></div>' +
+                        '<p class="help-block"></p></div>' +
+                        '<div class="form-item"><div><select name="country">' +
+                        '<option value=""><Choose country></option>' +
+                        '<option value="US">United States</option>' +
+                        '</select></div><p class="help-block"></p></div>' +
+                        '</fieldset>' +
+                        '<div><input name="card_number">' +
+                        '<p class="help-block"></p></div>' +
+                        '<div><input name="card_cvn">' +
+                        '<p class="help-block"></p></div>' +
+                        '<div><select name="card_expiry_month">' +
+                        '<option value="01">01</option>' +
+                        '<option value="12">12</option>' +
+                        '<option value="99">99</option>' +
+                        '</select>' +
+                        '<p class="help-block"></p></div>' +
+                        '<div><select name="card_expiry_year">' +
+                        '<option value="2015">2015</option>' +
+                        '</select>' +
+                        '<p class="help-block"></p></div>' +
+                        '<button id="payment-button">Pay</button>'
+                    ).appendTo('body');
+
+                    $('select[name=card_expiry_year]').append('<option value="' +
+                        currentYear + '">' + currentYear + '</option>'
+                    );
+                    $('select[name=card_expiry_month]').append('<option value="' +
+                        lastMonth + '">' + lastMonth + '</option>'
+                    );
+
+                    $('input[name=first_name]').val('Joey');
+                    $('input[name=last_name]').val('Tribbiani');
+                    $('input[name=address_line1]').val('Central Perk');
+                    $('input[name=city]').val('New York City');
+                    $('select[name=country]').val('US');
+
+                    BasketPage.onReady();
+                });
+
+                describe('cardHolderInformationValidation', function() {
+                    it('should validate first name', function() {
+                        $('input[name=first_name]').val('');
+                        $('#payment-button').click();
+
+                        expect(
+                            $('input[name=first_name]').parentsUntil(
+                                'form-item'
+                            ).find('~.help-block span').text()
+                        ).toEqual('This field is required');
+                    });
+
+                    it('should validate last name', function() {
+                        $('input[name=last_name]').val('');
+                        $('#payment-button').click();
+
+                        expect(
+                            $('input[name=last_name]').parentsUntil(
+                                'form-item'
+                            ).find('~.help-block span').text()
+                        ).toEqual('This field is required');
+                    });
+
+                    it('should validate address', function() {
+                        $('input[name=address_line1]').val('');
+                        $('#payment-button').click();
+
+                        expect(
+                            $('input[name=address_line1]').parentsUntil(
+                                'form-item'
+                            ).find('~.help-block span').text()
+                        ).toEqual('This field is required');
+                    });
+
+                    it('should validate city', function() {
+                        $('input[name=city]').val('');
+                        $('#payment-button').click();
+
+                        expect(
+                            $('input[name=city]').parentsUntil(
+                                'form-item'
+                            ).find('~.help-block span').text()
+                        ).toEqual('This field is required');
+                    });
+
+                    it('should validate country', function() {
+                        $('select[name=country]').val('');
+                        $('#payment-button').click();
+
+                        expect(
+                            $('select[name=country]').parentsUntil(
+                                'form-item'
+                            ).find('~.help-block span').text()
+                        ).toEqual('This field is required');
+                    });
+
+                });
+
+                describe('cardInfoValidation', function() {
+                    var validCardNumber = '378282246310005',  // AMEX (CVN length 4)
+                        validCvn = '1234',
+                        enRouteCardNumber = '201401173701274'; // Unsupported type (Dec, 2016)
+
+                    it('should validate card number', function() {
+                        $('input[name=card_number]').val('123invalid456');
+                        $('#payment-button').click();
+                        expect($('input[name=card_number] ~ .help-block span').text()).toEqual('Invalid card number');
+
+                        $('input[name=card_number]').val(validCardNumber);
+                        $('#payment-button').click();
+                        expect($('input[name=card_number] ~ .help-block').has('span').length).toEqual(0);
+                    });
+
+                    it('should validate card type', function() {
+                        $('input[name=card_number]').val(enRouteCardNumber);
+                        $('#payment-button').click();
+                        expect($('input[name=card_number]~.help-block span').text()).toEqual('Unsupported card type');
+
+                        $('input[name=card_number]').val(validCardNumber);
+                        $('#payment-button').click();
+                        expect($('input[name=card_number] ~ .help-block').has('span').length).toEqual(0);
+                    });
+
+                    it('should validate CVN number', function() {
+                        $('input[name=card_number]').val(validCardNumber);
+                        $('input[name=card_cvn]').val('123');
+                        $('#payment-button').click();
+                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid CVN');
+
+                        $('input[name=card_cvn]').val('123b');
+                        $('#payment-button').click();
+                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid CVN');
+
+                        $('input[name=card_cvn]').val(validCvn);
+                        $('#payment-button').click();
+                        expect($('input[name=card_number] ~ .help-block').has('span').length).toEqual(0);
+                    });
+
+                    it('should validate expiry month', function() {
+                        $('input[name=card_number]').val(validCardNumber);
+                        $('input[name=card_cvn]').val(validCvn);
+                        $('select[name=card_expiry_month]').val('99');
+                        $('#payment-button').click();
+                        expect($('select[name=card_expiry_month]~.help-block span').text()).toEqual('Invalid month');
+
+                        $('select[name=card_expiry_month]').val('12');
+                        $('#payment-button').click();
+                        expect($('select[name=card_expiry_month] ~ .help-block').has('span').length).toEqual(0);
+                    });
+
+                    it('should validate expiry year', function() {
+                        $('input[name=card_number]').val(validCardNumber);
+                        $('input[name=card_cvn]').val(validCvn);
+                        $('select[name=card_expiry_month]').val('12');
+                        $('select[name=card_expiry_year]').val('2015');
+                        $('#payment-button').click();
+                        expect($('select[name=card_expiry_year] ~ .help-block span').text()).toEqual('Invalid year');
+
+                        $('select[name=card_expiry_year]').val(currentYear);
+                        $('#payment-button').click();
+                        expect($('select[name=card_expiry_year] ~ .help-block').has('span').length).toEqual(0);
+                    });
+
+                    it('should validate card expiration', function() {
+                        $('input[name=card_number]').val(validCardNumber);
+                        $('input[name=card_cvn]').val(validCvn);
+                        $('select[name=card_expiry_month]').val(lastMonth);
+                        $('select[name=card_expiry_year]').val(currentYear);
+                        $('#payment-button').click();
+                        expect($('select[name=card_expiry_month] ~ .help-block span').text()).toEqual('Card expired');
+
+                        $('select[name=card_expiry_month]').val('12');
+                        $('select[name=card_expiry_year]').val(currentYear + 1);
+                        $('#payment-button').click();
+                        expect($('select[name=card_expiry_month] ~ .help-block').has('span').length).toEqual(0);
+                    });
                 });
             });
 

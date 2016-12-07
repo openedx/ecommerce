@@ -57,6 +57,8 @@ def prepare_basket(request, product, voucher=None):
 
 def get_basket_switch_data(product):
     product_class_name = product.get_product_class().name
+    structure = product.structure
+    switch_link_text = None
 
     if product_class_name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
         switch_link_text = _('Click here to just purchase an enrollment for yourself')
