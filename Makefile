@@ -27,6 +27,7 @@ help:
 	@echo '    make static                       compile and compress static assets               		'
 	@echo '    make detect_changed_source_translations    check if translation files are up-to-date		'
 	@echo '    make validate_translations        install fake translations and check if translation files are up-to-date'
+	@echo '    make production-requirements      install requirements for production                    '
 	@echo '                                                                                     		'
 
 requirements.js:
@@ -35,6 +36,9 @@ requirements.js:
 
 requirements: requirements.js
 	pip install -r requirements/local.txt --exists-action w
+
+production-requirements: requirements.js
+	pip install -r requirements.txt --exists-action w
 
 migrate:
 	python manage.py migrate
@@ -122,4 +126,4 @@ validate_translations: fake_translations detect_changed_source_translations
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage accept \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
-	push_translations update_translations fast_validate_python clean_static
+	push_translations update_translations fast_validate_python clean_static production-requirements

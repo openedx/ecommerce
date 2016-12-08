@@ -1,2 +1,0 @@
-# Optional packages
-newrelic==2.74.0.54
