@@ -15,6 +15,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PR
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
+from ecommerce.enterprise import helpers as enterprise_helpers
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -73,6 +74,10 @@ class BasketSingleItemView(View):
             except (ConnectionError, SlumberBaseException, Timeout):
                 msg = _('An error occurred while retrieving enrollment details. Please try again.')
                 return HttpResponseBadRequest(msg)
+
+        # If learner is eligible for entitlements, apply entitlements and return HttpResponse
+        # if voucher is None and enterprise_helpers.is_learner_eligible_for_entitlements(request.user, request.site):
+        #     voucher = enterprise_helpers.get_entitlement_voucher(request, product, voucher)
 
         # At this point we're either adding an Enrollment Code product to the basket,
         # or the user is adding a Seat product for which they are not already enrolled

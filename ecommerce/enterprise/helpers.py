@@ -5,6 +5,11 @@ import logging
 from edx_rest_api_client.client import EdxRestApiClient
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
+from oscar.core.loading import get_model
+
+from ecommerce.coupons.views import voucher_is_valid
+
+CouponVouchers = get_model('voucher', 'CouponVouchers')
 
 log = logging.getLogger(__name__)
 
@@ -63,21 +68,29 @@ def get_data_sharing_consent_info(learner, enterprise_customer, site):
         raise
 
 
-def get_entitlements_info(user, site):
+def fetch_entitlements(course, enterprise):
+    entitlements = []
+    return entitlements
+
+
+def is_learner_eligible_for_entitlements(user, site):
     """
     Get entitlement info for the given learner.
+
+    Returns True if learner is eligible for entitlements, False otherwise.
 
     Args:
         user: (django.contrib.auth.User) django auth user
         site: (django.contrib.sites.Site) site instance
     """
+
     learner = get_learner_info(user, site)
     enterprise_customer = learner.get("enterprise_customer")
 
     if enterprise_customer is None:
-        # Learner not associated to any interprise customer,
+        # Learner not associated to any enterprise customer,
         # proceed to the checkout
-        raise ValueError("Learner does not have entitlements, proceed to checkout.")
+        return False
 
     data_sharing = get_data_sharing_consent_info(learner, enterprise_customer, site)
 
@@ -86,7 +99,26 @@ def get_entitlements_info(user, site):
         # "In order to get discount for course <course-id> you must consent to share your
         # data with <enterprise customer name>, If you do not consent to data sharing you
         # will still be able to enroll but you will not get any discounts from <enterprise customer name>"
-        pass
+        return False
     else:
         # Apply discount on the course and proceed to checkout
-        pass
+        return True
+
+
+def get_entitlement_voucher(request, product):
+    """
+    Return entitlement voucher for the given learner.
+    """
+    learner = get_learner_info(request.user, request.site)
+    enterprise_customer = learner.get("enterprise_customer")
+    entitlement_ids = fetch_entitlements(product, enterprise_customer)
+
+    coupon_vouchers = CouponVouchers.objects.filter(coupon__id__in=entitlement_ids)
+    for coupon_voucher in coupon_vouchers:
+        vouchers = [
+            voucher for voucher in coupon_voucher.vouchers.all() if voucher_is_valid(voucher, [product], request)
+        ]
+        if len(vouchers) > 0:
+            return vouchers[0]
+
+    return None
