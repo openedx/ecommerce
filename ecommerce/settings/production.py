@@ -8,7 +8,6 @@ from django.core.exceptions import ImproperlyConfigured
 import yaml
 
 from ecommerce.settings.base import *
-from ecommerce.settings.logger import get_logger_config
 
 
 # Enable offline compression of CSS/JS
@@ -23,7 +22,7 @@ COMPRESS_CSS_FILTERS += [
     'compressor.filters.cssmin.CSSMinFilter',
 ]
 
-LOGGING = get_logger_config()
+LOGGING['handlers']['local']['level'] = 'INFO'
 
 
 def get_env_setting(setting):
