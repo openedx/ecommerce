@@ -75,9 +75,9 @@ class BasketSingleItemView(View):
                 msg = _('An error occurred while retrieving enrollment details. Please try again.')
                 return HttpResponseBadRequest(msg)
 
-        # If learner is eligible for entitlements, apply entitlements and return HttpResponse
-        # if voucher is None and enterprise_helpers.is_learner_eligible_for_entitlements(request.user, request.site):
-        #     voucher = enterprise_helpers.get_entitlement_voucher(request, product, voucher)
+        # If learner is eligible for entitlements, apply entitlements
+        if voucher is None and enterprise_helpers.is_learner_eligible_for_entitlements(request.user, request.site):
+            voucher = enterprise_helpers.get_entitlement_voucher(request, product)
 
         # At this point we're either adding an Enrollment Code product to the basket,
         # or the user is adding a Seat product for which they are not already enrolled

@@ -8,12 +8,14 @@ from slumber.exceptions import SlumberBaseException
 from oscar.core.loading import get_model
 
 from ecommerce.coupons.views import voucher_is_valid
+from ecommerce.enterprise.tmp import utils
 
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 
 log = logging.getLogger(__name__)
 
 
+@utils.dummy_data("learner")
 def get_learner_info(user, site):
     """
     Fetch user and its enterprise data from lms.
@@ -42,6 +44,7 @@ def get_learner_info(user, site):
         raise
 
 
+@utils.dummy_data("data_sharing")
 def get_data_sharing_consent_info(learner, enterprise_customer, site):
     """
     Fetch data related to data sharing consent.
@@ -68,9 +71,34 @@ def get_data_sharing_consent_info(learner, enterprise_customer, site):
         raise
 
 
-def fetch_entitlements(course, enterprise):
-    entitlements = []
-    return entitlements
+@utils.dummy_data("entitlements")
+def fetch_entitlements(learner, course, enterprise, site):
+    """
+    Fetch data related to enterprise entitlements.
+    Args:
+        learner: (django.contrib.auth.User) django auth user
+        course: course for which to fetch entitlements
+        enterprise: (str) unique identifier for enterprise customer
+        site: (django.contrib.sites.Site) site instance
+    """
+    api_url = site.siteconfiguration.build_enterprise_url('/api/enterprise/v1/')
+
+    try:
+        api = EdxRestApiClient(
+            api_url,
+            oauth_access_token=learner.access_token,
+            append_slash=False
+        )
+        response = api.entitlements(
+            learner=learner.username, enterprise_custome=enterprise, course=course,
+        ).get()
+        return response
+    except (ConnectionError, SlumberBaseException, Timeout):
+        log.exception(
+            'Failed to retrieve entitlements details for [%s]',
+            learner.username
+        )
+        raise
 
 
 def is_learner_eligible_for_entitlements(user, site):
@@ -111,7 +139,7 @@ def get_entitlement_voucher(request, product):
     """
     learner = get_learner_info(request.user, request.site)
     enterprise_customer = learner.get("enterprise_customer")
-    entitlement_ids = fetch_entitlements(product, enterprise_customer)
+    entitlement_ids = fetch_entitlements(request.user, product, enterprise_customer, request.site)
 
     coupon_vouchers = CouponVouchers.objects.filter(coupon__id__in=entitlement_ids)
     for coupon_voucher in coupon_vouchers:

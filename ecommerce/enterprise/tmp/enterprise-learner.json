@@ -1,0 +1,12 @@
+{
+  "learner": {
+    "enterprise_customer": {
+      "name": "Enterprise Customer"
+    }
+  },
+  "data_sharing": {
+    "enterprise_customer": "required",
+    "learner": "agree"
+  },
+  "entitlements": [6]
+}
