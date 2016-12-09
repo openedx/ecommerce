@@ -18,6 +18,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
+from ecommerce.coupons.enterprise_utils import get_user_enterprise_info
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -100,6 +101,9 @@ class CouponOfferView(TemplateView):
                 return {'error': _('Coupon does not exist')}
             except exceptions.ProductNotFoundError:
                 return {'error': _('The voucher is not applicable to your current basket.')}
+
+            # TODO: Add Enterprise related entitlements code here
+
             valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
                 self.template_name = 'coupons/offer.html'
