@@ -1,11 +1,16 @@
 """Devstack settings"""
-
 from ecommerce.settings.production import *
-
-LOGGING = get_logger_config(debug=True, dev_env=True, local_loglevel='DEBUG')
 
 DEBUG = True
 ENABLE_AUTO_AUTH = True
+
+# Docker does not support the syslog socket at /dev/log. Rely on the console.
+LOGGING['handlers']['local'] = {
+    'class': 'logging.NullHandler',
+}
+
+# Determine which requests should render Django Debug Toolbar
+INTERNAL_IPS = ('127.0.0.1',)
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
@@ -34,6 +39,7 @@ PAYMENT_PROCESSOR_CONFIG = {
 }
 # END PAYMENT PROCESSING
 
-# Load private settings
+#####################################################################
+# Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     from .private import *  # pylint: disable=import-error

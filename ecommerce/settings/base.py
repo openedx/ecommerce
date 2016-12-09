@@ -1,6 +1,8 @@
 """Common settings and globals."""
 import datetime
 import os
+import platform
+from logging.handlers import SysLogHandler
 from os.path import basename, normpath
 from sys import path
 
@@ -285,32 +287,74 @@ INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + OSCAR_APPS
 
 
 # LOGGING CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+# Set up logging for development use (logging to stdout)
+level = 'DEBUG' if DEBUG else 'INFO'
+hostname = platform.node().split(".")[0]
+
+# Use a different address for Mac OS X
+syslog_address = '/var/run/syslog' if platform.system().lower() == 'darwin' else '/dev/log'
+syslog_format = '[service_variant=ecommerce][%(name)s] %(levelname)s [{hostname}  %(process)d] ' \
+                '[%(pathname)s:%(lineno)d] - %(message)s'.format(hostname=hostname)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s %(levelname)s %(process)d [%(name)s] %(pathname)s:%(lineno)d - %(message)s',
+        },
+        'syslog_format': {'format': syslog_format},
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'console': {
+            'level': level,
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+            'stream': 'ext://sys.stdout',
+        },
+        'local': {
+            'level': level,
+            'class': 'logging.handlers.SysLogHandler',
+            'address': syslog_address,
+            'formatter': 'syslog_format',
+            'facility': SysLogHandler.LOG_LOCAL0,
+        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'django': {
+            'handlers': ['console', 'local'],
             'propagate': True,
+            'level': 'INFO'
+        },
+        'requests': {
+            'handlers': ['console', 'local'],
+            'propagate': True,
+            'level': 'WARNING'
+        },
+        'factory': {
+            'handlers': ['console', 'local'],
+            'propagate': True,
+            'level': 'WARNING'
+        },
+        'elasticsearch': {
+            'handlers': ['console', 'local'],
+            'propagate': True,
+            'level': 'WARNING'
+        },
+        'urllib3': {
+            'handlers': ['console', 'local'],
+            'propagate': True,
+            'level': 'WARNING'
+        },
+        'django.request': {
+            'handlers': ['console', 'local'],
+            'propagate': True,
+            'level': 'WARNING'
+        },
+        '': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': False
         },
     }
 }
