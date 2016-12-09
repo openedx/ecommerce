@@ -190,7 +190,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         for code in 'BCDFGHJKL':
             create_vouchers(
                 benefit_type=Benefit.PERCENTAGE,
-                benefit_value=100.00,
+                benefit_value=90.00,
                 catalog=self.catalog,
                 coupon=self.coupon,
                 end_datetime=datetime.date(2015, 10, 30),

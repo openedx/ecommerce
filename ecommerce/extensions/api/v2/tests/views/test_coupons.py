@@ -714,6 +714,23 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.data['category'] = 'String type'
         self.assert_post_response_status(self.data)
 
+    def test_creating_enrollment_coupon_with_code(self):
+        """ Test that bad request status is returned when creating enrollment coupon with code parameter set. """
+        self.data.update({'code': 'test'})
+        self.assert_post_response_status(self.data)
+
+    def test_creating_coupon_with_code_and_quantity_greater_than_one(self):
+        """
+        Test that bad request status is returned when creating discount coupon
+        with code set and quantity greater than one.
+        """
+        self.data.update({
+            'benefit_value': 90,
+            'code': 'test',
+            'quantity': 5
+        })
+        self.assert_post_response_status(self.data)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """
