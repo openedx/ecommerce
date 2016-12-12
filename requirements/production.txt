@@ -12,3 +12,4 @@ MySQL-python==1.2.5
 newrelic==2.74.0.54
 python-memcached==1.58
 PyYAML==3.12
+nodeenv==1.0.0
