@@ -696,6 +696,17 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.get_response_json('PUT', path, self.data)
         self.assertEqual(offer.email_domains, email_domains)
 
+    def test_update_max_uses_field(self):
+        """Verify max_uses field can be updated."""
+        path = reverse('api:v2:coupons-detail', args=[self.coupon.id])
+        details = self.get_response_json('GET', path)
+        self.assertIsNone(details['max_uses'])
+
+        max_uses = 3
+        self.data.update({'max_uses': max_uses})
+        response = self.get_response_json('PUT', path, self.data)
+        self.assertEqual(response['max_uses'], max_uses)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """

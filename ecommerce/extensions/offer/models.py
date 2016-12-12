@@ -12,10 +12,11 @@ from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditiona
 from threadlocals.threadlocals import get_current_request
 
 logger = logging.getLogger(__name__)
-VALID_BENEFIT_TYPES = [AbstractBenefit.PERCENTAGE, AbstractBenefit.FIXED]
 
 
 class Benefit(AbstractBenefit):
+    VALID_BENEFIT_TYPES = [AbstractBenefit.PERCENTAGE, AbstractBenefit.FIXED]
+
     def save(self, *args, **kwargs):
         self.clean()
         super(Benefit, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
@@ -26,9 +27,9 @@ class Benefit(AbstractBenefit):
         super(Benefit, self).clean()  # pylint: disable=bad-super-call
 
     def clean_type(self):
-        if self.type not in VALID_BENEFIT_TYPES:
+        if self.type not in self.VALID_BENEFIT_TYPES:
             logger.exception(
-                'Failed to create Benefit. Benefit type must be one of the following %s.', VALID_BENEFIT_TYPES
+                'Failed to create Benefit. Benefit type must be one of the following %s.', self.VALID_BENEFIT_TYPES
             )
             raise ValidationError(_('Unrecognised benefit type {type}'.format(type=self.type)))
 
@@ -39,6 +40,7 @@ class Benefit(AbstractBenefit):
 
 
 class ConditionalOffer(AbstractConditionalOffer):
+    UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
 
     def is_email_valid(self, email):

@@ -29,6 +29,7 @@ from ecommerce.invoice.models import Invoice
 Basket = get_model('basket', 'Basket')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -253,12 +254,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon.attr.note = note
             coupon.save()
 
-        if 'email_domains' in request.data:
-            email_domains = request.data.get('email_domains')
-            # Need to update for individual vouchers because in case of multiple
-            # multi-use voucher each voucher will have individual offer.
-            for voucher in vouchers.all():
-                voucher.offers.update(email_domains=email_domains)
+        offer_data = self.create_update_data_dict(data=request.data, fields=ConditionalOffer.UPDATABLE_OFFER_FIELDS)
+        if offer_data:
+            ConditionalOffer.objects.filter(vouchers__in=vouchers.all()).update(**offer_data)
 
         self.update_invoice_data(coupon, request.data)
 
@@ -280,8 +278,15 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         for field in fields:
             if field in data:
-                value = prepare_course_seat_types(data.get(field)) if field == 'course_seat_types' else data.get(field)
-                update_dict[field.replace('invoice_', '')] = value
+                if field == 'course_seat_types':
+                    value = prepare_course_seat_types(data.get(field))
+                    update_dict[field] = value
+                elif field == 'max_uses':
+                    value = data.get(field)
+                    update_dict['max_global_applications'] = value
+                else:
+                    value = data.get(field)
+                    update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
     def update_coupon_benefit_value(self, benefit_value, coupon, vouchers):

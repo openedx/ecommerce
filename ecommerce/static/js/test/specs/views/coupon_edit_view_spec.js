@@ -46,6 +46,10 @@ define([
                     expect(view.$el.find('[name=price]').val()).toEqual(model.get('price'));
                     expect(view.$el.find('[name=course_id]').val()).toEqual(model.get('course_id'));
                 });
+
+                it('should verify single-use voucher max_uses field min attribute is empty string', function () {
+                    expect(view.$('[name=max_uses]').attr('min')).toBe('');
+                });
             });
 
             describe('edit discount code', function () {
@@ -170,12 +174,23 @@ define([
                     expect(view.model.get('course_id')).toBe(formView._initAttributes.course_id);
                     expect(view.model.get('seat_type')).toBe(formView._initAttributes.seat_type);
                 });
-
+                
                 it('should not update price when editing coupon', function() {
                     var formView = view.formView;
                     spyOn(formView, 'updateTotalValue');
                     formView.changeSeatType();
                     expect(formView.updateTotalValue).not.toHaveBeenCalled();
+                });
+
+                it('should verify multi-use max_uses field min attribute is set to model value', function () {
+                    expect(view.$('[name=max_uses]').attr('min')).toBe(view.model.get('max_uses'));
+                });
+
+                it('should verify once-per-customer max_uses field min attribute is set to model value', function () {
+                    view.model.set('voucher_type', 'Once per customer');
+                    view.model.set('max_uses', '3');
+                    view.render();
+                    expect(view.$('[name=max_uses]').attr('min')).toBe(view.model.get('max_uses'));
                 });
             });
         });
