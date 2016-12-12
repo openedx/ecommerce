@@ -28,8 +28,14 @@ class CouponsCreatePage(EcommerceAppPage):
     def is_browser_on_page(self):
         return self.q(css='form.coupon-form-view').visible
 
+    def _fill_date_and_client(self):
+        """ Fill voucher start and end dates and client data. """
+        self.q(css="input[name='start_date']").fill(str(DEFAULT_START_DATE))
+        self.q(css="input[name='end_date']").fill(str(DEFAULT_END_DATE))
+        self.q(css="input[name='client']").fill('Test Client')
+
     @wait_for_js
-    def fill_create_coupon_form(self, is_discount):
+    def fill_create_coupon_form(self, is_discount, is_dynamic=False):
         """ Fills the coupon form with test data and creates the coupon.
 
         Args:
@@ -43,26 +49,32 @@ class CouponsCreatePage(EcommerceAppPage):
         course_id_input = 'input[name="course_id"]'
         coupon_name = _get_coupon_name(is_discount)
         self.q(css='input[name="title"]').fill(coupon_name)
-        self.q(css=course_id_input).fill(VERIFIED_COURSE_ID)
-        self.wait_for_ajax()
 
-        wait = WebDriverWait(self.browser, 2)
-        verified_option_present = EC.presence_of_element_located(
-            (By.CSS_SELECTOR, 'select[name="seat_type"] option[value="Verified"]')
-        )
-        wait.until(verified_option_present)
+        if is_dynamic:
+            self.q(css='input#multiple-courses').click()
+            self.q(css='textarea#catalog-query').fill('org:TestX')
+            self.q(css='input#professional').click()
 
-        self.q(css="input[name='start_date']").fill(str(DEFAULT_START_DATE))
-        self.q(css="input[name='end_date']").fill(str(DEFAULT_END_DATE))
-        self.q(css="input[name='client']").fill('Test Client')
+            self._fill_date_and_client()
+        else:
+            self.q(css=course_id_input).fill(VERIFIED_COURSE_ID)
+            self.wait_for_ajax()
 
-        select = Select(self.browser.find_element_by_css_selector('select[name="seat_type"]'))
-        select.select_by_value('Verified')
+            wait = WebDriverWait(self.browser, 2)
+            verified_option_present = EC.presence_of_element_located(
+                (By.CSS_SELECTOR, 'select[name="seat_type"] option[value="Verified"]')
+            )
+            wait.until(verified_option_present)
 
-        # Prevent the test from advancing before the seat type is selected.
-        wait = WebDriverWait(self.browser, 2)
-        verified_option_selected = option_selected(select, 'Verified')
-        wait.until(verified_option_selected)
+            self._fill_date_and_client()
+
+            select = Select(self.browser.find_element_by_css_selector('select[name="seat_type"]'))
+            select.select_by_value('Verified')
+
+            # Prevent the test from advancing before the seat type is selected.
+            wait = WebDriverWait(self.browser, 2)
+            verified_option_selected = option_selected(select, 'Verified')
+            wait.until(verified_option_selected)
 
         select = Select(self.browser.find_element_by_css_selector('select[name="code_type"]'))
         select.select_by_value('Discount code')

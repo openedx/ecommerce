@@ -102,6 +102,20 @@ class LMSCourseModePage(LMSPage):
         self.course_id = course_id
 
 
+class LMSCourseAboutPage(LMSPage):
+    def is_browser_on_page(self):
+        return self.q(css='header.course-profile').visible
+
+    @property
+    def url(self):
+        path = 'courses/{}/about'.format(urllib.quote_plus(self.course_id))
+        return self._build_url(path)
+
+    def __init__(self, browser, course_id):
+        super(LMSCourseAboutPage, self).__init__(browser)
+        self.course_id = course_id
+
+
 class LMSDashboardPage(LMSPage):
     @property
     def url(self):
