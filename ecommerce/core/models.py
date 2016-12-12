@@ -499,10 +499,16 @@ class Client(User):
 class BusinessClient(models.Model):
     """The model for the business client."""
 
-    name = models.CharField(_('Name'), unique=True, max_length=255, blank=False, null=False)
+    name = models.CharField(_('Name'), unique=True, max_length=255)
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            log.exception('Failed to create BusinessClient. BusinessClient name may not be empty.')
+            raise ValidationError(_('BusinessClient name must be set.'))
+        super(BusinessClient, self).save(*args, **kwargs)
 
 
 def validate_configuration():

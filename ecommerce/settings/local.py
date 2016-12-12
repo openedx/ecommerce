@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 
 from ecommerce.settings.base import *
-from ecommerce.settings.logger import get_logger_config
 
 
 # DEBUG CONFIGURATION
@@ -118,7 +117,6 @@ BROKER_URL = 'amqp://'
 
 
 ENABLE_AUTO_AUTH = True
-LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.

@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from path import Path
 
 from ecommerce.settings.base import *
-from ecommerce.settings.logger import get_logger_config
 
 
 SITE_ID = 1
@@ -15,7 +14,7 @@ INSTALLED_APPS += (
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-LOGGING = get_logger_config(debug=DEBUG, dev_env=True, local_loglevel='DEBUG')
+LOGGING['handlers']['local'] = {'class': 'logging.NullHandler'}
 
 if os.getenv('DISABLE_MIGRATIONS'):
 

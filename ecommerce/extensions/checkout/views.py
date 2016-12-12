@@ -42,7 +42,12 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
             # Need to re-apply the voucher to the basket.
             Applicator().apply(basket, self.request.user, self.request)
             if basket.total_incl_tax != Decimal(0):
-                raise BasketNotFreeError("Basket is not free.")
+                raise BasketNotFreeError(
+                    "Basket [{}] is not free. User affected [{}]".format(
+                        basket.id,
+                        basket.owner.id
+                    )
+                )
 
             order = self.place_free_order(basket)
 

@@ -169,6 +169,10 @@ class BusinessClientTests(TestCase):
         client = BusinessClient.objects.create(name='TestClient')
         self.assertEquals(str(client), 'TestClient')
 
+    def test_creating_without_client_name_raises_exception(self):
+        with self.assertRaises(ValidationError):
+            BusinessClient.objects.create()
+
 
 @ddt.ddt
 class SiteConfigurationTests(TestCase):

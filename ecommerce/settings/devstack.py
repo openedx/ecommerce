@@ -1,23 +1,16 @@
 """Devstack settings"""
-from os import environ
-
-import yaml
-
-from ecommerce.settings.base import *
-from ecommerce.settings.logger import get_logger_config
-
-LOGGING = get_logger_config(debug=True, dev_env=True, local_loglevel='DEBUG')
-
-# Pull in base setting overrides from configuration file.
-CONFIG_FILE = environ.get('ECOMMERCE_CFG')
-if CONFIG_FILE is not None:
-    with open(CONFIG_FILE) as f:
-        overrides = yaml.load(f)
-        vars().update(overrides)
+from ecommerce.settings.production import *
 
 DEBUG = True
 ENABLE_AUTO_AUTH = True
 
+# Docker does not support the syslog socket at /dev/log. Rely on the console.
+LOGGING['handlers']['local'] = {
+    'class': 'logging.NullHandler',
+}
+
+# Determine which requests should render Django Debug Toolbar
+INTERNAL_IPS = ('127.0.0.1',)
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
@@ -46,6 +39,7 @@ PAYMENT_PROCESSOR_CONFIG = {
 }
 # END PAYMENT PROCESSING
 
-# Load private settings
+#####################################################################
+# Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     from .private import *  # pylint: disable=import-error
