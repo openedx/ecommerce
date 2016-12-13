@@ -1,7 +1,7 @@
 import re
 
-from acceptance_tests.config import BULK_PURCHASE_SKU
-from acceptance_tests.pages.ecommerce import EcommerceAppPage
+from e2e.config import BULK_PURCHASE_SKU
+from e2e.pages.ecommerce import EcommerceAppPage
 
 
 class BasketPage(EcommerceAppPage):

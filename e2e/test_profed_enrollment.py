@@ -5,10 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.config import PROFESSIONAL_COURSE_ID, MARKETING_URL_ROOT
-from acceptance_tests.mixins import LogistrationMixin, EnrollmentApiMixin
-from acceptance_tests.pages.lms import LMSCourseModePage
-from acceptance_tests.pages.marketing import MarketingCourseAboutPage
+from e2e.config import PROFESSIONAL_COURSE_ID, MARKETING_URL_ROOT
+from e2e.mixins import LogistrationMixin, EnrollmentApiMixin
+from e2e.pages.lms import LMSCourseModePage
+from e2e.pages.marketing import MarketingCourseAboutPage
 
 
 @skipUnless(PROFESSIONAL_COURSE_ID, 'Professional education tests are not enabled.')

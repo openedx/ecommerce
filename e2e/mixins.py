@@ -9,8 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.api import EnrollmentApiClient
-from acceptance_tests.config import (
+from e2e.api import EnrollmentApiClient
+from e2e.config import (
     LMS_AUTO_AUTH,
     ECOMMERCE_URL_ROOT,
     LMS_PASSWORD,
@@ -26,10 +26,10 @@ from acceptance_tests.config import (
     PAYPAL_EMAIL,
     LMS_HTTPS
 )
-from acceptance_tests.expected_conditions import input_provided
-from acceptance_tests.pages import submit_lms_login_form
-from acceptance_tests.pages.ecommerce import EcommerceLoginPage
-from acceptance_tests.pages.lms import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage, LMSLogoutPage
+from e2e.expected_conditions import input_provided
+from e2e.pages import submit_lms_login_form
+from e2e.pages.ecommerce import EcommerceLoginPage
+from e2e.pages.lms import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage, LMSLogoutPage
 
 log = logging.getLogger(__name__)
 
@@ -375,7 +375,7 @@ class CouponMixin(EcommerceApiMixin):
 
     def get_and_delete_coupons(self, partial_title):
         """
-        Get all coupons created in the acceptance tests and delete those
+        Get all coupons created in the e2e tests and delete those
         and all associated stock records and vouchers.
         """
         coupons = self.ecommerce_api_client.coupons.get(title=partial_title)['results']

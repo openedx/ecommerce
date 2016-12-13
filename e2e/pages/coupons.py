@@ -8,10 +8,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from acceptance_tests.config import ECOMMERCE_URL_ROOT, VERIFIED_COURSE_ID
-from acceptance_tests.constants import CODE, DEFAULT_END_DATE, DEFAULT_START_DATE
-from acceptance_tests.expected_conditions import option_selected
-from acceptance_tests.pages.ecommerce import EcommerceAppPage
+from e2e.config import ECOMMERCE_URL_ROOT, VERIFIED_COURSE_ID
+from e2e.constants import CODE, DEFAULT_END_DATE, DEFAULT_START_DATE
+from e2e.expected_conditions import option_selected
+from e2e.pages.ecommerce import EcommerceAppPage
 
 
 def _get_coupon_name(is_discount):

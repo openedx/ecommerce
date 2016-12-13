@@ -83,7 +83,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         self.assertIn(alert_class, classes)
         self.assertEqual(alert.find_element_by_css_selector('.message').text, text)
 
-    @skip("Requires refund processing endpoint.  Move to acceptance_tests and re-enable under ticket XCOM-342.")
+    @skip("Requires refund processing endpoint.  Move to e2e and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_processing_success(self, approve):
         """
@@ -119,7 +119,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         # Verify that an alert is displayed.
         self.assert_alert_displayed('alert-success', 'Refund {} has been processed.'.format(self.refund.id))
 
-    @skip("This test is flaky in Travis.  Move to acceptance_tests and re-enable under ticket XCOM-342.")
+    @skip("This test is flaky in Travis.  Move to e2e and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_processing_failure(self, approve):
         """
@@ -164,7 +164,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             'Please try again, or contact the E-Commerce Development Team.'.format(refund_id=refund_id)
         )
 
-    @skip("This test is flaky in Travis.  Move to acceptance_tests and re-enable under ticket XCOM-342.")
+    @skip("This test is flaky in Travis.  Move to e2e and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_cancel_action(self, approve):
         """

@@ -7,8 +7,8 @@ from bok_choy.promise import EmptyPromise
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.select import Select
 
-from acceptance_tests.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, MARKETING_URL_ROOT
-from acceptance_tests.pages import submit_lms_login_form
+from e2e.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, MARKETING_URL_ROOT
+from e2e.pages import submit_lms_login_form
 
 
 class LMSPage(PageObject):  # pylint: disable=abstract-method

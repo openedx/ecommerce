@@ -3,9 +3,9 @@ from unittest import skipUnless
 from bok_choy.promise import EmptyPromise
 from bok_choy.web_app_test import WebAppTest
 
-from acceptance_tests.config import ENABLE_SSO_TESTS, MARKETING_URL_ROOT, LMS_URL_ROOT
-from acceptance_tests.mixins import LogistrationMixin, OttoAuthenticationMixin, LMSLogoutMixin
-from acceptance_tests.pages.ecommerce import EcommerceDashboardHomePage
+from e2e.config import ENABLE_SSO_TESTS, MARKETING_URL_ROOT, LMS_URL_ROOT
+from e2e.mixins import LogistrationMixin, OttoAuthenticationMixin, LMSLogoutMixin
+from e2e.pages.ecommerce import EcommerceDashboardHomePage
 
 
 @skipUnless(ENABLE_SSO_TESTS, 'Single sign-on tests are not enabled.')
