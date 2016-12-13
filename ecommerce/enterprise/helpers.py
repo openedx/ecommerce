@@ -2,6 +2,10 @@
 Helper methods for enterprise app.
 """
 import logging
+import waffle
+
+from django.conf import settings
+
 from edx_rest_api_client.client import EdxRestApiClient
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -9,10 +13,36 @@ from oscar.core.loading import get_model
 
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tmp import utils
+from ecommerce.theming import helpers as theming_helpers
 
 CouponVouchers = get_model('voucher', 'CouponVouchers')
 
 log = logging.getLogger(__name__)
+
+
+def is_enterprise_feature_enabled():
+    """
+    Returns boolean indicating whether enterprise feature is enabled or disabled.
+
+    Example:
+        >> is_enterprise_feature_enabled()
+        True
+
+    Returns:
+         (bool): True if enterprise feature is enabled else False
+    """
+
+    # Return False if enterprise feature is disabled via Django settings
+    if not settings.ENABLE_ENTERPRISES:
+        return False
+
+    # Return False if we're currently processing a request and enterprise feature is disabled via runtime switch
+    if bool(theming_helpers.get_current_request()) and \
+            waffle.switch_is_active(settings.DISABLE_ENTERPRISES_ON_RUNTIME_SWITCH):
+        return False
+
+    # Return True indicating enterprise feature is enabled
+    return True
 
 
 @utils.dummy_data("learner")

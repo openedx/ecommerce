@@ -602,3 +602,12 @@ ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(w
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+
+# Enterprise settings
+# enable or disable enterprise features
+ENABLE_ENTERPRISES = True
+
+# name for waffle switch to use for disabling enterprise features on runtime.
+# Note: management command ignore this switch
+DISABLE_ENTERPRISES_ON_RUNTIME_SWITCH = "disable_theming_on_runtime"
