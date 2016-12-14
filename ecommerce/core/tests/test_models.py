@@ -17,6 +17,15 @@ from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
+ANALYTICS_CONFIGURATION = {
+    'SEGMENT': {
+        'DEFAULT_WRITE_KEY': 'segment_key_1',
+        'ADDITIONAL_WRITE_KEYS': ['segment_key_2', 'segment_key_3'],
+    },
+    'GOOGLE_ANALYTICS': {
+        'TRACKING_IDS': ['ga_tracking_1', 'ga_tracking_2'],
+    },
+}
 COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
 
 
@@ -26,7 +35,8 @@ def _make_site_config(payment_processors_str, site_id=1):
     return SiteConfiguration(
         site=site,
         payment_processors=payment_processors_str,
-        from_email='sender@example.com'
+        from_email='sender@example.com',
+        analytics_configuration=ANALYTICS_CONFIGURATION
     )
 
 
@@ -364,6 +374,44 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], COURSE_CATALOG_API_URL)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
+
+    def test_google_analytics_tracking_ids(self):
+        """ Verify the property returns the expected google analytics tracking IDs """
+        site_config = _make_site_config('')
+        self.assertEqual(
+            ANALYTICS_CONFIGURATION['GOOGLE_ANALYTICS']['TRACKING_IDS'],
+            site_config.google_analytics_tracking_ids
+        )
+
+    def test_default_segment_key(self):
+        """ Verify the property returns the expected default segment key """
+        site_config = _make_site_config('')
+        self.assertEqual(
+            ANALYTICS_CONFIGURATION['SEGMENT']['DEFAULT_WRITE_KEY'],
+            site_config.default_segment_key
+        )
+
+    def test_segment_clients(self):
+        """ Verify the property returns the expected Segment Client objects """
+        segment_config = ANALYTICS_CONFIGURATION['SEGMENT']
+        expected_segment_keys = [segment_config['DEFAULT_WRITE_KEY']] + segment_config['ADDITIONAL_WRITE_KEYS']
+        site_config = _make_site_config('')
+        segment_clients = site_config.segment_clients
+        self.assertEqual(len(expected_segment_keys), len(segment_clients))
+        for segment_client in segment_clients:
+            self.assertIn(segment_client.write_key, expected_segment_keys)
+
+    @mock.patch('ecommerce.core.models.SegmentClient.track')
+    def test_track_analytics_event(self, mock_track):
+        """ Verify the event is tracked with each configured Segment Client """
+        segment_config = ANALYTICS_CONFIGURATION['SEGMENT']
+        expected_segment_keys = [segment_config['DEFAULT_WRITE_KEY']] + segment_config['ADDITIONAL_WRITE_KEYS']
+        expected_args = ['test_user_id', 'test_event', {}]
+        site_config = _make_site_config('')
+        site_config.track_analytics_event(*expected_args)
+        expected_call = mock.call(*expected_args)
+        # Assert that SegmentClient.track is called each of the configured Segment keys
+        mock_track.assert_has_calls(expected_call for key in expected_segment_keys)
 
 
 class HelperMethodTests(TestCase):

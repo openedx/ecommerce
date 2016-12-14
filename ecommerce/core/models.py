@@ -25,6 +25,15 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
 
+DEFAULT_ANALYTICS_CONFIGURATION = {
+    'SEGMENT': {
+        'DEFAULT_WRITE_KEY': None,
+        'ADDITIONAL_WRITE_KEYS': [],
+    },
+    'GOOGLE_ANALYTICS': {
+        'TRACKING_IDS': [],
+    },
+}
 log = logging.getLogger(__name__)
 
 
@@ -72,12 +81,20 @@ class SiteConfiguration(models.Model):
         blank=False,
         default={}
     )
+    # TODO: WL-895 Remove the segment_key field after the analytics_configuration field has been deployed and configured
     segment_key = models.CharField(
         verbose_name=_('Segment key'),
         help_text=_('Segment write/API key.'),
         max_length=255,
         null=True,
         blank=True
+    )
+    analytics_configuration = JSONField(
+        verbose_name=_('Analytics tracking configuration'),
+        help_text=_('JSON string containing settings related to analytics event tracking.'),
+        null=False,
+        blank=False,
+        default=DEFAULT_ANALYTICS_CONFIGURATION
     )
     from_email = models.CharField(
         verbose_name=_('From email'),
@@ -236,8 +253,44 @@ class SiteConfiguration(models.Model):
             self._clean_client_side_payment_processor()
 
     @cached_property
-    def segment_client(self):
-        return SegmentClient(self.segment_key, debug=settings.DEBUG)
+    def google_analytics_tracking_ids(self):
+        return self.analytics_configuration.get('GOOGLE_ANALYTICS', {}).get('TRACKING_IDS')
+
+    @cached_property
+    def default_segment_key(self):
+        # TODO: WL-895 Remove self.segment_key from this statement once the segment_key field is removed from this model
+        return self.analytics_configuration.get('SEGMENT', {}).get('DEFAULT_WRITE_KEY') or \
+            self.segment_key
+
+    @cached_property
+    def segment_clients(self):
+        """
+        Returns a list of SegmentClient objects for each of the Segment keys configured for this site.
+
+        Returns:
+            list: List of SegmentClient objects
+        """
+        segment_clients = []
+
+        # Segment allows for only a single key to be used client-side, however multiple keys can be
+        # used for server-side tracking. The default Segment key will be used for both client-side
+        # and server-side tracking. Additional Google Analytics trackers can be configured to overcome
+        # the client-side limitation.
+        default_key = self.default_segment_key
+        additional_keys = self.analytics_configuration.get('SEGMENT', {}).get('ADDITIONAL_WRITE_KEYS', [])
+        if default_key:
+            segment_clients.append(SegmentClient(default_key, debug=settings.DEBUG))
+        for key in additional_keys:
+            segment_clients.append(SegmentClient(key, debug=settings.DEBUG))
+
+        return segment_clients
+
+    def track_analytics_event(self, *args, **kwargs):
+        """
+        Sends server-side events to Segment sources.
+        """
+        for client in self.segment_clients:
+            client.track(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         # Clear Site cache upon SiteConfiguration changed

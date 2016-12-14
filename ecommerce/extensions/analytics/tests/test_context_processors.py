@@ -9,7 +9,7 @@ class AnalyticsContextProcessorTests(TestCase):
         request = RequestFactory().get('/')
         request.user = self.create_user()
         request.site = self.site
-        analytics_data = prepare_analytics_data(request.user, request.site.siteconfiguration.segment_key)
+        analytics_data = prepare_analytics_data(request.user, request.site.siteconfiguration)
 
         self.assertDictEqual(
             analytics(request),

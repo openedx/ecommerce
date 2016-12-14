@@ -38,7 +38,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_processors, self.payment_processors)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'], self.client_id)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
-        self.assertEqual(site_configuration.segment_key, self.segment_key)
+        self.assertEqual(site_configuration.default_segment_key, self.segment_key)
         self.assertEqual(site_configuration.from_email, self.from_email)
 
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,

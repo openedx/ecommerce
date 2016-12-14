@@ -16,6 +16,15 @@ class SiteConfigurationViewSetTests(TestCase):
             partner__name='TestX',
             site__domain='test.api.endpoint',
             segment_key='test_segment_key',
+            analytics_configuration=json.dumps({
+                'SEGMENT': {
+                    'DEFAULT_WRITE_KEY': 'test_segment_key2',
+                    'ADDITIONAL_WRITE_KEYS': ['test_segment_key3'],
+                },
+                'GOOGLE_ANALYTICS': {
+                    'TRACKING_IDS': ['test_tracking_id'],
+                },
+            }),
             enable_enrollment_codes=True
         )
         self.path = reverse('api:v2:siteconfiguration-list')

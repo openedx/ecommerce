@@ -20,7 +20,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
     # Ecommerce transaction reversal, performed by emitting an event which is the inverse of an
     # order completion event emitted previously.
     # See: https://support.google.com/analytics/answer/1037443?hl=en
-    refund.order.site.siteconfiguration.segment_client.track(
+    refund.order.site.siteconfiguration.track_analytics_event(
         user_tracking_id,
         'Completed Order',
         {

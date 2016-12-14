@@ -4,7 +4,7 @@ define(['underscore', 'backbone'],
 
         /**
          * Use this for triggering track events when an element is clicked.
-         * 'segment:track' and an event are fired when the element is clicked.
+         * 'analytics:track' and an event are fired when the element is clicked.
          */
         return Backbone.View.extend({
 
@@ -23,7 +23,7 @@ define(['underscore', 'backbone'],
                 // track the click
                 self.$el.click(function () {
                     // track this event type along with properties
-                    self.model.trigger('segment:track',
+                    self.model.trigger('analytics:track',
                         self.options.trackEventType,
                         self.options.trackProperties);
                 });
