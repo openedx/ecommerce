@@ -12,7 +12,6 @@ from oscar.test import factories
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.offer.models import validate_credit_seat_type
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -75,7 +74,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
             non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         """
         self.range.catalog_query = large_query
-        self.range.course_seat_types = ['verified', ]
+        self.range.course_seat_types = 'verified'
         self.range.save()
         self.assertEqual(self.range.catalog_query, large_query)
 
@@ -142,16 +141,6 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.course_seat_types = 'verified'
         self.assertEqual(len(self.range.all_products()), 0)
 
-    def test_credit_seat_type_validator(self):
-        """
-        Verify the validator raises error for combination of credit and another seat type.
-        """
-        self.assertIsNone(validate_credit_seat_type('verified,professional'))
-        self.assertIsNone(validate_credit_seat_type('credit'))
-
-        with self.assertRaises(ValidationError):
-            validate_credit_seat_type('credit,verified')
-
     @ddt.data(
         {'catalog_query': '*:*'},
         {'catalog_query': '', 'course_seat_types': ['verified']},
@@ -177,12 +166,32 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         """Verify creating range with catalog_query or catalog_seat_types creates range with those values."""
         data = {
             'catalog_query': 'id:testquery',
-            'course_seat_types': ['verified', 'professional']
+            'course_seat_types': 'verified,professional'
         }
         new_range = Range.objects.create(**data)
         self.assertEqual(new_range.catalog_query, data['catalog_query'])
         self.assertEqual(new_range.course_seat_types, data['course_seat_types'])
         self.assertEqual(new_range.catalog, None)
+
+    @ddt.data(5, 'credit,verified', 'verified,not_allowed_value')
+    def test_creating_range_with_wrong_course_seat_types(self, course_seat_types):
+        """ Verify creating range with incorrect course seat types will raise exception. """
+        data = {
+            'catalog_query': '*:*',
+            'course_seat_types': course_seat_types
+        }
+        with self.assertRaises(ValidationError):
+            Range.objects.create(**data)
+
+    @ddt.data('credit', 'professional', 'verified', 'professional,verified')
+    def test_creating_range_with_course_seat_types(self, course_seat_types):
+        """ Verify creating range with allowed course seat types values creates range. """
+        data = {
+            'catalog_query': '*:*',
+            'course_seat_types': course_seat_types
+        }
+        _range = Range.objects.create(**data)
+        self.assertEqual(_range.course_seat_types, course_seat_types)
 
 
 class ConditionalOfferTests(TestCase):

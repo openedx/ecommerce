@@ -731,6 +731,21 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         })
         self.assert_post_response_status(self.data)
 
+    @ddt.data(8, 'string', {'dict': 'type'})
+    def test_creating_coupon_with_wrong_course_seat_types(self, course_seat_types):
+        """ Verify creating coupon with course seat types not a list returns bad request. """
+        self.data.update({'course_seat_types': course_seat_types})
+        self.assert_post_response_status(self.data)
+
+    def test_creating_coupon_with_course_seat_types(self):
+        """ Verify creating coupon with course seat types list creates coupon. """
+        self.data.update({
+            'catalog_query': 'test',
+            'course_seat_types': ['verified'],
+            'stock_record_ids': None
+        })
+        self.assert_post_response_status(self.data, status.HTTP_200_OK)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """
