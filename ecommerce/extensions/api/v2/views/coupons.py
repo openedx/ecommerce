@@ -103,7 +103,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         'Category {category_name} not found.'.format(category_name=category_data['name']),
                         status=status.HTTP_404_NOT_FOUND
                     )
-                except KeyError:
+                except (KeyError, TypeError):
                     return Response('Invalid Coupon Category data.', status=status.HTTP_400_BAD_REQUEST)
 
                 # Maximum number of uses can be set for each voucher type and disturb

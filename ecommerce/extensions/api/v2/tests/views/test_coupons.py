@@ -243,6 +243,10 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.coupon = Product.objects.get(title=self.data['title'])
 
+    def assert_post_response_status(self, data, expected_status=status.HTTP_400_BAD_REQUEST):
+        response = self.client.post(COUPONS_LINK, json.dumps(data), 'application/json')
+        self.assertEqual(response.status_code, expected_status)
+
     def get_response_json(self, method, path, data=None):
         """Helper method for sending requests and returning JSON response content."""
         if method == 'GET':
@@ -319,20 +323,15 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
 
     def test_authentication_required(self):
         """Test that a guest cannot access the view."""
-        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
+        self.assert_post_response_status(self.data, status.HTTP_200_OK)
         self.client.logout()
-        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assert_post_response_status(self.data, status.HTTP_401_UNAUTHORIZED)
 
     def test_authorization_required(self):
         """Test that a non-staff user cannot access the view."""
         user = self.create_user(is_staff=False)
         self.client.login(username=user.username, password=self.password)
-
-        response = self.client.post(COUPONS_LINK, data=self.data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assert_post_response_status(self.data, status.HTTP_403_FORBIDDEN)
 
     def test_list_coupons(self):
         """Test that the endpoint returns information needed for the details page."""
@@ -372,8 +371,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'quantity': 1,
         })
         self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_post_response_status(self.data)
 
     def test_update(self):
         """Test updating a coupon."""
@@ -554,8 +552,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         if mode == 'audit':
             seat = ProductFactory()
         self.data.update({'stock_record_ids': [StockRecord.objects.get(product=seat).id]})
-        response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_post_response_status(self.data)
 
     @httpretty.activate
     @mock_course_catalog_api_client
@@ -706,6 +703,16 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.data.update({'max_uses': max_uses})
         response = self.get_response_json('PUT', path, self.data)
         self.assertEqual(response['max_uses'], max_uses)
+
+    def test_create_coupon_without_category(self):
+        """ Verify creating coupon without category returns bad request. """
+        del self.data['category']
+        self.assert_post_response_status(self.data)
+
+    def test_create_coupon_with_category_not_dict(self):
+        """ Verify creating coupon with category not being a dictionary returns bad request. """
+        self.data['category'] = 'String type'
+        self.assert_post_response_status(self.data)
 
 
 class CouponCategoriesListViewTests(TestCase):
