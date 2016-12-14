@@ -167,6 +167,10 @@ def get_entitlement_voucher(request, product):
     """
     Return entitlement voucher for the given learner.
     """
+
+    if not is_learner_eligible_for_entitlements(request.user, request.site):
+        return None
+
     learner = get_learner_info(request.user, request.site)
     enterprise_customer = learner.get("enterprise_customer")
     entitlement_ids = fetch_entitlements(request.user, product, enterprise_customer, request.site)

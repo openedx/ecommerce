@@ -76,7 +76,7 @@ class BasketSingleItemView(View):
                 return HttpResponseBadRequest(msg)
 
         # If learner is eligible for entitlements, apply entitlements
-        if voucher is None and enterprise_helpers.is_learner_eligible_for_entitlements(request.user, request.site):
+        if voucher is None:
             voucher = enterprise_helpers.get_entitlement_voucher(request, product)
 
         # At this point we're either adding an Enrollment Code product to the basket,
