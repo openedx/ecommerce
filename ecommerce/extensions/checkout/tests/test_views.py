@@ -46,7 +46,7 @@ class FreeCheckoutViewTests(TestCase):
         """ Verify redirect to the receipt page. """
         self.prepare_basket(0)
         self.assertEqual(Order.objects.count(), 0)
-        receipt_page = get_lms_url('/commerce/checkout/receipt')
+        receipt_page = get_lms_url('/commerce/checkout/receipt/')
 
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)

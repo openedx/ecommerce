@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 
+import calendar
+import collections
 import logging
+from datetime import datetime
 
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
@@ -96,32 +99,48 @@ class BasketSummaryView(BasketView):
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
+    def _get_course_data(self, course_key):
+        """
+        Helper method for getting Course data from Course Catalog service.
+
+        Arguments:
+            course_key (str): Course key of the Course the data is being fetched for
+
+        Returns:
+            A namedtuple containing the course title, short description and image URL.
+            In case an exception is caught, None values are returned instead.
+        """
+        CourseData = collections.namedtuple('CourseData', 'title, description, image_url')
+        try:
+            course = get_course_info_from_catalog(self.request.site, course_key)
+            try:
+                image_url = course['image']['src']
+            except (KeyError, TypeError):
+                image_url = ''
+            return CourseData(
+                title=course.get('title', ''),
+                description=course.get('short_description', ''),
+                image_url=image_url
+            )
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+            return CourseData(None, None, None)
+
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
         lines_data = []
-        is_verification_required = is_bulk_purchase = False
+        is_verification_required = is_bulk_purchase = is_certifiable = False
         switch_link_text = partner_sku = ''
         basket = self.request.basket
         site = self.request.site
         site_configuration = site.siteconfiguration
+        payment_processors_list = site_configuration.get_payment_processors()
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
-            course_name = None
-            image_url = None
-            short_description = None
-            try:
-                course = get_course_info_from_catalog(self.request.site, course_key)
-                try:
-                    image_url = course['image']['src']
-                except (KeyError, TypeError):
-                    image_url = ''
-                short_description = course.get('short_description', '')
-                course_name = course.get('title', '')
-            except (ConnectionError, SlumberBaseException, Timeout):
-                logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+            course_name, short_description, image_url = self._get_course_data(course_key)
 
             if self.request.site.siteconfiguration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
@@ -139,8 +158,10 @@ class BasketSummaryView(BasketView):
             else:
                 benefit_value = None
 
+            seat_type = self._determine_seat_type(line.product)
+
             lines_data.append({
-                'seat_type': self._determine_seat_type(line.product),
+                'seat_type': seat_type,
                 'course_name': course_name,
                 'course_key': course_key,
                 'image_url': image_url,
@@ -166,11 +187,21 @@ class BasketSummaryView(BasketView):
 
                 if payment_processor_class:
                     payment_processor = payment_processor_class(site)
+                    # Excluding the client side payment processor from the processors list.
+                    # 'payment_processors_list' is a list of active payment processor classes
+                    # and 'payment_processor' is an object of a class hence the __class__.
+                    if payment_processor.__class__ in payment_processors_list:
+                        payment_processors_list.remove(payment_processor.__class__)
+                    today = datetime.today()
 
                     context.update({
                         'enable_client_side_checkout': True,
+                        'client_side_payment_processor': payment_processor,
+                        'months': calendar.month_name[1:],
                         'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
                         'payment_url': payment_processor.client_side_payment_url,
+                        # Assumption is that the credit card duration is 15 years
+                        'years': range(today.year, today.year + 16)
                     })
                 else:
                     msg = 'Unable to load client-side payment processor [{processor}] for ' \
@@ -178,16 +209,21 @@ class BasketSummaryView(BasketView):
                                                              sc=site_configuration.id)
                     raise SiteConfigurationError(msg)
 
-            # Check product attributes to determine if ID verification is required for this basket
             try:
-                is_verification_required = line.product.attr.id_verification_required \
-                    and line.product.attr.certificate_type != 'credit'
-            except AttributeError:
+                # Check product attributes to determine if ID verification is required for this basket.
+                # Skip if verification is required for some previous line item.
+                if not is_verification_required:
+                    is_verification_required = line.product.attr.id_verification_required and seat_type != 'Credit'
+                # Check if seat type is either verified or professional so that the order details
+                # could be displayed.
+                if not is_certifiable:
+                    is_certifiable = seat_type == 'Verified' or seat_type == 'Professional'
+            except AttributeError:  # Bulk enrollment codes don't have the certificate_type attribute.
                 pass
 
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': site_configuration.get_payment_processors(),
+            'payment_processors': payment_processors_list,
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
             'is_verification_required': is_verification_required,
@@ -195,6 +231,7 @@ class BasketSummaryView(BasketView):
             'is_bulk_purchase': is_bulk_purchase,
             'switch_link_text': switch_link_text,
             'partner_sku': partner_sku,
+            'is_certifiable': is_certifiable
         })
 
         return context

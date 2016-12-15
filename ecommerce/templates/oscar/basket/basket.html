@@ -1,4 +1,5 @@
 {% extends 'edx/base.html' %}
+{% load core_extras %}
 {% load i18n %}
 {% load staticfiles %}
 
@@ -16,10 +17,34 @@
 {% endblock %}
 
 {% block content %}
-    <div class="basket">
+    <div class="basket {% if enable_client_side_checkout %}basket-new{% endif %}">
         <div class="container">
             {# Use a partial template so that AJAX can be used to re-render basket #}
-            {% include 'basket/partials/basket_content.html' %}
+            {% if basket.is_empty %}
+                {% block emptybasket %}
+                    <div class="depth depth-2 message-error-content">
+                        <h3>{% trans "Your basket is empty" %}</h3>
+                        {% captureas dashboard_link_start %}
+                            <a href="{{ homepage_url }}">
+                        {% endcaptureas %}
+
+                        {% captureas support_link_start %}
+                            <a href="{{ support_url }}">
+                        {% endcaptureas %}
+
+                        {% blocktrans with link_end="</a>" %}
+                            If you have attempted to do a purchase, you have not been charged. Return to your {{ dashboard_link_start }}dashboard{{ link_end }} to try
+                            again, or {{ support_link_start }}contact {{ platform_name }} Support{{ link_end }}.
+                        {% endblocktrans %}
+                    </div>
+                {% endblock %}
+            {% else %}
+                {% if enable_client_side_checkout %}
+                    {% include 'basket/partials/new_basket_page.html' %}
+                {% else %}
+                    {% include 'basket/partials/old_basket_page.html' %}
+                {% endif %}
+            {% endif %}
         </div>
     </div>
 {% endblock content %}

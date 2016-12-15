@@ -457,11 +457,28 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['is_verification_required'], False)
 
+    @ddt.data(
+        ('verified', True),
+        ('professional', True),
+        ('credit', False)
+    )
+    @ddt.unpack
+    def test_is_certifiable_seat_type(self, cert_type, is_certifiable):
+        """ Verify the is_certifiable attribute is set for certifiable seat types. """
+        seat = self.create_seat(self.course, cert_type=cert_type)
+        self.create_basket_and_add_product(seat)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['is_certifiable'], is_certifiable)
+
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
     def test_client_side_checkout(self):
         """ Verify the view returns the data necessary to initiate client-side checkout. """
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
+        self.site.siteconfiguration.payment_processors = 'cybersource'
+        self.site.siteconfiguration.save()
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + 'cybersource', True)
 
         response = self.client.get(self.get_full_url(self.path))
         self.assertEqual(response.status_code, 200)

@@ -1,0 +1,21 @@
+{% load i18n %}
+
+
+<div id="voucher_form_container" class="voucher_form">
+    <form id="voucher_form" action="{% url 'basket:vouchers-add' %}" method="post">
+        {% csrf_token %}
+        <div class="code">
+            <input id="id_code" name="code" type="text"
+                   placeholder="{% trans 'Enter a coupon code' %}">
+            <button type="submit"
+                    class="btn btn-default"
+                    data-loading-text="{% trans 'Applying...' %}"
+                    data-track-type="click"
+                    data-track-event="edx.bi.ecommerce.basket.voucher_applied"
+                    data-track-category="voucher-application"
+                    data-voucher-code="{{ voucher_code }}">
+                {% trans "Apply" %}
+            </button>
+        </div>
+    </form>
+</div>

@@ -301,6 +301,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
             'basket': basket_id,
             'first_name': 'Test',
             'last_name': 'User',
+            'email_address': self.user.email,
             'address_line1': '141 Portland Ave.',
             'address_line2': 'Floor 9',
             'city': 'Cambridge',
@@ -376,7 +377,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         extra_parameters = {
             'payment_method': 'card',
             'unsigned_field_names': 'card_cvn,card_expiry_date,card_number,card_type',
-            'bill_to_email': self.user.email,
+            'bill_to_email': data['email_address'],
             'device_fingerprint_id': self.client.session.session_key,
             'bill_to_address_city': data['city'],
             'bill_to_address_country': data['country'],

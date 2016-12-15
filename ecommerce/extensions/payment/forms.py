@@ -8,6 +8,9 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Div, Layout
+
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 
@@ -27,13 +30,31 @@ class PaymentForm(forms.Form):
 
     def __init__(self, user, *args, **kwargs):
         super(PaymentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Div('basket'),
+            Div('first_name', css_class='col-md-6'),
+            Div('last_name', css_class='col-md-6'),
+            Div('address_line1', css_class='col-md-6'),
+            Div('address_line2', css_class='col-md-6'),
+            Div('city', css_class='col-md-6'),
+            Div('state', css_class='col-md-6'),
+            Div('country', css_class='col-md-6'),
+            Div('postal_code', css_class='col-md-6')
+        )
         self.fields['basket'].queryset = self.fields['basket'].queryset.filter(owner=user)
+        for bound_field in self:
+            # https://www.w3.org/WAI/tutorials/forms/validation/#validating-required-input
+            if hasattr(bound_field, 'field') and bound_field.field.required:
+                self.fields[bound_field.name].label = '{label} (required)'.format(label=bound_field.label)
+                bound_field.field.widget.attrs['required'] = 'required'
+                bound_field.field.widget.attrs['aria-required'] = 'true'
 
     basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
     address_line1 = forms.CharField(max_length=29, label=_('Address'))
-    address_line2 = forms.CharField(max_length=29, required=False, label=_('Address (continued)'))
+    address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))

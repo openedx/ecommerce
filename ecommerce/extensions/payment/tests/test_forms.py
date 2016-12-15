@@ -21,6 +21,7 @@ class CyberSourceSubmitFormTests(TestCase):
             'basket': self.basket.id,
             'first_name': 'Test',
             'last_name': 'User',
+            'email_address': self.user.email,
             'address_line1': '141 Portland Ave.',
             'address_line2': 'Floor 9',
             'city': 'Cambridge',

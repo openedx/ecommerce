@@ -84,6 +84,22 @@ define([
                     expect(button).not.toHaveClass('is-disabled');
                 });
             });
+
+            describe('isValidCreditCard', function() {
+                it('should return true for the valid credit cards', function() {
+                    var validCards = ['378282246310005', '30569309025904', '3530111333300000'];
+                    _.each(validCards, function(cardNum) {
+                        expect(Utils.isValidCardNumber(cardNum)).toEqual(true);
+                    });
+                });
+
+                it('should return false for the invalidvalid credit cards', function() {
+                    var validCards = ['3782831abc0005', '305699909025904', '00000'];
+                    _.each(validCards, function(cardNum) {
+                        expect(Utils.isValidCardNumber(cardNum)).toEqual(false);
+                    });
+                });
+            });
         });
     }
 );

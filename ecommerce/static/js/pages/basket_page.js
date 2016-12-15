@@ -24,6 +24,29 @@ define([
                 value: value
             }).appendTo(form);
         },
+        getCreditCardType = function(cardNumber) {
+            var matchers = {
+                    amex: [/^3[47]\d{13}$/, '003'],
+                    diners: [/^3(?:0[0-59]|[689]\d)\d{11}$/, '005'],
+                    discover: [
+                        /^(6011\d{2}|65\d{4}|64[4-9]\d{3}|62212[6-9]|6221[3-9]\d|622[2-8]\d{2}|6229[01]\d|62292[0-5])\d{10,13}$/,  // jshint ignore:line
+                        '004'
+                    ],
+                    jcb: [/^(?:2131|1800|35\d{3})\d{11}$/, '007'],
+                    maestro: [/^(5[06789]|6\d)[0-9]{10,17}$/, '042'],
+                    mastercard: [/^(5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)\d{12}$/, '002'],
+                    visa: [/^(4\d{12}?(\d{3})?)$/, '001']
+                };
+
+            for (var key in matchers) {
+                if (matchers[key][0].test(cardNumber)) {
+                    return {
+                        'name': key,
+                        'type': matchers[key][1]
+                    };
+                }
+            }
+        },
         checkoutPayment = function(data) {
             $.ajax({
                 url: '/api/v2/checkout/',
@@ -37,7 +60,6 @@ define([
                 success: onSuccess,
                 error: onFail
             });
-
         },
         hideVoucherForm = function() {
             $('#voucher_form_container').hide();
@@ -69,9 +91,10 @@ define([
         },
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
-                basketId = $paymentButtons.data('basket-id');
+                basketId = $paymentButtons.data('basket-id'),
+                iconPath = '/static/images/credit_cards/';
 
-            $('#voucher_form_link a').on('click', function(event) {
+            $('#voucher_form_link').on('click', function(event) {
                 event.preventDefault();
                 showVoucherForm();
             });
@@ -79,6 +102,27 @@ define([
             $('#voucher_form_cancel').on('click', function(event) {
                 event.preventDefault();
                 hideVoucherForm();
+            });
+
+            $('#id_card_number').on('input', function() {
+                var cardNumber = $('#id_card_number').val().replace(/\s+/g, ''),
+                    card = getCreditCardType(cardNumber);
+
+                if (cardNumber.length > 13 && cardNumber.length < 19){
+                    var color = (Utils.isValidCardNumber(cardNumber)) ? 'black' : 'red';
+                    $('#id_card_number').css('color', color);
+                }
+
+                if (typeof card !== 'undefined') {
+                    $('.card-type-icon').attr(
+                        'src',
+                        iconPath + card.name + '.png'
+                    );
+                    $('input[name=card_type]').val(card.type);
+                } else {
+                    $('.card-type-icon').attr('src', '');
+                    $('input[name=card_type]').val('');
+                }
             });
 
             $paymentButtons.find('.payment-button').click(function (e) {
@@ -127,6 +171,7 @@ define([
 
         return {
             appendToForm: appendToForm,
+            getCreditCardType: getCreditCardType,
             checkoutPayment: checkoutPayment,
             hideVoucherForm: hideVoucherForm,
             onSuccess: onSuccess,
