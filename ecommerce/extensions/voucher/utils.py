@@ -362,6 +362,9 @@ def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime,
     Returns:
         Voucher
     """
+    if offer.benefit.type == Benefit.PERCENTAGE and offer.benefit.value == 100 and code:
+        logger.exception('Failed to create Voucher. Code may not be set for enrollment coupon.')
+        raise ValidationError(_('Voucher can not be created when code is set in enrollment coupon.'))
     voucher_code = code or _generate_code_string(settings.VOUCHER_CODE_LENGTH)
 
     voucher = Voucher.objects.create(

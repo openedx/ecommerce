@@ -111,12 +111,13 @@ class CouponCreationTests(CouponMixin, TestCase):
         super(CouponCreationTests, self).setUp()
         self.catalog = Catalog.objects.create(partner=self.partner)
 
-    def create_custom_coupon(self, code='', max_uses=None, note=None, quantity=1, title='Tešt Čoupon'):
+    def create_custom_coupon(self, benefit_value=100, code='', max_uses=None, note=None, quantity=1,
+                             title='Tešt Čoupon'):
         """Create a custom test coupon product."""
 
         return create_coupon_product(
             benefit_type=Benefit.PERCENTAGE,
-            benefit_value=100,
+            benefit_value=benefit_value,
             catalog=self.catalog,
             catalog_query=None,
             category=self.category,
@@ -137,12 +138,14 @@ class CouponCreationTests(CouponMixin, TestCase):
     def test_custom_code_integrity_error(self):
         """Test custom coupon code duplication."""
         self.create_custom_coupon(
+            benefit_value=90,
             code='CUSTOMCODE',
             title='Custom coupon',
         )
 
         with self.assertRaises(IntegrityError):
             self.create_custom_coupon(
+                benefit_value=90,
                 code='CUSTOMCODE',
                 title='Coupon with integrity issue',
             )
@@ -158,8 +161,9 @@ class CouponCreationTests(CouponMixin, TestCase):
 
     def test_custom_code_string(self):
         """Test creating a coupon with custom voucher code."""
-        custom_code = 'ČUSTOMĆODE'
+        custom_code = 'CUSTOMCODE'
         custom_coupon = self.create_custom_coupon(
+            benefit_value=90,
             code=custom_code,
             quantity=1,
             title='Custom coupon',

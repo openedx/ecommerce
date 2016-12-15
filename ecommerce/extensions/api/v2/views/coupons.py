@@ -5,7 +5,7 @@ import logging
 import dateutil.parser
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -136,25 +136,28 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 else:
                     coupon_catalog = None
 
-                coupon_product = create_coupon_product(
-                    benefit_type=request.data.get('benefit_type'),
-                    benefit_value=request.data.get('benefit_value'),
-                    catalog=coupon_catalog,
-                    catalog_query=request.data.get('catalog_query'),
-                    category=category,
-                    code=code,
-                    course_seat_types=course_seat_types,
-                    email_domains=request.data.get('email_domains'),
-                    end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),
-                    max_uses=max_uses,
-                    note=request.data.get('note'),
-                    partner=partner,
-                    price=request.data.get('price'),
-                    quantity=request.data.get('quantity'),
-                    start_datetime=dateutil.parser.parse(request.data.get('start_datetime')),
-                    title=request.data.get('title'),
-                    voucher_type=voucher_type
-                )
+                try:
+                    coupon_product = create_coupon_product(
+                        benefit_type=request.data.get('benefit_type'),
+                        benefit_value=request.data.get('benefit_value'),
+                        catalog=coupon_catalog,
+                        catalog_query=request.data.get('catalog_query'),
+                        category=category,
+                        code=code,
+                        course_seat_types=course_seat_types,
+                        email_domains=request.data.get('email_domains'),
+                        end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),
+                        max_uses=max_uses,
+                        note=request.data.get('note'),
+                        partner=partner,
+                        price=request.data.get('price'),
+                        quantity=request.data.get('quantity'),
+                        start_datetime=dateutil.parser.parse(request.data.get('start_datetime')),
+                        title=request.data.get('title'),
+                        voucher_type=voucher_type
+                    )
+                except IntegrityError as e:
+                    return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
                 basket = prepare_basket(request, coupon_product)
 

@@ -281,21 +281,27 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
         self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
 
-    @property
-    def redeem_url_with_params(self):
+    def redeem_url_with_params(self, code=COUPON_CODE):
         """ Constructs the coupon redemption URL with the proper string query parameters. """
-        return self.redeem_url + '?code={}&sku={}'.format(COUPON_CODE, self.stock_record.partner_sku)
+        return self.redeem_url + '?code={}&sku={}'.format(code, self.stock_record.partner_sku)
 
-    def create_and_test_coupon(self, email_domains=None):
-        """ Creates enrollment code coupon. """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, email_domains=email_domains)
-        self.assertEqual(Voucher.objects.filter(code=COUPON_CODE).count(), 1)
+    def create_and_test_coupon_and_return_code(self, benefit_value=90, code=COUPON_CODE, email_domains=None):
+        """ Creates coupon and returns code. """
+        coupon = self.create_coupon(
+            benefit_value=benefit_value,
+            catalog=self.catalog,
+            code=code,
+            email_domains=email_domains
+        )
+        coupon_code = coupon.attr.coupon_vouchers.vouchers.first().code
+        self.assertEqual(Voucher.objects.filter(code=coupon_code).count(), 1)
+        return coupon_code
 
-    def assert_redemption_page_redirects(self, expected_url, target=200):
+    def assert_redemption_page_redirects(self, expected_url, target=200, code=COUPON_CODE):
         """ Verify redirect from redeem page to expected page. """
         self.request.user = self.user
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
-        response = self.client.get(self.redeem_url_with_params)
+        response = self.client.get(self.redeem_url_with_params(code=code))
         self.assertRedirects(response, expected_url, status_code=302, target_status_code=target)
 
     def test_login_required(self):
@@ -327,7 +333,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
     def test_no_product(self):
         """ Verify an error is returned when a stock record for the provided SKU doesn't exist. """
-        self.create_and_test_coupon()
+        self.create_and_test_coupon_and_return_code()
         url = self.redeem_url + '?code={}&sku=INVALID'.format(COUPON_CODE)
         response = self.client.get(url)
         self.assertEqual(response.context['error'], _('The product does not exist.'))
@@ -354,28 +360,36 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     @httpretty.activate
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to LMS when an enrollment code is provided. """
-        self.create_and_test_coupon()
+        code = self.create_and_test_coupon_and_return_code(benefit_value=100, code='')
         httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=status.HTTP_301_MOVED_PERMANENTLY)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        self.assert_redemption_page_redirects(self.student_dashboard_url, target=status.HTTP_301_MOVED_PERMANENTLY)
+        self.assert_redemption_page_redirects(
+            self.student_dashboard_url,
+            target=status.HTTP_301_MOVED_PERMANENTLY,
+            code=code
+        )
 
     @httpretty.activate
     def test_multiple_vouchers(self):
         """ Verify a redirect to LMS happens when a basket with already existing vouchers is used. """
-        self.create_and_test_coupon()
+        code = self.create_and_test_coupon_and_return_code(benefit_value=100, code='')
         basket = Basket.get_basket(self.user, self.site)
-        basket.vouchers.add(Voucher.objects.get(code=COUPON_CODE))
+        basket.vouchers.add(Voucher.objects.get(code=code))
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=status.HTTP_301_MOVED_PERMANENTLY)
-        self.assert_redemption_page_redirects(self.student_dashboard_url, target=status.HTTP_301_MOVED_PERMANENTLY)
+        self.assert_redemption_page_redirects(
+            self.student_dashboard_url,
+            target=status.HTTP_301_MOVED_PERMANENTLY,
+            code=code
+        )
 
     @httpretty.activate
     def test_already_enrolled_rejection(self):
         """ Verify a user is rejected from redeeming a coupon for a course she's already enrolled in."""
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        self.create_and_test_coupon()
-        response = self.client.get(self.redeem_url_with_params)
+        self.create_and_test_coupon_and_return_code()
+        response = self.client.get(self.redeem_url_with_params())
         msg = 'You are already enrolled in the course.'
         self.assertEqual(response.context['error'], _(msg))
 
@@ -383,8 +397,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     def test_invalid_email_domain_rejection(self):
         """ Verify a user with invalid email domain is rejected. """
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
-        self.create_and_test_coupon(email_domains='example.com')
-        response = self.client.get(self.redeem_url_with_params)
+        self.create_and_test_coupon_and_return_code(email_domains='example.com')
+        response = self.client.get(self.redeem_url_with_params())
         msg = 'You are not eligible to use this coupon.'
         self.assertEqual(response.context['error'], _(msg))
 
@@ -392,8 +406,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     def test_inactive_user_rejection(self):
         """ Verify that a user who hasn't activated the account is rejected. """
         self.mock_account_api(self.request, self.user.username, data={'is_active': False})
-        self.create_and_test_coupon()
-        response = self.client.get(self.redeem_url_with_params)
+        self.create_and_test_coupon_and_return_code()
+        response = self.client.get(self.redeem_url_with_params())
         msg = 'You need to activate your account in order to redeem this coupon.'
         self.assertEqual(response.context['error'], _(msg))
 
