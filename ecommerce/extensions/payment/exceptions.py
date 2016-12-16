@@ -39,3 +39,8 @@ class PCIViolation(PaymentError):
     If we are raising this exception BAD things are happening, and the service MUST be taken offline IMMEDIATELY!
     """
     pass
+
+
+class InvalidBasketError(PaymentError):
+    """ Payment was made for an invalid basket. """
+    pass

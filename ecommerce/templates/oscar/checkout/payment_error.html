@@ -1,0 +1,37 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+    {% trans "Payment Failed" %}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+  <div class="container content-wrapper receipt-cancel-error">
+    <h1>{% trans "Payment Failed" %}</h1>
+    <p>
+      {% blocktrans %}
+        A system error occurred while processing your payment. <strong>You have not been charged.</strong>
+      {% endblocktrans %}</p>
+
+    <p>
+      {% with "<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe as start_link %}
+        {% blocktrans with end_link="</a>"|safe %}
+          Please wait a few minutes and then try again. For help, contact {{ start_link }}{{ payment_support_email }}{{ end_link }}.
+        {% endblocktrans %}
+      {% endwith %}
+    </p>
+
+    <p>
+      {% with "<a class='nav-link' href='|add:basket_url|add:'>"|safe as start_link %}
+        {% blocktrans with end_link="</a>"|safe %}
+          To try again, visit the {{ start_link }}basket page{{ end_link }}.
+        {% endblocktrans %}
+      {% endwith %}
+    </p>
+  </div>
+{% endblock content %}

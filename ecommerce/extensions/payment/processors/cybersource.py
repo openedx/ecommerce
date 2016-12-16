@@ -7,6 +7,7 @@ import uuid
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 from suds.client import Client
@@ -15,7 +16,6 @@ from suds.wsse import Security, UsernameToken
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
@@ -152,9 +152,8 @@ class Cybersource(BasePaymentProcessor):
             'amount': str(basket.total_incl_tax),
             'currency': basket.currency,
             'consumer_id': basket.owner.username,
-            'override_custom_receipt_page': get_receipt_page_url(
-                order_number=basket.order_number,
-                site_configuration=site.siteconfiguration
+            'override_custom_receipt_page': site.siteconfiguration.build_ecommerce_url(
+                reverse('cybersource_redirect')
             ),
             'override_custom_cancel_page': self.cancel_page_url,
         }

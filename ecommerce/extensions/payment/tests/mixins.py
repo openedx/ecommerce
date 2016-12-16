@@ -5,22 +5,34 @@ import json
 import os
 from urlparse import urljoin
 
+import ddt
 import httpretty
 import mock
 from django.conf import settings
-from oscar.core.loading import get_model
-from oscar.test import newfactories
+from django.core.urlresolvers import reverse
+from factory.django import mute_signals
+from oscar.apps.order.exceptions import UnableToPlaceOrder
+from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
+from oscar.core.loading import get_class, get_model
+from oscar.test import factories, newfactories
+from oscar.test.contextmanagers import mock_signal_receiver
 from suds.sudsobject import Factory
+from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
-from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 
 CURRENCY = 'USD'
+Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
+PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+SourceType = get_model('payment', 'SourceType')
+
+post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 class PaymentEventsMixin(object):
@@ -79,9 +91,52 @@ class PaymentEventsMixin(object):
         self.assert_basket_matches_source(basket, source, source_type, reference, label)
 
 
-class CybersourceMixin(object):
+class CybersourceMixin(PaymentEventsMixin):
     """ Mixin with helper methods for testing CyberSource notifications. """
     DEFAULT_CARD_TYPE = 'visa'
+
+    def _assert_payment_data_recorded(self, notification):
+        """ Ensure PaymentEvent, PaymentProcessorResponse, and Source objects are created for the basket. """
+
+        # Ensure the response is stored in the database
+        self.assert_processor_response_recorded(self.processor_name, notification['transaction_id'], notification,
+                                                basket=self.basket)
+
+        # Validate a payment Source was created
+        reference = notification['transaction_id']
+        source_type = SourceType.objects.get(code=self.processor_name)
+        label = notification['req_card_number']
+        self.assert_payment_source_exists(self.basket, source_type, reference, label)
+
+        # Validate that PaymentEvents exist
+        paid_type = PaymentEventType.objects.get(code='paid')
+        self.assert_payment_event_exists(self.basket, paid_type, reference, self.processor_name)
+
+    def _assert_processing_failure(self, notification, error_message, log_level='ERROR'):
+        """Verify that payment processing operations fail gracefully."""
+        logger_name = 'ecommerce.extensions.payment.views.cybersource'
+        with LogCapture(logger_name) as l:
+            self.client.post(self.path, notification)
+
+            self.assert_processor_response_recorded(
+                self.processor_name,
+                notification[u'transaction_id'],
+                notification,
+                basket=self.basket
+            )
+
+            l.check(
+                (
+                    logger_name,
+                    'INFO',
+                    'Received CyberSource merchant notification for transaction [{transaction_id}], '
+                    'associated with basket [{basket_id}].'.format(
+                        transaction_id=notification[u'transaction_id'],
+                        basket_id=self.basket.id
+                    )
+                ),
+                (logger_name, log_level, error_message)
+            )
 
     def generate_signature(self, secret_key, data):
         """ Generate a signature for the given data dict. """
@@ -205,9 +260,8 @@ class CybersourceMixin(object):
             'amount': unicode(basket.total_incl_tax),
             'currency': basket.currency,
             'consumer_id': basket.owner.username,
-            'override_custom_receipt_page': get_receipt_page_url(
-                order_number=basket.order_number,
-                site_configuration=basket.site.siteconfiguration
+            'override_custom_receipt_page': basket.site.siteconfiguration.build_ecommerce_url(
+                reverse('cybersource_redirect')
             ),
             'override_custom_cancel_page': processor.cancel_page_url,
         }
@@ -241,6 +295,202 @@ class CybersourceMixin(object):
         expected['signature'] = self.generate_signature(secret_key, expected)
 
         return expected
+
+
+@ddt.ddt
+class CybersourceNotificationTestsMixin(CybersourceMixin):
+    """ Mixin with test methods for testing CyberSource payment views. """
+
+    def setUp(self):
+        super(CybersourceNotificationTestsMixin, self).setUp()
+
+        self.toggle_ecommerce_receipt_page(True)
+
+        self.user = factories.UserFactory()
+        self.billing_address = self.make_billing_address()
+
+        self.basket = factories.create_basket()
+        self.basket.owner = self.user
+        self.basket.freeze()
+
+        self.processor = Cybersource(self.site)
+        self.processor_name = self.processor.NAME
+
+    # Disable the normal signal receivers so that we can verify the state of the created order.
+    @mute_signals(post_checkout)
+    def test_accepted(self):
+        """
+        When payment is accepted, the following should occur:
+            1. The response is recorded and PaymentEvent/Source objects created.
+            2. An order for the corresponding basket is created.
+            3. The order is fulfilled.
+        """
+
+        # The basket should not have an associated order if no payment was made.
+        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
+
+        notification = self.generate_notification(self.basket, billing_address=self.billing_address)
+
+        with mock_signal_receiver(post_checkout) as receiver:
+            self.client.post(self.path, notification)
+
+            # Validate that a new order exists in the correct state
+            order = Order.objects.get(basket=self.basket)
+            self.assertIsNotNone(order, 'No order was created for the basket after payment.')
+            self.assertEqual(order.status, ORDER.OPEN)
+
+            # Validate the order's line items
+            self.assertListEqual(list(order.lines.values_list('product__id', flat=True)),
+                                 list(self.basket.lines.values_list('product__id', flat=True)))
+
+            # Verify the post_checkout signal was emitted
+            self.assertEqual(receiver.call_count, 1)
+            __, kwargs = receiver.call_args
+            self.assertEqual(kwargs['order'], order)
+
+        # Validate the payment data was recorded for auditing
+        self._assert_payment_data_recorded(notification)
+
+        # The basket should be marked as submitted. Refresh with data from the database.
+        basket = Basket.objects.get(id=self.basket.id)
+        self.assertTrue(basket.is_submitted)
+        self.assertIsNotNone(basket.date_submitted)
+
+    @ddt.data('CANCEL', 'DECLINE', 'ERROR', 'blah!')
+    def test_not_accepted(self, decision):
+        """
+        When payment is NOT accepted, the processor's response should be saved to the database. An order should NOT
+        be created.
+        """
+
+        notification = self.generate_notification(self.basket, decision=decision)
+        self.client.post(self.path, notification)
+
+        # The basket should not have an associated order if no payment was made.
+        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
+
+        # Ensure the response is stored in the database
+        self.assert_processor_response_recorded(
+            self.processor_name,
+            notification[u'transaction_id'],
+            notification,
+            basket=self.basket
+        )
+
+    @ddt.data(
+        (PaymentError, 'ERROR', 'CyberSource payment failed for basket [{basket_id}]. '
+                                'The payment response was recorded in entry [{response_id}].'),
+        (UserCancelled, 'INFO', 'CyberSource payment did not complete for basket [{basket_id}] because '
+                                '[UserCancelled]. The payment response was recorded in entry [{response_id}].'),
+        (TransactionDeclined, 'INFO', 'CyberSource payment did not complete for basket [{basket_id}] because '
+                                      '[TransactionDeclined]. The payment response was recorded in entry '
+                                      '[{response_id}].'),
+        (KeyError, 'ERROR', 'Attempts to handle payment for basket [{basket_id}] failed.')
+    )
+    @ddt.unpack
+    def test_payment_handling_error(self, error_class, log_level, error_message):
+        """
+        Verify that CyberSource's merchant notification is saved to the database despite an error handling payment.
+        """
+        notification = self.generate_notification(
+            self.basket,
+            billing_address=self.billing_address,
+        )
+        with mock.patch.object(self.view, 'handle_payment', side_effect=error_class) as fake_handle_payment:
+            self._assert_processing_failure(
+                notification,
+                error_message.format(basket_id=self.basket.id, response_id=1),
+                log_level
+            )
+            self.assertTrue(fake_handle_payment.called)
+
+    @ddt.data(UnableToPlaceOrder, KeyError)
+    def test_unable_to_place_order(self, exception):
+        """ When payment is accepted, but an order cannot be placed, log an error and return HTTP 200. """
+
+        notification = self.generate_notification(
+            self.basket,
+            billing_address=self.billing_address,
+        )
+
+        # Verify that anticipated errors are handled gracefully.
+        with mock.patch.object(
+            self.view,
+            'handle_order_placement',
+            side_effect=exception
+        ) as fake_handle_order_placement:
+            error_message = 'Payment was received, but an order for basket [{basket_id}] could not be placed.'.format(
+                basket_id=self.basket.id,
+            )
+            self._assert_processing_failure(notification, error_message)
+            self.assertTrue(fake_handle_order_placement.called)
+
+    def test_invalid_basket(self):
+        """ When payment is accepted for a non-existent basket, log an error and record the response. """
+        order_number = '{}-{}'.format(self.partner.short_code.upper(), 101986)
+
+        notification = self.generate_notification(
+            self.basket,
+            billing_address=self.billing_address,
+            req_reference_number=order_number,
+        )
+        self.client.post(self.path, notification)
+
+        self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification)
+
+    @ddt.data(('line2', 'foo'), ('state', 'bar'))
+    @ddt.unpack
+    def test_optional_fields(self, field_name, field_value, ):
+        """ Ensure notifications are handled properly with or without keys/values present for optional fields. """
+
+        with mock.patch(
+            'ecommerce.extensions.payment.views.cybersource.{}.handle_order_placement'.format(self.view.__name__)
+        ) as mock_placement_handler:
+            def check_notification_address(notification, expected_address):
+                self.client.post(self.path, notification)
+                self.assertTrue(mock_placement_handler.called)
+                actual_address = mock_placement_handler.call_args[0][6]
+                self.assertEqual(actual_address.summary, expected_address.summary)
+
+            cybersource_key = 'req_bill_to_address_{}'.format(field_name)
+
+            # Generate a notification without the optional field set.
+            # Ensure that the Cybersource key does not exist in the notification,
+            # and that the address our endpoint parses from the notification is
+            # equivalent to the original.
+            notification = self.generate_notification(
+                self.basket,
+                billing_address=self.billing_address,
+            )
+            self.assertNotIn(cybersource_key, notification)
+            check_notification_address(notification, self.billing_address)
+
+            # Add the optional field to the billing address in the notification.
+            # Ensure that the Cybersource key now does exist, and that our endpoint
+            # recognizes and parses it correctly.
+            billing_address = self.make_billing_address({field_name: field_value})
+            notification = self.generate_notification(
+                self.basket,
+                billing_address=billing_address,
+            )
+            self.assertIn(cybersource_key, notification)
+            check_notification_address(notification, billing_address)
+
+    def test_invalid_signature(self):
+        """
+        If the response signature is invalid, the view should return a 400. The response should be recorded, but an
+        order should NOT be created.
+        """
+        notification = self.generate_notification(self.basket)
+        notification[u'signature'] = u'Tampered'
+        self.client.post(self.path, notification)
+
+        # The basket should not have an associated order
+        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
+
+        # The response should be saved.
+        self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
+                                                basket=self.basket)
 
 
 class PaypalMixin(object):
