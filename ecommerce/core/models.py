@@ -485,6 +485,7 @@ class User(AbstractUser):
                     cache.set(cache_key, verification, cache_timeout)
             return verification
         except HttpNotFoundError:
+            log.debug('No verification data found for [%s]', self.username)
             return False
         except (ConnectionError, SlumberBaseException, Timeout):
             msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)

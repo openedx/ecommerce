@@ -31,7 +31,7 @@ def get_discount_percentage(discount_value, product_price):
     Returns:
         float: Discount percentage
     """
-    return discount_value / product_price * 100
+    return discount_value / product_price * 100 if product_price > 0 else 0.0
 
 
 def get_discount_value(discount_percentage, product_price):

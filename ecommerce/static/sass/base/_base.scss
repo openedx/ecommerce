@@ -42,22 +42,3 @@ a {
   background: #fcfcfc;
   box-shadow: 0 1px 2px 1px rgba(167, 164, 164, 0.25);
 }
-
-.depth--3 {
-  background: #34383a;
-  text-align: center;
-  .copy {
-    color: #e7e6e6;
-    @include container-fixed;
-
-    @media (min-width: $screen-sm-min) {
-      width: $container-sm;
-    }
-    @media (min-width: $screen-md-min) {
-      width: $container-md;
-    }
-    @media (min-width: $screen-lg-min) {
-      width: $container-lg;
-    }
-  }
-}

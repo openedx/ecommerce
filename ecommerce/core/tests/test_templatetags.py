@@ -37,3 +37,11 @@ class CoreExtrasTests(TestCase):
 
     def test_captureas_unicode(self):
         self.assertTextCaptured(u'★❤')
+
+    def test_course_organization(self):
+        course_id = 'course-v1:edX+Course+100'
+        template = Template(
+            "{% load core_extras %}"
+            "{{ course_id|course_organization }}"
+        )
+        self.assertEqual(template.render(Context({'course_id': course_id})), 'edX')

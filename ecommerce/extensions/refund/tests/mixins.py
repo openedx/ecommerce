@@ -27,12 +27,21 @@ class RefundTestMixin(CourseCatalogTestMixin):
         self.course, __ = Course.objects.get_or_create(id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course')
         self.honor_product = self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.verified_product = self.course.create_or_update_seat('verified', True, 10, self.partner)
+        self.credit_product = self.course.create_or_update_seat(
+            'credit',
+            True,
+            100,
+            self.partner,
+            credit_provider='HGW'
+        )
 
-    def create_order(self, user=None, multiple_lines=False, free=False, status=ORDER.COMPLETE):
+    def create_order(self, user=None, credit=False, multiple_lines=False, free=False, status=ORDER.COMPLETE):
         user = user or self.user
         basket = BasketFactory(owner=user)
 
-        if multiple_lines:
+        if credit:
+            basket.add_product(self.credit_product)
+        elif multiple_lines:
             basket.add_product(self.verified_product)
             basket.add_product(self.honor_product)
         elif free:

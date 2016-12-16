@@ -2,10 +2,10 @@
 from __future__ import unicode_literals
 
 from decimal import Decimal
-import logging
 
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, TemplateView
@@ -19,7 +19,7 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
-logger = logging.getLogger(__name__)
+Order = get_model('order', 'Order')
 
 
 class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
@@ -50,7 +50,6 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                 )
 
             order = self.place_free_order(basket)
-
             receipt_path = get_receipt_page_url(
                 order_number=order.number,
                 site_configuration=order.site.siteconfiguration
@@ -117,4 +116,85 @@ class CheckoutErrorView(TemplateView):
         context.update({
             'payment_support_email': self.request.site.siteconfiguration.payment_support_email,
         })
+        return context
+
+
+class ReceiptResponseView(ThankYouView):
+    """ Handles behavior needed to display an order receipt. """
+    template_name = 'edx/checkout/receipt.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """ Customers should only be able to view their receipts when logged in. """
+        return super(ReceiptResponseView, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return super(ReceiptResponseView, self).get(request, *args, **kwargs)
+        except Http404:
+            self.template_name = 'edx/checkout/receipt_not_found.html'
+            context = {
+                'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
+            }
+            return self.render_to_response(context=context, status=404)
+
+    def get_context_data(self, **kwargs):
+        context = super(ReceiptResponseView, self).get_context_data(**kwargs)
+        order = context[self.context_object_name]
+        context.update({
+            'payment_method': self.get_payment_method(order),
+            'fire_tracking_events': self.request.session.pop('fire_tracking_events', False),
+            'display_credit_messaging': self.order_contains_credit_seat(order),
+        })
+        context.update(self.get_order_verification_context(order))
+        return context
+
+    def get_object(self):
+        kwargs = {
+            'number': self.request.GET['order_number'],
+            'site': self.request.site,
+        }
+
+        user = self.request.user
+        if not user.is_staff:
+            kwargs['user'] = user
+
+        return get_object_or_404(Order, **kwargs)
+
+    def get_payment_method(self, order):
+        source = order.sources.first()
+        if source:
+            if source.card_type:
+                return '{type} {number}'.format(
+                    type=source.get_card_type_display(),
+                    number=source.label
+                )
+            return source.source_type.name
+        return None
+
+    def order_contains_credit_seat(self, order):
+        for line in order.lines.all():
+            if getattr(line.product.attr, 'credit_provider', None):
+                return True
+        return False
+
+    def get_order_verification_context(self, order):
+        context = {}
+        verified_course_id = None
+
+        # NOTE: Only display verification and credit completion details to the user who actually placed the order.
+        if self.request.user == order.user:
+            for line in order.lines.all():
+                product = line.product
+
+                if not verified_course_id and getattr(product.attr, 'id_verification_required', False):
+                    verified_course_id = product.attr.course_key
+
+            if verified_course_id:
+                context.update({
+                    'verified_course_id': verified_course_id,
+                    'user_verified': self.request.user.is_verified(self.request.site),
+                })
+
         return context

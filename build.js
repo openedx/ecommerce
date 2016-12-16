@@ -35,6 +35,10 @@
         {
             name: 'js/apps/basket_app',
             exclude: ['js/common']
+        },
+        {
+            name: 'js/pages/receipt_page',
+            exclude: ['js/common']
         }
     ]
 })

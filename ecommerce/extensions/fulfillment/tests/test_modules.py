@@ -443,7 +443,7 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.toggle_ecommerce_receipt_page(True)
         course = CourseFactory()
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)

@@ -1,6 +1,7 @@
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from opaque_keys.edx.keys import CourseKey
 
 register = template.Library()
 
@@ -36,6 +37,20 @@ def do_captureas(parser, token):
     nodelist = parser.parse(('endcaptureas',))
     parser.delete_first_token()
     return CaptureasNode(nodelist, args)
+
+
+@register.filter(name='course_organization')
+def course_organization(course_key):
+    """
+    Retrieve course organization from course key.
+
+    Arguments:
+        course_key (str): Course key.
+
+    Returns:
+        str: Course organization.
+    """
+    return CourseKey.from_string(course_key).org
 
 
 class CaptureasNode(template.Node):
