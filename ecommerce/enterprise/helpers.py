@@ -2,21 +2,20 @@
 Helper methods for enterprise app.
 """
 import logging
-import waffle
 
 from django.conf import settings
-
 from edx_rest_api_client.client import EdxRestApiClient
+from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
-from oscar.core.loading import get_model
+import waffle
 
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tmp import utils
 from ecommerce.theming import helpers as theming_helpers
 
-CouponVouchers = get_model('voucher', 'CouponVouchers')
 
+CouponVouchers = get_model('voucher', 'CouponVouchers')
 log = logging.getLogger(__name__)
 
 
@@ -33,45 +32,44 @@ def is_enterprise_feature_enabled():
     """
 
     # Return False if enterprise feature is disabled via Django settings
-    if not settings.ENABLE_ENTERPRISES:
+    if not settings.ENABLE_ENTERPRISE:
         return False
 
     # Return False if we're currently processing a request and enterprise feature is disabled via runtime switch
     if bool(theming_helpers.get_current_request()) and \
-            waffle.switch_is_active(settings.DISABLE_ENTERPRISES_ON_RUNTIME_SWITCH):
+            waffle.switch_is_active(settings.DISABLE_ENTERPRISE_ON_RUNTIME_SWITCH):
         return False
 
     # Return True indicating enterprise feature is enabled
     return True
 
 
-@utils.dummy_data("learner")
-def get_learner_info(user, site):
+@utils.dummy_data("enterprise_learner_info")
+def get_enterprise_learner_info(site, user):
     """
-    Fetch user and its enterprise data from lms.
+    Get the Enterprise for the given learner along with the entitlement info.
 
-    Args:
-        user: (django.contrib.auth.User) django auth user
-        site: (django.contrib.sites.Site) site instance
+    Arguments:
+        site (django.contrib.sites.Site): site instance
+        user (django.contrib.auth.User): django auth user
     """
-    # We can also add another method (build_enterprise_url) specifically for building enterprise related urls
-    # This would be useful when we move enterprise to a separated IDA
-    api_url = site.siteconfiguration.build_enterprise_url('/api/enterprise/v1/')
 
-    try:
-        api = EdxRestApiClient(
-            api_url,
-            oauth_access_token=user.access_token,
-            append_slash=False
-        )
-        response = api.learners(user.username).get()
+    response = {}
+    if not is_enterprise_feature_enabled():
         return response
+
+    # TODO: Fetch learner related enterprise info from Enterprise API against a specific site
+    try:
+        response = site.siteconfiguration.enterprise_api_client.enterprise_learner_info(user.username).get()
     except (ConnectionError, SlumberBaseException, Timeout):
         log.exception(
-            'Failed to retrieve learner details for [%s]',
+            'Failed to retrieve enterprise info for the learner [%s]',
             user.username
         )
         raise
+
+    # TODO: Cache the response from enterprise API in case of 200 status
+    return response
 
 
 @utils.dummy_data("data_sharing")
@@ -142,17 +140,19 @@ def is_learner_eligible_for_entitlements(user, site):
         site: (django.contrib.sites.Site) site instance
     """
 
-    learner = get_learner_info(user, site)
-    enterprise_customer = learner.get("enterprise_customer")
+    enterprise_learner_info = get_enterprise_learner_info(site, user)
+    enterprise_customer = enterprise_learner_info.get("enterprise_customer")
 
     if enterprise_customer is None:
-        # Learner not associated to any enterprise customer,
-        # proceed to the checkout
+        # Learner not associated to any enterprise customer
         return False
 
-    data_sharing = get_data_sharing_consent_info(learner, enterprise_customer, site)
+    data_sharing = get_data_sharing_consent_info(user, enterprise_customer, site)
 
-    if data_sharing.get("enterprise_customer") == "required" and data_sharing.get("learner") != "agree":
+    enterprise_data_sharing_consent_is_required = (data_sharing.get("enterprise_customer") == "required")
+    user_data_sharing_consent_is_granted = (data_sharing.get("learner") == "agree")
+
+    if enterprise_data_sharing_consent_is_required and not user_data_sharing_consent_is_granted:
         # display the following message to learner
         # "In order to get discount for course <course-id> you must consent to share your
         # data with <enterprise customer name>, If you do not consent to data sharing you
@@ -171,7 +171,7 @@ def get_entitlement_voucher(request, product):
     if not is_learner_eligible_for_entitlements(request.user, request.site):
         return None
 
-    learner = get_learner_info(request.user, request.site)
+    learner = get_enterprise_learner_info(request.site, request.user)
     enterprise_customer = learner.get("enterprise_customer")
     entitlement_ids = fetch_entitlements(request.user, product, enterprise_customer, request.site)
 

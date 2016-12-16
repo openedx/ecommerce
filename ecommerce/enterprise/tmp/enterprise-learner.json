@@ -1,8 +1,14 @@
 {
-  "learner": {
-    "enterprise_customer": {
-      "name": "Enterprise Customer"
-    }
+  "enterprise_learner_info": {
+      "username": "edx_user",
+      "enterprise_customer": {
+          "name": "Arbisoft",
+          "catalog": 1,
+          "enable_data_sharing_consent": true,
+          "enforce_data_sharing_consent": "At Enrollment",
+          "logo": "https://www.edx.org/sites/default/files/homepage/banner/promo/bkg/onethird-539x290-csedweek.jpg",
+          "learner_data_sharing_consent": true
+      }
   },
   "data_sharing": {
     "enterprise_customer": "required",

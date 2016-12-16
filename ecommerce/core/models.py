@@ -329,6 +329,17 @@ class SiteConfiguration(models.Model):
 
         return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 
+    @cached_property
+    def enterprise_api_client(self):
+        """
+        Returns an API client to access the Enterprise service.
+
+        Returns:
+            EdxRestApiClient: The client to access the Enterprise service.
+        """
+
+        return EdxRestApiClient(settings.ENTERPRISE_API_URL, jwt=self.access_token)
+
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""

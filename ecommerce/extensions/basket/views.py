@@ -111,7 +111,19 @@ class BasketSummaryView(BasketView):
         basket = self.request.basket
         site = self.request.site
         site_configuration = site.siteconfiguration
+        user = self.request.user
 
+        enterprise_learner_info = enterprise_helpers.get_enterprise_learner_info(site, user)
+        enterprise_customer = enterprise_learner_info.get('enterprise_customer')
+        if not enterprise_customer:
+            # Learner not associated with any Enterprise customer,
+            # proceed to the checkout
+            logger.info(
+                'Learner [%s] is not associated with any enterprise, proceeding to checkout.',
+                self.request.user.username
+            )
+
+        enterprise_discount_for_learner = False
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
             course_name = None
@@ -144,6 +156,12 @@ class BasketSummaryView(BasketView):
             else:
                 benefit_value = None
 
+            voucher = enterprise_helpers.get_entitlement_voucher(self.request, line.product)
+            # TODO: Apply this enterprise entitlement voucher on the basket
+            if voucher:
+                # Learner getting discount from the Enterprise, with which this learner is associated
+                enterprise_discount_for_learner = True
+
             lines_data.append({
                 'seat_type': self._determine_seat_type(line.product),
                 'course_name': course_name,
@@ -155,7 +173,6 @@ class BasketSummaryView(BasketView):
                 'line': line,
             })
 
-            user = self.request.user
             context.update({
                 'analytics_data': prepare_analytics_data(
                     user,
@@ -190,6 +207,9 @@ class BasketSummaryView(BasketView):
             except AttributeError:
                 pass
 
+        # TODO: remove this dummy value for "enterprise_discount_for_learner"
+        enterprise_discount_for_learner = True
+
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': site_configuration.get_payment_processors(),
@@ -200,6 +220,8 @@ class BasketSummaryView(BasketView):
             'is_bulk_purchase': is_bulk_purchase,
             'switch_link_text': switch_link_text,
             'partner_sku': partner_sku,
+            'enterprise_customer': enterprise_customer,
+            'enterprise_discount_for_learner': enterprise_discount_for_learner,
         })
 
         return context

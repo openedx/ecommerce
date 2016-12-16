@@ -11,6 +11,21 @@
 
 {% if not basket.is_empty %}
     <div id="content-inner">
+
+        {% if enterprise_customer and enterprise_discount_for_learner %}
+            <h3>
+                <span class="pull-left">
+                    <img class="thumbnail" height="50px" width="50px" src="{{ enterprise_customer.logo }}"/>
+                </span>
+                <span class="pull-left">
+                     {% blocktrans with enterprise_name=enterprise_customer.name %}
+                        You are eligible for the enterprise entitlements from {{ enterprise_name }}.
+                    {% endblocktrans %}
+                </span>
+            </h3>
+        {% endif %}
+        <br><br><br>
+
         {% block basket_form_main %}
             <form action="." method="post" class="basket_summary" id="basket_formset">
                 {% csrf_token %}
