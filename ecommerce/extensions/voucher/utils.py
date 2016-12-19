@@ -9,7 +9,6 @@ import uuid
 import dateutil.parser
 from django.conf import settings
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
@@ -18,6 +17,7 @@ from oscar.templatetags.currency_filters import currency
 import pytz
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
@@ -301,8 +301,9 @@ def _get_or_create_offer(
             max_affected_items=1,
         )
     except (TypeError, DecimalException):  # If the benefit_value parameter is not sent TypeError will be raised
-        logger.exception('Failed to create Benefit. Benefit value may not be empty or a string.')
-        raise ValidationError(_('Benefit value must be a positive number or 0.'))
+        log_message_and_raise_validation_error(
+            'Failed to create Benefit. Benefit value must be a positive number or 0.'
+        )
 
     offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
     if offer_number:
@@ -364,29 +365,28 @@ def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime,
         Voucher
     """
     if offer.benefit.type == Benefit.PERCENTAGE and offer.benefit.value == 100 and code:
-        logger.exception('Failed to create Voucher. Code may not be set for enrollment coupon.')
-        raise ValidationError(_('Voucher can not be created when code is set in enrollment coupon.'))
+        log_message_and_raise_validation_error('Failed to create Voucher. Code may not be set for enrollment coupon.')
     voucher_code = code or _generate_code_string(settings.VOUCHER_CODE_LENGTH)
 
     if not end_datetime:
-        logger.exception('Failed to create Voucher. Voucher end datetime field must be set.')
-        raise ValidationError(_('Voucher end datetime field must be set.'))
+        log_message_and_raise_validation_error('Failed to create Voucher. Voucher end datetime field must be set.')
     elif not isinstance(end_datetime, datetime.datetime):
         try:
             end_datetime = dateutil.parser.parse(end_datetime)
         except (AttributeError, ValueError):
-            logger.exception('Failed to create Voucher. Voucher end datetime value [%s] is invalid.', end_datetime)
-            raise ValidationError(_('Voucher end datetime value [{date}] is invalid.'.format(date=end_datetime)))
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. Voucher end datetime value [{date}] is invalid.'.format(date=end_datetime)
+            )
 
     if not start_datetime:
-        logger.exception('Failed to create Voucher. Voucher start datetime field must be set.')
-        raise ValidationError(_('Voucher start datetime field must be set.'))
+        log_message_and_raise_validation_error('Failed to create Voucher. Voucher start datetime field must be set.')
     elif not isinstance(start_datetime, datetime.datetime):
         try:
             start_datetime = dateutil.parser.parse(start_datetime)
         except (AttributeError, ValueError):
-            logger.exception('Failed to create Voucher. Voucher start datetime value [%s] is invalid.', start_datetime)
-            raise ValidationError(_('Voucher start datetime value [{date}] is invalid.'.format(date=start_datetime)))
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. Voucher start datetime [{date}] is invalid.'.format(date=start_datetime)
+            )
 
     voucher = Voucher.objects.create(
         name=name,

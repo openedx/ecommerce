@@ -194,7 +194,7 @@ define([
                 'input[name=email_domains]': {
                     observe: 'email_domains',
                     onSet: function(val) {
-                        return val.replace(/\s/g, '');
+                        return val.replace(/\s/g, '').toLowerCase();
                     }
                 },
                 'input[name=invoice_type]': {

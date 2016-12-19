@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import hashlib
 
 import ddt
@@ -98,8 +100,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         request.site = self.site
         self.range.catalog_query = 'key:*'
 
-        cache_key = 'catalog_query_contains [{}] [{}]'.format('key:*', seat.course_id)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = hashlib.md5('catalog_query_contains [{}] [{}]'.format('key:*', seat.course_id)).hexdigest()
         cached_response = cache.get(cache_key)
         self.assertIsNone(cached_response)
 
@@ -194,6 +195,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.assertEqual(_range.course_seat_types, course_seat_types)
 
 
+@ddt.ddt
 class ConditionalOfferTests(TestCase):
     """Tests for custom ConditionalOffer model."""
     def setUp(self):
@@ -255,3 +257,23 @@ class ConditionalOfferTests(TestCase):
 
         valid_email_2 = 'test@sub2.{domain}'.format(domain=self.valid_domain)
         self.assertTrue(self.offer.is_email_valid(valid_email_2))
+
+    @ddt.data(
+        'domain.com', 'multi.it,domain.hr', 'sub.domain.net', '例如.com', 'val-id.例如', 'valid1.co例如',
+        'valid-domain.com', 'çççç.рф', 'çç-ççç32.中国', 'ççç.ççç.இலங்கை'
+    )
+    def test_creating_offer_with_valid_email_domains(self, email_domains):
+        """ Verify creating ConditionalOffer with valid email domains. """
+        offer = factories.ConditionalOfferFactory(email_domains=email_domains)
+        self.assertEqual(offer.email_domains, email_domains)
+
+    @ddt.data(
+        '', 'noDot', 'spaceAfter.comma, domain.hr', 'nothingAfterDot.', '.nothingBeforeDot', 'space not.allowed',
+        3, '-invalid.com', 'invalid', 'invalid-.com', 'invalid.c', 'valid.com,', 'invalid.photography1',
+        'valid.com,invalid', 'valid.com,invalid-.com', 'valid.com,-invalid.com', 'in--valid.com',
+        'in..valid.com', 'valid.com,invalid.c', 'invalid,valid.com', 'çççç.çç-çç', 'ççç.xn--ççççç', 'çççç.çç--çç.ççç'
+    )
+    def test_creating_offer_with_invalid_email_domains(self, email_domains):
+        """ Verify creating ConditionalOffer with invalid email domains raises validation error. """
+        with self.assertRaises(ValidationError):
+            factories.ConditionalOfferFactory(email_domains=email_domains)

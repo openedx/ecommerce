@@ -3,11 +3,13 @@ define([
         'backbone.validation',
         'moment',
         'pikaday',
+        'punycode',
         'underscore'],
     function (Backbone,
               BackboneValidation,
               moment,
               Pikaday,
+              punycode,
               _) {
         'use strict';
 
@@ -162,6 +164,60 @@ define([
                         el.setAttribute('datepicker-initialized', 'true');
                     }
                 });
+            },
+
+            /**
+             * Validates given domain/domains.
+             * @param {String} domains - String that contains a domain or multiple domains separated by comma.
+             * @returns {String} Returns invalid domain or undefined if all domains are valid.
+             */
+            validateDomains: function(domains) {
+                var encodedDomainPart,
+                    domainArray = domains.split(','),
+                    domainParts,
+                    invalidDomain;
+
+                if (_.isEmpty(domainArray[domainArray.length-1])) {
+                    return gettext('Trailing comma not allowed.');
+                }
+
+                // Go through domains in the array and if invalid domain detected exit loop and remember domain
+                invalidDomain = _.find(domainArray, function (el) {
+                    domainParts = el.split('.');
+
+                    /*
+                     * Conditions being tested:
+                     * - double hyphens are not allowed in domains
+                     * - two consecutive dots are not allowed
+                     * - domains must contain at least one dot which will make domainPartsLength > 1
+                     * - top level domain must be at least two characters long
+                     * - hyphens are not allowed in top level domain
+                     * - numbers are not allowed in top level domain
+                     */
+                    if (/--/.test(el) ||
+                        /\.\./.test(el) ||
+                        domainParts.length < 2 ||
+                        domainParts[domainParts.length-1].length < 2 ||
+                        /[-0-9]/.test(domainParts[domainParts.length-1])) {
+                        return true;
+                    }
+
+                    for (var i=0; i<domainParts.length; i++) {
+                        // - non of the domain levels can start or end with a hyphen before encoding
+                        if (/^-/.test(domainParts[i]) || /-$/.test(domainParts[i])) {
+                            return true;
+                        }
+
+                        encodedDomainPart = punycode.toASCII(domainParts[i]);
+
+                        // - all encoded domain levels must match given regex expression
+                        if (!/^([a-z0-9-]+)$/.test(encodedDomainPart)) {
+                            return true;
+                        }
+                    }
+                });
+
+                return invalidDomain;
             }
         };
     }
