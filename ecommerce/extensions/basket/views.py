@@ -14,6 +14,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.coupons.enterprise_utils import get_user_enterprise_info
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
@@ -106,6 +107,34 @@ class BasketSummaryView(BasketView):
         basket = self.request.basket
         site = self.request.site
         site_configuration = site.siteconfiguration
+        user = self.request.user
+
+        # TODO: Add Enterprise related entitlements code here
+        user_enterprise_info = get_user_enterprise_info(user, site)
+        enterprise_customer = user_enterprise_info.get('enterprise')
+        if not enterprise_customer:
+            # Learner not associated with any Enterprise customer,
+            # proceed to the checkout
+            logger.info(
+                'Learner [%s] is not associated with any enterprise, proceeding to checkout.',
+                self.request.user.username
+            )
+        else:
+            # learner is registered with an enterprise
+            enable_data_sharing_consent = enterprise_customer.get('enable_data_sharing_consent')
+            user_data_sharing_consent = enterprise_customer.get('user_data_sharing_consent')
+            if enable_data_sharing_consent and not user_data_sharing_consent:
+                # Enterprise has enabled the data sharing consent but user
+                # hasn't approved that consent so display the warning
+                # message to learner.
+                # TODO: Display consent warning message to the enterprise learner
+                # "In order to get discount for course <course-id> you must consent to share your
+                # data with <enterprise customer name>, If you do not consent to data sharing you
+                # will still be able to enroll but you will not get any discounts from <enterprise customer name>"
+                pass
+            else:
+                # Apply discount on the course and proceed to checkout
+                pass
 
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
@@ -150,7 +179,6 @@ class BasketSummaryView(BasketView):
                 'line': line,
             })
 
-            user = self.request.user
             context.update({
                 'analytics_data': prepare_analytics_data(
                     user,
@@ -195,7 +223,9 @@ class BasketSummaryView(BasketView):
             'is_bulk_purchase': is_bulk_purchase,
             'switch_link_text': switch_link_text,
             'partner_sku': partner_sku,
+            'enterprise_customer': enterprise_customer,
         })
+        print "enterprise_customer ======> ", enterprise_customer
 
         return context
 
