@@ -171,7 +171,7 @@ class Cybersource(BasePaymentProcessor):
                 parameters['item_{}_discount_amount '.format(index)] = str(line.discount_value)
                 # Note (CCB): This indicates that the total_amount field below includes tax.
                 parameters['item_{}_gross_net_indicator'.format(index)] = 'Y'
-                parameters['item_{}_name'.format(index)] = line.product.title
+                parameters['item_{}_name'.format(index)] = line.product.title.replace('"', '')
                 parameters['item_{}_quantity'.format(index)] = line.quantity
                 parameters['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
                 parameters['item_{}_tax_amount'.format(index)] = str(line.line_tax)
