@@ -15,6 +15,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PR
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
+from ecommerce.enterprise import helpers as enterprise_helpers
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -74,6 +75,10 @@ class BasketSingleItemView(View):
                 msg = _('An error occurred while retrieving enrollment details. Please try again.')
                 return HttpResponseBadRequest(msg)
 
+        # If learner is eligible for entitlements, apply entitlements
+        if voucher is None:
+            voucher = enterprise_helpers.get_entitlement_voucher(request, product)
+
         # At this point we're either adding an Enrollment Code product to the basket,
         # or the user is adding a Seat product for which they are not already enrolled
         prepare_basket(request, product, voucher)
@@ -106,7 +111,19 @@ class BasketSummaryView(BasketView):
         basket = self.request.basket
         site = self.request.site
         site_configuration = site.siteconfiguration
+        user = self.request.user
 
+        enterprise_learner_info = enterprise_helpers.get_enterprise_learner_info(site, user)
+        enterprise_customer = enterprise_learner_info.get('enterprise_customer')
+        if not enterprise_customer:
+            # Learner not associated with any Enterprise customer,
+            # proceed to the checkout
+            logger.info(
+                'Learner [%s] is not associated with any enterprise, proceeding to checkout.',
+                self.request.user.username
+            )
+
+        enterprise_discount_for_learner = False
         for line in lines:
             course_key = CourseKey.from_string(line.product.attr.course_key)
             course_name = None
@@ -139,6 +156,12 @@ class BasketSummaryView(BasketView):
             else:
                 benefit_value = None
 
+            voucher = enterprise_helpers.get_entitlement_voucher(self.request, line.product)
+            # TODO: Apply this enterprise entitlement voucher on the basket
+            if voucher:
+                # Learner getting discount from the Enterprise, with which this learner is associated
+                enterprise_discount_for_learner = True
+
             lines_data.append({
                 'seat_type': self._determine_seat_type(line.product),
                 'course_name': course_name,
@@ -150,7 +173,6 @@ class BasketSummaryView(BasketView):
                 'line': line,
             })
 
-            user = self.request.user
             context.update({
                 'analytics_data': prepare_analytics_data(
                     user,
@@ -185,6 +207,9 @@ class BasketSummaryView(BasketView):
             except AttributeError:
                 pass
 
+        # TODO: remove this dummy value for "enterprise_discount_for_learner"
+        enterprise_discount_for_learner = True
+
         context.update({
             'free_basket': context['order_total'].incl_tax == 0,
             'payment_processors': site_configuration.get_payment_processors(),
@@ -195,6 +220,8 @@ class BasketSummaryView(BasketView):
             'is_bulk_purchase': is_bulk_purchase,
             'switch_link_text': switch_link_text,
             'partner_sku': partner_sku,
+            'enterprise_customer': enterprise_customer,
+            'enterprise_discount_for_learner': enterprise_discount_for_learner,
         })
 
         return context

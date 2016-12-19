@@ -279,6 +279,9 @@ LOCAL_APPS = [
 
     # Sailthru email marketing integration
     'ecommerce.sailthru',
+
+    # Enterprise app for ecommerce
+    'ecommerce.enterprise',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -599,3 +602,15 @@ ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(w
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+
+# Enterprise settings
+# enable or disable enterprise features
+ENABLE_ENTERPRISE = True
+
+# URL for Enterprise service
+ENTERPRISE_API_URL = 'http://localhost:8000/enterprise/api/v1/'
+
+# name for waffle switch to use for disabling enterprise features on runtime.
+# Note: management command ignore this switch
+DISABLE_ENTERPRISE_ON_RUNTIME_SWITCH = "disable_enterprise_on_runtime"
