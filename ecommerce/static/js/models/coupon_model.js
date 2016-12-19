@@ -5,12 +5,10 @@ define([
         'jquery',
         'js-cookie',
         'underscore',
+        'underscore.string',
+        'utils/utils',
         'moment',
-        'collections/category_collection',
-        'collections/catalog_collection',
-        'models/category',
-        'models/catalog_model',
-        'utils/validation_patterns'
+        'backbone.relational'
     ],
     function (Backbone,
               BackboneSuper,
@@ -18,6 +16,8 @@ define([
               $,
               Cookies,
               _,
+              _s,
+              Utils,
               moment
               ) {
         'use strict';
@@ -93,11 +93,14 @@ define([
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
-                email_domains: {
-                    pattern:
-                    /^((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}(,((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,})*$/,
-                    msg: gettext('Email domains are invalid.'),
-                    required: false
+                email_domains: function (val) {
+                    if (!_.isEmpty(val)) {
+                        var invalidDomain = Utils.validateDomains(val);
+
+                        if (invalidDomain) {
+                            return _s.sprintf(gettext('Email domain {%s} is invalid.'), invalidDomain);
+                        }
+                    }
                 },
                 end_date: function (val) {
                     var startDate,

@@ -135,14 +135,15 @@ define([
 
                 it('should validate email domain.', function() {
                     var invalid_domains = [
-                            '-invalid.com', 'invalid', 'invalid-.com', 'invalid.c',
-                            'valid.com,', 'invalid.photography1', 'valid.com,invalid',
-                            'valid.com,invalid-.com', 'valid.com,-invalid.com', 'in--valid.com',
-                            'in..valid.com', 'valid.com,invalid.c', 'invalid,valid.com'
+                            '-invalid.com', 'invalid', 'invalid-.com', 'invalid.c', 'valid.com,',
+                            'invalid.photography1', 'valid.com,invalid', 'valid.com,invalid-.com',
+                            'valid.com,-invalid.com', 'in--valid.com', 'in..valid.com',
+                            'valid.com,invalid.c', 'invalid,valid.com', 'çççç.çç-çç',
+                            'ççç.xn--ççççç', 'çççç.çç--çç.ççç'
                         ],
                         valid_domains = [
-                            'valid.com', 'valid.co', 'valid-domain.com',
-                            'valid.photography', 'valid.com,valid.co'
+                            'valid.com', 'valid.co', 'valid-domain.com', 'valid.photography',
+                            'valid.com,valid.co', 'çççç.рф', 'çç-ççç32.中国', 'ççç.ççç.இலங்கை'
                         ];
 
                     _.each(invalid_domains, function(domain) {

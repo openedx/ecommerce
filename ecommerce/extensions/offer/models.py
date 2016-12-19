@@ -1,17 +1,15 @@
-# noinspection PyUnresolvedReferences
+from __future__ import unicode_literals
 import hashlib
-import logging
 import re
 
 from django.conf import settings
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditionalOffer, AbstractRange
 from threadlocals.threadlocals import get_current_request
 
-logger = logging.getLogger(__name__)
+from ecommerce.core.utils import log_message_and_raise_validation_error
 
 
 class Benefit(AbstractBenefit):
@@ -28,20 +26,74 @@ class Benefit(AbstractBenefit):
 
     def clean_type(self):
         if self.type not in self.VALID_BENEFIT_TYPES:
-            logger.exception(
-                'Failed to create Benefit. Benefit type must be one of the following %s.', self.VALID_BENEFIT_TYPES
+            log_message_and_raise_validation_error(
+                'Failed to create Benefit. Unrecognised benefit type [{type}]'.format(type=self.type)
             )
-            raise ValidationError(_('Unrecognised benefit type {type}'.format(type=self.type)))
 
     def clean_value(self):
         if self.value < 0:
-            logger.exception('Failed to create Benefit. Benefit value may not be a negative number.')
-            raise ValidationError(_('Benefit value must be a positive number or 0.'))
+            log_message_and_raise_validation_error(
+                'Failed to create Benefit. Benefit value may not be a negative number.'
+            )
 
 
 class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(ConditionalOffer, self).save(*args, **kwargs)   # pylint: disable=bad-super-call
+
+    def clean(self):
+        self.clean_email_domains()
+        super(ConditionalOffer, self).clean()   # pylint: disable=bad-super-call
+
+    def clean_email_domains(self):
+        if self.email_domains == '':
+            log_message_and_raise_validation_error(
+                'Failed to create ConditionalOffer. ConditionalOffer email domains may not be an empty string.'
+            )
+
+        if self.email_domains:
+            if not isinstance(self.email_domains, basestring):
+                log_message_and_raise_validation_error(
+                    'Failed to create ConditionalOffer. ConditionalOffer email domains must be of type string.'
+                )
+
+            email_domains_array = self.email_domains.split(',')
+
+            if not email_domains_array[-1]:
+                log_message_and_raise_validation_error(
+                    'Failed to create ConditionalOffer. '
+                    'Trailing comma for ConditionalOffer email domains is not allowed.'
+                )
+
+            for domain in email_domains_array:
+                domain_parts = domain.split('.')
+                error_message = 'Failed to create ConditionalOffer. ' \
+                                'Email domain [{email_domain}] is invalid.'.format(email_domain=domain)
+
+                # Conditions being tested:
+                # - double hyphen not allowed
+                # - must contain at least one dot
+                # - top level domain must be at least two characters long
+                # - hyphens are not allowed in top level domain
+                # - numbers are not allowed in top level domain
+                if any(['--' in domain,
+                        len(domain_parts) < 2,
+                        len(domain_parts[-1]) < 2,
+                        re.findall(r'[-0-9]', domain_parts[-1])]):
+                    log_message_and_raise_validation_error(error_message)
+
+                for domain_part in domain_parts:
+                    # - non of the domain levels can start or end with a hyphen before encoding
+                    if domain_part.startswith('-') or domain_part.endswith('-'):
+                        log_message_and_raise_validation_error(error_message)
+
+                    # - all encoded domain levels must match given regex expression
+                    if not re.match(r'^([a-z0-9-]+)$', domain_part.encode('idna')):
+                        log_message_and_raise_validation_error(error_message)
 
     def is_email_valid(self, email):
         """
@@ -96,23 +148,20 @@ class ConditionalOffer(AbstractConditionalOffer):
 
 def validate_credit_seat_type(course_seat_types, allowed_seat_types):
     if not isinstance(course_seat_types, basestring):
-        logger.exception('Failed to create Range. Credit seat types must be type str or unicode.')
-        raise ValidationError(_('Credit seat types must be type str or unicode.'))
+        log_message_and_raise_validation_error('Failed to create Range. Credit seat types must be of type string.')
 
     course_seat_types_list = course_seat_types.split(',')
 
     if len(course_seat_types_list) > 1 and 'credit' in course_seat_types_list:
-        logger.exception('Failed to create Range. Credit seat type cannot be paired with other seat types.')
-        raise ValidationError('Credit seat types cannot be paired with other seat types.')
+        log_message_and_raise_validation_error(
+            'Failed to create Range. Credit seat type cannot be paired with other seat types.'
+        )
 
     if not set(course_seat_types_list).issubset(set(allowed_seat_types)):
-        logger.exception(
-            'Failed to create Range. Not allowed course seat types %s. Allowed values for course seat types are %s',
-            course_seat_types_list, allowed_seat_types
+        log_message_and_raise_validation_error(
+            'Failed to create Range. Not allowed course seat types {}. '
+            'Allowed values for course seat types are {}.'.format(course_seat_types_list, allowed_seat_types)
         )
-        raise ValidationError(_(
-            'Not allowed course seat types {}. Allowed values for course seat types are {}'
-        ).format(course_seat_types_list, allowed_seat_types))
 
 
 class Range(AbstractRange):
@@ -143,20 +192,16 @@ class Range(AbstractRange):
     def clean(self):
         """ Validation for model fields. """
         if self.catalog and (self.catalog_query or self.course_seat_types):
-            logger.exception(
+            log_message_and_raise_validation_error(
                 'Failed to create Range. Catalog and dynamic catalog fields may not be set in the same range.'
             )
-            raise ValidationError(_('Catalog and dynamic catalog fields may not be set in the same range.'))
 
         # Both catalog_query and course_seat_types must be set or empty
-        exception_msg = 'Failed to create Range. If catalog_query is set course_seat_types must be set as well.'
-        validation_error_msg = _('Both catalog_query and course_seat_types fields must be set.')
+        error_message = 'Failed to create Range. Both catalog_query and course_seat_types fields must be set.'
         if self.catalog_query and not self.course_seat_types:
-            logger.exception(exception_msg)
-            raise ValidationError(validation_error_msg)
+            log_message_and_raise_validation_error(error_message)
         elif self.course_seat_types and not self.catalog_query:
-            logger.exception(exception_msg)
-            raise ValidationError(validation_error_msg)
+            log_message_and_raise_validation_error(error_message)
 
         if self.course_seat_types:
             validate_credit_seat_type(self.course_seat_types, self.ALLOWED_SEAT_TYPES)
@@ -165,8 +210,9 @@ class Range(AbstractRange):
         """
         Retrieve the results from running the query contained in catalog_query field.
         """
-        cache_key = 'catalog_query_contains [{}] [{}]'.format(self.catalog_query, product.course_id)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = hashlib.md5(
+            'catalog_query_contains [{}] [{}]'.format(self.catalog_query, product.course_id)
+        ).hexdigest()
         response = cache.get(cache_key)
         if not response:  # pragma: no cover
             request = get_current_request()

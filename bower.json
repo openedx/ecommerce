@@ -25,6 +25,7 @@
     "js-cookie": "~2.1.2",
     "moment": "~2.10.3",
     "pikaday": "https://github.com/owenmead/Pikaday.git#1.4.0",
+    "punycode": "~1.4.1",
     "requirejs": "~2.1.15",
     "text": "~2.0.14",
     "underscore": "~1.8.2",

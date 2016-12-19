@@ -21,6 +21,7 @@ from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.exceptions import VerificationStatusError
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
@@ -507,8 +508,9 @@ class BusinessClient(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.name:
-            log.exception('Failed to create BusinessClient. BusinessClient name may not be empty.')
-            raise ValidationError(_('BusinessClient name must be set.'))
+            log_message_and_raise_validation_error(
+                'Failed to create BusinessClient. BusinessClient name may not be empty.'
+            )
         super(BusinessClient, self).save(*args, **kwargs)
 
 

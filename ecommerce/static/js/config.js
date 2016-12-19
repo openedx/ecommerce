@@ -19,6 +19,7 @@ require.config({
         'moment': 'bower_components/moment/moment',
         'pages': 'js/pages',
         'pikaday': 'bower_components/pikaday/pikaday',
+        'punycode': 'bower_components/punycode/punycode',
         'requirejs': 'bower_components/requirejs/require',
         'routers': 'js/routers',
         'templates': 'templates',

@@ -1,10 +1,10 @@
 import datetime
 import logging
 
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from oscar.apps.voucher.abstract_models import AbstractVoucher
+
+from ecommerce.core.utils import log_message_and_raise_validation_error
 
 logger = logging.getLogger(__name__)
 
@@ -36,21 +36,23 @@ class Voucher(AbstractVoucher):
 
     def clean_code(self):
         if not self.code:
-            logger.exception('Failed to create Voucher. Voucher code must be set.')
-            raise ValidationError(_('Voucher code must be set.'))
+            log_message_and_raise_validation_error('Failed to create Voucher. Voucher code must be set.')
         if not self.code.isalnum():
-            logger.exception('Failed to create Voucher. Voucher code must contain only alphanumeric characters.')
-            raise ValidationError(_('Voucher code must contain only alphanumeric characters.'))
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. Voucher code must contain only alphanumeric characters.'
+            )
 
     def clean_datetimes(self):
         if not (self.end_datetime and self.start_datetime):
-            logger.exception('Failed to create Voucher. Voucher start and end datetime fields must be set.')
-            raise ValidationError(_('Voucher start and end datetime fields must be set.'))
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. Voucher start and end datetime fields must be set.'
+            )
 
         if not (isinstance(self.end_datetime, datetime.datetime) and
                 isinstance(self.start_datetime, datetime.datetime)):
-            logger.exception('Failed to create Voucher. Voucher start and end datetime fields must be type datetime.')
-            raise ValidationError(_('Voucher start and end datetime fields must be type datetime.'))
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. Voucher start and end datetime fields must be type datetime.'
+            )
 
     @classmethod
     def does_exist(cls, code):
@@ -61,4 +63,4 @@ class Voucher(AbstractVoucher):
             return False
 
 
-from oscar.apps.voucher.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+from oscar.apps.voucher.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order
