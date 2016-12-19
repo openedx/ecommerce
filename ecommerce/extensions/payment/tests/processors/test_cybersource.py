@@ -12,7 +12,9 @@ from django.conf import settings
 from django.test import override_settings
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import UserCancelled, TransactionDeclined, GatewayError
+from oscar.test import factories
 
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
     ProcessorMisconfiguredError
@@ -78,6 +80,20 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         """ Verify the method supports adding additional unsigned parameters. """
         extra_parameters = {'payment_method': 'card'}
         self.assert_correct_transaction_parameters(extra_parameters=extra_parameters)
+
+    def test_get_transaction_parameters_with_quoted_product_title(self):
+        """ Verify quotes are removed from item name """
+        course = CourseFactory(id='a/b/c/d', name='Course with "quotes"')
+        product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
+
+        basket = factories.create_basket(empty=True)
+        basket.add_product(product)
+        basket.owner = factories.UserFactory()
+        basket.site = self.site
+        basket.save()
+
+        response = self.processor.get_transaction_parameters(basket)
+        self.assertEqual(response['item_0_name'], 'Seat in Course with quotes with test-certificate-type certificate')
 
     @ddt.data('card_type', 'card_number', 'card_expiry_date', 'card_cvn')
     def test_get_transaction_parameters_with_unpermitted_parameters(self, field):
