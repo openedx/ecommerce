@@ -324,9 +324,11 @@ define([
                 });
 
                 it('should unset all single course attributes when multiple courses selected', function () {
-                    view.model.set('course_id', 'course id');
-                    view.model.set('seat_type', 'seat type');
-                    view.model.set('stock_record_ids', [1]);
+                    view.model.set({
+                        'course_id': 'course id',
+                        'seat_type': 'seat type',
+                        'stock_record_ids': [1]
+                    });
                     view.$('#multiple-courses').prop('checked', true).trigger('change');
                     expect(view.model.get('course_id')).toEqual(undefined);
                     expect(view.model.get('seat_type')).toEqual(undefined);

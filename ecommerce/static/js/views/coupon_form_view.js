@@ -429,8 +429,8 @@ define([
                     this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
-                    this.model.unset('course_id');
                     this.$('[name=seat_type] option').remove();
+                    this.model.unset('course_id');
                     this.model.unset('seat_type');
                     this.model.unset('stock_record_ids');
 
