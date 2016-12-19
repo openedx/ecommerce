@@ -94,9 +94,25 @@ class ConditionalOffer(AbstractConditionalOffer):
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
 
-def validate_credit_seat_type(value):
-    if len(value.split(',')) > 1 and 'credit' in value:
+def validate_credit_seat_type(course_seat_types, allowed_seat_types):
+    if not isinstance(course_seat_types, basestring):
+        logger.exception('Failed to create Range. Credit seat types must be type str or unicode.')
+        raise ValidationError(_('Credit seat types must be type str or unicode.'))
+
+    course_seat_types_list = course_seat_types.split(',')
+
+    if len(course_seat_types_list) > 1 and 'credit' in course_seat_types_list:
+        logger.exception('Failed to create Range. Credit seat type cannot be paired with other seat types.')
         raise ValidationError('Credit seat types cannot be paired with other seat types.')
+
+    if not set(course_seat_types_list).issubset(set(allowed_seat_types)):
+        logger.exception(
+            'Failed to create Range. Not allowed course seat types %s. Allowed values for course seat types are %s',
+            course_seat_types_list, allowed_seat_types
+        )
+        raise ValidationError(_(
+            'Not allowed course seat types {}. Allowed values for course seat types are {}'
+        ).format(course_seat_types_list, allowed_seat_types))
 
 
 class Range(AbstractRange):
@@ -104,6 +120,7 @@ class Range(AbstractRange):
         'catalog_query',
         'course_seat_types',
     ]
+    ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
     catalog_query = models.TextField(blank=True, null=True)
     course_seat_types = models.CharField(
@@ -134,6 +151,9 @@ class Range(AbstractRange):
         elif self.course_seat_types and not self.catalog_query:
             logger.exception(exception_msg)
             raise ValidationError(validation_error_msg)
+
+        if self.course_seat_types:
+            validate_credit_seat_type(self.course_seat_types, self.ALLOWED_SEAT_TYPES)
 
     def run_catalog_query(self, product):
         """

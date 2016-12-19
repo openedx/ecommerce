@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -44,7 +45,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
     queryset = Product.objects.filter(product_class__name='Coupon')
     permission_classes = (IsAuthenticated, IsAdminUser)
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend,)
     filter_class = ProductFilter
 
     def get_serializer_class(self):
@@ -94,7 +95,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         pass
 
                 if course_seat_types:
-                    course_seat_types = prepare_course_seat_types(course_seat_types)
+                    try:
+                        course_seat_types = prepare_course_seat_types(course_seat_types)
+                    except (AttributeError, TypeError) as e:
+                        logger.exception('Failed to create coupon. Invalid course seat types data: %s', e.message)
+                        return Response(
+                            _('Invalid course seat types data: {}').format(e.message),
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
 
                 try:
                     category = Category.objects.get(name=category_data['name'])
