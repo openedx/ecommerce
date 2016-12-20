@@ -33,19 +33,23 @@ def get_credit_provider_details(access_token, credit_provider_id, site_configura
         return None
 
 
-def get_receipt_page_url(site_configuration, order_number=None):
+def get_receipt_page_url(site_configuration, order_number=None, override_url=None):
     """ Returns the receipt page URL.
 
     Args:
         order_number (str): Order number
         site_configuration (SiteConfiguration): Site Configuration containing the flag for enabling Otto receipt page.
+        override_url (str): New receipt page to override the default one.
 
     Returns:
         str: Receipt page URL.
     """
     if site_configuration.enable_otto_receipt_page:
-        base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
-        params = urllib.urlencode({'order_number': order_number}) if order_number else ''
+        if override_url:
+            return override_url
+        else:
+            base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
+            params = urllib.urlencode({'order_number': order_number}) if order_number else ''
     else:
         base_url = site_configuration.build_lms_url('/commerce/checkout/receipt')
         params = urllib.urlencode({'orderNum': order_number}) if order_number else ''

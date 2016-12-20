@@ -44,6 +44,8 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         super(CybersourceSubmitViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
+        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.site.siteconfiguration.save()
 
     def _generate_data(self, basket_id):
         return {
