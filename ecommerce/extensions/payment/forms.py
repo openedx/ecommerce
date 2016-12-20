@@ -8,13 +8,18 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Div, HTML, Layout
+
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 
 
 def country_choices():
     """ Returns a tuple of tuples, each containing an ISO 3166 country code. """
-    return ((country.alpha2, country.name) for country in pycountry.countries)
+    countries = [(country.alpha2, country.name) for country in pycountry.countries]
+    countries.insert(0, ('', _('<Choose country>')))
+    return countries
 
 
 class PaymentForm(forms.Form):
@@ -27,13 +32,66 @@ class PaymentForm(forms.Form):
 
     def __init__(self, user, *args, **kwargs):
         super(PaymentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Div('basket'),
+            Div(
+                Div('first_name'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('last_name'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('address_line1'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('address_line2'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('city'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('state'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('country'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            ),
+            Div(
+                Div('postal_code'),
+                HTML('<p class="help-block"></p>'),
+                css_class='form-item col-md-6'
+            )
+        )
         self.fields['basket'].queryset = self.fields['basket'].queryset.filter(owner=user)
+        for bound_field in self:
+            # https://www.w3.org/WAI/tutorials/forms/validation/#validating-required-input
+            if hasattr(bound_field, 'field') and bound_field.field.required:
+                # Translators: This is a string added next to the name of the required
+                # fields on the payment form. For example, the first name field is
+                # required, so this would read "First name (required)".
+                self.fields[bound_field.name].label = _('{label} (required)'.format(label=bound_field.label))
+                bound_field.field.widget.attrs['required'] = 'required'
+                bound_field.field.widget.attrs['aria-required'] = 'true'
 
     basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
     address_line1 = forms.CharField(max_length=29, label=_('Address'))
-    address_line2 = forms.CharField(max_length=29, required=False, label=_('Address (continued)'))
+    address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))

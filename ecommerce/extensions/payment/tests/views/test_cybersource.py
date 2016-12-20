@@ -180,7 +180,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             self.basket,
             billing_address=self.billing_address,
         )
-        with mock.patch.object(CybersourceInterstitialView, 'validate_notification', side_effect=error_class):
+        with mock.patch.object(self.view, 'validate_notification', side_effect=error_class):
             response = self.client.post(self.path, notification)
             self.assertRedirects(response, self.get_full_url(reverse('payment_error')))
 
@@ -201,9 +201,14 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             self.basket,
             billing_address=self.billing_address,
         )
-        with mock.patch.object(CybersourceInterstitialView, 'validate_notification', side_effect=error_class):
+        with mock.patch.object(self.view, 'validate_notification', side_effect=error_class):
             response = self.client.post(self.path, notification)
-            self.assertRedirects(response, self.get_full_url(path=reverse('basket:summary')), status_code=302)
+            self.assertRedirects(
+                response,
+                self.get_full_url(path=reverse('basket:summary')),
+                status_code=302,
+                fetch_redirect_response=False
+            )
 
     def test_successful_order(self):
         """ Verify the view redirects to the Receipt page when the Order has been successfully placed. """
@@ -224,6 +229,6 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             self.basket,
             billing_address=self.billing_address,
         )
-        with mock.patch.object(CybersourceInterstitialView, 'create_order', side_effect=Exception):
+        with mock.patch.object(self.view, 'create_order', side_effect=Exception):
             response = self.client.post(self.path, notification)
             self.assertRedirects(response, self.get_full_url(path=reverse('payment_error')), status_code=302)

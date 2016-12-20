@@ -7,12 +7,14 @@ define([
         'underscore',
         'underscore.string',
         'utils/utils',
+        'utils/credit_card',
         'js-cookie'
     ],
     function ($,
               _,
               _s,
               Utils,
+              CreditCardUtils,
               Cookies
     ) {
         'use strict';
@@ -37,7 +39,6 @@ define([
                 success: onSuccess,
                 error: onFail
             });
-
         },
         hideVoucherForm = function() {
             $('#voucher_form_container').hide();
@@ -67,11 +68,74 @@ define([
 
             $form.appendTo('body').submit();
         },
+        appendValidationErrorMsg = function(event, field, msg) {
+            field.find('~.help-block').append('<span>' + msg + '</span>');
+            field.focus();
+            event.preventDefault();
+        },
+
+        cardHolderInfoValidation = function (event) {
+            var requiredFields = [
+                'input[name=first_name]',
+                'input[name=last_name]',
+                'input[name=address_line1]',
+                'input[name=city]',
+                'select[name=country]'
+            ];
+
+            _.each(requiredFields, function(field) {
+                if ($(field).val() === '') {
+                    event.preventDefault();
+                    $(field).parentsUntil('form-item').find('~.help-block').append(
+                        '<span>This field is required</span>'
+                    );
+                }
+            });
+
+            // Focus the first element that has an error message.
+            $('.help-block > span').first().parentsUntil('fieldset').last().find('input').focus();
+        },
+
+        cardInfoValidation = function (event) {
+            var cardType,
+                currentMonth = new Date().getMonth(),
+                currentYear = new Date().getFullYear(),
+                cardNumber = $('input[name=card_number]').val(),
+                cvnNumber = $('input[name=card_cvn]').val(),
+                cardExpiryMonth = $('select[name=card_expiry_month]').val(),
+                cardExpiryYear = $('select[name=card_expiry_year]').val(),
+                cardNumberField = $('input[name=card_number]'),
+                cvnNumberField = $('input[name=card_cvn]'),
+                cardExpiryMonthField = $('select[name=card_expiry_month]'),
+                cardExpiryYearField = $('select[name=card_expiry_year]');
+
+            cardType = CreditCardUtils.getCreditCardType(cardNumber);
+
+            if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
+                appendValidationErrorMsg(event, cardNumberField, 'Invalid card number');
+            } else if (typeof cardType === 'undefined') {
+                appendValidationErrorMsg(event, cardNumberField, 'Unsupported card type');
+            } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
+                appendValidationErrorMsg(event, cvnNumberField, 'Invalid CVN');
+            }
+
+            if (!Number.isInteger(Number(cardExpiryMonth)) ||
+                Number(cardExpiryMonth) > 12 || Number(cardExpiryMonth) < 1) {
+                appendValidationErrorMsg(event, cardExpiryMonthField, 'Invalid month');
+            } else if (!Number.isInteger(Number(cardExpiryYear)) || Number(cardExpiryYear) < currentYear) {
+                appendValidationErrorMsg(event, cardExpiryYearField, 'Invalid year');
+            } else if (Number(cardExpiryMonth) < currentMonth && Number(cardExpiryYear) === currentYear) {
+                appendValidationErrorMsg(event, cardExpiryMonthField, 'Card expired');
+            }
+        },
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
-                basketId = $paymentButtons.data('basket-id');
+                basketId = $paymentButtons.data('basket-id'),
+                cardNumber,
+                iconPath = '/static/images/credit_cards/',
+                card;
 
-            $('#voucher_form_link a').on('click', function(event) {
+            $('#voucher_form_link').on('click', function(event) {
                 event.preventDefault();
                 showVoucherForm();
             });
@@ -79,6 +143,33 @@ define([
             $('#voucher_form_cancel').on('click', function(event) {
                 event.preventDefault();
                 hideVoucherForm();
+            });
+
+            $('#card-number-input').on('input', function() {
+                cardNumber = $('#card-number-input').val().replace(/\s+/g, '');
+
+                if (cardNumber.length > 12) {
+                    card = CreditCardUtils.getCreditCardType(cardNumber);
+
+                    if (typeof card !== 'undefined') {
+                        $('.card-type-icon').attr(
+                            'src',
+                            iconPath + card.name + '.png'
+                        );
+                        $('input[name=card_type]').val(card.type);
+                    } else {
+                        $('.card-type-icon').attr('src', '');
+                        $('input[name=card_type]').val('');
+                    }
+                }
+            });
+
+            $('#payment-button').click(function(e) {
+                _.each($('.help-block'), function(errorMsg) {
+                    $(errorMsg).empty();  // Clear existing validation error messages.
+                });
+                cardInfoValidation(e);
+                cardHolderInfoValidation(e);
             });
 
             $paymentButtons.find('.payment-button').click(function (e) {
@@ -127,11 +218,12 @@ define([
 
         return {
             appendToForm: appendToForm,
+            cardInfoValidation: cardInfoValidation,
             checkoutPayment: checkoutPayment,
             hideVoucherForm: hideVoucherForm,
-            onSuccess: onSuccess,
             onFail: onFail,
             onReady: onReady,
+            onSuccess: onSuccess,
             showVoucherForm: showVoucherForm,
         };
     }

@@ -54,7 +54,6 @@ class FreeCheckoutViewTests(TestCase):
         """ Verify redirect to the receipt page. """
         self.prepare_basket(0)
         self.assertEqual(Order.objects.count(), 0)
-
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
@@ -71,7 +70,7 @@ class FreeCheckoutViewTests(TestCase):
         self.toggle_ecommerce_receipt_page(False)
         self.prepare_basket(0)
         self.assertEqual(Order.objects.count(), 0)
-        receipt_page = self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt')
+        receipt_page = self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt/')
 
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)

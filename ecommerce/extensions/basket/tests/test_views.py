@@ -279,6 +279,19 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
                 )
             )
 
+    def test_non_seat_product(self):
+        """Verify the basket accepts non-seat product types."""
+        title = 'Test Product 123'
+        description = 'All hail the test product.'
+        product = factories.ProductFactory(title=title, description=description)
+        self.create_basket_and_add_product(product)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        line_data = response.context['formset_lines_data'][0][1]
+        self.assertEqual(line_data['product_title'], title)
+        self.assertEqual(line_data['product_description'], description)
+
     def test_enrollment_code_seat_type(self):
         """Verify the correct seat type attribute is retrieved."""
         course = CourseFactory()
@@ -290,7 +303,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['is_bulk_purchase'])
+        self.assertFalse(response.context['show_voucher_form'])
 
         # Enable enrollment codes
         self.site.siteconfiguration.enable_enrollment_codes = True
@@ -298,7 +311,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['is_bulk_purchase'])
+        self.assertFalse(response.context['show_voucher_form'])
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], _(enrollment_code.attr.seat_type.capitalize()))
 
@@ -370,7 +383,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['benefit_value'], format_benefit_value(benefit))
         self.assertEqual(line_data['seat_type'], _(seat.attr.certificate_type.capitalize()))
-        self.assertEqual(line_data['course_name'], self.course.name)
+        self.assertEqual(line_data['product_title'], self.course.name)
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
 
@@ -446,7 +459,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.create_basket_and_add_product(seat)
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['is_verification_required'], ver_req)
+        self.assertEqual(response.context['display_verification_message'], ver_req)
 
     def test_verification_attribute_missing(self):
         """ Verify the variable for verification requirement is False when the attribute is missing. """
@@ -455,7 +468,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.create_basket_and_add_product(seat)
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['is_verification_required'], False)
+        self.assertEqual(response.context['display_verification_message'], False)
 
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
     def test_client_side_checkout(self):

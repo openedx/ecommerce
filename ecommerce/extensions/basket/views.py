@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from datetime import datetime
 import logging
 
 import waffle
@@ -96,42 +97,71 @@ class BasketSummaryView(BasketView):
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
+    def _get_course_data(self, product):
+        """
+        Return course data.
+
+        Args:
+            product (Product): A product that has course_key as attribute (seat or bulk enrollment coupon)
+        Returns:
+            Dictionary containing course name, course key, course image URL and description.
+        """
+        course_key = CourseKey.from_string(product.attr.course_key)
+        course_name = None
+        image_url = None
+        short_description = None
+
+        try:
+            course = get_course_info_from_catalog(self.request.site, course_key)
+            try:
+                image_url = course['image']['src']
+            except (KeyError, TypeError):
+                image_url = ''
+            short_description = course.get('short_description', '')
+            course_name = course.get('title', '')
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+
+        return {
+            'product_title': course_name,
+            'course_key': course_key,
+            'image_url': image_url,
+            'product_description': short_description,
+        }
+
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
         lines_data = []
-        is_verification_required = is_bulk_purchase = False
+        display_verification_message = False
+        show_voucher_form = True
         switch_link_text = partner_sku = ''
         basket = self.request.basket
         site = self.request.site
         site_configuration = site.siteconfiguration
 
         for line in lines:
-            course_key = CourseKey.from_string(line.product.attr.course_key)
-            course_name = None
-            image_url = None
-            short_description = None
-            try:
-                course = get_course_info_from_catalog(self.request.site, course_key)
-                try:
-                    image_url = course['image']['src']
-                except (KeyError, TypeError):
-                    image_url = ''
-                short_description = course.get('short_description', '')
-                course_name = course.get('title', '')
-            except (ConnectionError, SlumberBaseException, Timeout):
-                logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+            product_class_name = line.product.get_product_class().name
+            if product_class_name == 'Seat':
+                line_data = self._get_course_data(line.product)
+                if (getattr(line.product.attr, 'id_verification_required', False) and
+                        line.product.attr.certificate_type != 'credit'):
+                    display_verification_message = True
+            elif product_class_name == 'Enrollment Code':
+                line_data = self._get_course_data(line.product)
+                show_voucher_form = False
+            else:
+                line_data = {
+                    'product_title': line.product.title,
+                    'image_url': None,
+                    'product_description': line.product.description
+                }
 
+            # TODO: handle these links for multi-line baskets.
             if self.request.site.siteconfiguration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
                 switch_link_text, partner_sku = get_basket_switch_data(line.product)
-                if line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
-                    is_bulk_purchase = True
-                    # Iterate on message storage so all messages are marked as read.
-                    # This will hide the success messages when a user updates the quantity
-                    # for an item in the basket.
-                    list(messages.get_messages(self.request))
 
             if line.has_discount:
                 benefit = basket.applied_offers().values()[0].benefit
@@ -139,62 +169,70 @@ class BasketSummaryView(BasketView):
             else:
                 benefit_value = None
 
-            lines_data.append({
+            line_data.update({
                 'seat_type': self._determine_seat_type(line.product),
-                'course_name': course_name,
-                'course_key': course_key,
-                'image_url': image_url,
-                'course_short_description': short_description,
                 'benefit_value': benefit_value,
                 'enrollment_code': line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
                 'line': line,
             })
+            lines_data.append(line_data)
 
-            user = self.request.user
-            context.update({
-                'analytics_data': prepare_analytics_data(
-                    user,
-                    self.request.site.siteconfiguration.segment_key,
-                    unicode(course_key)
-                ),
-                'enable_client_side_checkout': False,
-            })
+        course_key = lines_data[0].get('course_key') if len(lines) == 1 else None
+        user = self.request.user
+        context.update({
+            'analytics_data': prepare_analytics_data(
+                user,
+                self.request.site.siteconfiguration.segment_key,
+                unicode(course_key)
+            ),
+            'enable_client_side_checkout': False,
+        })
 
-            if site_configuration.client_side_payment_processor \
-                    and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
-                payment_processor_class = site_configuration.get_client_side_payment_processor_class()
+        payment_processors = site_configuration.get_payment_processors()
+        if site_configuration.client_side_payment_processor \
+                and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
+            payment_processor_class = site_configuration.get_client_side_payment_processor_class()
 
-                if payment_processor_class:
-                    payment_processor = payment_processor_class(site)
+            if payment_processor_class:
+                payment_processor = payment_processor_class(site)
 
-                    context.update({
-                        'enable_client_side_checkout': True,
-                        'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
-                        'payment_url': payment_processor.client_side_payment_url,
-                    })
-                else:
-                    msg = 'Unable to load client-side payment processor [{processor}] for ' \
-                          'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
-                                                             sc=site_configuration.id)
-                    raise SiteConfigurationError(msg)
+                today = datetime.today()
+                context.update({
+                    'enable_client_side_checkout': True,
+                    'client_side_payment_processor_name': payment_processor.NAME,
+                    'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
+                    'months': range(1, 13),
+                    'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
+                    'payment_url': payment_processor.client_side_payment_url,
+                    # Assumption is that the credit card duration is 15 years
+                    'years': range(today.year, today.year + 16)
+                })
+            else:
+                msg = 'Unable to load client-side payment processor [{processor}] for ' \
+                      'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
+                                                         sc=site_configuration.id)
+                raise SiteConfigurationError(msg)
 
-            # Check product attributes to determine if ID verification is required for this basket
-            try:
-                is_verification_required = line.product.attr.id_verification_required \
-                    and line.product.attr.certificate_type != 'credit'
-            except AttributeError:
-                pass
+        # Total benefit displayed in price summary.
+        # Currently only one voucher per basket is supported.
+        applied_voucher = basket.vouchers.first()
+        total_benefit = (
+            format_benefit_value(applied_voucher.offers.first().benefit)
+            if applied_voucher else None
+        )
 
         context.update({
+            'total_benefit': total_benefit,
             'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': site_configuration.get_payment_processors(),
+            'payment_processors': payment_processors,
             'homepage_url': get_lms_url(''),
             'formset_lines_data': zip(formset, lines_data),
-            'is_verification_required': is_verification_required,
+            'display_verification_message': display_verification_message,
             'min_seat_quantity': 1,
-            'is_bulk_purchase': is_bulk_purchase,
+            'show_voucher_form': show_voucher_form,
             'switch_link_text': switch_link_text,
             'partner_sku': partner_sku,
+            'course_key': course_key
         })
 
         return context

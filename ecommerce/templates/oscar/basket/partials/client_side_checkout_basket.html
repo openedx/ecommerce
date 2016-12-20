@@ -1,0 +1,200 @@
+{% load i18n %}
+{% load currency_filters %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% load staticfiles %}
+
+{% if show_voucher_form %}
+    {% include 'partials/alert_messages.html' %}
+{% endif %}
+
+<div id="summary" class="col-sm-5">
+    <form action="." method="post" class="row">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        <p class="title">{% trans "IN YOUR CART" %}</p>
+        {% for form, line_data in formset_lines_data %}
+            {{ form.id }}
+            <div class="product col-sm-12">
+                <div class="product-image col-sm-5 col-xs-5">
+                    <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}"
+                         alt="{{ line_data.product_title|default_if_none:'' }}"/>
+                </div>
+                <div class="product-information col-sm-7 col-xs-7">
+                    <p class="product-name">{{ line_data.product_title }}</p>
+                    {% if line_data.seat_type %}
+                    <p class="seat-type">
+                        {% blocktrans with seat_type=line_data.seat_type %}
+                            {{ seat_type }} Certificate
+                        {% endblocktrans %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% if line_data.enrollment_code %}
+                    <div class="col-sm-12 col-xs-12 form-inline">
+                        <label class="product-price-label text-muted">{% trans 'Quantity' %}</label>
+                        <div class="checkout-quantity form-group">
+                            <div class="input-group spinner col-sm-3 {% if form.errors %}error{% endif %}">
+                                {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
+                            </div>
+                            <button class="btn btn-primary update-button" type="submit"
+                                    data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </form>
+    <fieldset aria-live="polite">
+        <legend>{% trans "SUMMARY" %}</legend>
+        <div id="line-price" class="amount row">
+            <span class="description">{% trans "Price" %}</span>
+            <span class="price">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
+        </div>
+        {% if basket.total_discount %}
+            <div id="line-discount" class="amount row">
+                <span class="description">{% trans "Discounts applied" %}</span>
+                <span class="price">-{{basket.total_discount|currency:basket.currency}}</span>
+            </div>
+        {% endif %}
+        <div id="voucher-information" class="row">
+            {% if show_voucher_form %}
+                {% block vouchers %}
+                    {% if basket.contains_a_voucher %}
+                        <div class="vouchers">
+                            {% for voucher in basket.vouchers.all %}
+                                <p class="voucher">
+                                    {% blocktrans with voucher_code=voucher.code %}
+                                        Coupon {{ voucher_code }} applied for {{ total_benefit }} off
+                                    {% endblocktrans %}
+                                    <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button class="remove-voucher" type="submit" aria-label={% trans "Remove coupon" %}>Remove</button>
+                                    </form>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
+                        {% if voucher_form %}
+                            <div class="use-voucher">
+                                <button type="button" class="btn btn-default" id="voucher_form_link">
+                                    {% trans "Add Coupon Code" %}
+                                </button>
+                                {% include 'basket/partials/add_voucher_form.html' %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endblock vouchers %}
+            {% endif %}
+        </div>
+        <div id="basket-total" class="row" aria-describedby="total-price-desc">
+            <span id="total-price-desc" class="description">{% trans "TOTAL" %}</span>
+            <span class="price">{{ order_total.incl_tax|currency:basket.currency }}</span>
+        </div>
+    </fieldset>
+</div>
+
+
+<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}" aria-live="polite">
+    {% csrf_token %}
+
+    <div id="payment-information" class="col-sm-7">
+        {% if not free_basket %}
+        {% if paypal_enabled %}
+        <div id="payment-method-information" class="placeholder row">
+            <fieldset>
+                <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
+                <div class="col-sm-12 payment-methods">
+                    <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
+                        <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png"></a>
+                    </div>
+                    <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
+                        {# Translators: Do NOT translate the name PayPal. #}
+                        <button aria-label={% trans "Pay with PayPal" %}
+                                data-track-type="click"
+                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                data-track-category="checkout"
+                                data-processor-name="paypal"
+                                data-course-id="{{ course_key }}"
+                                class="btn payment-button payment-processor-paypal"
+                                value="paypal"
+                                type="button"
+                                role="button">
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        {% endif %}
+        <div id="card-holder-information" class="form-input-elements placeholder row">
+            <fieldset>
+                <legend aria-label={% trans "Card holder information" %}>{% trans "CARD HOLDER INFORMATION" %}</legend>
+                {% crispy payment_form %}
+            </fieldset>
+        </div>
+        {% endif %}
+        <div id="billing-information" class="form-input-elements placeholder">
+            <fieldset>
+                {% if not free_basket %}
+                <legend aria-label={% trans "Billing information" %}>{% trans "BILLING INFORMATION" %}</legend>
+                {% if not paypal_enabled %}
+                <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png">
+                {% endif %}
+                <div class="pci-fields row">
+                    <div id="card-number" class="form-group col-sm-6">
+                        <label for="card-number-input" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
+                        <input id="card-number-input" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <img class="card-type-icon">
+                        <p class="help-block"></p>
+                    </div>
+                    <input type="hidden" name="card_type" class="pci-field">
+                    <div id="card-cvn" class="form-group col-sm-6">
+                        <label for="card-cvn-input" class="control-label">
+                            {% trans "Security Code (required)" %}
+                            <span class="sr">, {% trans "Secure" %}</span>
+                            <i class="fa fa-question-circle" aria-hidden="true" role="tooltip" title="The three last digits in the signature area on the back of your card. For American Express, it is the four digits on the front of the card."></i>
+                        </label>
+                        <input type="password" id="card-cvn-input" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true"/>
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <p class="help-block"></p>
+                    </div>
+                    <label id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration (required)" %}</label>
+                    <div id="card-expiry-month" class="form-group col-sm-6 col-xs-7">
+                        <select name="card_expiry_month" class="form-control pci-field" required aria-required="true">
+                            <option>{% trans "(Month)" %}</option>
+                            {% for month in months %}
+                                <option value="{{forloop.counter|stringformat:'02d'}}">{{month}}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block"></p>
+                    </div>
+                    <div id="card-expiry-year" class="form-group col-sm-6 col-xs-5">
+                        <select name="card_expiry_year" class="form-control pci-field" required aria-required="true">
+                            <option>{% trans "(Year)" %}</option>
+                            {% for year in years %}
+                                <option value="{{year}}">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block"></p>
+                    </div>
+                    <input type="hidden" name="card_expiry_date" class="pci-field">
+                </div>
+                {% endif %}
+                <div class="payment-button col-sm-6 col-sm-offset-6 col-xs-12">
+                    <button id="payment-button" type="submit" class="btn btn-primary btn-large col-sm-12 col-xs-12"
+                            data-track-type="click"
+                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                            data-track-category="checkout"
+                            data-processor-name="{{ client_side_payment_processor_name }}"
+                            data-course-id="{{ course_key }}"
+                            data-checkout-type="client_side">
+                      {% trans "Place Order" %}
+                    </button>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</form>
