@@ -186,13 +186,13 @@ class CouponMixin(object):
             code=code,
             course_seat_types=course_seat_types,
             email_domains=email_domains,
-            end_datetime=datetime.date(2020, 1, 1),
+            end_datetime=datetime.datetime(2020, 1, 1),
             max_uses=max_uses,
             note=note,
             partner=partner,
             price=price,
             quantity=quantity,
-            start_datetime=datetime.date(2015, 1, 1),
+            start_datetime=datetime.datetime(2015, 1, 1),
             title=title,
             voucher_type=voucher_type
         )

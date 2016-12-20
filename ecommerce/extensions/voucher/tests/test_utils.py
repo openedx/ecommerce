@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import ddt
 import httpretty
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _
@@ -36,6 +38,7 @@ VOUCHER_CODE = "XMASC0DE"
 VOUCHER_CODE_LENGTH = 1
 
 
+@ddt.ddt
 @httpretty.activate
 @mock_course_catalog_api_client
 class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
@@ -68,6 +71,18 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.coupon.history.all().update(history_user=self.user)
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
+        self.data = {
+            'benefit_type': Benefit.PERCENTAGE,
+            'benefit_value': 100.00,
+            'catalog': self.catalog,
+            'coupon': self.coupon,
+            'end_datetime': datetime.datetime.now() + datetime.timedelta(days=1),
+            'name': "Test voucher",
+            'quantity': 10,
+            'start_datetime': datetime.datetime.now() - datetime.timedelta(days=1),
+            'voucher_type': Voucher.SINGLE_USE
+        }
+
     def create_benefits(self):
         """
         Create all Benefit permutations
@@ -87,31 +102,25 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def setup_coupons_for_report(self):
         """ Create specific coupons to test report generation """
-        create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=50.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2099, 10, 30),
-            name='Enrollment',
-            quantity=1,
-            start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.ONCE_PER_CUSTOMER,
-            code=VOUCHER_CODE,
-            max_uses=1
-        )
+        self.data.update({
+            'benefit_value': 50.00,
+            'code': VOUCHER_CODE,
+            'max_uses': 1,
+            'name': 'Discount',
+            'quantity': 1,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER
+        })
+        create_vouchers(**self.data)
 
-        create_vouchers(
-            benefit_type=Benefit.FIXED,
-            benefit_value=100.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date.today() + datetime.timedelta(10),
-            name='Discount',
-            quantity=1,
-            start_datetime=datetime.date.today() - datetime.timedelta(1),
-            voucher_type=Voucher.SINGLE_USE
-        )
+        del self.data['code']
+        del self.data['max_uses']
+
+        self.data.update({
+            'benefit_type': Benefit.FIXED,
+            'benefit_value': 100.00,
+            'voucher_type': Voucher.SINGLE_USE
+        })
+        create_vouchers(**self.data)
 
     def create_catalog_coupon(
             self,
@@ -154,18 +163,11 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         Test voucher creation
         """
         email_domains = 'edx.org,example.com'
-        vouchers = create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=100.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2015, 10, 30),
-            name="Tešt voučher",
-            quantity=10,
-            start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE,
-            email_domains=email_domains
-        )
+        self.data.update({
+            'email_domains': email_domains,
+            'name': 'Tešt voučher'
+        })
+        vouchers = create_vouchers(**self.data)
 
         self.assertEqual(len(vouchers), 10)
 
@@ -178,41 +180,40 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
         self.assertEqual(voucher_offer.email_domains, email_domains)
         self.assertEqual(len(coupon_voucher.vouchers.all()), 11)
-        self.assertEqual(voucher.end_datetime, datetime.date(2015, 10, 30))
-        self.assertEqual(voucher.start_datetime, datetime.date(2015, 10, 1))
+        self.assertEqual(voucher.end_datetime, self.data['end_datetime'])
+        self.assertEqual(voucher.start_datetime, self.data['start_datetime'])
         self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
+
+    @ddt.data(
+        {'end_datetime': ''},
+        {'end_datetime': 3},
+        {'end_datetime': 'nonumbers'},
+        {'start_datetime': ''},
+        {'start_datetime': 3},
+        {'start_datetime': 'nonumbers'},
+    )
+    def test_create_vouchers_with_incorrect_datetime_value(self, data):
+        """ Test calling create vouchers with incorrect start/end datetime value raises exception. """
+        self.data.update(data)
+        with self.assertRaises(ValidationError):
+            create_vouchers(**self.data)
 
     @override_settings(VOUCHER_CODE_LENGTH=VOUCHER_CODE_LENGTH)
     def test_regenerate_voucher_code(self):
         """
         Test that voucher code will be regenerated if it already exists
         """
+        self.data.update({
+            'benefit_value': 90.00,
+            'quantity': 1
+        })
         for code in 'BCDFGHJKL':
-            create_vouchers(
-                benefit_type=Benefit.PERCENTAGE,
-                benefit_value=90.00,
-                catalog=self.catalog,
-                coupon=self.coupon,
-                end_datetime=datetime.date(2015, 10, 30),
-                name="Test voucher",
-                quantity=1,
-                start_datetime=datetime.date(2015, 10, 1),
-                voucher_type=Voucher.SINGLE_USE,
-                code=code
-            )
+            self.data['code'] = code
+            create_vouchers(**self.data)
 
+        del self.data['code']
         for __ in range(20):
-            voucher = create_vouchers(
-                benefit_type=Benefit.PERCENTAGE,
-                benefit_value=100.00,
-                catalog=self.catalog,
-                coupon=self.coupon,
-                end_datetime=datetime.date(2015, 10, 30),
-                name="Test voucher",
-                quantity=1,
-                start_datetime=datetime.date(2015, 10, 1),
-                voucher_type=Voucher.SINGLE_USE
-            )
+            voucher = create_vouchers(**self.data)
             self.assertTrue(Voucher.objects.filter(code__iexact=voucher[0].code).exists())
 
     @override_settings(VOUCHER_CODE_LENGTH=0)
@@ -222,51 +223,24 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         raises a ValueError
         """
         with self.assertRaises(ValueError):
-            create_vouchers(
-                benefit_type=Benefit.PERCENTAGE,
-                benefit_value=100.00,
-                catalog=self.catalog,
-                coupon=self.coupon,
-                end_datetime=datetime.date(2015, 10, 30),
-                name="Test voucher",
-                quantity=1,
-                start_datetime=datetime.date(2015, 10, 1),
-                voucher_type=Voucher.SINGLE_USE
-            )
+            create_vouchers(**self.data)
 
     def test_create_discount_coupon(self):
         """
         Test discount voucher creation with specified code
         """
-        discount_vouchers = create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=25.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2015, 10, 30),
-            name="Discount code",
-            quantity=1,
-            start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE,
-            code=VOUCHER_CODE
-        )
+        self.data.update({
+            'benefit_value': 25.00,
+            'code': VOUCHER_CODE,
+            'quantity': 1
+        })
+        discount_vouchers = create_vouchers(**self.data)
 
         self.assertEqual(len(discount_vouchers), 1)
-        self.assertEqual(discount_vouchers[0].code, "XMASC0DE")
+        self.assertEqual(discount_vouchers[0].code, VOUCHER_CODE)
 
         with self.assertRaises(IntegrityError):
-            create_vouchers(
-                benefit_type=Benefit.PERCENTAGE,
-                benefit_value=35.00,
-                catalog=self.catalog,
-                coupon=self.coupon,
-                end_datetime=datetime.date(2015, 10, 30),
-                name="Discount name",
-                quantity=1,
-                start_datetime=datetime.date(2015, 10, 1),
-                voucher_type=Voucher.SINGLE_USE,
-                code=VOUCHER_CODE
-            )
+            create_vouchers(**self.data)
 
     def assert_report_first_row(self, row, coupon, voucher):
         """
@@ -402,18 +376,11 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_report_for_inactive_coupons(self):
         """ Verify the coupon report show correct status for inactive coupons. """
-        coupon_title = self.coupon.title
-        create_vouchers(
-            benefit_type=Benefit.FIXED,
-            benefit_value=100.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2015, 10, 30),
-            name=coupon_title,
-            quantity=1,
-            start_datetime=datetime.date(2015, 10, 30),
-            voucher_type=Voucher.SINGLE_USE
-        )
+        self.data.update({
+            'name': self.coupon.title,
+            'end_datetime': datetime.datetime.now() - datetime.timedelta(days=0.1)
+        })
+        create_vouchers(**self.data)
 
         __, rows = generate_coupon_report(self.coupon_vouchers)
 
@@ -421,7 +388,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         # are only shown in row[0]
         # The data that is unique among vouchers like Code, Url, Status, etc.
         # starts from row[1]
-        self.assertEqual(rows[0]['Coupon Name'], coupon_title)
+        self.assertEqual(rows[0]['Coupon Name'], self.coupon.title)
         self.assertEqual(rows[2]['Status'], _('Inactive'))
 
     def test_generate_coupon_report_for_query_coupons(self):
@@ -546,18 +513,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_update_voucher_offer(self):
         """Test updating a voucher."""
-        vouchers = create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=100.00,
-            catalog=self.catalog,
-            coupon=self.coupon,
-            end_datetime=datetime.date(2015, 10, 30),
-            name="Test voucher",
-            quantity=10,
-            start_datetime=datetime.date(2015, 10, 1),
-            voucher_type=Voucher.SINGLE_USE,
-            email_domains='example.com'
-        )
+        self.data['email_domains'] = 'example.com'
+        vouchers = create_vouchers(**self.data)
 
         voucher = vouchers[0]
         voucher_offer = voucher.offers.first()
