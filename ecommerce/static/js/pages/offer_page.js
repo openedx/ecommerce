@@ -15,8 +15,8 @@ define([
 
             initialize: function(options) {
                 this.collection = new OfferCollection();
-                this.view = new OfferView({code: options.code, collection: this.collection});
-                this.collection.fetch({remove: false, data: {code: options.code, limit: 50}});
+                this.view = new OfferView({code: options.code, course: options.course, enterprise: options.enterprise, collection: this.collection});
+                this.collection.fetch({remove: false, data: {code: options.code, course: options.course, enterprise: options.enterprise, limit: 50}});
                 this.render();
             }
         });

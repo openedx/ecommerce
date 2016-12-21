@@ -12,11 +12,15 @@ define([
             root: '/coupons/',
 
             routes: {
-                'offer/?code=:code': 'showOfferPage'
+                'offer/?*queryString': 'showOfferPage'
+            /*                
+                'offer/?code=:code': 'showOfferPage',
+            */
             },
 
-            showOfferPage: function(code) {
-                var page = new OfferPage({code: code});
+            showOfferPage: function(queryString) {
+                var params = this.parseQueryString(queryString);
+                var page = new OfferPage({code: params.code, course: params.course, enterprise: params.enterprise});
                 this.currentView = page;
                 this.$el.html(page.el);
             }
