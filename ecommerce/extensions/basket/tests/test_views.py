@@ -387,11 +387,21 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
 
-    def test_no_basket_response(self):
-        """ Verify there are no form and line data in the context for a non-existing basket. """
+    def assert_emtpy_basket(self):
+        """ Assert that the basket is empty on visiting the basket summary page. """
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['formset_lines_data'], [])
+        self.assertEqual(response.context['total_benefit'], None)
+
+    def test_no_basket_response(self):
+        """ Verify there are no form, line and benefit data in the context for a non-existing basket. """
+        self.assert_emtpy_basket()
+
+    def test_anonymous_basket(self):
+        """ Verify there are no form, line and benefit data in the context for anonymous user. """
+        self.client.logout()
+        self.assert_emtpy_basket()
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """

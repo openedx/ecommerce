@@ -254,7 +254,9 @@
     }
 
     .help-block {
-        height: 10px;
+        margin-top: 0;
+        margin-bottom: 0;
+        min-height: 22px;
         color: red;
     }
 
@@ -355,7 +357,7 @@
 
                     #expiration-label {
                         width: 100%;
-                        margin-left: 15px;
+                        padding-left: 15px;
                         text-align: left;
                     }
 
@@ -527,15 +529,9 @@
         }
 
         .payment-form #payment-information {
-            border-left: none;
-        }
-
-        .payment-methods {
             padding-left: 0;
-
-            #payment-method {
-                padding-left: 0;
-            }
+            padding-right: 0;
+            border-left: none;
         }
 
         #summary #basket-information .product {

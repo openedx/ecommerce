@@ -1,7 +1,13 @@
 /**
  * CyberSource payment processor specific actions.
  */
-require(['jquery'], function($) {
+require([
+        'jquery',
+        'pages/basket_page'
+    ], function(
+        $,
+        BasketPage
+    ) {
     'use strict';
 
     function initializePaymentForm() {
@@ -44,15 +50,28 @@ require(['jquery'], function($) {
                         }
                     }
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    // TODO Handle errors. Ideally the form should be validated in JavaScript
-                    // before it is submitted.
-                    console.log(jqXHR);
-                    console.log(textStatus);
-                    console.log(errorThrown);
-
+                error: function (jqXHR, textStatus) {
                     // Don't allow the form to submit.
+                    event.preventDefault();
                     event.stopPropagation();
+
+                    var cardHolderFields = [
+                        'first_name', 'last_name', 'address_line1', 'address_line2',
+                        'state', 'city', 'country', 'postal_code'
+                    ];
+
+                    if (textStatus === 'error') {
+                        var error = JSON.parse(jqXHR.responseText);
+                        if (error.field_errors) {
+                            for (var k in error.field_errors) {
+                                if (cardHolderFields.indexOf(k) !== -1) {
+                                    var field = $('input[name=' + k + ']');
+                                    BasketPage.appendCardHolderValidationErrorMsg(field, error.field_errors[k]);
+                                    field.focus();
+                                }
+                            }
+                        }
+                    }
                 }
             });
         });
