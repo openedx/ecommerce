@@ -38,7 +38,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
             if username and user.username != username:
                 raise PermissionDenied
 
-            queryset = queryset.filter(user=user)
+            queryset = queryset.filter(user=user, site=self.request.site)
 
         return queryset
 
