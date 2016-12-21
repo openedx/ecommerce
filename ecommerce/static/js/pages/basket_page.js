@@ -68,10 +68,16 @@ define([
 
             $form.appendTo('body').submit();
         },
-        appendValidationErrorMsg = function(event, field, msg) {
+        appendCardValidationErrorMsg = function(event, field, msg) {
             field.find('~.help-block').append('<span>' + msg + '</span>');
             field.focus();
             event.preventDefault();
+        },
+
+        appendCardHolderValidationErrorMsg = function(field, msg) {
+            field.parentsUntil('form-item').find('~.help-block').append(
+                '<span>' + msg + '</span>'
+            );
         },
 
         cardHolderInfoValidation = function (event) {
@@ -86,9 +92,7 @@ define([
             _.each(requiredFields, function(field) {
                 if ($(field).val() === '') {
                     event.preventDefault();
-                    $(field).parentsUntil('form-item').find('~.help-block').append(
-                        '<span>This field is required</span>'
-                    );
+                    appendCardHolderValidationErrorMsg($(field), 'This field is required');
                 }
             });
 
@@ -112,20 +116,20 @@ define([
             cardType = CreditCardUtils.getCreditCardType(cardNumber);
 
             if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
-                appendValidationErrorMsg(event, cardNumberField, 'Invalid card number');
+                appendCardValidationErrorMsg(event, cardNumberField, 'Invalid card number');
             } else if (typeof cardType === 'undefined') {
-                appendValidationErrorMsg(event, cardNumberField, 'Unsupported card type');
+                appendCardValidationErrorMsg(event, cardNumberField, 'Unsupported card type');
             } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
-                appendValidationErrorMsg(event, cvnNumberField, 'Invalid CVN');
+                appendCardValidationErrorMsg(event, cvnNumberField, 'Invalid CVN');
             }
 
             if (!Number.isInteger(Number(cardExpiryMonth)) ||
                 Number(cardExpiryMonth) > 12 || Number(cardExpiryMonth) < 1) {
-                appendValidationErrorMsg(event, cardExpiryMonthField, 'Invalid month');
+                appendCardValidationErrorMsg(event, cardExpiryMonthField, 'Invalid month');
             } else if (!Number.isInteger(Number(cardExpiryYear)) || Number(cardExpiryYear) < currentYear) {
-                appendValidationErrorMsg(event, cardExpiryYearField, 'Invalid year');
+                appendCardValidationErrorMsg(event, cardExpiryYearField, 'Invalid year');
             } else if (Number(cardExpiryMonth) < currentMonth && Number(cardExpiryYear) === currentYear) {
-                appendValidationErrorMsg(event, cardExpiryMonthField, 'Card expired');
+                appendCardValidationErrorMsg(event, cardExpiryMonthField, 'Card expired');
             }
         },
         onReady = function() {
@@ -155,10 +159,10 @@ define([
                         $('.card-type-icon').attr(
                             'src',
                             iconPath + card.name + '.png'
-                        );
+                        ).removeClass('hidden');
                         $('input[name=card_type]').val(card.type);
                     } else {
-                        $('.card-type-icon').attr('src', '');
+                        $('.card-type-icon').attr('src', '').addClass('hidden');
                         $('input[name=card_type]').val('');
                     }
                 }
@@ -217,6 +221,7 @@ define([
         };
 
         return {
+            appendCardHolderValidationErrorMsg: appendCardHolderValidationErrorMsg,
             appendToForm: appendToForm,
             cardInfoValidation: cardInfoValidation,
             checkoutPayment: checkoutPayment,

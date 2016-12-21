@@ -108,7 +108,7 @@
                 <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
                 <div class="col-sm-12 payment-methods">
                     <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
-                        <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png"></a>
+                        <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png" alt="Credit cards"></a>
                     </div>
                     <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
                         {# Translators: Do NOT translate the name PayPal. #}
@@ -140,14 +140,14 @@
                 {% if not free_basket %}
                 <legend aria-label={% trans "Billing information" %}>{% trans "BILLING INFORMATION" %}</legend>
                 {% if not paypal_enabled %}
-                <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png">
+                <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="Credit cards">
                 {% endif %}
                 <div class="pci-fields row">
                     <div id="card-number" class="form-group col-sm-6">
                         <label for="card-number-input" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
                         <input id="card-number-input" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
-                        <img class="card-type-icon">
+                        <img class="card-type-icon hidden" alt="Credit card icon">
                         <p class="help-block"></p>
                     </div>
                     <input type="hidden" name="card_type" class="pci-field">

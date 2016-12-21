@@ -215,11 +215,14 @@ class BasketSummaryView(BasketView):
 
         # Total benefit displayed in price summary.
         # Currently only one voucher per basket is supported.
-        applied_voucher = basket.vouchers.first()
-        total_benefit = (
-            format_benefit_value(applied_voucher.offers.first().benefit)
-            if applied_voucher else None
-        )
+        try:
+            applied_voucher = basket.vouchers.first()
+            total_benefit = (
+                format_benefit_value(applied_voucher.offers.first().benefit)
+                if applied_voucher else None
+            )
+        except ValueError:
+            total_benefit = None
 
         context.update({
             'total_benefit': total_benefit,
