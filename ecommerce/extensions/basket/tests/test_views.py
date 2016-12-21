@@ -545,7 +545,8 @@ class VoucherAddMessagesViewTests(TestCase):
     def test_voucher_expired_error_msg(self):
         """ Verify correct error message is returned when voucher has expired. """
         end_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
-        factories.VoucherFactory(code=COUPON_CODE, end_datetime=end_datetime)
+        start_datetime = datetime.datetime.now() - datetime.timedelta(days=2)
+        factories.VoucherFactory(code=COUPON_CODE, end_datetime=end_datetime, start_datetime=start_datetime)
         self.assertMessage(_("Coupon code '{code}' has expired.").format(code=COUPON_CODE))
 
     def test_voucher_added_to_basket_msg(self):
