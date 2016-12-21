@@ -14,6 +14,8 @@ from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.test.factories import create_order
+from ecommerce.tests.factories import SiteFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -58,17 +60,21 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         self.assert_empty_result_response(response)
 
     def test_with_orders(self):
-        """ The view should return a list of the user's orders, sorted reverse chronologically. """
-        order = factories.create_order(user=self.user)
+        """
+        The view should return a list of the user's orders, sorted reverse chronologically, filtered by current site.
+        """
+        order = create_order(site=self.site, user=self.user)
+        create_order(site=SiteFactory(), user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
 
+        self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], unicode(order.number))
 
         # Test ordering
-        order_2 = factories.create_order(user=self.user)
+        order_2 = create_order(site=self.site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
