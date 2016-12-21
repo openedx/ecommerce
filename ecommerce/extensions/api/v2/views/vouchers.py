@@ -72,8 +72,9 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         # If an enterprise is specified instead of a code, then we'll
         # need to look up the coupon linked to the indicated enterprise
         # through its catalog, which should be linked to a coupon.
-        # All that is not possible at the moment so, for now, HACK IT!!!
+        # All that is not possible at the moment so, for now, HACK IT!!!        
         if enterprise_uuid:
+            # Enterprise-Catalog-Coupon lookup logic goes here
             code = '7O3FJRATAO3Y3HGV'
 
         try:
