@@ -1,4 +1,4 @@
-from ecommerce.extensions.payment.utils import middle_truncate
+from ecommerce.extensions.payment.utils import clean_field_value, middle_truncate
 from ecommerce.tests.testcases import TestCase
 
 
@@ -17,3 +17,8 @@ class UtilsTests(TestCase):
         self.assertEqual('xx...xx', middle_truncate(string, length - 2))
 
         self.assertRaises(ValueError, middle_truncate, string, 0)
+
+    def test_clean_field_value(self):
+        """ Verify the passed value is cleaned of specific special characters. """
+        value = 'Some^text:\'test-value'
+        self.assertEqual(clean_field_value(value), 'Sometexttest-value')

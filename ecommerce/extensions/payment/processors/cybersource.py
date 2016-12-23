@@ -25,6 +25,7 @@ from ecommerce.extensions.payment.exceptions import (
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.transport import RequestsTransport
+from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +177,7 @@ class Cybersource(BasePaymentProcessor):
                 parameters['item_{}_discount_amount '.format(index)] = str(line.discount_value)
                 # Note (CCB): This indicates that the total_amount field below includes tax.
                 parameters['item_{}_gross_net_indicator'.format(index)] = 'Y'
-                parameters['item_{}_name'.format(index)] = line.product.title.replace('"', '')
+                parameters['item_{}_name'.format(index)] = clean_field_value(line.product.title)
                 parameters['item_{}_quantity'.format(index)] = line.quantity
                 parameters['item_{}_sku'.format(index)] = line.stockrecord.partner_sku
                 parameters['item_{}_tax_amount'.format(index)] = str(line.line_tax)

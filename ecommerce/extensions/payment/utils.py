@@ -1,3 +1,5 @@
+import re
+
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -37,3 +39,17 @@ def middle_truncate(string, chars):
     truncated = u'{start}{indicator}{end}'.format(start=start, indicator=indicator, end=end)
 
     return truncated
+
+
+def clean_field_value(value):
+    """Strip the value of any special characters.
+
+    Currently strips caret(^), colon(:) and quote(" ') characters from the value.
+
+    Args:
+        value (str): The original value.
+
+    Returns:
+        A cleaned string.
+    """
+    return re.sub(r'[\^:"\']', '', value)
