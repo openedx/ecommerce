@@ -23,6 +23,7 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import InvalidSignatureError, InvalidBasketError
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,7 @@ class CybersourceSubmitView(FormView):
         }
 
         for source, destination in six.iteritems(self.FIELD_MAPPINGS):
-            extra_parameters[destination] = data[source]
+            extra_parameters[destination] = clean_field_value(data[source])
 
         parameters = Cybersource(self.request.site).get_transaction_parameters(
             basket,
