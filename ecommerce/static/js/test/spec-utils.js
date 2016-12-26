@@ -14,7 +14,13 @@ define([
                 return Backbone.Model.extend({
                     defaults: {
                         id: null,
-                        category: {}
+                        category: {},
+                        course_catalog: {}
+                    },
+                    catalogTypes: {
+                        single_course: 'Single course',
+                        multiple_courses: 'Multiple courses',
+                        catalog: 'Catalog'
                     },
 
                     isValid: function () {
