@@ -179,9 +179,11 @@ define([
                     observe: 'course_catalog',
                     selectOptions: {
                         collection: function () {
-                            this.fetchCourseCatalogsData();
                             return this.catalogData;
                         }
+                    },
+                    initialize: function () {
+                        this.fetchCourseCatalogsData();
                     }
                 },
                 'input[name=email_domains]': {
@@ -631,9 +633,6 @@ define([
             },
 
             fetchCourseCatalogsData: function() {
-                this.limit = 10;
-                this.offset = 0;
-
                 Backbone.ajax({
                     context: this,
                     type: 'GET',
