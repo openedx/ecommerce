@@ -52,7 +52,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return CouponListSerializer
         return CouponSerializer
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):  # pylint: disable=too-many-statements
         """Adds coupon to the user's basket.
 
         Expects request array to contain all the necessary data (listed out below).
@@ -75,6 +75,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """
         category_data = request.data.get('category')
         code = request.data.get('code')
+        course_catalog_data = request.data.get('course_catalog')
         course_seat_types = request.data.get('course_seat_types')
         max_uses = request.data.get('max_uses')
         partner = request.site.siteconfiguration.partner
@@ -112,6 +113,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     )
                 except (KeyError, TypeError):
                     return Response('Invalid Coupon Category data.', status=status.HTTP_400_BAD_REQUEST)
+
+                try:
+                    course_catalog = course_catalog_data['id']
+                except (KeyError, TypeError):
+                    return Response(
+                        'Unexpected catalog data format received for coupon.',
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
                 # Maximum number of uses can be set for each voucher type and disturb
                 # the predefined behaviours of the different voucher types. Therefor
@@ -151,6 +160,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         catalog_query=request.data.get('catalog_query'),
                         category=category,
                         code=code,
+                        course_catalog=course_catalog,
                         course_seat_types=course_seat_types,
                         email_domains=request.data.get('email_domains'),
                         end_datetime=request.data.get('end_datetime'),
@@ -240,6 +250,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             # Remove catalog if switching from single course to dynamic query
             if voucher_range.catalog:
                 range_data['catalog'] = None
+
+            course_catalog_data = request.data.get('course_catalog')
+            if course_catalog_data:
+                # make sure course catalog is None if its empty
+                course_catalog = course_catalog_data.get('id') if course_catalog_data.get('id') else None
+                range_data['course_catalog'] = course_catalog
+
             Range.objects.filter(id=voucher_range.id).update(**range_data)
 
         benefit_value = request.data.get('benefit_value')

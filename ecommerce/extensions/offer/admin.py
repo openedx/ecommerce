@@ -2,8 +2,9 @@ from oscar.apps.offer.admin import *  # pylint: disable=unused-import,wildcard-i
 
 
 class RangeAdminExtended(admin.ModelAdmin):
-    list_display = ('name', 'catalog',)
+    list_display = ('name', 'catalog', 'course_catalog',)
     raw_id_fields = ('catalog',)
+    search_fields = ['name', 'course_catalog']
 
 
 admin.site.unregister(Range)

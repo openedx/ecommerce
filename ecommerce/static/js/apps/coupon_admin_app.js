@@ -1,12 +1,14 @@
 require([
         'backbone',
         'collections/category_collection',
+        'collections/catalog_collection',
         'ecommerce',
         'routers/coupon_router',
         'utils/navigate',
     ],
     function (Backbone,
               CategoryCollection,
+              CatalogCollection,
               ecommerce,
               CouponRouter,
               navigate) {
@@ -20,6 +22,11 @@ require([
             ecommerce.coupons.categories = new CategoryCollection();
             ecommerce.coupons.categories.url = '/api/v2/coupons/categories/';
             ecommerce.coupons.categories.fetch({ async: false });
+
+            ecommerce.coupons.catalogs = new CatalogCollection();
+            ecommerce.coupons.catalogs.url = '/api/v2/catalogs/course_catalogs/';
+            ecommerce.coupons.catalogs.fetch({ async: false });
+
             couponApp.start();
 
             // Handle navbar clicks.

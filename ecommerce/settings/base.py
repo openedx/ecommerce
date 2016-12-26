@@ -237,6 +237,9 @@ COMMERCE_API_TIMEOUT = 7
 # Cache course info from course API.
 COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
 
+# Cache catalog info from Course Discovery API.
+CATALOG_API_CACHE_TIMEOUT = 3600  # Value is in seconds
+
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
@@ -279,6 +282,8 @@ LOCAL_APPS = [
 
     # Sailthru email marketing integration
     'ecommerce.sailthru',
+
+    'ecommerce.services',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
