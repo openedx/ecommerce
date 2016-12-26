@@ -4,6 +4,7 @@ define([
         'views/coupon_create_edit_view',
         'models/coupon_model',
         'test/mock_data/coupons',
+        'test/mock_data/catalogs',
         'test/spec-utils'
     ],
     function (_s,
@@ -11,6 +12,7 @@ define([
               CouponCreateEditView,
               Coupon,
               Mock_Coupons,
+              Mock_Catalogs,
               SpecUtils) {
 
         'use strict';
@@ -26,6 +28,7 @@ define([
 
             describe('edit enrollment code', function () {
                 beforeEach(function () {
+                    enrollment_code_data.course_catalog = Mock_Catalogs;
                     model = Coupon.findOrCreate(enrollment_code_data, {parse: true});
                     model.updateSeatData();
                     view = new CouponCreateEditView({model: model, editing: true}).render();

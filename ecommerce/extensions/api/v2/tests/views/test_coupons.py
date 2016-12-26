@@ -121,6 +121,59 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             expected_max_uses
         )
 
+    @ddt.data(
+        (Voucher.ONCE_PER_CUSTOMER, 2),
+        (Voucher.SINGLE_USE, 2)
+    )
+    @ddt.unpack
+    def test_clean_voucher_request_data(self, voucher_type, max_uses):
+        """
+        Test that the method "clean_voucher_request_data" returns expected
+        cleaned data dict.
+        """
+        title = 'Test coupon'
+        stock_record = self.seat.stockrecords.first()
+        self.coupon_data.update({
+            'title': title,
+            'client': 'Člient',
+            'stock_record_ids': [stock_record.id],
+            'voucher_type': voucher_type,
+            'price': 100,
+            'category': {'name': self.category.name},
+            'max_uses': max_uses,
+        })
+        request = RequestFactory()
+        request.user = self.user
+        request.data = self.coupon_data
+        request.site = self.site
+        request.COOKIES = {}
+
+        view = CouponViewSet()
+        view.request = request
+        cleaned_voucher_data = view.clean_voucher_request_data(request)
+
+        expected_cleaned_voucher_data_keys = [
+            'benefit_type',
+            'benefit_value',
+            'coupon_catalog',
+            'catalog_query',
+            'category',
+            'code',
+            'course_catalog',
+            'course_seat_types',
+            'email_domains',
+            'end_datetime',
+            'max_uses',
+            'note',
+            'partner',
+            'price',
+            'quantity',
+            'start_datetime',
+            'title',
+            'voucher_type'
+        ]
+        self.assertEqual(sorted(expected_cleaned_voucher_data_keys), sorted(cleaned_voucher_data.keys()))
+
     def test_create_coupon_product(self):
         """Test the created coupon data."""
         coupon = self.create_coupon()
@@ -238,7 +291,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'start_datetime': str(now() - datetime.timedelta(days=10)),
             'stock_record_ids': [1, 2],
             'title': 'Tešt čoupon',
-            'voucher_type': Voucher.SINGLE_USE
+            'voucher_type': Voucher.SINGLE_USE,
         }
         self.response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.coupon = Product.objects.get(title=self.data['title'])
@@ -278,6 +331,34 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         )
         self.assertEqual(details_response['coupon_type'], 'Enrollment code')
         self.assertEqual(details_response['code_status'], 'ACTIVE')
+
+    def test_create_coupon_with_same_code_data(self):
+        """
+        Test creating discount coupon with same code again is invalid.
+        """
+        self.data.update({
+            'benefit_value': 50,
+            'code': '123456',
+            'quantity': 1,
+            'title': 'Test coupon'
+        })
+        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response_data.status_code, status.HTTP_200_OK)
+
+        # now try to create discount coupon with same code again
+        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response_data.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_coupon_with_invalid_course_catalog_data(self):
+        """
+        Test creating discount coupon with invalid course catalog returns bad
+        response.
+        """
+        self.data.update({
+            'course_catalog': {'name': 'Invalid course catalog data dict without id key'},
+        })
+        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response_data.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_coupon_product_invalid_category_data(self):
         """Test creating coupon when provided category data is invalid."""
@@ -503,6 +584,28 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(voucher_range.catalog, None)
         self.assertEqual(voucher_range.catalog_query, data['catalog_query'])
         self.assertEqual(voucher_range.course_seat_types, data['course_seat_types'][0])
+
+    def test_update_course_catalog(self):
+        """
+        Test updating course catalog range value deletes catalog,
+        catalog_query and course_seat_types from that voucher range.
+        """
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+        course_catalog_id = {'id': 1, 'name': 'Test catalog'}
+        data = {
+            'id': self.coupon.id,
+            'course_catalog': course_catalog_id
+        }
+        self.client.put(path, json.dumps(data), 'application/json')
+
+        updated_coupon = Product.objects.get(id=self.coupon.id)
+        vouchers = updated_coupon.attr.coupon_vouchers.vouchers
+        voucher_range = vouchers.first().offers.first().benefit.range
+
+        self.assertEqual(voucher_range.catalog, None)
+        self.assertEqual(voucher_range.catalog_query, None)
+        self.assertEqual(voucher_range.course_seat_types, None)
+        self.assertEqual(voucher_range.course_catalog, course_catalog_id['id'])
 
     def test_update_coupon_benefit_value(self):
         vouchers = self.coupon.attr.coupon_vouchers.vouchers.all()

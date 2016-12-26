@@ -81,10 +81,30 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
 
+                    model.set('catalog_query', '');
+                    model.set('course_seat_types', ['verified']);
+                    model.validate();
+                    expect(model.isValid()).toBe(false);
+
                     model.set('catalog_query', '*:*');
                     model.set('course_seat_types', ['verified']);
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
+                });
+
+                it('should validate course catalog for type Catalog', function () {
+                    model.set('catalog_type', 'Catalog');
+                    model.set('course_catalog', '');
+                    model.validate();
+                    expect(model.isValid()).toBe(false);
+
+                    model.set('course_catalog', '');
+                    model.validate();
+                    expect(model.isValid()).toBe(false);
+
+                    model.set('course_catalog', '1');
+                    model.validate();
+                    expect(model.isValid()).toBe(true);
                 });
 
                 it('should validate invoice data.', function() {
@@ -170,6 +190,29 @@ define([
 
                     model.set('seats', [{'price': 100}]);
                     expect(model.getSeatPrice()).toEqual(100);
+                });
+            });
+
+            describe('Should Update Seat Data Correctly.', function () {
+                it('should set correct catalog type for each seat.', function () {
+
+                    // Test single course catalog type when a single course is selected for coupon creation.
+                    var model = new Coupon({});
+                    model.updateSeatData();
+                    expect(model.get('catalog_type')).toEqual(model.catalogTypes.single_course);
+
+                    model = new Coupon({
+                        course_catalog: 1
+                    });
+                    model.updateSeatData();
+                    expect(model.get('catalog_type')).toEqual(model.catalogTypes.catalog);
+
+                    // Test multiple course type when an catalog query is given for coupon creation.
+                    model = new Coupon({
+                        catalog_query: '*:*'
+                    });
+                    model.updateSeatData();
+                    expect(model.get('catalog_type')).toEqual(model.catalogTypes.multiple_courses);
                 });
             });
 

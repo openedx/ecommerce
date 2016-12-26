@@ -3,6 +3,8 @@ define([
         'underscore.string',
         'models/coupon_model',
         'utils/alert_utils',
+        'ecommerce',
+        'collections/catalog_collection',
         'views/coupon_detail_view',
         'test/mock_data/coupons',
         'test/spec-utils',
@@ -12,6 +14,8 @@ define([
               _s,
               Coupon,
               AlertUtils,
+              ecommerce,
+              CatalogCollection,
               CouponDetailView,
               Mock_Coupons,
               SpecUtils) {
@@ -135,6 +139,16 @@ define([
                 expect(view.$('.invoice-discount-value > .value').text()).toEqual('');
                 expect(view.$('.invoice-discount-type > .value').text()).toEqual('');
             });
+
+             it('should display course catalog name on render.', function() {
+                 ecommerce.coupons.catalogs = new CatalogCollection([{id: 1, name: 'Test Catalog'}]);
+
+                 data.course_catalog = 1;
+                 model = Coupon.findOrCreate(data, {parse: true, create: true});
+                 view = new CouponDetailView({model: model});
+                 view.render();
+                 expect(view.$('.catalog-name > .value').text()).toEqual('Test Catalog');
+             });
 
             it('should format seat types.', function() {
                 view.model.unset('course_seat_types');
