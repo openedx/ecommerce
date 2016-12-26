@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -73,98 +72,37 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             429 if the client has made requests at a rate exceeding that allowed by the configured rate limit.
             500 if an error occurs when attempting to create a coupon.
         """
-        category_data = request.data.get('category')
-        code = request.data.get('code')
-        course_seat_types = request.data.get('course_seat_types')
-        max_uses = request.data.get('max_uses')
-        partner = request.site.siteconfiguration.partner
-        stock_record_ids = request.data.get('stock_record_ids')
-        voucher_type = request.data.get('voucher_type')
-
         try:
             with transaction.atomic():
-                if code:
-                    try:
-                        Voucher.objects.get(code=code)
-                        return Response(
-                            'A coupon with code {code} already exists.'.format(code=code),
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
-                    except Voucher.DoesNotExist:
-                        pass
-
-                if course_seat_types:
-                    try:
-                        course_seat_types = prepare_course_seat_types(course_seat_types)
-                    except (AttributeError, TypeError) as e:
-                        logger.exception('Failed to create coupon. Invalid course seat types data: %s', e.message)
-                        return Response(
-                            _('Invalid course seat types data: {}').format(e.message),
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
-
                 try:
-                    category = Category.objects.get(name=category_data['name'])
-                except Category.DoesNotExist:
-                    return Response(
-                        'Category {category_name} not found.'.format(category_name=category_data['name']),
-                        status=status.HTTP_404_NOT_FOUND
-                    )
-                except (KeyError, TypeError):
-                    return Response('Invalid Coupon Category data.', status=status.HTTP_400_BAD_REQUEST)
-
-                # Maximum number of uses can be set for each voucher type and disturb
-                # the predefined behaviours of the different voucher types. Therefor
-                # here we enforce that the max_uses variable can't be used for SINGLE_USE
-                # voucher types.
-                if max_uses and voucher_type != Voucher.SINGLE_USE:
-                    max_uses = int(max_uses)
-                else:
-                    max_uses = None
-
-                # When a black-listed course mode is received raise an exception.
-                # Audit modes do not have a certificate type and therefore will raise
-                # an AttributeError exception.
-                if stock_record_ids:
-                    seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
-                    for seat in seats:
-                        try:
-                            if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
-                                return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-                        except AttributeError:
-                            return Response('Course mode not supported', status=status.HTTP_400_BAD_REQUEST)
-
-                    stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-                    coupon_catalog, __ = get_or_create_catalog(
-                        name='Catalog for stock records: {}'.format(stock_records_string),
-                        partner=partner,
-                        stock_record_ids=stock_record_ids
-                    )
-                else:
-                    coupon_catalog = None
+                    cleaned_voucher_data = self.clean_voucher_request_data(request)
+                except ValidationError as error:
+                    logger.exception('Failed to create coupon. %s', error.message)
+                    return Response(error.message, status=error.code)
 
                 try:
                     coupon_product = create_coupon_product(
-                        benefit_type=request.data.get('benefit_type'),
-                        benefit_value=request.data.get('benefit_value'),
-                        catalog=coupon_catalog,
-                        catalog_query=request.data.get('catalog_query'),
-                        category=category,
-                        code=code,
-                        course_seat_types=course_seat_types,
-                        email_domains=request.data.get('email_domains'),
-                        end_datetime=request.data.get('end_datetime'),
-                        max_uses=max_uses,
-                        note=request.data.get('note'),
-                        partner=partner,
-                        price=request.data.get('price'),
-                        quantity=request.data.get('quantity'),
-                        start_datetime=request.data.get('start_datetime'),
-                        title=request.data.get('title'),
-                        voucher_type=voucher_type
+                        benefit_type=cleaned_voucher_data['benefit_type'],
+                        benefit_value=cleaned_voucher_data['benefit_value'],
+                        catalog=cleaned_voucher_data['coupon_catalog'],
+                        catalog_query=cleaned_voucher_data['catalog_query'],
+                        category=cleaned_voucher_data['category'],
+                        code=cleaned_voucher_data['code'],
+                        course_catalog=cleaned_voucher_data['course_catalog'],
+                        course_seat_types=cleaned_voucher_data['course_seat_types'],
+                        email_domains=cleaned_voucher_data['email_domains'],
+                        end_datetime=cleaned_voucher_data['end_datetime'],
+                        max_uses=cleaned_voucher_data['max_uses'],
+                        note=cleaned_voucher_data['note'],
+                        partner=cleaned_voucher_data['partner'],
+                        price=cleaned_voucher_data['price'],
+                        quantity=cleaned_voucher_data['quantity'],
+                        start_datetime=cleaned_voucher_data['start_datetime'],
+                        title=cleaned_voucher_data['title'],
+                        voucher_type=cleaned_voucher_data['voucher_type'],
                     )
-                except IntegrityError as e:
-                    return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+                except (KeyError, IntegrityError) as error:
+                    return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
 
                 basket = prepare_basket(request, coupon_product)
 
@@ -178,6 +116,104 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 return Response(response_data, status=status.HTTP_200_OK)
         except ValidationError as e:
             raise serializers.ValidationError(e.message)
+
+    @classmethod
+    def clean_voucher_request_data(cls, request):
+        """
+        Helper method to return cleaned request data for voucher creation or
+        raise validation error with error code.
+
+        Arguments:
+            request (HttpRequest): request with voucher data
+
+        """
+        category_data = request.data.get('category')
+        code = request.data.get('code')
+        course_catalog_data = request.data.get('course_catalog')
+        course_seat_types = request.data.get('course_seat_types')
+        max_uses = request.data.get('max_uses')
+        partner = request.site.siteconfiguration.partner
+        stock_record_ids = request.data.get('stock_record_ids')
+        voucher_type = request.data.get('voucher_type')
+
+        if code and Voucher.does_exist(code):
+            validation_message = 'A coupon with code {code} already exists.'.format(code=code)
+            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+
+        if course_seat_types:
+            try:
+                course_seat_types = prepare_course_seat_types(course_seat_types)
+            except (AttributeError, TypeError) as exception:
+                validation_message = 'Invalid course seat types data: {}'.format(exception.message)
+                raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            category = Category.objects.get(name=category_data['name'])
+        except Category.DoesNotExist:
+            validation_message = 'Category "{category_name}" not found.'.format(category_name=category_data['name'])
+            raise ValidationError(validation_message, code=status.HTTP_404_NOT_FOUND)
+        except (KeyError, TypeError):
+            validation_message = 'Invalid Coupon Category data.'
+            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            course_catalog = course_catalog_data['id'] if course_catalog_data else None
+        except (KeyError, TypeError):
+            validation_message = 'Unexpected catalog data format received for coupon.'
+            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+
+        # Maximum number of uses can be set for each voucher type and disturb
+        # the predefined behaviours of the different voucher types. Therefor
+        # here we enforce that the max_uses variable can't be used for SINGLE_USE
+        # voucher types.
+        if max_uses and voucher_type != Voucher.SINGLE_USE:
+            max_uses = int(max_uses)
+        else:
+            max_uses = None
+
+        # When a black-listed course mode is received raise an exception.
+        # Audit modes do not have a certificate type and therefore will raise
+        # an AttributeError exception.
+        if stock_record_ids:
+            seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
+            for seat in seats:
+                try:
+                    if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                        validation_message = 'Course mode not supported'
+                        raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+                except AttributeError:
+                    validation_message = 'Course mode not supported'
+                    raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+
+            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+            coupon_catalog, __ = get_or_create_catalog(
+                name='Catalog for stock records: {}'.format(stock_records_string),
+                partner=partner,
+                stock_record_ids=stock_record_ids
+            )
+        else:
+            coupon_catalog = None
+
+        return {
+            'benefit_type': request.data.get('benefit_type'),
+            'benefit_value': request.data.get('benefit_value'),
+            'coupon_catalog': coupon_catalog,
+            'catalog_query': request.data.get('catalog_query'),
+            'category': category,
+            'code': code,
+            'course_catalog': course_catalog,
+            'course_seat_types': course_seat_types,
+            'email_domains': request.data.get('email_domains'),
+            'end_datetime': request.data.get('end_datetime'),
+            'max_uses': max_uses,
+            'note': request.data.get('note'),
+            'partner': partner,
+            'price': request.data.get('price'),
+            'quantity': request.data.get('quantity'),
+            'start_datetime': request.data.get('start_datetime'),
+            'title': request.data.get('title'),
+            'voucher_type': voucher_type,
+        }
 
     def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
@@ -240,6 +276,19 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             # Remove catalog if switching from single course to dynamic query
             if voucher_range.catalog:
                 range_data['catalog'] = None
+
+            course_catalog_data = request.data.get('course_catalog')
+            if course_catalog_data:
+                course_catalog = course_catalog_data.get('id')
+                range_data['course_catalog'] = course_catalog
+
+                # Remove catalog_query and course_seat_types, switching from
+                # dynamic query to course catalog
+                range_data['catalog_query'] = None
+                range_data['course_seat_types'] = None
+            else:
+                range_data['course_catalog'] = None
+
             Range.objects.filter(id=voucher_range.id).update(**range_data)
 
         benefit_value = request.data.get('benefit_value')

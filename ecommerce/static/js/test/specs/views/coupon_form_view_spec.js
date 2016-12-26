@@ -4,8 +4,11 @@ define([
         'views/coupon_form_view',
         'views/alert_view',
         'models/coupon_model',
+        'models/catalog_model',
+        'collections/catalog_collection',
         'test/mock_data/categories',
         'test/mock_data/coupons',
+        'test/mock_data/catalogs',
         'test/spec-utils',
         'ecommerce',
         'test/custom-matchers'
@@ -15,8 +18,11 @@ define([
               CouponFormView,
               AlertView,
               Coupon,
+              Catalog,
+              CatalogCollection,
               Mock_Categories,
               Mock_Coupons,
+              Mock_Catalogs,
               SpecUtils,
               ecommerce) {
         'use strict';
@@ -28,10 +34,11 @@ define([
 
             beforeEach(function () {
                 ecommerce.coupons = {
-                    categories: Mock_Categories
+                    categories: Mock_Categories,
+                    catalogs: Mock_Catalogs
                 };
-                model = new Coupon();
-                view = new CouponFormView({ editing: false, model: model }).render();
+                model = new Coupon({course_catalog: Mock_Catalogs});
+                view = new CouponFormView({editing: false, model: model}).render();
             });
 
             describe('seat type dropdown', function () {
@@ -136,6 +143,56 @@ define([
                     view.$el.append('<a href="' + href + '" class="test external-link">Google</a>');
                     view.$('.test.external-link').click();
                     expect(window.open).toHaveBeenCalledWith(href);
+                });
+            });
+
+            describe('course catalogs', function() {
+                it('course catalog drop down should be hidden when catalog is not selected', function() {
+                    view.$('#single-course').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+
+                    view.$('#multiple-courses').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+
+                    view.$('#catalog').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toBeVisible();
+                });
+
+                it('course catalog is setting properly', function() {
+                    view.$('#catalog').prop('checked', true).trigger('change');
+
+                    view.$('[name=course_catalog]').val(1).trigger('change');
+                    expect(view.$('select[name=course_catalog] option:selected').text()).toEqual(Mock_Catalogs[0].name);
+                    expect(view.$('[name=course_catalog]').val()).toEqual('1');
+
+                    view.$('[name=course_catalog]').val(2).trigger('change');
+                    expect(view.$('select[name=course_catalog] option:selected').text()).toEqual(Mock_Catalogs[1].name);
+                    expect(view.$('[name=course_catalog]').val()).toEqual('2');
+
+                    view.$('[name=course_catalog]').val(3).trigger('change');
+                    expect(view.$('select[name=course_catalog] option:selected').text()).toEqual(Mock_Catalogs[2].name);
+                    expect(view.$('[name=course_catalog]').val()).toEqual('3');
+                });
+
+                it('returning right course catalog when selected catalog is number', function() {
+                    var MOCK_SELECTED_CATALOG_DATA = {
+                        id: 123456,
+                        name: 'Course catalog 123456'
+                    };
+
+                    spyOn($, 'ajax').and.callFake(function(options) {
+                        options.success(MOCK_SELECTED_CATALOG_DATA);
+                    });
+
+                    var catalog = new Catalog();
+                    catalog.fetch();
+                    ecommerce.coupons = {
+                        categories: Mock_Categories,
+                        catalogs: new CatalogCollection(catalog)
+                    };
+                    var coupon_model = new Coupon({course_catalog: 123456});
+                    new CouponFormView({ editing: true, model: coupon_model }).render();
+                    expect(coupon_model.get('course_catalog')).toEqual(catalog);
                 });
             });
 

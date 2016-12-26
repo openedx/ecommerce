@@ -194,6 +194,7 @@ define([], function () {
                 'id': 4,
                 'name': 'TESTCAT'
             },
+            'course_catalog': null,
             'price': '100.00',
             'invoice_type': 'Prepaid',
             'invoice_discount_type': 'Percentage',
@@ -342,6 +343,6 @@ define([], function () {
         'lastEditData': lastEditData,
         'percentageDiscountCodeVoucher': percentageDiscountCodeVoucher,
         'valueDiscountCodeVoucher': valueDiscountCodeVoucher,
-        'verifiedSeat': verifiedSeat,
+        'verifiedSeat': verifiedSeat
     };
 });
