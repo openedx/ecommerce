@@ -57,6 +57,11 @@ define([
                         return this.get('catalog_type') === 'Multiple courses';
                     }
                 },
+                course_catalog: {
+                    required: function () {
+                        return this.get('catalog_type') === 'Course catalog';
+                    }
+                },
                 category: {required: true},
                 client: {required: true},
                 code: {
@@ -185,9 +190,16 @@ define([
 
             updateSeatData: function () {
                 var seat_data,
-                    seats = this.get('seats');
+                    seats = this.get('seats'),
+                    catalog_type;
 
-                this.set('catalog_type', this.has('catalog_query') ? 'Multiple courses': 'Single course');
+                if (this.has('catalog_query')) {
+                    catalog_type = 'Multiple courses'
+                } else if (this.has('course_catalog')) {
+                    catalog_type = 'Catalog course'
+                } else {
+                    catalog_type = 'Single course'
+                }
 
                 if (this.get('catalog_type') === 'Single course') {
                     if (seats[0]) {

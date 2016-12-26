@@ -121,6 +121,7 @@ class Range(AbstractRange):
         'course_seat_types',
     ]
     ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
+    course_catalog = models.PositiveIntegerField(help_text=_('Course catalog id.'), null=True, blank=True)
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
     catalog_query = models.TextField(blank=True, null=True)
     course_seat_types = models.CharField(

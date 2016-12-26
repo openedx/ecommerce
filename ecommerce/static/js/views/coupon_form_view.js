@@ -43,6 +43,13 @@ define([
 
             seatTypes: [],
 
+            catalogData: [
+                {
+                    value: '',
+                    label: '---'
+                }
+            ],
+
             codeTypes: [
                 {
                     value: 'Enrollment code',
@@ -168,6 +175,15 @@ define([
                 'input[name=course_seat_types]': {
                     observe: 'course_seat_types'
                 },
+                'select[name=course_catalog]': {
+                    observe: 'course_catalog',
+                    selectOptions: {
+                        collection: function () {
+                            this.fetchCourseCatalogsData();
+                            return this.catalogData;
+                        }
+                    }
+                },
                 'input[name=email_domains]': {
                     observe: 'email_domains',
                     onSet: function(val) {
@@ -252,6 +268,7 @@ define([
                         'category',
                         'client',
                         'course_seat_types',
+                        'course_catalog',
                         'end_date',
                         'invoice_discount_type',
                         'invoice_discount_value',
@@ -420,19 +437,31 @@ define([
                 if (this.model.get('catalog_type') === 'Single course') {
                     this.model.unset('course_seat_types');
                     this.model.unset('catalog_query');
+                    this.model.unset('course_catalog');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').removeClass(this.hiddenClass);
+                    this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
+                } else if (this.model.get('catalog_type') === 'Course catalog') {
+                    this.model.unset('course_seat_types');
+                    this.model.unset('catalog_query');
+                    this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_id]').addClass(this.hiddenClass);
+                    this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_catalog]').removeClass(this.hiddenClass);
                 } else {
                     this.formGroup('[name=catalog_query]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
                     this.$('[name=seat_type] option').remove();
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
                     this.model.unset('stock_record_ids');
+                    this.model.unset('course_catalog');
 
                     if (!this.model.get('course_seat_types')) {
                         this.model.set('course_seat_types', []);
@@ -601,6 +630,31 @@ define([
                 this.dynamic_catalog_view.seat_types = this.model.get('course_seat_types');
             },
 
+            fetchCourseCatalogsData: function() {
+                this.limit = 10;
+                this.offset = 0;
+
+                Backbone.ajax({
+                    context: this,
+                    type: 'GET',
+                    url: window.location.origin + '/api/v2/catalogs/all_catalogs/',
+                    data: {},
+                    success: this.onSuccess
+                });
+            },
+
+            onSuccess: function(data) {
+                var courseCatalogElement = this.$('#course-catalog'),
+                    option;
+
+                data.forEach(function (catalog) {
+                    option = document.createElement('option');
+                    option.value = catalog.id;
+                    option.text = catalog.name;
+                    courseCatalogElement.append(option);
+                });
+            },
+
             /**
              * Open external links in a new tab.
              * Works only for anchor elements that contain 'external-link' class.
@@ -641,6 +695,7 @@ define([
                     this.fillFromCourse();
                 } else {
                     this.model.set({
+                        'course_catalog': this.catalogData[0].value,
                         'coupon_type': this.codeTypes[0].value,
                         'voucher_type': this.voucherTypes[0].value,
                         'benefit_type': 'Percentage',

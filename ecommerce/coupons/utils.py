@@ -1,10 +1,13 @@
 """ Coupon related utility functions. """
 import hashlib
+import logging
 
 from django.conf import settings
 from django.core.cache import cache
 from oscar.core.loading import get_model
 
+
+log = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 
 
@@ -34,6 +37,55 @@ def get_range_catalog_query_results(limit, query, site, offset=None):
         )
         cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response
+
+
+def get_all_course_catalogs(site):
+    """
+    Get all course catalogs.
+
+    Arguments:
+        site (Site): Site object containing Site Configuration data
+
+    Returns:
+        dict: Course catalogs received from Course Catalog API
+    """
+    no_data = []
+    resource = 'catalogs'
+    api = site.siteconfiguration.course_catalog_api_client
+    try:
+        endpoint = getattr(api, resource)
+        resource_id = None
+        querystring = {}
+        response = endpoint(resource_id).get(**querystring)
+
+        if resource_id:
+            results = response
+        else:
+            results = _traverse_pagination(response, endpoint, querystring, no_data)
+    except:  # pylint: disable=bare-except
+        log.exception('Failed to retrieve data from the Discovery API.')
+        return no_data
+
+    return results
+
+
+def _traverse_pagination(response, endpoint, querystring, no_data):
+    """Traverse a paginated API response.
+
+    Extracts and concatenates "results" (list of dict) returned by DRF-powered APIs.
+    """
+    results = response.get('results', no_data)
+
+    page = 1
+    next_page = response.get('next')
+    while next_page:
+        page += 1
+        querystring['page'] = page
+        response = endpoint.get(**querystring)
+        results += response.get('results', no_data)
+        next_page = response.get('next')
+
+    return results
 
 
 def prepare_course_seat_types(course_seat_types):
