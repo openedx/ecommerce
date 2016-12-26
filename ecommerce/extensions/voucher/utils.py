@@ -418,26 +418,33 @@ def create_vouchers(
         _range=None,
         catalog_query=None,
         course_seat_types=None,
-        email_domains=None):
+        email_domains=None,
+        course_catalog=None,
+):
     """
     Create vouchers.
 
-    Args:
-            benefit_type (str): Type of benefit associated with vouchers.
-            benefit_value (Decimal): Value of benefit associated with vouchers.
-            catalog (Catalog): Catalog associated with range of products
-                               to which a voucher can be applied to.
-            coupon (Coupon): Coupon entity associated with vouchers.
-            end_datetime (datetime): End date for voucher offer.
-            name (str): Voucher name.
-            quantity (int): Number of vouchers to be created.
-            start_datetime (datetime): Start date for voucher offer.
-            voucher_type (str): Type of voucher.
-            code (str): Code associated with vouchers. Defaults to None.
-            email_domains (str): List of email domains to restrict coupons. Defaults to None.
+    Arguments:
+        benefit_type (str): Type of benefit associated with vouchers.
+        benefit_value (Decimal): Value of benefit associated with vouchers.
+        catalog (Catalog): Catalog associated with range of products
+                           to which a voucher can be applied to.
+        catalog_query (str): ElasticSearch query used by dynamic coupons. Defaults to None.
+        code (str): Code associated with vouchers. Defaults to None.
+        coupon (Coupon): Coupon entity associated with vouchers.
+        course_catalog (int): Course catalog id from Catalog Service. Defaults to None.
+        course_seat_types (str): Comma-separated list of course seat types.
+        email_domains (str): List of email domains to restrict coupons. Defaults to None.
+        end_datetime (datetime): End date for voucher offer.
+        max_uses (int): Number of Voucher max uses. Defaults to None.
+        name (str): Voucher name.
+        quantity (int): Number of vouchers to be created.
+        start_datetime (datetime): Start date for voucher offer.
+        voucher_type (str): Type of voucher.
+        _range (Range): Product range. Defaults to None.
 
     Returns:
-            List[Voucher]
+        List[Voucher]
     """
     logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
     vouchers = []
@@ -450,10 +457,13 @@ def create_vouchers(
     else:
         logger.info("Creating [%d] vouchers for coupon [%s]", quantity, coupon.id)
         range_name = (_('Range for coupon [{coupon_id}]').format(coupon_id=coupon.id))
+        # make sure course catalog is None if its empty
+        course_catalog = course_catalog if course_catalog else None
         product_range, __ = Range.objects.get_or_create(
             name=range_name,
             catalog=catalog,
             catalog_query=catalog_query,
+            course_catalog=course_catalog,
             course_seat_types=course_seat_types,
         )
 

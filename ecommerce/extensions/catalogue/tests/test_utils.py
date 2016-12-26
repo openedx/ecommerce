@@ -122,6 +122,7 @@ class CouponCreationTests(CouponMixin, TestCase):
             catalog_query=None,
             category=self.category,
             code=code,
+            course_catalog=None,
             course_seat_types=None,
             email_domains=None,
             end_datetime='2020-1-1',

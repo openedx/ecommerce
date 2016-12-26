@@ -194,6 +194,7 @@ define([], function () {
                 'id': 4,
                 'name': 'TESTCAT'
             },
+            course_catalog: {},
             'price': '100.00',
             'invoice_type': 'Prepaid',
             'invoice_discount_type': 'Percentage',

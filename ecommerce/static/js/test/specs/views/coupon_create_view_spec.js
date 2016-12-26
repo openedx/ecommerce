@@ -4,6 +4,7 @@ define([
         'views/alert_view',
         'models/coupon_model',
         'test/mock_data/categories',
+        'test/mock_data/catalogs',
         'ecommerce'
     ],
     function ($,
@@ -11,6 +12,7 @@ define([
               AlertView,
               Coupon,
               Mock_Categories,
+              Mock_Catalogs,
               ecommerce) {
         'use strict';
 
@@ -20,7 +22,8 @@ define([
 
             beforeEach(function () {
                 ecommerce.coupons = {
-                    categories: Mock_Categories
+                    categories: Mock_Categories,
+                    catalogs: Mock_Catalogs
                 };
                 model = new Coupon();
                 view = new CouponCreateEditView({ model: model, editing: false }).render();
