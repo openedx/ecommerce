@@ -85,6 +85,8 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
             logger.error('Unable to connect to Course Catalog service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Order catalogs by name
-        catalogs = sorted(results, key=lambda catalog: catalog.get('name', '').lower())
-        return Response(data=catalogs)
+        # Create catalogs list with sorting by name
+        catalogs = [{'id': catalog['id'], 'name': catalog['name']} for catalog in results]
+        sorted_catalogs = sorted(catalogs, key=lambda catalog: catalog.get('name', '').lower())
+        data = {'results': sorted_catalogs}
+        return Response(data=data)

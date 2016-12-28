@@ -7,7 +7,9 @@ define([
         'underscore',
         'moment',
         'collections/category_collection',
+        'collections/catalog_collection',
         'models/category',
+        'models/catalog_model',
         'utils/validation_patterns'
     ],
     function (Backbone,
@@ -33,6 +35,7 @@ define([
 
             defaults: {
                 category: {id: 3, name: 'Affiliate Promotion'},
+                course_catalog: {id: '', name: ''},
                 code: '',
                 course_seats: [],
                 course_seat_types: [],
@@ -200,6 +203,7 @@ define([
                 } else {
                     catalog_type = 'Single course'
                 }
+                this.set('catalog_type', catalog_type);
 
                 if (this.get('catalog_type') === 'Single course') {
                     if (seats[0]) {
