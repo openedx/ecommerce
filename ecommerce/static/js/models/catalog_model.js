@@ -5,7 +5,7 @@ define([
         'use strict';
 
         return Backbone.RelationalModel.extend({
-            urlRoot: '/api/v2/catalogs/all_catalogs/'
+            urlRoot: '/api/v2/catalogs/course_catalogs/'
         });
     }
 );

@@ -531,6 +531,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     benefit_type = serializers.SerializerMethodField()
     benefit_value = serializers.SerializerMethodField()
     catalog_query = serializers.SerializerMethodField()
+    course_catalog = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
     code = serializers.SerializerMethodField()
@@ -557,6 +558,9 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
 
     def get_catalog_query(self, obj):
         return retrieve_offer(obj).condition.range.catalog_query
+
+    def get_course_catalog(self, obj):
+        return retrieve_offer(obj).condition.range.course_catalog
 
     def get_category(self, obj):
         category = ProductCategory.objects.filter(product=obj).first().category
@@ -645,7 +649,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = (
-            'benefit_type', 'benefit_value', 'catalog_query', 'category',
+            'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
             'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
             'email_domains', 'end_date', 'id', 'last_edited', 'max_uses',
             'note', 'num_uses', 'payment_information', 'price', 'quantity',

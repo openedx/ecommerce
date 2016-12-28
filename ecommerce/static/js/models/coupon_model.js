@@ -198,7 +198,7 @@ define([
 
                 if (this.has('catalog_query')) {
                     catalog_type = 'Multiple courses'
-                } else if (this.has('course_catalog')) {
+                } else if (this.has('course_catalog') && this.get('course_catalog').id != '') {
                     catalog_type = 'Catalog course'
                 } else {
                     catalog_type = 'Single course'

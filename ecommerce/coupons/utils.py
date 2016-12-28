@@ -7,7 +7,7 @@ from django.core.cache import cache
 from oscar.core.loading import get_model
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 
 
@@ -39,38 +39,50 @@ def get_range_catalog_query_results(limit, query, site, offset=None):
     return response
 
 
-def get_all_course_catalogs(site):
+def get_course_catalogs(site, resource_id=None):
     """
-    Get all course catalogs.
+    Get details related to course catalogs.
 
     Arguments:
         site (Site): Site object containing Site Configuration data
+        resource_id (int or str): Identifies a specific resource to be retrieved
 
     Returns:
         dict: Course catalogs received from Course Catalog API
     """
     no_data = []
     resource = 'catalogs'
+    cache_key = 'catalog.api.data'
+
+    if cache_key:
+        cache_key = '{}.{}'.format(cache_key, resource_id) if resource_id else cache_key
+
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+
     api = site.siteconfiguration.course_catalog_api_client
     try:
         endpoint = getattr(api, resource)
-        resource_id = None
-        querystring = {}
-        response = endpoint(resource_id).get(**querystring)
+        response = endpoint(resource_id).get()
 
         if resource_id:
             results = response
         else:
-            results = _traverse_pagination(response, endpoint, querystring, no_data)
+            results = _traverse_pagination(response, endpoint, no_data)
     except:  # pylint: disable=bare-except
-        log.exception('Failed to retrieve data from the Discovery API.')
+        logger.exception('Failed to retrieve data from the Discovery API.')
         return no_data
+
+    if cache_key:
+        cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
 
     return results
 
 
-def _traverse_pagination(response, endpoint, querystring, no_data):
-    """Traverse a paginated API response.
+def _traverse_pagination(response, endpoint, no_data):
+    """
+    Traverse a paginated API response.
 
     Extracts and concatenates "results" (list of dict) returned by DRF-powered APIs.
     """
@@ -80,8 +92,7 @@ def _traverse_pagination(response, endpoint, querystring, no_data):
     next_page = response.get('next')
     while next_page:
         page += 1
-        querystring['page'] = page
-        response = endpoint.get(**querystring)
+        response = endpoint.get()
         results += response.get('results', no_data)
         next_page = response.get('next')
 

@@ -50,6 +50,12 @@
             <div class="value"><%= coupon.catalog_query %></div>
         </div>
         <%}%>
+        <% if(courseCatalogName) {%>
+        <div class="info-item grid-item catalog-query">
+            <div class="heading"><%= gettext('Course Catalog:') %></div>
+            <div class="value"><%= courseCatalogName %></div>
+        </div>
+        <%}%>
         <div class="info-item grid-item date-info">
             <div class="start-date-info">
                 <div class="heading"><%= gettext('Valid from:') %></div>

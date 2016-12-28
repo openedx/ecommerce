@@ -24,7 +24,7 @@ require([
             ecommerce.coupons.categories.fetch({ async: false });
 
             ecommerce.coupons.catalogs = new CatalogCollection();
-            ecommerce.coupons.catalogs.url = '/api/v2/catalogs/all_catalogs/';
+            ecommerce.coupons.catalogs.url = '/api/v2/catalogs/course_catalogs/';
             ecommerce.coupons.catalogs.fetch({ async: false });
 
             couponApp.start();
