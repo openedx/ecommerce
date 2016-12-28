@@ -408,18 +408,17 @@ def create_vouchers(
         benefit_value (Decimal): Value of benefit associated with vouchers.
         catalog (Catalog): Catalog associated with range of products
                            to which a voucher can be applied to.
+        catalog_query (str): ElasticSearch query used by dynamic coupons. Defaults to None.
+        code (str): Code associated with vouchers. Defaults to None.
         coupon (Coupon): Coupon entity associated with vouchers.
+        course_catalog (int): Course catalog id from discovery service. Defaults to None.
+        course_seat_types (str): Comma-separated list of course seat types.
+        email_domains (str): List of email domains to restrict coupons. Defaults to None.
         end_datetime (datetime): End date for voucher offer.
         name (str): Voucher name.
         quantity (int): Number of vouchers to be created.
         start_datetime (datetime): Start date for voucher offer.
         voucher_type (str): Type of voucher.
-
-        code (str): Code associated with vouchers. Defaults to None.
-        catalog_query (str): ElasticSearch query used by dynamic coupons. Defaults to None.
-        course_catalog (int): Course catalog id from discovery service. Defaults to None.
-        course_seat_types (str): Comma-separated list of course seat types.
-        email_domains (str): List of email domains to restrict coupons. Defaults to None.
         max_uses (int): Number of Voucher max uses. Defaults to None.
         _range (Range): Product range. Defaults to None.
 
