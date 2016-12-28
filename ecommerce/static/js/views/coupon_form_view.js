@@ -43,13 +43,6 @@ define([
 
             seatTypes: [],
 
-            catalogData: [
-                {
-                    value: '',
-                    label: '---'
-                }
-            ],
-
             codeTypes: [
                 {
                     value: 'Enrollment code',
@@ -179,11 +172,22 @@ define([
                     observe: 'course_catalog',
                     selectOptions: {
                         collection: function () {
-                            return this.catalogData;
-                        }
+                            return ecommerce.coupons.catalogs;
+                        },
+                        labelPath: 'name',
+                        valuePath: 'id'
                     },
-                    initialize: function () {
-                        this.fetchCourseCatalogsData();
+                    setOptions: {
+                        validate: true
+                    },
+                    onGet: function (val) {
+                        return val.id;
+                    },
+                    onSet: function (val) {
+                        return {
+                            id: val,
+                            name: $('select[name=course_catalog] option:selected').text()
+                        };
                     }
                 },
                 'input[name=email_domains]': {
@@ -439,15 +443,17 @@ define([
                 if (this.model.get('catalog_type') === 'Single course') {
                     this.model.unset('course_seat_types');
                     this.model.unset('catalog_query');
-                    this.model.unset('course_catalog');
+                    this.model.set('course_catalog', this.model.defaults.course_catalog);
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
                 } else if (this.model.get('catalog_type') === 'Course catalog') {
-                    this.model.unset('course_seat_types');
+                    this.model.unset('course_id');
+                    this.model.unset('seat_type');
                     this.model.unset('catalog_query');
+                    this.model.unset('course_seat_types');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
@@ -463,7 +469,7 @@ define([
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
                     this.model.unset('stock_record_ids');
-                    this.model.unset('course_catalog');
+                    this.model.set('course_catalog', this.model.defaults.course_catalog);
 
                     if (!this.model.get('course_seat_types')) {
                         this.model.set('course_seat_types', []);
@@ -632,28 +638,6 @@ define([
                 this.dynamic_catalog_view.seat_types = this.model.get('course_seat_types');
             },
 
-            fetchCourseCatalogsData: function() {
-                Backbone.ajax({
-                    context: this,
-                    type: 'GET',
-                    url: window.location.origin + '/api/v2/catalogs/all_catalogs/',
-                    data: {},
-                    success: this.onSuccess
-                });
-            },
-
-            onSuccess: function(data) {
-                var courseCatalogElement = this.$('#course-catalog'),
-                    option;
-
-                data.forEach(function (catalog) {
-                    option = document.createElement('option');
-                    option.value = catalog.id;
-                    option.text = catalog.name;
-                    courseCatalogElement.append(option);
-                });
-            },
-
             /**
              * Open external links in a new tab.
              * Works only for anchor elements that contain 'external-link' class.
@@ -694,7 +678,6 @@ define([
                     this.fillFromCourse();
                 } else {
                     this.model.set({
-                        'course_catalog': this.catalogData[0].value,
                         'coupon_type': this.codeTypes[0].value,
                         'voucher_type': this.voucherTypes[0].value,
                         'benefit_type': 'Percentage',
