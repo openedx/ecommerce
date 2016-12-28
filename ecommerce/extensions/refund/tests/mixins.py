@@ -5,7 +5,7 @@ from django.test import override_settings
 import mock
 from mock_django import mock_signal_receiver
 from oscar.core.loading import get_model, get_class
-from oscar.test.factories import create_order
+from oscar.test.factories import create_order, UserFactory
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.courses.models import Course
@@ -71,7 +71,7 @@ class RefundTestMixin(CourseCatalogTestMixin):
             self.assertEqual(refund_line.quantity, order_line.quantity)
 
     def create_refund(self, processor_name=DummyProcessor.NAME):
-        refund = RefundFactory()
+        refund = RefundFactory(order=self.create_order(UserFactory()))
         order = refund.order
         source_type, __ = SourceType.objects.get_or_create(name=processor_name)
         Source.objects.create(source_type=source_type, order=order, currency=refund.currency,

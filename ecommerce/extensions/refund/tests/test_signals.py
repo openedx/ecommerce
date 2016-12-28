@@ -77,9 +77,8 @@ class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
 
     def test_successful_refund_no_segment_key(self, mock_track):
         """Verify that a successfully placed refund is not tracked when Segment is disabled."""
-        self.site.siteconfiguration.segment_key = None
-
         # Approve the refund.
+        self.site.siteconfiguration.analytics_configuration['SEGMENT']['DEFAULT_WRITE_KEY'] = None
         self.approve(self.refund)
 
         # Verify that no business intelligence event was emitted.
