@@ -152,7 +152,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         catalog_query=request.data.get('catalog_query'),
                         category=category,
                         code=code,
-                        course_catalog=request.data.get('catalog'),
+                        course_catalog=request.data.get('course_catalog'),
                         course_seat_types=course_seat_types,
                         email_domains=request.data.get('email_domains'),
                         end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),

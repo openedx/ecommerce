@@ -11,7 +11,7 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
-from ecommerce.coupons.utils import get_range_catalog_query_results, get_all_course_catalogs
+from ecommerce.coupons.utils import get_range_catalog_query_results, get_course_catalogs
 from ecommerce.extensions.api import serializers
 
 
@@ -75,12 +75,13 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(is_for_list=True, methods=['get'])
-    def all_catalogs(self, request):
+    def course_catalogs(self, request):
         """
-        Get all course catalogs.
+        Returns response with all course catalogs in the format:
+        ["results": {"id": 1, "name": "Dummy Catalog"}]
         """
         try:
-            results = get_all_course_catalogs(site=request.site)
+            results = get_course_catalogs(site=request.site)
         except (ConnectionError, SlumberBaseException, Timeout):
             logger.error('Unable to connect to Course Catalog service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)

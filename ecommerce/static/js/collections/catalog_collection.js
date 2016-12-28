@@ -8,7 +8,7 @@ define([
 
         return PaginatedCollection.extend({
                 model: Catalog,
-                url: '/api/v2/catalogs/all_catalogs/'
+                url: '/api/v2/catalogs/course_catalogs/'
             }
         );
     }
