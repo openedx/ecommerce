@@ -650,6 +650,8 @@ define([
 
             render: function () {
                 // Render the parent form/template
+                var catalogId = '';
+
                 this.$el.html(this.template(this.model.attributes));
                 this.stickit();
 
@@ -666,6 +668,21 @@ define([
                             this.$('.non-credit-seats').addClass(this.hiddenClass);
                         }
                     }
+
+                    if (this.model.has('course_catalog')) {
+                        if (typeof this.model.get('course_catalog') === 'number') {
+                            catalogId = this.model.get('course_catalog');
+                        } else if (!$.isEmptyObject(this.model.get('course_catalog'))) {
+                            catalogId = this.model.get('course_catalog').id
+                        }
+                    }
+
+                    if (catalogId != '') {
+                        this.model.set('course_catalog', ecommerce.coupons.catalogs.get(catalogId));
+                    } else {
+                        this.model.set('course_catalog', this.model.defaults.course_catalog);
+                    }
+
                     this.disableNonEditableFields();
                     this.toggleCouponTypeField();
                     this.toggleVoucherTypeField();
