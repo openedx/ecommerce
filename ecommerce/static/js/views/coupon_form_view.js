@@ -452,6 +452,7 @@ define([
                 } else if (this.model.get('catalog_type') === this.model.catalogTypes.catalog) {
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
+                    this.model.unset('stock_record_ids');
                     this.model.unset('catalog_query');
                     this.model.unset('course_seat_types');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
