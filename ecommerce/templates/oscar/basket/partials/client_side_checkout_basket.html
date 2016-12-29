@@ -141,7 +141,7 @@
                 <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="Credit cards">
                 {% endif %}
                 <div class="pci-fields row">
-                    <div id="card-number" class="form-group col-sm-6">
+                    <div id="card-number" class="form-group col-md-6">
                         <label for="card-number-input" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
                         <input id="card-number-input" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
@@ -149,7 +149,7 @@
                         <p class="help-block"></p>
                     </div>
                     <input type="hidden" name="card_type" class="pci-field">
-                    <div id="card-cvn" class="form-group col-sm-6">
+                    <div id="card-cvn" class="form-group col-md-6">
                         <label for="card-cvn-input" class="control-label">
                             {% trans "Security Code (required)" %}
                             <span class="sr">, {% trans "Secure" %}</span>
