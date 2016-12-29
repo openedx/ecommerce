@@ -89,7 +89,7 @@ define([
                     }
                 },
                 course_seat_types: function (val) {
-                    if (this.get('catalog_type') === this.catalogTypes.multiple_courses && val.length === 0) {
+                    if (this.get('catalog_type') === CATALOG_TYPES.multiple_courses && val.length === 0) {
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
@@ -149,7 +149,7 @@ define([
                 // seat_type is for validation only, stock_record_ids holds the values
                 seat_type: {
                     required: function () {
-                        return this.get('catalog_type') === this.catalogTypes.single_course;
+                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
                     }
                 },
                 start_date: function (val) {
@@ -202,16 +202,26 @@ define([
             updateSeatData: function () {
                 var seat_data,
                     seats = this.get('seats'),
-                    catalog_type;
+                    catalogId,
+                    catalogType;
 
-                if (this.has('catalog_query')) {
-                    catalog_type = this.catalogTypes.multiple_courses
-                } else if (this.has('course_catalog') && this.get('course_catalog').id != '') {
-                    catalog_type = this.catalogTypes.catalog
-                } else {
-                    catalog_type = this.catalogTypes.single_course
+                catalogId = '';
+                if (this.has('course_catalog')) {
+                    if (typeof this.get('course_catalog') === 'number') {
+                        catalogId = this.get('course_catalog');
+                    } else if (!$.isEmptyObject(this.get('course_catalog'))) {
+                        catalogId = this.get('course_catalog').id
+                    }
                 }
-                this.set('catalog_type', catalog_type);
+
+                if (this.has('catalog_query') && this.get('catalog_query') != '') {
+                    catalogType = this.catalogTypes.multiple_courses
+                } else if (catalogId != '') {
+                    catalogType = this.catalogTypes.catalog
+                } else {
+                    catalogType = this.catalogTypes.single_course
+                }
+                this.set('catalog_type', catalogType);
 
                 if (this.get('catalog_type') === this.catalogTypes.single_course) {
                     if (seats[0]) {
