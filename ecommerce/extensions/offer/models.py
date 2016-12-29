@@ -119,11 +119,12 @@ class Range(AbstractRange):
     UPDATABLE_RANGE_FIELDS = [
         'catalog_query',
         'course_seat_types',
+        'course_catalog',
     ]
     ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
-    course_catalog = models.PositiveIntegerField(help_text=_('Course catalog id.'), null=True, blank=True)
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
     catalog_query = models.TextField(blank=True, null=True)
+    course_catalog = models.PositiveIntegerField(help_text=_('Course catalog id.'), null=True, blank=True)
     course_seat_types = models.CharField(
         max_length=255,
         validators=[validate_credit_seat_type],

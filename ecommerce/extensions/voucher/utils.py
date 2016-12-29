@@ -393,12 +393,12 @@ def create_vouchers(
         start_datetime,
         voucher_type,
         code=None,
-        catalog_query=None,
-        course_catalog=None,
-        course_seat_types=None,
-        email_domains=None,
         max_uses=None,
         _range=None,
+        catalog_query=None,
+        course_seat_types=None,
+        email_domains=None,
+        course_catalog=None,
 ):
     """
     Create vouchers.
@@ -415,11 +415,11 @@ def create_vouchers(
         course_seat_types (str): Comma-separated list of course seat types.
         email_domains (str): List of email domains to restrict coupons. Defaults to None.
         end_datetime (datetime): End date for voucher offer.
+        max_uses (int): Number of Voucher max uses. Defaults to None.
         name (str): Voucher name.
         quantity (int): Number of vouchers to be created.
         start_datetime (datetime): Start date for voucher offer.
         voucher_type (str): Type of voucher.
-        max_uses (int): Number of Voucher max uses. Defaults to None.
         _range (Range): Product range. Defaults to None.
 
     Returns:
