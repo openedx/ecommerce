@@ -48,6 +48,12 @@ define([
                 total_value: 0,
             },
 
+            catalogTypes: {
+                single_course: 'Single course',
+                multiple_courses: 'Multiple courses',
+                catalog: 'Catalog'
+            },
+
             validation: {
                 benefit_value: {
                     pattern: 'number',
@@ -57,12 +63,12 @@ define([
                 },
                 catalog_query: {
                     required: function () {
-                        return this.get('catalog_type') === 'Multiple courses';
+                        return this.get('catalog_type') === self.catalogTypes.multiple_courses;
                     }
                 },
                 course_catalog: {
                     required: function () {
-                        return this.get('catalog_type') === 'Course catalog';
+                        return this.get('catalog_type') === self.catalogTypes.catalog;
                     }
                 },
                 category: {required: true},
@@ -77,11 +83,11 @@ define([
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required'),
                     required: function () {
-                        return this.get('catalog_type') === 'Single course';
+                        return this.get('catalog_type') === self.catalogTypes.single_course;
                     }
                 },
                 course_seat_types: function (val) {
-                    if (this.get('catalog_type') === 'Multiple courses' && val.length === 0) {
+                    if (this.get('catalog_type') === this.catalogTypes.multiple_courses && val.length === 0) {
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
@@ -141,7 +147,7 @@ define([
                 // seat_type is for validation only, stock_record_ids holds the values
                 seat_type: {
                     required: function () {
-                        return this.get('catalog_type') === 'Single course';
+                        return this.get('catalog_type') === this.catalogTypes.single_course;
                     }
                 },
                 start_date: function (val) {
@@ -197,15 +203,15 @@ define([
                     catalog_type;
 
                 if (this.has('catalog_query')) {
-                    catalog_type = 'Multiple courses'
+                    catalog_type = this.catalogTypes.multiple_courses
                 } else if (this.has('course_catalog') && this.get('course_catalog').id != '') {
-                    catalog_type = 'Catalog course'
+                    catalog_type = this.catalogTypes.catalog
                 } else {
-                    catalog_type = 'Single course'
+                    catalog_type = this.catalogTypes.single_course
                 }
                 this.set('catalog_type', catalog_type);
 
-                if (this.get('catalog_type') === 'Single course') {
+                if (this.get('catalog_type') === this.catalogTypes.single_course) {
                     if (seats[0]) {
                         seat_data = seats[0].attribute_values;
 

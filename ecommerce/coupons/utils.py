@@ -52,14 +52,12 @@ def get_course_catalogs(site, resource_id=None):
     """
     no_data = []
     resource = 'catalogs'
-    cache_key = 'catalog.api.data'
+    base_cache_key = 'catalog.api.data'
 
-    if cache_key:
-        cache_key = '{}.{}'.format(cache_key, resource_id) if resource_id else cache_key
-
-        cached = cache.get(cache_key)
-        if cached:
-            return cached
+    cache_key = '{}.{}'.format(base_cache_key, resource_id) if resource_id else base_cache_key
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
 
     api = site.siteconfiguration.course_catalog_api_client
     try:
@@ -74,9 +72,7 @@ def get_course_catalogs(site, resource_id=None):
         logger.exception('Failed to retrieve data from the Discovery API.')
         return no_data
 
-    if cache_key:
-        cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
-
+    cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
     return results
 
 

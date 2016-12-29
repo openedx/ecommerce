@@ -80,11 +80,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         Returns response with all course catalogs in the format:
         ["results": {"id": 1, "name": "Dummy Catalog"}]
         """
-        try:
-            results = get_course_catalogs(site=request.site)
-        except (ConnectionError, SlumberBaseException, Timeout):
-            logger.error('Unable to connect to Course Catalog service.')
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        results = get_course_catalogs(site=request.site)
 
         # Create catalogs list with sorting by name
         catalogs = [{'id': catalog['id'], 'name': catalog['name']} for catalog in results]

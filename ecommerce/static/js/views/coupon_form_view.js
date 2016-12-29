@@ -440,7 +440,7 @@ define([
             },
 
             toggleCatalogTypeField: function() {
-                if (this.model.get('catalog_type') === 'Single course') {
+                if (this.model.get('catalog_type') === this.model.catalogTypes.single_course) {
                     this.model.unset('course_seat_types');
                     this.model.unset('catalog_query');
                     this.model.set('course_catalog', this.model.defaults.course_catalog);
@@ -449,7 +449,7 @@ define([
                     this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
-                } else if (this.model.get('catalog_type') === 'Course catalog') {
+                } else if (this.model.get('catalog_type') === this.model.catalogTypes.catalog) {
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
                     this.model.unset('catalog_query');
@@ -681,7 +681,7 @@ define([
                         'coupon_type': this.codeTypes[0].value,
                         'voucher_type': this.voucherTypes[0].value,
                         'benefit_type': 'Percentage',
-                        'catalog_type': 'Single course',
+                        'catalog_type': this.model.catalogTypes.single_course,
                         'invoice_discount_type': 'Percentage',
                         'invoice_type': 'Prepaid',
                         'tax_deduction': 'No',
