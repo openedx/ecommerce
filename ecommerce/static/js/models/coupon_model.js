@@ -30,6 +30,12 @@ define([
         });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
+        var CATALOG_TYPES = {
+            single_course: 'Single course',
+            multiple_courses: 'Multiple courses',
+            catalog: 'Catalog'
+        };
+
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/coupons/',
 
@@ -48,11 +54,7 @@ define([
                 total_value: 0,
             },
 
-            catalogTypes: {
-                single_course: 'Single course',
-                multiple_courses: 'Multiple courses',
-                catalog: 'Catalog'
-            },
+            catalogTypes: CATALOG_TYPES,
 
             validation: {
                 benefit_value: {
@@ -63,12 +65,12 @@ define([
                 },
                 catalog_query: {
                     required: function () {
-                        return this.get('catalog_type') === self.catalogTypes.multiple_courses;
+                        return this.get('catalog_type') === CATALOG_TYPES.multiple_courses;
                     }
                 },
                 course_catalog: {
                     required: function () {
-                        return this.get('catalog_type') === self.catalogTypes.catalog;
+                        return this.get('catalog_type') === CATALOG_TYPES.catalog;
                     }
                 },
                 category: {required: true},
@@ -83,7 +85,7 @@ define([
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required'),
                     required: function () {
-                        return this.get('catalog_type') === self.catalogTypes.single_course;
+                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
                     }
                 },
                 course_seat_types: function (val) {
