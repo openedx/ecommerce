@@ -436,6 +436,8 @@ def create_vouchers(
     else:
         logger.info("Creating [%d] vouchers for coupon [%s]", quantity, coupon.id)
         range_name = (_('Range for coupon [{coupon_id}]').format(coupon_id=coupon.id))
+        # make sure course catalog is None if its empty
+        course_catalog = course_catalog if course_catalog else None
         product_range, __ = Range.objects.get_or_create(
             name=range_name,
             catalog=catalog,
