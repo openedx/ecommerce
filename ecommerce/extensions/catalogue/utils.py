@@ -26,7 +26,6 @@ def create_coupon_product(
         catalog_query,
         category,
         code,
-        course_catalog,
         course_seat_types,
         email_domains,
         end_datetime,
@@ -37,7 +36,8 @@ def create_coupon_product(
         quantity,
         start_datetime,
         title,
-        voucher_type
+        voucher_type,
+        course_catalog,
 ):
     """
     Creates a coupon product and a stock record for it.
