@@ -231,6 +231,7 @@ define([
                         this.set('course_id', this.getCourseID(seat_data));
                         this.updateTotalValue(this.getSeatPrice());
                     }
+                    this.set('course_catalog', this.defaults.course_catalog);
                 }
             },
 
