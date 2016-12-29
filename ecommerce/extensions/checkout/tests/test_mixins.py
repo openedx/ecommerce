@@ -158,7 +158,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         Ensure that tracking events do not fire when there is no Segment key
         configured.
         """
-        self.site.siteconfiguration.segment_key = None
+        self.site.siteconfiguration.analytics_configuration['SEGMENT']['DEFAULT_WRITE_KEY'] = None
         EdxOrderPlacementMixin().handle_successful_order(self.order)
         # ensure no event was fired
         self.assertFalse(mock_track.called)

@@ -15,7 +15,6 @@ class SiteConfigurationViewSetTests(TestCase):
         self.site_configuration = SiteConfigurationFactory(
             partner__name='TestX',
             site__domain='test.api.endpoint',
-            segment_key='test_segment_key',
             analytics_configuration=json.dumps({
                 'SEGMENT': {
                     'DEFAULT_WRITE_KEY': 'test_segment_key2',

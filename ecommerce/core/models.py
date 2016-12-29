@@ -81,14 +81,6 @@ class SiteConfiguration(models.Model):
         blank=False,
         default={}
     )
-    # TODO: WL-895 Remove the segment_key field after the analytics_configuration field has been deployed and configured
-    segment_key = models.CharField(
-        verbose_name=_('Segment key'),
-        help_text=_('Segment write/API key.'),
-        max_length=255,
-        null=True,
-        blank=True
-    )
     analytics_configuration = JSONField(
         verbose_name=_('Analytics tracking configuration'),
         help_text=_('JSON string containing settings related to analytics event tracking.'),
@@ -258,9 +250,7 @@ class SiteConfiguration(models.Model):
 
     @cached_property
     def default_segment_key(self):
-        # TODO: WL-895 Remove self.segment_key from this statement once the segment_key field is removed from this model
-        return self.analytics_configuration.get('SEGMENT', {}).get('DEFAULT_WRITE_KEY') or \
-            self.segment_key
+        return self.analytics_configuration.get('SEGMENT', {}).get('DEFAULT_WRITE_KEY')
 
     @cached_property
     def segment_clients(self):

@@ -259,11 +259,11 @@ class SiteMixin(object):
                 'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
             },
             partner__name='edX',
-            segment_key='fake_segment_key',
             site__domain=domain,
             site__id=settings.SITE_ID,
             client_side_payment_processor='cybersource'
         )
+        site_configuration.analytics_configuration['SEGMENT']['DEFAULT_WRITE_KEY'] = 'fake_segment_key'
         self.partner = site_configuration.partner
         self.site = site_configuration.site
 
