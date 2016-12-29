@@ -72,11 +72,17 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         # If an enterprise is specified instead of a code, then we'll
         # need to look up the coupon linked to the indicated enterprise
         # through its catalog, which should be linked to a coupon.
-        # All that is not possible at the moment so, for now, HACK IT!!!        
+        # All that is not possible at the moment so, for now, HACK IT!!!
         if enterprise_uuid:
-            # Enterprise-Catalog-Coupon lookup logic goes here
-            code = '7O3FJRATAO3Y3HGV'
-
+            # Enterprise-Catalog lookup logic goes here
+            enterprise_catalog_id = 7
+            if enterprise_catalog_id:
+                # Attempt to locate a matching coupon for the catalog linked to this enterprise
+                try:
+                    voucher = Voucher.objects.get(offers__condition__range__course_catalog=enterprise_catalog_id)
+                    code = voucher.code
+                except Voucher.DoesNotExist:
+                    pass
         try:
             voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
