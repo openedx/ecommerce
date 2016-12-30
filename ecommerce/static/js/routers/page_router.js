@@ -64,7 +64,17 @@ define([
             notFound: function (path) {
                 // TODO Render something!
                 alert(path + ' is invalid.');
-            }
+            },
+
+            parseQueryString: function(queryString) {
+                var parameters = new Array();
+                var nameValuePairs = queryString.split(/&/);
+                for (var i in nameValuePairs) {
+                    var nameValue = nameValuePairs[i].split(/=/);
+                    parameters[nameValue[0]] = nameValue[1];
+                }
+                return parameters
+            }            
 
         });
 

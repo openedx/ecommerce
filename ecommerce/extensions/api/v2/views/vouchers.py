@@ -36,10 +36,12 @@ class VoucherFilter(django_filters.FilterSet):
     Currently supports filtering via the voucher's code.
     """
     code = django_filters.CharFilter(name='code', lookup_type='exact')
+    course = django_filters.CharFilter(name='course', lookup_type='exact')
+    enterprise = django_filters.CharFilter(name='enterprise', lookup_type='exact')
 
     class Meta(object):
         model = Voucher
-        fields = ('code', )
+        fields = ('code', 'course', 'enterprise')
 
 
 class VoucherViewSet(NonDestroyableModelViewSet):
@@ -65,13 +67,27 @@ class VoucherViewSet(NonDestroyableModelViewSet):
               multiple: false
         """
         code = request.GET.get('code', '')
+        enterprise_uuid = request.GET.get('enterprise', '')
 
+        # If an enterprise is specified instead of a code, then we'll
+        # need to look up the coupon linked to the indicated enterprise
+        # through its catalog, which should be linked to a coupon.
+        # All that is not possible at the moment so, for now, HACK IT!!!
+        if enterprise_uuid:
+            # Enterprise-Catalog lookup logic goes here
+            enterprise_catalog_id = 7
+            if enterprise_catalog_id:
+                # Attempt to locate a matching coupon for the catalog linked to this enterprise
+                try:
+                    voucher = Voucher.objects.get(offers__condition__range__course_catalog=enterprise_catalog_id)
+                    code = voucher.code
+                except Voucher.DoesNotExist:
+                    pass
         try:
             voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
             logger.error('Voucher with code %s not found.', code)
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
         try:
             offers_data = self.get_offers(request, voucher)
         except (ConnectionError, SlumberBaseException, Timeout):
@@ -139,6 +155,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         course_seat_types = benefit.range.course_seat_types
         multiple_credit_providers = False
         credit_provider_price = None
+
+        # Additionally filter the query result by course if specified
+        course_id = request.GET.get('course')
+        if course_id:
+            catalog_query = '{query} AND key:"{course}"'.format(query=catalog_query, course=course_id)
 
         response = get_range_catalog_query_results(
             limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),

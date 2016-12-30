@@ -93,6 +93,11 @@ class CouponOfferView(TemplateView):
 
     def get_context_data(self, **kwargs):
         code = self.request.GET.get('code', None)
+        course_id = self.request.GET.get('course', None)
+        enterprise_uuid = self.request.GET.get('enterprise', None)
+
+        if enterprise_uuid:
+            code = "7O3FJRATAO3Y3HGV"
         if code is not None:
             try:
                 voucher, products = get_voucher_and_products_from_code(code=code)
@@ -102,6 +107,8 @@ class CouponOfferView(TemplateView):
                 return {'error': _('The voucher is not applicable to your current basket.')}
             valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
             if valid_voucher:
+                if course_id:
+                    products = [product for product in products if product.course_id == course_id]
                 self.template_name = 'coupons/offer.html'
                 return
 

@@ -6,6 +6,7 @@ import hashlib
 import logging
 import uuid
 
+import dateutil.parser
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -366,6 +367,26 @@ def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime,
         logger.exception('Failed to create Voucher. Code may not be set for enrollment coupon.')
         raise ValidationError(_('Voucher can not be created when code is set in enrollment coupon.'))
     voucher_code = code or _generate_code_string(settings.VOUCHER_CODE_LENGTH)
+
+    if not end_datetime:
+        logger.exception('Failed to create Voucher. Voucher end datetime field must be set.')
+        raise ValidationError(_('Voucher end datetime field must be set.'))
+    elif not isinstance(end_datetime, datetime.datetime):
+        try:
+            end_datetime = dateutil.parser.parse(end_datetime)
+        except (AttributeError, ValueError):
+            logger.exception('Failed to create Voucher. Voucher end datetime value [%s] is invalid.', end_datetime)
+            raise ValidationError(_('Voucher end datetime value [{date}] is invalid.'.format(date=end_datetime)))
+
+    if not start_datetime:
+        logger.exception('Failed to create Voucher. Voucher start datetime field must be set.')
+        raise ValidationError(_('Voucher start datetime field must be set.'))
+    elif not isinstance(start_datetime, datetime.datetime):
+        try:
+            start_datetime = dateutil.parser.parse(start_datetime)
+        except (AttributeError, ValueError):
+            logger.exception('Failed to create Voucher. Voucher start datetime value [%s] is invalid.', start_datetime)
+            raise ValidationError(_('Voucher start datetime value [{date}] is invalid.'.format(date=start_datetime)))
 
     voucher = Voucher.objects.create(
         name=name,

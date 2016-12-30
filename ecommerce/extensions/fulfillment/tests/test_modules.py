@@ -388,10 +388,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             benefit_value=100.00,
             catalog=catalog,
             coupon=coupon,
-            end_datetime=datetime.datetime.now(),
+            end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
             name="Test Voucher",
             quantity=10,
-            start_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
+            start_datetime=datetime.datetime.now(),
             voucher_type=Voucher.SINGLE_USE
         )
         voucher = vouchers[0]

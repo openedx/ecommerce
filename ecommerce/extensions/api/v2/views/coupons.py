@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import logging
 
-import dateutil.parser
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -161,13 +160,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         course_catalog=course_catalog,
                         course_seat_types=course_seat_types,
                         email_domains=request.data.get('email_domains'),
-                        end_datetime=dateutil.parser.parse(request.data.get('end_datetime')),
+                        end_datetime=request.data.get('end_datetime'),
                         max_uses=max_uses,
                         note=request.data.get('note'),
                         partner=partner,
                         price=request.data.get('price'),
                         quantity=request.data.get('quantity'),
-                        start_datetime=dateutil.parser.parse(request.data.get('start_datetime')),
+                        start_datetime=request.data.get('start_datetime'),
                         title=request.data.get('title'),
                         voucher_type=voucher_type
                     )
