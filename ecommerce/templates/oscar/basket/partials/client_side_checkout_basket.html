@@ -184,6 +184,16 @@
                 </div>
                 {% endif %}
                 <div class="payment-button col-sm-6 col-sm-offset-6 col-xs-12">
+                {% if free_basket %}
+                    <a href="{% url 'checkout:free-checkout' %}"
+                       data-track-type="click"
+                       data-track-event="edx.bi.ecommerce.basket.free_checkout"
+                       data-track-category="checkout"
+                       data-course-id="{{ course_key }}"
+                       class="btn btn-primary btn-large col-sm-12 col-xs-12">
+                        {% trans "Place Order" %}
+                    </a>
+                {% else %}
                     <button id="payment-button" type="submit" class="btn btn-primary btn-large col-sm-12 col-xs-12"
                             data-track-type="click"
                             data-track-event="edx.bi.ecommerce.basket.payment_selected"
@@ -193,6 +203,7 @@
                             data-checkout-type="client_side">
                       {% trans "Place Order" %}
                     </button>
+                {% endif %}
                 </div>
             </fieldset>
         </div>
