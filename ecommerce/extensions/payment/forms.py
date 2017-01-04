@@ -90,7 +90,7 @@ class PaymentForm(forms.Form):
     basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
-    address_line1 = forms.CharField(max_length=255, label=_('Address'))
+    address_line1 = forms.CharField(max_length=60, label=_('Address'))
     address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
