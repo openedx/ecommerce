@@ -1,6 +1,6 @@
 .basket {
-    .close {
-        margin-top: -20px;
+    .alertinner {
+        display: inline-block;
     }
 
     .container {
@@ -53,7 +53,7 @@
                        width: 35%;
                        padding: 3px;
                    }
- 
+
                    button.update-button {
                        display: inline-block;
                        vertical-align:top;
@@ -235,10 +235,6 @@
 }
 
 .basket-client-side {
-    .close {
-        margin-top: -20px;
-    }
-
     legend, p.title {
         color: #337ab7;
         font-size: 16px;

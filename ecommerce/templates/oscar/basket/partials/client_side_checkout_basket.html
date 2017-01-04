@@ -4,9 +4,7 @@
 {% load widget_tweaks %}
 {% load staticfiles %}
 
-{% if show_voucher_form %}
-    {% include 'partials/alert_messages.html' %}
-{% endif %}
+{% include 'partials/alert_messages.html' %}
 
 <div id="summary" class="col-sm-5">
     <form action="." method="post" class="row">
