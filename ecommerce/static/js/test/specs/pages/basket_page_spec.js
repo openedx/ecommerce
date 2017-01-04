@@ -7,8 +7,7 @@ define([
         'models/tracking_model',
         'models/user_model',
         'views/analytics_view',
-        'js-cookie',
-        'moment'
+        'js-cookie'
     ],
     function ($,
               _,
@@ -18,8 +17,7 @@ define([
               TrackingModel,
               UserModel,
               AnalyticsView,
-              Cookies,
-              moment) {
+              Cookies) {
         'use strict';
 
         describe('Basket Page', function () {
@@ -185,8 +183,8 @@ define([
             });
 
             describe('clientSideCheckoutValidation', function() {
-                    var currentYear = moment().year(),
-                        lastMonth = moment().subtract(1, 'month').month();
+                    var currentYear = 2016,
+                        lastMonth = 11;
 
                 beforeEach(function() {
                     $(
@@ -233,6 +231,10 @@ define([
                     $('input[name=address_line1]').val('Central Perk');
                     $('input[name=city]').val('New York City');
                     $('select[name=country]').val('US');
+
+                    // Freeze time to 12-2016.
+                    spyOn(Date.prototype, 'getFullYear').and.returnValue(currentYear);
+                    spyOn(Date.prototype, 'getMonth').and.returnValue(lastMonth + 1);
 
                     BasketPage.onReady();
                 });
