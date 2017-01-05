@@ -102,7 +102,10 @@ define([
 
         cardInfoValidation = function (event) {
             var cardType,
-                currentMonth = new Date().getMonth(),
+                // We are adding 1 here because month in js style date-time starts with 0
+                // i.e. 0 for JAN, 1 for FEB etc. However, credit card expiry months start with 1
+                // i.e 1 for JAN, 2 for FEB etc.
+                currentMonth = new Date().getMonth() + 1,
                 currentYear = new Date().getFullYear(),
                 cardNumber = $('input[name=card_number]').val(),
                 cvnNumber = $('input[name=card_cvn]').val(),
