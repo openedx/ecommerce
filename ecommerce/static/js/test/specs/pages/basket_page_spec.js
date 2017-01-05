@@ -7,7 +7,8 @@ define([
         'models/tracking_model',
         'models/user_model',
         'views/analytics_view',
-        'js-cookie'
+        'js-cookie',
+        'moment'
     ],
     function ($,
               _,
@@ -17,7 +18,9 @@ define([
               TrackingModel,
               UserModel,
               AnalyticsView,
-              Cookies) {
+              Cookies,
+              moment
+    ) {
         'use strict';
 
         describe('Basket Page', function () {
@@ -208,8 +211,21 @@ define([
             });
 
             describe('clientSideCheckoutValidation', function() {
-                    var currentYear = 2016,
-                        lastMonth = 11;
+            var cc_expiry_months = {
+                    JAN: '01',
+                    FEB: '02',
+                    MAR: '03',
+                    APR: '04',
+                    MAY: '05',
+                    JUN: '06',
+                    JUL: '07',
+                    AUG: '08',
+                    SEP: '09',
+                    OCT: '10',
+                    NOV: '11',
+                    DEC: '12'
+                };
+
 
                 beforeEach(function() {
                     $(
@@ -232,8 +248,6 @@ define([
                         '<div><input name="card_cvn">' +
                         '<p class="help-block"></p></div>' +
                         '<div><select name="card_expiry_month">' +
-                        '<option value="01">01</option>' +
-                        '<option value="12">12</option>' +
                         '<option value="99">99</option>' +
                         '</select>' +
                         '<p class="help-block"></p></div>' +
@@ -244,11 +258,10 @@ define([
                         '<button id="payment-button">Pay</button>'
                     ).appendTo('body');
 
-                    $('select[name=card_expiry_year]').append('<option value="' +
-                        currentYear + '">' + currentYear + '</option>'
-                    );
-                    $('select[name=card_expiry_month]').append('<option value="' +
-                        lastMonth + '">' + lastMonth + '</option>'
+                    $('select[name=card_expiry_month]').append(
+                        _.reduce(_.toArray(cc_expiry_months), function(memo, value){
+                            return memo + '<option value="' + value + '">' + value + '</option>';
+                        }, '')
                     );
 
                     $('input[name=first_name]').val('Joey');
@@ -256,10 +269,6 @@ define([
                     $('input[name=address_line1]').val('Central Perk');
                     $('input[name=city]').val('New York City');
                     $('select[name=country]').val('US');
-
-                    // Freeze time to 12-2016.
-                    spyOn(Date.prototype, 'getFullYear').and.returnValue(currentYear);
-                    spyOn(Date.prototype, 'getMonth').and.returnValue(lastMonth + 1);
 
                     BasketPage.onReady();
                 });
@@ -325,7 +334,20 @@ define([
                 describe('cardInfoValidation', function() {
                     var validCardNumber = '378282246310005',  // AMEX (CVN length 4)
                         validCvn = '1234',
-                        enRouteCardNumber = '201401173701274'; // Unsupported type (Dec, 2016)
+                        enRouteCardNumber = '201401173701274', // Unsupported type (Dec, 2016)
+                        today = moment(),
+                        cardExpirationMonth = 'FEB',  // Card Expires in February
+                        thisMonth = moment().month('MAR').month(); // Let's say this month is March
+
+                    beforeEach (function () {
+                        $('select[name=card_expiry_year]').append('<option value="' +
+                            today.year() + '">' + today.year() + '</option>'
+                        );
+                        // Freeze month to March.
+                        // We are using moment here to get number of month instead of
+                        // hard coding it, so that it conforms to js date time style.
+                        spyOn(Date.prototype, 'getMonth').and.returnValue(thisMonth);
+                    });
 
                     it('should validate card number', function() {
                         $('input[name=card_number]').val('123invalid456');
@@ -382,7 +404,7 @@ define([
                         $('#payment-button').click();
                         expect($('select[name=card_expiry_year] ~ .help-block span').text()).toEqual('Invalid year');
 
-                        $('select[name=card_expiry_year]').val(currentYear);
+                        $('select[name=card_expiry_year]').val(today.year());
                         $('#payment-button').click();
                         expect($('select[name=card_expiry_year] ~ .help-block').has('span').length).toEqual(0);
                     });
@@ -390,13 +412,13 @@ define([
                     it('should validate card expiration', function() {
                         $('input[name=card_number]').val(validCardNumber);
                         $('input[name=card_cvn]').val(validCvn);
-                        $('select[name=card_expiry_month]').val(lastMonth);
-                        $('select[name=card_expiry_year]').val(currentYear);
+                        $('select[name=card_expiry_month]').val(cc_expiry_months[cardExpirationMonth]);
+                        $('select[name=card_expiry_year]').val(today.year());
                         $('#payment-button').click();
                         expect($('select[name=card_expiry_month] ~ .help-block span').text()).toEqual('Card expired');
 
                         $('select[name=card_expiry_month]').val('12');
-                        $('select[name=card_expiry_year]').val(currentYear + 1);
+                        $('select[name=card_expiry_year]').val(today.year());
                         $('#payment-button').click();
                         expect($('select[name=card_expiry_month] ~ .help-block').has('span').length).toEqual(0);
                     });
