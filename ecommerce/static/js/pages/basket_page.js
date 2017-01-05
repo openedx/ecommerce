@@ -132,12 +132,31 @@ define([
                 appendCardValidationErrorMsg(event, cardExpiryMonthField, 'Card expired');
             }
         },
+
+        detectCreditCard = function() {
+            var cardNumber = $('#card-number-input').val().replace(/\s+/g, ''),
+                card,
+                iconPath = '/static/images/credit_cards/';
+
+            if (cardNumber.length > 12) {
+                card = CreditCardUtils.getCreditCardType(cardNumber);
+
+                if (typeof card !== 'undefined') {
+                    $('.card-type-icon').attr(
+                        'src',
+                        iconPath + card.name + '.png'
+                    );
+                    $('input[name=card_type]').val(card.type);
+                } else {
+                    $('.card-type-icon').attr('src', '');
+                    $('input[name=card_type]').val('');
+                }
+            }
+        },
+
         onReady = function() {
             var $paymentButtons = $('.payment-buttons'),
-                basketId = $paymentButtons.data('basket-id'),
-                cardNumber,
-                iconPath = '/static/images/credit_cards/',
-                card;
+                basketId = $paymentButtons.data('basket-id');
 
             $('#voucher_form_link').on('click', function(event) {
                 event.preventDefault();
@@ -150,28 +169,16 @@ define([
             });
 
             $('#card-number-input').on('input', function() {
-                cardNumber = $('#card-number-input').val().replace(/\s+/g, '');
-
-                if (cardNumber.length > 12) {
-                    card = CreditCardUtils.getCreditCardType(cardNumber);
-
-                    if (typeof card !== 'undefined') {
-                        $('.card-type-icon').attr(
-                            'src',
-                            iconPath + card.name + '.png'
-                        ).removeClass('hidden');
-                        $('input[name=card_type]').val(card.type);
-                    } else {
-                        $('.card-type-icon').attr('src', '').addClass('hidden');
-                        $('input[name=card_type]').val('');
-                    }
-                }
+                detectCreditCard();
             });
 
             $('#payment-button').click(function(e) {
                 _.each($('.help-block'), function(errorMsg) {
                     $(errorMsg).empty();  // Clear existing validation error messages.
                 });
+                if ($('#card-number-input').val()) {
+                    detectCreditCard();
+                }
                 cardInfoValidation(e);
                 cardHolderInfoValidation(e);
             });
