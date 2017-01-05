@@ -409,6 +409,30 @@
                 margin: 0;
             }
 
+            .quantity-group {
+                padding-left: 0;
+            }
+
+            .quantity-label {
+                display: inline-block;
+                padding-right: 10px;
+            }
+
+            .checkout-quantity {
+                display: inline-block;
+            }
+
+            .spinner {
+                width: 70px;
+                float: left;
+                padding-right: 10px;
+            }
+
+            .quantity-update {
+                width: 80px;
+                float:left;
+            }
+
             fieldset > legend {
                 padding-top: 20px;
             }
@@ -464,6 +488,8 @@
                 padding: 0;
 
                 .product-image {
+                    padding-left: 0;
+
                     img {
                         width: 100%;
                         max-width: 150px;
@@ -472,6 +498,8 @@
                 }
 
                 .product-information {
+                    padding-left: 0;
+
                     .product-name {
                         margin-bottom: 0;
                         font-weight: bold;
@@ -548,7 +576,7 @@
             border-left: none;
         }
 
-        #summary #basket-information .product {
+        #summary .product {
             .product-image {
                 img {
                     max-width: 100%;
