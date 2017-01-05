@@ -30,13 +30,13 @@
                     {% endif %}
                 </div>
                 {% if line_data.enrollment_code %}
-                    <div class="col-sm-12 col-xs-12 form-inline">
-                        <label class="product-price-label text-muted">{% trans 'Quantity' %}</label>
+                    <div class="col-sm-12 col-xs-12 form-inline quantity-group">
+                        <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
                         <div class="checkout-quantity form-group">
-                            <div class="input-group spinner col-sm-3 {% if form.errors %}error{% endif %}">
+                            <div class="input-group spinner {% if form.errors %}error{% endif %}">
                                 {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
                             </div>
-                            <button class="btn btn-primary update-button" type="submit"
+                            <button class="btn btn-primary update-button quantity-update" type="submit"
                                     data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
                         </div>
                     </div>
