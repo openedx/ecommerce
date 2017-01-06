@@ -13,7 +13,7 @@ django-waffle==0.10.1
 djangorestframework==3.2.3
 djangorestframework-jwt==1.7.2
 drf-extensions==0.2.8
-edx-auth-backends==0.1.3
+git+https://github.com/openfun/auth-backends.git@fun/v0.1.3-fixed#egg=edx-auth-backends==0.1.3
 edx-ecommerce-worker==0.3.0
 edx-rest-api-client==1.3.0
 jsonfield==1.0.3
