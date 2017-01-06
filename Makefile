@@ -98,14 +98,13 @@ e2e:
 	nosetests --with-ignore-docstrings -v e2e --with-xunit --xunit-file=e2e/xunit.xml
 
 extract_translations:
-	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
-	python manage.py makemessages -l en -v1 -d djangojs --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
+	cd ecommerce && i18n_tool extract -v
 
 dummy_translations:
-	cd ecommerce && i18n_tool dummy
+	cd ecommerce && i18n_tool dummy -v
 
 compile_translations:
-	python manage.py compilemessages
+	cd ecommerce && i18n_tool generate -v
 
 fake_translations: extract_translations dummy_translations compile_translations
 
