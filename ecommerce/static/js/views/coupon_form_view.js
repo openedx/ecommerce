@@ -462,7 +462,8 @@ define([
                 */
                 if (voucherType === 'Single use') {
                     this.setLimitToElement(this.$(maxUsesFieldSelector), '', '');
-                    this.hideField(maxUsesFieldSelector, 1);
+                    this.hideField(maxUsesFieldSelector, '');
+                    this.model.unset('max_uses');
                 } else {
                     if (this.model.get('coupon_type') === 'Discount code' && this.$('[name=quantity]').val() === 1) {
                         this.formGroup('[name=code]').removeClass(this.hiddenClass);

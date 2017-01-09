@@ -186,13 +186,21 @@ define([
                     expect(SpecUtils.formGroup(view, '[name=max_uses]')).toBeVisible();
                 });
 
-                it('should set different values for max_uses field for different voucher types', function() {
+                it('should set different values for max_uses field for different voucher types', function () {
+                    view.$('[name=voucher_type]').val('Single use').trigger('change');
+                    expect(view.$('[name=max_uses]').val()).toBe('');
+                    expect(view.$('[name=max_uses]').attr('min')).toBe('');
                     view.$('[name=voucher_type]').val('Once per customer').trigger('change');
                     expect(view.$('[name=max_uses]').val()).toBe('1');
                     expect(view.$('[name=max_uses]').attr('min')).toBe('1');
                     view.$('[name=voucher_type]').val('Multi-use').trigger('change');
                     expect(view.$('[name=max_uses]').val()).toBe('');
                     expect(view.$('[name=max_uses]').attr('min')).toBe('2');
+                });
+
+                it('should unset max_uses field for singe-use voucher', function () {
+                    view.$('[name=voucher_type]').val('Single use').trigger('change');
+                    expect(view.model.get('max_uses')).toBe(undefined);
                 });
 
                 it('should hide quantity field when code entered', function () {
