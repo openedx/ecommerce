@@ -168,6 +168,107 @@ define([
                 hideVoucherForm();
             });
 
+            $('select[name=country]').on('change', function() {
+                var country = $('select[name=country]').val(),
+                    inputDiv = $('#div_id_state .controls'),
+                    states = {
+                        'US': {
+                            'Alabama': 'AL',
+                            'Alaska': 'AK',
+                            'American': 'AS',
+                            'Arizona': 'AZ',
+                            'Arkansas': 'AR',
+                            'California': 'CA',
+                            'Colorado': 'CO',
+                            'Connecticut': 'CT',
+                            'Delaware': 'DE',
+                            'Dist. of Columbia': 'DC',
+                            'Florida': 'FL',
+                            'Georgia': 'GA',
+                            'Guam': 'GU',
+                            'Hawaii': 'HI',
+                            'Idaho': 'ID',
+                            'Illinois': 'IL',
+                            'Indiana': 'IN',
+                            'Iowa': 'IA',
+                            'Kansas': 'KS',
+                            'Kentucky': 'KY',
+                            'Louisiana': 'LA',
+                            'Maine': 'ME',
+                            'Maryland': 'MD',
+                            'Marshall Islands': 'MH',
+                            'Massachusetts': 'MA',
+                            'Michigan': 'MI',
+                            'Micronesia': 'FM',
+                            'Minnesota': 'MN',
+                            'Mississippi': 'MS',
+                            'Missouri': 'MO',
+                            'Montana': 'MT',
+                            'Nebraska': 'NE',
+                            'Nevada': 'NV',
+                            'New Hampshire': 'NH',
+                            'New Jersey': 'NJ',
+                            'New Mexico': 'NM',
+                            'New York': 'NY',
+                            'North Carolina': 'NC',
+                            'North Dakota': 'ND',
+                            'Northern Marianas': 'MP',
+                            'Ohio': 'OH',
+                            'Oklahoma': 'OK',
+                            'Oregon': 'OR',
+                            'Palau': 'PW',
+                            'Pennsylvania': 'PA',
+                            'Puerto Rico': 'PR',
+                            'Rhode Island': 'RI',
+                            'South Carolina': 'SC',
+                            'South Dakota': 'SD',
+                            'Tennessee': 'TN',
+                            'Texas': 'TX',
+                            'Utah': 'UT',
+                            'Vermont': 'VT',
+                            'Virginia': 'VA',
+                            'Virgin Islands': 'VI',
+                            'Washington': 'WA',
+                            'West Virginia': 'WV',
+                            'Wisconsin': 'WI',
+                            'Wyoming': 'WY'
+                        },
+                        'CA': {
+                            'Alberta': 'AB',
+                            'British Columbia': 'BC',
+                            'Manitoba': 'MB',
+                            'New Brunswick': 'NB',
+                            'Newfoundland and Labrador': 'NL',
+                            'Northwest Territories': 'NT',
+                            'Nova Scotia': 'NS',
+                            'Nunavut': 'NU',
+                            'Ontario': 'ON',
+                            'Prince Edward Island': 'PE',
+                            'Quebec': 'QC',
+                            'Saskatchewan': 'SK',
+                            'Yukon': 'YT'
+                        }
+                    };
+
+                if (country === 'US' || country === 'CA') {
+                    $(inputDiv).empty();
+                    $(inputDiv).append(
+                        '<select name="state" class="select form-control" id="id_state"' +
+                        'aria-required="true" required></select>'
+                    );
+                    _.each(states[country], function(value, key) {
+                        $('#id_state').append($('<option>', {value: value, text: key}));
+                    });
+                } else {
+                    $(inputDiv).empty();
+                    // In order to change the maxlength attribute, the same needs to be changed in the Django form.
+                    $(inputDiv).append(
+                        '<input class="textinput textInput form-control" id="id_state"' +
+                        'maxlength="60" name="state" type="text">'
+                    );
+                }
+            });
+
             $('#card-number-input').on('input', function() {
                 detectCreditCard();
             });

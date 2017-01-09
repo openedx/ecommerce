@@ -110,6 +110,31 @@ define([
                     expect($('#voucher_form_link').is(':visible')).toBeTruthy();
                 });
 
+                it('should make the states input field dropdown for US and CA', function() {
+                    $(
+                        '<fieldset>' +
+                        '<div class="form-item"><div><select name="country">' +
+                        '<option value=""><Choose country></option>' +
+                        '<option value="US">United States</option>' +
+                        '<option value="CA">Canada</option>' +
+                        '<option value="HR">Croatia</option>' +
+                        '</select></div><p class="help-block"></p></div>' +
+                        '<div class="form-item"><div id="div_id_state"><div class="controls">' +
+                        '<input name="state"></div></div>' +
+                        '</fieldset>'
+                    ).appendTo('body');
+                    BasketPage.onReady();
+
+                    $('select[name=country]').val('US').trigger('change');
+                    expect($('#id_state').prop('tagName')).toEqual('SELECT');
+
+                    $('select[name=country]').val('HR').trigger('change');
+                    expect($('#id_state').prop('tagName')).toEqual('INPUT');
+
+                    $('select[name=country]').val('CA').trigger('change');
+                    expect($('#id_state').prop('tagName')).toEqual('SELECT');
+                });
+
                 it('should disable payment button before making ajax call', function () {
                     spyOn(Utils, 'disableElementWhileRunning').and.callThrough();
                     BasketPage.onReady();
