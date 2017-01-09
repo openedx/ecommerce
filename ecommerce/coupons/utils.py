@@ -1,10 +1,13 @@
 """ Coupon related utility functions. """
 import hashlib
+import logging
 
 from django.conf import settings
 from django.core.cache import cache
 from oscar.core.loading import get_model
 
+
+logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 
 
@@ -34,6 +37,62 @@ def get_range_catalog_query_results(limit, query, site, offset=None):
         )
         cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response
+
+
+def get_course_catalogs(site, resource_id=None):
+    """
+    Get details related to course catalogs.
+
+    Arguments:
+        site (Site): Site object containing Site Configuration data
+        resource_id (int or str): Identifies a specific resource to be retrieved
+
+    Returns:
+        dict: Course catalogs received from Course Catalog API
+    """
+    no_data = []
+    resource = 'catalogs'
+    base_cache_key = 'catalog.api.data'
+
+    cache_key = '{}.{}'.format(base_cache_key, resource_id) if resource_id else base_cache_key
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
+    api = site.siteconfiguration.course_catalog_api_client
+    try:
+        endpoint = getattr(api, resource)
+        response = endpoint(resource_id).get()
+
+        if resource_id:
+            results = response
+        else:
+            results = _traverse_pagination(response, endpoint, no_data)
+    except:  # pylint: disable=bare-except
+        logger.exception('Failed to retrieve data from the Discovery API.')
+        return no_data
+
+    cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
+    return results
+
+
+def _traverse_pagination(response, endpoint, no_data):
+    """
+    Traverse a paginated API response.
+
+    Extracts and concatenates "results" (list of dict) returned by DRF-powered APIs.
+    """
+    results = response.get('results', no_data)
+
+    page = 1
+    next_page = response.get('next')
+    while next_page:
+        page += 1
+        response = endpoint.get()
+        results += response.get('results', no_data)
+        next_page = response.get('next')
+
+    return results
 
 
 def prepare_course_seat_types(course_seat_types):

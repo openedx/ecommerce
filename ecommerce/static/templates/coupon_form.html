@@ -164,6 +164,8 @@
                 <label for="single-course"><%= gettext('Single course') %></label>
                 <input id="multiple-courses" type="radio" name="catalog_type" value="Multiple courses">
                 <label for="multiple-courses"><%= gettext('Multiple courses') %></label>
+                <input id="catalog" type="radio" name="catalog_type" value="Catalog">
+                <label for="catalog"><%= gettext('Catalog') %></label>
             </div>
             <p class="help-block"></p>
         </div>
@@ -203,6 +205,11 @@
                 <p class="help-block"></p>
             </div>
             <div class="catalog_buttons"></div>
+        </div>
+        <div class="form-group course-catalog">
+            <label for="course-catalog"><%= gettext('Select from course catalogs:') %> *</label>
+            <select id="course-catalog" class="form-control" name="course_catalog"></select>
+            <p class="help-block"></p>
         </div>
         <div class="form-group email-domains">
             <label for="email-domains"><%= gettext('Email domains:') %> </label>

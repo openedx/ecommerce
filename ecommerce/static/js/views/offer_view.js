@@ -30,13 +30,17 @@ define([
             initialize: function (options) {
                 this.listenTo(this.collection, 'sync', this.render);
                 this.code = options.code;
+                this.course = options.course;
+                this.enterprise = options.enterprise;
             },
 
             changePage: function() {
                 this.$el.html(
                     this.template({
                         code: this.code,
+                        course: this.course,
                         courses: this.collection,
+                        enterprise: this.enterprise,
                         isCredit: this.isCredit,
                         isEnrollmentCode: this.isEnrollmentCode,
                         page: this.page
@@ -55,7 +59,9 @@ define([
                     this.$el.html(
                         this.template({
                             code: this.code,
+                            course: this.course,
                             courses: this.collection,
+                            enterprise: this.enterprise,
                             isCredit: this.isCredit,
                             isEnrollmentCode: this.isEnrollmentCode,
                             page: this.collection.goToPage(this.collection.page),
