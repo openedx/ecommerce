@@ -423,7 +423,7 @@ define([
 
             describe('Analytics', function() {
                 beforeEach(function () {
-                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function() {
+                    spyOn(TrackingModel.prototype, 'isSegmentTrackingEnabled').and.callFake(function() {
                         return true;
                     });
                     spyOn(AnalyticsView.prototype, 'track');

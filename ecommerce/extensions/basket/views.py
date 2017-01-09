@@ -182,7 +182,7 @@ class BasketSummaryView(BasketView):
         context.update({
             'analytics_data': prepare_analytics_data(
                 user,
-                self.request.site.siteconfiguration.segment_key,
+                self.request.site.siteconfiguration,
                 unicode(course_key)
             ),
             'enable_client_side_checkout': False,

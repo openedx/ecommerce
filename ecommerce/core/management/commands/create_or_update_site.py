@@ -1,13 +1,14 @@
 """ Creates or updates a Site including Partner and SiteConfiguration data. """
 
 from __future__ import unicode_literals
+from copy import deepcopy
 import logging
 
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from oscar.core.loading import get_model
 
-from ecommerce.core.models import SiteConfiguration
+from ecommerce.core.models import DEFAULT_ANALYTICS_CONFIGURATION, SiteConfiguration
 
 logger = logging.getLogger(__name__)
 Partner = get_model('partner', 'Partner')
@@ -116,7 +117,8 @@ class Command(BaseCommand):
         lms_url_root = options.get('lms_url_root')
         client_id = options.get('client_id')
         client_secret = options.get('client_secret')
-        segment_key = options.get('segment_key')
+        analytics_configuration = deepcopy(DEFAULT_ANALYTICS_CONFIGURATION)
+        analytics_configuration['SEGMENT']['DEFAULT_WRITE_KEY'] = options.get('segment_key')
         from_email = options.get('from_email')
         enable_enrollment_codes = True if options.get('enable_enrollment_codes') else False
         payment_support_email = options.get('payment_support_email', '')
@@ -146,7 +148,7 @@ class Command(BaseCommand):
             'lms_url_root': lms_url_root,
             'theme_scss_path': options['theme_scss_path'],
             'payment_processors': options['payment_processors'],
-            'segment_key': segment_key,
+            'analytics_configuration': analytics_configuration,
             'from_email': from_email,
             'enable_enrollment_codes': enable_enrollment_codes,
             'oauth_settings': {

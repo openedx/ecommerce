@@ -26,7 +26,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
     user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(order.user)
 
-    order.site.siteconfiguration.segment_client.track(
+    order.site.siteconfiguration.track_analytics_event(
         user_tracking_id,
         'Completed Order',
         {
