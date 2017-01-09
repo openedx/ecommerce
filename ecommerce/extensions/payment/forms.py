@@ -61,12 +61,12 @@ class PaymentForm(forms.Form):
                 css_class='form-item col-md-6'
             ),
             Div(
-                Div('state'),
+                Div('country'),
                 HTML('<p class="help-block"></p>'),
                 css_class='form-item col-md-6'
             ),
             Div(
-                Div('country'),
+                Div('state'),
                 HTML('<p class="help-block"></p>'),
                 css_class='form-item col-md-6'
             ),
@@ -93,6 +93,8 @@ class PaymentForm(forms.Form):
     address_line1 = forms.CharField(max_length=60, label=_('Address'))
     address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
+    # max_length for state field is set to default 60, if it needs to be changed,
+    # the equivalent (maxlength) attribute in the basket page JS code needs to be changed too.
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
     country = forms.ChoiceField(choices=country_choices, label=_('Country'))
