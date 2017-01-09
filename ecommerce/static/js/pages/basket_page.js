@@ -145,12 +145,14 @@ define([
                     $('.card-type-icon').attr(
                         'src',
                         iconPath + card.name + '.png'
-                    );
+                    ).removeClass('hidden');
                     $('input[name=card_type]').val(card.type);
                 } else {
-                    $('.card-type-icon').attr('src', '');
+                    $('.card-type-icon').attr('src', '').addClass('hidden');
                     $('input[name=card_type]').val('');
                 }
+            } else {
+                $('.card-type-icon').attr('src', '').addClass('hidden');
             }
         },
 
