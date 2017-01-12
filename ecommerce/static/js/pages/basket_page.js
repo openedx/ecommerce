@@ -89,6 +89,10 @@ define([
                 'select[name=country]'
             ];
 
+            if (['US', 'CA'].indexOf($('select[name=country]').val()) > -1) {
+                requiredFields.push('select[name=state]');
+            }
+
             _.each(requiredFields, function(field) {
                 if ($(field).val() === '') {
                     event.preventDefault();
@@ -261,11 +265,15 @@ define([
                         '<select name="state" class="select form-control" id="id_state"' +
                         'aria-required="true" required></select>'
                     );
+                    $('#id_state').append($('<option>', {value: '', text: '<Choose state/province>'}));
+                    $('#div_id_state').find('label').text('State/Province (required)');
+
                     _.each(states[country], function(value, key) {
                         $('#id_state').append($('<option>', {value: value, text: key}));
                     });
                 } else {
                     $(inputDiv).empty();
+                    $('#div_id_state').find('label').text('State/Province');
                     // In order to change the maxlength attribute, the same needs to be changed in the Django form.
                     $(inputDiv).append(
                         '<input class="textinput textInput form-control" id="id_state"' +

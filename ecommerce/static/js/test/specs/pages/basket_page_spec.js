@@ -122,8 +122,8 @@ define([
                         '<option value="CA">Canada</option>' +
                         '<option value="HR">Croatia</option>' +
                         '</select></div><p class="help-block"></p></div>' +
-                        '<div class="form-item"><div id="div_id_state"><div class="controls">' +
-                        '<input name="state"></div></div>' +
+                        '<div class="form-item"><div id="div_id_state"><label>State/Province</label>' +
+                        '<div class="controls"><input name="state"></div></div></div>' +
                         '</fieldset>'
                     ).appendTo('body');
                     BasketPage.onReady();
@@ -136,6 +136,7 @@ define([
 
                     $('select[name=country]').val('CA').trigger('change');
                     expect($('#id_state').prop('tagName')).toEqual('SELECT');
+                    expect($('#div_id_state').find('label').text()).toEqual('State/Province (required)');
                 });
 
                 it('should disable payment button before making ajax call', function () {
@@ -242,6 +243,9 @@ define([
                         '<option value=""><Choose country></option>' +
                         '<option value="US">United States</option>' +
                         '</select></div><p class="help-block"></p></div>' +
+                        '<div class="form-item"><div><select name="state">' +
+                        '<option value=""><Choose state></option>' +
+                        '</select></div><p class="help-block"></p></div>' +
                         '</fieldset>' +
                         '<div><input name="card_number">' +
                         '<p class="help-block"></p></div>' +
@@ -274,61 +278,37 @@ define([
                 });
 
                 describe('cardHolderInformationValidation', function() {
-                    it('should validate first name', function() {
-                        $('input[name=first_name]').val('');
-                        $('#payment-button').click();
+                    it('should validate required fields', function() {
+                        var requiredFields = [
+                            'input[name=first_name]',
+                            'input[name=last_name]',
+                            'input[name=address_line1]',
+                            'input[name=city]',
+                            'select[name=country]'
+                        ];
 
+                        _.each(requiredFields, function(field) {
+                            $(field).val('');
+                            $('#payment-button').click();
+
+                            expect(
+                                $(field).parentsUntil(
+                                    'form-item'
+                                ).find('~.help-block span').text()
+                            ).toEqual('This field is required');
+                        });
+                    });
+
+                    it('should validate state field', function() {
+                        $('select[name=country]').val('US').trigger('change');
+                        $('select[name=state]').val('');
+                        $('#payment-button').click();
                         expect(
-                            $('input[name=first_name]').parentsUntil(
+                            $('select[name=state]').parentsUntil(
                                 'form-item'
                             ).find('~.help-block span').text()
                         ).toEqual('This field is required');
                     });
-
-                    it('should validate last name', function() {
-                        $('input[name=last_name]').val('');
-                        $('#payment-button').click();
-
-                        expect(
-                            $('input[name=last_name]').parentsUntil(
-                                'form-item'
-                            ).find('~.help-block span').text()
-                        ).toEqual('This field is required');
-                    });
-
-                    it('should validate address', function() {
-                        $('input[name=address_line1]').val('');
-                        $('#payment-button').click();
-
-                        expect(
-                            $('input[name=address_line1]').parentsUntil(
-                                'form-item'
-                            ).find('~.help-block span').text()
-                        ).toEqual('This field is required');
-                    });
-
-                    it('should validate city', function() {
-                        $('input[name=city]').val('');
-                        $('#payment-button').click();
-
-                        expect(
-                            $('input[name=city]').parentsUntil(
-                                'form-item'
-                            ).find('~.help-block span').text()
-                        ).toEqual('This field is required');
-                    });
-
-                    it('should validate country', function() {
-                        $('select[name=country]').val('');
-                        $('#payment-button').click();
-
-                        expect(
-                            $('select[name=country]').parentsUntil(
-                                'form-item'
-                            ).find('~.help-block span').text()
-                        ).toEqual('This field is required');
-                    });
-
                 });
 
                 describe('cardInfoValidation', function() {
