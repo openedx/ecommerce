@@ -73,7 +73,6 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
             'catalog_query': None,
             'course_seat_types': None,
             'email_domains': None,
-            'course_catalog': {'id': '', 'name': ''},
         }
 
     def setup_site_configuration(self):
@@ -239,8 +238,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'start_datetime': str(now() - datetime.timedelta(days=10)),
             'stock_record_ids': [1, 2],
             'title': 'Tešt čoupon',
-            'voucher_type': Voucher.SINGLE_USE,
-            'course_catalog': {'id': '', 'name': ''},
+            'voucher_type': Voucher.SINGLE_USE
         }
         self.response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.coupon = Product.objects.get(title=self.data['title'])

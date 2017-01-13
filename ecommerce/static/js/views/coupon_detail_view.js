@@ -1,7 +1,6 @@
 define([
         'jquery',
         'backbone',
-        'ecommerce',
         'underscore',
         'underscore.string',
         'moment',
@@ -12,7 +11,6 @@ define([
     ],
     function ($,
               Backbone,
-              ecommerce,
               _,
               _s,
               moment,
@@ -116,8 +114,6 @@ define([
             render: function () {
                 var html,
                     category = this.model.get('category').name,
-                    courseCatalog = this.model.get('course_catalog'),
-                    courseCatalogName = '',
                     invoice_data = this.formatInvoiceData(),
                     emailDomains = this.model.get('email_domains'),
                     template_data,
@@ -127,16 +123,9 @@ define([
                     price = _s.sprintf('$%s', this.model.get('price'));
                 }
 
-                if (typeof courseCatalog === 'number') {
-                    courseCatalogName = ecommerce.coupons.catalogs.get(courseCatalog).get('name');
-                } else if (!$.isEmptyObject(courseCatalog)) {
-                    courseCatalogName = courseCatalog.name;
-                }
-
                 template_data = {
                     category: category,
                     coupon: this.model.toJSON(),
-                    courseCatalogName: courseCatalogName,
                     courseSeatType: this.formatSeatTypes(),
                     discountValue: this.discountValue(),
                     endDateTime: this.formatDateTime(this.model.get('end_date')),

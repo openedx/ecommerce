@@ -13,7 +13,6 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import get_range_catalog_query_results
 from ecommerce.extensions.api import serializers
-from ecommerce.courses.utils import get_course_catalogs
 
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -74,20 +73,3 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
                 logger.error('Unable to connect to Course Catalog service.')
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    @action(is_for_list=True, methods=['get'])
-    def course_catalogs(self, request):
-        """
-        Returns response with all course catalogs in the format:
-        ["results": {"id": 1, "name": "Dummy Catalog"}]
-        """
-        try:
-            results = get_course_catalogs(site=request.site)
-        except:  # pylint: disable=bare-except
-            logger.exception('Failed to retrieve course catalogs data from the Course Discovery API.')
-            results = []
-
-        # Create catalogs list with sorting by name
-        catalogs = [{'id': catalog['id'], 'name': catalog['name']} for catalog in results]
-        data = {'results': sorted(catalogs, key=lambda catalog: catalog.get('name', '').lower())}
-        return Response(data=data)
