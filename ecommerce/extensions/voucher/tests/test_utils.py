@@ -137,13 +137,6 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             course_seat_types=course_seat_types
         )
 
-    def create_course_catalog_coupon(self, coupon_title, quantity, course_catalog):
-        return self.create_coupon(
-            title=coupon_title,
-            quantity=quantity,
-            course_catalog=course_catalog,
-        )
-
     def use_voucher(self, order_num, voucher, user):
         """
         Mark voucher as used by provided users
@@ -246,39 +239,6 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(len(discount_vouchers), 1)
         self.assertEqual(discount_vouchers[0].code, VOUCHER_CODE)
 
-        with self.assertRaises(IntegrityError):
-            create_vouchers(**self.data)
-
-    def test_create_course_catalog_coupon(self):
-        """
-        Test course catalog coupon voucher creation with specified catalog id.
-        """
-        coupon_title = 'Course catalog coupon'
-        quantity = 1
-        course_catalog = 1
-
-        course_catalog_coupon = self.create_course_catalog_coupon(
-            coupon_title=coupon_title,
-            quantity=quantity,
-            course_catalog=course_catalog,
-        )
-        self.assertEqual(course_catalog_coupon.title, coupon_title)
-
-        course_catalog_vouchers = course_catalog_coupon.attr.coupon_vouchers.vouchers.all()
-        self.assertEqual(course_catalog_vouchers.count(), quantity)
-
-        course_catalog_voucher_range = course_catalog_vouchers.first().offers.first().benefit.range
-        self.assertEqual(course_catalog_voucher_range.course_catalog, course_catalog)
-
-        self.data.update({
-            'name': coupon_title,
-            'benefit_value': course_catalog_vouchers.first().offers.first().benefit.value,
-            'code': course_catalog_vouchers.first().code,
-            'quantity': quantity,
-            'course_catalog': course_catalog,
-            'catalog': None,
-            'course_seat_types': None
-        })
         with self.assertRaises(IntegrityError):
             create_vouchers(**self.data)
 

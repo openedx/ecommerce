@@ -36,8 +36,7 @@ def create_coupon_product(
         quantity,
         start_datetime,
         title,
-        voucher_type,
-        course_catalog,
+        voucher_type
 ):
     """
     Creates a coupon product and a stock record for it.
@@ -50,7 +49,6 @@ def create_coupon_product(
         category (dict): Contains category ID and name.
         code (str): Voucher code.
         course_seat_types (str): Comma-separated list of course seat types.
-        course_catalog (int): Course catalog id from Catalog Service
         email_domains (str): Comma-separated list of email domains.
         end_datetime (Datetime): Voucher end Datetime.
         max_uses (int): Number of Voucher max uses.
@@ -84,7 +82,6 @@ def create_coupon_product(
             catalog_query=catalog_query,
             code=code or None,
             coupon=coupon_product,
-            course_catalog=course_catalog,
             course_seat_types=course_seat_types,
             email_domains=email_domains,
             end_datetime=end_datetime,

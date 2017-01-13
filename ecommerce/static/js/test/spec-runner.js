@@ -20,8 +20,6 @@ if (!window.gettext) {
 // Establish the global namespace
 window.ecommerce = window.ecommerce || {};
 window.ecommerce.coupons = window.ecommerce.coupons || {};
-window.ecommerce.catalogs = window.ecommerce.catalogs || {};
-window.ecommerce.categories = window.ecommerce.categories || {};
 window.ecommerce.credit = window.ecommerce.credit || {};
 
 // you can automatically get the test files using karma's configs

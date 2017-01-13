@@ -7,9 +7,7 @@ define([
         'underscore',
         'moment',
         'collections/category_collection',
-        'collections/catalog_collection',
         'models/category',
-        'models/catalog_model',
         'utils/validation_patterns'
     ],
     function (Backbone,
@@ -26,23 +24,15 @@ define([
             required: gettext('This field is required.'),
             number: gettext('This value must be a number.'),
             date: gettext('This value must be a date.'),
-            seat_types: gettext('At least one seat type must be selected.')
+            seat_types: gettext('At least one seat type must be selected.'),
         });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
-
-        /* jshint esnext: true */
-        var CATALOG_TYPES = {
-            single_course: 'Single course',
-            multiple_courses: 'Multiple courses',
-            catalog: 'Catalog'
-        };
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/coupons/',
 
             defaults: {
                 category: {id: 3, name: 'Affiliate Promotion'},
-                course_catalog: {id: '', name: ''},
                 code: '',
                 course_seats: [],
                 course_seat_types: [],
@@ -52,10 +42,8 @@ define([
                 quantity: 1,
                 seats: [],
                 stock_record_ids: [],
-                total_value: 0
+                total_value: 0,
             },
-
-            catalogTypes: CATALOG_TYPES,
 
             validation: {
                 benefit_value: {
@@ -66,12 +54,7 @@ define([
                 },
                 catalog_query: {
                     required: function () {
-                        return this.get('catalog_type') === CATALOG_TYPES.multiple_courses;
-                    }
-                },
-                course_catalog: {
-                    required: function () {
-                        return this.get('catalog_type') === CATALOG_TYPES.catalog;
+                        return this.get('catalog_type') === 'Multiple courses';
                     }
                 },
                 category: {required: true},
@@ -86,11 +69,11 @@ define([
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required'),
                     required: function () {
-                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
+                        return this.get('catalog_type') === 'Single course';
                     }
                 },
                 course_seat_types: function (val) {
-                    if (this.get('catalog_type') === CATALOG_TYPES.multiple_courses && val.length === 0) {
+                    if (this.get('catalog_type') === 'Multiple courses' && val.length === 0) {
                         return Backbone.Validation.messages.seat_types;
                     }
                 },
@@ -150,7 +133,7 @@ define([
                 // seat_type is for validation only, stock_record_ids holds the values
                 seat_type: {
                     required: function () {
-                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
+                        return this.get('catalog_type') === 'Single course';
                     }
                 },
                 start_date: function (val) {
@@ -168,7 +151,7 @@ define([
                         return gettext('Must occur before end date');
                     }
                 },
-                title: {required: true}
+                title: {required: true},
             },
 
             initialize: function () {
@@ -202,29 +185,11 @@ define([
 
             updateSeatData: function () {
                 var seat_data,
-                    seats = this.get('seats'),
-                    catalogId,
-                    catalogType;
+                    seats = this.get('seats');
 
-                catalogId = '';
-                if (this.has('course_catalog')) {
-                    if (typeof this.get('course_catalog') === 'number') {
-                        catalogId = this.get('course_catalog');
-                    } else if (!$.isEmptyObject(this.get('course_catalog'))) {
-                        catalogId = this.get('course_catalog').id;
-                    }
-                }
+                this.set('catalog_type', this.has('catalog_query') ? 'Multiple courses': 'Single course');
 
-                if (this.has('catalog_query') && this.get('catalog_query') !== '') {
-                    catalogType = this.catalogTypes.multiple_courses;
-                } else if (catalogId !== '') {
-                    catalogType = this.catalogTypes.catalog;
-                } else {
-                    catalogType = this.catalogTypes.single_course;
-                }
-                this.set('catalog_type', catalogType);
-
-                if (this.get('catalog_type') === this.catalogTypes.single_course) {
+                if (this.get('catalog_type') === 'Single course') {
                     if (seats[0]) {
                         seat_data = seats[0].attribute_values;
 
@@ -232,7 +197,6 @@ define([
                         this.set('course_id', this.getCourseID(seat_data));
                         this.updateTotalValue(this.getSeatPrice());
                     }
-                    this.set('course_catalog', this.defaults.course_catalog);
                 }
             },
 
@@ -247,7 +211,7 @@ define([
                     'invoice_number': invoice.number,
                     'invoice_payment_date': invoice.payment_date,
                     'tax_deducted_source': invoice.tax_deducted_source,
-                    'tax_deduction': tax_deducted
+                    'tax_deduction': tax_deducted,
                 });
             },
 
