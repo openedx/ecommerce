@@ -1,6 +1,24 @@
 .basket {
-    .alertinner {
-        display: inline-block;
+    .alert {
+        position: relative;
+
+        .alertinner {
+            padding-left: 0;
+
+            p {
+                margin-bottom: 0;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+
+            -webkit-transform: translateY(-50%);
+                -ms-transform: translateY(-50%);
+                    transform: translateY(-50%);
+        }
     }
 
     .container {
@@ -111,7 +129,7 @@
                 width: 30px;
                 vertical-align: middle;
                 display: table-cell;
-                float: left;
+                @include float(left);
 
                 .btn {
                     display: block;
@@ -262,7 +280,7 @@
 
     #payment-method {
         #payment-method-image, button {
-            float: left;
+            @include float(left);
             border: 1px solid palette(grayscale, base);
             border-radius: 5px;
             height: 50px;
@@ -367,7 +385,7 @@
 
                     .fa-lock {
                         position: relative;
-                        float: right;
+                        @include float(right);
                         top: -25px;
                         right: 10%;
                         margin-right: -5%;
@@ -375,7 +393,7 @@
 
                     .card-type-icon {
                         position: relative;
-                        float: right;
+                        @include float(right);
                         top: -30px;
                         right: 28%;
                         margin-right: -15%;
@@ -396,7 +414,7 @@
             }
 
             .description {
-                float: left;
+                @include float(left);
             }
 
             .price {
@@ -435,7 +453,7 @@
                 }
 
                 .voucher {
-                    float: left;
+                    @include float(left);
                     font-size: 14px;
                     margin: 0 10px 0 0;
                     line-height: 24px;
