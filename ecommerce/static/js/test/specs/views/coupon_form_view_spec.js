@@ -80,6 +80,21 @@ define([
                     expect(view.updateTotalValue).toHaveBeenCalled();
                     expect(view.getSeatData).toHaveBeenCalled();
                 });
+
+                it('should call updateTotalValue when catalog_type "Single course"', function () {
+                    spyOn(view, 'updateTotalValue');
+                    view.changeTotalValue();
+                    expect(view.updateTotalValue).toHaveBeenCalled();
+                    expect(view.model.get('catalog_type')).toBe('Single course');
+                });
+
+                it('should not call updateTotalValue when catalog_type not "Single course"', function () {
+                    spyOn(view, 'updateTotalValue');
+                    view.model.set('catalog_type', 'Not single course');
+                    view.changeTotalValue();
+                    expect(view.updateTotalValue).not.toHaveBeenCalled();
+                    expect(view.model.get('catalog_type')).not.toBe('Single course');
+                });
             });
 
             describe('enrollment code', function () {
