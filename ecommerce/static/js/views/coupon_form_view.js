@@ -572,7 +572,9 @@ define([
             },
 
             changeTotalValue: function () {
-                this.updateTotalValue(this.getSeatData());
+                if (this.model.get('catalog_type') === 'Single course' && this.getSeatType() !== null) {
+                    this.updateTotalValue(this.getSeatData());
+                }
             },
 
             updateTotalValue: function (seatData) {
