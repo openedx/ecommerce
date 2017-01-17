@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import json
+import urllib
 
 import ddt
 import httpretty
@@ -398,11 +399,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         """ Verify there are no form, line and benefit data in the context for a non-existing basket. """
         self.assert_emtpy_basket()
 
-    def test_anonymous_basket(self):
-        """ Verify there are no form, line and benefit data in the context for anonymous user. """
-        self.client.logout()
-        self.assert_emtpy_basket()
-
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
@@ -510,6 +506,14 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
         with self.assertRaises(SiteConfigurationError):
             self.client.get(self.get_full_url(self.path))
+
+    def test_login_required_basket_summary(self):
+        """ The view should redirect to the login page if the user is not logged in. """
+        self.client.logout()
+        response = self.client.get(self.path)
+        testserver_login_url = self.get_full_url(reverse(settings.LOGIN_URL))
+        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(self.path))
+        self.assertRedirects(response, expected_url, target_status_code=302)
 
 
 class VoucherAddMessagesViewTests(TestCase):
