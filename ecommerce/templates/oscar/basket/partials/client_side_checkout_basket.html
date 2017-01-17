@@ -143,7 +143,7 @@
                 <div class="pci-fields row">
                     <div id="card-number" class="form-group col-md-6">
                         <label for="card-number-input" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
-                        <input id="card-number-input" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true"/>
+                        <input id="card-number-input" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true" pattern="[0-9]*"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                         <img class="card-type-icon hidden" alt="Credit card icon">
                         <p class="help-block"></p>
@@ -155,7 +155,7 @@
                             <span class="sr">, {% trans "Secure" %}</span>
                             <i class="fa fa-question-circle" aria-hidden="true" role="tooltip" title="The three last digits in the signature area on the back of your card. For American Express, it is the four digits on the front of the card."></i>
                         </label>
-                        <input type="password" id="card-cvn-input" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true"/>
+                        <input type="password" id="card-cvn-input" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true" pattern="[0-9]*"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                         <p class="help-block"></p>
                     </div>
