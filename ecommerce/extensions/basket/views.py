@@ -17,7 +17,7 @@ from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
-from ecommerce.extensions.basket.utils import prepare_basket, get_basket_switch_data
+from ecommerce.extensions.basket.utils import get_basket_switch_data, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
@@ -129,17 +129,25 @@ class BasketSummaryView(BasketView):
             'product_description': short_description,
         }
 
-    def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
-        formset = context.get('formset', [])
-        lines = context.get('line_list', [])
-        lines_data = []
+    def _process_basket_lines(self, lines):
+        """Processes the basket lines and extracts information for the view's context.
+        In addition determines whether:
+            * verification message should be displayed
+            * voucher form should be displayed
+            * switch link (for switching between seat and enrollment code products) should be displayed
+        and returns that information for the basket view context to be updated with it.
+
+        Args:
+            lines (list): List of basket lines.
+        Returns:
+            context_updates (dict): Containing information with which the context needs to
+                                    be updated with.
+            lines_data (list): List of information about the basket lines.
+        """
         display_verification_message = False
+        lines_data = []
         show_voucher_form = True
         switch_link_text = partner_sku = ''
-        basket = self.request.basket
-        site = self.request.site
-        site_configuration = site.siteconfiguration
 
         for line in lines:
             product_class_name = line.product.get_product_class().name
@@ -164,25 +172,77 @@ class BasketSummaryView(BasketView):
                 switch_link_text, partner_sku = get_basket_switch_data(line.product)
 
             if line.has_discount:
-                benefit = basket.applied_offers().values()[0].benefit
+                benefit = self.request.basket.applied_offers().values()[0].benefit
                 benefit_value = format_benefit_value(benefit)
             else:
                 benefit_value = None
 
             line_data.update({
-                'seat_type': self._determine_seat_type(line.product),
                 'benefit_value': benefit_value,
                 'enrollment_code': line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
                 'line': line,
+                'seat_type': self._determine_seat_type(line.product),
             })
             lines_data.append(line_data)
+
+        context_updates = {
+            'display_verification_message': display_verification_message,
+            'partner_sku': partner_sku,
+            'show_voucher_form': show_voucher_form,
+            'switch_link_text': switch_link_text
+        }
+
+        return context_updates, lines_data
+
+    def _get_payment_processors_data(self, payment_processors):
+        """Retrieve information about payment processors for the client side checkout basket.
+
+        Args:
+            payment_processors (list): List of all available payment processors.
+        Returns:
+            A dictionary containing information about the payment processor(s) with which the
+            basket view context needs to be updated with.
+        """
+        site_configuration = self.request.site.siteconfiguration
+        payment_processor_class = site_configuration.get_client_side_payment_processor_class()
+
+        if payment_processor_class:
+            payment_processor = payment_processor_class(self.request.site)
+
+            today = datetime.today()
+            return {
+                'client_side_payment_processor_name': payment_processor.NAME,
+                'enable_client_side_checkout': True,
+                'months': range(1, 13),
+                'payment_form': PaymentForm(
+                    user=self.request.user, initial={'basket': self.request.basket}, label_suffix=''
+                ),
+                'payment_url': payment_processor.client_side_payment_url,
+                'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
+                # Assumption is that the credit card duration is 15 years
+                'years': range(today.year, today.year + 16)
+            }
+        else:
+            msg = 'Unable to load client-side payment processor [{processor}] for ' \
+                  'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
+                                                     sc=site_configuration.id)
+            raise SiteConfigurationError(msg)
+
+    def get_context_data(self, **kwargs):
+        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+        formset = context.get('formset', [])
+        lines = context.get('line_list', [])
+        site_configuration = self.request.site.siteconfiguration
+
+        context_updates, lines_data = self._process_basket_lines(lines)
+        context.update(context_updates)
 
         course_key = lines_data[0].get('course_key') if len(lines) == 1 else None
         user = self.request.user
         context.update({
             'analytics_data': prepare_analytics_data(
                 user,
-                self.request.site.siteconfiguration.segment_key,
+                site_configuration.segment_key,
                 unicode(course_key)
             ),
             'enable_client_side_checkout': False,
@@ -191,32 +251,13 @@ class BasketSummaryView(BasketView):
         payment_processors = site_configuration.get_payment_processors()
         if site_configuration.client_side_payment_processor \
                 and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
-            payment_processor_class = site_configuration.get_client_side_payment_processor_class()
-
-            if payment_processor_class:
-                payment_processor = payment_processor_class(site)
-
-                today = datetime.today()
-                context.update({
-                    'enable_client_side_checkout': True,
-                    'client_side_payment_processor_name': payment_processor.NAME,
-                    'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
-                    'months': range(1, 13),
-                    'payment_form': PaymentForm(user=user, initial={'basket': basket}, label_suffix=''),
-                    'payment_url': payment_processor.client_side_payment_url,
-                    # Assumption is that the credit card duration is 15 years
-                    'years': range(today.year, today.year + 16)
-                })
-            else:
-                msg = 'Unable to load client-side payment processor [{processor}] for ' \
-                      'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
-                                                         sc=site_configuration.id)
-                raise SiteConfigurationError(msg)
+            payment_processors_data = self._get_payment_processors_data(payment_processors)
+            context.update(payment_processors_data)
 
         # Total benefit displayed in price summary.
         # Currently only one voucher per basket is supported.
         try:
-            applied_voucher = basket.vouchers.first()
+            applied_voucher = self.request.basket.vouchers.first()
             total_benefit = (
                 format_benefit_value(applied_voucher.offers.first().benefit)
                 if applied_voucher else None
@@ -225,19 +266,14 @@ class BasketSummaryView(BasketView):
             total_benefit = None
 
         context.update({
-            'total_benefit': total_benefit,
-            'free_basket': context['order_total'].incl_tax == 0,
-            'payment_processors': payment_processors,
-            'homepage_url': get_lms_url(''),
+            'course_key': course_key,
             'formset_lines_data': zip(formset, lines_data),
-            'display_verification_message': display_verification_message,
+            'free_basket': context['order_total'].incl_tax == 0,
+            'homepage_url': get_lms_url(''),
             'min_seat_quantity': 1,
-            'show_voucher_form': show_voucher_form,
-            'switch_link_text': switch_link_text,
-            'partner_sku': partner_sku,
-            'course_key': course_key
+            'payment_processors': payment_processors,
+            'total_benefit': total_benefit
         })
-
         return context
 
 
