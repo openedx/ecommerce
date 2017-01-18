@@ -92,6 +92,12 @@
             <span class="price">{{ order_total.incl_tax|currency:basket.currency }}</span>
         </div>
     </fieldset>
+    {% if order_details_msg %}
+        <div id="order-details">
+            <p class="title">{% trans "ORDER DETAILS" %}</p>
+            <p>{{ order_details_msg }}</p>
+        </div>
+    {% endif %}
 </div>
 
 
