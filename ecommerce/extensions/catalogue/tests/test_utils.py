@@ -126,6 +126,7 @@ class CouponCreationTests(CouponMixin, TestCase):
             course_seat_types=None,
             email_domains=None,
             end_datetime='2020-1-1',
+            enterprise_customer=None,
             max_uses=max_uses,
             note=note,
             partner=self.partner,

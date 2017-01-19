@@ -93,6 +93,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         course_seat_types=cleaned_voucher_data['course_seat_types'],
                         email_domains=cleaned_voucher_data['email_domains'],
                         end_datetime=cleaned_voucher_data['end_datetime'],
+                        enterprise_customer=cleaned_voucher_data['enterprise_customer'],
                         max_uses=cleaned_voucher_data['max_uses'],
                         note=cleaned_voucher_data['note'],
                         partner=cleaned_voucher_data['partner'],
@@ -131,6 +132,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         category_data = request.data.get('category')
         code = request.data.get('code')
         course_catalog_data = request.data.get('course_catalog')
+        enterprise_customer_data = request.data.get('enterprise_customer')
         course_seat_types = request.data.get('course_seat_types')
         max_uses = request.data.get('max_uses')
         partner = request.site.siteconfiguration.partner
@@ -163,28 +165,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             validation_message = 'Unexpected catalog data format received for coupon.'
             raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
 
-        # When a black-listed course mode is received raise an exception.
-        # Audit modes do not have a certificate type and therefore will raise
-        # an AttributeError exception.
-        if stock_record_ids:
-            seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
-            for seat in seats:
-                try:
-                    if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
-                        validation_message = 'Course mode not supported'
-                        raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
-                except AttributeError:
-                    validation_message = 'Course mode not supported'
-                    raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+        try:
+            enterprise_customer = enterprise_customer_data['id'] if enterprise_customer_data else None
+        except (KeyError, TypeError):
+            validation_message = 'Unexpected EnterpriseCustomer data format received for coupon.'
+            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
 
-            stock_records_string = ' '.join(str(id) for id in stock_record_ids)
-            coupon_catalog, __ = get_or_create_catalog(
-                name='Catalog for stock records: {}'.format(stock_records_string),
-                partner=partner,
-                stock_record_ids=stock_record_ids
-            )
-        else:
-            coupon_catalog = None
+        coupon_catalog = cls.get_coupon_catalog(stock_record_ids, partner)
 
         return {
             'benefit_type': request.data.get('benefit_type'),
@@ -197,6 +184,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'course_seat_types': course_seat_types,
             'email_domains': request.data.get('email_domains'),
             'end_datetime': request.data.get('end_datetime'),
+            'enterprise_customer': enterprise_customer,
             'max_uses': max_uses,
             'note': request.data.get('note'),
             'partner': partner,
@@ -206,6 +194,36 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'title': request.data.get('title'),
             'voucher_type': voucher_type,
         }
+
+    @classmethod
+    def get_coupon_catalog(cls, stock_record_ids, partner):
+        """
+        Validate stock_record_ids and return a coupon catalog if applicable.
+
+        When a black-listed course mode is received raise an exception.
+        Audit modes do not have a certificate type and therefore will raise
+        an AttributeError exception.
+        """
+        if not stock_record_ids:
+            return None
+
+        seats = Product.objects.filter(stockrecords__id__in=stock_record_ids)
+        for seat in seats:
+            try:
+                if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
+                    validation_message = 'Course mode not supported'
+                    raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+            except AttributeError:
+                validation_message = 'Course mode not supported'
+                raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+
+        stock_records_string = ' '.join(str(id) for id in stock_record_ids)
+        coupon_catalog, __ = get_or_create_catalog(
+            name='Catalog for stock records: {}'.format(stock_records_string),
+            partner=partner,
+            stock_record_ids=stock_record_ids
+        )
+        return coupon_catalog
 
     def create_order_for_invoice(self, basket, coupon_id, client, invoice_data=None):
         """Creates an order from the basket and invokes the invoice payment processor."""
@@ -249,6 +267,40 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         return response_data
 
+    def update_range_data(self, request, vouchers):
+        """
+        Update the range data for a particular request.
+        """
+        range_data = self.create_update_data_dict(data=request.data, fields=Range.UPDATABLE_RANGE_FIELDS)
+
+        if not range_data:
+            return None
+
+        voucher_range = vouchers.first().offers.first().benefit.range
+        # Remove catalog if switching from single course to dynamic query
+        if voucher_range.catalog:
+            range_data['catalog'] = None
+
+        course_catalog_data = request.data.get('course_catalog')
+        if course_catalog_data:
+            course_catalog = course_catalog_data.get('id')
+            range_data['course_catalog'] = course_catalog
+
+            # Remove catalog_query and course_seat_types, switching from
+            # dynamic query to course catalog
+            range_data['catalog_query'] = None
+            range_data['course_seat_types'] = None
+        else:
+            range_data['course_catalog'] = None
+
+        enterprise_customer_data = request.data.get('enterprise_customer')
+        if enterprise_customer_data:
+            range_data['enterprise_customer'] = enterprise_customer_data.get('id')
+        else:
+            range_data['enterprise_customer'] = None
+
+        Range.objects.filter(id=voucher_range.id).update(**range_data)
+
     def update(self, request, *args, **kwargs):
         """Update coupon depending on request data sent."""
         try:
@@ -257,32 +309,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon = self.get_object()
             vouchers = coupon.attr.coupon_vouchers.vouchers
             baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
-
             data = self.create_update_data_dict(data=request.data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
+
             if data:
                 vouchers.all().update(**data)
 
-            range_data = self.create_update_data_dict(data=request.data, fields=Range.UPDATABLE_RANGE_FIELDS)
-
-            if range_data:
-                voucher_range = vouchers.first().offers.first().benefit.range
-                # Remove catalog if switching from single course to dynamic query
-                if voucher_range.catalog:
-                    range_data['catalog'] = None
-
-                course_catalog_data = request.data.get('course_catalog')
-                if course_catalog_data:
-                    course_catalog = course_catalog_data.get('id')
-                    range_data['course_catalog'] = course_catalog
-
-                    # Remove catalog_query and course_seat_types, switching from
-                    # dynamic query to course catalog
-                    range_data['catalog_query'] = None
-                    range_data['course_seat_types'] = None
-                else:
-                    range_data['course_catalog'] = None
-
-                Range.objects.filter(id=voucher_range.id).update(**range_data)
+            self.update_range_data(request, vouchers)
 
             benefit_value = request.data.get('benefit_value')
             if benefit_value:

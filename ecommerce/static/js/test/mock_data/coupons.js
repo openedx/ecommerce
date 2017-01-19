@@ -195,6 +195,7 @@ define([], function () {
                 'name': 'TESTCAT'
             },
             'course_catalog': null,
+            'enterprise_customer': '42a30ade47834489a607cd0f52ba13cf',
             'price': '100.00',
             'invoice_type': 'Prepaid',
             'invoice_discount_type': 'Percentage',

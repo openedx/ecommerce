@@ -5,6 +5,7 @@ define([
         'models/coupon_model',
         'test/mock_data/coupons',
         'test/mock_data/catalogs',
+        'test/mock_data/enterprise_customers',
         'test/spec-utils'
     ],
     function (_s,
@@ -13,6 +14,7 @@ define([
               Coupon,
               Mock_Coupons,
               Mock_Catalogs,
+              Mock_Customers,
               SpecUtils) {
 
         'use strict';
@@ -29,6 +31,7 @@ define([
             describe('edit enrollment code', function () {
                 beforeEach(function () {
                     enrollment_code_data.course_catalog = Mock_Catalogs;
+                    enrollment_code_data.enterprise_customer = Mock_Customers[0].id;
                     model = Coupon.findOrCreate(enrollment_code_data, {parse: true});
                     model.updateSeatData();
                     view = new CouponCreateEditView({model: model, editing: true}).render();
@@ -48,6 +51,9 @@ define([
                     expect(view.$el.find('[name=client]').val()).toEqual(model.get('client'));
                     expect(view.$el.find('[name=price]').val()).toEqual(model.get('price'));
                     expect(view.$el.find('[name=course_id]').val()).toEqual(model.get('course_id'));
+                    expect(view.$el.find('[name=enterprise_customer]').val()).toEqual(
+                        model.get('enterprise_customer').id
+                    );
                 });
 
                 it('should verify single-use voucher max_uses field min attribute is empty string', function () {

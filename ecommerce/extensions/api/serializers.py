@@ -538,6 +538,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     code_status = serializers.SerializerMethodField()
     coupon_type = serializers.SerializerMethodField()
     course_seat_types = serializers.SerializerMethodField()
+    enterprise_customer = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
     max_uses = serializers.SerializerMethodField()
@@ -597,6 +598,12 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_end_date(self, obj):
         return retrieve_end_date(obj)
 
+    def get_enterprise_customer(self, obj):
+        """
+        Get the Enterprise Customer UUID attached to a coupon.
+        """
+        return retrieve_offer(obj).condition.range.enterprise_customer
+
     def get_last_edited(self, obj):
         history = obj.history.latest()
         return history.history_user.username, history.history_date
@@ -651,7 +658,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         fields = (
             'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
             'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
-            'email_domains', 'end_date', 'id', 'last_edited', 'max_uses',
+            'email_domains', 'end_date', 'enterprise_customer', 'id', 'last_edited', 'max_uses',
             'note', 'num_uses', 'payment_information', 'price', 'quantity',
             'seats', 'start_date', 'title', 'voucher_type'
         )

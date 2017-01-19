@@ -9,6 +9,7 @@ define([
         'test/mock_data/categories',
         'test/mock_data/coupons',
         'test/mock_data/catalogs',
+        'test/mock_data/enterprise_customers',
         'test/spec-utils',
         'ecommerce',
         'test/custom-matchers'
@@ -23,6 +24,7 @@ define([
               Mock_Categories,
               Mock_Coupons,
               Mock_Catalogs,
+              Mock_Customers,
               SpecUtils,
               ecommerce) {
         'use strict';
@@ -35,7 +37,8 @@ define([
             beforeEach(function () {
                 ecommerce.coupons = {
                     categories: Mock_Categories,
-                    catalogs: Mock_Catalogs
+                    catalogs: Mock_Catalogs,
+                    enterprise_customers: Mock_Customers,
                 };
                 model = new Coupon({course_catalog: Mock_Catalogs});
                 view = new CouponFormView({editing: false, model: model}).render();
@@ -188,11 +191,47 @@ define([
                     catalog.fetch();
                     ecommerce.coupons = {
                         categories: Mock_Categories,
-                        catalogs: new CatalogCollection(catalog)
+                        catalogs: new CatalogCollection(catalog),
+                        enterprise_customers: Mock_Customers,
                     };
                     var coupon_model = new Coupon({course_catalog: 123456});
                     new CouponFormView({ editing: true, model: coupon_model }).render();
                     expect(coupon_model.get('course_catalog')).toEqual(catalog);
+                });
+            });
+
+            describe('enterprise customers', function () {
+                it('enterprise customer dropdown should be hidden when a catalog is selected', function () {
+                    view.$('#single-course').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+
+                    view.$('#catalog').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toBeVisible();
+
+                    view.$('#multiple-courses').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+                });
+
+                it('enterprise customer is setting properly', function() {
+                    view.$('#single-course').prop('checked', true).trigger('change');
+
+                    view.$('[name=enterprise_customer]').val('29c466f1583b47279265d0a1fd7012a3').trigger('change');
+                    expect(view.$('select[name=enterprise_customer] option:selected').text()).toEqual(
+                        Mock_Customers[0].name
+                    );
+                    expect(view.$('[name=enterprise_customer]').val()).toEqual('29c466f1583b47279265d0a1fd7012a3');
+
+                    view.$('[name=enterprise_customer]').val('e7d4a3c6f510405d968e28e098ddb543').trigger('change');
+                    expect(view.$('select[name=enterprise_customer] option:selected').text()).toEqual(
+                        Mock_Customers[1].name
+                    );
+                    expect(view.$('[name=enterprise_customer]').val()).toEqual('e7d4a3c6f510405d968e28e098ddb543');
+
+                    view.$('[name=enterprise_customer]').val('42a30ade47834489a607cd0f52ba13cf').trigger('change');
+                    expect(view.$('select[name=enterprise_customer] option:selected').text()).toEqual(
+                        Mock_Customers[2].name
+                    );
+                    expect(view.$('[name=enterprise_customer]').val()).toEqual('42a30ade47834489a607cd0f52ba13cf');
                 });
             });
 

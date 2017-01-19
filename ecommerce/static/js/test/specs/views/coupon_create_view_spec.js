@@ -5,6 +5,7 @@ define([
         'models/coupon_model',
         'test/mock_data/categories',
         'test/mock_data/catalogs',
+        'test/mock_data/enterprise_customers',
         'ecommerce'
     ],
     function ($,
@@ -13,6 +14,7 @@ define([
               Coupon,
               Mock_Categories,
               Mock_Catalogs,
+              Mock_Customers,
               ecommerce) {
         'use strict';
 
@@ -23,7 +25,8 @@ define([
             beforeEach(function () {
                 ecommerce.coupons = {
                     categories: Mock_Categories,
-                    catalogs: Mock_Catalogs
+                    catalogs: Mock_Catalogs,
+                    enterprise_customers: Mock_Customers,
                 };
                 model = new Coupon();
                 view = new CouponCreateEditView({ model: model, editing: false }).render();
@@ -45,6 +48,7 @@ define([
                 view.$('[name=end_date]').val('2016-01-01T00:00').trigger('change');
                 view.$('[name=price]').val('100').trigger('change');
                 view.$('[name=category]').val('4').trigger('change');
+                view.$('[name=enterprise_customer]').val('42a30ade47834489a607cd0f52ba13cf').trigger('change');
                 view.$('#not-applicable').prop('checked', true).trigger('change');
                 spyOn(view.formView, 'fillFromCourse').and.callFake(function () {
                     var seatTypes = [$('<option></option>')

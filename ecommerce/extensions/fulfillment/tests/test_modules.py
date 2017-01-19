@@ -389,6 +389,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             catalog=catalog,
             coupon=coupon,
             end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
+            enterprise_customer=None,
             name="Test Voucher",
             quantity=10,
             start_datetime=datetime.datetime.now(),

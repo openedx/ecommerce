@@ -317,6 +317,11 @@ class SiteConfiguration(models.Model):
         return self.build_lms_url('/oauth2')
 
     @property
+    def enterprise_api_url(self):
+        """ Returns the URL for the Enterprise service. """
+        return self.build_lms_url('/enterprise/api/v1')
+
+    @property
     def access_token(self):
         """ Returns an access token for this site's service user.
 

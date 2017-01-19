@@ -18,7 +18,8 @@ from ecommerce.extensions.api.v2.views import (
     sdn as sdn_views,
     siteconfiguration as siteconfiguration_views,
     stockrecords as stockrecords_views,
-    vouchers as voucher_views
+    vouchers as voucher_views,
+    enterprise as enterprise_views,
 )
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
@@ -75,15 +76,20 @@ SDN_URLS = [
     url(r'^search/$', sdn_views.SDNCheckViewSet.as_view(), name='search')
 ]
 
+ENTERPRISE_URLS = [
+    url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers')
+]
+
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^checkout/$', include(CHECKOUT_URLS, namespace='checkout')),
     url(r'^coupons/', include(COUPON_URLS, namespace='coupons')),
+    url(r'^enterprise/', include(ENTERPRISE_URLS, namespace='enterprise')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
     url(r'^providers/', include(PROVIDER_URLS, namespace='providers')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
-    url(r'^sdn/', include(SDN_URLS, namespace='sdn'))
+    url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
 ]
 
 router = ExtendedSimpleRouter()
