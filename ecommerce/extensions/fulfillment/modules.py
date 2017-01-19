@@ -415,6 +415,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 catalog=None,
                 coupon=seat,
                 end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
+                enterprise_customer=None,
                 quantity=line.quantity,
                 start_datetime=datetime.datetime.now(),
                 voucher_type=Voucher.SINGLE_USE,

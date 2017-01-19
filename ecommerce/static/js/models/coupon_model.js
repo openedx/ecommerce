@@ -102,6 +102,9 @@ define([
                         }
                     }
                 },
+                enterprise_customer: {
+                    required: false,
+                },
                 end_date: function (val) {
                     var startDate,
                         endDate;

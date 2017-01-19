@@ -2,6 +2,7 @@ require([
         'backbone',
         'collections/category_collection',
         'collections/catalog_collection',
+        'collections/enterprise_customer_collection',
         'ecommerce',
         'routers/coupon_router',
         'utils/navigate',
@@ -9,6 +10,7 @@ require([
     function (Backbone,
               CategoryCollection,
               CatalogCollection,
+              EnterpriseCustomerCollection,
               ecommerce,
               CouponRouter,
               navigate) {
@@ -25,6 +27,9 @@ require([
 
             ecommerce.coupons.catalogs = new CatalogCollection();
             ecommerce.coupons.catalogs.fetch({ async: false });
+
+            ecommerce.coupons.enterprise_customers = new EnterpriseCustomerCollection();
+            ecommerce.coupons.enterprise_customers.fetch({ async: false });
 
             couponApp.start();
 

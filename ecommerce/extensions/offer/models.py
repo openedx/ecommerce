@@ -177,6 +177,7 @@ class Range(AbstractRange):
         'catalog_query',
         'course_seat_types',
         'course_catalog',
+        'enterprise_customer',
     ]
     ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
     catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
@@ -185,6 +186,11 @@ class Range(AbstractRange):
         help_text=_('Course catalog id from the Catalog Service.'),
         null=True,
         blank=True
+    )
+    enterprise_customer = models.UUIDField(
+        help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'),
+        null=True,
+        blank=True,
     )
     course_seat_types = models.CharField(
         max_length=255,

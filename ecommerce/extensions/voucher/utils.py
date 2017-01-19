@@ -409,6 +409,7 @@ def create_vouchers(
         catalog,
         coupon,
         end_datetime,
+        enterprise_customer,
         name,
         quantity,
         start_datetime,
@@ -436,6 +437,7 @@ def create_vouchers(
         course_seat_types (str): Comma-separated list of course seat types.
         email_domains (str): List of email domains to restrict coupons. Defaults to None.
         end_datetime (datetime): End date for voucher offer.
+        enterprise_customer (str): UUID of an EnterpriseCustomer attached to this voucher
         max_uses (int): Number of Voucher max uses. Defaults to None.
         name (str): Voucher name.
         quantity (int): Number of vouchers to be created.
@@ -475,12 +477,15 @@ def create_vouchers(
         range_name = (_('Range for coupon [{coupon_id}]').format(coupon_id=coupon.id))
         # make sure course catalog is None if its empty
         course_catalog = course_catalog if course_catalog else None
+        # make sure enterprise_customer is None if it's empty
+        enterprise_customer = enterprise_customer or None
         product_range, __ = Range.objects.get_or_create(
             name=range_name,
             catalog=catalog,
             catalog_query=catalog_query,
             course_catalog=course_catalog,
             course_seat_types=course_seat_types,
+            enterprise_customer=enterprise_customer,
         )
 
     # In case of more than 1 multi-usage coupon, each voucher needs to have an individual

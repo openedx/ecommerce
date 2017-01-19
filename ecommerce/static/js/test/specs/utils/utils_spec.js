@@ -5,6 +5,7 @@ define([
         'views/coupon_form_view',
         'test/mock_data/categories',
         'test/mock_data/catalogs',
+        'test/mock_data/enterprise_customers',
         'ecommerce'
     ],
     function (Backbone,
@@ -13,6 +14,7 @@ define([
               CouponFormView,
               Mock_Categories,
               Mock_Catalogs,
+              Mock_Customers,
               ecommerce) {
         'use strict';
 
@@ -68,7 +70,8 @@ define([
                 beforeEach(function () {
                     ecommerce.coupons = {
                         categories: Mock_Categories,
-                        catalogs: Mock_Catalogs
+                        catalogs: Mock_Catalogs,
+                        enterprise_customers: Mock_Customers,
                     };
                 });
 

@@ -244,6 +244,29 @@ define([
                         }
                         return val;
                     }
+                },
+                'select[name=enterprise_customer]': {
+                    observe: 'enterprise_customer',
+                    selectOptions: {
+                        collection: function () {
+                            return ecommerce.coupons.enterprise_customers;
+                        },
+                        defaultOption: {id: '', name: ''},
+                        labelPath: 'name',
+                        valuePath: 'id'
+                    },
+                    setOptions: {
+                        validate: true
+                    },
+                    onGet: function (val) {
+                        return _.isUndefined(val) || _.isNull(val) ? '' : val.id;
+                    },
+                    onSet: function (val) {
+                        return {
+                            id: val,
+                            name: $('select[name=enterprise_customer] option:selected').text()
+                        };
+                    }
                 }
             },
 
@@ -277,6 +300,7 @@ define([
                         'course_seat_types',
                         'course_catalog',
                         'end_date',
+                        'enterprise_customer',
                         'invoice_discount_type',
                         'invoice_discount_value',
                         'invoice_number',
@@ -450,12 +474,15 @@ define([
                     this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
+                    this.formGroup('[name=enterprise_customer]').removeClass(this.hiddenClass);
                 } else if (this.model.get('catalog_type') === this.model.catalogTypes.catalog) {
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
                     this.model.unset('stock_record_ids');
                     this.model.unset('catalog_query');
                     this.model.unset('course_seat_types');
+                    this.formGroup('[name=enterprise_customer]').addClass(this.hiddenClass);
+                    this.model.unset('enterprise_customer');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
@@ -468,6 +495,7 @@ define([
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
+                    this.formGroup('[name=enterprise_customer]').removeClass(this.hiddenClass);
                     this.$('[name=seat_type] option').remove();
                     this.model.unset('course_id');
                     this.model.unset('seat_type');
@@ -657,6 +685,7 @@ define([
             render: function () {
                 // Render the parent form/template
                 var catalogId = '';
+                var customerId = '';
 
                 this.$el.html(this.template(this.model.attributes));
                 this.stickit();
@@ -678,6 +707,11 @@ define([
                     if (_.isNumber(this.model.get('course_catalog'))) {
                         catalogId = this.model.get('course_catalog');
                         this.model.set('course_catalog', ecommerce.coupons.catalogs.get(catalogId));
+                    }
+                    if (_.isString(this.model.get('enterprise_customer'))) {
+                        // API returns a string value for enterprise customer
+                        customerId = this.model.get('enterprise_customer');
+                        this.model.set('enterprise_customer', {'id': customerId});
                     }
 
                     this.disableNonEditableFields();
