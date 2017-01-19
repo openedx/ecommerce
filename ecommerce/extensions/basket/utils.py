@@ -2,13 +2,15 @@ import datetime
 import json
 import logging
 
+import pytz
+import waffle
 from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
-import pytz
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
+from ecommerce.courses.models import Course
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -38,7 +40,7 @@ def prepare_basket(request, product, voucher=None):
     basket = Basket.get_basket(request.user, request.site)
     basket.flush()
     basket.add_product(product, 1)
-    if product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+    if product.is_enrollment_code_product:
         basket.clear_vouchers()
     elif voucher:
         basket.clear_vouchers()
@@ -56,14 +58,13 @@ def prepare_basket(request, product, voucher=None):
 
 
 def get_basket_switch_data(product):
-    product_class_name = product.get_product_class().name
     structure = product.structure
     switch_link_text = None
 
-    if product_class_name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+    if product.is_enrollment_code_product:
         switch_link_text = _('Click here to just purchase an enrollment for yourself')
         structure = 'child'
-    elif product_class_name == SEAT_PRODUCT_CLASS_NAME:
+    elif product.is_seat_product:
         switch_link_text = _('Click here to purchase multiple seats in this course')
         structure = 'standalone'
 
@@ -159,3 +160,31 @@ def _record_utm_basket_attribution(referral, request):
         created_at_datetime = None
 
     referral.utm_created_at = created_at_datetime
+
+
+def get_enrollment_code(siteconfiguration, seat):
+    """Retrieves the enrollment code of a seat if enrollment codes are enabled globally (waffle switch)
+    and for the particular site from which the request came.
+
+    Args:
+        siteconfiguration (SiteConfiguration): The configuration of the site from which the request came.
+        seat (Product): The seat for which the enrollment code is retreived.
+    Returns:
+        Either the enrollment code product or None if:
+            * enrollment codes are globally disabled
+            * enrollment codes are disabled for the passed site configuration
+            * passed seat does not have an enrollment code
+    """
+    if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and siteconfiguration.enable_enrollment_codes:
+        course = Course.objects.get(id=seat.attr.course_key)
+        return course.enrollment_code_product
+    return None
+
+
+def get_seat_from_enrollment_code(enrollment_code):
+    """Retrieves the seat from the passed enrollment code."""
+    course = Course.objects.get(id=enrollment_code.attr.course_key)
+    return course.seat_products.get(
+        attributes__name='certificate_type',
+        attribute_values__value_text=enrollment_code.attr.seat_type
+    )

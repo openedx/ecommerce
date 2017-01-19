@@ -18,8 +18,7 @@ class Order(AbstractOrder):
     @property
     def contains_coupon(self):
         """ Return a boolean if the order contains a Coupon. """
-        return any(line.product.get_product_class().name == 'Coupon' for line in
-                   self.basket.all_lines())
+        return any(line.product.is_coupon_product for line in self.basket.all_lines())
 
 
 class PaymentEvent(AbstractPaymentEvent):

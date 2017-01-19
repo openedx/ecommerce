@@ -13,13 +13,14 @@ from oscar.core.utils import redirect_to_referrer
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
-from ecommerce.extensions.basket.utils import get_basket_switch_data, prepare_basket
+from ecommerce.extensions.basket.utils import (
+    get_basket_switch_data, get_enrollment_code, get_seat_from_enrollment_code, prepare_basket
+)
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
@@ -66,7 +67,7 @@ class BasketSingleItemView(View):
 
         # If the product is not an Enrollment Code, we check to see if the user is already
         # enrolled to prevent double-enrollment and/or accidental coupon usage
-        if product.get_product_class().name != ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        if not product.is_enrollment_code_product:
             try:
                 if request.user.is_user_already_enrolled(request, product):
                     logger.warning(
@@ -97,9 +98,9 @@ class BasketSummaryView(BasketView):
         Return the seat type based on the product class
         """
         seat_type = None
-        if product.get_product_class().name == SEAT_PRODUCT_CLASS_NAME:
+        if product.is_seat_product:
             seat_type = get_certificate_type_display_value(product.attr.certificate_type)
-        elif product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        elif product.is_enrollment_code_product:
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
@@ -175,12 +176,11 @@ class BasketSummaryView(BasketView):
         switch_link_text = partner_sku = order_details_msg = None
 
         for line in lines:
-            product_class_name = line.product.get_product_class().name
-            if product_class_name == 'Seat':
-                line_data = self._get_course_data(line.product)
-                certificate_type = line.product.attr.certificate_type
-
-                if getattr(line.product.attr, 'id_verification_required', False) and certificate_type != 'credit':
+            product = line.product
+            if product.is_seat_product:
+                line_data = self._get_course_data(product)
+                certificate_type = product.attr.certificate_type
+                if (getattr(product.attr, 'id_verification_required', False)) and certificate_type != 'credit':
                     display_verification_message = True
 
                 if certificate_type == 'verified':
@@ -194,23 +194,23 @@ class BasketSummaryView(BasketView):
                     order_details_msg = _(
                         'You will be automatically enrolled in the course upon completing your order.'
                     )
-            elif product_class_name == 'Enrollment Code':
-                line_data = self._get_course_data(line.product)
+            elif product.is_enrollment_code_product:
+                line_data = self._get_course_data(product)
                 show_voucher_form = False
                 order_details_msg = _(
                     'You will receive an email at {user_email} with your enrollment code(s).'
                 ).format(user_email=self.request.user.email)
             else:
                 line_data = {
-                    'product_title': line.product.title,
+                    'product_title': product.title,
                     'image_url': None,
-                    'product_description': line.product.description
+                    'product_description': product.description
                 }
 
             # TODO: handle these links for multi-line baskets.
             if self.request.site.siteconfiguration.enable_enrollment_codes:
                 # Get variables for the switch link that toggles from enrollment codes and seat.
-                switch_link_text, partner_sku = get_basket_switch_data(line.product)
+                switch_link_text, partner_sku = get_basket_switch_data(product)
 
             if line.has_discount:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
@@ -220,9 +220,10 @@ class BasketSummaryView(BasketView):
 
             line_data.update({
                 'benefit_value': benefit_value,
-                'enrollment_code': line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+                'enrollment_code': product.is_enrollment_code_product,
+                'has_enrollment_code': get_enrollment_code(self.request.site.siteconfiguration, product),
                 'line': line,
-                'seat_type': self._determine_seat_type(line.product),
+                'seat_type': self._determine_seat_type(product),
             })
             lines_data.append(line_data)
 
@@ -270,6 +271,12 @@ class BasketSummaryView(BasketView):
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
 
+    def _client_side_checkout_enabled(self):
+        return (
+            self.request.site.siteconfiguration.client_side_payment_processor and
+            waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME)
+        )
+
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
@@ -292,8 +299,7 @@ class BasketSummaryView(BasketView):
         })
 
         payment_processors = site_configuration.get_payment_processors()
-        if site_configuration.client_side_payment_processor \
-                and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
+        if self._client_side_checkout_enabled():
             payment_processors_data = self._get_payment_processors_data(payment_processors)
             context.update(payment_processors_data)
 
@@ -318,6 +324,25 @@ class BasketSummaryView(BasketView):
             'total_benefit': total_benefit
         })
         return context
+
+    def post(self, *args, **kwargs):
+        """POST request handler."""
+        basket = self.request.basket
+        if self._client_side_checkout_enabled() and basket.lines.count() == 1:
+            line = basket.lines.first()
+            add_enrollment_code = self.request.POST.get('add-enrollment-code') == 'checked'
+
+            if line.product.is_seat_product and add_enrollment_code:
+                enrollment_code = get_enrollment_code(self.request.site.siteconfiguration, line.product)
+                basket.flush()
+                basket.add(enrollment_code)
+                return HttpResponseRedirect(reverse('basket:summary'))
+            elif line.product.is_enrollment_code_product and not add_enrollment_code:
+                seat = get_seat_from_enrollment_code(line.product)
+                basket.flush()
+                basket.add(seat, 1)
+                return HttpResponseRedirect(reverse('basket:summary'))
+        return super(BasketSummaryView, self).post(*args, **kwargs)
 
 
 class VoucherAddMessagesView(VoucherAddView):

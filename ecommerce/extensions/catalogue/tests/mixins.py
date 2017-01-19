@@ -4,14 +4,16 @@ import logging
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.tests.factories import PartnerFactory
 
 logger = logging.getLogger(__name__)
 
 Category = get_model('catalogue', 'Category')
 Partner = get_model('partner', 'Partner')
+Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
@@ -56,6 +58,32 @@ class CourseCatalogTestMixin(object):
 
         seat = course.create_or_update_seat(seat_type, id_verification, price, partner)
         return course, seat
+
+    def create_course_seat_and_enrollment_code(
+            self, site_configuration=None, seat_type='verified', id_verification=False
+    ):
+        """
+        Create a new course, seat and enrollment code.
+        In order to create an enrollment code the waffle switch and site configuration
+        value for enrollment codes need to be turned on.
+
+        Args:
+            site_configuration (SiteConfiguration): The current site configuration.
+            seat_type (str): Seat type.
+            id_verification (bool): Whether or not an ID verification is necessary for the seat.
+        Returns:
+            The newly created course, seat and enrollment code.
+        """
+        course = CourseFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        if not site_configuration:
+            site_configuration = self.site.siteconfiguration
+        site_configuration.enable_enrollment_codes = True
+        site_configuration.save()
+
+        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        return course, seat, enrollment_code
 
     def _create_product_class(self, class_name, slug, attributes):
         """ Helper method for creating product classes.

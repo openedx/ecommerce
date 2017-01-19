@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.test import RequestFactory
 from oscar.test import factories
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.catalogue.utils import create_coupon_product
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -144,8 +145,10 @@ class CouponMixin(object):
 
     @property
     def coupon_product_class(self):
-        defaults = {'requires_shipping': False, 'track_stock': False, 'name': 'Coupon'}
-        pc, created = ProductClass.objects.get_or_create(name='Coupon', slug='coupon', defaults=defaults)
+        defaults = {'requires_shipping': False, 'track_stock': False, 'name': COUPON_PRODUCT_CLASS_NAME}
+        pc, created = ProductClass.objects.get_or_create(
+            name=COUPON_PRODUCT_CLASS_NAME, slug='coupon', defaults=defaults
+        )
 
         if created:
             factories.ProductAttributeFactory(

@@ -9,16 +9,18 @@ from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
 import pytz
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.utils import prepare_basket, attribute_cookie_data
+from ecommerce.extensions.basket.utils import (
+    attribute_cookie_data, get_enrollment_code, get_seat_from_enrollment_code, prepare_basket
+)
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.mixins import UserMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -35,9 +37,9 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         self.request = RequestFactory()
         self.request.COOKIES = {}
         self.request.user = self.create_user()
-        site_configuration = SiteConfigurationFactory(partner__name='Tester')
-        site_configuration.utm_cookie_name = 'test.edx.utm'
-        self.request.site = site_configuration.site
+        self.site_configuration = SiteConfigurationFactory(partner__name='Tester')
+        self.site_configuration.utm_cookie_name = 'test.edx.utm'
+        self.request.site = self.site_configuration.site
 
     def test_prepare_basket_with_voucher(self):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """
@@ -61,10 +63,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
 
     def test_prepare_basket_enrollment_with_voucher(self):
         """Verify the basket does not contain a voucher if enrollment code is added to it."""
-        course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        __, __, enrollment_code = self.create_course_seat_and_enrollment_code()
         voucher, product = prepare_voucher()
 
         basket = prepare_basket(self.request, product, voucher)
@@ -281,6 +280,40 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         # test referral record is deleted when no cookies are set
         with self.assertRaises(Referral.DoesNotExist):
             Referral.objects.get(basket_id=basket.id)
+
+    def test_get_enrollment_code(self):
+        """Verify the function returns an enrollment code for the passed seat."""
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code(self.site_configuration)
+        retreived_ec = get_enrollment_code(self.site_configuration, seat)
+        self.assertEqual(retreived_ec, enrollment_code)
+
+    def test_get_nonexisting_enrollment_code(self):
+        """Verify function returns None for seats that do not have enrollment code."""
+        seat = CourseFactory().create_or_update_seat('verified', False, 10, self.partner)
+        retreived_ec = get_enrollment_code(self.site_configuration, seat)
+        self.assertIsNone(retreived_ec)
+
+    def test_get_enrollment_code_disabled(self):
+        """Verify None is returned when enrollment codes are disabled."""
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code(self.site_configuration)
+        retreived_ec = get_enrollment_code(self.site_configuration, seat)
+        self.assertEqual(retreived_ec, enrollment_code)
+
+        toggle_switch(ENROLLMENT_CODE_SWITCH, False)
+        retreived_ec = get_enrollment_code(self.site_configuration, seat)
+        self.assertIsNone(retreived_ec)
+
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        self.site_configuration.enable_enrollment_codes = False
+        self.site_configuration.save()
+        retreived_ec = get_enrollment_code(self.site_configuration, seat)
+        self.assertIsNone(retreived_ec)
+
+    def test_get_seat_from_enrollment_code(self):
+        """Verify the right seat is retrieved."""
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code()
+        retreived_seat = get_seat_from_enrollment_code(enrollment_code)
+        self.assertEqual(seat, retreived_seat)
 
 
 class BasketUtilsTransactionTests(UserMixin, TransactionTestCase):

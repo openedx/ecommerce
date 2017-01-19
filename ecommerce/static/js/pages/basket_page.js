@@ -330,6 +330,14 @@ define([
                 }
             });
 
+            $('input[name=add-enrollment-code]').on('change', function() {
+                $('#summary > form').submit();
+            });
+
+            if ($('input[name=product-type]').val() === 'enrollment-code') {
+                $('input[name=add-enrollment-code]').prop('checked', true);
+            }
+
             $paymentButtons.find('.payment-button').click(function (e) {
                 var $btn = $(e.target),
                     deferred = new $.Deferred(),
