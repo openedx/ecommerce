@@ -62,6 +62,8 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 
 # AUTHENTICATION
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'insecure-secret-key',
     'JWT_ISSUERS': (

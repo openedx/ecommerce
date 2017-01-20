@@ -1,6 +1,6 @@
 """Tests of social auth strategies."""
 from django.conf import settings
-from threadlocals.threadlocals import get_current_request
+from social.apps.django_app.default.models import DjangoStorage
 
 from ecommerce.social_auth.strategies import CurrentSiteDjangoStrategy
 from ecommerce.tests.testcases import TestCase
@@ -14,7 +14,7 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         self.site.siteconfiguration.oauth_settings = {
             'SOCIAL_AUTH_EDX_OIDC_KEY': 'test-key'
         }
-        self.strategy = CurrentSiteDjangoStrategy(None, get_current_request())
+        self.strategy = CurrentSiteDjangoStrategy(DjangoStorage, self.request)
 
     def test_get_setting_from_siteconfiguration(self):
         """Test that a setting can be retrieved from the site configuration."""
@@ -34,5 +34,5 @@ class CurrentSiteDjangoStrategyTests(TestCase):
 
     def test_get_setting_raises_exception_on_missing_setting(self):
         """Test that a setting that does not exist raises exception."""
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(KeyError):
             self.strategy.get_setting('FAKE_SETTING')

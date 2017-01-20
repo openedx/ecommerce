@@ -12,6 +12,8 @@ LOGGING['handlers']['local'] = {
 # Determine which requests should render Django Debug Toolbar
 INTERNAL_IPS = ('127.0.0.1',)
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
