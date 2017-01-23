@@ -17,25 +17,18 @@ class CourseCatalogServiceMockMixin(object):
         super(CourseCatalogServiceMockMixin, self).setUp()
         cache.clear()
 
-    def mock_course_discovery_api_for_catalog_by_resource_id(self):
+    def mock_course_discovery_api_for_catalog_by_resource_id(self, catalog_query='title: *'):
         """
         Helper function to register course catalog API endpoint for a
         single catalog with its resource id.
         """
         catalog_id = 1
         course_discovery_api_response = {
-            'count': 1,
-            'next': None,
-            'previous': None,
-            'results': [
-                {
-                    'id': catalog_id,
-                    'name': 'Catalog {}'.format(catalog_id),
-                    'query': 'title: *',
-                    'courses_count': 0,
-                    'viewers': []
-                }
-            ]
+            'id': catalog_id,
+            'name': 'Catalog {}'.format(catalog_id),
+            'query': catalog_query,
+            'courses_count': 0,
+            'viewers': []
         }
         course_discovery_api_response_json = json.dumps(course_discovery_api_response)
         single_catalog_uri = '{}{}/'.format(self.COURSE_DISCOVERY_CATALOGS_URL, catalog_id)

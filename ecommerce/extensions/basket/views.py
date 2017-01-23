@@ -16,12 +16,14 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PR
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
+from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import get_basket_switch_data, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
+
 
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
@@ -50,6 +52,10 @@ class BasketSingleItemView(View):
             product = StockRecord.objects.get(partner=partner, partner_sku=sku).product
         except StockRecord.DoesNotExist:
             return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
+
+        if voucher is None:
+            # Find and apply the enterprise entitlement on the learner basket
+            voucher = get_entitlement_voucher(request, product)
 
         # If the product isn't available then there's no reason to continue with the basket addition
         purchase_info = request.strategy.fetch_for_product(product)

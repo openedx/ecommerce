@@ -330,6 +330,20 @@ class SiteConfiguration(models.Model):
 
         return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 
+    @cached_property
+    def enterprise_api_client(self):
+        """
+        Constructs a Slumber-based REST API client for the provided site.
+
+        Example:
+            site.siteconfiguration.enterprise_api_client.enterprise-learner(learner.username).get()
+
+        Returns:
+            EdxRestApiClient: The client to access the Enterprise service.
+
+        """
+        return EdxRestApiClient(settings.ENTERPRISE_API_URL, jwt=self.access_token)
+
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""

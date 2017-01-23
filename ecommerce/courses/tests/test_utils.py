@@ -124,9 +124,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         self.assertIsNone(cached_course_catalog)
 
         response = get_course_catalogs(self.request.site, catalog_id)
-
-        self.assertEqual(response['count'], 1)
-        self.assertEqual(response['results'][0]['name'], 'Catalog {}'.format(catalog_id))
+        self.assertEqual(response['name'], 'Catalog {}'.format(catalog_id))
 
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)

@@ -45,6 +45,11 @@ def get_course_catalogs(site, resource_id=None):
     Returns:
         dict: Course catalogs received from Course Catalog API
 
+    Raises:
+        ConnectionError: requests exception "ConnectionError"
+        SlumberBaseException: slumber exception "SlumberBaseException"
+        Timeout: requests exception "Timeout"
+
     """
     resource = 'catalogs'
     base_cache_key = '{}.catalog.api.data'.format(site.domain)
