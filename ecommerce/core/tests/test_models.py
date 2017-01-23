@@ -18,6 +18,7 @@ from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
+ENTERPRISE_API_URL = 'https://enterprise.example.com/api/v1/'
 
 
 def _make_site_config(payment_processors_str, site_id=1):
@@ -362,6 +363,22 @@ class SiteConfigurationTests(TestCase):
         client_auth = client_store['session'].auth
 
         self.assertEqual(client_store['base_url'], COURSE_CATALOG_API_URL)
+        self.assertIsInstance(client_auth, SuppliedJwtAuth)
+        self.assertEqual(client_auth.token, token)
+
+    @httpretty.activate
+    @override_settings(ENTERPRISE_API_URL=ENTERPRISE_API_URL)
+    def test_enterprise_api_client(self):
+        """
+        Verify the property "enterprise_api_client" returns a Slumber-based
+        REST API client for enterprise service API.
+        """
+        token = self.mock_access_token_response()
+        client = self.site.siteconfiguration.enterprise_api_client
+        client_store = client._store    # pylint: disable=protected-access
+        client_auth = client_store['session'].auth
+
+        self.assertEqual(client_store['base_url'], ENTERPRISE_API_URL)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
 

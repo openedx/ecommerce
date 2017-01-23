@@ -17,7 +17,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_catalog
-from ecommerce.coupons.utils import get_range_catalog_query_results
+from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
@@ -140,11 +140,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         multiple_credit_providers = False
         credit_provider_price = None
 
-        response = get_range_catalog_query_results(
+        response = get_catalog_course_runs(
+            site=request.site,
+            query=catalog_query,
             limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
             offset=request.GET.get('offset'),
-            query=catalog_query,
-            site=request.site
         )
         next_page = response['next']
         products, stock_records = self.retrieve_course_objects(response['results'], course_seat_types)

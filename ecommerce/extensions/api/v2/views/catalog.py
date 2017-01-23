@@ -11,7 +11,7 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
-from ecommerce.coupons.utils import get_range_catalog_query_results
+from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.extensions.api import serializers
 from ecommerce.courses.utils import get_course_catalogs
 
@@ -48,10 +48,10 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         if query and seat_types:
             seat_types = seat_types.split(',')
             try:
-                response = get_range_catalog_query_results(
-                    limit=limit,
-                    query=query,
+                response = get_catalog_course_runs(
                     site=request.site,
+                    query=query,
+                    limit=limit,
                     offset=offset
                 )
                 results = response['results']

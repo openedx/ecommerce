@@ -50,12 +50,17 @@ class CourseCatalogMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_dynamic_catalog_course_runs_api(self, course_run=None, query=None, course_run_info=None):
-        """ Helper function to register a dynamic course catalog API endpoint for the course run information. """
+    def mock_dynamic_catalog_course_runs_api(self, course_run=None, partner_code=None, query=None,
+                                             course_run_info=None):
+        """
+        Helper function to register a course catalog API endpoint for getting
+        course runs information.
+        """
         if not course_run_info:
             course_run_info = {
                 'count': 1,
-                'next': 'path/to/next/page',
+                'next': None,
+                'previous': None,
                 'results': [{
                     'key': course_run.id,
                     'title': course_run.name,
@@ -78,6 +83,18 @@ class CourseCatalogMockMixin(object):
         httpretty.register_uri(
             httpretty.GET,
             course_run_url_with_query,
+            body=course_run_info_json,
+            content_type='application/json'
+        )
+
+        course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            partner_code if partner_code else 'edx',
+            query if query else 'id:course*'
+        )
+        httpretty.register_uri(
+            httpretty.GET,
+            course_run_url_with_query_and_partner_code,
             body=course_run_info_json,
             content_type='application/json'
         )
