@@ -66,7 +66,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             catalog=self.catalog,
             note='Tešt note',
             quantity=1,
-            max_uses=1
+            max_uses=1,
+            voucher_type=Voucher.MULTI_USE
         )
         self.coupon.history.all().update(history_user=self.user)
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
@@ -406,7 +407,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             max_uses=1,
             note='Tešt note',
             quantity=1,
-            title='Tešt product'
+            title='Tešt product',
+            voucher_type=Voucher.MULTI_USE
         )
         dynamic_coupon.history.all().update(history_user=self.user)
         coupon_voucher = CouponVouchers.objects.get(coupon=dynamic_coupon)

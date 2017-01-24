@@ -450,6 +450,22 @@ def create_vouchers(
     vouchers = []
     offers = []
 
+    # Maximum number of uses can be set for each voucher type and disturb
+    # the predefined behaviours of the different voucher types. Therefor
+    # here we enforce that the max_uses variable can't be used for SINGLE_USE
+    # voucher types.
+    if max_uses is not None:
+        if voucher_type == Voucher.SINGLE_USE:
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. max_uses field cannot be set for voucher type [{voucher_type}].'.format(
+                    voucher_type=Voucher.SINGLE_USE
+                )
+            )
+        try:
+            max_uses = int(max_uses)
+        except ValueError:
+            raise log_message_and_raise_validation_error('Failed to create Voucher. max_uses field must be a number.')
+
     if _range:
         # Enrollment codes use a custom range.
         logger.info("Creating [%d] enrollment code vouchers", quantity)
