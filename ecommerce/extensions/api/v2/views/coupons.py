@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.models import BusinessClient
+from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
@@ -162,15 +163,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             validation_message = 'Unexpected catalog data format received for coupon.'
             raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
 
-        # Maximum number of uses can be set for each voucher type and disturb
-        # the predefined behaviours of the different voucher types. Therefor
-        # here we enforce that the max_uses variable can't be used for SINGLE_USE
-        # voucher types.
-        if max_uses and voucher_type != Voucher.SINGLE_USE:
-            max_uses = int(max_uses)
-        else:
-            max_uses = None
-
         # When a black-listed course mode is received raise an exception.
         # Audit modes do not have a certificate type and therefore will raise
         # an AttributeError exception.
@@ -259,68 +251,68 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         """Update coupon depending on request data sent."""
-        super(CouponViewSet, self).update(request, *args, **kwargs)
+        try:
+            super(CouponViewSet, self).update(request, *args, **kwargs)
 
-        coupon = self.get_object()
-        vouchers = coupon.attr.coupon_vouchers.vouchers
-        baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
-        data = self.create_update_data_dict(data=request.data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
+            coupon = self.get_object()
+            vouchers = coupon.attr.coupon_vouchers.vouchers
+            baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
 
-        if data:
-            vouchers.all().update(**data)
+            data = self.create_update_data_dict(data=request.data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
+            if data:
+                vouchers.all().update(**data)
 
-        range_data = self.create_update_data_dict(data=request.data, fields=Range.UPDATABLE_RANGE_FIELDS)
+            range_data = self.create_update_data_dict(data=request.data, fields=Range.UPDATABLE_RANGE_FIELDS)
 
-        if range_data:
-            voucher_range = vouchers.first().offers.first().benefit.range
-            # Remove catalog if switching from single course to dynamic query
-            if voucher_range.catalog:
-                range_data['catalog'] = None
+            if range_data:
+                voucher_range = vouchers.first().offers.first().benefit.range
+                # Remove catalog if switching from single course to dynamic query
+                if voucher_range.catalog:
+                    range_data['catalog'] = None
 
-            course_catalog_data = request.data.get('course_catalog')
-            if course_catalog_data:
-                course_catalog = course_catalog_data.get('id')
-                range_data['course_catalog'] = course_catalog
+                course_catalog_data = request.data.get('course_catalog')
+                if course_catalog_data:
+                    course_catalog = course_catalog_data.get('id')
+                    range_data['course_catalog'] = course_catalog
 
-                # Remove catalog_query and course_seat_types, switching from
-                # dynamic query to course catalog
-                range_data['catalog_query'] = None
-                range_data['course_seat_types'] = None
-            else:
-                range_data['course_catalog'] = None
+                    # Remove catalog_query and course_seat_types, switching from
+                    # dynamic query to course catalog
+                    range_data['catalog_query'] = None
+                    range_data['course_seat_types'] = None
+                else:
+                    range_data['course_catalog'] = None
 
-            Range.objects.filter(id=voucher_range.id).update(**range_data)
+                Range.objects.filter(id=voucher_range.id).update(**range_data)
 
-        benefit_value = request.data.get('benefit_value')
-        if benefit_value:
-            self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
+            benefit_value = request.data.get('benefit_value')
+            if benefit_value:
+                self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
 
-        category_data = request.data.get('category')
-        if category_data:
-            category = Category.objects.get(name=category_data['name'])
-            ProductCategory.objects.filter(product=coupon).update(category=category)
+            category_data = request.data.get('category')
+            if category_data:
+                category = Category.objects.get(name=category_data['name'])
+                ProductCategory.objects.filter(product=coupon).update(category=category)
 
-        client_username = request.data.get('client')
-        if client_username:
-            self.update_coupon_client(baskets=baskets, client_username=client_username)
+            client_username = request.data.get('client')
+            if client_username:
+                self.update_coupon_client(baskets=baskets, client_username=client_username)
 
-        coupon_price = request.data.get('price')
-        if coupon_price:
-            StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
+            coupon_price = request.data.get('price')
+            if coupon_price:
+                StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
 
-        note = request.data.get('note')
-        if note is not None:
-            coupon.attr.note = note
-            coupon.save()
+            note = request.data.get('note')
+            if note is not None:
+                coupon.attr.note = note
+                coupon.save()
 
-        offer_data = self.create_update_data_dict(data=request.data, fields=ConditionalOffer.UPDATABLE_OFFER_FIELDS)
-        if offer_data:
-            ConditionalOffer.objects.filter(vouchers__in=vouchers.all()).update(**offer_data)
+            self.update_offer_data(request.data, vouchers, coupon.id)
+            self.update_invoice_data(coupon, request.data)
 
-        self.update_invoice_data(coupon, request.data)
-
-        serializer = self.get_serializer(coupon)
-        return Response(serializer.data)
+            serializer = self.get_serializer(coupon)
+            return Response(serializer.data)
+        except ValidationError as error:
+            raise serializers.ValidationError(error.message)
 
     def create_update_data_dict(self, data, fields):
         """
@@ -393,6 +385,30 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         if invoice_data:
             Invoice.objects.filter(order__lines__product=coupon).update(**invoice_data)
+
+    def update_offer_data(self, data, vouchers, coupon_id):
+        offer_data = self.create_update_data_dict(data=data, fields=ConditionalOffer.UPDATABLE_OFFER_FIELDS)
+
+        if offer_data:
+            if offer_data.get('max_global_applications') is not None:
+                if vouchers.first().usage == Voucher.SINGLE_USE:
+                    log_message_and_raise_validation_error(
+                        'Failed to update Coupon [{coupon_id}]. '
+                        'max_global_applications field cannot be set for voucher type [{voucher_type}].'.format(
+                            coupon_id=coupon_id,
+                            voucher_type=Voucher.SINGLE_USE
+                        )
+                    )
+                try:
+                    offer_data['max_global_applications'] = int(offer_data['max_global_applications'])
+                    if offer_data['max_global_applications'] < 1:
+                        raise ValueError
+                except ValueError:
+                    log_message_and_raise_validation_error(
+                        'Failed to update Coupon [{coupon_id}]. '
+                        'max_global_applications field must be a positive number.'.format(coupon_id=coupon_id)
+                    )
+            ConditionalOffer.objects.filter(vouchers__in=vouchers.all()).update(**offer_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:

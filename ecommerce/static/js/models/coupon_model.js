@@ -136,6 +136,9 @@ define([
                 invoice_type: {required: true},
                 max_uses: function(val) {
                     var numberPattern = new RegExp('[0-9]+');
+                    if (val===''){
+                        this.unset('max_uses');
+                    }
                     if (val && !numberPattern.test(val)) {
                         return Backbone.Validation.messages.number;
                     } else if (val && val < 2 && this.get('voucher_type') === 'Multi-use') {

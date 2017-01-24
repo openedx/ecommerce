@@ -47,6 +47,7 @@ class ConditionalOffer(AbstractConditionalOffer):
 
     def clean(self):
         self.clean_email_domains()
+        self.clean_max_global_applications()  # Our frontend uses the name max_uses instead of max_global_applications
         super(ConditionalOffer, self).clean()   # pylint: disable=bad-super-call
 
     def clean_email_domains(self):
@@ -94,6 +95,13 @@ class ConditionalOffer(AbstractConditionalOffer):
                     # - all encoded domain levels must match given regex expression
                     if not re.match(r'^([a-z0-9-]+)$', domain_part.encode('idna')):
                         log_message_and_raise_validation_error(error_message)
+
+    def clean_max_global_applications(self):
+        if self.max_global_applications is not None:
+            if self.max_global_applications < 1 or not isinstance(self.max_global_applications, (int, long)):
+                log_message_and_raise_validation_error(
+                    'Failed to create ConditionalOffer. max_global_applications field must be a positive number.'
+                )
 
     def is_email_valid(self, email):
         """

@@ -263,7 +263,7 @@ class ConditionalOfferTests(TestCase):
         'valid-domain.com', 'çççç.рф', 'çç-ççç32.中国', 'ççç.ççç.இலங்கை'
     )
     def test_creating_offer_with_valid_email_domains(self, email_domains):
-        """ Verify creating ConditionalOffer with valid email domains. """
+        """Verify creating ConditionalOffer with valid email domains."""
         offer = factories.ConditionalOfferFactory(email_domains=email_domains)
         self.assertEqual(offer.email_domains, email_domains)
 
@@ -274,6 +274,17 @@ class ConditionalOfferTests(TestCase):
         'in..valid.com', 'valid.com,invalid.c', 'invalid,valid.com', 'çççç.çç-çç', 'ççç.xn--ççççç', 'çççç.çç--çç.ççç'
     )
     def test_creating_offer_with_invalid_email_domains(self, email_domains):
-        """ Verify creating ConditionalOffer with invalid email domains raises validation error. """
+        """Verify creating ConditionalOffer with invalid email domains raises validation error."""
         with self.assertRaises(ValidationError):
             factories.ConditionalOfferFactory(email_domains=email_domains)
+
+    def test_creating_offer_with_valid_max_global_applications(self):
+        """Verify creating ConditionalOffer with valid max global applications value."""
+        offer = factories.ConditionalOfferFactory(max_global_applications=5)
+        self.assertEqual(offer.max_global_applications, 5)
+
+    @ddt.data(-2, 0, 'string', '')
+    def test_creating_offer_with_invalid_max_global_applications(self, max_uses):
+        """Verify creating ConditionalOffer with invalid max global applications value raises validation error."""
+        with self.assertRaises(ValidationError):
+            factories.ConditionalOfferFactory(max_global_applications=max_uses)

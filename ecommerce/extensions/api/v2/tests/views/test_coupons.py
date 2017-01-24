@@ -81,20 +81,16 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         site.siteconfiguration = site_configuration
         return site
 
-    @ddt.data(
-        (Voucher.ONCE_PER_CUSTOMER, 2, 2),
-        (Voucher.SINGLE_USE, 2, None)
-    )
-    @ddt.unpack
-    def test_create(self, voucher_type, max_uses, expected_max_uses):
+    def test_create(self):
         """Test the create method."""
+        max_uses = 2
         title = 'Test coupon'
         stock_record = self.seat.stockrecords.first()
         self.coupon_data.update({
             'title': title,
             'client': 'Člient',
             'stock_record_ids': [stock_record.id],
-            'voucher_type': voucher_type,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
             'price': 100,
             'category': {'name': self.category.name},
             'max_uses': max_uses,
@@ -118,7 +114,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         coupon = Product.objects.get(title=title)
         self.assertEqual(
             coupon.attr.coupon_vouchers.vouchers.first().offers.first().max_global_applications,
-            expected_max_uses
+            max_uses
         )
 
     @ddt.data(
@@ -798,14 +794,19 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
 
     def test_update_max_uses_field(self):
         """Verify max_uses field can be updated."""
-        path = reverse('api:v2:coupons-detail', args=[self.coupon.id])
-        details = self.get_response_json('GET', path)
-        self.assertIsNone(details['max_uses'])
+        self.data.update({
+            'max_uses': 3,
+            'title': 'Max uses update',
+            'voucher_type': Voucher.MULTI_USE
+        })
+        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        coupon = Product.objects.get(title=self.data['title'])
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon.id]))
+        self.assertEqual(details['max_uses'], self.data['max_uses'])
 
-        max_uses = 3
-        self.data.update({'max_uses': max_uses})
-        response = self.get_response_json('PUT', path, self.data)
-        self.assertEqual(response['max_uses'], max_uses)
+        self.data['max_uses'] = 5
+        response = self.get_response_json('PUT', reverse('api:v2:coupons-detail', args=[coupon.id]), self.data)
+        self.assertEqual(response['max_uses'], self.data['max_uses'])
 
     def test_create_coupon_without_category(self):
         """ Verify creating coupon without category returns bad request. """
@@ -848,6 +849,66 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'stock_record_ids': None
         })
         self.assert_post_response_status(self.data, status.HTTP_200_OK)
+
+    def test_create_single_use_coupon_with_max_uses(self):
+        """Verify creating coupon with max uses field and single use voucher type returns 400 response."""
+        self.data.update({
+            'max_uses': 8,
+            'voucher_type': Voucher.SINGLE_USE
+        })
+        self.assert_post_response_status(self.data, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_single_use_coupon_with_max_uses(self):
+        """Verify updating coupon with max_uses field and single use voucher type returns 400 response."""
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[self.coupon.id]))
+        self.assertEqual(details['voucher_type'], Voucher.SINGLE_USE)
+
+        self.data['max_uses'] = 9
+        response = self.client.put(
+            reverse('api:v2:coupons-detail', args=[self.coupon.id]),
+            json.dumps(self.data),
+            'application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @ddt.data(6, '6')
+    def test_create_multi_use_coupon_with_max_uses(self, max_uses):
+        """Verify creating coupon with max uses field and multi-use voucher type."""
+        self.data.update({
+            'max_uses': max_uses,
+            'voucher_type': Voucher.MULTI_USE
+        })
+        self.assert_post_response_status(self.data, status.HTTP_200_OK)
+
+    @ddt.data(-3, 0, '', 'string')
+    def test_create_coupon_with_invalid_max_uses(self, max_uses):
+        """Verify creating coupon with invalid max uses field returns 400 response."""
+        self.data.update({
+            'max_uses': max_uses,
+            'voucher_type': Voucher.MULTI_USE
+        })
+        self.assert_post_response_status(self.data)
+
+    @ddt.data(-3, 0, '', 'string')
+    def test_update_coupon_with_invalid_max_uses(self, max_uses):
+        """Verify updating coupon with invalid max_uses field returns 400 response."""
+        self.data.update({
+            'max_uses': 2,
+            'title': 'Coupon update with max uses {}'.format(max_uses),
+            'voucher_type': Voucher.MULTI_USE
+        })
+        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        coupon = Product.objects.get(title=self.data['title'])
+        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon.id]))
+        self.assertEqual(details['max_uses'], 2)
+
+        self.data.update({'max_uses': max_uses})
+        response = self.client.put(
+            reverse('api:v2:coupons-detail', args=[coupon.id]),
+            json.dumps(self.data),
+            'application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CouponCategoriesListViewTests(TestCase):

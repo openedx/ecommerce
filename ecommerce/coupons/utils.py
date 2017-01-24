@@ -103,4 +103,6 @@ def prepare_course_seat_types(course_seat_types):
     Returns:
         str: Comma-separated list of course seat types if course_seat_types is not empty
     """
-    return ','.join(seat_type.lower() for seat_type in course_seat_types)
+    if course_seat_types:
+        return ','.join(seat_type.lower() for seat_type in course_seat_types)
+    return None
