@@ -333,3 +333,11 @@ class VoucherAddMessagesView(VoucherAddView):
                 )
 
         return redirect_to_referrer(self.request, 'basket:summary')
+
+
+class VoucherRemoveMessagesView(VoucherRemoveView):
+    def post(self, request, *args, **kwargs):
+        # This will fix the bug in Django Oscar
+        # Expected Primary Key to be integer, but it's Unicode instead
+        kwargs['pk'] = int(kwargs['pk'])
+        return super(VoucherRemoveMessagesView, self).post(request, *args, **kwargs)

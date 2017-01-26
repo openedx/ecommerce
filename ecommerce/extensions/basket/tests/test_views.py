@@ -30,7 +30,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data
-from ecommerce.extensions.basket.views import VoucherAddMessagesView
+from ecommerce.extensions.basket.views import VoucherAddMessagesView, VoucherRemoveMessagesView
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
@@ -544,7 +544,7 @@ class VoucherAddMessagesViewTests(TestCase):
         self.voucher_add_view.request = self.request
         self.voucher_add_view.form_valid(self.form)
         request_message = self.get_error_message_from_request()
-        self.assertEqual(request_message, message)
+        self.assertEqual(str(request_message), message)
 
     def test_no_voucher_error_msg(self):
         """ Verify correct error message is returned when voucher can't be found. """
@@ -587,3 +587,38 @@ class VoucherAddMessagesViewTests(TestCase):
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         self.assertMessage(_("Coupon code '{code}' is invalid.").format(code=COUPON_CODE))
+
+
+class VoucherRemoveMessagesViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+    """ VoucherRemoveMessagesView view tests. """
+    def setUp(self):
+        super(VoucherRemoveMessagesViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.course = CourseFactory()
+        self.course.create_or_update_seat('verified', True, 50, self.partner)
+        self.product = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.voucher, __ = prepare_voucher(code=COUPON_CODE)
+
+        self.request = RequestFactory().request()
+        # Fallback storage is needed in tests with messages
+        setattr(self.request, 'session', 'session')
+        messages = FallbackStorage(self.request)
+        setattr(self.request, '_messages', messages)
+        self.request.user = self.user
+
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(self.product, 1)
+        self.request.basket = basket
+
+        self.voucher_remove_view = VoucherRemoveMessagesView()
+
+    def test_remove_voucher_pk_conversion(self):
+        """ Verify that voucher primary key is converted to integer """
+        self.voucher_remove_view.post(self.request, pk=self.voucher.id)
+        request_message = list(get_messages(self.request))[-1].message
+        self.assertEqual(
+            str(request_message),
+            "No voucher found with id '{0}'".format(self.voucher.id)
+        )
