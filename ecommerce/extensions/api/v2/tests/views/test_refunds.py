@@ -70,8 +70,8 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         """
         If no user matching the username is found, return HTTP 400.
         """
-        superuser = self.create_user(is_superuser=True)
-        self.client.login(username=superuser.username, password=self.password)
+        staff_user = self.create_user(is_staff=True)
+        self.client.login(username=staff_user.username, password=self.password)
 
         username = 'fakey-userson'
         data = self._get_data(username, self.course_id)
@@ -117,7 +117,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         self.assert_ok_response(response)
 
     def test_authorization(self):
-        """ Client must be authenticated as the user matching the username field or a superuser. """
+        """ Client must be authenticated as the user matching the username field or a staff user. """
 
         # A normal user CANNOT create refunds for other users.
         self.client.login(username=self.user.username, password=self.password)
@@ -125,9 +125,9 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # A superuser can create refunds for everyone.
-        superuser = self.create_user(is_superuser=True)
-        self.client.login(username=superuser.username, password=self.password)
+        # A staff user can create refunds for everyone.
+        staff_user = self.create_user(is_staff=True)
+        self.client.login(username=staff_user.username, password=self.password)
         data = self._get_data(self.user.username, self.course_id)
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         self.assert_ok_response(response)
