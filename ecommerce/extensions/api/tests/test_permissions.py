@@ -23,19 +23,19 @@ class CanActForUserTests(PermissionsTestMixin, TestCase):
         request = self.get_request()
         self.assertFalse(self.permissions_class.has_permission(request, None))
 
-    def test_has_permission_superuser(self):
-        """ Return True if request.user is a superuser. """
-        user = self.create_user(is_superuser=True)
+    def test_has_permission_staff(self):
+        """ Return True if request.user is a staff user. """
+        user = self.create_user(is_staff=True)
 
-        # Data is required, even if you're a superuser.
+        # Data is required, even if you're a staff user.
         request = self.get_request(user=user)
         self.assertFalse(self.permissions_class.has_permission(request, None))
 
-        # Superusers can create their own refunds
+        # Staff can create their own refunds
         request = self.get_request(user=user, data={'username': user.username})
         self.assertTrue(self.permissions_class.has_permission(request, None))
 
-        # Superusers can create refunds for other users
+        # Staff can create refunds for other users
         request = self.get_request(user=user, data={'username': 'other_guy'})
         self.assertTrue(self.permissions_class.has_permission(request, None))
 
