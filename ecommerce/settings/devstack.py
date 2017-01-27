@@ -14,6 +14,9 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
+# TODO Remove this once we convert the E-Commerce service to use the latest JWT_ISSUERS configuration.
+JWT_AUTH['JWT_DECODE_HANDLER'] = 'edx_rest_framework_extensions.utils.jwt_decode_handler'
+
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
