@@ -184,12 +184,9 @@ define([
                 it('should recognize the credit card', function() {
                     var validCardList = [
                         {'number': '378282246310005', 'name': 'amex', 'type': '003'},
-                        {'number': '30569309025904', 'name': 'diners', 'type': '005'},
                         {'number': '6011111111111117', 'name': 'discover', 'type': '004'},
-                        {'number': '3530111333300000', 'name': 'jcb', 'type': '007'},
                         {'number': '5105105105105100', 'name': 'mastercard', 'type': '002'},
-                        {'number': '4111111111111111', 'name': 'visa', 'type': '001'},
-                        {'number': '6759649826438453', 'name': 'maestro', 'type': '042'}
+                        {'number': '4111111111111111', 'name': 'visa', 'type': '001'}
                     ];
                     BasketPage.onReady();
 
@@ -207,6 +204,19 @@ define([
                             '/static/images/credit_cards/' + card.name + '.png'
                         );
                         expect($('input[name=card_type]').val()).toEqual(card.type);
+                    });
+                });
+
+                it('should determine if credit card type is supported', function () {
+                    var validCardTypes = ['amex', 'discover', 'mastercard', 'visa'],
+                        invalidCardTypes = ['diners', 'jcb', 'maestro'];
+
+                    _.each(validCardTypes, function (cardType) {
+                        expect(BasketPage.isCardTypeSupported(cardType)).toBeTruthy();
+                    });
+
+                    _.each(invalidCardTypes, function (cardType) {
+                        expect(BasketPage.isCardTypeSupported(cardType)).toBeFalsy();
                     });
                 });
             });

@@ -124,7 +124,7 @@ define([
 
             if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
                 appendCardValidationErrorMsg(event, cardNumberField, 'Invalid card number');
-            } else if (typeof cardType === 'undefined') {
+            } else if (typeof cardType === 'undefined' || !isCardTypeSupported(cardType.name)) {
                 appendCardValidationErrorMsg(event, cardNumberField, 'Unsupported card type');
             } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
                 appendCardValidationErrorMsg(event, cvnNumberField, 'Invalid CVN');
@@ -148,6 +148,11 @@ define([
             if (cardNumber.length > 12) {
                 card = CreditCardUtils.getCreditCardType(cardNumber);
 
+                if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
+                    $('.card-type-icon').attr('src', '').addClass('hidden');
+                    return;
+                }
+
                 if (typeof card !== 'undefined') {
                     $('.card-type-icon').attr(
                         'src',
@@ -161,6 +166,10 @@ define([
             } else {
                 $('.card-type-icon').attr('src', '').addClass('hidden');
             }
+        },
+
+        isCardTypeSupported = function (cardType) {
+            return $.inArray(cardType, ['amex', 'discover', 'mastercard', 'visa']) > -1;
         },
 
         onReady = function() {
@@ -347,6 +356,7 @@ define([
             cardInfoValidation: cardInfoValidation,
             checkoutPayment: checkoutPayment,
             hideVoucherForm: hideVoucherForm,
+            isCardTypeSupported: isCardTypeSupported,
             onFail: onFail,
             onReady: onReady,
             onSuccess: onSuccess,
