@@ -34,24 +34,9 @@ define([],function () {
                         cybersourceTypeId: '003',
                         cvnLength: 4
                     },
-                    diners: {
-                        regex: /^3(?:0[0-59]|[689]\d)\d{11}$/,
-                        cybersourceTypeId: '005',
-                        cvnLength: 3
-                    },
                     discover: {
                         regex: /^(6011\d{2}|65\d{4}|64[4-9]\d{3}|62212[6-9]|6221[3-9]\d|622[2-8]\d{2}|6229[01]\d|62292[0-5])\d{10,13}$/,  // jshint ignore:line
                         cybersourceTypeId: '004',
-                        cvnLength: 3
-                    },
-                    jcb: {
-                        regex: /^(?:2131|1800|35\d{3})\d{11}$/,
-                        cybersourceTypeId: '007',
-                        cvnLength: 4
-                    },
-                    maestro: {
-                        regex: /^(5[06789]|6\d)[0-9]{10,17}$/,
-                        cybersourceTypeId: '042',
                         cvnLength: 3
                     },
                     mastercard: {
