@@ -77,5 +77,8 @@
 {% endblock footer %}
 
 {% block javascript %}
+    <script>
+        bulkEnrollmentCodesEnabled = {{ bulk_enrollment_codes_enabled }};
+    </script>
     <script src="{% static 'js/apps/course_admin_app.js' %}"></script>
 {% endblock %}

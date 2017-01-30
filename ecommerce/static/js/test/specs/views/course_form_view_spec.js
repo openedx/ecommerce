@@ -25,6 +25,32 @@ define([
 
             describe('getActiveCourseTypes', function () {
                 it('should return expected course types', function () {
+                    view.model.set('type', 'audit');
+                    expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'credit']);
+
+                    view.model.set('type', 'verified');
+                    expect(view.getActiveCourseTypes()).toEqual(['verified', 'credit']);
+
+                    view.model.set('type', 'professional');
+                    expect(view.getActiveCourseTypes()).toEqual(['professional']);
+
+                    view.model.set('type', 'credit');
+                    expect(view.getActiveCourseTypes()).toEqual(['credit']);
+
+                    view.model.set('type', 'default');
+                    expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'professional', 'credit']);
+                });
+            });
+
+            describe('Bulk enrollment code tests', function() {
+                it('should check enrollment code checkbox', function() {
+                    view.$el.append('<input type="checkbox" name="bulk_enrollment_code">');
+                    view.model.set('bulk_enrollment_code', true);
+                    view.renderBulkEnrollmentCode();
+                    expect(view.$('[name=bulk_enrollment_code]').prop('checked')).toBeTruthy();
+                });
+
+                it('should make an ajax call to site configuration', function() {
                     var mockAjaxData = {'results': [{
                             'enable_enrollment_codes': true,
                             'site': {
@@ -35,24 +61,7 @@ define([
                     spyOn($, 'ajax').and.callFake(function(options) {
                         options.success(mockAjaxData);
                     });
-                    view.model.set('type', 'audit');
-                    expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'credit']);
-                    expect($.ajax).toHaveBeenCalled();
-
-                    view.model.set('type', 'verified');
-                    expect(view.getActiveCourseTypes()).toEqual(['verified', 'credit']);
-                    expect($.ajax).toHaveBeenCalled();
-
-                    view.model.set('type', 'professional');
-                    expect(view.getActiveCourseTypes()).toEqual(['professional']);
-                    expect($.ajax).toHaveBeenCalled();
-
-                    view.model.set('type', 'credit');
-                    expect(view.getActiveCourseTypes()).toEqual(['credit']);
-                    expect($.ajax).toHaveBeenCalled();
-
-                    view.model.set('type', 'default');
-                    expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'professional', 'credit']);
+                    view.toggleDisabledBulkEnrollmentField();
                     expect($.ajax).toHaveBeenCalled();
                 });
             });

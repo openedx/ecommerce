@@ -260,8 +260,7 @@ class Course(models.Model):
 
         return seat
 
-    @property
-    def enrollment_code_product(self):
+    def get_enrollment_code(self):
         """ Returns an enrollment code Product related to this course. """
         try:
             # Current use cases dictate that only one enrollment code product exists for a given course
@@ -271,6 +270,14 @@ class Course(models.Model):
             )
         except Product.DoesNotExist:
             return None
+
+    @property
+    def enrollment_code_product(self):
+        """Returns this course's enrollment code if it exists and is active."""
+        enrollment_code = self.get_enrollment_code()
+        if enrollment_code and enrollment_code.attr.is_active:
+            return enrollment_code
+        return None
 
     def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price):
         """
@@ -299,6 +306,7 @@ class Course(models.Model):
             )
         enrollment_code.attr.course_key = self.id
         enrollment_code.attr.seat_type = seat_type
+        enrollment_code.attr.is_active = True
         enrollment_code.attr.id_verification_required = id_verification_required
         enrollment_code.save()
 
@@ -317,3 +325,13 @@ class Course(models.Model):
         stock_record.save()
 
         return enrollment_code
+
+    def toggle_enrollment_code_status(self, is_active):
+        enrollment_code = self.get_enrollment_code()
+        # For some reason needs to be initialized first. See discussion here:
+        # https://groups.google.com/forum/?fromgroups=#!topic/django-oscar/Q4cSzVwKMGI
+        enrollment_code.attr.initialised = True
+
+        if enrollment_code:
+            enrollment_code.attr.is_active = is_active
+            enrollment_code.save()

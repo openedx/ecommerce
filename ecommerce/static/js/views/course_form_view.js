@@ -118,10 +118,11 @@ define([
                     setOptions: {
                         validate: true
                     },
-                    onSet: 'cleanHonorMode'
+                    onSet: 'cleanBooleanValue'
                 },
-                'input[name=create_enrollment_code]': {
-                    observe: 'create_enrollment_code'
+                'input[name=bulk_enrollment_code]': {
+                    observe: 'has_active_bulk_enrollment_code',
+                    onSet: 'cleanBooleanValue'
                 }
             },
 
@@ -189,7 +190,7 @@ define([
                 this.lockedCourseType = this.model.get('type');
             },
 
-            cleanHonorMode: function (val) {
+            cleanBooleanValue: function (val) {
                 return _s.toBoolean(val);
             },
 
@@ -206,7 +207,7 @@ define([
                 this.$('.fields:first').before(AlertDivTemplate);
 
                 this.stickit();
-
+                this.toggleBulkEnrollmentField();
                 this._super();
 
                 return this;
@@ -288,7 +289,6 @@ define([
 
                         if (!view) {
                             seats = this.model.getOrCreateSeats(seatType);
-                            // seats = new ProductCollection(this.model.getOrCreateSeats(seatType));
                             viewClass = this.courseSeatViewMappings[seatType];
 
                             if (viewClass && seats.length > 0) {
@@ -331,33 +331,22 @@ define([
              * Toggle the bulk enrollment checkbox. Hidden only for audit mode.
              */
             toggleBulkEnrollmentField: function() {
-                var bulk_enrollment_field = this.$('[name=create_enrollment_code]'),
-                    form_group = bulk_enrollment_field.closest('.form-group');
-                $.ajax({
-                    url: '/api/v2/siteconfiguration/',
-                    method: 'get',
-                    contentType: 'application/json',
-                    async: false,
-                    success: this.onSuccess.bind(this)
-                });
+                var disableBEC = this.$('#disableBulkEnrollmentCode'),
+                    formGroup = disableBEC.closest('.form-group');
 
                 if (this.$('[name=type]:checked').val() === 'audit') {
-                    bulk_enrollment_field.prop('checked', false).trigger('change');
-                    form_group.addClass('hidden');
+                    disableBEC.prop('checked', false).trigger('change');
+                    formGroup.addClass('hidden');
                 } else {
-                    form_group.removeClass('hidden');
+                    formGroup.removeClass('hidden');
+                    if (this.model.get('bulk_enrollment_code')) {
+                        this.$('#enableBulkEnrollmentCode').prop('checked', true);
+                    }
+                    if (!bulkEnrollmentCodesEnabled) {
+                        this.$('[name=bulk_enrollment_code]').attr('disabled', true);
+                    }
                 }
             },
-
-            onSuccess: function(data) {
-                var site_configuration;
-                site_configuration = _.find(data.results, function(item) {
-                    return item.site.domain === window.location.host;
-                }) || {};
-                if (!site_configuration.enable_enrollment_codes) {
-                    this.$('[name=create_enrollment_code]').attr('disabled', true);
-                }
-            }
         });
     }
 );

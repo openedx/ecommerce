@@ -41,19 +41,20 @@ define([
                 var bulk_enrollment_seat_types = ['verified', 'professional', 'credit'];
                 view.model.set('type', 'audit');
                 view.formView.toggleBulkEnrollmentField();
-                expect(SpecUtils.formGroup(view, '[name=create_enrollment_code]')).not.toBeVisible();
+                expect(SpecUtils.formGroup(view, '[name=bulk_enrollment_code]')).not.toBeVisible();
 
                 _.each(bulk_enrollment_seat_types, function(seat) {
                     view.model.set('type', seat);
                     view.formView.toggleBulkEnrollmentField();
-                    expect(SpecUtils.formGroup(view, '[name=create_enrollment_code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=bulk_enrollment_code]')).toBeVisible();
                 }, this);
             });
 
             it('should set the bulk enrollment enabled if it is selected', function() {
-                view.$('[name=create_enrollment_code]').prop('checked', true).trigger('change');
-                expect(view.model.get('create_enrollment_code')).toBe('true');
+                view.$('[name=bulk_enrollment_code]').prop('checked', true).trigger('change');
+                expect(view.model.get('bulk_enrollment_code')).toBe('true');
             });
+
         });
     }
 );
