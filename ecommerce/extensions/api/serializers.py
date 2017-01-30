@@ -14,7 +14,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 import waffle
 
-from ecommerce.core.constants import COURSE_ID_REGEX, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.models import Site, SiteConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
@@ -280,6 +280,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     products = ProductSerializer(many=True)
     products_url = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
+    has_active_bulk_enrollment_code = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super(CourseSerializer, self).__init__(*args, **kwargs)
@@ -297,9 +298,14 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         return reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': obj.id},
                        request=self.context['request'])
 
+    def get_has_active_bulk_enrollment_code(self, obj):
+        return True if obj.enrollment_code_product else False
+
     class Meta(object):
         model = Course
-        fields = ('id', 'url', 'name', 'verification_deadline', 'type', 'products_url', 'last_edited', 'products')
+        fields = (
+            'id', 'url', 'name', 'verification_deadline', 'type',
+            'products_url', 'last_edited', 'products', 'has_active_bulk_enrollment_code')
         read_only_fields = ('type', 'products')
         extra_kwargs = {
             'url': {'view_name': COURSE_DETAIL_VIEW}
@@ -317,6 +323,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     # Verification deadline should only be required if the course actually requires verification.
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
     products = serializers.ListField()
+    create_or_activate_enrollment_code = serializers.BooleanField()
 
     def __init__(self, *args, **kwargs):
         super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
@@ -363,6 +370,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         course_id = self.validated_data['id']
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
+        create_or_activate_enrollment_code = self.validated_data.get('create_or_activate_enrollment_code')
         products = self.validated_data['products']
         partner = self.get_partner()
 
@@ -383,13 +391,15 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
+                create_enrollment_code = False
+                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and \
+                        self.context['request'].site.siteconfiguration.enable_enrollment_codes:
+                    create_enrollment_code = create_or_activate_enrollment_code
+
                 for product in products:
                     attrs = self._flatten(product['attribute_values'])
-
                     # Extract arguments required for Seat creation, deserializing as necessary.
                     certificate_type = attrs.get('certificate_type', '')
-                    create_enrollment_code = product['course'].get('create_enrollment_code') and \
-                        self.context['request'].site.siteconfiguration.enable_enrollment_codes
                     id_verification_required = attrs['id_verification_required']
                     price = Decimal(product['price'])
 
@@ -410,6 +420,9 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                         credit_hours=credit_hours,
                         create_enrollment_code=create_enrollment_code
                     )
+
+                if course.get_enrollment_code():
+                    course.toggle_enrollment_code_status(is_active=create_enrollment_code)
 
                 resp_message = course.publish_to_lms(access_token=self.access_token)
                 published = (resp_message is None)

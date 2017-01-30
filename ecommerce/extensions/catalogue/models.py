@@ -1,5 +1,7 @@
 # noinspection PyUnresolvedReferences
 from django.db import models
+from django.db.models.signals import post_init, post_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractProductAttributeValue
 from simple_history.models import HistoricalRecords
@@ -17,6 +19,8 @@ class Product(AbstractProduct):
                                    help_text=_('Last date/time on which this product can be purchased.'))
     history = HistoricalRecords()
 
+    original_expires = None
+
     @property
     def is_seat_product(self):
         return self.get_product_class().name == SEAT_PRODUCT_CLASS_NAME
@@ -28,6 +32,38 @@ class Product(AbstractProduct):
     @property
     def is_coupon_product(self):
         return self.get_product_class().name == COUPON_PRODUCT_CLASS_NAME
+
+
+@receiver(post_init, sender=Product)
+def update_original_expires(sender, **kwargs):  # pylint: disable=unused-argument
+    """Updates original_expires value of an instance.
+
+    The original_expires value is used to save a database call when updating a
+    seat's enrollment code expires field.
+    """
+    instance = kwargs['instance']
+    instance.original_expires = instance.expires
+
+
+@receiver(post_save, sender=Product)
+def update_enrollment_code(sender, **kwargs):  # pylint: disable=unused-argument
+    """Updates a seat's enrollment code when the seat is updated.
+
+    Whenever a seat's expires field is updated, the enrollment code's expires
+    field for that seat needs to be updated in these cases:
+        * the enrollment code's expires field was not already set
+        * the enrollment code's expires field was set and is not less than the
+          seat's one (if it is less that means the enrollment code was
+          deactivated manually, in which case it cannot be activated again
+          automatically here)
+    """
+    instance = kwargs['instance']
+    if instance.is_seat_product and (instance.expires != instance.original_expires):
+        enrollment_code = instance.course.get_enrollment_code()
+        if enrollment_code and (enrollment_code.expires is None or enrollment_code.expires >= instance.expires):
+            enrollment_code.expires = instance.expires
+            enrollment_code.save()
+        instance.original_expires = instance.expires
 
 
 class ProductAttributeValue(AbstractProductAttributeValue):

@@ -6,7 +6,8 @@ from oscar.core.loading import get_model
 from oscar.core.utils import slugify
 from oscar.test import factories
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.tests.factories import PartnerFactory
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 Category = get_model('catalogue', 'Category')
 Partner = get_model('partner', 'Partner')
+Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
@@ -111,3 +113,31 @@ class CourseCatalogTestMixin(object):
             ENROLLMENT_CODE_PRODUCT_CLASS_NAME, slugify(ENROLLMENT_CODE_PRODUCT_CLASS_NAME), attributes
         )
         return product_class
+
+    def create_course_seat_and_enrollment_code(
+            self, seat_type='verified', price=10, id_verification=False, expires=None
+    ):
+        """
+        Create a new course, seat and enrollment code.
+        In order to create an enrollment code the waffle switch and site configuration
+        value for enrollment codes need to be turned on.
+
+        Args:
+            seat_type (str): Seat type.
+            price (int): Seat price.
+            id_verification (bool): Whether or not an ID verification is necessary for the seat.
+            expires (datetime): Seat and enrollment code expiration date.
+        Returns:
+            The newly created course, seat and enrollment code.
+        """
+        course = CourseFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        site_configuration = self.site.siteconfiguration
+        site_configuration.enable_enrollment_codes = True
+        site_configuration.save()
+
+        seat = course.create_or_update_seat(
+            seat_type, id_verification, price, self.partner, expires=expires, create_enrollment_code=True
+        )
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        return course, seat, enrollment_code
