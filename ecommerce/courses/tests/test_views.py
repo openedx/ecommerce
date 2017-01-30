@@ -1,10 +1,13 @@
 import json
 
+import ddt
 import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from testfixtures import LogCapture
 
+from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
@@ -49,6 +52,7 @@ class ConvertCourseView(ManagementCommandViewMixin, TestCase):
     path = reverse('courses:convert_course')
 
 
+@ddt.ddt
 class CourseAppViewTests(TestCase):
     path = reverse('courses:app', args=[''])
 
@@ -93,6 +97,13 @@ class CourseAppViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(settings.LOGIN_URL, response.url)
 
+    def _create_and_login_staff_user(self):
+        """Setup staff user with an OAuth2 access token and log the user in."""
+        user = self.create_user(is_staff=True)
+        self.create_access_token(user)
+        self.assertIsNotNone(user.access_token)
+        self.client.login(username=user.username, password=self.password)
+
     @httpretty.activate
     def test_staff_user_required(self):
         """ Verify the view is only accessible to staff users. """
@@ -103,20 +114,14 @@ class CourseAppViewTests(TestCase):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 404)
 
-        user = self.create_user(is_staff=True)
-        self.create_access_token(user)
-        self.client.login(username=user.username, password=self.password)
+        self._create_and_login_staff_user()
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
     def test_credit_providers_in_context(self):
         """ Verify the context data includes a list of credit providers. """
-        # Setup staff user with an OAuth 2 access token
-        user = self.create_user(is_staff=True)
-        self.create_access_token(user)
-        self.assertIsNotNone(user.access_token)
-        self.client.login(username=user.username, password=self.password)
+        self._create_and_login_staff_user()
 
         # Mock Credit API
         __, provider_json = self.mock_credit_api_providers()
@@ -125,13 +130,27 @@ class CourseAppViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['credit_providers'], provider_json)
 
+    @ddt.data(True, False)
+    @httpretty.activate
+    def test_bulk_enrollment_code_flag_is_context(self, enabled):
+        """Verify the context data includes a bulk enrollment code flag."""
+        self._create_and_login_staff_user()
+        self.mock_credit_api_providers()
+
+        toggle_switch(ENROLLMENT_CODE_SWITCH, enabled)
+        site_config = self.site.siteconfiguration
+        site_config.enable_enrollment_codes = enabled
+        site_config.save()
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['bulk_enrollment_codes_enabled'], enabled)
+
     @httpretty.activate
     def test_credit_api_failure(self):
         """ Verify the view logs an error if it fails to retrieve credit providers. """
         # Setup staff user with an OAuth 2 access token
-        user = self.create_user(is_staff=True)
-        self.create_access_token(user)
-        self.client.login(username=user.username, password=self.password)
+        self._create_and_login_staff_user()
         self.mock_credit_api_error()
 
         with LogCapture(LOGGER_NAME) as l:

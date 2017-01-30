@@ -1,6 +1,8 @@
 import ddt
-from django.conf import settings
 import mock
+from django.conf import settings
+from django.utils.timezone import now, timedelta
+from freezegun import freeze_time
 from oscar.core.loading import get_model
 from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
@@ -136,21 +138,19 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
     def test_create_seat_with_enrollment_code(self):
         """Verify an enrollment code product is created."""
-        course = CourseFactory()
         seat_type = 'verified'
         price = 5
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat(seat_type, True, price, self.partner, create_enrollment_code=True)
-
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        course, __, enrollment_code = self.create_course_seat_and_enrollment_code(seat_type=seat_type, price=price)
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, seat_type)
+        self.assertIsNone(enrollment_code.expires)
 
         # Second time should skip over the enrollment code creation logic but result in the same data
         course.create_or_update_seat(seat_type, True, price, self.partner)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        enrollment_code.refresh_from_db()
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, seat_type)
+        self.assertIsNone(enrollment_code.expires)
 
         stock_record = StockRecord.objects.get(product=enrollment_code)
         self.assertEqual(stock_record.price_excl_tax, price)
@@ -291,14 +291,14 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         course = Course.objects.create(id='test/course/123', name='Test Course 123')
 
         # Audit seat products should not have a corresponding enrollment code
-        course.create_or_update_seat('audit', False, 0, self.partner)
+        course.create_or_update_seat('audit', False, 0, self.partner, create_enrollment_code=True)
         with self.assertRaises(Product.DoesNotExist):
-            enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+            Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
         # Honor seat products should not have a corresponding enrollment code
-        course.create_or_update_seat('honor', False, 0, self.partner)
+        course.create_or_update_seat('honor', False, 0, self.partner, create_enrollment_code=True)
         with self.assertRaises(Product.DoesNotExist):
-            enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+            Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
         # Verified seat products should have a corresponding enrollment code
         course.create_or_update_seat('verified', True, 10, self.partner, create_enrollment_code=True)
@@ -309,3 +309,25 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         # One parent product, three seat products, one enrollment code product (verified) -> five total products
         self.assertEqual(course.products.count(), 5)
         self.assertEqual(len(course.seat_products), 3)  # Definitely three seat products...
+
+    @ddt.data(True, False)
+    @freeze_time('2017-01-01')
+    def test_activate_enrollment_code(self, seat_expired):
+        """Verify enrollment code expiration date is set properly."""
+        seat_expires = now() + timedelta(days=365) if seat_expired else None
+        course, __, enrollment_code = self.create_course_seat_and_enrollment_code(expires=seat_expires)
+        course.toggle_enrollment_code_status(True)
+
+        ec_expires = seat_expires if seat_expires else now() + timedelta(days=365)
+        self.assertEqual(course.get_enrollment_code().expires, ec_expires)
+        self.assertEqual(course.enrollment_code_product, enrollment_code)
+
+    @freeze_time('2017-01-01')
+    def test_deactivate_enrollment_code(self):
+        """Verify enrollment code expiration date is set in the past."""
+        course, __, __ = self.create_course_seat_and_enrollment_code()
+        course.toggle_enrollment_code_status(False)
+
+        ec_expires = now() - timedelta(days=365)
+        self.assertEqual(course.get_enrollment_code().expires, ec_expires)
+        self.assertIsNone(course.enrollment_code_product)

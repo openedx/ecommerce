@@ -4,8 +4,9 @@ import logging
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q, Count
+from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from simple_history.models import HistoricalRecords
 import waffle
 
@@ -24,6 +25,7 @@ Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
+Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 
 
@@ -108,6 +110,16 @@ class Course(models.Model):
         """ Returns a queryset of course seat Products related to this course. """
         return self.parent_seat_product.children.all().prefetch_related('stockrecords')
 
+    @property
+    def enrollment_code_product(self):
+        """Returns this course's enrollment code if it exists and is active."""
+        enrollment_code = self.get_enrollment_code()
+        if enrollment_code:
+            info = Selector().strategy().fetch_for_product(enrollment_code)
+            if info.availability.is_available_to_buy:
+                return enrollment_code
+        return None
+
     def get_course_seat_name(self, certificate_type, id_verification_required):
         """ Returns the name for a course seat. """
         name = u'Seat in {}'.format(self.name)
@@ -143,7 +155,7 @@ class Course(models.Model):
 
         Optional arguments:
             credit_provider(str): Name of the organization that provides the credit
-            expires(Datetime): Date when the seat type expires.
+            expires(datetime): Date when the seat type expires.
             credit_hours(int): Number of credit hours provided.
             remove_stale_modes(bool): Remove stale modes.
             create_enrollment_code(bool): Whether an enrollment code is created in additon to the seat.
@@ -215,7 +227,7 @@ class Course(models.Model):
         if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and \
                 certificate_type in ENROLLMENT_CODE_SEAT_TYPES and \
                 create_enrollment_code:
-            self._create_or_update_enrollment_code(certificate_type, id_verification_required, partner, price)
+            self._create_or_update_enrollment_code(certificate_type, id_verification_required, partner, price, expires)
 
         if credit_provider:
             seat.attr.credit_provider = credit_provider
@@ -261,8 +273,7 @@ class Course(models.Model):
 
         return seat
 
-    @property
-    def enrollment_code_product(self):
+    def get_enrollment_code(self):
         """ Returns an enrollment code Product related to this course. """
         try:
             # Current use cases dictate that only one enrollment code product exists for a given course
@@ -273,7 +284,7 @@ class Course(models.Model):
         except Product.DoesNotExist:
             return None
 
-    def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price):
+    def _create_or_update_enrollment_code(self, seat_type, id_verification_required, partner, price, expires):
         """
         Creates an enrollment code product and corresponding stock record for the specified seat.
         Includes course ID and seat type as product attributes.
@@ -282,12 +293,14 @@ class Course(models.Model):
             seat_type (str): Seat type.
             partner (Partner): Seat provider set in the stock record.
             price (Decimal): Price of the seat.
+            expires (datetime): Date when the enrollment code expires.
 
         Returns:
             Enrollment code product.
         """
         enrollment_code_product_class = ProductClass.objects.get(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        enrollment_code = self.enrollment_code_product
+        enrollment_code = self.get_enrollment_code()
+
         if not enrollment_code:
             title = 'Enrollment code for {seat_type} seat in {course_name}'.format(
                 seat_type=seat_type,
@@ -296,7 +309,8 @@ class Course(models.Model):
             enrollment_code = Product(
                 title=title,
                 product_class=enrollment_code_product_class,
-                course=self
+                course=self,
+                expires=expires
             )
         enrollment_code.attr.course_key = self.id
         enrollment_code.attr.seat_type = seat_type
@@ -318,3 +332,26 @@ class Course(models.Model):
         stock_record.save()
 
         return enrollment_code
+
+    def toggle_enrollment_code_status(self, is_active):
+        """Activate or deactivate an enrollment code.
+
+        An enrollment code's expiration date should not exceed the accompanying
+        seat's expiration date. If the seat does not have an expiration date, the
+        enrollment code's expiration date is set to an arbitrary number of days
+        in the future (365).
+
+        Args:
+            is_active (bool): Whether the enrollment code should be activated.
+        """
+        enrollment_code = self.get_enrollment_code()
+        if enrollment_code:
+            if is_active:
+                seat = self.seat_products.get(
+                    attributes__name='certificate_type',
+                    attribute_values__value_text=enrollment_code.attr.seat_type
+                )
+                enrollment_code.expires = seat.expires if seat.expires else now() + timedelta(days=365)
+            else:
+                enrollment_code.expires = now() - timedelta(days=365)
+            enrollment_code.save()
