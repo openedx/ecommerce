@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-08 22:10-0500\n"
+"POT-Creation-Date: 2017-01-31 18:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/static/js/models/coupon_model.js
@@ -46,8 +46,9 @@ msgid "A valid course ID is required"
 msgstr "À välïd çöürsé ÌD ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/static/js/models/coupon_model.js
-msgid "Email domains are invalid."
-msgstr "Émäïl dömäïns äré ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+#, javascript-format
+msgid "Email domain {%s} is invalid."
+msgstr "Émäïl dömäïn {%s} ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/static/js/models/coupon_model.js
 msgid "Must occur after start date"
@@ -213,6 +214,10 @@ msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 #: ecommerce/static/js/pages/offer_page.js
 msgid "Redeem"
 msgstr "Rédéém Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/static/js/utils/utils.js
+msgid "Trailing comma not allowed."
+msgstr "Träïlïng çömmä nöt ällöwéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
 #: ecommerce/static/js/views/coupon_detail_view.js
 #: ecommerce/static/js/views/coupon_form_view.js
@@ -429,13 +434,13 @@ msgstr "Séléçt Ⱡ'σяєм ιρѕυ#"
 msgid "Selected"
 msgstr "Séléçtéd Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/static/vendor-extensions/oscar/js/order_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/order_actions.js
 msgid "Order %(order_number)s has been fulfilled."
 msgstr ""
 "Ördér %(order_number)s häs ßéén fülfïlléd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢#"
 
-#: ecommerce/static/vendor-extensions/oscar/js/order_list.js
+#: ecommerce/static/vendor-extensions/oscar/js/order_actions.js
 msgid "Failed to fulfill order %(order_number)s: %(error)s"
 msgstr ""
 "Fäïléd tö fülfïll ördér %(order_number)s: %(error)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "

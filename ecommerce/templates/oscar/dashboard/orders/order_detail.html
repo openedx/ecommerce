@@ -1,5 +1,7 @@
 {% extends 'dashboard/layout.html' %}
 {% load i18n %}
+{% load compress %}
+{% load staticfiles %}
 {% load currency_filters %}
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
@@ -13,6 +15,12 @@
 
   {# Translation support for JavaScript strings. #}
   <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+  
+  {% compress js %}
+      <script src="{% static 'bower_components/js-cookie/src/js.cookie.js' %}" type="text/javascript"></script>
+      <script src="{% static 'vendor-extensions/oscar/js/add_message.js' %}" type="text/javascript"></script>
+      <script src="{% static 'vendor-extensions/oscar/js/order_actions.js' %}" type="text/javascript"></script>
+  {% endcompress %}
 {% endblock extrascripts %}
 
 {% block breadcrumbs %}
@@ -64,12 +72,21 @@
               <th>{% trans "Date of purchase" %}</th>
               <th>{% trans "Time of purchase" %}</th>
               <th>{% trans "Status" %}</th>
+              {% if order.is_fulfillable  %}
+                  <th> Actions </th>
+              {% endif %}
           </tr>
-          <tr>
+          <tr data-order-number="{{ order.number }}">
               <td>{{ order.total_incl_tax|currency:order.currency }}</td>
               <td>{{ order.date_placed|date }}</td>
               <td>{{ order.date_placed|time }}</td>
-              <td>{{ order.status|default:"N/A" }}</td>
+              <td class="order-status">{{ order.status|default:"N/A" }}</td>
+              {% if order.is_fulfillable  %}
+                  <td>
+                      <a class="btn btn-warning" data-order-number="{{ order.number }}"
+                         data-action="retry-fulfillment">{% trans "Retry Fulfillment" %}</a>
+                  </td>
+              {% endif %}
           </tr>
       </table>
   {% endblock order_information %}
