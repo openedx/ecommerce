@@ -179,9 +179,19 @@ class BasketSummaryView(BasketView):
             product_class_name = line.product.get_product_class().name
             if product_class_name == 'Seat':
                 line_data = self._get_course_data(line.product)
-                if (getattr(line.product.attr, 'id_verification_required', False) and
-                        line.product.attr.certificate_type != 'credit'):
+                certificate_type = line.product.attr.certificate_type
+
+                if getattr(line.product.attr, 'id_verification_required', False) and certificate_type != 'credit':
                     display_verification_message = True
+
+                if certificate_type == 'verified':
+                    order_details_msg = _(
+                        'You will be automatically enrolled in the verified track'
+                        ' of the course upon completing your order.'
+                    )
+                elif certificate_type == 'credit':
+                    order_details_msg = _('You will receive your credit upon completing your order.')
+                else:
                     order_details_msg = _(
                         'You will be automatically enrolled in the course upon completing your order.'
                     )

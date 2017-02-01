@@ -257,6 +257,24 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         basket.vouchers.add(voucher)
         Applicator().apply(basket)
 
+    def prepare_course_seat_and_enrollment_code(self, seat_type='verified', id_verification=False):
+        """Helper function that creates a new course, enables enrollment codes and creates a new
+        seat and enrollment code for it.
+
+        Args:
+            seat_type (str): Seat/certification type.
+            is_verification (bool): Whether or not id verification is required for the seat.
+        Returns:
+            The newly created course, seat and enrollment code.
+        """
+        course = CourseFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        self.site.siteconfiguration.enable_enrollment_codes = True
+        self.site.siteconfiguration.save()
+        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        return course, seat, enrollment_code
+
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
         """ Verify a connection error and timeout are logged when they happen. """
@@ -295,20 +313,9 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_enrollment_code_seat_type(self):
         """Verify the correct seat type attribute is retrieved."""
-        course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         self.create_basket_and_add_product(enrollment_code)
         self.mock_dynamic_catalog_course_runs_api(course_run=course)
-
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['show_voucher_form'])
-
-        # Enable enrollment codes
-        self.site.siteconfiguration.enable_enrollment_codes = True
-        self.site.siteconfiguration.save()
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -318,11 +325,8 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_no_switch_link(self):
         """Verify response does not contain variables for the switch link if seat does not have an EC."""
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        ec_course = CourseFactory()
         no_ec_course = CourseFactory()
         seat_without_ec = no_ec_course.create_or_update_seat('verified', False, 10, self.partner)
-        seat_with_ec = ec_course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         self.create_basket_and_add_product(seat_without_ec)
         self.mock_dynamic_catalog_course_runs_api(course_run=no_ec_course)
 
@@ -330,28 +334,20 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertFalse(response.context['switch_link_text'])
         self.assertFalse(response.context['partner_sku'])
 
-        # Enable enrollment codes
-        self.site.siteconfiguration.enable_enrollment_codes = True
-        self.site.siteconfiguration.save()
-
+        ec_course, seat_with_ec, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         Basket.objects.all().delete()
         self.create_basket_and_add_product(seat_with_ec)
         self.mock_dynamic_catalog_course_runs_api(course_run=ec_course)
 
         response = self.client.get(self.path)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         enrollment_code_stockrecord = StockRecord.objects.get(product=enrollment_code)
         self.assertTrue(response.context['switch_link_text'])
         self.assertEqual(response.context['partner_sku'], enrollment_code_stockrecord.partner_sku)
 
     def test_basket_switch_data(self):
         """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""
-        course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-
-        seat = course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        __, seat, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         seat_sku = StockRecord.objects.get(product=seat).partner_sku
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku
 
         __, partner_sku = get_basket_switch_data(seat)
@@ -475,6 +471,22 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['display_verification_message'], False)
+
+    def assert_order_details_in_context(self, product):
+        """Assert order details message is in basket context for passed product."""
+        self.create_basket_and_add_product(product)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context['order_details_msg'])
+
+    @ddt.data(True, False)
+    def test_order_details_msg(self, id_verification):
+        """Verify the order details message is displayed for seats and enrollment codes."""
+        __, seat, enrollment_code = self.prepare_course_seat_and_enrollment_code(
+            seat_type='professional', id_verification=id_verification
+        )
+        self.assert_order_details_in_context(seat)
+        self.assert_order_details_in_context(enrollment_code)
 
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
     def test_client_side_checkout(self):
