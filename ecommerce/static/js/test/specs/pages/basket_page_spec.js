@@ -363,11 +363,11 @@ define([
                         $('input[name=card_number]').val(validCardNumber);
                         $('input[name=card_cvn]').val('123');
                         $('#payment-button').click();
-                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid CVN');
+                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid security number');
 
                         $('input[name=card_cvn]').val('123b');
                         $('#payment-button').click();
-                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid CVN');
+                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid security number');
 
                         $('input[name=card_cvn]').val(validCvn);
                         $('#payment-button').click();
