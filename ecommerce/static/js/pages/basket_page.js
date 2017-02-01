@@ -127,7 +127,7 @@ define([
             } else if (typeof cardType === 'undefined' || !isCardTypeSupported(cardType.name)) {
                 appendCardValidationErrorMsg(event, cardNumberField, 'Unsupported card type');
             } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
-                appendCardValidationErrorMsg(event, cvnNumberField, 'Invalid CVN');
+                appendCardValidationErrorMsg(event, cvnNumberField, 'Invalid security number');
             }
 
             if (!Number.isInteger(Number(cardExpiryMonth)) ||
