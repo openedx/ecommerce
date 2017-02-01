@@ -480,7 +480,7 @@ LANGUAGE_COOKIE_NAME = 'ecommerce_language'
 
 
 # CELERY
-# Default broker URL. See http://celery.readthedocs.org/en/latest/configuration.html#broker-url.
+# Default broker URL. See http://celery.readthedocs.io/en/latest/userguide/configuration.html#broker-url.
 # In order for tasks to be visible to the ecommerce worker, this must match the value of BROKER_URL
 # configured for the ecommerce worker!
 BROKER_URL = None
@@ -498,7 +498,7 @@ BROKER_HEARTBEAT = 10.0
 BROKER_HEARTBEAT_CHECKRATE = 2
 
 # A sequence of modules to import when the worker starts.
-# See http://celery.readthedocs.org/en/latest/configuration.html#celery-imports.
+# See http://celery.readthedocs.io/en/latest/userguide/configuration.html#imports.
 CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
 )
@@ -507,11 +507,11 @@ CELERY_ROUTES = {'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue'
                  'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'}}
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
-# See http://celery.readthedocs.org/en/latest/configuration.html#celeryd-hijack-root-logger.
+# See http://celery.readthedocs.io/en/latest/userguide/configuration.html#worker-hijack-root-logger.
 CELERYD_HIJACK_ROOT_LOGGER = False
 
 # Execute tasks locally (synchronously) instead of sending them to the queue.
-# See http://celery.readthedocs.org/en/latest/configuration.html#celery-always-eager.
+# See http://celery.readthedocs.io/en/latest/userguide/configuration.html#task-always-eager.
 CELERY_ALWAYS_EAGER = False
 # END CELERY
 
