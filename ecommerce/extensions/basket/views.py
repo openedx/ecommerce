@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 import logging
 
+import dateutil.parser
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
@@ -103,6 +104,14 @@ class BasketSummaryView(BasketView):
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
+    def _deserialize_date(self, date_string):
+        date = None
+        try:
+            date = dateutil.parser.parse(date_string)
+        except (AttributeError, ValueError):
+            pass
+        return date
+
     def _get_course_data(self, product):
         """
         Return course data.
@@ -116,6 +125,8 @@ class BasketSummaryView(BasketView):
         course_name = None
         image_url = None
         short_description = None
+        course_start = None
+        course_end = None
 
         try:
             course = get_course_info_from_catalog(self.request.site, course_key)
@@ -125,6 +136,13 @@ class BasketSummaryView(BasketView):
                 image_url = ''
             short_description = course.get('short_description', '')
             course_name = course.get('title', '')
+
+            # The course start/end dates are not currently used
+            # in the default basket templates, but we are adding
+            # the dates to the template context so that theme
+            # template overrides can make use of them.
+            course_start = self._deserialize_date(course.get('start'))
+            course_end = self._deserialize_date(course.get('end'))
         except (ConnectionError, SlumberBaseException, Timeout):
             logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
 
@@ -133,6 +151,8 @@ class BasketSummaryView(BasketView):
             'course_key': course_key,
             'image_url': image_url,
             'product_description': short_description,
+            'course_start': course_start,
+            'course_end': course_end,
         }
 
     def _process_basket_lines(self, lines):
