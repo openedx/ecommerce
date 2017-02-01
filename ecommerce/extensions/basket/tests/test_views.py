@@ -515,6 +515,27 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
+    @ddt.data(
+        (None, None),
+        ('invalid-date', None),
+        ('2017-02-01T00:00:00', datetime.datetime(2017, 2, 1)),
+    )
+    @ddt.unpack
+    @mock_course_catalog_api_client
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
+    def test_context_data_contains_course_dates(self, date_string, expected_result):
+        seat = self.create_seat(self.course)
+        self.create_basket_and_add_product(seat)
+        self.mock_dynamic_catalog_single_course_runs_api(self.course, {
+            'start': date_string,
+            'end': date_string
+        })
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        for _, line_data in response.context['formset_lines_data']:
+            self.assertEqual(line_data['course_start'], expected_result)
+            self.assertEqual(line_data['course_end'], expected_result)
+
 
 class VoucherAddMessagesViewTests(TestCase):
     """ VoucherAddMessagesView view tests. """
