@@ -486,6 +486,8 @@ define([
                 });
 
                 it('should trigger page load analytics event', function() {
+                    $('<script type="text/javascript">var initModelData = {"course": {"courseId": "a/b/c"}};</script>')
+                        .appendTo('body');
                     AnalyticsUtils.analyticsSetUp();
                     expect(window.analytics.page).toHaveBeenCalled();
                 });
