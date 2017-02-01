@@ -429,13 +429,6 @@ EXTRA_SCOPE = ['permissions']
 # END AUTHENTICATION
 
 
-# ANALYTICS
-# Specify a key to emit events to the corresponding Segment project. `None` disables tracking.
-# See: https://segment.com/docs/libraries/python/
-SEGMENT_KEY = None
-# END ANALYTICS
-
-
 # DJANGO REST FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
