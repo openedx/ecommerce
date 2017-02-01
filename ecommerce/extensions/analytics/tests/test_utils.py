@@ -12,16 +12,16 @@ class UtilsTest(TestCase):
     def test_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for a logged in user."""
         user = self.create_user(
-            username='Tester',
             first_name='John',
             last_name='Doe',
-            email='test@example.com'
+            email='test@example.com',
+            tracking_context={'lms_user_id': '1235123'}
         )
         data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key, 'a/b/c')
         self.assertDictEqual(json.loads(data), {
             'course': {'courseId': 'a/b/c'},
             'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
-            'user': {'username': 'Tester', 'name': 'John Doe', 'email': 'test@example.com'}
+            'user': {'user_tracking_id': '1235123', 'name': 'John Doe', 'email': 'test@example.com'}
         })
 
     def test_anon_prepare_analytics_data(self):

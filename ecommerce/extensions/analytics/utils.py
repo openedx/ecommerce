@@ -109,9 +109,10 @@ def prepare_analytics_data(user, segment_key, course_id=None):
     }
 
     if user.is_authenticated():
+        user_tracking_id, __, __ = parse_tracking_context(user)
         user_data = {
             'user': {
-                'username': user.get_username(),
+                'user_tracking_id': user_tracking_id,
                 'name': user.get_full_name(),
                 'email': user.email
             }
