@@ -87,7 +87,7 @@ define([
             logUser: function () {
                 var userModel = this.options.userModel;
                 analytics.identify(
-                    userModel.get('username'),
+                    userModel.get('user_tracking_id'),
                     {
                         name: userModel.get('name'),
                         email: userModel.get('email')
