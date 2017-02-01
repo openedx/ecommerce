@@ -42,6 +42,7 @@ define([
                     // kick off segment
                     this.initSegment(trackId);
                     this.logUser();
+                    this.recordPageData();
 
                     // now segment has been loaded, we can track events
                     this.listenTo(this.model, 'segment:track', this.track);
@@ -49,13 +50,12 @@ define([
             },
 
             /**
-             * This sets up Segment for our application and loads the initial
-             * page load.
+             * This sets up Segment for our application
              *
              * this.segment is set for convenience.
              */
             initSegment: function (applicationKey) {
-                var analytics, pageData;
+                var analytics;
 
                 /* jshint ignore:start */
                 // jscs:disable
@@ -65,20 +65,19 @@ define([
 
                 // provide our application key for logging
                 analytics.load(applicationKey);
-
-                pageData = this.getSegmentPageData();
-                analytics.page(pageData);
             },
 
             /**
-             * Get data for initializing segment.
+             * Get data for initializing segment and record the initial page load.
              */
-            getSegmentPageData: function () {
+            recordPageData: function () {
+                var pageData = {};
+
                 if (this.options.courseModel.get('courseId')) {
-                    return this.buildCourseProperties();
+                    pageData = this.buildCourseProperties();
                 }
 
-                return {};
+                analytics.page(pageData);
             },
 
             /**
