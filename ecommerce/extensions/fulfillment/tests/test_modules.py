@@ -11,6 +11,7 @@ from oscar.test import factories
 from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
+from edx_rest_api_client import exceptions
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
@@ -28,6 +29,8 @@ from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.tests.testcases import TestCase
+from ecommerce.core.tests.decorators import mock_enterprise_api_client
+from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
@@ -44,7 +47,8 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+class EnrollmentFulfillmentModuleTests(EnterpriseServiceMockMixin, CourseCatalogTestMixin, FulfillmentTestMixin,
+                                       TestCase):
     """Test course seat fulfillment."""
 
     course_id = 'edX/DemoX/Demo_Course'
@@ -88,6 +92,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
+    @mock.patch(
+        'ecommerce.extensions.fulfillment.modules.enterprise_api.get_enterprise_learner_data',
+        mock.Mock(return_value={'results': []})
+    )
     def test_enrollment_module_fulfill(self, parse_tracking_context):
         """Happy path test to ensure we can properly fulfill enrollments."""
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
@@ -282,6 +290,10 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             )
 
     @httpretty.activate
+    @mock.patch(
+        'ecommerce.extensions.fulfillment.modules.enterprise_api.get_enterprise_learner_data',
+        mock.Mock(return_value={'results': []})
+    )
     def test_credit_enrollment_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill enrollments."""
         # Create the credit certificate type and order for the credit certificate type.
@@ -334,6 +346,67 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
             ]
         }
         self.assertEqual(actual, expected)
+
+    @httpretty.activate
+    @mock_enterprise_api_client
+    def test_course_linked_with_enterprise_customer_user(self):
+        """
+        Ensure we can properly fulfill enrollments and enterprise customer user is linked with course.
+        """
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        httpretty.register_uri(
+            method=httpretty.POST,
+            uri=self.ENTERPRISE_COURSE_ENROLLMENT_URL,
+            status=200,
+            body='{}',
+            content_type=JSON
+        )
+
+        self.mock_enterprise_learner_api()
+        with LogCapture(LOGGER_NAME) as l:
+            EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+            line = self.order.lines.get()
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'line_fulfilled: course_id="{}", credit_provider="{}", mode="{}", order_line_id="{}", '
+                    'order_number="{}", product_class="{}", user_id="{}"'.format(
+                        line.product.attr.course_key,
+                        line.product.attr.credit_provider,
+                        mode_for_seat(line.product),
+                        line.id,
+                        line.order.number,
+                        line.product.get_product_class().name,
+                        line.order.user.id,
+                    )
+                )
+            )
+
+        self.assertEqual(LINE.COMPLETE, line.status)
+        actual = json.loads(httpretty.last_request().body)
+        expected = {'course_id': 'edX/DemoX/Demo_Course', 'enterprise_customer_user': 1}
+        self.assertEqual(actual, expected)
+
+    @httpretty.activate
+    @mock_enterprise_api_client
+    def test_course_linked_with_enterprise_customer_user_raised_exception(self):
+        """
+        Test: linking of course enrollment to enterprise_customer raised a HttpClientError exception correctly.
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        httpretty.register_uri(
+            method=httpretty.POST,
+            uri=self.ENTERPRISE_COURSE_ENROLLMENT_URL,
+            status=400,
+            body='{}',
+            content_type=JSON
+        )
+
+        self.mock_enterprise_learner_api()
+        with self.assertRaises(exceptions.HttpClientError):
+            EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
     def test_enrollment_headers(self):
         """ Test that the enrollment module 'EnrollmentFulfillmentModule' is
