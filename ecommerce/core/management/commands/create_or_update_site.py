@@ -106,6 +106,11 @@ class Command(BaseCommand):
                             type=str,
                             required=False,
                             help='URL displayed to user for payment support')
+        parser.add_argument('--send-refund-notifications',
+                            action='store_true',
+                            dest='send_refund_notifications',
+                            default=False,
+                            help='Enable refund notification emails')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -149,6 +154,7 @@ class Command(BaseCommand):
             'segment_key': segment_key,
             'from_email': from_email,
             'enable_enrollment_codes': enable_enrollment_codes,
+            'send_refund_notifications': options['send_refund_notifications'],
             'oauth_settings': {
                 'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),
                 'SOCIAL_AUTH_EDX_OIDC_KEY': client_id,

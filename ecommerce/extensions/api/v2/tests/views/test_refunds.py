@@ -228,7 +228,7 @@ class RefundProcessViewTests(ThrottlingMixin, TestCase):
                 refund = Refund.objects.get(id=self.refund.id)
                 self.assertEqual(response.data['status'], refund.status)
                 self.assertEqual(response.data['status'], "Complete")
-                patched_log.info.assert_called_once_with(
+                patched_log.info.assert_called_with(
                     "Skipping the revocation step for refund [%d].", self.refund.id)
 
     @ddt.data(
