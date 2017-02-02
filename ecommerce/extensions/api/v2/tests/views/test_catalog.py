@@ -179,7 +179,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         empty results list in case the Course Discovery API fails to return
         data.
         """
-        self.mock_course_discovery_api_for_failure()
+        self.mock_course_discovery_api_for_catalogs_with_failure(ConnectionError)
 
         request = self.prepare_request('/api/v2/coupons/course_catalogs/')
         response = CatalogViewSet().course_catalogs(request)

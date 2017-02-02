@@ -17,12 +17,11 @@ class CourseCatalogServiceMockMixin(object):
         super(CourseCatalogServiceMockMixin, self).setUp()
         cache.clear()
 
-    def mock_course_discovery_api_for_catalog_by_resource_id(self, catalog_query='title: *'):
+    def mock_course_discovery_api_for_catalog_by_resource_id(self, catalog_id=1, catalog_query='title: *'):
         """
         Helper function to register course catalog API endpoint for a
         single catalog with its resource id.
         """
-        catalog_id = 1
         course_discovery_api_response = {
             'id': catalog_id,
             'name': 'Catalog {}'.format(catalog_id),
@@ -122,15 +121,23 @@ class CourseCatalogServiceMockMixin(object):
             responses=mocked_api_responses
         )
 
-    def mock_course_discovery_api_for_failure(self):
+    def mock_course_discovery_api_for_catalogs_with_failure(self, error, catalog_id=None):
         """
-        Helper function to register course catalog API endpoint for a
-        failure.
+        Helper function to register course catalog API endpoint for catalogs
+        with failure.
         """
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+
+        if catalog_id:
+            course_catalog_uri = '{}{}/'.format(self.COURSE_DISCOVERY_CATALOGS_URL, catalog_id)
+        else:
+            course_catalog_uri = self.COURSE_DISCOVERY_CATALOGS_URL
+
         httpretty.register_uri(
             method=httpretty.GET,
-            uri=self.COURSE_DISCOVERY_CATALOGS_URL,
+            uri=course_catalog_uri,
             responses=[
-                httpretty.Response(body='Clunk', content_type='application/json', status_code=500)
+                httpretty.Response(body=callback, content_type='application/json', status_code=500)
             ]
         )

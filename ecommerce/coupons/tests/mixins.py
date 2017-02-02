@@ -89,8 +89,8 @@ class CourseCatalogMockMixin(object):
 
         course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
             settings.COURSE_CATALOG_API_URL,
-            partner_code if partner_code else 'edx',
-            query if query else 'id:course*'
+            query if query else 'id:course*',
+            partner_code if partner_code else 'edx'
         )
         httpretty.register_uri(
             httpretty.GET,
@@ -127,6 +127,49 @@ class CourseCatalogMockMixin(object):
             httpretty.GET, course_run_url,
             body=course_run_info_json,
             content_type='application/json'
+        )
+
+    def mock_get_catalog_contains_api_for_failure(self, partner_code, course_run_ids, query, error):
+        """
+        Helper function to register a course catalog API endpoint with failure
+        for getting course runs information.
+        """
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+
+        catalog_contains_course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}&partner={}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            (course_run_id for course_run_id in course_run_ids),
+            query,
+            partner_code,
+        )
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=catalog_contains_course_run_url,
+            responses=[
+                httpretty.Response(body=callback, content_type='application/json', status_code=500)
+            ]
+        )
+
+    def mock_get_catalog_course_runs_for_failure(self, partner_code, query, error):
+        """
+        Helper function to register a course catalog API endpoint with failure
+        for getting course runs information.
+        """
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+
+        course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
+            settings.COURSE_CATALOG_API_URL,
+            query,
+            partner_code,
+        )
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=course_run_url_with_query_and_partner_code,
+            responses=[
+                httpretty.Response(body=callback, content_type='application/json', status_code=500)
+            ]
         )
 
 

@@ -7,9 +7,12 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditionalOffer, AbstractRange
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.courses.utils import get_course_catalogs
 
 
 class Benefit(AbstractBenefit):
@@ -220,21 +223,30 @@ class Range(AbstractRange):
         if self.course_seat_types:
             validate_credit_seat_type(self.course_seat_types)
 
-    def run_catalog_query(self, product):
+    def run_catalog_query(self, product, query=None):
         """
         Retrieve the results from running the query contained in catalog_query field.
         """
+        if not query:
+            query = self.catalog_query
+
+        request = get_current_request()
+        partner_code = request.site.siteconfiguration.partner.short_code
         cache_key = hashlib.md5(
-            'catalog_query_contains [{}] [{}]'.format(self.catalog_query, product.course_id)
+            '{site_domain}_{partner_code}_catalog_query_contains_{course_id}_{query}'.format(
+                site_domain=request.site.domain,
+                partner_code=partner_code,
+                course_id=product.course_id,
+                query=query
+            )
         ).hexdigest()
         response = cache.get(cache_key)
         if not response:  # pragma: no cover
-            request = get_current_request()
             try:
                 response = request.site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
-                    query=self.catalog_query,
+                    query=query,
                     course_run_ids=product.course_id,
-                    partner=request.site.siteconfiguration.partner.short_code
+                    partner=partner_code
                 )
                 cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             except:  # pylint: disable=bare-except
@@ -246,7 +258,21 @@ class Range(AbstractRange):
         """
         Assert if the range contains the product.
         """
-        if self.catalog_query and self.course_seat_types:
+        if self.course_catalog:
+            request = get_current_request()
+            try:
+                course_catalog = get_course_catalogs(site=request.site, resource_id=self.course_catalog)
+            except (ConnectionError, SlumberBaseException, Timeout):
+                raise Exception(
+                    'Unable to connect to Course Catalog service for catalog with id [%s].' % self.course_catalog
+                )
+
+            response = self.run_catalog_query(product, course_catalog.get('query'))
+            # Range can have a catalog query and 'regular' products in it,
+            # therefor an OR is used to check for both possibilities.
+            return ((response['course_runs'][product.course_id]) or
+                    super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
+        elif self.catalog_query and self.course_seat_types:
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
                 response = self.run_catalog_query(product)
                 # Range can have a catalog query and 'regular' products in it,

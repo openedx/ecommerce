@@ -16,11 +16,10 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.utils import get_course_catalogs
 from ecommerce.enterprise.utils import is_enterprise_feature_enabled
-from ecommerce.extensions.api.serializers import retrieve_voucher
+from ecommerce.extensions.api.serializers import retrieve_all_vouchers
 
 
 logger = logging.getLogger(__name__)
@@ -34,28 +33,29 @@ def get_entitlement_voucher(request, product):
     learner.
 
     Arguments:
-        request (HttpRequest): request with voucher data
-        product (Product): A product that has course_key as attribute (seat or
+        product (Product): A product that has course_id as attribute (seat or
             bulk enrollment coupon)
+        request (HttpRequest): request with voucher data
 
     """
     if not is_enterprise_feature_enabled():
         return None
 
-    vouchers = get_vouchers_for_learner(request.site, request.user)
-    if vouchers:
-        entitlement_voucher = get_available_voucher_for_product(request, product, vouchers)
-        return entitlement_voucher
+    vouchers = get_course_vouchers_for_learner(request.site, request.user, product.course_id)
+    if not vouchers:
+        return None
 
-    return None
+    entitlement_voucher = get_available_voucher_for_product(request, product, vouchers)
+    return entitlement_voucher
 
 
-def get_vouchers_for_learner(site, user):
+def get_course_vouchers_for_learner(site, user, course_id):
     """
     Get vouchers against the list of all enterprise entitlements for the
-    provided learner.
+    provided learner and course id.
 
     Arguments:
+        course_id (str): The course ID.
         site: (django.contrib.sites.Site) site instance
         user: (django.contrib.auth.User) django auth user
 
@@ -63,7 +63,7 @@ def get_vouchers_for_learner(site, user):
         list of Voucher class objects
 
     """
-    entitlements = get_entitlements_for_learner(site, user)
+    entitlements = get_course_entitlements_for_learner(site, user, course_id)
     if not entitlements:
         return None
 
@@ -78,18 +78,19 @@ def get_vouchers_for_learner(site, user):
             )
             return None
 
-        entitlement_voucher = retrieve_voucher(coupon_product)
-        vouchers.append(entitlement_voucher)
+        entitlement_voucher = retrieve_all_vouchers(coupon_product)
+        vouchers.extend(entitlement_voucher)
 
     return vouchers
 
 
-def get_entitlements_for_learner(site, user):
+def get_course_entitlements_for_learner(site, user, course_id):
     """
-    Get entitlements for the provided learner if the provided learner is
-    affiliated with an enterprise.
+    Get entitlements for the provided learner against the provided course id
+    if the provided learner is affiliated with an enterprise.
 
     Arguments:
+        course_id (str): The course ID.
         site: (django.contrib.sites.Site) site instance
         user: (django.contrib.auth.User) django auth user
 
@@ -108,12 +109,88 @@ def get_entitlements_for_learner(site, user):
         return None
 
     try:
+        enterprise_catalog_id = enterprise_learner_data[0]['enterprise_customer']['catalog']
         entitlements = enterprise_learner_data[0]['enterprise_customer']['enterprise_customer_entitlements']
     except KeyError:
-        logger.error('Invalid structure for enterprise learner API response for the learner [%s]', user.username)
+        logger.exception('Invalid structure for enterprise learner API response for the learner [%s]', user.username)
+        return None
+
+    # Before returning entitlements verify that the provided course exists in
+    # the enterprise course catalog
+    if not is_course_in_enterprise_catalog(site, course_id, enterprise_catalog_id):
         return None
 
     return entitlements
+
+
+def is_course_in_enterprise_catalog(site, course_id, enterprise_catalog_id):
+    """
+    Verify that the provided course id exists in the site base list of course
+    run keys from the provided enterprise course catalog.
+
+    Arguments:
+        course_id (str): The course ID.
+        site: (django.contrib.sites.Site) site instance
+        enterprise_catalog_id (Int): Course catalog id of enterprise
+
+    Returns:
+        Boolean
+
+    """
+    try:
+        enterprise_course_catalog = get_course_catalogs(site=site, resource_id=enterprise_catalog_id)
+    except (ConnectionError, SlumberBaseException, Timeout):
+        logger.exception('Unable to connect to Course Catalog service for course catalogs.')
+        return None
+
+    if is_course_in_catalog_query(site, course_id, enterprise_course_catalog.get('query')):
+        return True
+
+    return False
+
+
+def is_course_in_catalog_query(site, course_id, enterprise_catalog_query):
+    """
+    Find out if the provided course exists in list of courses against the
+    enterprise course catalog query.
+
+    Arguments:
+        site: (django.contrib.sites.Site) site instance
+        course_id (Int): Course catalog id of enterprise
+        enterprise_catalog_query (Str): Enterprise course catalog query
+
+    Returns:
+        Boolean
+
+    """
+    partner_code = site.siteconfiguration.partner.short_code
+    cache_key = hashlib.md5(
+        '{site_domain}_{partner_code}_catalog_query_contains_{course_id}_{query}'.format(
+            site_domain=site.domain,
+            partner_code=partner_code,
+            course_id=course_id,
+            query=enterprise_catalog_query
+        )
+    ).hexdigest()
+    response = cache.get(cache_key)
+    if not response:
+        try:
+            response = site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
+                query=enterprise_catalog_query,
+                course_run_ids=course_id,
+                partner=partner_code
+            )
+            cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.exception('Unable to connect to Course Catalog service for course runs.')
+            return False
+
+    try:
+        is_course_in_course_runs = response['course_runs'][course_id]
+    except KeyError:
+        return False
+
+    return is_course_in_course_runs
 
 
 def get_enterprise_learner_data(site, user):
@@ -220,7 +297,7 @@ def get_available_voucher_for_product(request, product, vouchers):
     product.
 
     Arguments:
-        product (Product): A product that has course_key as attribute (seat or
+        product (Product): A product that has course_id as attribute (seat or
             bulk enrollment coupon)
         request (HttpRequest): request with voucher data
         vouchers: (List) List of voucher class objects for an enterprise
@@ -229,50 +306,10 @@ def get_available_voucher_for_product(request, product, vouchers):
     for voucher in vouchers:
         is_valid_voucher, __ = voucher_is_valid(voucher, [product], request)
         if is_valid_voucher:
-            voucher_course_ids = get_course_ids_from_voucher(request.site, voucher)
-            if product.course_id in voucher_course_ids:
+            voucher_offer = voucher.offers.first()
+            offer_range = voucher_offer.condition.range
+            if offer_range.contains_product(product):
                 return voucher
 
-
-def get_course_ids_from_voucher(site, voucher):
-    """
-    Get site base list of course run keys from the provided voucher object.
-
-    Arguments:
-        site: (django.contrib.sites.Site) site instance
-        voucher (Voucher): voucher class object
-
-    Returns:
-        list of course ids
-
-    """
-    voucher_offer = voucher.offers.first()
-    offer_range = voucher_offer.condition.range
-    if offer_range.course_catalog:
-        try:
-            course_catalog = get_course_catalogs(site=site, resource_id=offer_range.course_catalog)
-        except (ConnectionError, SlumberBaseException, Timeout):
-            logger.error('Unable to connect to Course Catalog service for course catalogs.')
-            return None
-
-        try:
-            course_runs = get_catalog_course_runs(site, course_catalog.get('query'))['results']
-        except (ConnectionError, SlumberBaseException, Timeout, KeyError):
-            logger.error('Unable to get course runs from Course Catalog service.')
-            return None
-
-        voucher_course_ids = [course_run.get('key') for course_run in course_runs if course_run.get('key')]
-    elif offer_range.catalog_query:
-        try:
-            course_runs = get_catalog_course_runs(site, offer_range.catalog_query)['results']
-        except (ConnectionError, SlumberBaseException, Timeout, KeyError):
-            logger.error('Unable to get course runs from Course Catalog service.')
-            return None
-
-        voucher_course_ids = [course_run.get('key') for course_run in course_runs if course_run.get('key')]
-    else:
-        stock_records = offer_range.catalog.stock_records.all()
-        seats = Product.objects.filter(id__in=[sr.product.id for sr in stock_records])
-        voucher_course_ids = [seat.course_id for seat in seats]
-
-    return voucher_course_ids
+    # Explicitly return None in case product has no valid voucher
+    return None
