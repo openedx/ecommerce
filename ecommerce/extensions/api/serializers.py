@@ -83,6 +83,11 @@ def retrieve_voucher(obj):
     return obj.attr.coupon_vouchers.vouchers.first()
 
 
+def retrieve_all_vouchers(obj):
+    """Helper method to retrieve all vouchers from coupon. """
+    return obj.attr.coupon_vouchers.vouchers.all()
+
+
 def retrieve_voucher_usage(obj):
     """Helper method to retrieve usage from voucher. """
     return retrieve_voucher(obj).usage

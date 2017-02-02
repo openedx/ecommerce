@@ -5,6 +5,8 @@ from django.core.cache import cache
 from django.conf import settings
 import httpretty
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
@@ -14,8 +16,8 @@ from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.enterprise.entitlements import (
-    get_enterprise_learner_data, get_entitlement_voucher, get_entitlements_for_learner,
-    get_course_ids_from_voucher
+    get_enterprise_learner_data, get_entitlement_voucher, get_course_entitlements_for_learner,
+    get_course_vouchers_for_learner, is_course_in_enterprise_catalog
 )
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -60,57 +62,6 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         """
         self.assertEqual(len(httpretty.httpretty.latest_requests), count)
 
-    def _create_course_catalog_coupon(self):
-        """
-        Helper method to create course catalog coupon.
-        """
-        coupon_title = 'Course catalog coupon'
-        quantity = 1
-        course_catalog_id = 1
-
-        course_catalog_coupon = self.create_coupon(
-            title=coupon_title,
-            quantity=quantity,
-            course_catalog=course_catalog_id,
-        )
-        course_catalog_coupon_voucher = course_catalog_coupon.attr.coupon_vouchers.vouchers.first()
-        self.assertEqual(course_catalog_coupon.title, coupon_title)
-
-        course_catalog_vouchers = course_catalog_coupon.attr.coupon_vouchers.vouchers.all()
-        self.assertEqual(course_catalog_vouchers.count(), quantity)
-
-        course_catalog_voucher_range = course_catalog_vouchers.first().offers.first().benefit.range
-        self.assertEqual(course_catalog_voucher_range.course_catalog, course_catalog_id)
-
-        return course_catalog_coupon_voucher
-
-    def _create_multiple_course_coupon(self):
-        """
-        Helper method to multiple course (dynamic) coupon.
-        """
-        coupon_title = 'Multiple courses coupon'
-        quantity = 1
-        catalog_query = '*:*',
-        course_seat_types = 'verified'
-
-        course_catalog_coupon = self.create_coupon(
-            title=coupon_title,
-            quantity=quantity,
-            catalog_query=catalog_query,
-            course_seat_types=course_seat_types,
-        )
-        course_catalog_coupon_voucher = course_catalog_coupon.attr.coupon_vouchers.vouchers.first()
-        self.assertEqual(course_catalog_coupon.title, coupon_title)
-
-        course_catalog_vouchers = course_catalog_coupon.attr.coupon_vouchers.vouchers.all()
-        self.assertEqual(course_catalog_vouchers.count(), quantity)
-
-        course_catalog_voucher_range = course_catalog_vouchers.first().offers.first().benefit.range
-        self.assertEqual(str(course_catalog_voucher_range.catalog_query), str(catalog_query))
-        self.assertEqual(course_catalog_voucher_range.course_seat_types, course_seat_types)
-
-        return course_catalog_coupon_voucher
-
     def _assert_get_enterprise_learner_data(self):
         """
         Helper method to validate the response from the method
@@ -135,14 +86,16 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
-    def _assert_get_entitlements_for_learner_log_and_response(self, expected_entitlements, log_level, log_message):
+    def _assert_get_course_entitlements_for_learner_response(self, expected_entitlements, log_level, log_message):
         """
         Helper method to validate the response from the method
-        "get_entitlements_for_learner" and verify the logged message.
+        "get_course_entitlements_for_learner" and verify the logged message.
         """
         logger_name = 'ecommerce.enterprise.entitlements'
         with LogCapture(logger_name) as logger:
-            entitlements = get_entitlements_for_learner(self.request.site, self.request.user)
+            entitlements = get_course_entitlements_for_learner(
+                self.request.site, self.request.user, self.course.id
+            )
             self._assert_num_requests(1)
 
             logger.check(
@@ -154,15 +107,19 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             )
             self.assertEqual(expected_entitlements, entitlements)
 
-    def _assert_get_course_ids_from_voucher_for_failure(self, voucher, expected_requests, log_message):
+    def _assert_is_course_in_enterprise_catalog_for_failure(self, expected_requests, log_message):
         """
         Helper method to validate the response from the method
-        "get_course_ids_from_voucher" and verify the logged message.
+        "is_course_in_enterprise_catalog" and verify the logged message.
         """
+        enterprise_catalog_id = 1
         logger_name = 'ecommerce.enterprise.entitlements'
         with LogCapture(logger_name) as logger:
-            voucher_course_ids = get_course_ids_from_voucher(self.request.site, voucher)
+            is_course_available = is_course_in_enterprise_catalog(
+                self.request.site, self.course.id, enterprise_catalog_id
+            )
             self._assert_num_requests(expected_requests)
+
             logger.check(
                 (
                     logger_name,
@@ -170,7 +127,19 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
                     log_message
                 )
             )
-            self.assertEqual(None, voucher_course_ids)
+            self.assertFalse(is_course_available)
+
+    def _create_course_catalog_coupon(self, course_catalog_id=1, quantity=1):
+        """
+        Helper method to create course catalog coupon.
+        """
+        coupon_title = 'Course catalog coupon {}'.format(course_catalog_id)
+        course_catalog_coupon = self.create_coupon(
+            title=coupon_title,
+            quantity=quantity,
+            course_catalog=course_catalog_id,
+        )
+        return course_catalog_coupon
 
     @mock_enterprise_api_client
     def test_get_enterprise_learner_data(self):
@@ -184,9 +153,9 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         # Verify the API was hit once
         self._assert_num_requests(1)
 
-        # Now fetch the enterprise learner data again and verify that was no
-        # actual call to Enterprise API, as the data will be fetched from the
-        # cache
+        # Now fetch the enterprise learner data again and verify that there was
+        # no actual call to Enterprise API, as the data will be fetched from
+        # the cache
         get_enterprise_learner_data(self.request.site, self.learner)
         self._assert_num_requests(1)
 
@@ -205,6 +174,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.assertIsNone(entitlement_voucher)
 
     @mock_enterprise_api_client
+    @mock_course_catalog_api_client
     def test_get_entitlement_voucher_with_enterprise_feature_enabled(self):
         """
         Verify that method "get_entitlement_voucher" returns a voucher if
@@ -213,13 +183,17 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         coupon = self.create_coupon(catalog=self.catalog)
         expected_voucher = coupon.attr.coupon_vouchers.vouchers.first()
 
+        catalog_query = '*:*'
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
+        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
-        self._assert_num_requests(1)
+        self._assert_num_requests(3)
         self.assertEqual(expected_voucher, entitlement_voucher)
 
     @mock_enterprise_api_client
+    @mock_course_catalog_api_client
     def test_get_entitlement_voucher_with_invalid_entitlement_id(self):
         """
         Verify that method "get_entitlement_voucher" logs exception if there
@@ -227,12 +201,20 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         learner API response.
         """
         non_existing_coupon_id = 99
-        self.mock_enterprise_learner_api(entitlement_id=non_existing_coupon_id)
+        self.mock_enterprise_learner_api(
+            catalog_id=non_existing_coupon_id, entitlement_id=non_existing_coupon_id
+        )
+
+        catalog_query = '*:*'
+        self.mock_course_discovery_api_for_catalog_by_resource_id(
+            catalog_id=non_existing_coupon_id, catalog_query=catalog_query
+        )
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         logger_name = 'ecommerce.enterprise.entitlements'
         with LogCapture(logger_name) as logger:
             entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
-            self._assert_num_requests(1)
+            self._assert_num_requests(3)
 
             logger.check(
                 (
@@ -244,162 +226,198 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             self.assertIsNone(entitlement_voucher)
 
     @mock_enterprise_api_client
-    def test_get_entitlements_for_learner_with_exception(self):
+    @mock_course_catalog_api_client
+    def test_get_course_vouchers_for_learner_with_multiple_codes(self):
         """
-        Verify that method "get_entitlements_for_learner" logs exception if
+        Verify that method "get_course_vouchers_for_learner" returns all valid
+        coupon codes for the provided enterprise course.
+        """
+        catalog_id = 1
+        coupon_quantity = 2
+        coupon = self._create_course_catalog_coupon(catalog_id, coupon_quantity)
+        expected_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+
+        catalog_query = '*:*'
+        self.mock_enterprise_learner_api(entitlement_id=coupon.id)
+        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_id=catalog_id, catalog_query=catalog_query)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+
+        course_vouchers = get_course_vouchers_for_learner(self.request.site, self.request.user, self.course.id)
+        self._assert_num_requests(3)
+        self.assertEqual(coupon_quantity, len(course_vouchers))
+        self.assertListEqual(list(expected_vouchers), list(course_vouchers))
+
+    @mock_enterprise_api_client
+    def test_get_course_vouchers_for_learner_with_exception(self):
+        """
+        Verify that method "get_course_vouchers_for_learner" returns empty
+        response if there is an error while accessing the enterprise learner
+        API.
+        """
+        self.mock_enterprise_learner_api_for_failure()
+
+        vouchers = get_course_vouchers_for_learner(self.request.site, self.request.user, self.course.id)
+        self.assertIsNone(vouchers)
+
+    @mock_enterprise_api_client
+    def test_get_course_entitlements_for_learner_with_exception(self):
+        """
+        Verify that method "get_course_entitlements_for_learner" logs exception if
         there is an error while accessing the enterprise learner API.
         """
         self.mock_enterprise_learner_api_for_failure()
 
-        self._assert_get_entitlements_for_learner_log_and_response(
+        self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='ERROR',
             log_message='Failed to retrieve enterprise info for the learner [%s]' % self.learner.username,
         )
 
     @mock_enterprise_api_client
-    def test_get_entitlements_for_learner_with_no_enterprise(self):
+    def test_get_course_entitlements_for_learner_with_no_enterprise(self):
         """
-        Verify that method "get_entitlements_for_learner" logs and returns
+        Verify that method "get_course_entitlements_for_learner" logs and returns
         empty list if the learner is not affiliated with any enterprise.
         """
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
 
-        self._assert_get_entitlements_for_learner_log_and_response(
+        self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='INFO',
             log_message='Learner with username [%s] in not affiliated with any enterprise' % self.learner.username,
         )
 
     @mock_enterprise_api_client
-    def test_get_entitlements_for_learner_with_invalid_response(self):
+    def test_get_course_entitlements_for_learner_with_invalid_response(self):
         """
-        Verify that method "get_entitlements_for_learner" logs and returns
+        Verify that method "get_course_entitlements_for_learner" logs and returns
         empty list for entitlements if the enterprise learner API response has
         invalid/unexpected structure.
         """
         self.mock_enterprise_learner_api_for_learner_with_invalid_response()
 
         message = 'Invalid structure for enterprise learner API response for the learner [%s]' % self.learner.username
-        self._assert_get_entitlements_for_learner_log_and_response(
+        self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='ERROR',
             log_message=message
         )
 
-    @mock_course_catalog_api_client
-    def test_get_course_ids_from_voucher_for_catalog_voucher(self):
+    @mock_enterprise_api_client
+    def test_get_course_entitlements_for_learner_with_invalid_entitlements_key_in_response(self):
         """
-        Verify that method "get_course_ids_from_voucher" returns course ids
-        related to a course catalog voucher.
+        Verify that method "get_course_entitlements_for_learner" logs and returns
+        empty list for entitlements if the enterprise learner API response has
+        invalid/unexpected or missing key for enterprise customer entitlements.
         """
-        course_catalog_coupon_voucher = self._create_course_catalog_coupon()
+        self.mock_enterprise_learner_api_for_learner_with_invalid_entitlements_response()
 
+        message = 'Invalid structure for enterprise learner API response for the learner [%s]' % self.learner.username
+        self._assert_get_course_entitlements_for_learner_response(
+            expected_entitlements=None,
+            log_level='ERROR',
+            log_message=message
+        )
+
+    @mock_enterprise_api_client
+    @mock_course_catalog_api_client
+    def test_get_course_entitlements_for_learner_with_unavailable_course(self):
+        """
+        Verify that method "get_course_entitlements_for_learner" returns empty
+        response for entitlements if the provided course id is not available
+        in the related enterprise course catalog.
+        """
+        enterprise_catalog_id = 1
+        catalog_query = '*:*'
+        self.mock_enterprise_learner_api(entitlement_id=enterprise_catalog_id)
+        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+
+        non_enterprise_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
+        entitlements = get_course_entitlements_for_learner(
+            self.request.site, self.request.user, non_enterprise_course
+        )
+        # Verify that there were total three calls. First for getting
+        # enterprise learner data from enterprise service and other two for
+        # getting enterprise catalog and course runs against the enterprise
+        # catalog query respectively from the course catalog service.
+        self._assert_num_requests(3)
+        self.assertIsNone(entitlements)
+
+    @mock_course_catalog_api_client
+    def test_is_course_in_enterprise_catalog_for_available_course(self):
+        """
+        Verify that method "is_course_in_enterprise_catalog" returns True if
+        the provided course is available in the enterprise course catalog.
+        """
+        enterprise_catalog_id = 1
+        catalog_query = '*:*'
+        self.mock_course_discovery_api_for_catalog_by_resource_id(
+            catalog_id=enterprise_catalog_id, catalog_query=catalog_query
+        )
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+
+        is_course_available = is_course_in_enterprise_catalog(self.request.site, self.course.id, enterprise_catalog_id)
+
+        # Verify that there were two calls for the course discovery API, one
+        # for getting enterprise course catalog and the other for verifying if
+        # course exists in course runs against the course catalog query
+        self._assert_num_requests(2)
+        self.assertTrue(is_course_available)
+
+    @mock_course_catalog_api_client
+    def test_is_course_in_enterprise_catalog_for_unavailable_course(self):
+        """
+        Verify that method "is_course_in_enterprise_catalog" returns False if
+        the provided course is not available in the enterprise course catalog.
+        """
+        enterprise_catalog_id = 1
+        catalog_query = '*:*'
+        self.mock_course_discovery_api_for_catalog_by_resource_id(
+            catalog_id=enterprise_catalog_id, catalog_query=catalog_query
+        )
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+
+        test_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
+        is_course_available = is_course_in_enterprise_catalog(self.request.site, test_course.id, enterprise_catalog_id)
+
+        # Verify that there were two calls for the course discovery API, one
+        # for getting enterprise course catalog and the other for verifying if
+        # course exists in course runs against the course catalog query
+        self._assert_num_requests(2)
+        self.assertFalse(is_course_available)
+
+    @mock_course_catalog_api_client
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    def test_is_course_in_enterprise_catalog_for_error_in_get_course_catalogs(self, error):
+        """
+        Verify that method "is_course_in_enterprise_catalog" returns False
+        and logs error message if the method "get_course_catalogs" is unable
+        to fetch catalog against the provided enterprise course catalog id.
+        """
+        enterprise_catalog_id = 1
+        self.mock_course_discovery_api_for_catalogs_with_failure(error, enterprise_catalog_id)
+
+        expected_number_of_requests = 1
+        log_message = 'Unable to connect to Course Catalog service for course catalogs.'
+        self._assert_is_course_in_enterprise_catalog_for_failure(expected_number_of_requests, log_message)
+
+    @mock_course_catalog_api_client
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    def test_is_course_in_enterprise_catalog_for_error_in_get_catalog_course_runs(self, error):
+        """
+        Verify that method "is_course_in_enterprise_catalog" returns False
+        and logs error message if the method "is_course_in_catalog_query" is
+        unable to validate the given course against the course runs for the
+        provided enterprise catalog.
+        """
         catalog_query = '*:*'
         self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
         partner_code = self.request.site.siteconfiguration.partner.short_code
-        self.mock_dynamic_catalog_course_runs_api(
-            course_run=self.course, partner_code=partner_code, query=catalog_query
+        self.mock_get_catalog_contains_api_for_failure(
+            partner_code=partner_code, course_run_ids=[self.course.id], query=catalog_query, error=error
         )
 
-        voucher_course_ids = get_course_ids_from_voucher(self.request.site, course_catalog_coupon_voucher)
-        # Verify that there were two calls for the course discovery API, one
-        # for getting all course_catalogs and the other for getting course
-        # runs against the course catalog query
-        self._assert_num_requests(2)
-
-        expected_voucher_course_ids = [self.course.id]
-        self.assertEqual(expected_voucher_course_ids, voucher_course_ids)
-
-    @mock_course_catalog_api_client
-    def test_get_course_ids_from_voucher_for_error_in_get_course_catalogs(self):
-        """
-        Verify that method "get_course_ids_from_voucher" returns empty course ids
-        if get_course_catalogs raises exception.
-        """
-        course_catalog_coupon_voucher = self._create_course_catalog_coupon()
-
-        self.mock_course_discovery_api_for_failure()
-        # Verify that there was only one call to the course discovery API and
-        # it fails with error
-        self._assert_get_course_ids_from_voucher_for_failure(
-            voucher=course_catalog_coupon_voucher,
-            expected_requests=1,
-            log_message='Unable to connect to Course Catalog service for course catalogs.'
-        )
-
-    @mock_course_catalog_api_client
-    def test_get_course_ids_from_voucher_for_error_in_get_catalog_course_runs(self):
-        """
-        Verify that method "get_course_ids_from_voucher" returns empty course ids
-        if get_catalog_course_runs raises exception.
-        """
-        course_catalog_coupon_voucher = self._create_course_catalog_coupon()
-
-        self.mock_course_discovery_api_for_catalog_by_resource_id()
-        self.mock_course_discovery_api_for_failure()
-        # Verify that there was two calls to the course discovery API, one for
-        # getting details of course catalog and other for getting course run
-        # against the catalog query and it fails with error
-        self._assert_get_course_ids_from_voucher_for_failure(
-            voucher=course_catalog_coupon_voucher,
-            expected_requests=2,
-            log_message='Unable to get course runs from Course Catalog service.'
-        )
-
-    @mock_course_catalog_api_client
-    def test_get_course_ids_from_voucher_for_dynamic_voucher(self):
-        """
-        Verify that method "get_course_ids_from_voucher" returns course ids
-        related to a dynamic catalog voucher query.
-        """
-        coupon_title = 'Multiple courses coupon'
-        quantity = 1
-        catalog_query = '*:*',
-        course_seat_types = 'verified'
-
-        course_catalog_coupon = self.create_coupon(
-            title=coupon_title,
-            quantity=quantity,
-            catalog_query=catalog_query,
-            course_seat_types=course_seat_types,
-        )
-        course_catalog_coupon_voucher = course_catalog_coupon.attr.coupon_vouchers.vouchers.first()
-        self.assertEqual(course_catalog_coupon.title, coupon_title)
-
-        course_catalog_vouchers = course_catalog_coupon.attr.coupon_vouchers.vouchers.all()
-        self.assertEqual(course_catalog_vouchers.count(), quantity)
-
-        course_catalog_voucher_range = course_catalog_vouchers.first().offers.first().benefit.range
-        self.assertEqual(str(course_catalog_voucher_range.catalog_query), str(catalog_query))
-        self.assertEqual(course_catalog_voucher_range.course_seat_types, course_seat_types)
-
-        partner_code = self.request.site.siteconfiguration.partner.short_code
-        self.mock_dynamic_catalog_course_runs_api(
-            course_run=self.course, partner_code=partner_code, query=catalog_query
-        )
-
-        voucher_course_ids = get_course_ids_from_voucher(self.request.site, course_catalog_coupon_voucher)
-        # Verify that there was only one call to the course discovery API for
-        # getting course runs against the catalog query from dynamic coupon.
-        self._assert_num_requests(1)
-
-        expected_voucher_course_ids = [self.course.id]
-        self.assertEqual(expected_voucher_course_ids, voucher_course_ids)
-
-    @mock_course_catalog_api_client
-    def test_get_course_ids_from_dynamic_voucher_for_error_in_get_catalog_course_runs(self):
-        """
-        Verify that method "get_course_ids_from_voucher" returns empty course
-        ids if get_course_ids_from_voucher raises exception for getting course
-        runs from course discovery service.
-        """
-        course_catalog_coupon_voucher = self._create_multiple_course_coupon()
-        self.mock_course_discovery_api_for_failure()
-        # Verify that there was only one call to the course discovery API for
-        # course runs and it fails with error
-        self._assert_get_course_ids_from_voucher_for_failure(
-            voucher=course_catalog_coupon_voucher,
-            expected_requests=1,
-            log_message='Unable to get course runs from Course Catalog service.'
-        )
+        expected_number_of_requests = 2
+        log_message = 'Unable to connect to Course Catalog service for course runs.'
+        self._assert_is_course_in_enterprise_catalog_for_failure(expected_number_of_requests, log_message)

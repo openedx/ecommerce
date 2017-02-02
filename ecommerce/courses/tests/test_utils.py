@@ -3,6 +3,7 @@ import hashlib
 import ddt
 from django.core.cache import cache
 import httpretty
+from requests.exceptions import ConnectionError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
@@ -175,7 +176,8 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         Verify that method "get_course_catalogs" raises exception in case
         the Course Discovery API fails to return data.
         """
-        self.mock_course_discovery_api_for_failure()
+        exception = ConnectionError
+        self.mock_course_discovery_api_for_catalogs_with_failure(exception)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(exception):
             get_course_catalogs(self.request.site)

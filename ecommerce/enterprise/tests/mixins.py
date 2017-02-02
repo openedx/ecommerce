@@ -110,7 +110,7 @@ class EnterpriseServiceMockMixin(object):
     def mock_enterprise_learner_api_for_learner_with_invalid_response(self):
         """
         Helper function to register enterprise learner API endpoint for a
-        learner with invalid API reponse structure.
+        learner with invalid API response structure.
         """
         enterprise_learner_api_response = {
             'count': 0,
@@ -135,6 +135,49 @@ class EnterpriseServiceMockMixin(object):
                                 }
                             ]
                         },
+                    }
+                }
+            ],
+            'next': None,
+            'start': 0,
+            'previous': None
+        }
+        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=self.ENTERPRISE_LEARNER_URL,
+            body=enterprise_learner_api_response_json,
+            content_type='application/json'
+        )
+
+    def mock_enterprise_learner_api_for_learner_with_invalid_entitlements_response(self):
+        """
+        Helper function to register enterprise learner API endpoint for a
+        learner with partial invalid API response structure for the enterprise
+        customer entitlements.
+        """
+        enterprise_learner_api_response = {
+            'count': 0,
+            'num_pages': 1,
+            'current_page': 1,
+            'results': [
+                {
+                    'enterprise_customer': {
+                        'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                        'name': 'TestShib',
+                        'catalog': 1,
+                        'active': True,
+                        'site': {
+                            'domain': 'example.com',
+                            'name': 'example.com'
+                        },
+                        'invalid-unexpected-enterprise_customer_entitlements-key': [
+                            {
+                                'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                                'entitlement_id': 1
+                            }
+                        ]
                     }
                 }
             ],
