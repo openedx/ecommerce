@@ -44,7 +44,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, theme_scss_path=None,
                       payment_processors=None, segment_key=None, enable_enrollment_codes=False,
-                      payment_support_email=None, payment_support_url=None):
+                      payment_support_email=None, payment_support_url=None, send_refund_notifications=False):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -85,6 +85,10 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             command_args.append('--payment-support-url={payment_support_url}'.format(
                 payment_support_url=payment_support_url
             ))
+
+        if send_refund_notifications:
+            command_args.append('--send-refund-notifications')
+
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -108,6 +112,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
 
         self._check_site_configuration(site, partner)
         self.assertFalse(site.siteconfiguration.enable_enrollment_codes)
+        self.assertFalse(site.siteconfiguration.send_refund_notifications)
 
     def test_update_site(self):
         """ Verify the command updates Site and creates Partner, and SiteConfiguration """
@@ -130,7 +135,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             from_email=self.from_email,
             enable_enrollment_codes=True,
             payment_support_email=self.payment_support_email,
-            payment_support_url=self.payment_support_url
+            payment_support_url=self.payment_support_url,
+            send_refund_notifications=True
         )
 
         site = Site.objects.get(id=site.id)
@@ -139,9 +145,12 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site.domain, updated_site_domain)
         self.assertEqual(site.name, updated_site_name)
         self._check_site_configuration(site, partner)
-        self.assertTrue(site.siteconfiguration.enable_enrollment_codes)
-        self.assertEqual(site.siteconfiguration.payment_support_email, self.payment_support_email)
-        self.assertEqual(site.siteconfiguration.payment_support_url, self.payment_support_url)
+
+        site_configuration = site.siteconfiguration
+        self.assertTrue(site_configuration.enable_enrollment_codes)
+        self.assertEqual(site_configuration.payment_support_email, self.payment_support_email)
+        self.assertEqual(site_configuration.payment_support_url, self.payment_support_url)
+        self.assertTrue(site_configuration.send_refund_notifications)
 
     @data(
         ['--site-id=1'],

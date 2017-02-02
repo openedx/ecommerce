@@ -28,6 +28,7 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     lms_url_root = factory.LazyAttribute(lambda obj: "http://lms.testserver.fake")
     site = factory.SubFactory(SiteFactory)
     partner = factory.SubFactory(PartnerFactory)
+    send_refund_notifications = False
 
 
 class StockRecordFactory(OscarStockRecordFactory):

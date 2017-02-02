@@ -126,6 +126,11 @@ class SiteConfiguration(models.Model):
         blank=True,
         default=False
     )
+    send_refund_notifications = models.BooleanField(
+        verbose_name=_('Send refund email notification'),
+        blank=True,
+        default=False
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')

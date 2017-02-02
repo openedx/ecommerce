@@ -70,8 +70,8 @@ class RefundTestMixin(CourseCatalogTestMixin):
             self.assertEqual(refund_line.line_credit_excl_tax, order_line.line_price_excl_tax)
             self.assertEqual(refund_line.quantity, order_line.quantity)
 
-    def create_refund(self, processor_name=DummyProcessor.NAME):
-        refund = RefundFactory()
+    def create_refund(self, processor_name=DummyProcessor.NAME, **kwargs):
+        refund = RefundFactory(**kwargs)
         order = refund.order
         source_type, __ = SourceType.objects.get_or_create(name=processor_name)
         Source.objects.create(source_type=source_type, order=order, currency=refund.currency,
