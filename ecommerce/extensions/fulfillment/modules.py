@@ -15,7 +15,7 @@ from rest_framework import status
 import requests
 from requests.exceptions import ConnectionError, Timeout
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
@@ -125,7 +125,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         return requests.post(enrollment_api_url, data=json.dumps(data), headers=headers, timeout=timeout)
 
     def supports_line(self, line):
-        return line.product.get_product_class().name == 'Seat'
+        return line.product.get_product_class().name == SEAT_PRODUCT_CLASS_NAME
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled through enrollment.

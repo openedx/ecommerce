@@ -1,16 +1,14 @@
 """Constants core to the ecommerce app."""
+from __future__ import unicode_literals
 
-ISO_8601_FORMAT = u'%Y-%m-%dT%H:%M:%SZ'
-
+ISO_8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # Regex used to match course IDs.
 COURSE_ID_REGEX = r'[^/+]+(/|\+)[^/+]+(/|\+)[^/]+'
 COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
 
-
 # Seat constants
-SEAT_PRODUCT_CLASS_NAME = "Seat"
-
+SEAT_PRODUCT_CLASS_NAME = 'Seat'
 
 # Enrollment Code constants
 ENROLLMENT_CODE_PRODUCT_CLASS_NAME = 'Enrollment Code'
@@ -23,11 +21,11 @@ DEFAULT_CATALOG_PAGE_SIZE = 100
 
 class Status(object):
     """Health statuses."""
-    OK = u"OK"
-    UNAVAILABLE = u"UNAVAILABLE"
+    OK = 'OK'
+    UNAVAILABLE = 'UNAVAILABLE'
 
 
 class UnavailabilityMessage(object):
     """Messages to be logged when services are unavailable."""
-    DATABASE = u"Unable to connect to database"
-    LMS = u"Unable to connect to LMS"
+    DATABASE = 'Unable to connect to database'
+    LMS = 'Unable to connect to LMS'
