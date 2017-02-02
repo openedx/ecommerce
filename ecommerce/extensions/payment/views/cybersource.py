@@ -271,6 +271,11 @@ class CybersourceNotifyView(CybersourceNotificationMixin, View):
     def post(self, request):
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
 
+        # If the Otto receipt page is enabled, CyberSource Interstitial View
+        # should handle the CyberSource response
+        if request.site.siteconfiguration.enable_otto_receipt_page:
+            return HttpResponse()
+
         try:
             notification = request.POST.dict()
             basket = self.validate_notification(notification)

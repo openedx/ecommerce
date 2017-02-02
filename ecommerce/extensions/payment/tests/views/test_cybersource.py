@@ -35,6 +35,21 @@ class CybersourceNotifyViewTests(CybersourceNotificationTestsMixin, TestCase):
     path = reverse('cybersource_notify')
     view = CybersourceNotifyView
 
+    def setUp(self):
+        super(CybersourceNotifyViewTests, self).setUp()
+        self.site.siteconfiguration.enable_otto_receipt_page = False
+        self.site.siteconfiguration.save()
+
+    def test_otto_receipt_page_enabled(self):
+        """
+        Verify that the Notify view returns HTTP response with 200 status
+        when the Otto hosted receipt page is enabled.
+        """
+        self.site.siteconfiguration.enable_otto_receipt_page = True
+        self.site.siteconfiguration.save()
+        response = self.client.post(self.path)
+        self.assertEqual(response.status_code, 200)
+
 
 @ddt.ddt
 class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
