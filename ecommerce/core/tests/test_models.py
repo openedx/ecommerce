@@ -98,6 +98,17 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.mock_account_api(self.request, user.username, data=user_details)
         self.assertDictEqual(user.account_details(self.request), user_details)
 
+    def test_user_details_uses_jwt(self):
+        """Verify user_details uses jwt from site configuration to call EdxRestApiClient."""
+        user = self.create_user()
+        with mock.patch("ecommerce.core.models.EdxRestApiClient") as patched_info:
+            user.account_details(self.request)
+            patched_info.assert_called_once_with(
+                self.request.site.siteconfiguration.build_lms_url('/api/user/v1'),
+                append_slash=False,
+                jwt=self.request.site.siteconfiguration.access_token
+            )
+
     def test_no_user_details(self):
         """ Verify False is returned when there is a connection error. """
         user = self.create_user()
