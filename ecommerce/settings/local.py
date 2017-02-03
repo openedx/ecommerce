@@ -1,5 +1,6 @@
 """Development settings and globals."""
 from __future__ import absolute_import
+from urlparse import urljoin
 
 from ecommerce.settings.base import *
 
@@ -120,3 +121,5 @@ ENABLE_AUTO_AUTH = True
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     from .private import *  # pylint: disable=import-error
+
+ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')

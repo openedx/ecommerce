@@ -19,6 +19,12 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.extensions.api import exceptions
+from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
+from ecommerce.enterprise.utils import (
+    get_enterprise_course_consent_url,
+    get_enterprise_customer_data_sharing_consent_token,
+    get_enterprise_customer_from_voucher,
+)
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
@@ -26,6 +32,7 @@ from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_cod
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
 OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
 Order = get_model('order', 'Order')
@@ -149,7 +156,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not voucher.offers.first().is_email_valid(request.user.email):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
-        if not request.user.account_details(request)['is_active']:
+        if not request.user.account_details(request).get('is_active'):
             return render(
                 request,
                 template_name,
@@ -158,6 +165,47 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         if request.user.is_user_already_enrolled(request, product):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})
+
+        try:
+            enterprise_customer = get_enterprise_customer_from_voucher(request.site, request.user.access_token, voucher)
+        except EnterpriseDoesNotExist as e:
+            # If an EnterpriseException is caught while pulling the EnterpriseCustomer, that means there's no
+            # corresponding EnterpriseCustomer in the Enterprise service (which should never happen).
+            logger.exception(e.message)
+            return render(
+                request,
+                template_name,
+                {'error': _('Couldn\'t find a matching Enterprise Customer for this coupon.')}
+            )
+
+        if enterprise_customer is not None and enterprise_customer.get('enable_data_sharing_consent'):
+            consent_token = get_enterprise_customer_data_sharing_consent_token(
+                request.user.access_token,
+                product.course.id,
+                enterprise_customer['id']
+            )
+            received_consent_token = request.GET.get('consent_token')
+            if received_consent_token:
+                # If the consent token is set, then the user is returning from the consent view. Render out an error
+                # if the computed token doesn't match the one received from the redirect URL.
+                if received_consent_token != consent_token:
+                    return render(
+                        request,
+                        template_name,
+                        {'error': _('Invalid data sharing consent token provided.')}
+                    )
+            else:
+                # The user hasn't been redirected to the interstitial consent view to collect consent, so
+                # redirect them now.
+                redirect_url = get_enterprise_course_consent_url(
+                    request.site,
+                    code,
+                    sku,
+                    consent_token,
+                    product.course.id,
+                    enterprise_customer['id']
+                )
+                return HttpResponseRedirect(redirect_url)
 
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == 0:

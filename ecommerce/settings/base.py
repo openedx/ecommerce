@@ -576,8 +576,8 @@ AFFILIATE_COOKIE_KEY = 'affiliate_id'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # ENTERPRISE APP CONFIGURATION
-# URL for Enterprise service API
-ENTERPRISE_API_URL = 'http://localhost:8000/enterprise/api/v1/'
+# URL for Enterprise service
+ENTERPRISE_SERVICE_URL = 'http://localhost:8000/enterprise/'
 # Cache enterprise response from Enterprise API.
 ENTERPRISE_API_CACHE_TIMEOUT = 3600  # Value is in seconds
 

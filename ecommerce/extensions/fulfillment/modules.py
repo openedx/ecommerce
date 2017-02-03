@@ -19,6 +19,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PR
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
+from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import LINE
@@ -209,6 +210,25 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     }
                 )
             try:
+                # Collect the EnterpriseCustomer UUID from the coupon, if any.
+                enterprise_customer_uuid = None
+                for discount in order.discounts.all():
+                    enterprise_customer_uuid = discount.voucher.benefit.range.enterprise_customer
+                    if enterprise_customer_uuid is not None:
+                        data['enterprise_course_consent'] = True
+                        break
+
+                # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
+                # on the Enterprise service if one doesn't already exist.
+                if enterprise_customer_uuid is not None:
+                    get_or_create_enterprise_customer_user(
+                        order.site,
+                        enterprise_customer_uuid,
+                        order.user.username
+                    )
+
+                # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
+                # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
                 response = self._post_to_enrollment_api(data, user=order.user)
 
                 if response.status_code == status.HTTP_200_OK:

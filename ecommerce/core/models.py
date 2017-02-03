@@ -283,6 +283,15 @@ class SiteConfiguration(models.Model):
         """
         return urljoin(self.lms_url_root, path)
 
+    def build_enterprise_service_url(self, path=''):
+        """
+        Returns path joined with the appropriate Enterprise service URL root for the current site.
+
+        Returns:
+            str
+        """
+        return urljoin(settings.ENTERPRISE_SERVICE_URL, path)
+
     @property
     def commerce_api_url(self):
         """ Returns the URL for the root of the Commerce API (hosted by LMS). """
@@ -311,7 +320,12 @@ class SiteConfiguration(models.Model):
     @property
     def enterprise_api_url(self):
         """ Returns the URL for the Enterprise service. """
-        return self.build_lms_url('/enterprise/api/v1')
+        return settings.ENTERPRISE_API_URL
+
+    @property
+    def enterprise_grant_data_sharing_url(self):
+        """ Returns the URL for the Enterprise data sharing permission view. """
+        return self.build_enterprise_service_url('grant_data_sharing_permissions')
 
     @property
     def access_token(self):
@@ -365,7 +379,7 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Enterprise service.
 
         """
-        return EdxRestApiClient(settings.ENTERPRISE_API_URL, jwt=self.access_token)
+        return EdxRestApiClient(self.enterprise_api_url, jwt=self.access_token)
 
     @cached_property
     def user_api_client(self):
