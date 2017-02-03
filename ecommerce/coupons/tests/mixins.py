@@ -52,6 +52,41 @@ class CourseCatalogMockMixin(object):
             content_type='application/json'
         )
 
+    def mock_fetch_course_catalog(self, catalog_id=1, expected_query="*:*", expected_status='200'):
+        """
+        Helper function to register a catalog API endpoint for fetching catalog by catalog id.
+        """
+        course_catalog = {
+            "id": 1,
+            "name": "All Courses",
+            "query": expected_query,
+            "courses_count": 1,
+            "viewers": []
+        }
+
+        course_run_info_json = json.dumps(course_catalog)
+        course_run_url = '{}catalogs/{}/'.format(
+            settings.COURSE_CATALOG_API_URL,
+            catalog_id,
+        )
+
+        httpretty.register_uri(
+            httpretty.GET, course_run_url,
+            body=course_run_info_json,
+            content_type='application/json',
+            status=expected_status,
+        )
+
+    def mock_course_catalog_api_for_catalog_voucher(
+            self, catalog_id=1, query="*:*", expected_status='200', course_run=None,
+    ):
+        """
+        Helper function to register course catalog API endpoint for fetching course run information and
+        catalog by catalog id.
+        """
+        self.mock_fetch_course_catalog(catalog_id=catalog_id, expected_query=query, expected_status=expected_status)
+        self.mock_dynamic_catalog_course_runs_api(query=query, course_run=course_run)
+
     def mock_dynamic_catalog_course_runs_api(self, course_run=None, partner_code=None, query=None,
                                              course_run_info=None):
         """

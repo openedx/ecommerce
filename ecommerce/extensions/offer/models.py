@@ -297,7 +297,7 @@ class Range(AbstractRange):
         return len(self.all_products())
 
     def all_products(self):
-        if self.catalog_query and self.course_seat_types:
+        if (self.catalog_query or self.course_catalog) and self.course_seat_types:
             # Backbone calls the Voucher Offers API endpoint which gets the products from the Course Catalog Service
             return []
         if self.catalog:

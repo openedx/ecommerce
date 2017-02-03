@@ -15,9 +15,9 @@ from rest_framework.response import Response
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
-from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_catalog
+from ecommerce.coupons.utils import get_catalog_course_runs, fetch_course_catalog
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
@@ -74,10 +74,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         try:
             offers_data = self.get_offers(request, voucher)
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.error('Could not get course information.')
+            logger.error('Could not connect to course catalog service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:
-            logger.error('Could not get product information for voucher with code %s.', code)
+            logger.error('Could not locate product for voucher with code %s.', code)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         next_page = offers_data['next']
@@ -214,8 +214,13 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         """
         benefit = voucher.offers.first().benefit
         catalog_query = benefit.range.catalog_query
+        catalog_id = benefit.range.course_catalog
         next_page = None
         offers = []
+
+        if catalog_id:
+            catalog = fetch_course_catalog(request.site, catalog_id)
+            catalog_query = catalog.get("query") if catalog else catalog_query
 
         if catalog_query:
             offers, next_page = self.get_offers_from_query(request, voucher, catalog_query)
