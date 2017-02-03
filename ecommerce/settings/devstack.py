@@ -3,6 +3,7 @@ from ecommerce.settings.production import *
 
 DEBUG = True
 ENABLE_AUTO_AUTH = True
+PROTOCOL = 'http'
 
 # Docker does not support the syslog socket at /dev/log. Rely on the console.
 LOGGING['handlers']['local'] = {

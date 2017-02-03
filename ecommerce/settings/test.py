@@ -1,11 +1,13 @@
 from __future__ import absolute_import
 
 from path import Path
+from urlparse import urljoin
 
 from ecommerce.settings.base import *
 
 
 SITE_ID = 1
+PROTOCOL = 'http'
 
 # TEST SETTINGS
 INSTALLED_APPS += (
@@ -142,3 +144,5 @@ COMPREHENSIVE_THEME_DIRS = [
 ]
 
 DEFAULT_SITE_THEME = "test-theme"
+
+ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')

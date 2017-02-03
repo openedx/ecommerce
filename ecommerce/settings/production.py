@@ -1,5 +1,6 @@
 """Production settings and globals."""
 from os import environ
+from urlparse import urljoin
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
@@ -9,6 +10,9 @@ import yaml
 
 from ecommerce.settings.base import *
 
+
+# Protocol used for construcing absolute callback URLs
+PROTOCOL = 'https'
 
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
@@ -79,3 +83,5 @@ for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         })
 # END PAYMENT PROCESSOR OVERRIDES
+
+ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')

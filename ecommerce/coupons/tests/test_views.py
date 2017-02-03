@@ -18,12 +18,18 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.enterprise.utils import (
+    get_enterprise_course_consent_url,
+    get_enterprise_customer_data_sharing_consent_token,
+)
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
+
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -38,6 +44,7 @@ VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 CONTENT_TYPE = 'application/json'
 COUPON_CODE = 'COUPONTEST'
+ENTERPRISE_CUSTOMER = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 
 class CouponAppViewTests(TestCase):
@@ -264,7 +271,8 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
         self.assertEqual(response.status_code, 200)
 
 
-class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, EnterpriseServiceMockMixin,
+                            TestCase):
     redeem_url = reverse('coupons:redeem')
 
     def setUp(self):
@@ -283,27 +291,40 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
         self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
 
-    def redeem_url_with_params(self, code=COUPON_CODE):
+    def redeem_url_with_params(self, code=COUPON_CODE, consent_token=None):
         """ Constructs the coupon redemption URL with the proper string query parameters. """
-        return self.redeem_url + '?code={}&sku={}'.format(code, self.stock_record.partner_sku)
+        params = {
+            'code': code,
+            'sku': self.stock_record.partner_sku,
+        }
+        if consent_token is not None:
+            params['consent_token'] = consent_token
+        return '{base}?{params}'.format(base=self.redeem_url, params=urllib.urlencode(params))
 
-    def create_and_test_coupon_and_return_code(self, benefit_value=90, code=COUPON_CODE, email_domains=None):
+    def create_and_test_coupon_and_return_code(
+            self,
+            benefit_value=90,
+            code=COUPON_CODE,
+            email_domains=None,
+            enterprise_customer=None
+    ):
         """ Creates coupon and returns code. """
         coupon = self.create_coupon(
             benefit_value=benefit_value,
             catalog=self.catalog,
             code=code,
-            email_domains=email_domains
+            email_domains=email_domains,
+            enterprise_customer=enterprise_customer
         )
         coupon_code = coupon.attr.coupon_vouchers.vouchers.first().code
         self.assertEqual(Voucher.objects.filter(code=coupon_code).count(), 1)
         return coupon_code
 
-    def assert_redemption_page_redirects(self, expected_url, target=200, code=COUPON_CODE):
+    def assert_redemption_page_redirects(self, expected_url, target=200, code=COUPON_CODE, consent_token=None):
         """ Verify redirect from redeem page to expected page. """
         self.request.user = self.user
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
-        response = self.client.get(self.redeem_url_with_params(code=code))
+        response = self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
         self.assertRedirects(response, expected_url, status_code=302, target_status_code=target)
 
     def test_login_required(self):
@@ -374,6 +395,107 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
             target=status.HTTP_301_MOVED_PERMANENTLY,
             code=code
         )
+
+    @httpretty.activate
+    def test_enterprise_customer_redirect_no_consent(self):
+        """ Verify the view redirects to LMS when an enrollment code is provided. """
+        code = self.create_and_test_coupon_and_return_code(
+            benefit_value=100,
+            code='',
+            enterprise_customer=ENTERPRISE_CUSTOMER
+        )
+        self.request.user = self.user
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+        self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
+
+        consent_token = get_enterprise_customer_data_sharing_consent_token(
+            self.request.user.access_token,
+            self.course.id,
+            ENTERPRISE_CUSTOMER
+        )
+        expected_url = get_enterprise_course_consent_url(
+            self.site,
+            code,
+            self.stock_record.partner_sku,
+            consent_token,
+            self.course.id,
+            ENTERPRISE_CUSTOMER
+        )
+
+        response = self.client.get(self.redeem_url_with_params(code=code))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, expected_url)
+
+    @httpretty.activate
+    def test_enterprise_customer_invalid_consent_token(self):
+        """ Verify that the view renders an error when the consent token doesn't match. """
+        code = self.create_and_test_coupon_and_return_code(
+            benefit_value=100,
+            code='',
+            enterprise_customer=ENTERPRISE_CUSTOMER
+        )
+        self.request.user = self.user
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+        self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
+
+        response = self.client.get(self.redeem_url_with_params(code=code, consent_token='invalid_consent_token'))
+        self.assertEqual(response.context['error'], 'Invalid data sharing consent token provided.')
+
+    @httpretty.activate
+    def test_enterprise_customer_does_not_exist(self):
+        """
+        Verify that a generic error is rendered when the corresponding EnterpriseCustomer doesn't exist
+        on the Enterprise service.
+        """
+        code = self.create_and_test_coupon_and_return_code(
+            benefit_value=100,
+            code='',
+            enterprise_customer=ENTERPRISE_CUSTOMER
+        )
+        self.request.user = self.user
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+        self.mock_enterprise_customer_api_not_found(ENTERPRISE_CUSTOMER)
+
+        response = self.client.get(self.redeem_url_with_params(code=code))
+        self.assertEqual(response.context['error'], 'Couldn\'t find a matching Enterprise Customer for this coupon.')
+
+    @httpretty.activate
+    def test_enterprise_customer_successful_redemption(self):
+        """ Verify the view redirects to LMS when valid consent is provided. """
+        code = self.create_and_test_coupon_and_return_code(
+            benefit_value=100,
+            code='',
+            enterprise_customer=ENTERPRISE_CUSTOMER
+        )
+        self.request.user = self.user
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+        self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+        self.mock_enterprise_learner_post_api()
+
+        consent_token = get_enterprise_customer_data_sharing_consent_token(
+            self.request.user.access_token,
+            self.course.id,
+            ENTERPRISE_CUSTOMER
+        )
+
+        self.assert_redemption_page_redirects(
+            self.student_dashboard_url,
+            target=status.HTTP_301_MOVED_PERMANENTLY,
+            code=code,
+            consent_token=consent_token,
+        )
+        last_request = httpretty.last_request()
+        self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
+        self.assertEqual(last_request.method, 'POST')
 
     @httpretty.activate
     def test_multiple_vouchers(self):

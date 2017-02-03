@@ -9,6 +9,9 @@ class EnterpriseServiceMockMixin(object):
     """
     Mocks for the Open edX service 'Enterprise Service' responses.
     """
+    ENTERPRISE_CUSTOMER_URL = '{}enterprise-customer/'.format(
+        settings.ENTERPRISE_API_URL,
+    )
     ENTERPRISE_LEARNER_URL = '{}enterprise-learner/'.format(
         settings.ENTERPRISE_API_URL,
     )
@@ -17,7 +20,68 @@ class EnterpriseServiceMockMixin(object):
         super(EnterpriseServiceMockMixin, self).setUp()
         cache.clear()
 
-    def mock_enterprise_learner_api(self, catalog_id=1, entitlement_id=1, learner_id=1):
+    def mock_specific_enterprise_customer_api(self, uuid):
+        """
+        Helper function to register the enterprise customer API endpoint.
+        """
+        enterprise_customer_api_response = {
+            'uuid': uuid,
+            'name': 'TestShib',
+            'catalog': 0,
+            'active': True,
+            'site': {
+                'domain': 'example.com',
+                'name': 'example.com'
+            },
+            'enable_data_sharing_consent': True,
+            'enforce_data_sharing_consent': 'at_login',
+            'enterprise_customer_users': [
+                1
+            ],
+            'branding_configuration': {
+                'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
+            },
+            'enterprise_customer_entitlements': [
+                {
+                    'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                    'entitlement_id': 0
+                }
+            ]
+        }
+        enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
+            body=enterprise_customer_api_response_json,
+            content_type='application/json'
+        )
+
+    def mock_enterprise_customer_api_not_found(self, uuid):
+        """
+        Helper function to register the enterprise customer API endpoint.
+        """
+        enterprise_customer_api_response = {
+            'detail': 'Not found.'
+        }
+        enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
+            body=enterprise_customer_api_response_json,
+            content_type='application/json',
+            status=404,
+        )
+
+    def mock_enterprise_learner_api(
+            self,
+            catalog_id=1,
+            entitlement_id=1,
+            learner_id=1,
+            enterprise_customer_uuid='cf246b88-d5f6-4908-a522-fc307e0b0c59'
+    ):
         """
         Helper function to register enterprise learner API endpoint.
         """
@@ -29,7 +93,7 @@ class EnterpriseServiceMockMixin(object):
                 {
                     'id': learner_id,
                     'enterprise_customer': {
-                        'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                        'uuid': enterprise_customer_uuid,
                         'name': 'TestShib',
                         'catalog': catalog_id,
                         'active': True,
@@ -43,12 +107,12 @@ class EnterpriseServiceMockMixin(object):
                             1
                         ],
                         'branding_configuration': {
-                            'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                            'enterprise_customer': enterprise_customer_uuid,
                             'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
                         },
                         'enterprise_customer_entitlements': [
                             {
-                                'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                                'enterprise_customer': enterprise_customer_uuid,
                                 'entitlement_id': entitlement_id
                             }
                         ]
@@ -80,6 +144,23 @@ class EnterpriseServiceMockMixin(object):
 
         httpretty.register_uri(
             method=httpretty.GET,
+            uri=self.ENTERPRISE_LEARNER_URL,
+            body=enterprise_learner_api_response_json,
+            content_type='application/json'
+        )
+
+    def mock_enterprise_learner_post_api(self):
+        """
+        Helper function to register the enterprise learner POST API endpoint.
+        """
+        enterprise_learner_api_response = {
+            'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+            'username': 'the_j_meister',
+        }
+        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.POST,
             uri=self.ENTERPRISE_LEARNER_URL,
             body=enterprise_learner_api_response_json,
             content_type='application/json'
