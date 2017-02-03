@@ -635,7 +635,7 @@ def get_voucher_and_products_from_code(code):
     voucher_range = voucher.offers.first().benefit.range
     products = voucher_range.all_products()
 
-    if products or voucher_range.catalog_query:
+    if products or voucher_range.catalog_query or voucher_range.course_catalog:
         # List of products is empty in case of Multi-course coupon
         return voucher, products
     else:

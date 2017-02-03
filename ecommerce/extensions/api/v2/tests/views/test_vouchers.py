@@ -13,6 +13,7 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.test.factories import BenefitFactory, OrderLineFactory, OrderFactory, RangeFactory
 from requests.exceptions import ConnectionError, Timeout
+from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
 
@@ -407,6 +408,47 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
             'voucher_end_date': voucher.end_datetime,
         })
 
+    @mock_course_catalog_api_client
+    def test_get_offers_for_course_catalog_voucher(self):
+        """ Verify that the course offers data is returned for a course catalog voucher. """
+        catalog_id = 1
+        catalog_query = '*:*'
+
+        # Populate database for the test case.
+        course, seat = self.create_course_and_seat()
+        new_range, __ = Range.objects.get_or_create(course_catalog=catalog_id, course_seat_types='verified')
+        new_range.add_product(seat)
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+
+        # Mock network calls
+        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=course)
+        self.mock_fetch_course_catalog(catalog_id=catalog_id, expected_query=catalog_query)
+
+        benefit = voucher.offers.first().benefit
+        request = self.prepare_offers_listing_request(voucher.code)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        first_offer = offers[0]
+
+        # Verify that offers are returned when voucher is created using course catalog
+        self.assertEqual(len(offers), 1)
+        self.assertDictEqual(first_offer, {
+            'benefit': {
+                'type': benefit.type,
+                'value': benefit.value
+            },
+            'contains_verified': True,
+            'course_start_date': '2016-05-01T00:00:00Z',
+            'id': course.id,
+            'image_url': 'path/to/the/course/image',
+            'multiple_credit_providers': False,
+            'organization': CourseKey.from_string(course.id).org,
+            'credit_provider_price': None,
+            'seat_type': course.type,
+            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+            'title': course.name,
+            'voucher_end_date': voucher.end_datetime,
+        })
+
     def test_get_course_offer_data(self):
         """ Verify that the course offers data is properly formatted. """
         benefit = BenefitFactory()
@@ -474,3 +516,73 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
 
         self.assertEqual(offer['image_url'], '')
         self.assertEqual(offer['course_start_date'], None)
+
+    @mock_course_catalog_api_client
+    def test_offers_api_endpoint_for_course_catalog_voucher(self):
+        """
+        Verify that the course offers data is returned for a course catalog voucher.
+        """
+        catalog_id = 1
+        catalog_query = '*:*'
+
+        # Populate database for the test case.
+        course, seat = self.create_course_and_seat()
+        new_range, __ = Range.objects.get_or_create(course_catalog=catalog_id, course_seat_types='verified')
+        new_range.add_product(seat)
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+
+        # Mock network calls
+        self.mock_course_catalog_api_for_catalog_voucher(
+            catalog_id=catalog_id, query=catalog_query, course_run=course
+        )
+
+        benefit = voucher.offers.first().benefit
+        request = self.prepare_offers_listing_request(voucher.code)
+
+        response = self.endpointView(request)
+        # Verify that offers are returned when voucher is created using course catalog
+        self.assertEqual(response.status_code, 200)
+        self.assertListEqual(
+            response.data['results'],
+            [{
+                'benefit': {
+                    'type': benefit.type,
+                    'value': benefit.value
+                },
+                'contains_verified': True,
+                'course_start_date': '2016-05-01T00:00:00Z',
+                'id': course.id,
+                'image_url': 'path/to/the/course/image',
+                'multiple_credit_providers': False,
+                'organization': CourseKey.from_string(course.id).org,
+                'credit_provider_price': None,
+                'seat_type': course.type,
+                'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+                'title': course.name,
+                'voucher_end_date': voucher.end_datetime,
+            }],
+        )
+
+    @mock_course_catalog_api_client
+    def test_get_offers_for_course_catalog_voucher_api_error(self):
+        """
+        Verify that offers api endpoint returns proper message if course catalog api returns error.
+        """
+        catalog_id = 1
+        catalog_query = '*:*'
+
+        # Populate database for the test case.
+        course, seat = self.create_course_and_seat()
+        new_range, __ = Range.objects.get_or_create(course_catalog=catalog_id, course_seat_types='verified')
+        new_range.add_product(seat)
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+
+        # Mock network calls
+        self.mock_course_catalog_api_for_catalog_voucher(
+            catalog_id=catalog_id, query=catalog_query, expected_status=status.HTTP_404_NOT_FOUND, course_run=course
+        )
+
+        request = self.prepare_offers_listing_request(voucher.code)
+        response = self.endpointView(request)
+        # Verify that offers are returned when voucher is created using course catalog
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
