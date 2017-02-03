@@ -133,9 +133,9 @@
         {% endif %}
       </div>
 
-      {% if verified_course_id and not user_verified %}
+      {% if verification_url and not user_verified %}
         <div class="nav-wizard row">
-            {% include 'oscar/checkout/_verification_data.html' with course_id=verified_course_id %}
+            {% include 'oscar/checkout/_verification_data.html' with verification_url=verification_url %}
         </div>
       {% else %}
         <div id="dashboard-link">

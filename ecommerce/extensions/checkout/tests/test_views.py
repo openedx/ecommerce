@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -256,6 +257,9 @@ class ReceiptResponseViewTests(CourseCatalogMockMixin, LmsApiMockMixin, RefundTe
             'payment_method': None,
             'fire_tracking_events': False,
             'display_credit_messaging': False,
+            'verification_url': get_lms_url(
+                'verify_student/verify-now/{course_id}'.format(course_id=self.course.id)
+            ),
         }
 
         self.assertEqual(response.status_code, 200)

@@ -193,7 +193,11 @@ class ReceiptResponseView(ThankYouView):
 
             if verified_course_id:
                 context.update({
-                    'verified_course_id': verified_course_id,
+                    'verification_url': get_lms_url(
+                        'verify_student/verify-now/{course_id}'.format(
+                            course_id=verified_course_id
+                        )
+                    ),
                     'user_verified': self.request.user.is_verified(self.request.site),
                 })
 
