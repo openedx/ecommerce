@@ -425,7 +425,7 @@ class User(AbstractUser):
         try:
             api = EdxRestApiClient(
                 request.site.siteconfiguration.build_lms_url('/api/user/v1'),
-                oauth_access_token=self.access_token,
+                jwt=request.site.siteconfiguration.access_token,
                 append_slash=False
             )
             response = api.accounts(self.username).get()
