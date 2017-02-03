@@ -154,7 +154,7 @@ class ConditionalOffer(AbstractConditionalOffer):
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
 
-def validate_credit_seat_type(course_seat_types, allowed_seat_types):
+def validate_credit_seat_type(course_seat_types):
     if not isinstance(course_seat_types, basestring):
         log_message_and_raise_validation_error('Failed to create Range. Credit seat types must be of type string.')
 
@@ -165,10 +165,10 @@ def validate_credit_seat_type(course_seat_types, allowed_seat_types):
             'Failed to create Range. Credit seat type cannot be paired with other seat types.'
         )
 
-    if not set(course_seat_types_list).issubset(set(allowed_seat_types)):
+    if not set(course_seat_types_list).issubset(set(Range.ALLOWED_SEAT_TYPES)):
         log_message_and_raise_validation_error(
             'Failed to create Range. Not allowed course seat types {}. '
-            'Allowed values for course seat types are {}.'.format(course_seat_types_list, allowed_seat_types)
+            'Allowed values for course seat types are {}.'.format(course_seat_types_list, Range.ALLOWED_SEAT_TYPES)
         )
 
 
@@ -212,7 +212,7 @@ class Range(AbstractRange):
             log_message_and_raise_validation_error(error_message)
 
         if self.course_seat_types:
-            validate_credit_seat_type(self.course_seat_types, self.ALLOWED_SEAT_TYPES)
+            validate_credit_seat_type(self.course_seat_types)
 
     def run_catalog_query(self, product):
         """
