@@ -171,7 +171,8 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         # Verify that the order totals $0.
         self.assertEqual(order.total_excl_tax, 0)
 
-        refund = Refund.create_with_lines(order, list(order.lines.all()))
+        with mock.patch.object(Refund, '_notify_purchaser') as mock_notify:
+            refund = Refund.create_with_lines(order, list(order.lines.all()))
 
         # Verify that refund lines are not revoked.
         self.assertFalse(mock_revoke_line.called)
@@ -179,6 +180,9 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         # Verify that the refund has been successfully approved.
         self.assertEqual(refund.status, REFUND.COMPLETE)
         self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
+
+        # Verify no notification is sent to the purchaser
+        self.assertFalse(mock_notify.called)
 
     @ddt.unpack
     @ddt.data(

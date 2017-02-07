@@ -137,7 +137,7 @@ class Refund(StatusMixin, TimeStampedModel):
                 )
 
             if total_credit_excl_tax == 0:
-                refund.approve()
+                refund.approve(notify_purchaser=False)
 
             return refund
 
@@ -232,7 +232,7 @@ class Refund(StatusMixin, TimeStampedModel):
             logger.error('Unable to revoke fulfillment of all lines of Refund [%d].', self.id)
             self.set_status(REFUND.REVOCATION_ERROR)
 
-    def approve(self, revoke_fulfillment=True):
+    def approve(self, revoke_fulfillment=True, notify_purchaser=True):
         if not self.can_approve:
             logger.debug('Refund [%d] cannot be approved.', self.id)
             return False
@@ -240,7 +240,8 @@ class Refund(StatusMixin, TimeStampedModel):
             try:
                 self._issue_credit()
                 self.set_status(REFUND.PAYMENT_REFUNDED)
-                self._notify_purchaser()
+                if notify_purchaser:
+                    self._notify_purchaser()
             except PaymentError:
                 logger.exception('Failed to issue credit for refund [%d].', self.id)
                 self.set_status(REFUND.PAYMENT_REFUND_ERROR)
