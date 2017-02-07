@@ -259,7 +259,6 @@ class CybersourceMixin(PaymentEventsMixin):
             'reference_number': basket.order_number,
             'amount': unicode(basket.total_incl_tax),
             'currency': basket.currency,
-            'consumer_id': basket.owner.username,
             'override_custom_receipt_page': basket.site.siteconfiguration.build_ecommerce_url(
                 reverse('cybersource_redirect')
             ),
@@ -286,6 +285,9 @@ class CybersourceMixin(PaymentEventsMixin):
                 expected['item_{}_total_amount '.format(index)] = str(line.line_price_incl_tax_incl_discounts)
                 expected['item_{}_unit_of_measure'.format(index)] = 'ITM'
                 expected['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+
+        if not use_sop_profile:
+            expected['consumer_id'] = basket.owner.username
 
         # Add the extra parameters
         expected.update(kwargs.get('extra_parameters', {}))
