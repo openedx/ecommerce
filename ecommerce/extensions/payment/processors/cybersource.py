@@ -153,7 +153,6 @@ class Cybersource(BasePaymentProcessor):
             'reference_number': basket.order_number,
             'amount': str(basket.total_incl_tax),
             'currency': basket.currency,
-            'consumer_id': basket.owner.username,
             'override_custom_receipt_page': get_receipt_page_url(
                 site_configuration=site.siteconfiguration,
                 order_number=basket.order_number,
@@ -186,6 +185,10 @@ class Cybersource(BasePaymentProcessor):
                 # Note (CCB): Course seat is not a unit of measure. Use item (ITM).
                 parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
                 parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
+
+        # Only send consumer_id for hosted payment page
+        if not use_sop_profile:
+            parameters['consumer_id'] = basket.owner.username
 
         # Add the extra parameters
         parameters.update(kwargs.get('extra_parameters', {}))
