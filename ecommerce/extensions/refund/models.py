@@ -233,8 +233,11 @@ class Refund(StatusMixin, TimeStampedModel):
             self.set_status(REFUND.REVOCATION_ERROR)
 
     def approve(self, revoke_fulfillment=True, notify_purchaser=True):
-        if not self.can_approve:
-            logger.debug('Refund [%d] cannot be approved.', self.id)
+        if self.status == REFUND.COMPLETE:
+            logger.info('Refund [%d] has already been completed. No additional action is required to approve.', self.id)
+            return True
+        elif not self.can_approve:
+            logger.warning('Refund [%d] has status set to [%s] and cannot be approved.', self.id, self.status)
             return False
         elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
             try:
@@ -251,7 +254,7 @@ class Refund(StatusMixin, TimeStampedModel):
             self._revoke_lines()
 
         if not revoke_fulfillment and self.status == REFUND.PAYMENT_REFUNDED:
-            logger.info("Skipping the revocation step for refund [%d].", self.id)
+            logger.info('Skipping the revocation step for refund [%d].', self.id)
             # Mark the status complete as it does not involve the revocation.
             self.set_status(REFUND.COMPLETE)
             for refund_line in self.lines.all():
@@ -264,8 +267,12 @@ class Refund(StatusMixin, TimeStampedModel):
         return False
 
     def deny(self):
+        if self.status == REFUND.DENIED:
+            logger.info('Refund [%d] has already been denied. No additional action is required to deny.', self.id)
+            return True
+
         if not self.can_deny:
-            logger.debug('Refund [%d] cannot be denied.', self.id)
+            logger.warning('Refund [%d] cannot be denied. Its status is [%s].', self.id, self.status)
             return False
 
         self.set_status(REFUND.DENIED)

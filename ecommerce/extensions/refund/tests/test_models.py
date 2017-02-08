@@ -264,6 +264,11 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         # Verify an attempt is made to send a notification
         mock_notify.assert_called_once_with()
 
+        # Verify subsequent calls to approve an approved refund do not change the state
+        refund.refresh_from_db()
+        self.assertTrue(refund.approve())
+        self.assertEqual(refund.status, REFUND.COMPLETE)
+
     def test_approve_payment_error(self):
         """
         If payment refund fails, the Refund status should be set to Payment Refund Error, and the RefundLine
@@ -296,9 +301,9 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
                 self.assertEqual(refund.status, REFUND.REVOCATION_ERROR)
                 self.assert_line_status(refund, REFUND_LINE.REVOCATION_ERROR)
 
-    @ddt.data(REFUND.COMPLETE, REFUND.DENIED)
-    def test_approve_wrong_state(self, status):
+    def test_approve_wrong_state(self):
         """ The method should return False if the Refund cannot be approved. """
+        status = REFUND.DENIED
         refund = self._get_instance(status=status)
         self.assertEqual(refund.status, status)
         self.assert_line_status(refund, REFUND_LINE.OPEN)
@@ -319,6 +324,11 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         self.assertTrue(refund.deny())
         self.assertEqual(refund.status, REFUND.DENIED)
         self.assert_line_status(refund, REFUND_LINE.DENIED)
+
+        # Verify subsequent calls to approve an approved refund do not change the state
+        refund.refresh_from_db()
+        self.assertTrue(refund.deny())
+        self.assertEqual(refund.status, REFUND.DENIED)
 
     def test_deny_with_exception(self):
         """
