@@ -172,9 +172,8 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         stock_record = StockRecordFactory(product=product, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
-        self.create_coupon(catalog=catalog, code=COUPON_CODE, benefit_value=5)
 
-        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=stock_record.partner_sku, code=COUPON_CODE)
+        url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
         expected_content = 'You are already enrolled in {product}.'.format(product=product.course.name)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
@@ -211,8 +210,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         """
         self.request.user = self.user
         self.mock_enrollment_api_error(self.request, self.user, self.course.id, error)
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku, code=COUPON_CODE)
+        url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
