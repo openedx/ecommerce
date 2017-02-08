@@ -1,9 +1,9 @@
 import json
 
 import ddt
-from django.core.urlresolvers import reverse
 import httpretty
 import mock
+from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
@@ -11,7 +11,7 @@ from rest_framework import status
 from ecommerce.extensions.api.serializers import RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
-from ecommerce.extensions.refund.status import REFUND_LINE
+from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
@@ -211,25 +211,21 @@ class RefundProcessViewTests(ThrottlingMixin, TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data, RefundSerializer(self.refund).data)
 
+    @mock.patch('ecommerce.extensions.refund.models.Refund._revoke_lines')
     @mock.patch('ecommerce.extensions.refund.models.Refund._issue_credit')
-    def test_success_approve_payment_only(self, mock_issue_credit):
-        """ If the action succeeds, the view should return HTTP 200 and the serialized Refund. """
-        def mock_fulfillment(refund_obj):
-            for refund_line in refund_obj.lines.all():
-                refund_line.set_status(REFUND_LINE.COMPLETE)
-
+    def test_success_approve_payment_only(self, mock_issue_credit, mock_revoke_lines):
+        """ Verify the endpoint supports approving the refund, and issuing credit without revoking fulfillment. """
         mock_issue_credit.return_value = None
 
-        with mock.patch("ecommerce.extensions.fulfillment.api.revoke_fulfillment_for_refund",
-                        side_effect=mock_fulfillment):
-            with mock.patch("ecommerce.extensions.refund.models.logger") as patched_log:
-                response = self.put('approve_payment_only')
-                self.assertEqual(response.status_code, 200)
-                refund = Refund.objects.get(id=self.refund.id)
-                self.assertEqual(response.data['status'], refund.status)
-                self.assertEqual(response.data['status'], "Complete")
-                patched_log.info.assert_called_with(
-                    "Skipping the revocation step for refund [%d].", self.refund.id)
+        with mock.patch('ecommerce.extensions.refund.models.logger') as patched_log:
+            response = self.put('approve_payment_only')
+            self.assertEqual(response.status_code, 200)
+
+        self.refund.refresh_from_db()
+        self.assertEqual(response.data['status'], self.refund.status)
+        self.assertEqual(response.data['status'], 'Complete')
+        patched_log.info.assert_called_with('Skipping the revocation step for refund [%d].', self.refund.id)
+        self.assertFalse(mock_revoke_lines.called)
 
     @ddt.data(
         ('approve', 'approve'),
@@ -243,3 +239,16 @@ class RefundProcessViewTests(ThrottlingMixin, TestCase):
             response = self.put(decision)
             self.assertEqual(response.status_code, 500)
             self.assertEqual(response.data, RefundSerializer(self.refund).data)
+
+    @ddt.data(
+        ('approve', REFUND.COMPLETE),
+        ('approve_payment_only', REFUND.COMPLETE),
+        ('deny', REFUND.DENIED)
+    )
+    @ddt.unpack
+    def test_subsequent_approval(self, action, _status):
+        """ Verify the endpoint supports reprocessing a previously-processed refund. """
+        self.refund.status = _status
+        self.refund.save()
+        response = self.put(action)
+        self.assertEqual(response.status_code, 200)
