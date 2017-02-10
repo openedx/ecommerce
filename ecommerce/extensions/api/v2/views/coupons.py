@@ -347,7 +347,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             serializer = self.get_serializer(coupon)
             return Response(serializer.data)
         except ValidationError as error:
-            raise serializers.ValidationError(error.message)
+            error_message = 'Failed to update Coupon [{coupon_id}]. {msg}'.format(
+                coupon_id=coupon.id,
+                msg=error.message
+            )
+            logger.exception(error_message)
+            raise serializers.ValidationError(error_message)
 
     def create_update_data_dict(self, data, fields):
         """
@@ -439,10 +444,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     if offer_data['max_global_applications'] < 1:
                         raise ValueError
                 except ValueError:
-                    log_message_and_raise_validation_error(
-                        'Failed to update Coupon [{coupon_id}]. '
-                        'max_global_applications field must be a positive number.'.format(coupon_id=coupon_id)
-                    )
+                    raise ValidationError('max_global_applications field must be a positive number.')
             ConditionalOffer.objects.filter(vouchers__in=vouchers.all()).update(**offer_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument

@@ -68,18 +68,19 @@ def create_coupon_product(
         A coupon Product object.
 
     Raises:
-        IntegrityError: An error occured when create_vouchers method returns
+        IntegrityError: An error occurred when create_vouchers method returns
                         an IntegrityError exception
     """
     product_class = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
     coupon_product = Product.objects.create(title=title, product_class=product_class)
+
     ProductCategory.objects.get_or_create(product=coupon_product, category=category)
 
     # Vouchers are created during order and not fulfillment like usual
     # because we want vouchers to be part of the line in the order.
 
     try:
-        create_vouchers(
+        vouchers = create_vouchers(
             benefit_type=benefit_type,
             benefit_value=benefit_value,
             catalog=catalog,
@@ -101,7 +102,8 @@ def create_coupon_product(
         logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
         raise
 
-    coupon_vouchers = CouponVouchers.objects.get(coupon=coupon_product)
+    coupon_vouchers, __ = CouponVouchers.objects.get_or_create(coupon=coupon_product)
+    coupon_vouchers.vouchers.add(*vouchers)
     coupon_product.attr.coupon_vouchers = coupon_vouchers
     coupon_product.attr.note = note
     coupon_product.save()

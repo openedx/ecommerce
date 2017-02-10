@@ -346,7 +346,7 @@ def _generate_code_string(length):
     return voucher_code
 
 
-def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime, voucher_type):
+def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher_type):
     """
     Creates a voucher.
 
@@ -354,7 +354,6 @@ def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime,
 
     Args:
         code (str): Code associated with vouchers. If not provided, one will be generated.
-        coupon (Product): Coupon product associated with voucher.
         end_datetime (datetime): Voucher end date.
         name (str): Voucher name.
         offer (Offer): Offer associated with voucher.
@@ -396,9 +395,6 @@ def _create_new_voucher(code, coupon, end_datetime, name, offer, start_datetime,
         end_datetime=end_datetime
     )
     voucher.offers.add(offer)
-
-    coupon_voucher, __ = CouponVouchers.objects.get_or_create(coupon=coupon)
-    coupon_voucher.vouchers.add(voucher)
 
     return voucher
 
@@ -510,7 +506,6 @@ def create_vouchers(
 
     for i in range(quantity):
         voucher = _create_new_voucher(
-            coupon=coupon,
             end_datetime=end_datetime,
             offer=offers[i] if multi_offer else offers[0],
             start_datetime=start_datetime,
