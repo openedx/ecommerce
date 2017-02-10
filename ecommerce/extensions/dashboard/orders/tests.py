@@ -1,4 +1,5 @@
 import os
+from unittest import skip
 
 from django.contrib.messages import constants as MSG
 from django.core.urlresolvers import reverse
@@ -120,6 +121,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
 class OrderListViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewBrowserTestBase):
     path = reverse('dashboard:order-list')
 
+    @skip("This test is flaky in Travis.  Fix and re-enable under ticket ECOM-6664.")
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
     def test_retry_fulfillment(self):
         """
