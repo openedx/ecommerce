@@ -1,4 +1,3 @@
-# noinspection PyUnresolvedReferences
 from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
@@ -9,6 +8,7 @@ from simple_history.models import HistoricalRecords
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 )
+from ecommerce.core.utils import log_message_and_raise_validation_error
 
 
 class Product(AbstractProduct):
@@ -18,7 +18,6 @@ class Product(AbstractProduct):
     expires = models.DateTimeField(null=True, blank=True,
                                    help_text=_('Last date/time on which this product can be purchased.'))
     history = HistoricalRecords()
-
     original_expires = None
 
     @property
@@ -32,6 +31,16 @@ class Product(AbstractProduct):
     @property
     def is_coupon_product(self):
         return self.get_product_class().name == COUPON_PRODUCT_CLASS_NAME
+
+    def save(self, *args, **kwargs):
+        try:
+            if not isinstance(self.attr.note, basestring) and self.attr.note is not None:
+                log_message_and_raise_validation_error(
+                    'Failed to create Product. Product note value must be of type string'
+                )
+        except AttributeError:
+            pass
+        super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
 
 @receiver(post_init, sender=Product)
@@ -82,6 +91,4 @@ class Catalog(models.Model):
             catalog_name=self.name
         )
 
-
-# noinspection PyUnresolvedReferences
-from oscar.apps.catalogue.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,ungrouped-imports,wrong-import-order
+from oscar.apps.catalogue.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

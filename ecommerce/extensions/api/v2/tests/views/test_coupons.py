@@ -357,6 +357,12 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         vouchers = new_coupon.attr.coupon_vouchers.vouchers
         return vouchers.first().offers.first().benefit.range, data
 
+    def _create_and_get_coupon_details(self):
+        """Helper method that creates and returns coupon details."""
+        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        coupon = Product.objects.get(title=self.data['title'])
+        return self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon.id]))
+
     def test_create_serializer_data(self):
         """Test if coupon serializer creates data for details page"""
         details_response = self.get_response_json(
@@ -483,13 +489,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'quantity': 1,
             'title': 'Tešt čoupon 2'
         })
-        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        coupon = Product.objects.get(title=self.data['title'])
-        details_response = self.get_response_json(
-            'GET',
-            reverse('api:v2:coupons-detail', args=[coupon.id]),
-            data=self.data
-        )
+        details_response = self._create_and_get_coupon_details()
         self.assertEqual(details_response['code'], self.data['code'])
         self.assertEqual(details_response['coupon_type'], 'Discount code')
         self.assertEqual(details_response['enterprise_customer'], self.data['enterprise_customer']['id'])
@@ -890,13 +890,11 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'title': 'Max uses update',
             'voucher_type': Voucher.MULTI_USE
         })
-        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        coupon = Product.objects.get(title=self.data['title'])
-        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon.id]))
+        details = self._create_and_get_coupon_details()
         self.assertEqual(details['max_uses'], self.data['max_uses'])
 
         self.data['max_uses'] = 5
-        response = self.get_response_json('PUT', reverse('api:v2:coupons-detail', args=[coupon.id]), self.data)
+        response = self.get_response_json('PUT', reverse('api:v2:coupons-detail', args=[details['id']]), self.data)
         self.assertEqual(response['max_uses'], self.data['max_uses'])
 
     def test_create_coupon_without_category(self):
@@ -988,14 +986,36 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'title': 'Coupon update with max uses {}'.format(max_uses),
             'voucher_type': Voucher.MULTI_USE
         })
-        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-        coupon = Product.objects.get(title=self.data['title'])
-        details = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon.id]))
+        details = self._create_and_get_coupon_details()
         self.assertEqual(details['max_uses'], 2)
 
         self.data.update({'max_uses': max_uses})
         response = self.client.put(
-            reverse('api:v2:coupons-detail', args=[coupon.id]),
+            reverse('api:v2:coupons-detail', args=[details['id']]),
+            json.dumps(self.data),
+            'application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @ddt.data(1, {'some': 'dict'}, ['array'])
+    def test_create_coupon_with_invalid_note(self, invalid_note):
+        """Verify creating coupon with invalid note field returns 400 response."""
+        self.data['note'] = invalid_note
+        self.assert_post_response_status(self.data)
+
+    @ddt.data(1, {'some': 'dict'}, ['array'])
+    def test_update_coupon_with_invalid_note(self, invalid_note):
+        """Verify updating coupon with invalid note field returns 400 response."""
+        self.data.update({
+            'note': 'Some valid note.',
+            'title': 'Coupon update with note {}'.format(invalid_note),
+        })
+        details = self._create_and_get_coupon_details()
+        self.assertEqual(details['note'], self.data['note'])
+
+        self.data['note'] = invalid_note
+        response = self.client.put(
+            reverse('api:v2:coupons-detail', args=[details['id']]),
             json.dumps(self.data),
             'application/json'
         )

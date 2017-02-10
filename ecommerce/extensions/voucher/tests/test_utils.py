@@ -112,7 +112,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             'quantity': 1,
             'voucher_type': Voucher.ONCE_PER_CUSTOMER
         })
-        create_vouchers(**self.data)
+        vouchers = create_vouchers(**self.data)
+        self.coupon_vouchers.first().vouchers.add(*vouchers)
 
         del self.data['code']
         del self.data['max_uses']
@@ -122,7 +123,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             'benefit_value': 100.00,
             'voucher_type': Voucher.SINGLE_USE
         })
-        create_vouchers(**self.data)
+        vouchers = create_vouchers(**self.data)
+        self.coupon_vouchers.first().vouchers.add(*vouchers)
 
     def create_catalog_coupon(
             self,
@@ -184,6 +186,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         voucher = vouchers[0]
         voucher_offer = voucher.offers.first()
         coupon_voucher = CouponVouchers.objects.get(coupon=self.coupon)
+        coupon_voucher.vouchers.add(*vouchers)
 
         self.assertEqual(voucher_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(voucher_offer.benefit.value, 100.00)
@@ -413,7 +416,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             'name': self.coupon.title,
             'end_datetime': datetime.datetime.now() - datetime.timedelta(days=0.1)
         })
-        create_vouchers(**self.data)
+        vouchers = create_vouchers(**self.data)
+        self.coupon_vouchers.first().vouchers.add(*vouchers)
 
         __, rows = generate_coupon_report(self.coupon_vouchers)
 
