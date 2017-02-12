@@ -21,32 +21,28 @@ define([],function () {
             },
 
             /**
-             * Get the credit card type based on the card's number.
+             * Get the credit card type based on the card number.
              *
-             * @param (string) - The credit card number.
+             * @param cardNumber (string) - The credit card number.
              *
-             * @returns (object) - The credit card type name and coresponding 3-number CyberSource card ID.
+             * @returns (object) - The credit card type name and CVN length.
              */
             getCreditCardType: function(cardNumber) {
                 var matchers = {
                     amex: {
                         regex: /^3[47]\d{13}$/,
-                        cybersourceTypeId: '003',
                         cvnLength: 4
                     },
                     discover: {
                         regex: /^(6011\d{2}|65\d{4}|64[4-9]\d{3}|62212[6-9]|6221[3-9]\d|622[2-8]\d{2}|6229[01]\d|62292[0-5])\d{10,13}$/,  // jshint ignore:line
-                        cybersourceTypeId: '004',
                         cvnLength: 3
                     },
                     mastercard: {
                         regex: /^(5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)\d{12}$/,
-                        cybersourceTypeId: '002',
                         cvnLength: 3
                     },
                     visa: {
                         regex: /^(4\d{12}?(\d{3})?)$/,
-                        cybersourceTypeId: '001',
                         cvnLength: 3
                     }
                 };
@@ -54,9 +50,8 @@ define([],function () {
                 for (var key in matchers) {
                     if (matchers[key].regex.test(cardNumber)) {
                         return {
-                            'name': key,
-                            'type': matchers[key].cybersourceTypeId,
-                            'cvnLength': matchers[key].cvnLength
+                            name: key,
+                            cvnLength: matchers[key].cvnLength
                         };
                     }
                 }

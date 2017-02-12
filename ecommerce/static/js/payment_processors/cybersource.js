@@ -2,40 +2,74 @@
  * CyberSource payment processor specific actions.
  */
 require([
-        'jquery',
-        'pages/basket_page'
-    ], function(
-        $,
-        BasketPage
-    ) {
+    'jquery',
+    'pages/basket_page'
+], function ($, BasketPage) {
     'use strict';
 
-    function initializePaymentForm() {
-        var signingUrl,
-            $paymentForm = $('.payment-form');
+    var CyberSourceClient = {
+        init: function () {
+            var $paymentForm = $('#paymentForm'),
+                $pciFields = $('.pci-field', $paymentForm),
+                cardMap = {
+                    visa: '001',
+                    mastercard: '002',
+                    amex: '003',
+                    discover: '004'
+                };
 
-        if ($paymentForm.length < 1) {
-            return;
-        }
+            this.signingUrl = Cybersource.signingUrl;   // jshint ignore:line
 
-        signingUrl = $paymentForm.data('signing-url');
+            // The payment form should post to CyberSource
+            $paymentForm.attr('action', Cybersource.postUrl);   // jshint ignore:line
 
-        $paymentForm.submit(function (event) {
-            var $signedFields = $('input,select', $paymentForm).not('.pci-field');
+            // Add name attributes to the PCI fields
+            $pciFields.each(function () {
+                var $this = $(this);
+                $this.attr('name', $this.data('name'));
+            });
 
-            // Format the date to a format that CyberSource accepts (MM-YYYY).
-            var cardExpiryMonth = $('select[name=card_expiry_month]').val(),
-                cardExpiryYear = $('select[name=card_expiry_year]').val();
-            $('input[name=card_expiry_date]').val(cardExpiryMonth + '-' + cardExpiryYear);
+            $paymentForm.submit($.proxy(this.onSubmit, this));
+
+            // Add CyberSource-specific fields
+            $paymentForm.append($('<input type="hidden" name="card_expiry_date" class="pci-field">'));
+            $paymentForm.append($('<input type="hidden" name="card_type" class="pci-field">'));
+
+            // Add an event listener to populate the CyberSource card type field
+            $paymentForm.on('cardType:detected', function (event, data) {
+                $('input[name=card_type]', $paymentForm).val(cardMap[data.type]);
+            });
+        },
+
+        /**
+         * Payment form submit handler.
+         *
+         * Before posting to CyberSource, this handler retrieves signed data fields from the server. PCI fields
+         * (e.g. credit card number, expiration) should NEVER be posted to the server, only to CyberSource.
+         *
+         * @param event
+         */
+        onSubmit: function (event) {
+            var $form = $(event.target),
+                $signedFields = $('input,select', $form).not('.pci-field'),
+                expMonth = $('#card-expiry-month', $form).val(),
+                expYear = $('#card-expiry-year', $form).val();
+
+            // Restore name attributes so the data can be posted to CyberSource
+            $('#card-number', $form).attr('name', 'card_number');
+            $('#card-cvn', $form).attr('name', 'card_cvn');
 
             // Post synchronously since we need the returned data.
             $.ajax({
                 type: 'POST',
-                url: signingUrl,
+                url: this.signingUrl,
                 data: $signedFields.serialize(),
                 async: false,
                 success: function (data) {
                     var formData = data.form_fields;
+
+                    // Format the date for CyberSource (MM-YYYY)
+                    $('input[name=card_expiry_date]', $form).val(expMonth + '-' + expYear);
 
                     // Disable the fields on the form so they are not posted since their names are not what is
                     // expected by CyberSource. Instead post add the parameters from the server to the form,
@@ -44,43 +78,46 @@ require([
 
                     for (var key in formData) {
                         if (formData.hasOwnProperty(key)) {
-                            $paymentForm.append(
+                            $form.append(
                                 '<input type="hidden" name="' + key + '" value="' + formData[key] + '" />'
                             );
                         }
                     }
                 },
+
                 error: function (jqXHR, textStatus) {
                     // Don't allow the form to submit.
                     event.preventDefault();
                     event.stopPropagation();
 
                     var cardHolderFields = [
-                        'first_name', 'last_name', 'address_line1', 'address_line2',
-                        'state', 'city', 'country', 'postal_code'
+                        'first_name', 'last_name', 'address_line1', 'address_line2', 'state', 'city', 'country',
+                        'postal_code'
                     ];
 
                     if (textStatus === 'error') {
                         var error = JSON.parse(jqXHR.responseText);
+
                         if (error.field_errors) {
                             for (var k in error.field_errors) {
                                 if (cardHolderFields.indexOf(k) !== -1) {
                                     var field = $('input[name=' + k + ']');
+                                    // TODO Use custom events to remove this dependency.
                                     BasketPage.appendCardHolderValidationErrorMsg(field, error.field_errors[k]);
                                     field.focus();
                                 }
                             }
                         } else {
-                            // Unhandled error types should default to the general payment error page.
-                            window.location.href = '/payment/error/';
+                            // Unhandled errors should redirect to the general payment error page.
+                            window.location.href = window.paymentErrorPath;
                         }
                     }
                 }
             });
-        });
-    }
+        }
+    };
 
     $(document).ready(function () {
-        initializePaymentForm();
+        CyberSourceClient.init();
     });
 });

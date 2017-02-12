@@ -1,4 +1,5 @@
 define([
+        'jquery',
         'backbone',
         'backbone.validation',
         'underscore',
@@ -7,8 +8,10 @@ define([
         'models/tracking_model',
         'models/course_model',
         'views/clickable_view',
-        'views/analytics_view',],
-    function (Backbone,
+        'views/analytics_view'
+    ],
+    function ($,
+              Backbone,
               BackboneValidation,
               _,
               Utils,
@@ -20,7 +23,7 @@ define([
         'use strict';
 
         return {
-            analyticsSetUp: function() {
+            analyticsSetUp: function () {
                 var courseModel = new CourseModel(),
                     trackingModel = new TrackingModel(),
                     userModel = new UserModel();

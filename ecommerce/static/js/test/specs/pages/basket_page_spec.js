@@ -19,8 +19,7 @@ define([
               UserModel,
               AnalyticsView,
               Cookies,
-              moment
-    ) {
+              moment) {
         'use strict';
 
         describe('Basket Page', function () {
@@ -28,36 +27,11 @@ define([
                 form;
 
             beforeEach(function () {
-                $('<div class="spinner">' +
-                    '<input class="quantity" id="id_form-0-quantity" min="1" max="10"' +
-                    'name="form-0-quantity" type="number" value="1">' +
-                    '<div class="input-group-btn-vertical">' +
-                    '<button class="btn btn-primary" type="button">' +
-                    '<i class="fa fa-caret-up"></i></button>' +
-                    '<button class="btn btn-primary" type="button">' +
-                    '<i class="fa fa-caret-down"></i></button></div></div>' +
-                    '<div id="voucher_form_container"><input id="id_code">' +
-                    '<a id="voucher_form_cancel"></a></button></div>' +
-                    '<div id="voucher_form_link"><a href=""></a></div>' +
-                    '<button type="submit" class="apply_voucher"' +
-                    'data-track-type="click" data-track-event="edx.bi.ecommerce.basket.voucher_applied"' +
-                    'data-voucher-code="ABCDEF"></button></div>' +
-                    '<div class="payment-buttons">' +
-                    '<button data-track-type="click"' +
-                    'data-track-event="edx.bi.ecommerce.basket.payment_selected"' +
-                    'data-track-category="cybersource"' +
-                    'data-processor-name="cybersource"' +
-                    'class="btn btn-success payment-button"' +
-                    'value="cybersource"' +
-                    'id="cybersource"></button></div>' +
-                    '<div><input type="number" id="card-number-input" name="card_number">' +
-                    '<img class="card-type-icon" src>' +
-                    '<input type="hidden" name="card_type" value>' +
-                    '<p class="validation-error"></div>'
-                ).appendTo('body');
+                jasmine.getFixtures().fixturesPath = '/base/ecommerce/static/js/test/fixtures';
+            });
 
-
-                $('<script type="text/javascript">var initModelData = {};</script>').appendTo('body');
+            beforeEach(function () {
+                loadFixtures('basket.html');
 
                 data = {
                     basket_id: 1,
@@ -113,7 +87,7 @@ define([
                     expect($('#voucher_form_link').is(':visible')).toBeTruthy();
                 });
 
-                it('should make the states input field dropdown for US and CA', function() {
+                it('should make the states input field dropdown for US and CA', function () {
                     $(
                         '<fieldset>' +
                         '<div class="form-item"><div><select name="country">' +
@@ -174,36 +148,40 @@ define([
                 });
 
                 it('should not decrement quantity once reached to min value', function () {
+                    var $quantity = $('input.quantity');
                     BasketPage.onReady();
 
-                    $('input.quantity').first().val(1);
+                    $quantity.first().val(1);
                     $('.spinner button.btn:last-of-type').trigger('click');
-                    expect($('input.quantity').first().val()).toEqual('1');
+                    expect($quantity.first().val()).toEqual('1');
                 });
 
-                it('should recognize the credit card', function() {
+                it('should recognize the credit card', function () {
                     var validCardList = [
-                        {'number': '378282246310005', 'name': 'amex', 'type': '003'},
-                        {'number': '6011111111111117', 'name': 'discover', 'type': '004'},
-                        {'number': '5105105105105100', 'name': 'mastercard', 'type': '002'},
-                        {'number': '4111111111111111', 'name': 'visa', 'type': '001'}
-                    ];
+                            {'number': '378282246310005', 'name': 'amex'},
+                            {'number': '6011111111111117', 'name': 'discover'},
+                            {'number': '5105105105105100', 'name': 'mastercard'},
+                            {'number': '4111111111111111', 'name': 'visa'}
+                        ],
+                        cardNumberSelector = '#card-number',
+                        $cardNumber = $(cardNumberSelector),
+                        $cardTypeIcon = $('.card-type-icon');
+
+                    spyOnEvent($cardNumber, 'cardType:detected');
                     BasketPage.onReady();
 
-                    $('#card-number-input').trigger('input');
-                    expect($('.card-type-icon').attr('src')).toEqual('');
-                    expect($('input[name=card_type]').val()).toEqual('');
+                    $cardNumber.trigger('input');
+                    expect($cardTypeIcon.attr('src')).toEqual('');
 
-                    $('#card-number-input').val('123123123123123').trigger('input');
-                    expect($('.card-type-icon').attr('src')).toEqual('');
-                    expect($('input[name=card_type]').val()).toEqual('');
+                    $cardNumber.val('123123123123123').trigger('input');
+                    expect($cardTypeIcon.attr('src')).toEqual('');
 
-                    _.each(validCardList, function(card) {
-                        $('#card-number-input').val(card.number).trigger('input');
-                        expect($('.card-type-icon').attr('src')).toEqual(
-                            '/static/images/credit_cards/' + card.name + '.png'
-                        );
-                        expect($('input[name=card_type]').val()).toEqual(card.type);
+                    _.each(validCardList, function (card) {
+                        var expectedImage = '/static/images/credit_cards/' + card.name + '.png';
+
+                        $cardNumber.val(card.number).trigger('input');
+                        expect($cardTypeIcon.attr('src')).toEqual(expectedImage);
+                        expect('cardType:detected').toHaveBeenTriggeredOnAndWith(cardNumberSelector, {type: card.name});
                     });
                 });
 
@@ -221,69 +199,35 @@ define([
                 });
             });
 
-            describe('clientSideCheckoutValidation', function() {
+            describe('clientSideCheckoutValidation', function () {
                 var cc_expiry_months = {
-                        JAN: '01',
-                        FEB: '02',
-                        MAR: '03',
-                        APR: '04',
-                        MAY: '05',
-                        JUN: '06',
-                        JUL: '07',
-                        AUG: '08',
-                        SEP: '09',
-                        OCT: '10',
-                        NOV: '11',
-                        DEC: '12'
-                    };
+                    JAN: '01',
+                    FEB: '02',
+                    MAR: '03',
+                    APR: '04',
+                    MAY: '05',
+                    JUN: '06',
+                    JUL: '07',
+                    AUG: '08',
+                    SEP: '09',
+                    OCT: '10',
+                    NOV: '11',
+                    DEC: '12'
+                };
 
 
-                beforeEach(function() {
-                    $(
-                        '<fieldset>' +
-                        '<input type="hidden" name="sdn-check" value="disabled">' +
-                        '<div class="form-item"><div><input name="first_name"></div>' +
-                        '<p class="help-block"></p></div>' +
-                        '<div class="form-item"><div><input name="last_name"></div>' +
-                        '<p class="help-block"></p></div>' +
-                        '<div class="form-item"><div><input name="address_line1"></div>' +
-                        '<p class="help-block"></p></div>' +
-                        '<div class="form-item"><div><input name="city"></div>' +
-                        '<p class="help-block"></p></div>' +
-                        '<div class="form-item"><div><select name="country">' +
-                        '<option value=""><Choose country></option>' +
-                        '<option value="US">United States</option>' +
-                        '<option value="DS">Death Star</option>' +
-                        '</select></div><p class="help-block"></p></div>' +
-                        '<div class="form-item"><div><select name="state">' +
-                        '<option value=""><Choose state></option>' +
-                        '<option value="NY">New York</option>' +
-                        '</select></div><p class="help-block"></p></div>' +
-                        '</fieldset>' +
-                        '<div><input name="card_number">' +
-                        '<p class="help-block"></p></div>' +
-                        '<div><input name="card_cvn">' +
-                        '<p class="help-block"></p></div>' +
-                        '<div><select name="card_expiry_month">' +
-                        '<option value="99">99</option>' +
-                        '</select>' +
-                        '<p class="help-block"></p></div>' +
-                        '<div><select name="card_expiry_year">' +
-                        '<option value="2015">2015</option>' +
-                        '</select>' +
-                        '<p class="help-block"></p></div>' +
-                        '<button id="payment-button">Pay</button>'
-                    ).appendTo('body');
+                beforeEach(function () {
+                    loadFixtures('client-side-checkout-validation.html');
 
-                    $('select[name=card_expiry_month]').append(
-                        _.reduce(_.toArray(cc_expiry_months), function(memo, value){
+                    $('#card-expiry-month').append(
+                        _.reduce(_.toArray(cc_expiry_months), function (memo, value) {
                             return memo + '<option value="' + value + '">' + value + '</option>';
                         }, '')
                     );
 
                     $('input[name=first_name]').val('Joey');
                     $('input[name=last_name]').val('Tribbiani');
-                    $('input[name=address_line1]').val('Central Perk');
+                    $('input[name=address_line1]').val('Central Park');
                     $('input[name=city]').val('New York City');
                     $('select[name=country]').val('US');
                     $('select[name=state]').val('NY');
@@ -291,8 +235,8 @@ define([
                     BasketPage.onReady();
                 });
 
-                describe('cardHolderInformationValidation', function() {
-                    it('should validate required fields', function() {
+                describe('cardHolderInformationValidation', function () {
+                    it('should validate required fields', function () {
                         var requiredFields = [
                             'input[name=first_name]',
                             'input[name=last_name]',
@@ -301,7 +245,7 @@ define([
                             'select[name=country]'
                         ];
 
-                        _.each(requiredFields, function(field) {
+                        _.each(requiredFields, function (field) {
                             $(field).val('');
                             $('#payment-button').click();
 
@@ -313,7 +257,7 @@ define([
                         });
                     });
 
-                    it('should validate state field', function() {
+                    it('should validate state field', function () {
                         $('select[name=country]').val('US').trigger('change');
                         $('select[name=state]').val('');
                         $('#payment-button').click();
@@ -324,7 +268,7 @@ define([
                         ).toEqual('This field is required');
                     });
 
-                    it('should perform the SDN check', function() {
+                    it('should perform the SDN check', function () {
                         var first_name = 'Darth',
                             last_name = 'Vader',
                             country = 'DS',
@@ -358,7 +302,7 @@ define([
                     });
                 });
 
-                describe('cardInfoValidation', function() {
+                describe('cardInfoValidation', function () {
                     var validCardNumber = '378282246310005',  // AMEX (CVN length 4)
                         validCvn = '1234',
                         enRouteCardNumber = '201401173701274', // Unsupported type (Dec, 2016)
@@ -366,8 +310,8 @@ define([
                         cardExpirationMonth = 'FEB',  // Card Expires in February
                         thisMonth = moment().month('MAR').month(); // Let's say this month is March
 
-                    beforeEach (function () {
-                        $('select[name=card_expiry_year]').append('<option value="' +
+                    beforeEach(function () {
+                        $('#card-expiry-year').append('<option value="' +
                             today.year() + '">' + today.year() + '</option>'
                         );
                         // Freeze month to March.
@@ -376,78 +320,85 @@ define([
                         spyOn(Date.prototype, 'getMonth').and.returnValue(thisMonth);
                     });
 
-                    it('should validate card number', function() {
-                        $('input[name=card_number]').val('123invalid456');
+                    it('should validate card number', function () {
+                        $('#card-number').val('123invalid456');
                         $('#payment-button').click();
-                        expect($('input[name=card_number] ~ .help-block span').text()).toEqual('Invalid card number');
+                        expect($('#card-number ~ .help-block span').text()).toEqual('Invalid card number');
 
-                        $('input[name=card_number]').val(validCardNumber);
+                        $('#card-number').val(validCardNumber);
                         $('#payment-button').click();
-                        expect($('input[name=card_number] ~ .help-block').has('span').length).toEqual(0);
+                        expect($('#card-number ~ .help-block').has('span').length).toEqual(0);
                     });
 
-                    it('should validate card type', function() {
-                        $('input[name=card_number]').val(enRouteCardNumber);
+                    it('should validate card type', function () {
+                        $('#card-number').val(enRouteCardNumber);
                         $('#payment-button').click();
-                        expect($('input[name=card_number]~.help-block span').text()).toEqual('Unsupported card type');
+                        expect($('#card-number~.help-block span').text()).toEqual('Unsupported card type');
 
-                        $('input[name=card_number]').val(validCardNumber);
+                        $('#card-number').val(validCardNumber);
                         $('#payment-button').click();
-                        expect($('input[name=card_number] ~ .help-block').has('span').length).toEqual(0);
+                        expect($('#card-number ~ .help-block').has('span').length).toEqual(0);
                     });
 
-                    it('should validate CVN number', function() {
-                        $('input[name=card_number]').val(validCardNumber);
-                        $('input[name=card_cvn]').val('123');
-                        $('#payment-button').click();
-                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid security number');
+                    it('should validate CVN number', function () {
+                        var amexCardNumber = '378282246310005',
+                            $number = $('#card-number'),
+                            $cvn = $('#card-cvn'),
+                            $paymentBtn = $('#payment-button');
 
-                        $('input[name=card_cvn]').val('123b');
-                        $('#payment-button').click();
-                        expect($('input[name=card_cvn] ~ .help-block span').text()).toEqual('Invalid security number');
+                        $number.val(amexCardNumber);
 
-                        $('input[name=card_cvn]').val(validCvn);
-                        $('#payment-button').click();
-                        expect($('input[name=card_number] ~ .help-block').has('span').length).toEqual(0);
+                        // American Express cards have a four-digit CVN
+                        $cvn.val('123');
+                        $paymentBtn.click();
+                        expect($cvn.find('~.help-block span').text()).toEqual('Invalid security number');
+
+                        $cvn.val('123b');
+                        $paymentBtn.click();
+                        expect($cvn.find('~.help-block span').text()).toEqual('Invalid security number');
+
+                        $cvn.val(validCvn);
+                        $paymentBtn.click();
+                        expect($number.find('~ .help-block').has('span').length).toEqual(0);
                     });
 
-                    it('should validate expiry month', function() {
-                        $('input[name=card_number]').val(validCardNumber);
-                        $('input[name=card_cvn]').val(validCvn);
-                        $('select[name=card_expiry_month]').val('99');
+                    it('should validate expiry month', function () {
+                        $('#card-number').val(validCardNumber);
+                        $('#card-cvn').val(validCvn);
+                        $('#card-expiry-month').val('99');
                         $('#payment-button').click();
-                        expect($('select[name=card_expiry_month]~.help-block span').text()).toEqual('Invalid month');
+                        expect($('#card-expiry-month~.help-block span').text()).toEqual('Invalid month');
 
-                        $('select[name=card_expiry_month]').val('12');
+                        $('#card-expiry-month').val('12');
                         $('#payment-button').click();
-                        expect($('select[name=card_expiry_month] ~ .help-block').has('span').length).toEqual(0);
+                        expect($('#card-expiry-month ~ .help-block').has('span').length).toEqual(0);
                     });
 
-                    it('should validate expiry year', function() {
-                        $('input[name=card_number]').val(validCardNumber);
-                        $('input[name=card_cvn]').val(validCvn);
-                        $('select[name=card_expiry_month]').val('12');
-                        $('select[name=card_expiry_year]').val('2015');
+                    it('should validate expiry year', function () {
+                        $('#card-number').val(validCardNumber);
+                        $('#card-cvn').val(validCvn);
+                        $('#card-expiry-month').val('12');
+                        $('#card-expiry-year').val('2015');
                         $('#payment-button').click();
-                        expect($('select[name=card_expiry_year] ~ .help-block span').text()).toEqual('Invalid year');
+                        expect($('#card-expiry-year ~ .help-block span').text()).toEqual('Invalid year');
 
-                        $('select[name=card_expiry_year]').val(today.year());
+                        $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
-                        expect($('select[name=card_expiry_year] ~ .help-block').has('span').length).toEqual(0);
+                        expect($('#card-expiry-year ~ .help-block').has('span').length).toEqual(0);
                     });
 
-                    it('should validate card expiration', function() {
-                        $('input[name=card_number]').val(validCardNumber);
-                        $('input[name=card_cvn]').val(validCvn);
-                        $('select[name=card_expiry_month]').val(cc_expiry_months[cardExpirationMonth]);
-                        $('select[name=card_expiry_year]').val(today.year());
+                    it('should validate card expiration', function () {
+                        $('#card-number').val(validCardNumber);
+                        $('#card-cvn').val(validCvn);
+                        $('#card-expiry-month').val(cc_expiry_months[cardExpirationMonth]);
+                        $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
-                        expect($('select[name=card_expiry_month] ~ .help-block span').text()).toEqual('Card expired');
+                        expect($('#card-expiry-month ~ .help-block span').text()).toEqual('Card expired');
 
-                        $('select[name=card_expiry_month]').val('12');
-                        $('select[name=card_expiry_year]').val(today.year());
+                        $('#card-expiry-month').val('12');
+                        $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
-                        expect($('select[name=card_expiry_month] ~ .help-block').has('span').length).toEqual(0);
+                        expect($('#card-expiry-month ~ .help-block').has('span').length).toEqual(0);
                     });
                 });
             });
@@ -486,9 +437,9 @@ define([
                 });
             });
 
-            describe('Analytics', function() {
+            describe('Analytics', function () {
                 beforeEach(function () {
-                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function() {
+                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function () {
                         return true;
                     });
                     spyOn(AnalyticsView.prototype, 'track');
@@ -497,23 +448,23 @@ define([
                     spyOn(window.analytics, 'page');
                 });
 
-                it('should trigger voucher applied analytics event', function() {
+                it('should trigger voucher applied analytics event', function () {
                     $('button.apply_voucher').trigger('click');
                     expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.basket.voucher_applied',
-                        { type: 'click' }
+                        {type: 'click'}
                     );
                 });
 
-                it('should trigger checkout analytics event', function() {
+                it('should trigger checkout analytics event', function () {
                     $('button.payment-button').trigger('click');
                     expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.basket.payment_selected',
-                        { category: 'cybersource', type: 'click' }
+                        {category: 'cybersource', type: 'click'}
                     );
                 });
 
-                it('should trigger page load analytics event', function() {
+                it('should trigger page load analytics event', function () {
                     $('<script type="text/javascript">var initModelData = {"course": {"courseId": "a/b/c"}};</script>')
                         .appendTo('body');
                     AnalyticsUtils.analyticsSetUp();

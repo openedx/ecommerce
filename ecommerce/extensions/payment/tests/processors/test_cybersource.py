@@ -253,3 +253,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         processor_config = settings.PAYMENT_PROCESSOR_CONFIG[self.partner.name.lower()][self.processor.NAME.lower()]
         expected = processor_config['sop_payment_page_url']
         self.assertEqual(self.processor.client_side_payment_url, expected)
+
+    def test_get_template_name(self):
+        """ Verify the method returns the path to the client-side template. """
+        self.assertEqual(self.processor.get_template_name(), 'payment/cybersource.html')

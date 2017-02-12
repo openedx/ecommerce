@@ -1,10 +1,11 @@
 {% extends 'edx/base.html' %}
+
 {% load core_extras %}
 {% load i18n %}
 {% load staticfiles %}
 
 {% block title %}
-{% trans "Basket" %}
+{% trans 'Basket' %}
 {% endblock title %}
 
 {% block navbar %}
@@ -13,8 +14,11 @@
 
 
 {% block javascript %}
-    <script src="{% static 'js/apps/basket_app.js' %}"></script>
-    <script src="{% static 'js/payment_processors/cybersource.js' %}"></script>
+  <script src="{% static 'js/apps/basket_app.js' %}"></script>
+
+  <script>
+    window.paymentErrorPath = "{% url 'payment_error' %}";
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -49,3 +53,10 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block post_js %}
+  {# Load payment processor code after the basket app to ensure that all neccessary hooks are in place. #}
+  {% if enable_client_side_checkout %}
+    {% include client_side_payment_processor.get_template_name %}
+  {% endif %}
+{% endblock %}

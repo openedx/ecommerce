@@ -105,32 +105,32 @@ define([
                 // i.e 1 for JAN, 2 for FEB etc.
                 currentMonth = new Date().getMonth() + 1,
                 currentYear = new Date().getFullYear(),
-                cardNumber = $('input[name=card_number]').val(),
-                cvnNumber = $('input[name=card_cvn]').val(),
-                cardExpiryMonth = $('select[name=card_expiry_month]').val(),
-                cardExpiryYear = $('select[name=card_expiry_year]').val(),
-                cardNumberField = $('input[name=card_number]'),
-                cvnNumberField = $('input[name=card_cvn]'),
-                cardExpiryMonthField = $('select[name=card_expiry_month]'),
-                cardExpiryYearField = $('select[name=card_expiry_year]');
+                $number = $('#card-number'),
+                $cvn = $('#card-cvn'),
+                $expMonth = $('#card-expiry-month'),
+                $expYear = $('#card-expiry-year'),
+                cardNumber = $number.val(),
+                cvnNumber = $cvn.val(),
+                cardExpiryMonth = $expMonth.val(),
+                cardExpiryYear = $expYear.val();
 
             cardType = CreditCardUtils.getCreditCardType(cardNumber);
 
             if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
-                appendCardValidationErrorMsg(event, cardNumberField, gettext('Invalid card number'));
+                appendCardValidationErrorMsg(event, $number, gettext('Invalid card number'));
             } else if (_.isUndefined(cardType) || !isCardTypeSupported(cardType.name)) {
-                appendCardValidationErrorMsg(event, cardNumberField, gettext('Unsupported card type'));
+                appendCardValidationErrorMsg(event, $number, gettext('Unsupported card type'));
             } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
-                appendCardValidationErrorMsg(event, cvnNumberField, gettext('Invalid security number'));
+                appendCardValidationErrorMsg(event, $cvn, gettext('Invalid security number'));
             }
 
             if (!Number.isInteger(Number(cardExpiryMonth)) ||
                 Number(cardExpiryMonth) > 12 || Number(cardExpiryMonth) < 1) {
-                appendCardValidationErrorMsg(event, cardExpiryMonthField, gettext('Invalid month'));
+                appendCardValidationErrorMsg(event, $expMonth, gettext('Invalid month'));
             } else if (!Number.isInteger(Number(cardExpiryYear)) || Number(cardExpiryYear) < currentYear) {
-                appendCardValidationErrorMsg(event, cardExpiryYearField, gettext('Invalid year'));
+                appendCardValidationErrorMsg(event, $expYear, gettext('Invalid year'));
             } else if (Number(cardExpiryMonth) < currentMonth && Number(cardExpiryYear) === currentYear) {
-                appendCardValidationErrorMsg(event, cardExpiryMonthField, gettext('Card expired'));
+                appendCardValidationErrorMsg(event, $expMonth, gettext('Card expired'));
             }
         }
 
@@ -139,8 +139,9 @@ define([
         }
 
         function detectCreditCard() {
-            var cardNumber = $('#card-number-input').val().replace(/\s+/g, ''),
-                card,
+            var card,
+                $input = $('#card-number'),
+                cardNumber = $input.val().replace(/\s+/g, ''),
                 iconPath = '/static/images/credit_cards/';
 
             if (cardNumber.length > 12) {
@@ -156,10 +157,9 @@ define([
                         'src',
                         iconPath + card.name + '.png'
                     ).removeClass('hidden');
-                    $('input[name=card_type]').val(card.type);
+                    $input.trigger('cardType:detected', {type: card.name});
                 } else {
                     $('.card-type-icon').attr('src', '').addClass('hidden');
-                    $('input[name=card_type]').val('');
                 }
             } else {
                 $('.card-type-icon').attr('src', '').addClass('hidden');
@@ -312,7 +312,7 @@ define([
                 }
             });
 
-            $('#card-number-input').on('input', function () {
+            $('#card-number').on('input', function () {
                 detectCreditCard();
             });
 
@@ -320,7 +320,7 @@ define([
                 _.each($('.help-block'), function (errorMsg) {
                     $(errorMsg).empty();  // Clear existing validation error messages.
                 });
-                if ($('#card-number-input').val()) {
+                if ($('#card-number').val()) {
                     detectCreditCard();
                 }
                 cardInfoValidation(e);

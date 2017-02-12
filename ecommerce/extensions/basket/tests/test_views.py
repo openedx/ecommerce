@@ -35,7 +35,6 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
-from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import StockRecordFactory
@@ -252,16 +251,9 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.course = CourseFactory(name='BasketSummaryTest')
         site_configuration = self.site.siteconfiguration
 
-        old_payment_processors = site_configuration.payment_processors
         site_configuration.payment_processors = DummyProcessor.NAME
+        site_configuration.client_side_payment_processor = DummyProcessor.NAME
         site_configuration.save()
-
-        def reset_site_config():
-            """ Reset method - resets site_config to pre-test state """
-            site_configuration.payment_processors = old_payment_processors
-            site_configuration.save()
-
-        self.addCleanup(reset_site_config)
 
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
 
@@ -511,6 +503,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assert_order_details_in_context(enrollment_code)
 
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_client_side_checkout(self):
         """ Verify the view returns the data necessary to initiate client-side checkout. """
         seat = self.create_seat(self.course)
@@ -518,11 +511,10 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
         response = self.client.get(self.get_full_url(self.path))
         self.assertEqual(response.status_code, 200)
-        expected = {
-            'enable_client_side_checkout': True,
-            'payment_url': Cybersource(self.site).client_side_payment_url,
-        }
-        self.assertDictContainsSubset(expected, response.context)
+        self.assertTrue(response.context['enable_client_side_checkout'])
+
+        actual_processor = response.context['client_side_payment_processor']
+        self.assertIsInstance(actual_processor, DummyProcessor)
 
         payment_form = response.context['payment_form']
         self.assertIsInstance(payment_form, PaymentForm)
@@ -646,6 +638,7 @@ class VoucherAddMessagesViewTests(TestCase):
 
 class VoucherRemoveMessagesViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     """ VoucherRemoveMessagesView view tests. """
+
     def setUp(self):
         super(VoucherRemoveMessagesViewTests, self).setUp()
         self.user = self.create_user()

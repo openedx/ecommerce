@@ -1,4 +1,5 @@
 define([
+        'jquery',
         'underscore.string',
         'utils/utils',
         'views/coupon_create_edit_view',
@@ -8,7 +9,8 @@ define([
         'test/mock_data/enterprise_customers',
         'test/spec-utils'
     ],
-    function (_s,
+    function ($,
+              _s,
               Utils,
               CouponCreateEditView,
               Coupon,
@@ -106,19 +108,19 @@ define([
                 });
             });
 
-            describe('Editing dynamic coupon', function() {
-                beforeEach(function() {
+            describe('Editing dynamic coupon', function () {
+                beforeEach(function () {
                     model = Coupon.findOrCreate(dynamic_coupon);
                     model.updateSeatData();
                     view = new CouponCreateEditView({model: model, editing: true}).render();
                 });
 
-                it('should display dynamic catalog information.', function() {
+                it('should display dynamic catalog information.', function () {
                     expect(view.$('#catalog-query').val()).toEqual(model.get('catalog_query'));
                     expect(view.$('#non-credit, #verified, #professional').is(':checked')).toEqual(true);
                 });
 
-                it('should hide checkboxes if credit seat type.', function() {
+                it('should hide checkboxes if credit seat type.', function () {
                     var credit_seat_type = ['credit'];
                     model.set('course_seat_types', credit_seat_type);
                     view.render();
@@ -126,14 +128,14 @@ define([
                 });
             });
 
-            describe('Coupon with invoice data', function() {
-                beforeEach(function() {
+            describe('Coupon with invoice data', function () {
+                beforeEach(function () {
                     model = Coupon.findOrCreate(invoice_coupon_data, {parse: true});
                     model.updatePaymentInformation();
                     view = new CouponCreateEditView({model: model, editing: true}).render();
                 });
 
-                it('should contain invoice attributes.', function() {
+                it('should contain invoice attributes.', function () {
                     var tds, payment_date = Utils.stripTimezone(model.get('invoice_payment_date'));
                     if (model.get('tax_deducted_source')) {
                         tds = 'Yes';
@@ -161,18 +163,18 @@ define([
                 });
             });
 
-            describe('Editing multi-use single course enrollment coupon', function() {
-                beforeEach(function() {
+            describe('Editing multi-use single course enrollment coupon', function () {
+                beforeEach(function () {
                     model = Coupon.findOrCreate(multi_use_coupon_data, {parse: true});
                     view = new CouponCreateEditView({model: model, editing: true}).render();
                 });
 
-                it('should display model max_uses value in max_uses field.', function() {
+                it('should display model max_uses value in max_uses field.', function () {
                     expect(view.$('[name=max_uses]').val()).toEqual(model.get('max_uses'));
                     expect(view.$('[name=voucher_type]').val()).toEqual(model.get('voucher_type'));
                 });
 
-                it('should reset catalog related values to initial values when cancel button pressed', function() {
+                it('should reset catalog related values to initial values when cancel button pressed', function () {
                     var formView = view.formView;
                     view.$('#multiple-courses').prop('checked', true).trigger('change');
                     expect(view.model.get('catalog_type')).not.toBe(formView._initAttributes.catalog_type);
@@ -183,8 +185,8 @@ define([
                     expect(view.model.get('course_id')).toBe(formView._initAttributes.course_id);
                     expect(view.model.get('seat_type')).toBe(formView._initAttributes.seat_type);
                 });
-                
-                it('should not update price when editing coupon', function() {
+
+                it('should not update price when editing coupon', function () {
                     var formView = view.formView;
                     spyOn(formView, 'updateTotalValue');
                     formView.changeSeatType();
