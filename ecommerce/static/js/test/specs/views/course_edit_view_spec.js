@@ -1,4 +1,5 @@
 define([
+        'jquery',
         'underscore.string',
         'moment',
         'views/course_create_edit_view',
@@ -7,7 +8,8 @@ define([
         'collections/credit_provider_collection',
         'ecommerce'
     ],
-    function (_s,
+    function ($,
+              _s,
               moment,
               CourseCreateEditView,
               Course,

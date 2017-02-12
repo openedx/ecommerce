@@ -1,8 +1,10 @@
 define([
+        'jquery',
         'models/course_model',
-        'views/course_form_view',
+        'views/course_form_view'
     ],
-    function (Course,
+    function ($,
+              Course,
               CourseFormView) {
         'use strict';
 

@@ -250,19 +250,18 @@ class BasketSummaryView(BasketView):
 
         if payment_processor_class:
             payment_processor = payment_processor_class(self.request.site)
+            current_year = datetime.today().year
 
-            today = datetime.today()
             return {
-                'client_side_payment_processor_name': payment_processor.NAME,
+                'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
                 'months': range(1, 13),
                 'payment_form': PaymentForm(
                     user=self.request.user, initial={'basket': self.request.basket}, label_suffix=''
                 ),
-                'payment_url': payment_processor.client_side_payment_url,
                 'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
                 # Assumption is that the credit card duration is 15 years
-                'years': range(today.year, today.year + 16)
+                'years': range(current_year, current_year + 16),
             }
         else:
             msg = 'Unable to load client-side payment processor [{processor}] for ' \

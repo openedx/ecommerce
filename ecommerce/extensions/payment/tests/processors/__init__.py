@@ -1,7 +1,7 @@
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
+from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse
 
 
-class DummyProcessor(BasePaymentProcessor):
+class DummyProcessor(BaseClientSidePaymentProcessor):
     NAME = 'dummy'
     REFUND_TRANSACTION_ID = 'fake-refund'
 

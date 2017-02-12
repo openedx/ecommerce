@@ -101,7 +101,7 @@
 </div>
 
 
-<form class="payment-form form-horizontal" method="post" action="{{ payment_url }}" data-signing-url="{% url 'cybersource_submit' %}" aria-live="polite">
+<form id="paymentForm" class="payment-form form-horizontal" method="post" aria-live="polite">
     {% csrf_token %}
 
     <div id="payment-information" class="col-sm-7">
@@ -112,7 +112,7 @@
                 <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
                 <div class="col-sm-12 payment-methods">
                     <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
-                        <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png" alt="Credit cards"></a>
+                        <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}"></a>
                     </div>
                     <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
                         {# Translators: Do NOT translate the name PayPal. #}
@@ -142,35 +142,37 @@
             </fieldset>
         </div>
         {% endif %}
-        <div id="billing-information" class="form-input-elements placeholder">
+        <div class="form-input-elements placeholder">
             <fieldset>
                 {% if not free_basket %}
                 <legend aria-label={% trans "Billing information" %}>{% trans "BILLING INFORMATION" %}</legend>
                 {% if not paypal_enabled %}
-                <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="Credit cards">
+                <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}">
                 {% endif %}
                 <div class="pci-fields row">
-                    <div id="card-number" class="form-group col-md-6">
-                        <label for="card-number-input" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
-                        <input id="card-number-input" name="card_number" class="form-control pci-field" maxlength="20" required aria-required="true" pattern="[0-9]*"/>
+                    {# NOTE: The PCI fields should NOT have name attributes by default. This ensures the fields are #}
+                    {# not posted to the server if JavaScript is disabled/fails. The processor-specific JS should #}
+                    {# restore the name attribute to ensure this information is sent to the payment processor. #}
+                    <div class="form-group col-md-6">
+                        <label for="card-number" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
+                        <input id="card-number" type="text" class="form-control pci-field" maxlength="20" required aria-required="true" pattern="[0-9]*"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
-                        <img class="card-type-icon hidden" alt="Credit card icon">
+                        <img class="card-type-icon hidden" alt="{% trans "Credit card icon" %}">
                         <p class="help-block"></p>
                     </div>
-                    <input type="hidden" name="card_type" class="pci-field">
-                    <div id="card-cvn" class="form-group col-md-6">
-                        <label for="card-cvn-input" class="control-label">
+                    <div class="form-group col-md-6">
+                        <label for="card-cvn" class="control-label">
                             {% trans "Security Code (required)" %}
                             <span class="sr">, {% trans "Secure" %}</span>
-                            <i class="fa fa-question-circle" aria-hidden="true" role="tooltip" title="The three last digits in the signature area on the back of your card. For American Express, it is the four digits on the front of the card."></i>
+                            <i class="fa fa-question-circle" aria-hidden="true" role="tooltip" title="{%  trans "The three last digits in the signature area on the back of your card. For American Express, it is the four digits on the front of the card." %}"></i>
                         </label>
-                        <input type="password" id="card-cvn-input" name="card_cvn" class="form-control pci-field" maxlength="4" required aria-required="true" pattern="[0-9]*"/>
+                        <input type="password" id="card-cvn" class="form-control pci-field" maxlength="4" required aria-required="true" pattern="[0-9]*"/>
                         <i class="fa fa-lock" aria-hidden="true"></i>
                         <p class="help-block"></p>
                     </div>
                     <label id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration (required)" %}</label>
-                    <div id="card-expiry-month" class="form-group col-sm-6 col-xs-7">
-                        <select name="card_expiry_month" class="form-control pci-field" required aria-required="true">
+                    <div class="form-group col-sm-6 col-xs-7">
+                        <select id="card-expiry-month" class="form-control pci-field" required aria-required="true">
                             <option>{% trans "(Month)" %}</option>
                             {% for month in months %}
                                 <option value="{{forloop.counter|stringformat:'02d'}}">{{month}}</option>
@@ -178,8 +180,8 @@
                         </select>
                         <p class="help-block"></p>
                     </div>
-                    <div id="card-expiry-year" class="form-group col-sm-6 col-xs-5">
-                        <select name="card_expiry_year" class="form-control pci-field" required aria-required="true">
+                    <div class="form-group col-sm-6 col-xs-5">
+                        <select id="card-expiry-year" class="form-control pci-field" required aria-required="true">
                             <option>{% trans "(Year)" %}</option>
                             {% for year in years %}
                                 <option value="{{year}}">{{year}}</option>
@@ -187,7 +189,6 @@
                         </select>
                         <p class="help-block"></p>
                     </div>
-                    <input type="hidden" name="card_expiry_date" class="pci-field">
                 </div>
                 {% endif %}
                 <div class="payment-button col-sm-6 col-sm-offset-6 col-xs-12">
@@ -205,7 +206,7 @@
                             data-track-type="click"
                             data-track-event="edx.bi.ecommerce.basket.payment_selected"
                             data-track-category="checkout"
-                            data-processor-name="{{ client_side_payment_processor_name }}"
+                            data-processor-name="{{ client_side_payment_processor.NAME }}"
                             data-course-id="{{ course_key }}"
                             data-track-checkout-type="client_side">
                       {% trans "Place Order" %}

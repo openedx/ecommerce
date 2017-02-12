@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-14 00:04-0500\n"
+"POT-Creation-Date: 2017-02-14 19:17-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -524,6 +524,20 @@ msgid ""
 msgstr ""
 "Àn érrör öççürréd whïlé rétrïévïng énröllmént détäïls. Pléäsé trý ägäïn. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: ecommerce/extensions/basket/views.py
+msgid ""
+"You will be automatically enrolled in the verified track of the course upon "
+"completing your order."
+msgstr ""
+"Ýöü wïll ßé äütömätïçällý énrölléd ïn thé vérïfïéd träçk öf thé çöürsé üpön "
+"çömplétïng ýöür ördér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: ecommerce/extensions/basket/views.py
+msgid "You will receive your credit upon completing your order."
+msgstr ""
+"Ýöü wïll réçéïvé ýöür çrédït üpön çömplétïng ýöür ördér. Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/basket/views.py
 msgid ""
@@ -1981,6 +1995,11 @@ msgstr "SÉLÉÇT PÀÝMÉNT MÉTHÖD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт
 msgid "Pay with a Credit Card"
 msgstr "Päý wïth ä Çrédït Çärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+msgid "Credit cards"
+msgstr "Çrédït çärds Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
 #. Translators: Do NOT translate the name PayPal.
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Pay with PayPal"
@@ -2012,8 +2031,26 @@ msgid "Secure"
 msgstr "Séçüré Ⱡ'σяєм ιρѕυ#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+msgid "Credit card icon"
+msgstr "Çrédït çärd ïçön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Security Code (required)"
 msgstr "Séçürïtý Çödé (réqüïréd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+msgid ""
+"The three last digits in the signature area on the back of your card. For "
+"American Express, it is the four digits on the front of the card."
+msgstr ""
+"Thé thréé läst dïgïts ïn thé sïgnätüré äréä ön thé ßäçk öf ýöür çärd. För "
+"Àmérïçän Éxpréss, ït ïs thé föür dïgïts ön thé frönt öf thé çärd. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя "
+"ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ "
+"ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ "
+"¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє "
+"¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
+"ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łα#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Expiration (required)"

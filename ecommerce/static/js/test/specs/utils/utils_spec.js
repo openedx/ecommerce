@@ -1,4 +1,5 @@
 define([
+        'jquery',
         'backbone',
         'test/spec-utils',
         'utils/utils',
@@ -8,7 +9,8 @@ define([
         'test/mock_data/enterprise_customers',
         'ecommerce'
     ],
-    function (Backbone,
+    function ($,
+              Backbone,
               SpecUtils,
               Utils,
               CouponFormView,
@@ -75,16 +77,18 @@ define([
                     };
                 });
 
-                it('adds "is-disabled" class to element while action is running and removes it after', function() {
+                it('adds "is-disabled" class to element while action is running and removes it after', function () {
                     var ModelClass = SpecUtils.getModelForValidation(false),
                         model = new ModelClass(),
-                        view = new CouponFormView({ editing: false, model: model }).render(),
+                        view = new CouponFormView({editing: false, model: model}).render(),
                         button,
                         deferred = new $.Deferred(),
                         promise = deferred.promise();
                     button = view.$el.find('button').first();
                     expect(button).not.toHaveClass('is-disabled');
-                    Utils.disableElementWhileRunning(button, function() { return promise; });
+                    Utils.disableElementWhileRunning(button, function () {
+                        return promise;
+                    });
                     expect(button).toHaveClass('is-disabled');
                     deferred.resolve();
                     expect(button).not.toHaveClass('is-disabled');

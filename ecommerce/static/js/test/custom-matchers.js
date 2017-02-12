@@ -1,7 +1,7 @@
-define(function() {
+define(['jquery'], function ($) {
     'use strict';
 
-    beforeEach(function() {
+    beforeEach(function () {
         jasmine.addMatchers({
             /**
              * Returns a Boolean value that indicates whether an element is visible,
@@ -21,10 +21,10 @@ define(function() {
             toHaveClass: function () {
                 return {
                     compare: function (actual, className) {
-                        return { pass: $(actual).hasClass(className) };
+                        return {pass: $(actual).hasClass(className)};
                     }
                 };
-            },
+            }
         });
     });
 });

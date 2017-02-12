@@ -9,7 +9,6 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
-from oscar.core.loading import get_model
 from suds.client import Client
 from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
@@ -23,21 +22,14 @@ from ecommerce.extensions.payment.exceptions import (
     ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.helpers import sign
-from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
+from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.transport import RequestsTransport
 from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
 
-PaymentEvent = get_model('order', 'PaymentEvent')
-PaymentEventType = get_model('order', 'PaymentEventType')
-PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-ProductClass = get_model('catalogue', 'ProductClass')
-Source = get_model('payment', 'Source')
-SourceType = get_model('payment', 'SourceType')
 
-
-class Cybersource(BasePaymentProcessor):
+class Cybersource(BaseClientSidePaymentProcessor):
     """
     CyberSource Secure Acceptance Web/Mobile (February 2015)
 
@@ -204,10 +196,6 @@ class Cybersource(BasePaymentProcessor):
     def handle_processor_response(self, response, basket=None):
         """
         Handle a response (i.e., "merchant notification") from CyberSource.
-
-        This method does the following:
-            1. Verify the validity of the response.
-            2. Create PaymentEvents and Sources for successful payments.
 
         Arguments:
             response (dict): Dictionary of parameters received from the payment processor.

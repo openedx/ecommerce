@@ -132,3 +132,17 @@ class BasePaymentProcessor(object):  # pragma: no cover
         Returns True if this payment processor is enabled, and False otherwise.
         """
         return waffle.switch_is_active(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + cls.NAME)
+
+
+class BaseClientSidePaymentProcessor(BasePaymentProcessor):  # pylint: disable=abstract-method
+    """ Base class for client-side payment processors. """
+
+    __metaclass__ = abc.ABCMeta
+
+    def get_template_name(self):
+        """ Returns the path of the template to be loaded for this payment processor.
+
+        Returns:
+            str
+        """
+        return 'payment/{}.html'.format(self.NAME)

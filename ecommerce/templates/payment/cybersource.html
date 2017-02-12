@@ -1,0 +1,12 @@
+{% load compress %}
+{% load staticfiles %}
+
+{% compress js %}
+  <script>
+      Cybersource = {
+          postUrl: "{{ client_side_payment_processor.client_side_payment_url }}",
+          signingUrl: "{% url 'cybersource_submit' %}"
+      }
+  </script>
+  <script src="{% static 'js/payment_processors/cybersource.js' %}"></script>
+{% endcompress %}
