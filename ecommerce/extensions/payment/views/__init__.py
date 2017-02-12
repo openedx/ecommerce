@@ -1,6 +1,20 @@
-from django.views.generic import TemplateView
+import logging
+
+import six
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext as _
+from django.views.generic import TemplateView, View
+from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.extensions.payment.forms import PaymentForm
+
+logger = logging.getLogger(__name__)
+
+Applicator = get_class('offer.utils', 'Applicator')
+Basket = get_model('basket', 'Basket')
 
 
 class PaymentFailedView(TemplateView):
@@ -23,3 +37,58 @@ class SDNFailure(TemplateView):
         context = super(SDNFailure, self).get_context_data(**kwargs)
         context['logout_url'] = self.request.site.siteconfiguration.build_lms_url('/logout')
         return context
+
+
+class BasePaymentSubmitView(View):
+    """ Base class for payment submission views.
+
+    Client-side payment processors should implement a view with this base class. The front-end should POST
+    to this view where finalization of payment and order creation will be handled.
+    """
+    form_class = PaymentForm
+    http_method_names = ['post', 'options']
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        logger.info(
+            '%s called for basket [%d]. It is in the [%s] state.',
+            self.__class__.__name__,
+            request.basket.id,
+            request.basket.status
+        )
+        return super(BasePaymentSubmitView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request):
+        # NOTE (CCB): Ideally, we'd inherit FormView; however, doing so causes issues for children
+        # of this class that want to inherit mixins (e.g. EdxOrderPlacementMixin).
+        form = self.form_class(data=request.POST, user=request.user, request=request)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(BasePaymentSubmitView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        # NOTE: Child classes should override this method to perform payment processing.
+        raise NotImplementedError
+
+    def form_invalid(self, form):
+        logger.info(
+            'Invalid payment form submitted for basket [%d].',
+            self.request.basket.id
+        )
+
+        errors = {field: error[0] for field, error in six.iteritems(form.errors)}
+        logger.debug(errors)
+
+        data = {'field_errors': errors}
+
+        if errors.get('basket'):
+            data['error'] = _('There was a problem retrieving your basket. Refresh the page to try again.')
+
+        return JsonResponse(data, status=400)

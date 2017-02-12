@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-30 22:36-0400\n"
+"POT-Creation-Date: 2017-10-31 08:23-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -1084,6 +1084,14 @@ msgstr "Çhöösé çöüntrý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 msgid "{label} (required)"
 msgstr "{label} (réqüïréd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
+#: ecommerce/extensions/payment/forms.py ecommerce/extensions/payment/forms.py
+#: ecommerce/extensions/payment/views/__init__.py
+msgid ""
+"There was a problem retrieving your basket. Refresh the page to try again."
+msgstr ""
+"Théré wäs ä prößlém rétrïévïng ýöür ßäskét. Réfrésh thé pägé tö trý ägäïn. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
+
 #: ecommerce/extensions/payment/forms.py
 msgid "First Name"
 msgstr "Fïrst Nämé Ⱡ'σяєм ιρѕυм ∂σłσ#"
@@ -1163,21 +1171,6 @@ msgstr ""
 #: ecommerce/extensions/payment/utils.py
 msgid "..."
 msgstr "... Ⱡ'σяєм#"
-
-#: ecommerce/extensions/payment/views/cybersource.py
-msgid ""
-"There was a problem retrieving your basket. Refresh the page to try again."
-msgstr ""
-"Théré wäs ä prößlém rétrïévïng ýöür ßäskét. Réfrésh thé pägé tö trý ägäïn. "
-"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
-
-#: ecommerce/extensions/payment/views/cybersource.py
-msgid ""
-"Your basket may have been modified or already purchased. Refresh the page to"
-" try again."
-msgstr ""
-"Ýöür ßäskét mäý hävé ßéén mödïfïéd ör älréädý pürçhäséd. Réfrésh thé pägé tö"
-" trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
 #: ecommerce/extensions/payment/views/cybersource.py
 #, python-brace-format

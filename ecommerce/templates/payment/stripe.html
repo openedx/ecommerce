@@ -1,0 +1,24 @@
+{% load compress %}
+{% load staticfiles %}
+
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<script type="text/javascript" src="https://js.stripe.com/v3/"></script>
+
+{% compress js %}
+  <script>
+    window.StripeConfig = {
+        postUrl: '{% url 'stripe:submit' %}',
+        publishableKey: '{{ client_side_payment_processor.publishable_key }}',
+        country: '{{ client_side_payment_processor.country }}',
+        paymentRequest: {
+            currency: '{{ basket.currency|lower }}',
+            label: '{{ platform_name }}',
+            // NOTE: Stripe expects the currency sub-unit (e.g. cents instead of dollars).
+            // widthratio is used to avoid having to write extra code for multiplication.
+            total: {% widthratio order_total.incl_tax 1 100 %}
+        }
+    }
+
+  </script>
+  <script src="{% static 'js/views/stripe.js' %}"></script>
+{% endcompress %}

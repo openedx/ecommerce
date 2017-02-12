@@ -35,4 +35,5 @@ pytz==2016.10
 requests==2.18.1
 sailthru-client==2.2.3
 six==1.10.0
+stripe==1.70.0
 zeep==2.1.1

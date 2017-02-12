@@ -9,21 +9,25 @@ CARD_TYPES = {
         'display_name': _('American Express'),
         'cybersource_code': '003',
         'apple_pay_network': 'amex',
+        'stripe_brand': 'American Express',
     },
     'discover': {
         'display_name': _('Discover'),
         'cybersource_code': '004',
         'apple_pay_network': 'discover',
+        'stripe_brand': 'Discover',
     },
     'mastercard': {
         'display_name': _('MasterCard'),
         'cybersource_code': '002',
         'apple_pay_network': 'mastercard',
+        'stripe_brand': 'MasterCard',
     },
     'visa': {
         'display_name': _('Visa'),
         'cybersource_code': '001',
         'apple_pay_network': 'visa',
+        'stripe_brand': 'Visa',
     },
 }
 
@@ -46,4 +50,8 @@ PAYPAL_LOCALES = {
 APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP = {
     value['apple_pay_network']: value['cybersource_code'] for value in six.itervalues(CARD_TYPES) if
     'cybersource_code' in value
+}
+
+STRIPE_CARD_TYPE_MAP = {
+    value['stripe_brand']: key for key, value in six.iteritems(CARD_TYPES) if 'stripe_brand' in value
 }

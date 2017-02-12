@@ -300,12 +300,16 @@ class BasketSummaryView(BasketView):
             payment_processor = payment_processor_class(self.request.site)
             current_year = datetime.today().year
 
+            # pylint: disable=no-value-for-parameter
             return {
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
                 'months': range(1, 13),
                 'payment_form': PaymentForm(
-                    user=self.request.user, initial={'basket': self.request.basket}, label_suffix=''
+                    user=self.request.user,
+                    request=self.request,
+                    initial={'basket': self.request.basket},
+                    label_suffix=''
                 ),
                 'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
                 # Assumption is that the credit card duration is 15 years
