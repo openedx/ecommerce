@@ -90,7 +90,7 @@ class PaymentForm(forms.Form):
                 css_class='form-item col-md-6'
             )
         )
-        self.fields['basket'].queryset = self.fields['basket'].queryset.filter(owner=user)
+
         for bound_field in self:
             # https://www.w3.org/WAI/tutorials/forms/validation/#validating-required-input
             if hasattr(bound_field, 'field') and bound_field.field.required:
@@ -180,3 +180,35 @@ class PaymentForm(forms.Form):
                     })
 
         return cleaned_data
+
+
+class StripeSubmitForm(forms.Form):
+    """
+    Form for Stripe token submissions.
+
+    This form differs drastically from `PaymentForm` because we can use the Stripe API to pull the billing address
+    from the token. This information is encoded in the token because we explicitly include the HTML form data in our
+    token creation request submitted Stripe by client-side JavaScript.
+    """
+    stripe_token = forms.CharField(widget=forms.HiddenInput(), required=True)
+    basket = forms.ModelChoiceField(
+        queryset=Basket.objects.all(),
+        widget=forms.HiddenInput(),
+        error_messages={
+            'invalid_choice': _('There was a problem retrieving your basket. Refresh the page to try again.'),
+        }
+    )
+
+    def __init__(self, user, request, *args, **kwargs):
+        super(StripeSubmitForm, self).__init__(*args, **kwargs)
+        self.request = request
+        update_basket_queryset_filter(self, user)
+
+    def clean_basket(self):
+        basket = self.cleaned_data['basket']
+
+        if basket:
+            basket.strategy = self.request.strategy
+            Applicator().apply(basket, self.request.user, self.request)
+
+        return basket

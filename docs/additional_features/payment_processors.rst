@@ -2,7 +2,8 @@ Payment Processors
 ##################
 Payment processors/gateways handle the acceptance/validation of payment data--credit cards, wallet payments, etc.--and
 transfer of funds from learners to merchants. At edx.org, we use CyberSource to accept credit card payments, and PayPal
-to accept PayPal payments (made from either the learner's PayPal account, bank account, or credit card).
+to accept PayPal payments (made from either the learner's PayPal account, bank account, or credit card). The codebase
+also contains an integration for Stripe, which supports credit card payments amongst other payment methods.
 
 If you are interested in supporting another payment processor, reach out to the open source community to determine if
 someone has already developed an integration. Otherwise, you may refer to existing integrations as reference points.
@@ -98,10 +99,11 @@ Apple Pay
 *********
 Apple Pay allows learners to checkout quickly without having to manually fill out the payment form. If you are not
 familiar with Apple Pay, please take a moment to read the following documents to understand the user flow and necessary
-configuration. **Apple Pay support is only available when using the CyberSource processor.**
+configuration. **Apple Pay support is only available when using either the CyberSource or Stripe processors.**
 
 * `Apple Pay JS <https://developer.apple.com/documentation/applepayjs>`_
 * `CyberSource: Apple Pay Using  the Simple Order API <https://www.cybersource.com/developers/integration_methods/apple_pay/>`_
+* `Stripe: Apple Pay on web <https://stripe.com/apple-pay>`_
 
 Apple Pay is only available to learners using Safari on the following platforms:
 
@@ -122,8 +124,6 @@ Testing
 Apple Pay is only available over HTTPS (SSL). If you do not have SSL configured for your local development system, use a
 tunnel/proxy application like `ngrok`_ to expose your system via publicly-accessible URL with HTTPS. Additionally, when
 testing with CyberSource, you will need to validate your ngrok domain at Apple.
-
-.. _ngrok: https://ngrok.com/
 
 
 CyberSource
@@ -231,3 +231,62 @@ Settings
             },
         },
     }
+
+
+Stripe
+******
+The Stripe integration supports payments via credit cards, Apple Pay, and the `Payment Request API`_ which is a W3C
+browser standard that provides Apple Pay-like behavior across different browsers. Both payment methods take advantage of
+tokenization. Sensitive data--credit card number, card expiration date, CVC--never touches your servers. Instead this
+information is relayed directly to Stripe in exchange for a token. This token is sent to the E-Commerce Service and used
+to make a final call to Stripe, charging the learner and completing the checkout process. For additional details
+regarding Stripe payments, check out the `Stripe quickstart guide`_.
+
+If you wish to use Apple Pay, you must use SSL and verify your domain on your `Stripe Dashboard`_.
+
+.. _Payment Request API: https://stripe.com/docs/payment-request-api
+.. _Stripe quickstart guide: https://stripe.com/docs/quickstart
+
+
+
+Settings
+--------
+
+.. code-block:: python
+
+    PAYMENT_PROCESSOR_CONFIG = {
+        'edx': {
+            'stripe': {
+                # Get your keys from https://dashboard.stripe.com/account/apikeys.
+                # Remember to toggle test data to see keys for use with test mode
+                'publishable_key': '',
+                'secret_key': '',
+
+                # Two-letter ISO 3166 country code for your business/merchant account.
+                # This is required for Apple Pay and the Payment Request API!
+                # https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+                'country': '',
+
+                # Get this from Stripe at https://dashboard.stripe.com/account/apple_pay.
+                'apple_pay_merchant_id_domain_association': '',
+            },
+        },
+    }
+
+
+Testing
+-------
+Stripe provides both live and test API keys. Remember to use your test keys when testing. The publishable and secret
+keys should be prefixed with `pk_test_` and `sk_test`, respectively.
+
+When in testing mode, you must use test credit card numbers. Test card numbers can be obtained from
+https://stripe.com/docs/testing#cards. When testing Apple Pay, Stripe *does* allow for testing with real cards, so there
+is no need to setup a sandbox iCloud account. You will *not* be charged **provided you are using test API keys**.
+
+Apple Pay and the Payment Request API require HTTPS. If you do not have SSL configured for your local development
+system, use a tunnel/proxy application like `ngrok`_ to expose your system via publicly-accessible URL with HTTPS. You
+will also need to register your domain on your `Stripe dashboard`_. Remember to remove
+the domain after your testing is complete.
+
+.. _Stripe Dashboard: https://dashboard.stripe.com/account/apple_pay
+.. _ngrok: https://ngrok.com/
