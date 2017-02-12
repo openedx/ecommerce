@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-31 18:11+0000\n"
+"POT-Creation-Date: 2017-02-13 10:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/static/js/models/coupon_model.js
@@ -178,6 +178,42 @@ msgid "Problem occurred during checkout. Please contact support"
 msgstr ""
 "Prößlém öççürréd dürïng çhéçköüt. Pléäsé çöntäçt süppört Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "This field is required"
+msgstr "Thïs fïéld ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Invalid card number"
+msgstr "Ìnvälïd çärd nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Unsupported card type"
+msgstr "Ûnsüppörtéd çärd týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Invalid security number"
+msgstr "Ìnvälïd séçürïtý nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Invalid month"
+msgstr "Ìnvälïd mönth Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Invalid year"
+msgstr "Ìnvälïd ýéär Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "Card expired"
+msgstr "Çärd éxpïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "<Choose state/province>"
+msgstr "<Choose state/province> Ⱡ'σяєм#"
+
+#: ecommerce/static/js/pages/basket_page.js
+msgid "State/Province (required)"
+msgstr "Stäté/Prövïnçé (réqüïréd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/static/js/pages/coupon_create_page.js
 msgid "Create New Coupon"

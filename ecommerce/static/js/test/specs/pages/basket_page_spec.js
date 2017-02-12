@@ -452,15 +452,6 @@ define([
                 });
             });
 
-            describe('appendToForm', function () {
-                it('should append input data to form', function () {
-                    _.each(data.payment_form_data, function(value, key) {
-                        BasketPage.appendToForm(value, key, form);
-                    });
-                    expect(form.children().length).toEqual(3);
-                });
-            });
-
             describe('onFail', function () {
                 it('should report error to message div element', function () {
                     $('<div id="messages"></div>').appendTo('body');

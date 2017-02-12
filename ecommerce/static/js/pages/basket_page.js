@@ -15,18 +15,39 @@ define([
               _s,
               Utils,
               CreditCardUtils,
-              Cookies
-    ) {
+              Cookies) {
         'use strict';
 
-        var appendToForm = function (value, key, form) {
-            $('<input>').attr({
-                type: 'text',
-                name: key,
-                value: value
-            }).appendTo(form);
-        },
-        checkoutPayment = function(data) {
+        function hideVoucherForm() {
+            $('#voucher_form_container').hide();
+            $('#voucher_form_link').show();
+        }
+
+        function onFail() {
+            var message = gettext('Problem occurred during checkout. Please contact support');
+            $('#messages').html(_s.sprintf('<div class="alert alert-error">%s</div>', message));
+        }
+
+        function onSuccess(data) {
+            var $form = $('<form>', {
+                class: 'hidden',
+                action: data.payment_page_url,
+                method: 'POST',
+                'accept-method': 'UTF-8'
+            });
+
+            _.each(data.payment_form_data, function (value, key) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: key,
+                    value: value
+                }).appendTo($form);
+            });
+
+            $form.appendTo('body').submit();
+        }
+
+        function checkoutPayment(data) {
             $.ajax({
                 url: '/api/v2/checkout/',
                 method: 'POST',
@@ -39,48 +60,21 @@ define([
                 success: onSuccess,
                 error: onFail
             });
-        },
-        hideVoucherForm = function() {
-            $('#voucher_form_container').hide();
-            $('#voucher_form_link').show();
-        },
-        onFail = function(){
-            var message = gettext('Problem occurred during checkout. Please contact support');
-            $('#messages').empty().append(
-                _s.sprintf('<div class="alert alert-error">%s</div>', message)
-            );
-        },
-        onSuccess = function (data) {
-            var $form = $('<form>', {
-                class: 'hidden',
-                action: data.payment_page_url,
-                method: 'POST',
-                'accept-method': 'UTF-8'
-            });
+        }
 
-            _.each(data.payment_form_data, function (value, key) {
-                    $('<input>').attr({
-                        type: 'hidden',
-                        name: key,
-                        value: value
-                    }).appendTo($form);
-                  });
-
-            $form.appendTo('body').submit();
-        },
-        appendCardValidationErrorMsg = function(event, field, msg) {
+        function appendCardValidationErrorMsg(event, field, msg) {
             field.find('~.help-block').append('<span>' + msg + '</span>');
             field.focus();
             event.preventDefault();
-        },
+        }
 
-        appendCardHolderValidationErrorMsg = function(field, msg) {
+        function appendCardHolderValidationErrorMsg(field, msg) {
             field.parentsUntil('form-item').find('~.help-block').append(
                 '<span>' + msg + '</span>'
             );
-        },
+        }
 
-        cardHolderInfoValidation = function (event) {
+        function cardHolderInfoValidation(event) {
             var requiredFields = [
                 'input[name=first_name]',
                 'input[name=last_name]',
@@ -93,18 +87,18 @@ define([
                 requiredFields.push('select[name=state]');
             }
 
-            _.each(requiredFields, function(field) {
+            _.each(requiredFields, function (field) {
                 if ($(field).val() === '') {
                     event.preventDefault();
-                    appendCardHolderValidationErrorMsg($(field), 'This field is required');
+                    appendCardHolderValidationErrorMsg($(field), gettext('This field is required'));
                 }
             });
 
             // Focus the first element that has an error message.
             $('.help-block > span').first().parentsUntil('fieldset').last().find('input').focus();
-        },
+        }
 
-        cardInfoValidation = function (event) {
+        function cardInfoValidation(event) {
             var cardType,
                 // We are adding 1 here because month in js style date-time starts with 0
                 // i.e. 0 for JAN, 1 for FEB etc. However, credit card expiry months start with 1
@@ -123,24 +117,28 @@ define([
             cardType = CreditCardUtils.getCreditCardType(cardNumber);
 
             if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
-                appendCardValidationErrorMsg(event, cardNumberField, 'Invalid card number');
-            } else if (typeof cardType === 'undefined' || !isCardTypeSupported(cardType.name)) {
-                appendCardValidationErrorMsg(event, cardNumberField, 'Unsupported card type');
+                appendCardValidationErrorMsg(event, cardNumberField, gettext('Invalid card number'));
+            } else if (_.isUndefined(cardType) || !isCardTypeSupported(cardType.name)) {
+                appendCardValidationErrorMsg(event, cardNumberField, gettext('Unsupported card type'));
             } else if (cvnNumber.length !== cardType.cvnLength || !Number.isInteger(Number(cvnNumber))) {
-                appendCardValidationErrorMsg(event, cvnNumberField, 'Invalid security number');
+                appendCardValidationErrorMsg(event, cvnNumberField, gettext('Invalid security number'));
             }
 
             if (!Number.isInteger(Number(cardExpiryMonth)) ||
                 Number(cardExpiryMonth) > 12 || Number(cardExpiryMonth) < 1) {
-                appendCardValidationErrorMsg(event, cardExpiryMonthField, 'Invalid month');
+                appendCardValidationErrorMsg(event, cardExpiryMonthField, gettext('Invalid month'));
             } else if (!Number.isInteger(Number(cardExpiryYear)) || Number(cardExpiryYear) < currentYear) {
-                appendCardValidationErrorMsg(event, cardExpiryYearField, 'Invalid year');
+                appendCardValidationErrorMsg(event, cardExpiryYearField, gettext('Invalid year'));
             } else if (Number(cardExpiryMonth) < currentMonth && Number(cardExpiryYear) === currentYear) {
-                appendCardValidationErrorMsg(event, cardExpiryMonthField, 'Card expired');
+                appendCardValidationErrorMsg(event, cardExpiryMonthField, gettext('Card expired'));
             }
-        },
+        }
 
-        detectCreditCard = function() {
+        function isCardTypeSupported(cardType) {
+            return $.inArray(cardType, ['amex', 'discover', 'mastercard', 'visa']) > -1;
+        }
+
+        function detectCreditCard() {
             var cardNumber = $('#card-number-input').val().replace(/\s+/g, ''),
                 card,
                 iconPath = '/static/images/credit_cards/';
@@ -166,13 +164,9 @@ define([
             } else {
                 $('.card-type-icon').attr('src', '').addClass('hidden');
             }
-        },
+        }
 
-        isCardTypeSupported = function (cardType) {
-            return $.inArray(cardType, ['amex', 'discover', 'mastercard', 'visa']) > -1;
-        },
-
-        sdnCheck = function(event) {
+        function sdnCheck(event) {
             var first_name = $('input[name=first_name]').val(),
                 last_name = $('input[name=last_name]').val(),
                 country = $('select[name=country]').val();
@@ -190,30 +184,30 @@ define([
                     'country': country
                 }),
                 async: false,
-                success: function(data) {
+                success: function (data) {
                     if (data.hits > 0) {
                         event.preventDefault();
                         Utils.redirect('/payment/sdn/failure/');
                     }
                 }
             });
-        },
+        }
 
-        onReady = function() {
+        function onReady() {
             var $paymentButtons = $('.payment-buttons'),
                 basketId = $paymentButtons.data('basket-id');
 
-            $('#voucher_form_link').on('click', function(event) {
+            $('#voucher_form_link').on('click', function (event) {
                 event.preventDefault();
                 showVoucherForm();
             });
 
-            $('#voucher_form_cancel').on('click', function(event) {
+            $('#voucher_form_cancel').on('click', function (event) {
                 event.preventDefault();
                 hideVoucherForm();
             });
 
-            $('select[name=country]').on('change', function() {
+            $('select[name=country]').on('change', function () {
                 var country = $('select[name=country]').val(),
                     inputDiv = $('#div_id_state .controls'),
                     states = {
@@ -301,10 +295,10 @@ define([
                         '<select name="state" class="select form-control" id="id_state"' +
                         'aria-required="true" required></select>'
                     );
-                    $('#id_state').append($('<option>', {value: '', text: '<Choose state/province>'}));
-                    $('#div_id_state').find('label').text('State/Province (required)');
+                    $('#id_state').append($('<option>', {value: '', text: gettext('<Choose state/province>')}));
+                    $('#div_id_state').find('label').text(gettext('State/Province (required)'));
 
-                    _.each(states[country], function(value, key) {
+                    _.each(states[country], function (value, key) {
                         $('#id_state').append($('<option>', {value: value, text: key}));
                     });
                 } else {
@@ -318,12 +312,12 @@ define([
                 }
             });
 
-            $('#card-number-input').on('input', function() {
+            $('#card-number-input').on('input', function () {
                 detectCreditCard();
             });
 
-            $('#payment-button').click(function(e) {
-                _.each($('.help-block'), function(errorMsg) {
+            $('#payment-button').click(function (e) {
+                _.each($('.help-block'), function (errorMsg) {
                     $(errorMsg).empty();  // Clear existing validation error messages.
                 });
                 if ($('#card-number-input').val()) {
@@ -346,16 +340,20 @@ define([
                         payment_processor: paymentProcessor
                     };
 
-                Utils.disableElementWhileRunning($btn, function() { return promise; });
+                Utils.disableElementWhileRunning($btn, function () {
+                    return promise;
+                });
                 checkoutPayment(data);
             });
 
             // Increment the quantity field until max
-            $('.spinner .btn:first-of-type').on('click', function() {
-                var btn = $(this);
-                var input = btn.closest('.spinner').find('input');
+            $('.spinner .btn:first-of-type').on('click', function () {
+                var btn = $(this),
+                    input = btn.closest('.spinner').find('input'),
+                    max = input.attr('max');
+
                 // Stop if max attribute is defined and value is reached to given max value
-                if (input.attr('max') === undefined || parseInt(input.val()) < parseInt(input.attr('max'))) {
+                if (_.isUndefined(max) || parseInt(input.val()) < parseInt(max)) {
                     input.val(parseInt(input.val()) + 1);
                 } else {
                     btn.next('disabled', true);
@@ -363,26 +361,28 @@ define([
             });
 
             // Decrement the quantity field until min
-            $('.spinner .btn:last-of-type').on('click', function() {
-                var btn = $(this);
-                var input = btn.closest('.spinner').find('input');
+            $('.spinner .btn:last-of-type').on('click', function () {
+                var btn = $(this),
+                    input = btn.closest('.spinner').find('input'),
+                    min = input.attr('min');
+
                 // Stop if min attribute is defined and value is reached to given min value
-                if (input.attr('min') === undefined || parseInt(input.val()) > parseInt(input.attr('min'))) {
+                if (_.isUndefined(min) || parseInt(input.val()) > parseInt(min)) {
                     input.val(parseInt(input.val()) - 1);
                 } else {
                     btn.prev('disabled', true);
                 }
             });
-        },
-        showVoucherForm = function() {
+        }
+
+        function showVoucherForm() {
             $('#voucher_form_container').show();
             $('#voucher_form_link').hide();
             $('#id_code').focus();
-        };
+        }
 
         return {
             appendCardHolderValidationErrorMsg: appendCardHolderValidationErrorMsg,
-            appendToForm: appendToForm,
             cardInfoValidation: cardInfoValidation,
             checkoutPayment: checkoutPayment,
             hideVoucherForm: hideVoucherForm,
@@ -391,7 +391,7 @@ define([
             onReady: onReady,
             onSuccess: onSuccess,
             sdnCheck: sdnCheck,
-            showVoucherForm: showVoucherForm,
+            showVoucherForm: showVoucherForm
         };
     }
 );
