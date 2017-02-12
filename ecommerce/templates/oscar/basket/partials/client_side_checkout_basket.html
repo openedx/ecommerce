@@ -143,6 +143,13 @@
                               class="payment-button apple-pay-button apple-pay-button-black"
                               title="{% trans "Pay with Apple Pay" %}" type="button">
                       </button>
+                    <div id="payment-request-button"
+                         data-track-type="click"
+                         data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                         data-track-category="checkout"
+                         data-track-payment-method="Stripe Payment Request">
+                      <!-- A Stripe Element will be inserted here. -->
+                    </div>
                   </div>
             </div>
         </div>
@@ -175,6 +182,7 @@
                         <img class="card-type-icon hidden" alt="{% trans "Credit card icon" %}">
                         <p class="help-block"></p>
                     </div>
+                    <input type="hidden" data-name="card_type" class="pci-field">
                     <div class="form-group col-md-6">
                         <label for="card-cvn" class="control-label">
                             {% trans "Security Code (required)" %}

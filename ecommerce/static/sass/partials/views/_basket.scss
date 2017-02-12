@@ -334,13 +334,21 @@
     }
 
     #payment-processor {
+        $payment-button-width: 120px;
+
+        // Stripe payment request button
+        #payment-request-button {
+            display: inline-block;
+            width: $payment-button-width;
+        }
+
         .payment-button {
             border: 1px solid palette(grayscale, base);
             border-radius: 5px;
             background-position: center center;
             background-repeat: no-repeat;
             background-color: #fff;
-            width: 120px;
+            width: $payment-button-width;
             height: 50px;
             vertical-align: top;
 

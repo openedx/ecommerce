@@ -51,6 +51,10 @@
         {
             name: 'js/views/cybersource_client_side_checkout',
             exclude: ['js/common']
+        },
+        {
+            name: 'js/views/stripe',
+            exclude: ['js/common']
         }
     ]
 })
