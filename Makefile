@@ -32,7 +32,8 @@ help:
 
 requirements.js:
 	npm install
-	$(NODE_BIN)/bower install
+	# Allow root for Docker
+	$(NODE_BIN)/bower install --allow-root
 
 requirements: requirements.js
 	pip install -r requirements/local.txt --exists-action w
