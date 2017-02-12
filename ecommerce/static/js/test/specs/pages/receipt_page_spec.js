@@ -1,10 +1,11 @@
 define([
+        'jquery',
         'pages/receipt_page',
         'utils/analytics_utils'
     ],
-    function (ReceiptPage,
-              AnalyticsUtils
-              ) {
+    function ($,
+              ReceiptPage,
+              AnalyticsUtils) {
         'use strict';
 
         describe('Receipt Page', function () {

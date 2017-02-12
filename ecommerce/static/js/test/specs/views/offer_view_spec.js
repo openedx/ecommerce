@@ -36,7 +36,7 @@ define([
                     course_start_date: '2013-02-05T05:00:00Z',
                     id: 'course-v1:edX+DemoX+Demo_Course',
                     voucher_end_date: '2016-07-29T00:00:00Z',
-                    contains_verified: true,
+                    contains_verified: true
                 }),
                 course2 = new OfferModel({
                     benefit: {
@@ -58,7 +58,7 @@ define([
                     course_start_date: '2013-02-05T05:00:00Z',
                     id: 'course-v1:edX+DemoX+Demo_Courseewewe',
                     voucher_end_date: '2016-07-29T00:00:00Z',
-                    contains_verified: true,
+                    contains_verified: true
                 });
 
             beforeEach(function() {

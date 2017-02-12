@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-31 18:11+0000\n"
+"POT-Creation-Date: 2017-02-13 10:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,11 +50,11 @@ msgstr ""
 msgid "Must occur after start date"
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:142
+#: ecommerce/static/js/models/coupon_model.js:145
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr ""
 
-#: ecommerce/static/js/models/coupon_model.js:170
+#: ecommerce/static/js/models/coupon_model.js:173
 msgid "Must occur before end date"
 msgstr ""
 
@@ -154,8 +154,44 @@ msgstr ""
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:48
+#: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:93
+msgid "This field is required"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:120
+msgid "Invalid card number"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:122
+msgid "Unsupported card type"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:124
+msgid "Invalid security number"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:129
+msgid "Invalid month"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:131
+msgid "Invalid year"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:133
+msgid "Card expired"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:298
+msgid "<Choose state/province>"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:299
+msgid "State/Province (required)"
 msgstr ""
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
