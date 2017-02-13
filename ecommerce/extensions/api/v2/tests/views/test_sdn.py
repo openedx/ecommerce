@@ -3,6 +3,7 @@ import mock
 
 import ddt
 from django.core.urlresolvers import reverse
+from requests.exceptions import HTTPError, Timeout
 from rest_framework import status
 
 from ecommerce.core.models import User
@@ -38,12 +39,21 @@ class SDNCheckViewSetTests(TestCase):
         self.client.logout()
         self.assertEqual(self.make_request().status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_sdn_check_match(self):
+    @ddt.data(0, 1)
+    def test_sdn_check_match(self, hits):
         """Verify the endpoint returns the number of hits SDN check made."""
         with mock.patch.object(SDNClient, 'search') as sdn_validator_mock:
             with mock.patch.object(User, 'deactivate_account') as deactivate_account_mock:
-                sdn_validator_mock.return_value = {'total': 1}
+                sdn_validator_mock.return_value = {'total': hits}
                 deactivate_account_mock.return_value = True
                 response = self.make_request()
-                self.assertEqual(json.loads(response.content)['hits'], 1)
+                self.assertEqual(json.loads(response.content)['hits'], hits)
                 self.assertTrue(sdn_validator_mock.called)
+
+    @ddt.data(HTTPError, Timeout)
+    def test_sdn_check_error(self, side_effect):
+        """Verify zero hits are returned when an exception happens."""
+        with mock.patch.object(SDNClient, 'search') as sdn_validator_mock:
+            sdn_validator_mock.side_effect = side_effect
+            response = self.make_request()
+            self.assertEqual(json.loads(response.content)['hits'], 0)

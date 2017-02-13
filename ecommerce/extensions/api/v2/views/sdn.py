@@ -1,4 +1,5 @@
 """API endpoint for performing an SDN check on users."""
+from requests.exceptions import HTTPError, Timeout
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -27,15 +28,20 @@ class SDNCheckViewSet(APIView):
                 api_key=site_configuration.sdn_api_key,
                 sdn_list=site_configuration.sdn_api_list
             )
-            response = sdn_check.search(name, country)
-            hits = response['total']
-            if hits > 0:
-                sdn_check.deactivate_user(
-                    request.user,
-                    request.site.siteconfiguration,
-                    name,
-                    country,
-                    response
-                )
+            try:
+                response = sdn_check.search(name, country)
+                hits = response['total']
+                if hits > 0:
+                    sdn_check.deactivate_user(
+                        request.user,
+                        request.site.siteconfiguration,
+                        name,
+                        country,
+                        response
+                    )
+            except (HTTPError, Timeout):
+                # If the SDN API endpoint is down or times out
+                # the user is allowed to make the purchase.
+                pass
 
         return Response({'hits': hits})
