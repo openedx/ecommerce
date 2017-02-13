@@ -254,14 +254,6 @@ class SiteConfiguration(models.Model):
         """
         return self.from_email or settings.OSCAR_FROM_EMAIL
 
-    def clean_fields(self, exclude=None):
-        """ Validates model fields """
-        if not exclude or 'payment_processors' not in exclude:
-            self._clean_payment_processors()
-
-        if not exclude or 'client_side_payment_processor' not in exclude:
-            self._clean_client_side_payment_processor()
-
     @cached_property
     def segment_client(self):
         return SegmentClient(self.segment_key, debug=settings.DEBUG)
@@ -587,9 +579,3 @@ class BusinessClient(models.Model):
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
         super(BusinessClient, self).save(*args, **kwargs)
-
-
-def validate_configuration():
-    """ Validates all existing SiteConfiguration models """
-    for config in SiteConfiguration.objects.all():
-        config.clean_fields()
