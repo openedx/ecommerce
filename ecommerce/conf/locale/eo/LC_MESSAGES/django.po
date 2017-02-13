@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-31 18:09+0000\n"
+"POT-Creation-Date: 2017-02-13 00:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -154,6 +154,36 @@ msgid "Enable the usage of Otto receipt page."
 msgstr ""
 "Énäßlé thé üsägé öf Öttö réçéïpt pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
+
+#: ecommerce/core/models.py
+msgid "Send refund email notification"
+msgstr "Sénd réfünd émäïl nötïfïçätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: ecommerce/core/models.py
+msgid "Enable SDN check"
+msgstr "Énäßlé SDN çhéçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: ecommerce/core/models.py
+msgid "Enable SDN check at checkout."
+msgstr "Énäßlé SDN çhéçk ät çhéçköüt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/core/models.py
+msgid "US Treasury SDN API URL"
+msgstr "ÛS Tréäsürý SDN ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/core/models.py
+msgid "US Treasury SDN API key"
+msgstr "ÛS Tréäsürý SDN ÀPÌ kéý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/core/models.py
+msgid "SDN lists"
+msgstr "SDN lïsts Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: ecommerce/core/models.py
+msgid "A comma-seperated list of Treasury OFAC lists to check against."
+msgstr ""
+"À çömmä-sépérätéd lïst öf Tréäsürý ÖFÀÇ lïsts tö çhéçk ägäïnst. Ⱡ'σяєм ιρѕυм"
+" ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/core/models.py
 msgid "Full Name"
@@ -2179,6 +2209,43 @@ msgstr ""
 "\n"
 "          Tö trý ägäïn, vïsït thé %(start_link)sßäskét pägé%(end_link)s.\n"
 "         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#. Translators: SDN is an acronym for Specially Designated Nationals
+#: ecommerce/templates/oscar/checkout/sdn_failure.html
+msgid "SDN Check Failure"
+msgstr "SDN Çhéçk Fäïlüré Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/templates/oscar/checkout/sdn_failure.html
+msgid ""
+"Unfortunately, your account profile or payment information appears to match "
+"one or more records on a U.S. Treasury Department sanctions list. This means"
+" we cannot complete your transaction or provide you with services and must "
+"suspend your learner account."
+msgstr ""
+"Ûnförtünätélý, ýöür äççöünt pröfïlé ör päýmént ïnförmätïön äppéärs tö mätçh "
+"öné ör möré réçörds ön ä Û.S. Tréäsürý Dépärtmént sänçtïöns lïst. Thïs méäns"
+" wé çännöt çömplété ýöür tränsäçtïön ör prövïdé ýöü wïth sérvïçés änd müst "
+"süspénd ýöür léärnér äççöünt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
+" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
+"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρ#"
+
+#: ecommerce/templates/oscar/checkout/sdn_failure.html
+#, python-format
+msgid ""
+"If you have questions regarding clearing a match, please contact "
+"%(ofac_email_link)s ofac.reconsideration@treasury.gov%(end_link)s for "
+"information about options for clearing a match. Your account will be "
+"suspended until this matter is resolved satisfactorily."
+msgstr ""
+"Ìf ýöü hävé qüéstïöns régärdïng çléärïng ä mätçh, pléäsé çöntäçt "
+"%(ofac_email_link)s öfäç.réçönsïdérätïön@tréäsürý.göv%(end_link)s för "
+"ïnförmätïön äßöüt öptïöns för çléärïng ä mätçh. Ýöür äççöünt wïll ßé "
+"süspéndéd üntïl thïs mättér ïs résölvéd sätïsfäçtörïlý. Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт "
+"łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ "
+"єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ "
+"αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
