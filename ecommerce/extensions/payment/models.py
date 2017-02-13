@@ -1,7 +1,10 @@
+from __future__ import unicode_literals
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from oscar.apps.payment.abstract_models import AbstractSource
+from django_extensions.db.models import TimeStampedModel
 from solo.models import SingletonModel
 
 from ecommerce.extensions.payment.constants import CARD_TYPE_CHOICES
@@ -45,6 +48,21 @@ class PaypalProcessorConfiguration(SingletonModel):
     class Meta(object):
         verbose_name = "Paypal Processor Configuration"
 
+
+class SDNCheckFailure(TimeStampedModel):
+    """ Record of SDN check failure. """
+    full_name = models.CharField(max_length=255)
+    username = models.CharField(max_length=255)
+    country = models.CharField(max_length=2)
+    sdn_check_response = JSONField()
+
+    def __unicode__(self):
+        return 'SDN check failure [{username}]'.format(
+            username=self.username
+        )
+
+    class Meta(object):
+        verbose_name = 'SDN Check Failure'
 
 # noinspection PyUnresolvedReferences
 from oscar.apps.payment.models import *  # noqa pylint: disable=ungrouped-imports, wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order

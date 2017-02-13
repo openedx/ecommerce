@@ -25,5 +25,5 @@ make validate_translations
 # Compile assets and run validation
 make clean_static
 make static
-xvfb-run make validate_python
+TRAVIS=true xvfb-run make validate_python
 xvfb-run make validate_js

@@ -222,25 +222,26 @@ define([
             });
 
             describe('clientSideCheckoutValidation', function() {
-            var cc_expiry_months = {
-                    JAN: '01',
-                    FEB: '02',
-                    MAR: '03',
-                    APR: '04',
-                    MAY: '05',
-                    JUN: '06',
-                    JUL: '07',
-                    AUG: '08',
-                    SEP: '09',
-                    OCT: '10',
-                    NOV: '11',
-                    DEC: '12'
-                };
+                var cc_expiry_months = {
+                        JAN: '01',
+                        FEB: '02',
+                        MAR: '03',
+                        APR: '04',
+                        MAY: '05',
+                        JUN: '06',
+                        JUL: '07',
+                        AUG: '08',
+                        SEP: '09',
+                        OCT: '10',
+                        NOV: '11',
+                        DEC: '12'
+                    };
 
 
                 beforeEach(function() {
                     $(
                         '<fieldset>' +
+                        '<input type="hidden" name="sdn-check" value="disabled">' +
                         '<div class="form-item"><div><input name="first_name"></div>' +
                         '<p class="help-block"></p></div>' +
                         '<div class="form-item"><div><input name="last_name"></div>' +
@@ -252,9 +253,11 @@ define([
                         '<div class="form-item"><div><select name="country">' +
                         '<option value=""><Choose country></option>' +
                         '<option value="US">United States</option>' +
+                        '<option value="DS">Death Star</option>' +
                         '</select></div><p class="help-block"></p></div>' +
                         '<div class="form-item"><div><select name="state">' +
                         '<option value=""><Choose state></option>' +
+                        '<option value="NY">New York</option>' +
                         '</select></div><p class="help-block"></p></div>' +
                         '</fieldset>' +
                         '<div><input name="card_number">' +
@@ -283,6 +286,7 @@ define([
                     $('input[name=address_line1]').val('Central Perk');
                     $('input[name=city]').val('New York City');
                     $('select[name=country]').val('US');
+                    $('select[name=state]').val('NY');
 
                     BasketPage.onReady();
                 });
@@ -318,6 +322,39 @@ define([
                                 'form-item'
                             ).find('~.help-block span').text()
                         ).toEqual('This field is required');
+                    });
+
+                    it('should perform the SDN check', function() {
+                        var first_name = 'Darth',
+                            last_name = 'Vader',
+                            country = 'DS',
+                            args,
+                            ajaxData,
+                            event = $.Event('click'),
+                            data = {'hits': 1};
+
+                        $('input[name=first_name]').val(first_name);
+                        $('input[name=last_name]').val(last_name);
+                        $('select[name=country]').val(country);
+                        $('input[name=sdn-check]').val('enabled');
+
+                        spyOn(Utils, 'redirect');
+                        spyOn(event, 'preventDefault');
+                        spyOn($, 'ajax').and.callFake(function (options) {
+                            options.success(data);
+                        });
+                        BasketPage.sdnCheck(event);
+
+                        expect($.ajax).toHaveBeenCalled();
+                        expect(event.preventDefault).toHaveBeenCalled();
+                        expect(Utils.redirect).toHaveBeenCalled();
+                        args = $.ajax.calls.argsFor(0)[0];
+                        ajaxData = JSON.parse(args.data);
+                        expect(args.method).toEqual('POST');
+                        expect(args.url).toEqual('/api/v2/sdn/search/');
+                        expect(args.contentType).toEqual('application/json; charset=utf-8');
+                        expect(ajaxData.name).toEqual('Darth Vader');
+                        expect(ajaxData.country).toEqual(country);
                     });
                 });
 

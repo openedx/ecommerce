@@ -70,6 +70,9 @@ require([
                                     field.focus();
                                 }
                             }
+                        } else {
+                            // Unhandled error types should default to the general payment error page.
+                            window.location.href = '/payment/error/';
                         }
                     }
                 }

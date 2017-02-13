@@ -278,6 +278,7 @@ class BasketSummaryView(BasketView):
                 unicode(course_key)
             ),
             'enable_client_side_checkout': False,
+            'sdn_check': site_configuration.enable_sdn_check
         })
 
         payment_processors = site_configuration.get_payment_processors()

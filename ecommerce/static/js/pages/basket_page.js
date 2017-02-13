@@ -47,7 +47,7 @@ define([
         onFail = function(){
             var message = gettext('Problem occurred during checkout. Please contact support');
             $('#messages').empty().append(
-                _s.sprintf('<div class="error">%s</div>', message)
+                _s.sprintf('<div class="alert alert-error">%s</div>', message)
             );
         },
         onSuccess = function (data) {
@@ -170,6 +170,33 @@ define([
 
         isCardTypeSupported = function (cardType) {
             return $.inArray(cardType, ['amex', 'discover', 'mastercard', 'visa']) > -1;
+        },
+
+        sdnCheck = function(event) {
+            var first_name = $('input[name=first_name]').val(),
+                last_name = $('input[name=last_name]').val(),
+                country = $('select[name=country]').val();
+
+            $.ajax({
+                url: '/api/v2/sdn/search/',
+                method: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                headers: {
+                    'X-CSRFToken': Cookies.get('ecommerce_csrftoken')
+                },
+                data: JSON.stringify({
+                    'name': _s.sprintf('%s %s', first_name, last_name),
+                    'country': country
+                }),
+                async: false,
+                success: function(data) {
+                    if (data.hits > 0) {
+                        event.preventDefault();
+                        Utils.redirect('/payment/sdn/failure/');
+                    }
+                }
+            });
         },
 
         onReady = function() {
@@ -304,6 +331,9 @@ define([
                 }
                 cardInfoValidation(e);
                 cardHolderInfoValidation(e);
+                if ($('input[name=sdn-check]').val() === 'enabled') {
+                    sdnCheck(e);
+                }
             });
 
             $paymentButtons.find('.payment-button').click(function (e) {
@@ -360,6 +390,7 @@ define([
             onFail: onFail,
             onReady: onReady,
             onSuccess: onSuccess,
+            sdnCheck: sdnCheck,
             showVoucherForm: showVoucherForm,
         };
     }

@@ -29,6 +29,7 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     site = factory.SubFactory(SiteFactory)
     partner = factory.SubFactory(PartnerFactory)
     send_refund_notifications = False
+    enable_sdn_check = False
 
 
 class StockRecordFactory(OscarStockRecordFactory):
