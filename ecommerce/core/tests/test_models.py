@@ -11,7 +11,7 @@ from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
 
 from ecommerce.core.exceptions import VerificationStatusError
-from ecommerce.core.models import BusinessClient, User, SiteConfiguration, validate_configuration
+from ecommerce.core.models import BusinessClient, User, SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
@@ -187,8 +187,10 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
 
     def test_deactivation_exception_handling(self):
         """Verify an error is logged if an exception happens."""
+
         def callback(*args):  # pylint: disable=unused-argument
             raise ConnectionError
+
         user = self.create_user()
         self.mock_deactivation_api(self.request, user.username, response=callback)
 
@@ -227,76 +229,6 @@ class SiteConfigurationTests(TestCase):
         """
         site_config = _make_site_config(payment_processors_str)
         self.assertEqual(site_config.payment_processors_set, expected_result)
-
-    @ddt.data("paypal", "paypal, cybersource", "paypal , cybersource")
-    def test_clean_fields_valid_values_pass_validation(self, payment_processors_str):
-        """
-        Tests that valid payment_processors value passes validation
-        :param str payment_processors_str: comma-separated string of processor names (potentially with spaces)
-        """
-        site_config = _make_site_config(payment_processors_str)
-        with mock.patch("ecommerce.extensions.payment.helpers.get_processor_class_by_name") as patched_proc_by_name:
-            patched_proc_by_name.return_value = DummyProcessor
-            try:
-                site_config.clean_fields()
-            except ValidationError as exc:
-                self.fail(exc.message)
-
-    @ddt.data(" ", "  \t ", "\t\n\r")
-    def test_clean_fields_whitespace_payment_processor_fail_validation(self, payment_processors_str):
-        """
-        Tests that whitespace-only payment_processor values fail validation
-        :param str payment_processors_str: comma-separated string of processor names (potentially with spaces)
-        """
-        site_config = _make_site_config(payment_processors_str)
-        with self.assertRaises(ValidationError) as err:
-            site_config.clean_fields()
-            self.assertEqual(
-                err.message, "Invalid payment processors field: must not only contain whitespace characters"
-            )
-
-    def test_clean_fields_unknown_payment_processor_fail_validation(self):
-        """
-        Tests that  validation fails if payment_processors field contains unknown payment processor names
-        """
-        site_config = _make_site_config("unknown_payment_processor")
-
-        with self.assertRaises(ValidationError):
-            site_config.clean_fields()
-
-    def test_clean_fields_payment_processor_excluded_always_pass(self):
-        """
-        Tests that `clean_fields` pass if "payment_processors" are excluded, regardless of validity
-        """
-        site_config = _make_site_config("")
-        site_config.clean_fields(exclude={"payment_processors"})
-
-        site_config.payment_processors = "irrelevant-get_processor_by_name-is-patched"
-        site_config.clean_fields(exclude={"payment_processors"})
-
-    @ddt.data(None, '', ' ')
-    def test_clean_client_side_payment_processor_with_empty_value(self, value):
-        """ Verify validation succeeds if no value is set for the client_side_payment_processor field. """
-        site_config = _make_site_config('paypal')
-        site_config.client_side_payment_processor = value
-        site_config.clean_fields()
-
-    def test_clean_client_side_payment_processor_with_invalid_processor(self):
-        """ Verify an error is raised if the value client_side_payment_processor is not in the list
-        of available payment processors. """
-        site_config = _make_site_config('paypal')
-        site_config.client_side_payment_processor = 'bad-value'
-
-        with self.assertRaises(ValidationError):
-            site_config.clean_fields()
-
-    def test_clean_client_side_payment_processor(self):
-        """ Verify no error is raised if the value of client_side_payment_processor is in the
-        list of available payment processors. """
-        processor = 'paypal'
-        site_config = _make_site_config(processor)
-        site_config.client_side_payment_processor = processor
-        site_config.clean_fields()
 
     @staticmethod
     def _enable_processor_switches(processors):
@@ -408,52 +340,9 @@ class SiteConfigurationTests(TestCase):
         """
         token = self.mock_access_token_response()
         client = self.site.siteconfiguration.enterprise_api_client
-        client_store = client._store    # pylint: disable=protected-access
+        client_store = client._store  # pylint: disable=protected-access
         client_auth = client_store['session'].auth
 
         self.assertEqual(client_store['base_url'], ENTERPRISE_API_URL)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
-
-
-class HelperMethodTests(TestCase):
-    """ Tests helper methods in models.py """
-
-    def setUp(self):
-        """ setUp test """
-        self.site_config_objects = mock.Mock()
-
-        patcher = mock.patch('ecommerce.core.models.SiteConfiguration.objects', self.site_config_objects)
-        patcher.start()
-
-        self.addCleanup(patcher.stop)
-
-    @override_settings(PAYMENT_PROCESSORS=[
-        'ecommerce.extensions.payment.tests.processors.DummyProcessor',
-        'ecommerce.extensions.payment.tests.processors.AnotherDummyProcessor',
-    ])
-    def test_validate_configuration_passes(self):
-        """
-        Test that site configurations with available payment processor(s) pass validation
-        """
-        config1 = _make_site_config(DummyProcessor.NAME)
-        config2 = _make_site_config(DummyProcessor.NAME + ',' + AnotherDummyProcessor.NAME)
-
-        self.site_config_objects.all.return_value = [config1, config2]
-
-        validate_configuration()  # checks that no exception is thrown
-
-    @override_settings(PAYMENT_PROCESSORS=[
-        'ecommerce.extensions.payment.tests.processors.DummyProcessor',
-    ])
-    def test_validate_configuration_fails(self):
-        """
-        Test that site configurations with unknown payment processor(s) fail validation
-        """
-        config1 = _make_site_config(DummyProcessor.NAME)
-        config2 = _make_site_config(DummyProcessor.NAME + ',' + AnotherDummyProcessor.NAME)
-
-        self.site_config_objects.all.return_value = [config1, config2]
-
-        with self.assertRaises(ValidationError):
-            validate_configuration()
