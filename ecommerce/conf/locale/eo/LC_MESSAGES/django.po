@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-13 00:35-0500\n"
+"POT-Creation-Date: 2017-02-14 00:04-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,9 +180,9 @@ msgid "SDN lists"
 msgstr "SDN lïsts Ⱡ'σяєм ιρѕυм ∂σł#"
 
 #: ecommerce/core/models.py
-msgid "A comma-seperated list of Treasury OFAC lists to check against."
+msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr ""
-"À çömmä-sépérätéd lïst öf Tréäsürý ÖFÀÇ lïsts tö çhéçk ägäïnst. Ⱡ'σяєм ιρѕυм"
+"À çömmä-sépärätéd lïst öf Tréäsürý ÖFÀÇ lïsts tö çhéçk ägäïnst. Ⱡ'σяєм ιρѕυм"
 " ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/core/models.py
@@ -650,6 +650,12 @@ msgid "Course catalog id from the Catalog Service."
 msgstr ""
 "Çöürsé çätälög ïd fröm thé Çätälög Sérvïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
+
+#: ecommerce/extensions/offer/models.py
+msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
+msgstr ""
+"ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/offer/utils.py
 #, python-brace-format

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-13 00:35-0500\n"
+"POT-Creation-Date: 2017-02-14 00:04-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -158,14 +158,14 @@ msgid "SDN lists"
 msgstr ""
 
 #: ecommerce/core/models.py:151
-msgid "A comma-seperated list of Treasury OFAC lists to check against."
+msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr ""
 
-#: ecommerce/core/models.py:387
+#: ecommerce/core/models.py:392
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:574 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:579 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr ""
 
@@ -319,19 +319,19 @@ msgid ""
 "been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:571
+#: ecommerce/extensions/api/serializers.py:572
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:572
+#: ecommerce/extensions/api/serializers.py:573
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:586
+#: ecommerce/extensions/api/serializers.py:587
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:586
+#: ecommerce/extensions/api/serializers.py:587
 msgid "INACTIVE"
 msgstr ""
 
@@ -533,8 +533,12 @@ msgstr ""
 msgid "Failed to retrieve enrollment data."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:185
+#: ecommerce/extensions/offer/models.py:186
 msgid "Course catalog id from the Catalog Service."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:191
+msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:61
@@ -738,14 +742,14 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:165
+#: ecommerce/extensions/voucher/tests/test_utils.py:166
 #: ecommerce/extensions/voucher/utils.py:58
 #: ecommerce/extensions/voucher/utils.py:246
 msgid "Redeemed"
 msgstr ""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:300
-#: ecommerce/extensions/voucher/tests/test_utils.py:305
+#: ecommerce/extensions/voucher/tests/test_utils.py:301
+#: ecommerce/extensions/voucher/tests/test_utils.py:306
 #: ecommerce/extensions/voucher/utils.py:77
 #: ecommerce/extensions/voucher/utils.py:109
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:197
@@ -754,22 +758,22 @@ msgstr ""
 msgid "Discount"
 msgstr ""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:300
-#: ecommerce/extensions/voucher/tests/test_utils.py:305
+#: ecommerce/extensions/voucher/tests/test_utils.py:301
+#: ecommerce/extensions/voucher/tests/test_utils.py:306
 #: ecommerce/extensions/voucher/utils.py:77
 #: ecommerce/extensions/voucher/utils.py:109
 msgid "Enrollment"
 msgstr ""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:301
-#: ecommerce/extensions/voucher/tests/test_utils.py:309
+#: ecommerce/extensions/voucher/tests/test_utils.py:302
+#: ecommerce/extensions/voucher/tests/test_utils.py:310
 #: ecommerce/extensions/voucher/utils.py:78
 #: ecommerce/extensions/voucher/utils.py:116
 #, python-brace-format
 msgid "{percentage} %"
 msgstr ""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:434
+#: ecommerce/extensions/voucher/tests/test_utils.py:435
 #: ecommerce/extensions/voucher/utils.py:60
 msgid "Inactive"
 msgstr ""
@@ -884,7 +888,7 @@ msgstr ""
 msgid "Email Domains"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:475
+#: ecommerce/extensions/voucher/utils.py:477
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr ""
