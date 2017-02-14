@@ -168,7 +168,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         """
         course = CourseFactory()
         self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
-        product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
+        product = course.create_or_update_seat(mode, id_verification, 0, self.partner, create_enrollment_code=False)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
@@ -201,6 +201,30 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.assertEqual(response.reason_phrase, "SEE OTHER")
         self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
         self.assertEqual(response.wsgi_request.GET['sku'], sku)
+
+    @httpretty.activate
+    @ddt.data(('verified', False), ('professional', True), ('no-id-professional', False))
+    @ddt.unpack
+    def test_enrolled_verified_student_for_enrollment_code(self, mode, id_verification):
+        """
+        Verify the view return HTTP 303 if the student is enrolled as verified and purchasing enrollment code
+        (The Enrollment API call being used returns an inactive enrollment record in this case)
+        """
+        course = CourseFactory()
+        self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course.create_or_update_seat(mode, id_verification, 10, self.partner, create_enrollment_code=True)
+        product = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        stock_record = StockRecordFactory(product=product, partner=self.partner)
+        catalog = Catalog.objects.create(partner=self.partner)
+        catalog.stock_records.add(stock_record)
+
+        url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response.reason_phrase, "SEE OTHER")
+        self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
+        self.assertEqual(response.wsgi_request.GET['sku'], stock_record.partner_sku)
 
     @httpretty.activate
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
