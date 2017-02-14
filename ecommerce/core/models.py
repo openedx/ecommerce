@@ -148,7 +148,7 @@ class SiteConfiguration(models.Model):
     )
     sdn_api_list = models.CharField(
         verbose_name=_('SDN lists'),
-        help_text=_('A comma-seperated list of Treasury OFAC lists to check against.'),
+        help_text=_('A comma-separated list of Treasury OFAC lists to check against.'),
         max_length=255,
         blank=True
     )
