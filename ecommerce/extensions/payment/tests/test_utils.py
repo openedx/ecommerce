@@ -85,6 +85,7 @@ class SDNCheckTests(TestCase):
         sdn_object = SDNCheckFailure.objects.first()
         self.assertEqual(sdn_object.full_name, self.name)
         self.assertEqual(sdn_object.country, self.country)
+        self.assertEqual(sdn_object.site, self.site_configuration.site)
         self.assertEqual(sdn_object.sdn_check_response, response)
 
     @httpretty.activate

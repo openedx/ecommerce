@@ -54,6 +54,7 @@ class SDNCheckFailure(TimeStampedModel):
     full_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
     country = models.CharField(max_length=2)
+    site = models.ForeignKey('sites.Site', verbose_name=_('Site'), null=True, blank=True, on_delete=models.SET_NULL)
     sdn_check_response = JSONField()
 
     def __unicode__(self):
