@@ -2,7 +2,7 @@ from oscar.apps.offer.admin import *  # pylint: disable=unused-import,wildcard-i
 
 
 class RangeAdminExtended(admin.ModelAdmin):
-    list_display = ('name', 'catalog', 'course_catalog',)
+    list_display = ('name', 'catalog', 'catalog_query', 'course_catalog', 'course_seat_types')
     raw_id_fields = ('catalog',)
     search_fields = ['name', 'course_catalog']
 

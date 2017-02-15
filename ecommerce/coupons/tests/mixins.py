@@ -239,7 +239,7 @@ class CouponMixin(object):
             partner = PartnerFactory(name='Tester')
         if client is None:
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None and not (catalog_query and course_seat_types):
+        if catalog is None and not ((catalog_query or course_catalog) and course_seat_types):
             catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
