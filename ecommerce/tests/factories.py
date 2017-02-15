@@ -20,6 +20,9 @@ class SiteFactory(factory.DjangoModelFactory):
     class Meta(object):
         model = Site
 
+    domain = FuzzyText(suffix='.fake')
+    name = FuzzyText()
+
 
 class SiteConfigurationFactory(factory.DjangoModelFactory):
     class Meta(object):
