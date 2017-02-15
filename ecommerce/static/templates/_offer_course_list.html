@@ -70,8 +70,7 @@
                                     <% } else { %>
                                         <% if (isEnrollmentCode) { %>
                                         <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
-                                           id="RedeemEnrollment"
-                                           class="btn btn-success"><%- gettext('Enroll Now') %></a>
+                                           class="btn btn-success redeem-enrollment"><%- gettext('Enroll Now') %></a>
                                         <% } else { %>
                                             <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
                                                id="PurchaseCertificate"
