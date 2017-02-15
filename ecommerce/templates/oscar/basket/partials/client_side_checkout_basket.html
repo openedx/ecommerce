@@ -29,8 +29,9 @@
                     </p>
                     {% endif %}
                 </div>
+                <div class="col-sm-12 col-xs-12 form-inline quantity-group">
                 {% if line_data.enrollment_code %}
-                    <div class="col-sm-12 col-xs-12 form-inline quantity-group">
+                    <input type="hidden" name="product-type" value="enrollment-code">
                         <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
                         <div class="checkout-quantity form-group">
                             <div class="input-group spinner {% if form.errors %}error{% endif %}">
@@ -39,8 +40,13 @@
                             <button class="btn btn-primary update-button quantity-update" type="submit"
                                     data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
                         </div>
+                {% endif %}
+                {% if line_data.has_enrollment_code %}
+                    <div class="ec-checkbox form-group">
+                        <input type="checkbox" value="checked" name="add-enrollment-code"> I am buying this course for someone else <i class="fa fa-question-circle" aria-hidden="true" role="tooltip" title="If purchasing for someone else we will email you an enrollment code. If purchasing for yourself, we will auto enroll you from this account."></i>
                     </div>
                 {% endif %}
+                </div>
             </div>
         {% endfor %}
     </form>

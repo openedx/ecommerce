@@ -358,6 +358,37 @@ define([
                     });
                 });
 
+                describe('Enrollment code checkbox', function() {
+                    beforeEach(function() {
+                        $(
+                            '<div id="summary"><form><div class="product"><div class="form-inline">' +
+                            '<input type="hidden" name="product-type" value="seat">' +
+                            '<button class="update-button" type="submit">Update</button></div>' +
+                            '<div class="ec-checkbox">' +
+                            '<input type="checkbox" value="checked" name="add-enrollment-code"></div>' +
+                            '</div></div></form></div>'
+                        ).appendTo('body');
+                    });
+
+                    it('should submit the form on enrollment code checkbox check', function() {
+                        var submitted = false;
+                        $('form').on('submit', function() {
+                            submitted = true;
+                            return false;  // Disable page reload triggered by form submit.
+                        });
+
+                        BasketPage.onReady();
+                        $('input[name=add-enrollment-code]').prop('checked', true).trigger('change');
+                        expect(submitted).toBeTruthy();
+                    });
+
+                    it('should check checkbox on enrollment code product-type', function() {
+                        $('input[name=product-type]').val('enrollment-code');
+                        BasketPage.onReady();
+                        expect($('input[name=add-enrollment-code]').prop('checked')).toBeTruthy();
+                    });
+                });
+
                 describe('cardInfoValidation', function() {
                     var validCardNumber = '378282246310005',  // AMEX (CVN length 4)
                         validCvn = '1234',

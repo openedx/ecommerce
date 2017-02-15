@@ -12,7 +12,6 @@ from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.checkout.utils import get_receipt_page_url, format_currency
 from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
@@ -205,13 +204,12 @@ class Refund(StatusMixin, TimeStampedModel):
 
         # NOTE (CCB): The initial version of the refund email only supports refunding a single course.
         product = self.lines.first().order_line.product
-        product_class = product.get_product_class().name
 
-        if product_class != SEAT_PRODUCT_CLASS_NAME:
+        if not product.is_seat_product:
             logger.warning(
                 ('No refund notification will be sent for Refund [%d]. The notification supports product lines '
                  'of type Course, not [%s].'),
-                self.id, product_class
+                self.id, product.get_product_class().name
             )
             return
 

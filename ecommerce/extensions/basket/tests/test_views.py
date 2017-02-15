@@ -21,7 +21,6 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
@@ -166,15 +165,14 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         Verify the view return HTTP 400 if the student is already enrolled as verified student in the course
         (The Enrollment API call being used returns an active enrollment record in this case)
         """
-        course = CourseFactory()
+        course, seat = self.create_course_and_seat(seat_type=mode, id_verification=id_verification)
         self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
-        product = course.create_or_update_seat(mode, id_verification, 0, self.partner, create_enrollment_code=False)
-        stock_record = StockRecordFactory(product=product, partner=self.partner)
+        stock_record = StockRecordFactory(product=seat, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
 
         url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
-        expected_content = 'You are already enrolled in {product}.'.format(product=product.course.name)
+        expected_content = 'You are already enrolled in {product}.'.format(product=course.name)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, expected_content)
@@ -187,10 +185,9 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         Verify the view return HTTP 303 if the student is unenrolled as verified student in the course
         (The Enrollment API call being used returns an inactive enrollment record in this case)
         """
-        course = CourseFactory()
+        course, seat = self.create_course_and_seat(seat_type=mode, id_verification=id_verification)
         self.mock_enrollment_api_success_unenrolled(course.id, mode=mode)
-        product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
-        stock_record = StockRecordFactory(product=product, partner=self.partner)
+        stock_record = StockRecordFactory(product=seat, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
         sku = stock_record.partner_sku
@@ -210,12 +207,11 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         Verify the view return HTTP 303 if the student is enrolled as verified and purchasing enrollment code
         (The Enrollment API call being used returns an inactive enrollment record in this case)
         """
-        course = CourseFactory()
+        course, __, enrollment_code = self.create_course_seat_and_enrollment_code(
+            seat_type=mode, id_verification=id_verification
+        )
         self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat(mode, id_verification, 10, self.partner, create_enrollment_code=True)
-        product = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        stock_record = StockRecordFactory(product=product, partner=self.partner)
+        stock_record = StockRecordFactory(product=enrollment_code, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
 
@@ -244,6 +240,13 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
 class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
+    form_post_data = {
+        'form-0-id': 1,
+        'form-TOTAL_FORMS': 1,
+        'form-INITIAL_FORMS': 1,
+        'form-MIN_NUM_FORMS': 0,
+        'form-MAX_NUM_FORMS': 1000,
+    }
 
     def setUp(self):
         super(BasketSummaryViewTests, self).setUp()
@@ -278,24 +281,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
         basket.vouchers.add(voucher)
         Applicator().apply(basket)
-
-    def prepare_course_seat_and_enrollment_code(self, seat_type='verified', id_verification=False):
-        """Helper function that creates a new course, enables enrollment codes and creates a new
-        seat and enrollment code for it.
-
-        Args:
-            seat_type (str): Seat/certification type.
-            is_verification (bool): Whether or not id verification is required for the seat.
-        Returns:
-            The newly created course, seat and enrollment code.
-        """
-        course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        self.site.siteconfiguration.enable_enrollment_codes = True
-        self.site.siteconfiguration.save()
-        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        return course, seat, enrollment_code
 
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
@@ -335,9 +320,11 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_enrollment_code_seat_type(self):
         """Verify the correct seat type attribute is retrieved."""
-        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        course, __, enrollment_code = self.create_course_seat_and_enrollment_code()
         self.create_basket_and_add_product(enrollment_code)
         self.mock_dynamic_catalog_course_runs_api(course_run=course)
+        self.site.siteconfiguration.enable_enrollment_codes = True
+        self.site.siteconfiguration.save()
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -356,7 +343,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertFalse(response.context['switch_link_text'])
         self.assertFalse(response.context['partner_sku'])
 
-        ec_course, seat_with_ec, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        ec_course, seat_with_ec, enrollment_code = self.create_course_seat_and_enrollment_code()
         Basket.objects.all().delete()
         self.create_basket_and_add_product(seat_with_ec)
         self.mock_dynamic_catalog_course_runs_api(course_run=ec_course)
@@ -368,7 +355,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_basket_switch_data(self):
         """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""
-        __, seat, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code()
         seat_sku = StockRecord.objects.get(product=seat).partner_sku
         ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku
 
@@ -504,7 +491,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
     @ddt.data(True, False)
     def test_order_details_msg(self, id_verification):
         """Verify the order details message is displayed for seats and enrollment codes."""
-        __, seat, enrollment_code = self.prepare_course_seat_and_enrollment_code(
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code(
             seat_type='professional', id_verification=id_verification
         )
         self.assert_order_details_in_context(seat)
@@ -569,6 +556,52 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         for _, line_data in response.context['formset_lines_data']:
             self.assertEqual(line_data['course_start'], expected_result)
             self.assertEqual(line_data['course_end'], expected_result)
+
+    @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
+    def assert_basket_switch_items(self, original_item, exchange_item, add_enrollment_code=False):
+        """Assert that the original item in basket has been replaced by the exchange item.
+
+        Args:
+            original_item (Product): The original item that is added first to the basket.
+            exchange_item (Product): Item that should be exchanged for the original item in the basket.
+            add_enrollment_code (bool): Whether the 'add-enrollment-code' POST parameter is passed.
+        """
+        basket = self.create_basket_and_add_product(original_item)
+        self.assertEqual(basket.lines.count(), 1)
+        self.assertEqual(basket.lines.first().product, original_item)
+
+        # Default Django form POST data.
+        data = self.form_post_data
+        if add_enrollment_code:
+            data['add-enrollment-code'] = 'checked'
+
+        self.client.post(self.path, data=data)
+
+        basket.refresh_from_db()
+        self.assertEqual(basket.lines.count(), 1)
+        self.assertEqual(basket.lines.first().product, exchange_item)
+
+    def test_seat_to_enrollment_code_exchange(self):
+        """Verify that a seat basket item is exchanged with it's enrollment code."""
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code()
+        self.assert_basket_switch_items(seat, enrollment_code, add_enrollment_code=True)
+
+    def test_enrollment_code_to_seat_exchange(self):
+        """Verify that an enrollment code basket item is exchanged with it's seat."""
+        __, seat, enrollment_code = self.create_course_seat_and_enrollment_code()
+        self.assert_basket_switch_items(enrollment_code, seat)
+
+    def test_non_client_side_form_post(self):
+        """Verify when client side checkout basket is turned off the product stays the same."""
+        seat = CourseFactory().create_or_update_seat('verified', False, 10, self.partner)
+        basket = self.create_basket_and_add_product(seat)
+        data = self.form_post_data
+        data['add-enrollment-code'] = 'checked'
+
+        self.client.post(self.path, data=data)
+        basket.refresh_from_db()
+        self.assertEqual(basket.lines.count(), 1)
+        self.assertEqual(basket.lines.first().product, seat)
 
 
 class VoucherAddMessagesViewTests(TestCase):

@@ -16,6 +16,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.utils import get_course_catalogs
@@ -70,7 +71,9 @@ def get_vouchers_for_learner(site, user):
     vouchers = []
     for entitlement in entitlements:
         try:
-            coupon_product = Product.objects.filter(product_class__name='Coupon').get(id=entitlement['entitlement_id'])
+            coupon_product = Product.objects.filter(
+                product_class__name=COUPON_PRODUCT_CLASS_NAME
+            ).get(id=entitlement['entitlement_id'])
         except Product.DoesNotExist:
             logger.exception(
                 'There was an error getting coupon product with the entitlement id %s',
