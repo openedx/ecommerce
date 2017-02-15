@@ -98,18 +98,23 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         user = self.create_user()
         user_details = {'is_active': True}
         self.mock_account_api(self.request, user.username, data=user_details)
+        self.mock_access_token_response()
         self.assertDictEqual(user.account_details(self.request), user_details)
 
+    @httpretty.activate
     def test_user_details_uses_jwt(self):
         """Verify user_details uses jwt from site configuration to call EdxRestApiClient."""
         user = self.create_user()
-        with mock.patch("ecommerce.core.models.EdxRestApiClient") as patched_info:
-            user.account_details(self.request)
-            patched_info.assert_called_once_with(
-                self.request.site.siteconfiguration.build_lms_url('/api/user/v1'),
-                append_slash=False,
-                jwt=self.request.site.siteconfiguration.access_token
-            )
+        user_details = {'is_active': True}
+        self.mock_account_api(self.request, user.username, data=user_details)
+        token = self.mock_access_token_response()
+
+        user.account_details(self.request)
+        last_request = httpretty.last_request()
+
+        # Verify the headers passed to the API were correct.
+        expected = {'Authorization': 'JWT {}'.format(token), }
+        self.assertDictContainsSubset(expected, last_request.headers)
 
     def test_no_user_details(self):
         """ Verify False is returned when there is a connection error. """
@@ -183,6 +188,8 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         user = self.create_user()
         expected_response = {'user_deactivated': True}
         self.mock_deactivation_api(self.request, user.username, response=json.dumps(expected_response))
+        self.mock_access_token_response()
+
         self.assertEqual(user.deactivate_account(self.request.site.siteconfiguration), expected_response)
 
     def test_deactivation_exception_handling(self):

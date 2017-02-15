@@ -18,8 +18,8 @@ from ecommerce.tests.testcases import TestCase
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 log = logging.getLogger(__name__)
 
-TEST_EMAIL = "test@edx.org"
-CAMPAIGN_COOKIE = "cookie_bid"
+TEST_EMAIL = 'test@edx.org'
+CAMPAIGN_COOKIE = 'cookie_bid'
 
 
 class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
@@ -28,7 +28,7 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(SailthruSignalTests, self).setUp()
         self.request_factory = RequestFactory()
-        self.request = self.request_factory.get("foo")
+        self.request = self.request_factory.get('foo')
         self.request.COOKIES['sailthru_bid'] = CAMPAIGN_COOKIE
         self.request.site = self.site
         self.user = UserFactory.create(username='test', email=TEST_EMAIL)
@@ -76,9 +76,7 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         coupon = self.create_coupon()
         basket = BasketFactory()
         basket.add_product(coupon, 1)
-        process_basket_addition(None, request=self.request,
-                                user=self.user,
-                                product=coupon, basket=basket)
+        process_basket_addition(None, request=self.request, user=self.user, product=coupon, basket=basket)
         self.assertFalse(mock_update_course_enrollment.called)
         self.assertFalse(mock_log_error.called)
 
@@ -94,15 +92,17 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         seat, order = self._create_order(99)
         process_checkout_complete(None, order=order, request=self.request)
         self.assertTrue(mock_update_course_enrollment.called)
-        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
-                                                         self.course_url,
-                                                         False,
-                                                         seat.attr.certificate_type,
-                                                         course_id=self.course_id,
-                                                         currency=order.currency,
-                                                         message_id=CAMPAIGN_COOKIE,
-                                                         site_code='edX',
-                                                         unit_cost=order.total_excl_tax)
+        mock_update_course_enrollment.assert_called_with(
+            TEST_EMAIL,
+            self.course_url,
+            False,
+            seat.attr.certificate_type,
+            course_id=self.course_id,
+            currency=order.currency,
+            message_id=CAMPAIGN_COOKIE,
+            site_code=self.partner.short_code,
+            unit_cost=order.total_excl_tax
+        )
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_process_checkout_complete_without_request(self, mock_update_course_enrollment):
@@ -111,43 +111,43 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         seat, order = self._create_order(99)
         process_checkout_complete(None, order=order)
         self.assertTrue(mock_update_course_enrollment.called)
-        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
-                                                         self.course_url,
-                                                         False,
-                                                         seat.attr.certificate_type,
-                                                         course_id=self.course_id,
-                                                         currency=order.currency,
-                                                         message_id=None,
-                                                         site_code='edX',
-                                                         unit_cost=order.total_excl_tax)
+        mock_update_course_enrollment.assert_called_with(
+            TEST_EMAIL,
+            self.course_url,
+            False,
+            seat.attr.certificate_type,
+            course_id=self.course_id,
+            currency=order.currency,
+            message_id=None,
+            site_code=self.partner.short_code,
+            unit_cost=order.total_excl_tax
+        )
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_basket_addition(self, mock_update_course_enrollment):
         """ Verify the basket_addition receiver is called, and contacts Sailthru. """
 
         seat, order = self._create_order(99)
-        process_basket_addition(None, request=self.request,
-                                user=self.user,
-                                product=seat)
+        process_basket_addition(None, request=self.request, user=self.user, product=seat)
         self.assertTrue(mock_update_course_enrollment.called)
-        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
-                                                         self.course_url,
-                                                         True,
-                                                         seat.attr.certificate_type,
-                                                         course_id=self.course_id,
-                                                         currency=order.currency,
-                                                         message_id=CAMPAIGN_COOKIE,
-                                                         site_code='edX',
-                                                         unit_cost=order.total_excl_tax)
+        mock_update_course_enrollment.assert_called_with(
+            TEST_EMAIL,
+            self.course_url,
+            True,
+            seat.attr.certificate_type,
+            course_id=self.course_id,
+            currency=order.currency,
+            message_id=CAMPAIGN_COOKIE,
+            site_code=self.partner.short_code,
+            unit_cost=order.total_excl_tax
+        )
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_basket_addition_with_free_product(self, mock_update_course_enrollment):
         """ Verify Sailthru is not contacted when free items are added to the basket. """
 
         seat = self._create_order(0)[0]
-        process_basket_addition(None, request=self.request,
-                                user=self.user,
-                                product=seat)
+        process_basket_addition(None, request=self.request, user=self.user, product=seat)
         self.assertFalse(mock_update_course_enrollment.called)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
@@ -155,32 +155,34 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         """ Verify the Sailthru campaign ID is saved as a basket attribute. """
 
         seat, order = self._create_order(99)
-        process_basket_addition(None, request=self.request,
-                                user=self.user,
-                                product=seat, basket=order.basket)
+        process_basket_addition(None, request=self.request, user=self.user, product=seat, basket=order.basket)
         self.assertTrue(mock_update_course_enrollment.called)
-        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
-                                                         self.course_url,
-                                                         True,
-                                                         seat.attr.certificate_type,
-                                                         course_id=self.course_id,
-                                                         currency=order.currency,
-                                                         message_id=CAMPAIGN_COOKIE,
-                                                         site_code='edX',
-                                                         unit_cost=order.total_excl_tax)
+        mock_update_course_enrollment.assert_called_with(
+            TEST_EMAIL,
+            self.course_url,
+            True,
+            seat.attr.certificate_type,
+            course_id=self.course_id,
+            currency=order.currency,
+            message_id=CAMPAIGN_COOKIE,
+            site_code=self.partner.short_code,
+            unit_cost=order.total_excl_tax
+        )
 
         # now call checkout_complete with the same basket to see if campaign id saved and restored
         process_checkout_complete(None, order=order, request=None)
         self.assertTrue(mock_update_course_enrollment.called)
-        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
-                                                         self.course_url,
-                                                         False,
-                                                         seat.attr.certificate_type,
-                                                         course_id=self.course_id,
-                                                         currency=order.currency,
-                                                         message_id=CAMPAIGN_COOKIE,
-                                                         site_code='edX',
-                                                         unit_cost=order.total_excl_tax)
+        mock_update_course_enrollment.assert_called_with(
+            TEST_EMAIL,
+            self.course_url,
+            False,
+            seat.attr.certificate_type,
+            course_id=self.course_id,
+            currency=order.currency,
+            message_id=CAMPAIGN_COOKIE,
+            site_code=self.partner.short_code,
+            unit_cost=order.total_excl_tax
+        )
 
     def test_basket_attribute_update_with_existing_attribute(self):
         """ Verify existing BasketAttribute values are updated if a user is modifying an existing basket. """
@@ -204,23 +206,23 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         """ Verify the Sailthru campaign ID is saved as a basket attribute for audit enrollments. """
 
         seat, order = self._create_order(0, 'audit')
-        process_basket_addition(None, request=self.request,
-                                user=self.user,
-                                product=seat, basket=order.basket)
+        process_basket_addition(None, request=self.request, user=self.user, product=seat, basket=order.basket)
         self.assertFalse(mock_update_course_enrollment.called)
 
         # now call checkout_complete with the same basket to see if campaign id saved and restored
         process_checkout_complete(None, order=order, request=None)
         self.assertTrue(mock_update_course_enrollment.called)
-        mock_update_course_enrollment.assert_called_with(TEST_EMAIL,
-                                                         self.course_url,
-                                                         False,
-                                                         seat.attr.certificate_type,
-                                                         course_id=self.course_id,
-                                                         currency=order.currency,
-                                                         message_id=CAMPAIGN_COOKIE,
-                                                         site_code='edX',
-                                                         unit_cost=order.total_excl_tax)
+        mock_update_course_enrollment.assert_called_with(
+            TEST_EMAIL,
+            self.course_url,
+            False,
+            seat.attr.certificate_type,
+            course_id=self.course_id,
+            currency=order.currency,
+            message_id=CAMPAIGN_COOKIE,
+            site_code=self.partner.short_code,
+            unit_cost=order.total_excl_tax
+        )
 
     def _create_order(self, price, mode='verified'):
         seat = self.course.create_or_update_seat(mode, False, price, self.partner, None)

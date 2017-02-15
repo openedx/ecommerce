@@ -94,7 +94,7 @@ class JwtMixin(object):
 class BasketCreationMixin(UserMixin, JwtMixin):
     """Provides utility methods for creating baskets in test cases."""
     PATH = reverse('api:v2:baskets:create')
-    FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
+    FREE_SKU = 'FREE_PRODUCT'
 
     def setUp(self):
         super(BasketCreationMixin, self).setUp()
@@ -102,20 +102,20 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         self.user = self.create_user()
 
         product_class = factories.ProductClassFactory(
-            name=u'𝑨𝒖𝒕𝒐𝒎𝒐𝒃𝒊𝒍𝒆',
+            name=u'Áutomobilé',
             requires_shipping=False,
             track_stock=False
         )
         self.base_product = factories.ProductFactory(
             structure='parent',
-            title=u'𝑳𝒂𝒎𝒃𝒐𝒓𝒈𝒉𝒊𝒏𝒊 𝑮𝒂𝒍𝒍𝒂𝒓𝒅𝒐',
+            title=u'Lamborghinï Gallardœ',
             product_class=product_class,
             stockrecords=None,
         )
         self.free_product = factories.ProductFactory(
             structure='child',
             parent=self.base_product,
-            title=u'𝑪𝒂𝒓𝒅𝒃𝒐𝒂𝒓𝒅 𝑪𝒖𝒕𝒐𝒖𝒕',
+            title='Cardboard Cutout',
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
         )
@@ -259,6 +259,7 @@ class SiteMixin(object):
                 'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
             },
             partner__name='edX',
+            partner__short_code='edx',
             segment_key='fake_segment_key',
             site__domain=domain,
             site__id=settings.SITE_ID,

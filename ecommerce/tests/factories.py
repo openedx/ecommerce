@@ -13,7 +13,7 @@ class PartnerFactory(factory.DjangoModelFactory):
         django_get_or_create = ('name',)
 
     name = FuzzyText(prefix='test-partner-')
-    short_code = factory.SelfAttribute('name')
+    short_code = FuzzyText(length=8)
 
 
 class SiteFactory(factory.DjangoModelFactory):
