@@ -82,8 +82,8 @@ theme_static:
 
 static: theme_static
 	$(NODE_BIN)/r.js -o build.js
-	python manage.py collectstatic --noinput -v0
-	python manage.py compress -v0 --force
+	python manage.py collectstatic --noinput
+	python manage.py compress --force
 
 html_coverage:
 	coverage html && open htmlcov/index.html
