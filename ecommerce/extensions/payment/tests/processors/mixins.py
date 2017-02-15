@@ -42,9 +42,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
 
     def test_configuration(self):
         """ Verifies configuration is read from settings. """
-        other_site = SiteConfigurationFactory(partner__name='other').site
-        self.assertEqual(self.site.siteconfiguration.partner.short_code, 'edX')
-        self.assertEqual(other_site.siteconfiguration.partner.short_code, 'other')
+        other_site = SiteConfigurationFactory(partner__short_code='other').site
 
         for site in (self.site, other_site):
             processor = self.processor_class(site)  # pylint: disable=not-callable

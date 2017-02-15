@@ -13,9 +13,6 @@ ProductRecord = get_model('analytics', 'ProductRecord')
 class AnalyticsTests(BasketCreationMixin, TestCase):
     """Test analytics behavior in controlled scenarios."""
 
-    def setUp(self):
-        super(AnalyticsTests, self).setUp()
-
     @override_settings(INSTALL_DEFAULT_ANALYTICS_RECEIVERS=False)
     def test_order_receiver_disabled(self):
         """Verify that Oscar's Analytics order receiver can be disabled."""

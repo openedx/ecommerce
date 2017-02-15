@@ -42,7 +42,7 @@ class SDNCheckTests(TestCase):
     def setUp(self):
         super(SDNCheckTests, self).setUp()
         self.name = 'Dr. Evil'
-        self.country = 'Evilland'
+        self.country = 'EL'
         self.user = self.create_user(full_name=self.name)
         self.site_configuration = self.site.siteconfiguration
         self.site_configuration.enable_sdn_check = True,

@@ -36,10 +36,10 @@ LOGGER_NAME = 'ecommerce.extensions.api.v2.views.baskets'
 )
 # Why TransactionTestCase? See http://stackoverflow.com/a/23326971.
 class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTestCase):
-    FREE_SKU = u'𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
-    PAID_SKU = u'𝑷𝑨𝑰𝑫-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
-    ALTERNATE_FREE_SKU = u'𝑨𝑳𝑻𝑬𝑹𝑵𝑨𝑻𝑬-𝑭𝑹𝑬𝑬-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
-    ALTERNATE_PAID_SKU = u'𝑨𝑳𝑻𝑬𝑹𝑵𝑨𝑻𝑬-𝑷𝑨𝑰𝑫-𝑷𝑹𝑶𝑫𝑼𝑪𝑻'
+    FREE_SKU = 'FREE_PRODUCT'
+    PAID_SKU = 'PAID_PRODUCT'
+    ALTERNATE_FREE_SKU = 'ALTERNATE_FREE_PRODUCT'
+    ALTERNATE_PAID_SKU = 'ALTERNATE_PAID_PRODUCT'
     BAD_SKU = 'not-a-sku'
     UNAVAILABLE = False
     UNAVAILABLE_MESSAGE = 'Unavailable'
@@ -51,7 +51,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         self.paid_product = factories.ProductFactory(
             structure='child',
             parent=self.base_product,
-            title=u'𝐋𝐏 𝟓𝟔𝟎-𝟒',
+            title='LP 560-4',
             stockrecords__partner_sku=self.PAID_SKU,
             stockrecords__price_excl_tax=Decimal('180000.00'),
             stockrecords__partner__short_code='oscr',
@@ -67,7 +67,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         factories.ProductFactory(
             structure='child',
             parent=self.base_product,
-            title=u'𝐋𝐏 𝟓𝟕𝟎-𝟒 𝐒𝐮𝐩𝐞𝐫𝐥𝐞𝐠𝐠𝐞𝐫𝐚',
+            title='LP 570-4 Superleggera',
             stockrecords__partner_sku=self.ALTERNATE_PAID_SKU,
             stockrecords__price_excl_tax=Decimal('240000.00'),
             stockrecords__partner__short_code='dummy',

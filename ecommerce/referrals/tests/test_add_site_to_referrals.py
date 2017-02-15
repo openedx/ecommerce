@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
-from StringIO import StringIO
 
-from django.contrib.sites.models import Site
+import six
 from django.core.management import call_command, CommandError
 
 from ecommerce.referrals.models import Referral
+from ecommerce.referrals.tests.factories import ReferralFactory
 from ecommerce.tests.testcases import TestCase
 
 
@@ -13,10 +13,7 @@ class AddSiteToReferralsCommandTests(TestCase):
 
     def setUp(self):
         super(AddSiteToReferralsCommandTests, self).setUp()
-        self.site = Site.objects.create(domain='acme.fake')
-        site = Site.objects.create(domain='test.fake')
-        self.associated_referrals = [Referral.objects.create(basket_id=i, site=site) for i in range(0, 2)]
-        self.unassociated_referrals = [Referral.objects.create(basket_id=i) for i in range(3, 6)]
+        self.unassociated_referrals = ReferralFactory.create_batch(3, site=None)
 
     def test_without_commit(self):
         """ Verify the command does not modify any referrals, if the commit flag is not specified. """
@@ -24,7 +21,7 @@ class AddSiteToReferralsCommandTests(TestCase):
         expected = queryset.count()
 
         # Call the command with dry-run flag
-        out = StringIO()
+        out = six.StringIO()
         call_command(self.command, site_id=self.site.id, commit=False, stdout=out)
 
         # Verify no referrals affected
@@ -49,7 +46,7 @@ class AddSiteToReferralsCommandTests(TestCase):
         self.assertEqual(queryset.count(), 0)
 
         # Call the command
-        out = StringIO()
+        out = six.StringIO()
         call_command(self.command, site_id=self.site.id, commit=True, stdout=out)
 
         # The referrals should be associated with the site

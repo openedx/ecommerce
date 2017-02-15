@@ -8,7 +8,7 @@ django-filter==0.11.0
 django-libsass==0.5
 django-oscar==1.1.1
 django-rest-swagger[reST]==0.3.10
-django_simple_history==1.6.3
+django-simple-history==1.8.2
 django-solo==1.1.2
 django-threadlocals==0.8
 django-waffle==0.11.1

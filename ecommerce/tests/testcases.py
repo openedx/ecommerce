@@ -1,11 +1,24 @@
-from django.test import (TestCase as DjangoTestCase,
-                         LiveServerTestCase as DjangoLiveServerTestCase,
-                         TransactionTestCase as DjangoTransactionTestCase)
+from django.core.cache import cache
+from django.test import (
+    TestCase as DjangoTestCase,
+    LiveServerTestCase as DjangoLiveServerTestCase,
+    TransactionTestCase as DjangoTransactionTestCase
+)
 
 from ecommerce.tests.mixins import SiteMixin, UserMixin, TestServerUrlMixin
 
 
-class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, DjangoTestCase):
+class CacheMixin(object):
+    def setUp(self):
+        cache.clear()
+        super(CacheMixin, self).setUp()
+
+    def tearDown(self):
+        cache.clear()
+        super(CacheMixin, self).tearDown()
+
+
+class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoTestCase):
     """
     Base test case for ecommerce tests.
 
@@ -14,7 +27,7 @@ class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, DjangoTestCase):
     pass
 
 
-class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, DjangoLiveServerTestCase):
+class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoLiveServerTestCase):
     """
     Base test case for ecommerce tests.
 
@@ -23,7 +36,7 @@ class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, DjangoLiveSer
     pass
 
 
-class TransactionTestCase(TestServerUrlMixin, UserMixin, SiteMixin, DjangoTransactionTestCase):
+class TransactionTestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoTransactionTestCase):
     """
     Base test case for ecommerce tests.
 

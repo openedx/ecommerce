@@ -61,8 +61,6 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         stock_record = self.seat.stockrecords.first()
         self.catalog.stock_records.add(stock_record)
 
-        self.assertEqual(self.catalog.id, 1)
-
         existing_catalog, created = get_or_create_catalog(
             name='Test',
             partner=self.partner,
@@ -154,12 +152,11 @@ class CouponCreationTests(CouponMixin, TestCase):
 
     def test_coupon_note(self):
         """Test creating a coupon with a note."""
-        note_coupon = self.create_custom_coupon(
-            note='𝑵𝑶𝑻𝑬',
-            title='Coupon',
-        )
-        self.assertEqual(note_coupon.attr.note, '𝑵𝑶𝑻𝑬')
-        self.assertEqual(note_coupon.title, 'Coupon')
+        note = 'Ñote'
+        title = 'Coupon'
+        note_coupon = self.create_custom_coupon(note=note, title=title)
+        self.assertEqual(note_coupon.attr.note, note)
+        self.assertEqual(note_coupon.title, title)
 
     def test_custom_code_string(self):
         """Test creating a coupon with custom voucher code."""

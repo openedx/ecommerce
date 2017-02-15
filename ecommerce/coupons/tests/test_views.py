@@ -6,7 +6,7 @@ import pytz
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import (
     ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
@@ -80,17 +80,18 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
 
     def test_no_product(self):
         """ Verify that an exception is raised if there is no product. """
-        voucher = VoucherFactory(code='NOPRODUCT')
+        code = FuzzyText().fuzz()
+        voucher = VoucherFactory(code=code)
         offer = ConditionalOfferFactory()
         voucher.offers.add(offer)
 
         with self.assertRaises(exceptions.ProductNotFoundError):
-            get_voucher_and_products_from_code(code='NOPRODUCT')
+            get_voucher_and_products_from_code(code=code)
 
     def test_get_non_existing_voucher(self):
         """ Verify that get_voucher_and_products_from_code() raises exception for a non-existing voucher. """
         with self.assertRaises(Voucher.DoesNotExist):
-            get_voucher_and_products_from_code(code='INVALID')
+            get_voucher_and_products_from_code(code=FuzzyText().fuzz())
 
     def test_valid_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is valid. """
@@ -104,7 +105,7 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         """ Verify voucher_is_valid() assess that the voucher is invalid. """
         valid, msg = voucher_is_valid(voucher=None, products=None, request=None)
         self.assertFalse(valid)
-        self.assertEqual(msg, _('Coupon does not exist'))
+        self.assertEqual(msg, 'Coupon does not exist')
 
     def test_expired_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher has expired. """
@@ -113,7 +114,7 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
         valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=None)
         self.assertFalse(valid)
-        self.assertEqual(msg, _('This coupon code has expired.'))
+        self.assertEqual(msg, 'This coupon code has expired.')
 
     def test_future_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher has not started yet. """
@@ -122,7 +123,7 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
         valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=None)
         self.assertFalse(valid)
-        self.assertEqual(msg, _('This coupon code is not yet valid.'))
+        self.assertEqual(msg, 'This coupon code is not yet valid.')
 
     def test_voucher_unavailable_to_buy(self):
         """ Verify that False is returned for unavialable products. """
@@ -162,7 +163,7 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         """ Verify voucher_is_valid() assess that the voucher exceeded it's usage limit. """
         voucher, product = prepare_voucher(code=COUPON_CODE, usage=Voucher.ONCE_PER_CUSTOMER, max_usage=1)
         user = self.create_user()
-        error_msg = _('This coupon code is no longer available.')
+        error_msg = 'This coupon code is no longer available.'
         self.assert_error_messages(voucher, product, user, error_msg)
 
     def test_used_voucher(self):
@@ -171,14 +172,13 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         user = self.create_user()
         order = OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=user, order=order)
-        error_msg = _('This coupon has already been used')
+        error_msg = 'This coupon has already been used'
         self.assert_error_messages(voucher, product, user, error_msg)
 
 
 @httpretty.activate
 class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
-    path_with_code = '{path}?code={code}'.format(path=path, code=COUPON_CODE)
 
     def setUp(self):
         super(CouponOfferViewTests, self).setUp()
@@ -203,13 +203,13 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
     def test_no_code(self):
         """ Verify a proper response is returned when no code is supplied. """
         response = self.client.get(self.path)
-        self.assertEqual(response.context['error'], _('This coupon code is invalid.'))
+        self.assertEqual(response.context['error'], 'This coupon code is invalid.')
 
     def test_invalid_voucher(self):
         """ Verify an error is returned when voucher with provided code does not exist. """
         url = self.path + '?code={}'.format('DOESNTEXIST')
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('Coupon does not exist'))
+        self.assertEqual(response.context['error'], 'Coupon does not exist')
 
     def test_expired_voucher(self):
         """ Verify proper response is returned for expired vouchers. """
@@ -219,18 +219,21 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
 
         url = self.path + '?code={}'.format('EXPIRED')
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('This coupon code has expired.'))
+        self.assertEqual(response.context['error'], 'This coupon code has expired.')
 
     def test_no_product(self):
         """ Verify an error is returned for voucher with no product. """
+        code = FuzzyText().fuzz()
         no_product_range = RangeFactory()
-        prepare_voucher(code='NOPRODUCT', _range=no_product_range)
-        url = self.path + '?code={}'.format('NOPRODUCT')
+        prepare_voucher(code=code, _range=no_product_range)
+        url = self.path + '?code={}'.format(code)
+
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('The voucher is not applicable to your current basket.'))
+        self.assertEqual(response.context['error'], 'The voucher is not applicable to your current basket.')
 
     def prepare_url_for_credit_seat(self, code='CREDIT'):
         """Helper method for creating a credit seat and construct the URL to its offer landing page.
+
         Returns:
             URL to its offer landing page.
         """
@@ -252,7 +255,6 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
 
         testserver_login_url = self.get_full_url(reverse('login'))
         expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(url))
-        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     def test_credit_seat_response(self):
@@ -315,44 +317,46 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         """ Verify a response message is returned when no code is provided. """
         url_without_code = '{}?sku={}'.format(self.redeem_url, self.stock_record.partner_sku)
         response = self.client.get(url_without_code)
-        self.assertEqual(response.context['error'], _('Code not provided.'))
+        self.assertEqual(response.context['error'], 'Code not provided.')
 
     def test_sku_not_provided(self):
         """ Verify a response message is returned when no SKU is provided. """
         url_without_sku = '{}?code={}'.format(self.redeem_url, COUPON_CODE)
         response = self.client.get(url_without_sku)
-        self.assertEqual(response.context['error'], _('SKU not provided.'))
+        self.assertEqual(response.context['error'], 'SKU not provided.')
 
     def test_invalid_voucher_code(self):
         """ Verify an error is returned when voucher does not exist. """
-        code = 'DOESNTEXIST'
+        code = FuzzyText().fuzz()
         url = self.redeem_url + '?code={}&sku={}'.format(code, self.stock_record.partner_sku)
         response = self.client.get(url)
         msg = 'No voucher found with code {code}'.format(code=code)
-        self.assertEqual(response.context['error'], _(msg))
+        self.assertEqual(response.context['error'], msg)
 
     def test_no_product(self):
         """ Verify an error is returned when a stock record for the provided SKU doesn't exist. """
         self.create_and_test_coupon_and_return_code()
         url = self.redeem_url + '?code={}&sku=INVALID'.format(COUPON_CODE)
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('The product does not exist.'))
+        self.assertEqual(response.context['error'], 'The product does not exist.')
 
     def test_expired_voucher(self):
         """ Verify an error is returned for expired coupon. """
         start_datetime = now() - datetime.timedelta(days=20)
         end_datetime = now() - datetime.timedelta(days=10)
-        code = 'INVALID'
+        code = FuzzyText().fuzz()
         __, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
         url = self.redeem_url + '?code={}&sku={}'.format(code, StockRecord.objects.get(product=product).partner_sku)
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], _('This coupon code has expired.'))
+        self.assertEqual(response.context['error'], 'This coupon code has expired.')
 
     @httpretty.activate
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket single-item view when a discount code is provided. """
         self.mock_course_api_response(course=self.course)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
@@ -363,6 +367,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         code = self.create_and_test_coupon_and_return_code(benefit_value=100, code='')
         httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=status.HTTP_301_MOVED_PERMANENTLY)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+
         self.assert_redemption_page_redirects(
             self.student_dashboard_url,
             target=status.HTTP_301_MOVED_PERMANENTLY,
@@ -377,6 +383,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         basket.vouchers.add(Voucher.objects.get(code=code))
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         httpretty.register_uri(httpretty.GET, self.student_dashboard_url, status=status.HTTP_301_MOVED_PERMANENTLY)
+        self.mock_access_token_response()
+
         self.assert_redemption_page_redirects(
             self.student_dashboard_url,
             target=status.HTTP_301_MOVED_PERMANENTLY,
@@ -388,10 +396,12 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         """ Verify a user is rejected from redeeming a coupon for a course she's already enrolled in."""
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+
         self.create_and_test_coupon_and_return_code()
         response = self.client.get(self.redeem_url_with_params())
         msg = 'You are already enrolled in the course.'
-        self.assertEqual(response.context['error'], _(msg))
+        self.assertEqual(response.context['error'], msg)
 
     @httpretty.activate
     def test_invalid_email_domain_rejection(self):
@@ -400,16 +410,18 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.create_and_test_coupon_and_return_code(email_domains='example.com')
         response = self.client.get(self.redeem_url_with_params())
         msg = 'You are not eligible to use this coupon.'
-        self.assertEqual(response.context['error'], _(msg))
+        self.assertEqual(response.context['error'], msg)
 
     @httpretty.activate
     def test_inactive_user_rejection(self):
         """ Verify that a user who hasn't activated the account is rejected. """
         self.mock_account_api(self.request, self.user.username, data={'is_active': False})
         self.create_and_test_coupon_and_return_code()
+        self.mock_access_token_response()
+
         response = self.client.get(self.redeem_url_with_params())
         msg = 'You need to activate your account in order to redeem this coupon.'
-        self.assertEqual(response.context['error'], _(msg))
+        self.assertEqual(response.context['error'], msg)
 
 
 class EnrollmentCodeCsvViewTests(TestCase):

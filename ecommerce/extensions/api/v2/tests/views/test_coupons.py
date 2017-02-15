@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import datetime
+import json
 from decimal import Decimal
 from uuid import uuid4
 
@@ -24,7 +24,7 @@ from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
-from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, SiteFactory
+from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -88,12 +88,6 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         request.COOKIES = {}
         return request
 
-    def setup_site_configuration(self):
-        site_configuration = SiteConfigurationFactory(partner__name='TestX')
-        site = SiteFactory()
-        site.siteconfiguration = site_configuration
-        return site
-
     def test_create(self):
         """Test the create method."""
         max_uses = 2
@@ -115,12 +109,17 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         response = view.create(request)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(
-            response.data,
-            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 3}
-        )
 
         coupon = Product.objects.get(title=title)
+        basket = Basket.objects.last()
+        order = Order.objects.last()
+
+        self.assertDictEqual(
+            response.data,
+            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': basket.id, 'order': order.id,
+             'coupon_id': coupon.id}
+        )
+
         self.assertEqual(
             coupon.attr.coupon_vouchers.vouchers.first().offers.first().max_global_applications,
             max_uses
@@ -246,16 +245,18 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def test_create_order(self):
         """Test the order creation."""
-        self.create_coupon(partner=self.partner)
+        coupon = self.create_coupon(partner=self.partner)
+        order = Order.objects.first()
+        self.assertEqual(Order.objects.count(), 1)
 
         self.assertDictEqual(
             self.response_data,
-            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 3}
+            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': self.basket.id, 'order': order.id,
+             'coupon_id': coupon.id}
         )
 
-        self.assertEqual(Order.objects.count(), 1)
-        self.assertEqual(Order.objects.first().status, 'Complete')
-        self.assertEqual(Order.objects.first().total_incl_tax, 100)
+        self.assertEqual(order.status, 'Complete')
+        self.assertEqual(order.total_incl_tax, 100)
         self.assertEqual(Basket.objects.first().status, 'Submitted')
 
     def test_create_update_data_dict(self):
@@ -283,7 +284,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
         self.assertEqual(coupon_voucher_qs.first().vouchers.count(), 5)
 
         request = RequestFactory()
-        request.site = self.setup_site_configuration()
+        request.site = SiteConfigurationFactory().site
         response = CouponViewSet().destroy(request, coupon.id)
 
         self.assertEqual(Product.objects.filter(product_class=self.coupon_product_class).count(), 0)
@@ -306,8 +307,10 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         super(CouponViewSetFunctionalTest, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.create_course_and_seat(course_id='edx/Demo_Course1/DemoX', price=50)
-        self.create_course_and_seat(course_id='edx/Demo_Course2/DemoX', price=100)
+
+        __, seat = self.create_course_and_seat(course_id='edx/Demo_Course1/DemoX', price=50)
+        __, other_seat = self.create_course_and_seat(course_id='edx/Demo_Course2/DemoX', price=100)
+
         self.data = {
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100,
@@ -319,7 +322,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
             'price': 100,
             'quantity': 2,
             'start_datetime': str(now() - datetime.timedelta(days=10)),
-            'stock_record_ids': [1, 2],
+            'stock_record_ids': [seat.stockrecords.first().id, other_seat.stockrecords.first().id],
             'title': 'Tešt čoupon',
             'voucher_type': Voucher.SINGLE_USE,
         }
@@ -429,12 +432,18 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
 
     def test_response(self):
         """Test the response data given after the order was created."""
+        basket = Basket.objects.last()
+        order = Order.objects.last()
+
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         response_data = json.loads(self.response.content)
-        self.assertDictEqual(
-            response_data,
-            {'payment_data': {'payment_processor_name': 'Invoice'}, 'id': 1, 'order': 1, 'coupon_id': 5}
-        )
+        expected = {
+            'payment_data': {'payment_processor_name': 'Invoice'},
+            'id': basket.id,
+            'order': order.id,
+            'coupon_id': self.coupon.id
+        }
+        self.assertDictEqual(response_data, expected)
 
     def test_order(self):
         """Test the order data after order creation."""

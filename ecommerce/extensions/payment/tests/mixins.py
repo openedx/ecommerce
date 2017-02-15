@@ -118,12 +118,14 @@ class CybersourceMixin(PaymentEventsMixin):
         with LogCapture(logger_name) as l:
             self.client.post(self.path, notification)
 
-            self.assert_processor_response_recorded(
+            ppr_id = self.assert_processor_response_recorded(
                 self.processor_name,
-                notification[u'transaction_id'],
+                notification['transaction_id'],
                 notification,
                 basket=self.basket
             )
+
+            error_message = error_message.format(basket_id=self.basket.id, response_id=ppr_id)
 
             l.check(
                 (
@@ -131,7 +133,7 @@ class CybersourceMixin(PaymentEventsMixin):
                     'INFO',
                     'Received CyberSource merchant notification for transaction [{transaction_id}], '
                     'associated with basket [{basket_id}].'.format(
-                        transaction_id=notification[u'transaction_id'],
+                        transaction_id=notification['transaction_id'],
                         basket_id=self.basket.id
                     )
                 ),
@@ -401,7 +403,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         with mock.patch.object(self.view, 'handle_payment', side_effect=error_class) as fake_handle_payment:
             self._assert_processing_failure(
                 notification,
-                error_message.format(basket_id=self.basket.id, response_id=1),
+                error_message,
                 log_level
             )
             self.assertTrue(fake_handle_payment.called)
