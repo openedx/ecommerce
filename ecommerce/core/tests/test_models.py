@@ -220,12 +220,12 @@ class BusinessClientTests(TestCase):
 @ddt.ddt
 class SiteConfigurationTests(TestCase):
     @ddt.data(
-        ("paypal", {"paypal"}),
-        ("paypal ", {"paypal"}),
-        ("paypal,cybersource", {"paypal", "cybersource"}),
-        ("paypal, cybersource", {"paypal", "cybersource"}),
-        ("paypal,cybersource,something_else", {"paypal", "cybersource", "something_else"}),
-        ("paypal , cybersource , something_else", {"paypal", "cybersource", "something_else"}),
+        ('paypal', {'paypal'}),
+        ('paypal ', {'paypal'}),
+        ('paypal,cybersource', {'paypal', 'cybersource'}),
+        ('paypal, cybersource', {'paypal', 'cybersource'}),
+        ('paypal,cybersource,something_else', {'paypal', 'cybersource', 'something_else'}),
+        ('paypal , cybersource , something_else', {'paypal', 'cybersource', 'something_else'}),
     )
     @ddt.unpack
     def test_payment_processor_field_parsing(self, payment_processors_str, expected_result):
@@ -307,11 +307,11 @@ class SiteConfigurationTests(TestCase):
         Validate SiteConfiguration.get_from_email() along with whether, or not,
         the base from email address is actually changed when a site-specific value is specified.
         """
-        site_config = SiteConfigurationFactory(from_email='', partner__name='TestX')
+        site_config = SiteConfigurationFactory(from_email='')
         self.assertEqual(site_config.get_from_email(), settings.OSCAR_FROM_EMAIL)
 
-        expected_from_email = "expected@email.com"
-        site_config = SiteConfigurationFactory(from_email=expected_from_email, partner__name='TestX')
+        expected_from_email = 'expected@email.com'
+        site_config = SiteConfigurationFactory(from_email=expected_from_email)
         self.assertEqual(site_config.get_from_email(), expected_from_email)
 
     @httpretty.activate

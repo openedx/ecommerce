@@ -2,9 +2,18 @@
 version: "2"
 
 services:
+  db:
+    image: mysql:5.6
+    container_name: db
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_USER: "ecomm001"
+      MYSQL_PASSWORD: "password"
+      MYSQL_DATABASE: "ecommerce"
   ecommerce:
     image: edxops/ecommerce:latest
-
     container_name: ecommerce_testing
     volumes:
       - ..:/edx/app/ecommerce/ecommerce
@@ -14,3 +23,14 @@ services:
     # command that keeps the ecommerce container alive while we run tests on it.
     # We have not yet standardized on an init replacement which could be used instead.
     command: tail -f /dev/null
+    depends_on:
+      - db
+    environment:
+      CONN_MAX_AGE: 60
+      DB_ENGINE: "django.db.backends.mysql"
+      DB_HOST: "db"
+      DB_NAME: "ecommerce"
+      DB_PASSWORD: "password"
+      DB_PORT: "3306"
+      DB_USER: "ecomm001"
+      DJANGO_SETTINGS_MODULE: "ecommerce.settings.test"
