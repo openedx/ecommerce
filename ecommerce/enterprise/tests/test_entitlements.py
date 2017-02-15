@@ -138,6 +138,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             title=coupon_title,
             quantity=quantity,
             course_catalog=course_catalog_id,
+            course_seat_types='verified'
         )
         return course_catalog_coupon
 

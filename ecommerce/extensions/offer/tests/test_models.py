@@ -156,7 +156,7 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
             catalog_id=course_catalog_id, catalog_query=catalog_query
         )
         self.range.catalog_query = None
-        self.range.course_seat_types = None
+        self.range.course_seat_types = 'verified'
         self.range.course_catalog = course_catalog_id
         self.range.save()
 
@@ -174,7 +174,7 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         __, seat = self.create_course_and_seat()
         course_catalog_id = 1
         self.range.catalog_query = None
-        self.range.course_seat_types = None
+        self.range.course_seat_types = 'verified'
         self.range.course_catalog = course_catalog_id
         self.range.save()
 
@@ -204,9 +204,17 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         {'catalog_query': '*:*'},
         {'catalog_query': '', 'course_seat_types': ['verified']},
         {'course_seat_types': ['verified']},
+        {'course_catalog': '', 'course_seat_types': 'verified'},
+        {'course_catalog': '20'},
+        {'course_catalog': '20', 'catalog_query': '*:*'},
+        {'course_catalog': '20', 'catalog_query': '*:*', 'course_seat_types': 'verified'},
     )
     def test_creating_range_with_wrong_data(self, data):
-        """Verify creating range without catalog_query or catalog_seat_types raises ValidationError."""
+        """
+        Verify creating range raises ValidationError:
+            - without course_catalog or catalog_query or catalog_seat_types.
+            - with both given course_catalog and catalog_query.
+        """
         with self.assertRaises(ValidationError):
             Range.objects.create(**data)
 
@@ -229,6 +237,20 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         }
         new_range = Range.objects.create(**data)
         self.assertEqual(new_range.catalog_query, data['catalog_query'])
+        self.assertEqual(new_range.course_seat_types, data['course_seat_types'])
+        self.assertEqual(new_range.catalog, None)
+
+    def test_creating_dynamic_range_with_course_catalog(self):
+        """
+        Verify creating range with course_catalog and catalog_seat_types creates
+        range with those values.
+        """
+        data = {
+            'course_catalog': '10',
+            'course_seat_types': 'verified,professional'
+        }
+        new_range = Range.objects.create(**data)
+        self.assertEqual(new_range.course_catalog, data['course_catalog'])
         self.assertEqual(new_range.course_seat_types, data['course_seat_types'])
         self.assertEqual(new_range.catalog, None)
 

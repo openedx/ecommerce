@@ -139,11 +139,12 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             course_seat_types=course_seat_types
         )
 
-    def create_course_catalog_coupon(self, coupon_title, quantity, course_catalog):
+    def create_course_catalog_coupon(self, coupon_title, quantity, course_catalog, course_seat_types):
         return self.create_coupon(
             title=coupon_title,
             quantity=quantity,
             course_catalog=course_catalog,
+            course_seat_types=course_seat_types,
         )
 
     def use_voucher(self, order_num, voucher, user):
@@ -263,6 +264,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             coupon_title=coupon_title,
             quantity=quantity,
             course_catalog=course_catalog,
+            course_seat_types='verified',
         )
         self.assertEqual(course_catalog_coupon.title, coupon_title)
 
@@ -271,18 +273,6 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
         course_catalog_voucher_range = course_catalog_vouchers.first().offers.first().benefit.range
         self.assertEqual(course_catalog_voucher_range.course_catalog, course_catalog)
-
-        self.data.update({
-            'name': coupon_title,
-            'benefit_value': course_catalog_vouchers.first().offers.first().benefit.value,
-            'code': course_catalog_vouchers.first().code,
-            'quantity': quantity,
-            'course_catalog': course_catalog,
-            'catalog': None,
-            'course_seat_types': None
-        })
-        with self.assertRaises(IntegrityError):
-            create_vouchers(**self.data)
 
     def assert_report_first_row(self, row, coupon, voucher):
         """

@@ -208,16 +208,19 @@ class Range(AbstractRange):
 
     def clean(self):
         """ Validation for model fields. """
-        if self.catalog and (self.catalog_query or self.course_seat_types):
+        if self.catalog and (self.course_catalog or self.catalog_query or self.course_seat_types):
             log_message_and_raise_validation_error(
                 'Failed to create Range. Catalog and dynamic catalog fields may not be set in the same range.'
             )
 
-        # Both catalog_query and course_seat_types must be set or empty
-        error_message = 'Failed to create Range. Both catalog_query and course_seat_types fields must be set.'
-        if self.catalog_query and not self.course_seat_types:
+        error_message = 'Failed to create Range. Either catalog_query or course_catalog must be given but not both ' \
+                        'and course_seat_types fields must be set.'
+
+        if self.catalog_query and self.course_catalog:
             log_message_and_raise_validation_error(error_message)
-        elif self.course_seat_types and not self.catalog_query:
+        elif (self.catalog_query or self.course_catalog) and not self.course_seat_types:
+            log_message_and_raise_validation_error(error_message)
+        elif self.course_seat_types and not (self.catalog_query or self.course_catalog):
             log_message_and_raise_validation_error(error_message)
 
         if self.course_seat_types:
