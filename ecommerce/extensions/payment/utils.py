@@ -130,7 +130,8 @@ class SDNClient(object):
             full_name=name,
             username=user.username,
             country=country,
+            site=site_configuration.site,
             sdn_check_response=search_results
         )
-        logger.warning('SDN check failed for user [%s]', name)
+        logger.warning('SDN check failed for user [%s] on site [%s]', name, site_configuration.site.name)
         user.deactivate_account(site_configuration)
