@@ -21,6 +21,9 @@ addons:
 before_install:
     - docker-compose -f ./.travis/docker-compose-travis.yml up -d
 
+# Prevent Travis CI from installing requirments.txt. The requirements will be installed by the script below.
+install: true
+
 script:
     - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_tests.sh
 
