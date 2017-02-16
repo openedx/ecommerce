@@ -276,3 +276,30 @@ def get_course_ids_from_voucher(site, voucher):
         voucher_course_ids = [seat.course_id for seat in seats]
 
     return voucher_course_ids
+
+
+def link_course_enrollment_to_enterprise_customer(site, course_id, enterprise_customer_user_id):
+    """
+    Make a link of course enrollment with enterprise customer
+
+    Arguments:
+        site: (django.contrib.sites.Site) site instance
+        course_id: course id
+        user: (django.contrib.auth.User) django auth user
+
+    """
+    api_resource_name = 'enterprise-course-enrollment'
+    api = site.siteconfiguration.enterprise_api_client
+    endpoint = getattr(api, api_resource_name)
+    data = {
+        'course_id': course_id,
+        'enterprise_customer_user': enterprise_customer_user_id
+    }
+    try:
+        endpoint.post(data)
+    except (ConnectionError, SlumberBaseException, Timeout) as exc:
+        logger.exception(
+            'Linking of course "%s" with enterprise customer user is failed with message: %s',
+            course_id, exc.response.text
+        )
+        raise exc

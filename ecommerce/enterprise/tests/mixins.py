@@ -13,6 +13,10 @@ class EnterpriseServiceMockMixin(object):
         settings.ENTERPRISE_API_URL,
     )
 
+    ENTERPRISE_COURSE_ENROLLMENT_URL = '{}enterprise-course-enrollment/'.format(
+        settings.ENTERPRISE_API_URL,
+    )
+
     def setUp(self):
         super(EnterpriseServiceMockMixin, self).setUp()
         cache.clear()
@@ -27,6 +31,7 @@ class EnterpriseServiceMockMixin(object):
             'current_page': 1,
             'results': [
                 {
+                    'id': 1,
                     'enterprise_customer': {
                         'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
                         'name': 'TestShib',

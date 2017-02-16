@@ -25,6 +25,7 @@ from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.notifications.notifications import send_notification
+import ecommerce.enterprise.entitlements as enterprise_api
 
 Benefit = get_model('offer', 'Benefit')
 Product = get_model('catalogue', 'Product')
@@ -213,6 +214,14 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
+                    learner_data = enterprise_api.get_enterprise_learner_data(site=order.site, user=order.user)
+
+                    if learner_data['results']:
+                        enterprise_api.link_course_enrollment_to_enterprise_customer(
+                            site=order.site,
+                            course_id=course_key,
+                            enterprise_customer_user_id=learner_data['results'][0]['id']
+                        )
 
                     audit_log(
                         'line_fulfilled',
