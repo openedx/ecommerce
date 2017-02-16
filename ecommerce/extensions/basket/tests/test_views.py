@@ -198,7 +198,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 303)
-        self.assertEqual(response.reason_phrase, "SEE OTHER")
         self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
         self.assertEqual(response.wsgi_request.GET['sku'], sku)
 
@@ -222,7 +221,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 303)
-        self.assertEqual(response.reason_phrase, "SEE OTHER")
         self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
         self.assertEqual(response.wsgi_request.GET['sku'], stock_record.partner_sku)
 

@@ -1,10 +1,10 @@
 """Helper functions for working with payment processor classes."""
-import hmac
 import base64
 import hashlib
+import hmac
+from importlib import import_module
 
 from django.conf import settings
-from django.utils import importlib
 
 from ecommerce.extensions.payment import exceptions
 
@@ -24,7 +24,7 @@ def get_processor_class(path):
             does not contain a class with the parsed class name.
     """
     module_path, _, class_name = path.rpartition('.')
-    processor_class = getattr(importlib.import_module(module_path), class_name)
+    processor_class = getattr(import_module(module_path), class_name)
 
     return processor_class
 

@@ -82,7 +82,7 @@ ENTERPRISE_URLS = [
 
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
-    url(r'^checkout/$', include(CHECKOUT_URLS, namespace='checkout')),
+    url(r'^checkout/', include(CHECKOUT_URLS, namespace='checkout')),
     url(r'^coupons/', include(COUPON_URLS, namespace='coupons')),
     url(r'^enterprise/', include(ENTERPRISE_URLS, namespace='enterprise')),
     url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),

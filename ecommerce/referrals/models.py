@@ -19,9 +19,9 @@ class Referral(TimeStampedModel):
         'utm_created_at',
     )
 
-    site = models.ForeignKey('sites.Site', null=True, blank=False)
-    basket = models.OneToOneField('basket.Basket', null=True, blank=True)
-    order = models.OneToOneField('order.Order', null=True, blank=True)
+    site = models.ForeignKey('sites.Site', null=True, blank=False, on_delete=models.CASCADE)
+    basket = models.OneToOneField('basket.Basket', null=True, blank=True, on_delete=models.SET_NULL)
+    order = models.OneToOneField('order.Order', null=True, blank=True, on_delete=models.SET_NULL)
     affiliate_id = models.CharField(_('Affiliate ID'), blank=True, default="", max_length=255)
     utm_source = models.CharField(_('UTM Source'), blank=True, default="", max_length=255)
     utm_medium = models.CharField(_('UTM Medium'), blank=True, default="", max_length=255)

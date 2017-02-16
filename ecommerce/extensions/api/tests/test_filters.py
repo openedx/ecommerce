@@ -23,5 +23,5 @@ class ProductFilterTests(CourseCatalogTestMixin, TestCase):
         product_class_name = self.seat_product_class.name
         queryset = Product.objects.all()
 
-        actual = list(self.filter.filter_product_class(queryset, product_class_name))
+        actual = list(self.filter.filter_product_class(queryset, 'product_class', product_class_name))
         self.assertListEqual(actual, [seat, parent])

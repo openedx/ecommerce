@@ -6,7 +6,9 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.shortcuts import redirect
+from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
+from django.views.i18n import javascript_catalog
 
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
@@ -40,9 +42,7 @@ js_info_dict = {
 
 # NOTE 1: Add our logout override first to ensure it is registered by Django as the actual logout view.
 # NOTE 2: These same patterns are used for rest_framework's browseable API authentication links.
-AUTH_URLS = [
-    url(r'^logout/$', LogoutView.as_view(), name='logout'),
-] + auth_urlpatterns
+AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + auth_urlpatterns
 
 urlpatterns = AUTH_URLS + [
     url(r'^admin/', include(admin.site.urls)),
@@ -54,7 +54,7 @@ urlpatterns = AUTH_URLS + [
     url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
+    url(r'^jsi18n/$', javascript_catalog, js_info_dict, name='javascript-catalog'),
 ]
 
 # Install Oscar extension URLs
@@ -74,8 +74,8 @@ if settings.DEBUG and settings.MEDIA_ROOT:  # pragma: no cover
 if settings.DEBUG:  # pragma: no cover
     urlpatterns += [
         url(r'^403/$', handler403, name='403'),
-        url(r'^404/$', 'django.views.defaults.page_not_found', name='404'),
-        url(r'^500/$', 'django.views.defaults.server_error', name='500'),
+        url(r'^404/$', page_not_found, name='404'),
+        url(r'^500/$', server_error, name='500'),
         url(r'^bootstrap/$', TemplateView.as_view(template_name='bootstrap-demo.html')),
     ]
     # Allow error pages to be tested

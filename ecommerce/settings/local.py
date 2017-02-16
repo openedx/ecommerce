@@ -50,11 +50,7 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
         'debug_toolbar',
     )
 
-    MIDDLEWARE_CLASSES += (
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
-
-    DEBUG_TOOLBAR_PATCH_SETTINGS = False
+    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
 
 # http://django-debug-toolbar.readthedocs.org/en/latest/installation.html
 INTERNAL_IPS = ('127.0.0.1',)
