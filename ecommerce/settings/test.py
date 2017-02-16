@@ -14,7 +14,11 @@ INSTALLED_APPS += (
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+# Disable syslog logging since we usually do not have syslog enabled in test environments.
 LOGGING['handlers']['local'] = {'class': 'logging.NullHandler'}
+
+# Disable console logging to cut down on log size. Nose will capture the logs for us.
+LOGGING['handlers']['console'] = {'class': 'logging.NullHandler'}
 
 if os.getenv('DISABLE_MIGRATIONS'):
 
