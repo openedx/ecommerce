@@ -21,13 +21,7 @@
                 </div>
                 <div class="product-information col-sm-7 col-xs-7">
                     <p class="product-name">{{ line_data.product_title }}</p>
-                    {% if line_data.seat_type %}
-                    <p class="seat-type">
-                        {% blocktrans with seat_type=line_data.seat_type %}
-                            {{ seat_type }} Certificate
-                        {% endblocktrans %}
-                    </p>
-                    {% endif %}
+                    {% include 'oscar/basket/partials/seat_type.html' %}
                 </div>
                 {% if line_data.enrollment_code %}
                     <div class="col-sm-12 col-xs-12 form-inline quantity-group">
