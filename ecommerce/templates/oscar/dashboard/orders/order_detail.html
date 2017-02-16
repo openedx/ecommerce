@@ -15,7 +15,7 @@
 
   {# Translation support for JavaScript strings. #}
   <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
-  
+
   {% compress js %}
       <script src="{% static 'bower_components/js-cookie/src/js.cookie.js' %}" type="text/javascript"></script>
       <script src="{% static 'vendor-extensions/oscar/js/add_message.js' %}" type="text/javascript"></script>
@@ -27,11 +27,9 @@
     <ul class="breadcrumb">
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-            <span class="divider">/</span>
         </li>
         <li>
             <a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a>
-            <span class="divider">/</span>
         </li>
         <li class="active">#{{ order.number }}</li>
     </ul>

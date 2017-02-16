@@ -11,11 +11,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.test.client import RequestFactory
 from django.utils.timezone import now
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
+from oscar.test.utils import RequestFactory
 from social.apps.django_app.default.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 

@@ -5,6 +5,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Default = get_class('partner.strategy', 'Default')
 Voucher = get_model('voucher', 'Voucher')
 
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
@@ -17,7 +18,7 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
     """
     if not basket:
         basket = Basket.objects.create()
-        basket.strategy = strategy.Default()
+        basket.strategy = Default()
         product = create_product()
         create_stockrecord(
             product, num_in_stock=10, price_excl_tax=D('10.00'))
@@ -50,13 +51,16 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
 def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_datetime=None, benefit_value=100,
                     benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE, max_usage=None):
     """ Helper function to create a voucher and add an offer to it that contains a product. """
+
+    # NOTE (CCB): We use empty categories here to avoid unique-constraint issues that occur when we use
+    # ProductCategoryFactory in conjunction with pre-created Category objects.
     if _range is None:
-        product = ProductFactory(title='Test product')
+        product = ProductFactory(categories=[])
         _range = RangeFactory(products=[product, ])
     elif _range.num_products() > 0:
         product = _range.all_products()[0]
     else:
-        product = ProductFactory(title='Test product')
+        product = ProductFactory(categories=[])
 
     if start_datetime is None:
         start_datetime = now() - datetime.timedelta(days=1)
