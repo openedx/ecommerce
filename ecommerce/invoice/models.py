@@ -30,9 +30,9 @@ class Invoice(TimeStampedModel):
         'invoice_type',
         'tax_deducted_source',
     ]
-    basket = models.ForeignKey('basket.Basket', null=True, blank=True)
-    order = models.ForeignKey('order.Order', null=True, blank=False)
-    business_client = models.ForeignKey('core.BusinessClient', null=True, blank=False)
+    basket = models.ForeignKey('basket.Basket', null=True, blank=True, on_delete=models.SET_NULL)
+    order = models.ForeignKey('order.Order', null=True, blank=False, on_delete=models.SET_NULL)
+    business_client = models.ForeignKey('core.BusinessClient', null=True, blank=False, on_delete=models.SET_NULL)
     state = models.CharField(max_length=255, default=NOT_PAID, choices=state_choices)
 
     number = models.CharField(max_length=255, null=True, blank=True)

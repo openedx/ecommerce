@@ -183,7 +183,9 @@ class Range(AbstractRange):
         'enterprise_customer',
     ]
     ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
-    catalog = models.ForeignKey('catalogue.Catalog', blank=True, null=True, related_name='ranges')
+    catalog = models.ForeignKey(
+        'catalogue.Catalog', blank=True, null=True, related_name='ranges', on_delete=models.CASCADE
+    )
     catalog_query = models.TextField(blank=True, null=True)
     course_catalog = models.PositiveIntegerField(
         help_text=_('Course catalog id from the Catalog Service.'),

@@ -74,8 +74,10 @@ class BasketAttribute(models.Model):
     can be added by defining new types.  Currently only supports text fields,
     but could be extended
     """
-    basket = models.ForeignKey('basket.Basket', verbose_name=_("Basket"))
-    attribute_type = models.ForeignKey('basket.BasketAttributeType', verbose_name=_("Attribute Type"))
+    basket = models.ForeignKey('basket.Basket', verbose_name=_("Basket"), on_delete=models.CASCADE)
+    attribute_type = models.ForeignKey(
+        'basket.BasketAttributeType', verbose_name=_("Attribute Type"), on_delete=models.CASCADE
+    )
     value_text = models.TextField(_("Text Attribute"))
 
     class Meta(object):

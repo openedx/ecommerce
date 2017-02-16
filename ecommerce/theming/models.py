@@ -11,7 +11,7 @@ class SiteTheme(models.Model):
         site (ForeignKey): Foreign Key field pointing to django Site model
         theme_dir_name (CharField): Contains directory name for any site's theme (e.g. 'red-theme')
     """
-    site = models.ForeignKey(Site, related_name='themes')
+    site = models.ForeignKey(Site, related_name='themes', on_delete=models.CASCADE)
     theme_dir_name = models.CharField(max_length=255)
 
     @staticmethod

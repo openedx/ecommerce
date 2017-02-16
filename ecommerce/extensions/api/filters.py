@@ -9,11 +9,11 @@ Product = get_model('catalogue', 'Product')
 
 class ProductFilter(django_filters.FilterSet):
     """ Filter products via query string parameters. """
-    product_class = django_filters.MethodFilter()
-    structure = django_filters.CharFilter(name='structure', lookup_type='iexact')
-    title = django_filters.CharFilter(name='title', lookup_type='startswith')
+    product_class = django_filters.CharFilter(method='filter_product_class')
+    structure = django_filters.CharFilter(name='structure', lookup_expr='iexact')
+    title = django_filters.CharFilter(name='title', lookup_expr='startswith')
 
-    def filter_product_class(self, queryset, value):
+    def filter_product_class(self, queryset, name, value):  # pylint: disable=unused-argument
         return queryset.filter(Q(product_class__name__iexact=value) | Q(parent__product_class__name__iexact=value))
 
     class Meta(object):

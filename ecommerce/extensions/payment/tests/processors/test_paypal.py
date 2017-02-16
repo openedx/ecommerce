@@ -12,6 +12,7 @@ import paypalrestsdk
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
+from factory.fuzzy import FuzzyInteger
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 from paypalrestsdk.resource import Resource  # pylint:disable=ungrouped-imports
@@ -184,24 +185,26 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.site.siteconfiguration.enable_otto_receipt_page = False
         assert self._get_receipt_url() == self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt/')
 
-    @httpretty.activate
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
-    @ddt.data(None, Paypal.DEFAULT_PROFILE_NAME, "some-other-name")
+    @ddt.data(None, Paypal.DEFAULT_PROFILE_NAME, 'some-other-name')
     def test_web_profiles(self, enabled_profile_name, mock_payment):
         """
         Verify that the payment creation payload references a web profile when one is enabled with the expected name.
         """
         mock_payment_instance = mock.Mock()
+        # NOTE: This is necessary to avoid the issue in https://code.djangoproject.com/ticket/25493.
+        mock_payment_instance.id = FuzzyInteger(low=1).fuzz()
         mock_payment_instance.to_dict.return_value = {}
         mock_payment_instance.links = [mock.Mock(rel='approval_url', href='dummy')]
         mock_payment.return_value = mock_payment_instance
+
         if enabled_profile_name is not None:
-            PaypalWebProfile.objects.create(name=enabled_profile_name, id="test-profile-id")
+            PaypalWebProfile.objects.create(name=enabled_profile_name, id='test-profile-id')
 
         self.processor.get_transaction_parameters(self.basket, request=self.request)
         payment_creation_payload = mock_payment.call_args[0][0]
         if enabled_profile_name == Paypal.DEFAULT_PROFILE_NAME:
-            self.assertEqual(payment_creation_payload['experience_profile_id'], "test-profile-id")
+            self.assertEqual(payment_creation_payload['experience_profile_id'], 'test-profile-id')
         else:
             self.assertNotIn('experience_profile_id', payment_creation_payload)
 

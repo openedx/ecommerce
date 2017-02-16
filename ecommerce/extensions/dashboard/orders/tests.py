@@ -115,7 +115,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
 
         # Ensure an alert is displayed)
         self.assertAlertDisplayed('alert-error',
-                                  'Failed to fulfill order {}: INTERNAL SERVER ERROR'.format(order_number))
+                                  'Failed to fulfill order {}: Internal Server Error'.format(order_number))
 
 
 class OrderListViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewBrowserTestBase):

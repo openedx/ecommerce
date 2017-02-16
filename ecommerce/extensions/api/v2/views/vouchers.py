@@ -10,18 +10,17 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import filters, status
+from rest_framework.decorators import list_route
 from rest_framework.response import Response
-from rest_framework_extensions.decorators import action
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
+from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_catalog
-from ecommerce.coupons.utils import get_catalog_course_runs
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
-
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
@@ -35,25 +34,25 @@ class VoucherFilter(django_filters.FilterSet):
     Filter for vouchers via query string parameters.
     Currently supports filtering via the voucher's code.
     """
-    code = django_filters.CharFilter(name='code', lookup_type='exact')
+    code = django_filters.CharFilter(name='code')
 
     class Meta(object):
         model = Voucher
-        fields = ('code', )
+        fields = ('code',)
 
 
 class VoucherViewSet(NonDestroyableModelViewSet):
     """ View set for vouchers. """
     queryset = Voucher.objects.all()
     serializer_class = serializers.VoucherSerializer
-    permission_classes = (IsOffersOrIsAuthenticatedAndStaff, )
-    filter_backends = (filters.DjangoFilterBackend, )
+    permission_classes = (IsOffersOrIsAuthenticatedAndStaff,)
+    filter_backends = (filters.DjangoFilterBackend,)
     filter_class = VoucherFilter
 
-    @action(is_for_list=True, methods=['get'], endpoint='offers')
+    @list_route()
     def offers(self, request):
-        """
-        Preview the courses offered by the voucher.
+        """ Preview the courses offered by the voucher.
+
         Paginated Response containing the list of course offers will be returned.
         ---
         parameters:
@@ -107,9 +106,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         nonexpired_course_ids = []
         for result in results:
             all_course_ids.append(result['key'])
-            if not result['enrollment_end'] or (
-                    result['enrollment_end'] and parser.parse(result['enrollment_end']) > now()
-            ):
+            if not result['enrollment_end'] or \
+                    (result['enrollment_end'] and parser.parse(result['enrollment_end']) > now()):
                 nonexpired_course_ids.append(result['key'])
 
         products = []

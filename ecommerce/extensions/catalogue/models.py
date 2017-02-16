@@ -6,7 +6,9 @@ from simple_history.models import HistoricalRecords
 
 
 class Product(AbstractProduct):
-    course = models.ForeignKey('courses.Course', null=True, blank=True, related_name='products')
+    course = models.ForeignKey(
+        'courses.Course', null=True, blank=True, related_name='products', on_delete=models.CASCADE
+    )
     expires = models.DateTimeField(null=True, blank=True,
                                    help_text=_('Last date/time on which this product can be purchased.'))
     history = HistoricalRecords()
@@ -18,7 +20,7 @@ class ProductAttributeValue(AbstractProductAttributeValue):
 
 class Catalog(models.Model):
     name = models.CharField(max_length=255)
-    partner = models.ForeignKey('partner.Partner', related_name='catalogs')
+    partner = models.ForeignKey('partner.Partner', related_name='catalogs', on_delete=models.CASCADE)
     stock_records = models.ManyToManyField('partner.StockRecord', blank=True, related_name='catalogs')
 
     def __unicode__(self):

@@ -15,12 +15,12 @@ class CouponVouchers(models.Model):
         'start_datetime',
         'name'
     ]
-    coupon = models.ForeignKey('catalogue.Product', related_name='coupon_vouchers')
+    coupon = models.ForeignKey('catalogue.Product', related_name='coupon_vouchers', on_delete=models.CASCADE)
     vouchers = models.ManyToManyField('voucher.Voucher', blank=True, related_name='coupon_vouchers')
 
 
 class OrderLineVouchers(models.Model):
-    line = models.ForeignKey('order.Line', related_name='order_line_vouchers')
+    line = models.ForeignKey('order.Line', related_name='order_line_vouchers', on_delete=models.CASCADE)
     vouchers = models.ManyToManyField('voucher.Voucher', related_name='order_line_vouchers')
 
 

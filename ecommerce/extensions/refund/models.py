@@ -65,8 +65,8 @@ class StatusMixin(object):
 
 class Refund(StatusMixin, TimeStampedModel):
     """Main refund model, used to represent the state of a refund."""
-    order = models.ForeignKey('order.Order', related_name='refunds', verbose_name=_('Order'))
-    user = models.ForeignKey('core.User', related_name='refunds', verbose_name=_('User'))
+    order = models.ForeignKey('order.Order', related_name='refunds', verbose_name=_('Order'), on_delete=models.CASCADE)
+    user = models.ForeignKey('core.User', related_name='refunds', verbose_name=_('User'), on_delete=models.CASCADE)
     total_credit_excl_tax = models.DecimalField(_('Total Credit (excl. tax)'), decimal_places=2, max_digits=12)
     currency = models.CharField(_("Currency"), max_length=12, default=get_default_currency)
     status = models.CharField(
@@ -290,8 +290,12 @@ class Refund(StatusMixin, TimeStampedModel):
 
 class RefundLine(StatusMixin, TimeStampedModel):
     """A refund line, used to represent the state of a single item as part of a larger Refund."""
-    refund = models.ForeignKey('refund.Refund', related_name='lines', verbose_name=_('Refund'))
-    order_line = models.ForeignKey('order.Line', related_name='refund_lines', verbose_name=_('Order Line'))
+    refund = models.ForeignKey(
+        'refund.Refund', related_name='lines', verbose_name=_('Refund'), on_delete=models.CASCADE
+    )
+    order_line = models.ForeignKey(
+        'order.Line', related_name='refund_lines', verbose_name=_('Order Line'), on_delete=models.CASCADE
+    )
     line_credit_excl_tax = models.DecimalField(_('Line Credit (excl. tax)'), decimal_places=2, max_digits=12)
     quantity = models.PositiveIntegerField(_('Quantity'), default=1)
     status = models.CharField(

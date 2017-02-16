@@ -3,18 +3,17 @@ import logging
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
+from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework_extensions.decorators import action
 from rest_framework_extensions.mixins import NestedViewSetMixin
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import get_catalog_course_runs
-from ecommerce.extensions.api import serializers
 from ecommerce.courses.utils import get_course_catalogs
-
+from ecommerce.extensions.api import serializers
 
 Catalog = get_model('catalogue', 'Catalog')
 Product = get_model('catalogue', 'Product')
@@ -26,10 +25,10 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
     serializer_class = serializers.CatalogSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
 
-    @action(is_for_list=True, methods=['get'])
+    @list_route()
     def preview(self, request):
-        """
-        Preview the results of the catalog query.
+        """ Preview the results of the catalog query.
+
         A list of course runs, indicating a course run presence within the catalog, will be returned.
         ---
         parameters:
@@ -75,7 +74,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @action(is_for_list=True, methods=['get'])
+    @list_route()
     def course_catalogs(self, request):
         """
         Returns response with all course catalogs in the format:

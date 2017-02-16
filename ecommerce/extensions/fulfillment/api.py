@@ -6,15 +6,14 @@ can successfully fulfill the product. Success can be reported back based on each
 
 """
 import logging
+from importlib import import_module
 
 from django.conf import settings
-from django.utils import importlib
 from django.utils.timezone import now
 
 from ecommerce.extensions.fulfillment import exceptions
 from ecommerce.extensions.fulfillment.status import ORDER, LINE
 from ecommerce.extensions.refund.status import REFUND_LINE
-
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ def fulfill_order(order, lines):
             logger.error("Product Type [%s] does not have an associated Fulfillment Module. It cannot be fulfilled.",
                          product_type)
             line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
-    except Exception:   # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         logger.exception('An unexpected error occurred while fulfilling order [%s].', order.number)
     finally:
         # Check if all lines are successful, or there were errors, and set the status of the Order.
@@ -97,7 +96,7 @@ def get_fulfillment_modules():
     for cls_path in module_paths:
         try:
             module_path, _, name = cls_path.rpartition('.')
-            module = getattr(importlib.import_module(module_path), name)
+            module = getattr(import_module(module_path), name)
             modules.append(module)
         except (ImportError, ValueError, AttributeError):
             logger.exception("Could not load module at [%s]", cls_path)
