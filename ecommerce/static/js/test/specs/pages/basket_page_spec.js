@@ -1,6 +1,7 @@
 define([
         'jquery',
         'underscore',
+        'underscore.string',
         'pages/basket_page',
         'utils/utils',
         'utils/analytics_utils',
@@ -12,6 +13,7 @@ define([
     ],
     function ($,
               _,
+              _s,
               BasketPage,
               Utils,
               AnalyticsUtils,
@@ -271,6 +273,8 @@ define([
                     it('should perform the SDN check', function () {
                         var first_name = 'Darth',
                             last_name = 'Vader',
+                            address = 'Deck 1',
+                            city = 'Death Star',
                             country = 'DS',
                             args,
                             ajaxData,
@@ -279,6 +283,8 @@ define([
 
                         $('input[name=first_name]').val(first_name);
                         $('input[name=last_name]').val(last_name);
+                        $('input[name=address_line1]').val(address);
+                        $('input[name=city]').val(city);
                         $('select[name=country]').val(country);
                         $('input[name=sdn-check]').val('enabled');
 
@@ -297,7 +303,8 @@ define([
                         expect(args.method).toEqual('POST');
                         expect(args.url).toEqual('/api/v2/sdn/search/');
                         expect(args.contentType).toEqual('application/json; charset=utf-8');
-                        expect(ajaxData.name).toEqual('Darth Vader');
+                        expect(ajaxData.name).toEqual(_s.sprintf('%s %s', first_name, last_name));
+                        expect(ajaxData.address).toEqual(_s.sprintf('%s, %s', address, city));
                         expect(ajaxData.country).toEqual(country);
                     });
                 });

@@ -73,7 +73,7 @@ class SDNClient(object):
         self.api_key = api_key
         self.sdn_list = sdn_list
 
-    def search(self, name, country):
+    def search(self, name, address, country):
         """
         Searches the OFAC list for an individual with the specified details.
         The check returns zero hits if:
@@ -83,6 +83,7 @@ class SDNClient(object):
 
         Args:
             name (str): Individual's full name.
+            address (str): Individual's address.
             country (str): ISO 3166-1 alpha-2 country code where the individual is from.
         Returns:
             dict: SDN API response.
@@ -93,6 +94,7 @@ class SDNClient(object):
             'api_key': self.api_key,
             'type': 'individual',
             'name': name,
+            'address': address,
             'countries': country
         })
         sdn_check_url = '{api_url}?{params}'.format(
@@ -115,23 +117,28 @@ class SDNClient(object):
 
         return json.loads(response.content)
 
-    def deactivate_user(self, user, site_configuration, name, country, search_results):
+    def deactivate_user(self, basket, name, address, country, search_results):
         """ Deactivates a user account.
 
         Args:
-            user (User): User whose account should be deactivated.
-            site_configuration (SiteConfiguration): The current site's configuration.
+            basket (Basket): The user's basket.
             name (str): The user's name.
+            address (str): The user's address.
             country (str): ISO 3166-1 alpha-2 country code where the individual is from.
             search_results (dict): Results from a call to `search` that will
                 be recorded as the reason for the deactivation.
         """
-        SDNCheckFailure.objects.create(
+        site = basket.site
+        snd_failure = SDNCheckFailure.objects.create(
             full_name=name,
-            username=user.username,
+            username=basket.owner.username,
+            address=address,
             country=country,
-            site=site_configuration.site,
+            site=site,
             sdn_check_response=search_results
         )
-        logger.warning('SDN check failed for user [%s] on site [%s]', name, site_configuration.site.name)
-        user.deactivate_account(site_configuration)
+        for line in basket.lines.all():
+            snd_failure.products.add(line.product)
+
+        logger.warning('SDN check failed for user [%s] on site [%s]', name, site.name)
+        basket.owner.deactivate_account(site.siteconfiguration)

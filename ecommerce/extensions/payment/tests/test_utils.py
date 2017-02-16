@@ -6,6 +6,7 @@ import mock
 import httpretty
 from django.conf import settings
 from django.test import override_settings
+from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.models import User
@@ -42,6 +43,7 @@ class SDNCheckTests(TestCase):
     def setUp(self):
         super(SDNCheckTests, self).setUp()
         self.name = 'Dr. Evil'
+        self.address = 'Top-secret lair'
         self.country = 'EL'
         self.user = self.create_user(full_name=self.name)
         self.site_configuration = self.site.siteconfiguration
@@ -64,6 +66,7 @@ class SDNCheckTests(TestCase):
             'api_key': self.site_configuration.sdn_api_key,
             'type': 'individual',
             'name': self.name,
+            'address': self.address,
             'countries': self.country
         })
         sdn_check_url = '{api_url}?{params}'.format(
@@ -79,15 +82,6 @@ class SDNCheckTests(TestCase):
             content_type='application/json'
         )
 
-    def assert_sdn_check_failure_recorded(self, response):
-        """ Assert an SDN check failure is logged and has the correct values. """
-        self.assertEqual(SDNCheckFailure.objects.count(), 1)
-        sdn_object = SDNCheckFailure.objects.first()
-        self.assertEqual(sdn_object.full_name, self.name)
-        self.assertEqual(sdn_object.country, self.country)
-        self.assertEqual(sdn_object.site, self.site_configuration.site)
-        self.assertEqual(sdn_object.sdn_check_response, response)
-
     @httpretty.activate
     @override_settings(SDN_CHECK_REQUEST_TIMEOUT=0.1)
     def test_sdn_check_timeout(self):
@@ -99,7 +93,7 @@ class SDNCheckTests(TestCase):
         self.mock_sdn_response(mock_timeout, status_code=200)
         with self.assertRaises(Timeout):
             with mock.patch('ecommerce.extensions.payment.utils.logger.exception') as mock_logger:
-                self.sdn_validator.search(self.name, self.country)
+                self.sdn_validator.search(self.name, self.address, self.country)
                 self.assertTrue(mock_logger.called)
 
     @httpretty.activate
@@ -108,7 +102,7 @@ class SDNCheckTests(TestCase):
         self.mock_sdn_response(json.dumps({'total': 1}), status_code=400)
         with self.assertRaises(HTTPError):
             with mock.patch('ecommerce.extensions.payment.utils.logger.exception') as mock_logger:
-                self.sdn_validator.search(self.name, self.country)
+                self.sdn_validator.search(self.name, self.address, self.country)
                 self.assertTrue(mock_logger.called)
 
     @httpretty.activate
@@ -116,19 +110,35 @@ class SDNCheckTests(TestCase):
         """ Verify the SDN check returns the number of matches and records the match. """
         sdn_response = {'total': 1}
         self.mock_sdn_response(json.dumps(sdn_response))
-        response = self.sdn_validator.search(self.name, self.country)
+        response = self.sdn_validator.search(self.name, self.address, self.country)
         self.assertEqual(response, sdn_response)
 
     def test_deactivate_user(self):
         """ Verify an SDN failure is logged. """
         response = {'description': 'Bad dude.'}
+        product1 = factories.ProductFactory(stockrecords__partner__short_code='first')
+        product2 = factories.ProductFactory(stockrecords__partner__short_code='second')
+        basket = factories.BasketFactory(owner=self.user, site=self.site_configuration.site)
+        basket.add(product1)
+        basket.add(product2)
         self.assertEqual(SDNCheckFailure.objects.count(), 0)
         with mock.patch.object(User, 'deactivate_account') as deactivate_account:
             deactivate_account.return_value = True
             self.sdn_validator.deactivate_user(
-                self.user,
-                self.site_configuration,
+                basket,
                 self.name,
+                self.address,
                 self.country,
-                response)
-            self.assert_sdn_check_failure_recorded(response)
+                response
+            )
+
+            self.assertEqual(SDNCheckFailure.objects.count(), 1)
+            sdn_object = SDNCheckFailure.objects.first()
+            self.assertEqual(sdn_object.full_name, self.name)
+            self.assertEqual(sdn_object.address, self.address)
+            self.assertEqual(sdn_object.country, self.country)
+            self.assertEqual(sdn_object.site, self.site_configuration.site)
+            self.assertEqual(sdn_object.sdn_check_response, response)
+            self.assertEqual(sdn_object.products.count(), basket.lines.count())
+            self.assertIn(product1, sdn_object.products.all())
+            self.assertIn(product2, sdn_object.products.all())

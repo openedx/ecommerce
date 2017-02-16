@@ -53,8 +53,10 @@ class SDNCheckFailure(TimeStampedModel):
     """ Record of SDN check failure. """
     full_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
+    address = models.CharField(max_length=60, default='')
     country = models.CharField(max_length=2)
     site = models.ForeignKey('sites.Site', verbose_name=_('Site'), null=True, blank=True, on_delete=models.SET_NULL)
+    products = models.ManyToManyField('catalogue.Product', related_name='sdn_failures')
     sdn_check_response = JSONField()
 
     def __unicode__(self):

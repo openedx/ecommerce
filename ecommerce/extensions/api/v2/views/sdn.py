@@ -1,10 +1,13 @@
 """API endpoint for performing an SDN check on users."""
+from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.extensions.payment.utils import SDNClient
+
+Basket = get_model('basket', 'Basket')
 
 
 class SDNCheckViewSet(APIView):
@@ -18,10 +21,13 @@ class SDNCheckViewSet(APIView):
         or failed.
         """
         name = request.data['name']
+        address = request.data['address']
         country = request.data['country']
         hits = 0
 
         site_configuration = request.site.siteconfiguration
+        basket = Basket.get_basket(request.user, site_configuration.site)
+
         if site_configuration.enable_sdn_check:
             sdn_check = SDNClient(
                 api_url=site_configuration.sdn_api_url,
@@ -29,13 +35,13 @@ class SDNCheckViewSet(APIView):
                 sdn_list=site_configuration.sdn_api_list
             )
             try:
-                response = sdn_check.search(name, country)
+                response = sdn_check.search(name, address, country)
                 hits = response['total']
                 if hits > 0:
                     sdn_check.deactivate_user(
-                        request.user,
-                        request.site.siteconfiguration,
+                        basket,
                         name,
+                        address,
                         country,
                         response
                     )
