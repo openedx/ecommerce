@@ -29,6 +29,7 @@ class SDNCheckViewSetTests(TestCase):
             self.PATH,
             data=json.dumps({
                 'name': 'Tester',
+                'address': 'Testlandia',
                 'country': 'TE'
             }),
             content_type=JSON_CONTENT_TYPE

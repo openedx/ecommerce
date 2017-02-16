@@ -30,7 +30,7 @@ class Basket(AbstractBasket):
         If no such basket exists, create a new one. If multiple such baskets exist,
         merge them into one.
         """
-        editable_baskets = cls.objects.filter(site=site, owner=user, status__in=Basket.editable_statuses)
+        editable_baskets = cls.objects.filter(site=site, owner=user, status__in=cls.editable_statuses)
         if len(editable_baskets) == 0:
             basket = cls.create_basket(site, user)
         else:
