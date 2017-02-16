@@ -1,6 +1,13 @@
+from auth_backends.urls import auth_urlpatterns
 from django.conf.urls import url, include
 from oscar.apps.dashboard import app
 from oscar.core.loading import get_class
+
+from ecommerce.core.views import LogoutView
+
+# NOTE: This should match AUTH_URLS in ecommerce/urls.py. These are duplicated here because Oscar's
+# dashboard templates, strangely, reference dashboard:login and dashboard:logout instead of login and logout.
+AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + auth_urlpatterns
 
 
 class DashboardApplication(app.DashboardApplication):
@@ -25,6 +32,7 @@ class DashboardApplication(app.DashboardApplication):
             url(r'^shipping/', include(self.shipping_app.urls)),
             url(r'^refunds/', include(self.refunds_app.urls)),
         ]
+        urls += AUTH_URLS
         return self.post_process_urls(urls)
 
 

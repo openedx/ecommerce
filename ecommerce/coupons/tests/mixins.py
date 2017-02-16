@@ -180,7 +180,7 @@ class CouponMixin(object):
 
     def setUp(self):
         super(CouponMixin, self).setUp()
-        self.category = factories.CategoryFactory()
+        self.category = factories.CategoryFactory(path='1000')
 
         # Force the creation of a coupon ProductClass
         self.coupon_product_class  # pylint: disable=pointless-statement

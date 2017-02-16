@@ -8,14 +8,14 @@ import httpretty
 import pytz
 from django.conf import settings
 from django.contrib.messages import get_messages
-from django.contrib.messages.storage.fallback import FallbackStorage  # Messages don't work without fallback
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.test import override_settings, RequestFactory
-from django.utils.translation import ugettext_lazy as _
+from django.test import override_settings
+from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import newfactories as factories
+from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
@@ -30,7 +30,6 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data
-from ecommerce.extensions.basket.views import VoucherAddMessagesView, VoucherRemoveMessagesView
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
@@ -50,7 +49,9 @@ ProductAttribute = get_model('catalogue', 'ProductAttribute')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+VoucherAddView = get_class('basket.views', 'VoucherAddView')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
+VoucherRemoveView = get_class('basket.views', 'VoucherRemoveView')
 
 COUPON_CODE = 'COUPONTEST'
 
@@ -335,7 +336,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['show_voucher_form'])
         line_data = response.context['formset_lines_data'][0][1]
-        self.assertEqual(line_data['seat_type'], _(enrollment_code.attr.seat_type.capitalize()))
+        self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
 
     def test_no_switch_link(self):
         """Verify response does not contain variables for the switch link if seat does not have an EC."""
@@ -393,7 +394,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertEqual(len(response.context['formset_lines_data']), 1)
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['benefit_value'], format_benefit_value(benefit))
-        self.assertEqual(line_data['seat_type'], _(seat.attr.certificate_type.capitalize()))
+        self.assertEqual(line_data['seat_type'], seat.attr.certificate_type.capitalize())
         self.assertEqual(line_data['product_title'], self.course.name)
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
@@ -563,110 +564,100 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
             self.assertEqual(line_data['course_end'], expected_result)
 
 
-class VoucherAddMessagesViewTests(TestCase):
-    """ VoucherAddMessagesView view tests. """
+class VoucherAddViewTests(TestCase):
+    """ Tests for VoucherAddView. """
 
     def setUp(self):
-        super(VoucherAddMessagesViewTests, self).setUp()
+        super(VoucherAddViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.basket = factories.BasketFactory(owner=self.user, site=self.site)
 
-        self.request = RequestFactory().request()
         # Fallback storage is needed in tests with messages
-        setattr(self.request, 'session', 'session')
-        messages = FallbackStorage(self.request)
-        setattr(self.request, '_messages', messages)
+        self.request = RequestFactory().post('/')
         self.request.user = self.user
+        self.request.basket = self.basket
 
-        self.voucher_add_view = VoucherAddMessagesView()
+        self.view = VoucherAddView()
+        self.view.request = self.request
+
         self.form = BasketVoucherForm()
         self.form.cleaned_data = {'code': COUPON_CODE}
 
     def get_error_message_from_request(self):
         return list(get_messages(self.request))[-1].message
 
-    def assertMessage(self, message):
-        self.request.basket = self.basket
-        self.voucher_add_view.request = self.request
-        self.voucher_add_view.form_valid(self.form)
-        request_message = self.get_error_message_from_request()
-        self.assertEqual(str(request_message), message)
+    def assert_form_valid_message(self, expected):
+        """ Asserts the expected message is logged via messages framework when the
+        view's form_valid method is called. """
+        self.view.form_valid(self.form)
+
+        actual = self.get_error_message_from_request()
+        self.assertEqual(str(actual), expected)
 
     def test_no_voucher_error_msg(self):
         """ Verify correct error message is returned when voucher can't be found. """
-        self.assertMessage(_("Coupon code '{code}' does not exist.").format(code=COUPON_CODE))
+        self.assert_form_valid_message("Coupon code '{code}' does not exist.".format(code=COUPON_CODE))
 
     def test_voucher_already_in_basket_error_msg(self):
         """ Verify correct error message is returned when voucher already in basket. """
         voucher = factories.VoucherFactory(code=COUPON_CODE)
         self.basket.vouchers.add(voucher)
-        self.assertMessage(_("You have already added coupon code '{code}' to your basket.").format(code=COUPON_CODE))
+        self.assert_form_valid_message(
+            "You have already added coupon code '{code}' to your basket.".format(code=COUPON_CODE))
 
     def test_voucher_expired_error_msg(self):
         """ Verify correct error message is returned when voucher has expired. """
         end_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
         start_datetime = datetime.datetime.now() - datetime.timedelta(days=2)
         factories.VoucherFactory(code=COUPON_CODE, end_datetime=end_datetime, start_datetime=start_datetime)
-        self.assertMessage(_("Coupon code '{code}' has expired.").format(code=COUPON_CODE))
+        self.assert_form_valid_message("Coupon code '{code}' has expired.".format(code=COUPON_CODE))
 
     def test_voucher_added_to_basket_msg(self):
         """ Verify correct message is returned when voucher is added to basket. """
         __, product = prepare_voucher(code=COUPON_CODE)
         self.basket.add_product(product)
-        self.assertMessage(_("Coupon code '{code}' added to basket.").format(code=COUPON_CODE))
+        self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
     def test_voucher_has_no_discount_error_msg(self):
         """ Verify correct error message is returned when voucher has no discount. """
         factories.VoucherFactory(code=COUPON_CODE)
-        self.assertMessage(_("Your basket does not qualify for a coupon code discount."))
+        self.assert_form_valid_message("Your basket does not qualify for a coupon code discount.")
 
     def test_voucher_used_error_msg(self):
         """ Verify correct error message is returned when voucher has been used (Single use). """
         voucher, __ = prepare_voucher(code=COUPON_CODE)
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
-        self.assertMessage(_("Coupon code '{code}' has already been redeemed.").format(code=COUPON_CODE))
+        self.assert_form_valid_message("Coupon code '{code}' has already been redeemed.".format(code=COUPON_CODE))
 
-    def test_voucher_else_error_msg(self):
-        """ Verify correct error message is returned when error case in not covered. """
-        voucher, __ = prepare_voucher(code=COUPON_CODE, usage=Voucher.ONCE_PER_CUSTOMER)
-        order = factories.OrderFactory()
-        VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
-        self.assertMessage(_("Coupon code '{code}' is invalid.").format(code=COUPON_CODE))
+    def test_form_valid_without_basket_id(self):
+        """ Verify the view redirects to the basket summary view if the basket has no ID.  """
+        self.request.basket = Basket()
+        response = self.view.form_valid(self.form)
+        self.assertEqual(response.url, reverse('basket:summary'))
+
+    def test_inactive_voucher(self):
+        """ Verify the view alerts the user if the voucher is inactive. """
+        code = FuzzyText().fuzz()
+        start_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
+        end_datetime = start_datetime + datetime.timedelta(days=2)
+        voucher = factories.VoucherFactory(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
+        self.form.cleaned_data = {'code': voucher.code}
+        self.assert_form_valid_message("Coupon code '{code}' is not active.".format(code=voucher.code))
 
 
-class VoucherRemoveMessagesViewTests(CouponMixin, CourseCatalogTestMixin, TestCase):
-    """ VoucherRemoveMessagesView view tests. """
+class VoucherRemoveViewTests(TestCase):
+    def test_post_with_missing_voucher(self):
+        """ If the voucher is missing, verify the view queues a message and redirects. """
+        pk = '12345'
+        view = VoucherRemoveView.as_view()
+        request = RequestFactory().post('/')
+        request.basket.save()
+        response = view(request, pk=pk)
 
-    def setUp(self):
-        super(VoucherRemoveMessagesViewTests, self).setUp()
-        self.user = self.create_user()
-        self.client.login(username=self.user.username, password=self.password)
+        self.assertEqual(response.status_code, 302)
 
-        self.course = CourseFactory()
-        self.course.create_or_update_seat('verified', True, 50, self.partner)
-        self.product = self.course.create_or_update_seat('verified', False, 0, self.partner)
-        self.voucher, __ = prepare_voucher(code=COUPON_CODE)
-
-        self.request = RequestFactory().request()
-        # Fallback storage is needed in tests with messages
-        setattr(self.request, 'session', 'session')
-        messages = FallbackStorage(self.request)
-        setattr(self.request, '_messages', messages)
-        self.request.user = self.user
-
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(self.product, 1)
-        self.request.basket = basket
-
-        self.voucher_remove_view = VoucherRemoveMessagesView()
-
-    def test_remove_voucher_pk_conversion(self):
-        """ Verify that voucher primary key is converted to integer """
-        self.voucher_remove_view.post(self.request, pk=self.voucher.id)
-        request_message = list(get_messages(self.request))[-1].message
-        self.assertEqual(
-            str(request_message),
-            "No voucher found with id '{0}'".format(self.voucher.id)
-        )
+        actual = list(get_messages(request))[-1].message
+        expected = "No coupon found with id '{}'".format(pk)
+        self.assertEqual(actual, expected)

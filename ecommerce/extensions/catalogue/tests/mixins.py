@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
+
 import logging
 
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.tests.factories import PartnerFactory
 
 logger = logging.getLogger(__name__)
@@ -22,13 +23,19 @@ class CourseCatalogTestMixin(object):
     The setup method guarantees the requisite product class, partner, and category will be in place. This is especially
     useful when running tests without database migrations (which normally create these objects).
     """
+
     def setUp(self):
         super(CourseCatalogTestMixin, self).setUp()
 
         # Force the creation of a seat ProductClass
         self.seat_product_class  # pylint: disable=pointless-statement
         self.enrollment_code_product_class  # pylint: disable=pointless-statement
-        self.category, _created = Category.objects.get_or_create(name='Seats', defaults={'depth': 1})
+
+        category_name = 'Seats'
+        try:
+            self.category = Category.objects.get(name=category_name)
+        except Category.DoesNotExist:
+            self.category = factories.CategoryFactory(name=category_name)
 
     def create_course_and_seat(
             self, course_id=None, seat_type='verified', id_verification=False, price=10, partner=None
