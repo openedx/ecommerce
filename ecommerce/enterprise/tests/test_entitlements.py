@@ -1,7 +1,5 @@
-import hashlib
 
 import ddt
-from django.core.cache import cache
 from django.conf import settings
 import httpretty
 from oscar.core.loading import get_model
@@ -16,7 +14,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.enterprise.entitlements import (
-    get_enterprise_learner_data, get_entitlement_voucher, get_course_entitlements_for_learner,
+    get_entitlement_voucher, get_course_entitlements_for_learner,
     get_course_vouchers_for_learner, is_course_in_enterprise_catalog
 )
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -62,31 +60,9 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         """
         self.assertEqual(len(httpretty.httpretty.latest_requests), count)
 
-    def _assert_get_enterprise_learner_data(self):
-        """
-        Helper method to validate the response from the method
-        "get_enterprise_learner_data".
-        """
-        api_resource_name = 'enterprise-learner'
-        partner_code = self.request.site.siteconfiguration.partner.short_code
-        cache_key = '{site_domain}_{partner_code}_{resource}_{username}'.format(
-            site_domain=self.request.site.domain,
-            partner_code=partner_code,
-            resource=api_resource_name,
-            username=self.learner.username
-        )
-        cache_key = hashlib.md5(cache_key).hexdigest()
-
-        cached_enterprise_learner_response = cache.get(cache_key)
-        self.assertIsNone(cached_enterprise_learner_response)
-
-        response = get_enterprise_learner_data(self.request.site, self.learner)
-        self.assertEqual(len(response['results']), 1)
-
-        cached_course = cache.get(cache_key)
-        self.assertEqual(cached_course, response)
-
-    def _assert_get_course_entitlements_for_learner_response(self, expected_entitlements, log_level, log_message):
+    def _assert_get_course_entitlements_for_learner_response(
+            self, expected_entitlements, log_level, log_message, expected_request_count
+    ):
         """
         Helper method to validate the response from the method
         "get_course_entitlements_for_learner" and verify the logged message.
@@ -96,7 +72,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             entitlements = get_course_entitlements_for_learner(
                 self.request.site, self.request.user, self.course.id
             )
-            self._assert_num_requests(1)
+            self._assert_num_requests(expected_request_count)
 
             logger.check(
                 (
@@ -143,24 +119,6 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         return course_catalog_coupon
 
     @mock_enterprise_api_client
-    def test_get_enterprise_learner_data(self):
-        """
-        Verify that method "get_enterprise_learner_data" returns a proper
-        response for the enterprise learner.
-        """
-        self.mock_enterprise_learner_api()
-        self._assert_get_enterprise_learner_data()
-
-        # Verify the API was hit once
-        self._assert_num_requests(1)
-
-        # Now fetch the enterprise learner data again and verify that there was
-        # no actual call to Enterprise API, as the data will be fetched from
-        # the cache
-        get_enterprise_learner_data(self.request.site, self.learner)
-        self._assert_num_requests(1)
-
-    @mock_enterprise_api_client
     def test_get_entitlement_voucher_with_enterprise_feature_disabled(self):
         """
         Verify that method "get_entitlement_voucher" doesn't call the
@@ -168,6 +126,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         feature is disabled.
         """
         self.mock_enterprise_learner_api()
+        self.mock_enterprise_learner_entitlements_api()
         toggle_switch(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH, False)
 
         entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
@@ -186,11 +145,12 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
 
         catalog_query = '*:*'
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
+        self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
         self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
         self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
-        self._assert_num_requests(3)
+        self._assert_num_requests(4)
         self.assertEqual(expected_voucher, entitlement_voucher)
 
     @mock_enterprise_api_client
@@ -205,6 +165,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.mock_enterprise_learner_api(
             catalog_id=non_existing_coupon_id, entitlement_id=non_existing_coupon_id
         )
+        self.mock_enterprise_learner_entitlements_api(entitlement_id=non_existing_coupon_id)
 
         catalog_query = '*:*'
         self.mock_course_discovery_api_for_catalog_by_resource_id(
@@ -215,7 +176,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         logger_name = 'ecommerce.enterprise.entitlements'
         with LogCapture(logger_name) as logger:
             entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
-            self._assert_num_requests(3)
+            self._assert_num_requests(4)
 
             logger.check(
                 (
@@ -240,11 +201,18 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
 
         catalog_query = '*:*'
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
+        self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
         self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_id=catalog_id, catalog_query=catalog_query)
         self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         course_vouchers = get_course_vouchers_for_learner(self.request.site, self.request.user, self.course.id)
-        self._assert_num_requests(3)
+
+        # Verify that there were total four calls. two for getting
+        # enterprise learner data and enterprise learner entitlements
+        # from enterprise service and other two for
+        # getting enterprise catalog and course runs against the enterprise
+        # catalog query respectively from the course catalog service.
+        self._assert_num_requests(4)
         self.assertEqual(coupon_quantity, len(course_vouchers))
         self.assertListEqual(list(expected_vouchers), list(course_vouchers))
 
@@ -272,6 +240,50 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             expected_entitlements=None,
             log_level='ERROR',
             log_message='Failed to retrieve enterprise info for the learner [%s]' % self.learner.username,
+            expected_request_count=1,
+        )
+
+    @mock_enterprise_api_client
+    @mock_course_catalog_api_client
+    def test_learner_entitlements_with_exception(self):
+        """
+        Verify that method "get_course_entitlements_for_learner" logs exception if
+        there is an error while accessing the learner entitlements.
+        """
+        learner_id = 1
+        catalog_query = '*:*'
+        self.mock_enterprise_learner_api(learner_id=learner_id)
+        self.mock_learner_entitlements_api_failure(learner_id=learner_id)
+        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+
+        self._assert_get_course_entitlements_for_learner_response(
+            expected_entitlements=None,
+            log_level='ERROR',
+            log_message='Failed to retrieve entitlements for enterprise learner [%s].' % learner_id,
+            expected_request_count=4,
+        )
+
+    @mock_enterprise_api_client
+    @mock_course_catalog_api_client
+    def test_learner_entitlements_invalid_response(self):
+        """
+        Verify that method "get_course_entitlements_for_learner" logs exception if
+        there is an error while accessing the learner entitlements.
+        """
+        learner_id = 1
+        catalog_query = '*:*'
+        self.mock_enterprise_learner_api(learner_id=learner_id)
+        self.mock_learner_entitlements_api_failure(learner_id=learner_id, status=200)
+        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+
+        self._assert_get_course_entitlements_for_learner_response(
+            expected_entitlements=None,
+            log_level='ERROR',
+            log_message='Invalid structure for enterprise learner entitlements API response for enterprise learner'
+                        ' [%s].' % learner_id,
+            expected_request_count=4,
         )
 
     @mock_enterprise_api_client
@@ -286,6 +298,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             expected_entitlements=None,
             log_level='INFO',
             log_message='Learner with username [%s] in not affiliated with any enterprise' % self.learner.username,
+            expected_request_count=1,
         )
 
     @mock_enterprise_api_client
@@ -301,7 +314,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='ERROR',
-            log_message=message
+            log_message=message,
+            expected_request_count=1,
         )
 
     @mock_enterprise_api_client
@@ -317,7 +331,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='ERROR',
-            log_message=message
+            log_message=message,
+            expected_request_count=1,
         )
 
     @mock_enterprise_api_client
@@ -331,6 +346,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         enterprise_catalog_id = 1
         catalog_query = '*:*'
         self.mock_enterprise_learner_api(entitlement_id=enterprise_catalog_id)
+        self.mock_enterprise_learner_entitlements_api(entitlement_id=enterprise_catalog_id)
         self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
         self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 

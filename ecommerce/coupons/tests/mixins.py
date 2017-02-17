@@ -120,7 +120,7 @@ class CourseCatalogMockMixin(object):
         course_run_info_json = json.dumps(course_contains_info)
         course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}'.format(
             settings.COURSE_CATALOG_API_URL,
-            (course_run_id for course_run_id in course_run_ids),
+            ",".join(course_run_id for course_run_id in course_run_ids),
             query if query else 'id:course*'
         )
         httpretty.register_uri(
