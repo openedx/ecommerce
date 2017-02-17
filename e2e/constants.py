@@ -2,8 +2,7 @@ from datetime import date
 
 CODE = 'ABCD'
 
-# cybersource data
-CYBERSOURCE_DATA1 = {
+ADDRESS_US = {
     'country': 'US',
     'state': 'MA',
     'line1': '141 Portland Ave.',
@@ -11,7 +10,7 @@ CYBERSOURCE_DATA1 = {
     'city': 'Cambridge',
     'postal_code': '02141',
 }
-CYBERSOURCE_DATA2 = {
+ADDRESS_FR = {
     'country': 'FR',
     'state': None,
     'line1': 'Champ de Mars',

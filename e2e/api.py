@@ -1,7 +1,20 @@
-import requests
+from edx_rest_api_client.client import EdxRestApiClient
 from requests.auth import AuthBase
 
-from e2e.config import ACCESS_TOKEN, ENROLLMENT_API_URL
+from e2e.config import ENROLLMENT_API_URL, OAUTH_ACCESS_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET
+
+
+def get_access_token():
+    """ Returns an access token and expiration date from the OAuth provider.
+
+    Returns:
+        (str, datetime)
+    """
+
+    # TODO Use JWT auth once https://github.com/edx/edx-platform/pull/14577 is merged/released.
+    return EdxRestApiClient.get_oauth_access_token(
+        OAUTH_ACCESS_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET,
+    )
 
 
 class BearerAuth(AuthBase):
@@ -18,13 +31,13 @@ class BearerAuth(AuthBase):
 
 
 class EnrollmentApiClient(object):
-    def __init__(self, host=None, key=None):
-        self.host = host or ENROLLMENT_API_URL
-        self.key = key or ACCESS_TOKEN
+    def __init__(self):
+        access_token, __ = get_access_token()
+        self.client = EdxRestApiClient(ENROLLMENT_API_URL, oauth_access_token=access_token, append_slash=False)
 
     def get_enrollment_status(self, username, course_id):
         """
         Retrieve the enrollment status for given user in a given course.
         """
-        url = '{host}/enrollment/{username},{course_id}'.format(host=self.host, username=username, course_id=course_id)
-        return requests.get(url, auth=BearerAuth(self.key)).json()
+        param = '{username},{course_id}'.format(username=username, course_id=course_id)
+        return self.client.enrollment(param).get()

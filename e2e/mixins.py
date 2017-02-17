@@ -1,4 +1,5 @@
 import logging
+import time
 import uuid
 
 import requests
@@ -9,22 +10,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from e2e.api import EnrollmentApiClient
+from e2e.api import EnrollmentApiClient, get_access_token
 from e2e.config import (
-    LMS_AUTO_AUTH,
-    ECOMMERCE_URL_ROOT,
-    LMS_PASSWORD,
-    LMS_EMAIL,
-    LMS_URL_ROOT,
-    BASIC_AUTH_USERNAME,
-    BASIC_AUTH_PASSWORD,
-    ECOMMERCE_API_URL,
-    LMS_USERNAME,
-    ACCESS_TOKEN,
-    MAX_COMPLETION_RETRIES,
-    PAYPAL_PASSWORD,
-    PAYPAL_EMAIL,
-    LMS_HTTPS
+    LMS_AUTO_AUTH, ECOMMERCE_URL_ROOT, LMS_PASSWORD, LMS_EMAIL, LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD,
+    ECOMMERCE_API_URL, LMS_USERNAME, MAX_COMPLETION_RETRIES, PAYPAL_PASSWORD, PAYPAL_EMAIL, LMS_HTTPS,
+    MARKETING_URL_ROOT
 )
 from e2e.expected_conditions import input_provided
 from e2e.pages import submit_lms_login_form
@@ -98,7 +88,8 @@ class LMSLogoutMixin(object):
         self.lms_logout_page = LMSLogoutPage(self.browser)
 
     def assert_on_lms_logout_page(self):
-        self.assertTrue(self.lms_logout_page.is_browser_on_page())
+        lms_homepage_url = MARKETING_URL_ROOT or LMS_URL_ROOT
+        self.assertTrue(self.browser.current_url.startswith(lms_homepage_url))
 
     def logout_via_lms(self):
         self.lms_logout_page.visit()
@@ -163,7 +154,8 @@ class EnrollmentApiMixin(object):
 class EcommerceApiMixin(object):
     @property
     def ecommerce_api_client(self):
-        return EdxRestApiClient(ECOMMERCE_API_URL, oauth_access_token=ACCESS_TOKEN)
+        access_token, __ = get_access_token()
+        return EdxRestApiClient(ECOMMERCE_API_URL, oauth_access_token=access_token)
 
     def assert_order_created_and_completed(self):
         orders = self.ecommerce_api_client.orders.get()['results']
@@ -223,20 +215,28 @@ class PaymentMixin(object):
             except TimeoutException:
                 pass
 
+    def wait_for_payment_form(self):
+        """ Wait for the payment form to load. """
+        wait = WebDriverWait(self.browser, 10)
+        wait.until(EC.presence_of_element_located((By.ID, 'paymentForm')))
+
     def checkout_with_paypal(self):
         """ Completes the checkout process via PayPal. """
+        self.wait_for_payment_form()
+
+        # Wait for the button handler to be setup
+        time.sleep(0.5)
 
         # Click the payment button
-        self.browser.find_element_by_css_selector('#paypal').click()
+        self.browser.find_element_by_css_selector('button.payment-button[data-processor-name=paypal]').click()
 
         # Wait for login form to load. PayPal's test environment is slow.
         wait = WebDriverWait(self.browser, 30)
-        iframe_present = EC.presence_of_element_located((By.CSS_SELECTOR, '#injectedUnifiedLogin > iframe'))
-        iframe = wait.until(iframe_present)
+        login_iframe = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#injectedUnifiedLogin > iframe')))
+        # TODO Determine how to get past the TypeError here.
+        self.browser.switch_to.frame(login_iframe)
 
         # Log into PayPal
-        self.browser.switch_to.frame(iframe)
-
         email = self.browser.find_element_by_css_selector('input#email')
         password = self.browser.find_element_by_css_selector('input#password')
 
@@ -269,28 +269,16 @@ class PaymentMixin(object):
 
         confirmation_button.click()
 
-    def checkout_with_cybersource(self, address):
-        """ Completes the checkout process via CyberSource. """
-
-        # Click the payment button
-        self.browser.find_element_by_css_selector('#cybersource').click()
-
-        self.dismiss_alert()
-
-        # Wait for form to load
-        wait = WebDriverWait(self.browser, 10)
-        billing_details_present = EC.presence_of_element_located((By.ID, 'billing_details'))
-        wait.until(billing_details_present)
-
-        # Select the credit card type (Visa) first since it triggers the display of additional fields
-        self.browser.find_element_by_css_selector('#card_type_001').click()  # Visa
+    def checkout_with_credit_card(self, address):
+        """ Submit the payment form. """
+        self.wait_for_payment_form()
 
         # Select the appropriate <option> elements
         select_fields = (
-            ('#bill_to_address_country', address['country']),
-            ('#bill_to_address_state_us_ca', address['state']),
-            ('#card_expiry_month', '01'),
-            ('#card_expiry_year', '2020')
+            ('#id_country', address['country']),
+            ('#id_state', address['state']),
+            ('#card-expiry-month', '12'),
+            ('#card-expiry-year', '2030')
         )
         for selector, value in select_fields:
             if value:
@@ -299,24 +287,21 @@ class PaymentMixin(object):
 
         # Fill in the text fields
         billing_information = {
-            'bill_to_forename': 'Ed',
-            'bill_to_surname': 'Xavier',
-            'bill_to_address_line1': address['line1'],
-            'bill_to_address_line2': address['line2'],
-            'bill_to_address_city': address['city'],
-            'bill_to_address_postal_code': address['postal_code'],
-            'bill_to_email': 'edx@example.com',
-            'card_number': '4111111111111111',
-            'card_cvn': '1234'
+            'id_first_name': 'Ed',
+            'id_last_name': 'Xavier',
+            'id_address_line1': address['line1'],
+            'id_address_line2': address['line2'],
+            'id_city': address['city'],
+            'id_postal_code': address['postal_code'],
+            'card-number': '4111111111111111',
+            'card-cvn': '123'
         }
 
         for field, value in billing_information.items():
             self.browser.find_element_by_css_selector('#' + field).send_keys(value)
 
         # Click the payment button
-        self.browser.find_element_by_css_selector('input[type=submit]').click()
-
-        self.dismiss_alert()
+        self.browser.find_element_by_css_selector('#payment-button').click()
 
     def assert_receipt_page_loads(self):
         """ Verifies the receipt page loaded in the browser. """

@@ -2,9 +2,12 @@ import os
 from e2e.utils import str2bool
 
 
-ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
-if ACCESS_TOKEN is None:
-    raise RuntimeError('A valid OAuth2 access token is required.')
+OAUTH_ACCESS_TOKEN_URL = os.environ.get('OAUTH_ACCESS_TOKEN_URL')
+OAUTH_CLIENT_ID = os.environ.get('OAUTH_CLIENT_ID')
+OAUTH_CLIENT_SECRET = os.environ.get('OAUTH_CLIENT_SECRET')
+
+if not all([OAUTH_ACCESS_TOKEN_URL, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET]):
+    raise RuntimeError('Valid OAuth details must be provided.')
 
 HONOR_COURSE_ID = os.environ.get('HONOR_COURSE_ID')
 VERIFIED_COURSE_ID = os.environ.get('VERIFIED_COURSE_ID')
@@ -20,9 +23,11 @@ except AttributeError:
 
 ECOMMERCE_API_URL = os.environ.get('ECOMMERCE_API_URL', ECOMMERCE_URL_ROOT + '/api/v2')
 MAX_COMPLETION_RETRIES = int(os.environ.get('MAX_COMPLETION_RETRIES', 3))
+
 PAYPAL_EMAIL = os.environ.get('PAYPAL_EMAIL')
 PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
-ENABLE_CYBERSOURCE_TESTS = str2bool(os.environ.get('ENABLE_CYBERSOURCE_TESTS', True))
+if not all([PAYPAL_EMAIL, PAYPAL_PASSWORD]):
+    raise RuntimeError('PayPal credentials are required to fully test payment.')
 
 try:
     MARKETING_URL_ROOT = os.environ.get('MARKETING_URL_ROOT').strip('/')
