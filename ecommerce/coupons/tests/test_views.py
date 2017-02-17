@@ -80,7 +80,7 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
 
     def test_no_product(self):
         """ Verify that an exception is raised if there is no product. """
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         voucher = VoucherFactory(code=code)
         offer = ConditionalOfferFactory()
         voucher.offers.add(offer)
@@ -223,7 +223,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
 
     def test_no_product(self):
         """ Verify an error is returned for voucher with no product. """
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         no_product_range = RangeFactory()
         prepare_voucher(code=code, _range=no_product_range)
         url = self.path + '?code={}'.format(code)
@@ -327,7 +327,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
     def test_invalid_voucher_code(self):
         """ Verify an error is returned when voucher does not exist. """
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         url = self.redeem_url + '?code={}&sku={}'.format(code, self.stock_record.partner_sku)
         response = self.client.get(url)
         msg = 'No voucher found with code {code}'.format(code=code)
@@ -344,7 +344,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         """ Verify an error is returned for expired coupon. """
         start_datetime = now() - datetime.timedelta(days=20)
         end_datetime = now() - datetime.timedelta(days=10)
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         __, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
         url = self.redeem_url + '?code={}&sku={}'.format(code, StockRecord.objects.get(product=product).partner_sku)
         response = self.client.get(url)

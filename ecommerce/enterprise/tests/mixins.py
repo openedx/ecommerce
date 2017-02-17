@@ -17,7 +17,7 @@ class EnterpriseServiceMockMixin(object):
         super(EnterpriseServiceMockMixin, self).setUp()
         cache.clear()
 
-    def mock_enterprise_learner_api(self, catalog_id=1, entitlement_id=1):
+    def mock_enterprise_learner_api(self, catalog_id=1, entitlement_id=1, learner_id=1):
         """
         Helper function to register enterprise learner API endpoint.
         """
@@ -27,6 +27,7 @@ class EnterpriseServiceMockMixin(object):
             'current_page': 1,
             'results': [
                 {
+                    'id': learner_id,
                     'enterprise_customer': {
                         'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
                         'name': 'TestShib',
@@ -202,7 +203,42 @@ class EnterpriseServiceMockMixin(object):
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
+            status=500,
+        )
+
+    def mock_learner_entitlements_api_failure(self, learner_id, status=500):
+        """
+        Helper function to return 500 error while accessing learner entitlements api endpoint.
+        """
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{base_url}{learner_id}/entitlements/'.format(
+                base_url=self.ENTERPRISE_LEARNER_URL, learner_id=learner_id,
+            ),
             responses=[
-                httpretty.Response(body='{}', content_type='application/json', status_code=500)
+                httpretty.Response(body='{}', content_type='application/json', status=status)
             ]
+        )
+
+    def mock_enterprise_learner_entitlements_api(self, learner_id=1, entitlement_id=1, require_consent=False):
+        """
+        Helper function to register enterprise learner entitlements API endpoint.
+        """
+        enterprise_learner_entitlements_api_response = {
+            'entitlements': [
+                {
+                    'entitlement_id': entitlement_id,
+                    'requires_consent': require_consent,
+                }
+            ]
+        }
+        learner_entitlements_json = json.dumps(enterprise_learner_entitlements_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{base_url}{learner_id}/entitlements/'.format(
+                base_url=self.ENTERPRISE_LEARNER_URL, learner_id=learner_id,
+            ),
+            body=learner_entitlements_json,
+            content_type='application/json'
         )
