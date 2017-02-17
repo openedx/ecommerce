@@ -1,10 +1,10 @@
 # Packages required for testing
 -r base.txt
 
-bok-choy==0.4.7
-coverage==4.2
-ddt==1.0.0
-django-nose==1.4.2
+bok-choy==0.6.2
+coverage==4.3.4
+ddt==1.1.1
+django-nose==1.4.4
 factory-boy==2.8.1
 freezegun==0.3.7
 httpretty==0.8.14

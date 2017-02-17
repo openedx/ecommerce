@@ -1,12 +1,10 @@
-from unittest import skipUnless
-
 import ddt
 from bok_choy.web_app_test import WebAppTest
 
-from e2e.config import VERIFIED_COURSE_ID, ENABLE_CYBERSOURCE_TESTS
-from e2e.constants import CODE, CYBERSOURCE_DATA1, CYBERSOURCE_DATA2
-from e2e.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin,
-                        LogistrationMixin, UnenrollmentMixin, PaymentMixin)
+from e2e.config import VERIFIED_COURSE_ID
+from e2e.constants import CODE, ADDRESS_US, ADDRESS_FR
+from e2e.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, UnenrollmentMixin,
+                        PaymentMixin)
 from e2e.pages.basket import BasketPage
 from e2e.pages.coupons import CouponsCreatePage, CouponsDetailsPage, CouponsListPage, RedeemVoucherPage
 from e2e.pages.ecommerce import EcommerceDashboardHomePage
@@ -69,8 +67,7 @@ class CouponCheckoutTests(CouponMixin, UnenrollmentMixin, EcommerceApiMixin, Enr
         self.assert_order_created_and_completed()
         self.assert_user_enrolled(self.username, self.course_id, 'verified')
 
-    @skipUnless(ENABLE_CYBERSOURCE_TESTS, 'CyberSource tests are not enabled.')
-    @ddt.data(CYBERSOURCE_DATA1, CYBERSOURCE_DATA2)
+    @ddt.data(ADDRESS_US, ADDRESS_FR)
     def test_discount_checkout_with_cybersource(self, address):
         """ Test redemption of discount code and purchase of course via Cybersource """
         self.start_redeem_flow(is_discount=True)
