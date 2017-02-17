@@ -293,7 +293,8 @@ class Course(models.Model):
             Enrollment code product.
         """
         enrollment_code_product_class = ProductClass.objects.get(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        enrollment_code = self.enrollment_code_product
+        enrollment_code = self.get_enrollment_code()
+
         if not enrollment_code:
             title = 'Enrollment code for {seat_type} seat in {course_name}'.format(
                 seat_type=seat_type,

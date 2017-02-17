@@ -342,7 +342,7 @@ define([
                     if (this.model.get('bulk_enrollment_code')) {
                         this.$('#enableBulkEnrollmentCode').prop('checked', true);
                     }
-                    if (!bulkEnrollmentCodesEnabled) {
+                    if (!window.bulkEnrollmentCodesEnabled) {
                         this.$('[name=bulk_enrollment_code]').attr('disabled', true);
                     }
                 }

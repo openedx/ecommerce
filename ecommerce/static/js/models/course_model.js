@@ -337,7 +337,6 @@ define([
                     return product.toJSON();
                 }, this);
 
-
                 if (this.isIdVerified()) {
                     verificationDeadline = this.get('verification_deadline');
 

@@ -16,10 +16,12 @@ define([
         });
 
         describe('course form view', function () {
+            window.bulkEnrollmentCodesEnabled = false;
+
             describe('cleanHonorCode', function () {
                 it('should always return a boolean', function () {
-                    expect(view.cleanHonorMode('false')).toEqual(false);
-                    expect(view.cleanHonorMode('true')).toEqual(true);
+                    expect(view.cleanBooleanValue('false')).toEqual(false);
+                    expect(view.cleanBooleanValue('true')).toEqual(true);
                 });
             });
 
@@ -44,25 +46,13 @@ define([
 
             describe('Bulk enrollment code tests', function() {
                 it('should check enrollment code checkbox', function() {
-                    view.$el.append('<input type="checkbox" name="bulk_enrollment_code">');
+                    view.$el.append(
+                        '<input type="radio" name="bulk_enrollment_code" value="true" id="enableBulkEnrollmentCode">' +
+                        '<input type="radio" name="bulk_enrollment_code" value="false" id="disableBulkEnrollmentCode">'
+                        );
                     view.model.set('bulk_enrollment_code', true);
-                    view.renderBulkEnrollmentCode();
-                    expect(view.$('[name=bulk_enrollment_code]').prop('checked')).toBeTruthy();
-                });
-
-                it('should make an ajax call to site configuration', function() {
-                    var mockAjaxData = {'results': [{
-                            'enable_enrollment_codes': true,
-                            'site': {
-                                'domain': 'test.site.domain'
-                            }
-                        }]
-                    };
-                    spyOn($, 'ajax').and.callFake(function(options) {
-                        options.success(mockAjaxData);
-                    });
-                    view.toggleDisabledBulkEnrollmentField();
-                    expect($.ajax).toHaveBeenCalled();
+                    view.toggleBulkEnrollmentField();
+                    expect(view.$('#enableBulkEnrollmentCode').prop('checked')).toBeTruthy();
                 });
             });
         });

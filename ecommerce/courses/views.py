@@ -36,9 +36,9 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
         else:
             logger.warning('User [%s] has no access token, and will not be able to edit courses.', user.username)
 
-        context['bulk_enrollment_codes_enabled'] = 'false'
-        if switch_is_active(ENROLLMENT_CODE_SWITCH) and self.request.site.siteconfiguration.enable_enrollment_codes:
-            context['bulk_enrollment_codes_enabled'] = 'true'
+        context['bulk_enrollment_codes_enabled'] = (
+            switch_is_active(ENROLLMENT_CODE_SWITCH) and self.request.site.siteconfiguration.enable_enrollment_codes
+        )
 
         return context
 

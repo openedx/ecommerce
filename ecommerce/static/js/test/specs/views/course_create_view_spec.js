@@ -49,12 +49,6 @@ define([
                     expect(SpecUtils.formGroup(view, '[name=bulk_enrollment_code]')).toBeVisible();
                 }, this);
             });
-
-            it('should set the bulk enrollment enabled if it is selected', function() {
-                view.$('[name=bulk_enrollment_code]').prop('checked', true).trigger('change');
-                expect(view.model.get('bulk_enrollment_code')).toBe('true');
-            });
-
         });
     }
 );
