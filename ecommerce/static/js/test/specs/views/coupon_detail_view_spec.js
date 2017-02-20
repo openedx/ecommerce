@@ -140,14 +140,20 @@ define([
                 expect(view.$('.invoice-discount-type > .value').text()).toEqual('');
             });
 
-             it('should display course catalog name on render.', function() {
+             it('should display course catalog name and course seats without preview button on render.', function() {
                  ecommerce.coupons.catalogs = new CatalogCollection([{id: 1, name: 'Test Catalog'}]);
 
                  data.course_catalog = 1;
+                 data.course_seat_types = ['verified'];
                  model = Coupon.findOrCreate(data, {parse: true, create: true});
                  view = new CouponDetailView({model: model});
                  view.render();
+
                  expect(view.$('.catalog-name > .value').text()).toEqual('Test Catalog');
+                 expect(view.$('.seat-types .value').text()).toEqual(
+                     data.course_seat_types.join(', ')
+                 );
+                 expect(view.$('.catalog_buttons').text()).toEqual('');
              });
 
             it('should format seat types.', function() {

@@ -89,7 +89,9 @@ define([
                     }
                 },
                 course_seat_types: function (val) {
-                    if (this.get('catalog_type') === CATALOG_TYPES.multiple_courses && val.length === 0) {
+                    // add validation only for dynamic coupons, e.g. dynamic query coupon or catalog coupon
+                    var dynamicCoupons = [CATALOG_TYPES.multiple_courses, CATALOG_TYPES.catalog];
+                    if (dynamicCoupons.indexOf(this.get('catalog_type')) !== -1 && val.length === 0) {
                         return Backbone.Validation.messages.seat_types;
                     }
                 },

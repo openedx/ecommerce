@@ -480,15 +480,19 @@ define([
                     this.model.unset('seat_type');
                     this.model.unset('stock_record_ids');
                     this.model.unset('catalog_query');
-                    this.model.unset('course_seat_types');
                     this.formGroup('[name=enterprise_customer]').addClass(this.hiddenClass);
                     this.model.unset('enterprise_customer');
                     this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
-                    this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
+                    this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_id]').addClass(this.hiddenClass);
                     this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
                     this.formGroup('[name=course_catalog]').removeClass(this.hiddenClass);
                     this.formGroup('[name=seat_type] option').remove();
+
+                    this.$('.catalog_buttons').addClass(this.hiddenClass);
+                    if (!this.model.get('course_seat_types')) {
+                        this.model.set('course_seat_types', []);
+                    }
                 } else {
                     this.formGroup('[name=catalog_query]').removeClass(this.hiddenClass);
                     this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
@@ -502,6 +506,7 @@ define([
                     this.model.unset('stock_record_ids');
                     this.model.set('course_catalog', this.model.defaults.course_catalog);
 
+                    this.$('.catalog_buttons').removeClass(this.hiddenClass);
                     if (!this.model.get('course_seat_types')) {
                         this.model.set('course_seat_types', []);
                     }
