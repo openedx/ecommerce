@@ -153,14 +153,16 @@ define([
                 this.renderCourseData();
                 this.delegateEvents();
 
-                this.dynamic_catalog_view = new DynamicCatalogView({
-                    'query': this.model.get('catalog_query'),
-                    'seat_types': this.model.get('course_seat_types')
-                });
+                if (this.model.get('catalog_type') === this.model.catalogTypes.multiple_courses) {
+                    this.dynamic_catalog_view = new DynamicCatalogView({
+                        'query': this.model.get('catalog_query'),
+                        'seat_types': this.model.get('course_seat_types')
+                    });
 
-                this.dynamic_catalog_view.$el = this.$('.catalog_buttons');
-                this.dynamic_catalog_view.render();
-                this.dynamic_catalog_view.delegateEvents();
+                    this.dynamic_catalog_view.$el = this.$('.catalog_buttons');
+                    this.dynamic_catalog_view.render();
+                    this.dynamic_catalog_view.delegateEvents();
+                }
 
                 this.$('.coupon-information').before(AlertDivTemplate);
                 this.$alerts = this.$el.find('.alerts');

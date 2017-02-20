@@ -286,10 +286,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             course_catalog = course_catalog_data.get('id')
             range_data['course_catalog'] = course_catalog
 
-            # Remove catalog_query and course_seat_types, switching from
-            # dynamic query to course catalog
+            # Remove catalog_query, switching from the dynamic query coupon to
+            # course catalog coupon
             range_data['catalog_query'] = None
-            range_data['course_seat_types'] = None
         else:
             range_data['course_catalog'] = None
 
@@ -299,7 +298,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         else:
             range_data['enterprise_customer'] = None
 
-        Range.objects.filter(id=voucher_range.id).update(**range_data)
+        for attr, value in range_data.iteritems():
+            setattr(voucher_range, attr, value)
+
+        voucher_range.save()
 
     def update(self, request, *args, **kwargs):
         """Update coupon depending on request data sent."""

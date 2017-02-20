@@ -185,6 +185,11 @@
             <span>Query length: <span class="query_length">0</span></span>
             <p class="help-block"></p>
         </div>
+        <div class="form-group course-catalog">
+            <label for="course-catalog"><%= gettext('Select from course catalogs:') %> *</label>
+            <select id="course-catalog" class="form-control" name="course_catalog"></select>
+            <p class="help-block"></p>
+        </div>
         <div class="form-group course-seat-types">
             <label for="course-seat-types"><%= gettext('Seat Types:') %> *</label>
             <div class="checkboxes">
@@ -205,11 +210,6 @@
                 <p class="help-block"></p>
             </div>
             <div class="catalog_buttons"></div>
-        </div>
-        <div class="form-group course-catalog">
-            <label for="course-catalog"><%= gettext('Select from course catalogs:') %> *</label>
-            <select id="course-catalog" class="form-control" name="course_catalog"></select>
-            <p class="help-block"></p>
         </div>
         <div class="form-group enterprise-customer">
             <label for="enterprise-customer"><%= gettext('Enterprise Customer:') %></label>

@@ -92,7 +92,7 @@ define([
                     expect(model.isValid()).toBeTruthy();
                 });
 
-                it('should validate course catalog for type Catalog', function () {
+                it('should validate course catalog and course seat types for type Catalog', function () {
                     model.set('catalog_type', 'Catalog');
                     model.set('course_catalog', '');
                     model.validate();
@@ -103,6 +103,12 @@ define([
                     expect(model.isValid()).toBe(false);
 
                     model.set('course_catalog', '1');
+                    model.set('course_seat_types', []);
+                    model.validate();
+                    expect(model.isValid()).toBe(false);
+
+                    model.set('course_catalog', '1');
+                    model.set('course_seat_types', ['verified']);
                     model.validate();
                     expect(model.isValid()).toBe(true);
                 });

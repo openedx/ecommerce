@@ -16,6 +16,7 @@ from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
+from testfixtures import LogCapture
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
@@ -27,6 +28,7 @@ from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
+
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -636,16 +638,20 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(voucher_range.catalog_query, data['catalog_query'])
         self.assertEqual(voucher_range.course_seat_types, data['course_seat_types'][0])
 
-    def test_update_course_catalog(self):
+    def test_update_course_catalog_coupon(self):
         """
-        Test updating course catalog range value deletes catalog,
-        catalog_query and course_seat_types from that voucher range.
+        Test that on updating a coupon as course catalog coupon with course
+        seats, deletes values for fields "catalog" and "catalog_query" from its
+        related voucher range.
         """
         path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
-        course_catalog_id = {'id': 1, 'name': 'Test catalog'}
+        course_catalog = {'id': 1, 'name': 'Test catalog'}
+        course_seat_types = ['verified']
+
         data = {
             'id': self.coupon.id,
-            'course_catalog': course_catalog_id
+            'course_catalog': course_catalog,
+            'course_seat_types': course_seat_types,
         }
         self.client.put(path, json.dumps(data), 'application/json')
 
@@ -653,10 +659,40 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         vouchers = updated_coupon.attr.coupon_vouchers.vouchers
         voucher_range = vouchers.first().offers.first().benefit.range
 
+        expected_course_seat_types = ','.join(course_seat_types)
         self.assertEqual(voucher_range.catalog, None)
         self.assertEqual(voucher_range.catalog_query, None)
-        self.assertEqual(voucher_range.course_seat_types, None)
-        self.assertEqual(voucher_range.course_catalog, course_catalog_id['id'])
+        self.assertEqual(voucher_range.course_seat_types, expected_course_seat_types)
+        self.assertEqual(voucher_range.course_catalog, course_catalog['id'])
+
+    def test_update_course_catalog_coupon_without_seat_types(self):
+        """
+        Test that on updating a coupon as a course catalog coupon without any
+        course seat types, a validation error message is logged along with a
+        400 http response.
+        """
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+
+        data = {
+            'id': self.coupon.id,
+            'course_catalog': {'id': 1, 'name': 'Test catalog'},
+            'course_seat_types': [],
+        }
+
+        logger_name = 'ecommerce.core.utils'
+        expected_logger_message = 'Failed to create Range. Either catalog_query or course_catalog must be given ' \
+                                  'but not both and course_seat_types fields must be set.'
+        with LogCapture(logger_name) as logger:
+            response = self.client.put(path, json.dumps(data), 'application/json')
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            logger.check(
+                (
+                    logger_name,
+                    'ERROR',
+                    expected_logger_message
+                )
+            )
 
     def test_update_coupon_benefit_value(self):
         vouchers = self.coupon.attr.coupon_vouchers.vouchers.all()
