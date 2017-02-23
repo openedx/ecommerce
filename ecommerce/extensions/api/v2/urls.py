@@ -41,8 +41,7 @@ BASKET_URLS = [
 ]
 
 PAYMENT_URLS = [
-    url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(),
-        name='list_processors'),
+    url(r'^processors/$', payment_views.PaymentProcessorListView.as_view(), name='list_processors'),
 ]
 
 REFUND_URLS = [
@@ -93,25 +92,23 @@ urlpatterns = [
 ]
 
 router = ExtendedSimpleRouter()
-router.register(r'courses', course_views.CourseViewSet) \
-    .register(r'products', product_views.ProductViewSet,
-              base_name='course-product', parents_query_lookups=['course_id'])
-router.register(r'partners', partner_views.PartnerViewSet) \
-    .register(r'products', product_views.ProductViewSet,
-              base_name='partner-product', parents_query_lookups=['stockrecords__partner_id'])
-router.register(r'partners', partner_views.PartnerViewSet) \
-    .register(r'catalogs', catalog_views.CatalogViewSet,
-              base_name='partner-catalogs', parents_query_lookups=['partner_id'])
-router.register(r'products', product_views.ProductViewSet)
-router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
-
 router.register(r'catalogs', catalog_views.CatalogViewSet) \
     .register(r'products', product_views.ProductViewSet, base_name='catalog-product',
               parents_query_lookups=['stockrecords__catalogs'])
-
 router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
+router.register(r'courses', course_views.CourseViewSet) \
+    .register(r'products', product_views.ProductViewSet,
+              base_name='course-product', parents_query_lookups=['course_id'])
 router.register(r'orders', order_views.OrderViewSet)
-
+router.register(r'partners', partner_views.PartnerViewSet) \
+    .register(r'catalogs', catalog_views.CatalogViewSet,
+              base_name='partner-catalogs', parents_query_lookups=['partner_id'])
+router.register(r'partners', partner_views.PartnerViewSet) \
+    .register(r'products', product_views.ProductViewSet,
+              base_name='partner-product', parents_query_lookups=['stockrecords__partner_id'])
+router.register(r'products', product_views.ProductViewSet)
 router.register(r'vouchers', voucher_views.VoucherViewSet, base_name='vouchers')
 router.register(r'siteconfiguration', siteconfiguration_views.SiteConfigurationViewSet, base_name='siteconfiguration')
+router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
+
 urlpatterns += router.urls

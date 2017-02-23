@@ -4,6 +4,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.decorators import list_route
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -44,35 +45,45 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         offset = request.GET.get('offset')
         limit = request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE)
 
-        if query and seat_types:
-            seat_types = seat_types.split(',')
-            try:
-                response = get_catalog_course_runs(
-                    site=request.site,
-                    query=query,
-                    limit=limit,
-                    offset=offset
-                )
-                results = response['results']
-                course_ids = [result['key'] for result in results]
-                seats = serializers.ProductSerializer(
-                    Product.objects.filter(
-                        course_id__in=course_ids,
-                        attributes__name='certificate_type',
-                        attribute_values__value_text__in=seat_types
-                    ),
-                    many=True,
-                    context={'request': request}
-                ).data
-                data = {
-                    'next': response['next'],
-                    'seats': seats
-                }
-                return Response(data=data)
-            except (ConnectionError, SlumberBaseException, Timeout):
-                logger.error('Unable to connect to Course Catalog service.')
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not (query and seat_types):
+            detail = {}
+
+            if not query:
+                detail['query'] = 'The query parameter is required.'
+
+            if not seat_types:
+                detail['seat_types'] = 'The seat_type parameter is required.'
+
+            raise ValidationError(detail=detail)
+
+        seat_types = seat_types.split(',')
+
+        try:
+            response = get_catalog_course_runs(
+                site=request.site,
+                query=query,
+                limit=limit,
+                offset=offset
+            )
+            results = response['results']
+            course_ids = [result['key'] for result in results]
+            seats = serializers.ProductSerializer(
+                Product.objects.filter(
+                    course_id__in=course_ids,
+                    attributes__name='certificate_type',
+                    attribute_values__value_text__in=seat_types
+                ),
+                many=True,
+                context={'request': request}
+            ).data
+            data = {
+                'next': response['next'],
+                'seats': seats
+            }
+            return Response(data=data)
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.error('Unable to connect to Catalog API.')
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @list_route()
     def course_catalogs(self, request):

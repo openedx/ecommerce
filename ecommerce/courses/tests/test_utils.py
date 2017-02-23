@@ -144,7 +144,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         single page Course Discovery API response and uses cache to return data
         in case of same API request.
         """
-        self.mock_course_discovery_api_for_catalogs(catalog_name_list)
+        self.mock_catalog_api(catalog_name_list)
 
         self._assert_get_course_catalogs(catalog_name_list)
 
@@ -177,7 +177,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         the Course Discovery API fails to return data.
         """
         exception = ConnectionError
-        self.mock_course_discovery_api_for_catalogs_with_failure(exception)
+        self.mock_catalog_api_failure(exception)
 
         with self.assertRaises(exception):
             get_course_catalogs(self.request.site)

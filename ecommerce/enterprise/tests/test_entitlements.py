@@ -413,7 +413,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         to fetch catalog against the provided enterprise course catalog id.
         """
         enterprise_catalog_id = 1
-        self.mock_course_discovery_api_for_catalogs_with_failure(error, enterprise_catalog_id)
+        self.mock_catalog_api_failure(error, enterprise_catalog_id)
 
         expected_number_of_requests = 1
         log_message = 'Unable to connect to Course Catalog service for course catalogs.'
