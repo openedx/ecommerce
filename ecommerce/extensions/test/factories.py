@@ -1,7 +1,12 @@
 from datetime import datetime
 
+import factory
 from django.utils.timezone import now
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from oscar.test.factories import (
+    ConditionalOfferFactory as BaseConditionalOfferFactory,
+    VoucherFactory as BaseVoucherFactory,
+)
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -87,3 +92,12 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
         offer = ConditionalOfferFactory(name='PrepareVoucherOffer', benefit=benefit, condition=condition)
     voucher.offers.add(offer)
     return voucher, product
+
+
+class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined
+    name = factory.Faker('word')
+    code = factory.Faker('word')
+
+
+class ConditionalOfferFactory(BaseConditionalOfferFactory):  # pylint: disable=function-redefined
+    name = factory.Faker('word')

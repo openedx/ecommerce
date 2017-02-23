@@ -1,20 +1,17 @@
 from __future__ import unicode_literals
 
 import datetime
-import json
-import mock
 
 import ddt
 import httpretty
+import mock
 import pytz
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
-from oscar.test.factories import (
-    BenefitFactory, ConditionalOfferFactory, OrderLineFactory, OrderFactory, RangeFactory, VoucherFactory
-)
+from oscar.test.factories import BenefitFactory, OrderLineFactory, OrderFactory, RangeFactory
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
@@ -26,16 +23,13 @@ from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
-from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.test.factories import prepare_voucher, VoucherFactory, ConditionalOfferFactory
 from ecommerce.tests.mixins import Catalog, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-COUPON_CODE = 'COUPONCODE'
-
-
+Product = get_model('catalogue', 'Product')
 Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
-Product = get_model('catalogue', 'Product')
 
 
 @ddt.ddt
@@ -47,27 +41,32 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
         super(VoucherViewSetTests, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        voucher1 = VoucherFactory()
-        voucher1.offers.add(ConditionalOfferFactory())
-        self.voucher = VoucherFactory(code=COUPON_CODE)
-        self.voucher.offers.add(ConditionalOfferFactory(name='test2'))
 
-    def test_voucher_listing(self):
-        """ Verify the endpoint lists out all vouchers. """
+    def test_list(self):
+        """ Verify the endpoint lists all vouchers. """
+        vouchers = VoucherFactory.create_batch(3)
+
+        for voucher in vouchers:
+            voucher.offers.add(ConditionalOfferFactory())
+
         response = self.client.get(self.path)
-        response_data = json.loads(response.content)
 
-        self.assertEqual(response_data['count'], 2)
-        self.assertEqual(response_data['results'][1]['code'], COUPON_CODE)
+        self.assertEqual(response.data['count'], len(vouchers))
 
-    def test_voucher_filtering(self):
-        """ Verify the endpoint filters by code. """
-        filter_path = '{}?code={}'.format(self.path, COUPON_CODE)
-        response = self.client.get(filter_path)
-        response_data = json.loads(response.content)
+        actual_codes = [datum['code'] for datum in response.data['results']]
+        expected_codes = [voucher.code for voucher in vouchers]
+        self.assertEqual(actual_codes, expected_codes)
 
-        self.assertEqual(response_data['count'], 1)
-        self.assertEqual(response_data['results'][0]['code'], COUPON_CODE)
+    def test_list_with_code_filter(self):
+        """ Verify the endpoint list all vouchers, filtered by the specified code. """
+        voucher = VoucherFactory()
+        voucher.offers.add(ConditionalOfferFactory())
+
+        url = '{path}?code={code}'.format(path=self.path, code=voucher.code)
+        response = self.client.get(url)
+
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['code'], voucher.code)
 
     def prepare_get_offers_response(self, quantity=1, seat_type='verified', seats=None):
         """Helper method for creating response the voucher offers endpoint.
@@ -123,17 +122,23 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
 
         return products, request, voucher
 
+    def build_offers_url(self, voucher):
+        return '{path}?code={code}'.format(path=reverse('api:v2:vouchers-offers-list'), code=voucher.code)
+
     @httpretty.activate
     @mock_course_catalog_api_client
     def test_omitting_unavailable_seats(self):
         """ Verify an unavailable seat is omitted from offer page results. """
         products, request, voucher = self.prepare_get_offers_response(quantity=2)
+        url = self.build_offers_url(voucher)
 
-        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
-        self.assertEqual(len(offers), 2)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 2)
 
-        products[0].expires = pytz.utc.localize(datetime.datetime.min)
-        products[0].save()
+        product = products[0]
+        product.expires = pytz.utc.localize(datetime.datetime.min)
+        product.save()
 
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
@@ -208,13 +213,8 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
 
 @ddt.ddt
 @httpretty.activate
-class VoucherViewOffersEndpointTests(
-        CourseCatalogMockMixin,
-        CouponMixin,
-        CourseCatalogTestMixin,
-        LmsApiMockMixin,
-        TestCase
-):
+class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin,
+                                     TestCase):
     """ Tests for the VoucherViewSet offers endpoint. """
 
     def setUp(self):
