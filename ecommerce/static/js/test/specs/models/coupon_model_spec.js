@@ -18,6 +18,19 @@ define([
             enrollmentCodeData = Mock_Coupons.enrollmentCodeCouponModelData;
 
         describe('Coupon model', function () {
+            describe('url', function () {
+                it('should be /api/v2/coupons/ for new instances', function () {
+                    var instance = new Coupon();
+                    expect(instance.url()).toEqual('/api/v2/coupons/');
+                });
+
+                it('should have a trailing slash for existing instances', function () {
+                    var id = 1,
+                        instance = new Coupon({id: id});
+                    expect(instance.url()).toEqual('/api/v2/coupons/' + id + '/');
+                });
+            });
+
             describe('validation', function () {
                 var model;
 
@@ -113,7 +126,7 @@ define([
                     expect(model.isValid()).toBe(true);
                 });
 
-                it('should validate invoice data.', function() {
+                it('should validate invoice data.', function () {
                     model.set('price', 'text');
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
@@ -129,7 +142,7 @@ define([
                     expect(model.isValid()).toBeTruthy();
                 });
 
-                it('should validate coupon code.', function() {
+                it('should validate coupon code.', function () {
                     model.set('code', '!#$%&/()=');
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
@@ -139,7 +152,7 @@ define([
                     expect(model.isValid()).toBeTruthy();
                 });
 
-                it('should validate email domain.', function() {
+                it('should validate email domain.', function () {
                     var invalid_domains = [
                             '-invalid.com', 'invalid', 'invalid-.com', 'invalid.c', 'valid.com,',
                             'invalid.photography1', 'valid.com,invalid', 'valid.com,invalid-.com',
@@ -152,19 +165,19 @@ define([
                             'valid.com,valid.co', 'çççç.рф', 'çç-ççç32.中国', 'ççç.ççç.இலங்கை'
                         ];
 
-                    _.each(invalid_domains, function(domain) {
+                    _.each(invalid_domains, function (domain) {
                         model.set('email_domains', domain);
                         model.validate();
                         expect(model.isValid()).toBeFalsy();
                     });
-                    _.each(valid_domains, function(domain) {
+                    _.each(valid_domains, function (domain) {
                         model.set('email_domains', domain);
                         model.validate();
                         expect(model.isValid()).toBeTruthy();
                     });
                 });
 
-                it('should validate max_uses value', function() {
+                it('should validate max_uses value', function () {
                     model.set('max_uses', 'abc');
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
@@ -286,4 +299,4 @@ define([
             });
 
         });
-});
+    });
