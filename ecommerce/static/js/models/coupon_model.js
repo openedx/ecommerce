@@ -18,8 +18,7 @@ define([
               _,
               _s,
               Utils,
-              moment
-              ) {
+              moment) {
         'use strict';
 
         _.extend(Backbone.Validation.messages, {
@@ -104,9 +103,7 @@ define([
                         }
                     }
                 },
-                enterprise_customer: {
-                    required: false,
-                },
+                enterprise_customer: {required: false},
                 end_date: function (val) {
                     var startDate,
                         endDate;
@@ -129,19 +126,19 @@ define([
                     }
                 },
                 invoice_number: {
-                    required: function() {
+                    required: function () {
                         return this.isPrepaidInvoiceType();
                     }
                 },
                 invoice_payment_date: {
-                    required: function() {
+                    required: function () {
                         return this.isPrepaidInvoiceType();
                     }
                 },
                 invoice_type: {required: true},
-                max_uses: function(val) {
+                max_uses: function (val) {
                     var numberPattern = new RegExp('[0-9]+');
-                    if (val===''){
+                    if (val === '') {
                         this.unset('max_uses');
                     }
                     if (val && !numberPattern.test(val)) {
@@ -152,7 +149,7 @@ define([
                 },
                 price: {
                     pattern: 'number',
-                    required: function() {
+                    required: function () {
                         return this.isPrepaidInvoiceType();
                     }
                 },
@@ -181,13 +178,22 @@ define([
                 title: {required: true}
             },
 
+            url: function () {
+                var url = this._super();
+
+                // Ensure the URL always ends with a trailing slash
+                url += _s.endsWith(url, '/') ? '' : '/';
+
+                return url;
+            },
+
             initialize: function () {
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
             },
 
-            isPrepaidInvoiceType: function() {
+            isPrepaidInvoiceType: function () {
                 return this.get('invoice_type') === 'Prepaid';
             },
 
@@ -200,12 +206,12 @@ define([
                 this.set('total_value', this.get('quantity') * seat_price);
             },
 
-            getCertificateType: function(seat_data) {
+            getCertificateType: function (seat_data) {
                 var seat_type = _.findWhere(seat_data, {'name': 'certificate_type'});
                 return seat_type ? seat_type.value : '';
             },
 
-            getCourseID: function(seat_data) {
+            getCourseID: function (seat_data) {
                 var course_id = _.findWhere(seat_data, {'name': 'course_key'});
                 return course_id ? course_id.value : '';
             },
@@ -243,7 +249,7 @@ define([
                 }
             },
 
-            updatePaymentInformation: function() {
+            updatePaymentInformation: function () {
                 var payment_information = this.get('payment_information'),
                     invoice = payment_information.Invoice,
                     tax_deducted = invoice.tax_deducted_source ? 'Yes' : 'No';
@@ -268,7 +274,7 @@ define([
                     contentType: 'application/json'
                 });
 
-                if (!options.patch){
+                if (!options.patch) {
                     this.set('start_datetime', moment.utc(this.get('start_date')));
                     this.set('end_datetime', moment.utc(this.get('end_date')));
 
