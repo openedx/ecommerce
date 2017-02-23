@@ -39,7 +39,7 @@ class CourseCatalogServiceMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_course_discovery_api_for_catalogs(self, catalog_name_list):
+    def mock_catalog_api(self, catalog_name_list):
         """
         Helper function to register course catalog API endpoint for a
         single catalog or multiple catalogs response.
@@ -121,7 +121,7 @@ class CourseCatalogServiceMockMixin(object):
             responses=mocked_api_responses
         )
 
-    def mock_course_discovery_api_for_catalogs_with_failure(self, error, catalog_id=None):
+    def mock_catalog_api_failure(self, error, catalog_id=None):
         """
         Helper function to register course catalog API endpoint for catalogs
         with failure.

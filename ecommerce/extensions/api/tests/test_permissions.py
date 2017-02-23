@@ -1,3 +1,4 @@
+from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -12,7 +13,7 @@ class PermissionsTestMixin(object):
         if user:
             force_authenticate(request, user=user)
 
-        return Request(request)
+        return Request(request, parsers=(JSONParser(),))
 
 
 class CanActForUserTests(PermissionsTestMixin, TestCase):

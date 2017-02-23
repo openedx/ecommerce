@@ -2,10 +2,9 @@ import json
 
 import ddt
 import httpretty
-from django.conf import settings
+import mock
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
-import mock
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -15,10 +14,8 @@ from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
-from ecommerce.extensions.api.v2.views.catalog import CatalogViewSet
 from ecommerce.tests.mixins import ApiMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
@@ -33,7 +30,6 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
 
     def setUp(self):
         super(CatalogViewSetTest, self).setUp()
-
         self.client.login(username=self.user.username, password=self.password)
 
     def prepare_request(self, url):
@@ -103,86 +99,66 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         expected_data = ProductSerializer(self.stock_record.product, context={'request': response.wsgi_request}).data
         self.assertListEqual(response_data['results'], [expected_data])
 
-    @ddt.data(
-        ('/api/v2/coupons/preview/', 400),
-        ('/api/v2/coupons/preview/?query=', 400),
-        ('/api/v2/coupons/preview/?wrong=parameter', 400),
-        ('/api/v2/coupons/preview/?query=id:course*', 400),
-        ('/api/v2/coupons/preview/?query=id:course*&seat_types=verified', 200),
-    )
-    @ddt.unpack
     @mock_course_catalog_api_client
-    def test_preview_catalog_query_results(self, url, status_code):
-        """Test catalog query preview."""
+    def test_preview_success(self):
+        """ Verify the endpoint returns a list of catalogs from the Catalog API. """
         self.mock_dynamic_catalog_course_runs_api()
 
-        request = self.prepare_request(url)
-        response = CatalogViewSet().preview(request)
-
-        self.assertEqual(response.status_code, status_code)
-
-    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
-    @mock_course_catalog_api_client
-    def test_preview_catalog_course_discovery_service_not_available(self, error):
-        """Test catalog query preview when course discovery is not available."""
-        url = '/api/v2/coupons/preview/?query=id:course*'
-        request = self.prepare_request(url)
-
-        self.mock_api_error(error=error, url='{}course_runs/?q=id:course*'.format(settings.COURSE_CATALOG_API_URL))
-
-        response = CatalogViewSet().preview(request)
-        self.assertEqual(response.status_code, 400)
+        url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # TODO Test the actual data
 
     @ddt.data(
-        (
-            '/api/v2/coupons/course_catalogs/',
-            ['Catalog 1'],
-            ['Catalog 1']
-        ),
-        (
-            '/api/v2/coupons/course_catalogs/',
-            ['Clean Catalog', 'ABC Catalog', 'New Catalog', 'Edx Catalog'],
-            ['ABC Catalog', 'Clean Catalog', 'Edx Catalog', 'New Catalog']
-        ),
+        '',
+        'foo=bar',
+        'query=',
+        'query=foo',
+        'query=foo&seat_types=',
+        'query=&seat_types=bar',
+        'seat_types=bar',
     )
-    @ddt.unpack
+    def test_preview_with_invalid_parameters(self, querystring):
+        """ Verify the endpoint returns HTTP 400 if the parameters are invalid. """
+        url = '{path}?{qs}'.format(path=reverse('api:v2:catalog-preview-list'), qs=querystring)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    def test_preview_catalog_course_discovery_service_not_available(self, exc_class):
+        """Test catalog query preview when course discovery is not available."""
+        url = '{path}?query=foo&seat_types=bar'.format(path=reverse('api:v2:catalog-preview-list'))
+
+        with mock.patch('ecommerce.coupons.utils.get_catalog_course_runs', side_effect=exc_class):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+
     @mock_course_catalog_api_client
-    def test_course_catalogs_for_single_page_api_response(self, url, catalog_name_list, sorted_catalog_name_list):
+    def test_course_catalogs_for_single_page_api_response(self):
         """
         Test course catalogs list view "course_catalogs" for valid response
         with catalogs in alphabetical order.
         """
-        self.mock_course_discovery_api_for_catalogs(catalog_name_list)
+        catalogs = ('Clean Catalog', 'ABC Catalog', 'New Catalog', 'Edx Catalog',)
+        self.mock_catalog_api(catalogs)
 
-        request = self.prepare_request(url)
-        response = CatalogViewSet().course_catalogs(request)
-
+        response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
         self.assertEqual(response.status_code, 200)
-        # Validate that the catalogs are sorted by name in alphabetical order
-        self._assert_get_course_catalogs_response_with_order(response, sorted_catalog_name_list)
 
-    def _assert_get_course_catalogs_response_with_order(self, response, catalog_name_list):
-        """
-        Helper method to validate the response from the method
-        "course_catalogs".
-        """
-        response_results = response.data.get('results')
-        self.assertEqual(len(response_results), len(catalog_name_list))
-        for catalog_index, catalog in enumerate(response_results):
-            self.assertEqual(catalog['name'], catalog_name_list[catalog_index])
+        actual = [catalog['name'] for catalog in response.data['results']]
+        self.assertEqual(actual, sorted(catalogs))
 
     @mock_course_catalog_api_client
     @mock.patch('ecommerce.extensions.api.v2.views.catalog.logger.exception')
-    def test_get_course_catalogs_for_failure(self, mock_exception):
+    def test_get_course_catalogs_with_catalog_api_failure(self, mock_exception):
         """
         Verify that the course catalogs list view "course_catalogs" returns
         empty results list in case the Course Discovery API fails to return
         data.
         """
-        self.mock_course_discovery_api_for_catalogs_with_failure(ConnectionError)
+        self.mock_catalog_api_failure(ConnectionError)
 
-        request = self.prepare_request('/api/v2/coupons/course_catalogs/')
-        response = CatalogViewSet().course_catalogs(request)
+        response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
 
         self.assertTrue(mock_exception.called)
         self.assertEqual(response.data.get('results'), [])
