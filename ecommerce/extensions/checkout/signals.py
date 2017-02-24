@@ -71,7 +71,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                     'Failed to send credit receipt notification. Credit seat product [%s] has no provider.', product.id
                 )
                 return
-            elif product.get_product_class().name == 'Seat':
+            elif product.is_seat_product:
                 provider_data = get_credit_provider_details(
                     access_token=order.site.siteconfiguration.access_token,
                     credit_provider_id=credit_provider_id,

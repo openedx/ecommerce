@@ -13,7 +13,6 @@ from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView, Vouche
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog, mode_for_seat
@@ -65,7 +64,7 @@ class BasketSingleItemView(View):
 
         # If the product is not an Enrollment Code, we check to see if the user is already
         # enrolled to prevent double-enrollment and/or accidental coupon usage
-        if product.get_product_class().name != ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        if not product.is_enrollment_code_product:
             try:
                 if request.user.is_user_already_enrolled(request, product):
                     logger.warning(
@@ -96,9 +95,9 @@ class BasketSummaryView(BasketView):
         Return the seat type based on the product class
         """
         seat_type = None
-        if product.get_product_class().name == SEAT_PRODUCT_CLASS_NAME:
+        if product.is_seat_product:
             seat_type = get_certificate_type_display_value(product.attr.certificate_type)
-        elif product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+        elif product.is_enrollment_code_product:
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
@@ -174,8 +173,7 @@ class BasketSummaryView(BasketView):
         switch_link_text = partner_sku = order_details_msg = None
 
         for line in lines:
-            product_class_name = line.product.get_product_class().name
-            if product_class_name == 'Seat':
+            if line.product.is_seat_product:
                 line_data = self._get_course_data(line.product)
                 certificate_type = line.product.attr.certificate_type
 
@@ -193,7 +191,7 @@ class BasketSummaryView(BasketView):
                     order_details_msg = _(
                         'You will be automatically enrolled in the course upon completing your order.'
                     )
-            elif product_class_name == 'Enrollment Code':
+            elif line.product.is_enrollment_code_product:
                 line_data = self._get_course_data(line.product)
                 show_voucher_form = False
                 order_details_msg = _(
@@ -219,7 +217,7 @@ class BasketSummaryView(BasketView):
 
             line_data.update({
                 'benefit_value': benefit_value,
-                'enrollment_code': line.product.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+                'enrollment_code': line.product.is_enrollment_code_product,
                 'line': line,
                 'seat_type': self._determine_seat_type(line.product),
             })

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 from oscar.core.loading import get_model
+from oscar.core.utils import slugify
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 
@@ -18,7 +19,7 @@ def create_enrollment_code_product_class(apps, schema_editor):
         track_stock=False,
         requires_shipping=False,
         name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-        slug='enrollment_code',
+        slug=slugify(ENROLLMENT_CODE_PRODUCT_CLASS_NAME),
     )
 
     ProductAttribute.objects.create(

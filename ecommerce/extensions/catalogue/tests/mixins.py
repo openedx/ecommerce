@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 import logging
 
 from oscar.core.loading import get_model
+from oscar.core.utils import slugify
 from oscar.test import factories
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.tests.factories import PartnerFactory
 
@@ -94,7 +95,9 @@ class CourseCatalogTestMixin(object):
             ('id_verification_required', 'boolean'),
             ('credit_hours', 'integer'),
         )
-        product_class = self._create_product_class('Seat', 'seat', attributes)
+        product_class = self._create_product_class(
+            SEAT_PRODUCT_CLASS_NAME, slugify(SEAT_PRODUCT_CLASS_NAME), attributes
+        )
         return product_class
 
     @property
@@ -104,5 +107,7 @@ class CourseCatalogTestMixin(object):
             ('course_key', 'text'),
             ('id_verification_required', 'boolean')
         )
-        product_class = self._create_product_class(ENROLLMENT_CODE_PRODUCT_CLASS_NAME, 'enrollment_code', attributes)
+        product_class = self._create_product_class(
+            ENROLLMENT_CODE_PRODUCT_CLASS_NAME, slugify(ENROLLMENT_CODE_PRODUCT_CLASS_NAME), attributes
+        )
         return product_class

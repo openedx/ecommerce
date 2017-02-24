@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api.serializers import ProductSerializer
@@ -171,4 +172,4 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
         self.assertEqual(response_data['count'], 1)
-        self.assertEqual(response_data['results'][0]['product_class'], 'Coupon')
+        self.assertEqual(response_data['results'][0]['product_class'], COUPON_PRODUCT_CLASS_NAME)

@@ -1,6 +1,7 @@
 from oscar.core.loading import get_model
 from oscar.test.factories import ProductFactory, VoucherFactory
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.tests.testcases import TestCase
 
@@ -13,7 +14,7 @@ class CouponProductTest(TestCase):
 
     def test_coupon_product(self):
         """Test if a coupon product is properly created."""
-        coupon_product_class, _ = ProductClass.objects.get_or_create(name='coupon')
+        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
         coupon_product = ProductFactory(
             product_class=coupon_product_class,
             title='Test product'

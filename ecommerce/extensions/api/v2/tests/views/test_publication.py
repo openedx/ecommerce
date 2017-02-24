@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 import mock
 import pytz
 
-from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.constants import ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
@@ -33,7 +33,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
             'verification_deadline': EXPIRES_STRING,
             'products': [
                 {
-                    'product_class': 'Seat',
+                    'product_class': SEAT_PRODUCT_CLASS_NAME,
                     'expires': None,
                     'price': 0.00,
                     'attribute_values': [
@@ -52,7 +52,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                     }
                 },
                 {
-                    'product_class': 'Seat',
+                    'product_class': SEAT_PRODUCT_CLASS_NAME,
                     'expires': None,
                     'price': 0.00,
                     'attribute_values': [
@@ -75,7 +75,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                     }
                 },
                 {
-                    'product_class': 'Seat',
+                    'product_class': SEAT_PRODUCT_CLASS_NAME,
                     'expires': EXPIRES_STRING,
                     'price': 10.00,
                     'attribute_values': [
@@ -98,7 +98,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                     }
                 },
                 {
-                    'product_class': 'Seat',
+                    'product_class': SEAT_PRODUCT_CLASS_NAME,
                     'expires': EXPIRES_STRING,
                     'price': 100.00,
                     'attribute_values': [

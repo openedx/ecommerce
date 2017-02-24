@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 from oscar.core.loading import get_model
+from oscar.core.utils import slugify
+
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 
 Category = get_model("catalogue", "Category")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
@@ -15,8 +18,8 @@ def create_product_class(apps, schema_editor):
     coupon = ProductClass.objects.create(
         track_stock=False,
         requires_shipping=False,
-        name='Coupon',
-        slug='coupon',
+        name=COUPON_PRODUCT_CLASS_NAME,
+        slug=slugify(COUPON_PRODUCT_CLASS_NAME),
     )
 
     ProductAttribute.objects.create(
@@ -40,7 +43,7 @@ def create_product_class(apps, schema_editor):
 def remove_product_class(apps, schema_editor):
     """ Reverse function. """
     Category.objects.filter(slug='coupon').delete()
-    ProductClass.objects.filter(slug='coupon').delete()
+    ProductClass.objects.filter(name=COUPON_PRODUCT_CLASS_NAME).delete()
 
 
 def remove_enrollment_code(apps, schema_editor):

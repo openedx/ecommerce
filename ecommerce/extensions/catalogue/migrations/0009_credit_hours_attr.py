@@ -3,12 +3,14 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+
 
 def create_credit_hours_attribute(apps, schema_editor):
 
     # Get seat Object
     ProductClass = apps.get_model('catalogue', 'ProductClass')
-    seat = ProductClass.objects.get(name='Seat')
+    seat = ProductClass.objects.get(name=SEAT_PRODUCT_CLASS_NAME)
 
     # Create our Product Attributes
     ProductAttribute = apps.get_model('catalogue', 'ProductAttribute')

@@ -12,7 +12,9 @@ from oscar.test.newfactories import UserFactory, BasketFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import (
+    COUPON_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH, SEAT_PRODUCT_CLASS_NAME
+)
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -152,7 +154,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
     def test_enrollment_module_fulfill_bad_attributes(self):
         """Test that use of the Fulfillment Module fails when the product does not have attributes."""
-        ProductAttribute.objects.get(product_class__name='Seat', code='course_key').delete()
+        ProductAttribute.objects.get(product_class__name=SEAT_PRODUCT_CLASS_NAME, code='course_key').delete()
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
 
@@ -374,7 +376,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         """
         catalog = Catalog.objects.create(partner=self.partner)
 
-        coupon_product_class, _ = ProductClass.objects.get_or_create(name='coupon')
+        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
         coupon = factories.create_product(
             product_class=coupon_product_class,
             title='Test product'

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 
@@ -71,7 +71,7 @@ def create_coupon_product(
         IntegrityError: An error occured when create_vouchers method returns
                         an IntegrityError exception
     """
-    product_class = ProductClass.objects.get(slug='coupon')
+    product_class = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
     coupon_product = Product.objects.create(title=title, product_class=product_class)
     ProductCategory.objects.get_or_create(product=coupon_product, category=category)
 
@@ -126,23 +126,21 @@ def generate_sku(product, partner):
 
     Example: 76E4E71
     """
-    product_class = product.get_product_class()
-
-    if not product_class:
+    if not product.get_product_class():
         raise AttributeError('Product has no product class')
 
-    if product_class.name == 'Coupon':
+    if product.is_coupon_product:
         _hash = ' '.join((
             unicode(product.id),
             str(partner.id)
         ))
-    elif product_class.name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME:
+    elif product.is_enrollment_code_product:
         _hash = ' '.join((
             getattr(product.attr, 'course_key', ''),
             getattr(product.attr, 'seat_type', ''),
             unicode(partner.id)
         ))
-    elif product_class.name == SEAT_PRODUCT_CLASS_NAME:
+    elif product.is_seat_product:
         _hash = ' '.join((
             getattr(product.attr, 'certificate_type', ''),
             product.attr.course_key,

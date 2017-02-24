@@ -5,7 +5,6 @@ from django.dispatch import receiver
 from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import silence_exceptions
@@ -58,9 +57,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
         product = line.product
 
         # ignore everything except course seats.  no support for coupons as of yet
-        product_class_name = product.get_product_class().name
-
-        if product_class_name == SEAT_PRODUCT_CLASS_NAME:
+        if product.is_seat_product:
             price = line.line_price_excl_tax
             course_id = product.course_id
 
@@ -90,11 +87,8 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
         return
 
     # ignore everything except course seats.  no support for coupons as of yet
-    product_class_name = product.get_product_class().name
-    if product_class_name == SEAT_PRODUCT_CLASS_NAME:
-
+    if product.is_seat_product:
         course_id = product.course_id
-
         stock_record = product.stockrecords.first()
         if stock_record:
             price = stock_record.price_excl_tax

@@ -12,7 +12,8 @@ import waffle
 from ecommerce.core.constants import (
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_SEAT_TYPES,
-    ENROLLMENT_CODE_SWITCH
+    ENROLLMENT_CODE_SWITCH,
+    SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.utils import generate_sku
@@ -45,7 +46,7 @@ class Course(models.Model):
         parent, created = self.products.get_or_create(
             course=self,
             structure=Product.PARENT,
-            product_class=ProductClass.objects.get(slug='seat'),
+            product_class=ProductClass.objects.get(name=SEAT_PRODUCT_CLASS_NAME),
         )
         ProductCategory.objects.get_or_create(category=Category.objects.get(name='Seats'), product=parent)
         parent.title = 'Seat in {}'.format(self.name)
@@ -100,7 +101,7 @@ class Course(models.Model):
     @property
     def parent_seat_product(self):
         """ Returns the course seat parent Product. """
-        return self.products.get(product_class__slug='seat', structure=Product.PARENT)
+        return self.products.get(product_class__name=SEAT_PRODUCT_CLASS_NAME, structure=Product.PARENT)
 
     @property
     def seat_products(self):
