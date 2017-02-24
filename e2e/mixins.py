@@ -2,6 +2,7 @@ import logging
 import time
 import uuid
 
+import datetime
 import requests
 from edx_rest_api_client.client import EdxRestApiClient
 from selenium.common.exceptions import TimeoutException
@@ -155,7 +156,7 @@ class EcommerceApiMixin(object):
     @property
     def ecommerce_api_client(self):
         access_token, __ = get_access_token()
-        return EdxRestApiClient(ECOMMERCE_API_URL, oauth_access_token=access_token)
+        return EdxRestApiClient(ECOMMERCE_API_URL, jwt=access_token)
 
     def assert_order_created_and_completed(self):
         orders = self.ecommerce_api_client.orders.get()['results']
@@ -273,19 +274,6 @@ class PaymentMixin(object):
         """ Submit the payment form. """
         self.wait_for_payment_form()
 
-        # Select the appropriate <option> elements
-        select_fields = (
-            ('#id_country', address['country']),
-            ('#id_state', address['state']),
-            ('#card-expiry-month', '12'),
-            ('#card-expiry-year', '2030')
-        )
-        for selector, value in select_fields:
-            if value:
-                select = Select(self.browser.find_element_by_css_selector(selector))
-                select.select_by_value(value)
-
-        # Fill in the text fields
         billing_information = {
             'id_first_name': 'Ed',
             'id_last_name': 'Xavier',
@@ -297,6 +285,28 @@ class PaymentMixin(object):
             'card-cvn': '123'
         }
 
+        country = address['country']
+        state = address['state'] or ''
+
+        card_expiry_year = str(datetime.datetime.now().year + 3)
+        select_fields = [
+            ('#id_country', country),
+            ('#card-expiry-month', '12'),
+            ('#card-expiry-year', card_expiry_year),
+        ]
+
+        if country in ('US', 'CA',):
+            select_fields.append(('#id_state', state,))
+        else:
+            billing_information['id_state'] = state
+
+        # Select the appropriate <option> elements
+        for selector, value in select_fields:
+            if value:
+                select = Select(self.browser.find_element_by_css_selector(selector))
+                select.select_by_value(value)
+
+        # Fill in the text fields
         for field, value in billing_information.items():
             self.browser.find_element_by_css_selector('#' + field).send_keys(value)
 
