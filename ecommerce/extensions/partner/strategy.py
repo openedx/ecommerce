@@ -3,6 +3,8 @@ from django.utils import timezone
 from oscar.apps.partner import availability, strategy
 from oscar.core.loading import get_model
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+
 
 class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
     """
@@ -15,7 +17,7 @@ class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
     @property
     def seat_class(self):
         ProductClass = get_model('catalogue', 'ProductClass')
-        return ProductClass.objects.get(slug='seat')
+        return ProductClass.objects.get(name=SEAT_PRODUCT_CLASS_NAME)
 
     def availability_policy(self, product, stockrecord):
         """ A product is unavailable for non-admin users if the current date is

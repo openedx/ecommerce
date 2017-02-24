@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model, get_class
 
-from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.constants import ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
@@ -125,7 +125,7 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         self.assertEqual(course.products.count(), 1)
 
         # Validate the parent seat
-        seat_product_class = ProductClass.objects.get(slug='seat')
+        seat_product_class = ProductClass.objects.get(name=SEAT_PRODUCT_CLASS_NAME)
         parent = course.parent_seat_product
         self.assertEqual(parent.structure, Product.PARENT)
         self.assertEqual(parent.title, 'Seat in Test Course')

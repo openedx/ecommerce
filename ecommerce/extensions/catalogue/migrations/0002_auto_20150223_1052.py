@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+from oscar.core.utils import slugify
+
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 
 
 def create_catalog(apps, schema_editor):
@@ -20,8 +23,8 @@ def create_catalog(apps, schema_editor):
     seat = ProductClass.objects.create(
         track_stock=False,
         requires_shipping=False,
-        name='Seat',
-        slug='seat'
+        name=SEAT_PRODUCT_CLASS_NAME,
+        slug=slugify(SEAT_PRODUCT_CLASS_NAME)
     )
 
     # Create product attributes for course seat products
@@ -66,7 +69,7 @@ def remove_catalog(apps, schema_editor):
     ProductClass = apps.get_model("catalogue", "ProductClass")
 
     Category.objects.filter(slug='seats').delete()
-    ProductClass.objects.filter(slug='seat').delete()
+    ProductClass.objects.filter(name=SEAT_PRODUCT_CLASS_NAME).delete()
 
 
 class Migration(migrations.Migration):

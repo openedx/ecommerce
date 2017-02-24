@@ -12,6 +12,7 @@ from rest_framework import filters, generics, serializers, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
@@ -42,7 +43,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
-    queryset = Product.objects.filter(product_class__name='Coupon')
+    queryset = Product.objects.filter(product_class__name=COUPON_PRODUCT_CLASS_NAME)
     permission_classes = (IsAuthenticated, IsAdminUser)
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = ProductFilter

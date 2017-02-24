@@ -14,7 +14,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 import waffle
 
-from ecommerce.core.constants import ISO_8601_FORMAT, COURSE_ID_REGEX
+from ecommerce.core.constants import COURSE_ID_REGEX, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.models import Site, SiteConfiguration
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
@@ -329,7 +329,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         for product in products:
             # Verify that each product is intended to be a Seat.
             product_class = product.get('product_class')
-            if product_class != 'Seat':
+            if product_class != SEAT_PRODUCT_CLASS_NAME:
                 raise serializers.ValidationError(
                     _(u"Invalid product class [{product_class}] requested.".format(product_class=product_class))
                 )

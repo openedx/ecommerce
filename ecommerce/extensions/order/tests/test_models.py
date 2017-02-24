@@ -1,6 +1,7 @@
 import ddt
 from oscar.test import factories
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.tests.testcases import TestCase
 
@@ -31,8 +32,7 @@ class OrderTests(TestCase):
     def test_contains_coupon(self):
         self.assertFalse(self.order.contains_coupon)
 
-        product_class = u'Coupon'
-        product = factories.create_product(product_class=product_class)
+        product = factories.create_product(product_class=COUPON_PRODUCT_CLASS_NAME)
         basket = factories.create_basket(empty=True)
         factories.create_stockrecord(product, num_in_stock=1)
         basket.add_product(product)
