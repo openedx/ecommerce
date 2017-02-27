@@ -41,8 +41,8 @@ class PaymentProcessorResponseAdmin(admin.ModelAdmin):
 class SDNCheckFailureAdmin(admin.ModelAdmin):
     search_fields = ('username', 'full_name')
     list_display = ('username', 'full_name', 'country')
-    fields = ('username', 'full_name', 'country', 'formatted_response')
-    readonly_fields = ('username', 'full_name', 'country', 'formatted_response')
+    fields = ('username', 'full_name', 'country', 'address', 'products', 'formatted_response')
+    readonly_fields = ('username', 'full_name', 'country', 'address', 'products', 'formatted_response')
 
     def formatted_response(self, obj):
         pretty_response = pformat(obj.sdn_check_response)
