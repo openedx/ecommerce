@@ -16,44 +16,43 @@ define([
         });
 
         describe('course form view', function () {
+            window.bulkEnrollmentCodesEnabled = false;
+
             describe('cleanHonorCode', function () {
                 it('should always return a boolean', function () {
-                    expect(view.cleanHonorMode('false')).toEqual(false);
-                    expect(view.cleanHonorMode('true')).toEqual(true);
+                    expect(view.cleanBooleanValue('false')).toEqual(false);
+                    expect(view.cleanBooleanValue('true')).toEqual(true);
                 });
             });
 
             describe('getActiveCourseTypes', function () {
                 it('should return expected course types', function () {
-                    var mockAjaxData = {'results': [{
-                            'enable_enrollment_codes': true,
-                            'site': {
-                                'domain': 'test.site.domain'
-                            }
-                        }]
-                    };
-                    spyOn($, 'ajax').and.callFake(function(options) {
-                        options.success(mockAjaxData);
-                    });
                     view.model.set('type', 'audit');
                     expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'credit']);
-                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'verified');
                     expect(view.getActiveCourseTypes()).toEqual(['verified', 'credit']);
-                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'professional');
                     expect(view.getActiveCourseTypes()).toEqual(['professional']);
-                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'credit');
                     expect(view.getActiveCourseTypes()).toEqual(['credit']);
-                    expect($.ajax).toHaveBeenCalled();
 
                     view.model.set('type', 'default');
                     expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'professional', 'credit']);
-                    expect($.ajax).toHaveBeenCalled();
+                });
+            });
+
+            describe('Bulk enrollment code tests', function() {
+                it('should check enrollment code checkbox', function() {
+                    view.$el.append(
+                        '<input type="radio" name="bulk_enrollment_code" value="true" id="enableBulkEnrollmentCode">' +
+                        '<input type="radio" name="bulk_enrollment_code" value="false" id="disableBulkEnrollmentCode">'
+                        );
+                    view.model.set('bulk_enrollment_code', true);
+                    view.toggleBulkEnrollmentField();
+                    expect(view.$('#enableBulkEnrollmentCode').prop('checked')).toBeTruthy();
                 });
             });
         });

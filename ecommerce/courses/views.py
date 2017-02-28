@@ -11,7 +11,9 @@ from django.views.generic import View, TemplateView
 from edx_rest_api_client.client import EdxRestApiClient
 from requests import Timeout
 from slumber.exceptions import SlumberBaseException
+from waffle import switch_is_active
 
+from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -33,6 +35,10 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
             context['credit_providers'] = json.dumps(credit_providers)
         else:
             logger.warning('User [%s] has no access token, and will not be able to edit courses.', user.username)
+
+        context['bulk_enrollment_codes_enabled'] = (
+            switch_is_active(ENROLLMENT_CODE_SWITCH) and self.request.site.siteconfiguration.enable_enrollment_codes
+        )
 
         return context
 

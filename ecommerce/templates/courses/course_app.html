@@ -62,6 +62,9 @@
 
 {% block content %}
     <div id="app" class="container" data-credit-providers="{{ credit_providers }}"></div>
+    <script>
+        window.bulkEnrollmentCodesEnabled = {% if bulk_enrollment_codes_enabled %}true{% else %}false{% endif %};
+    </script>
 {% endblock %}
 
 {% block footer %}

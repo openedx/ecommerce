@@ -1,19 +1,22 @@
+import json
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
-import json
 
-from django.core.urlresolvers import reverse
 import mock
 import pytz
+from django.core.urlresolvers import reverse
+from oscar.core.loading import get_model
 
-from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
+
+Product = get_model('catalogue', 'Product')
 
 EXPIRES = datetime(year=1992, month=4, day=24, tzinfo=pytz.utc)
 EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
@@ -31,6 +34,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
             'id': self.course_id,
             'name': self.course_name,
             'verification_deadline': EXPIRES_STRING,
+            'create_or_activate_enrollment_code': False,
             'products': [
                 {
                     'product_class': 'Seat',
@@ -43,7 +47,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                         }
                     ],
                     'course': {
-                        'create_enrollment_code': 'true',
                         'honor_mode': True,
                         'id': self.course_id,
                         'name': self.course_name,
@@ -66,7 +69,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                         }
                     ],
                     'course': {
-                        'create_enrollment_code': 'true',
                         'honor_mode': True,
                         'id': self.course_id,
                         'name': self.course_name,
@@ -89,7 +91,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                         }
                     ],
                     'course': {
-                        'create_enrollment_code': 'true',
                         'honor_mode': True,
                         'id': self.course_id,
                         'name': self.course_name,
@@ -120,7 +121,6 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
                         }
                     ],
                     'course': {
-                        'create_enrollment_code': 'true',
                         'honor_mode': True,
                         'id': self.course_id,
                         'name': self.course_name,
@@ -261,6 +261,7 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
             self.assert_course_saved(self.course_id, expected=self.data)
+            self.assertFalse(Product.objects.filter(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).exists())
 
     def test_update(self):
         """Verify that a Course and associated products can be updated and published."""
@@ -330,14 +331,50 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
         )
         self.assert_course_does_not_exist(self.course_id)
 
-    def test_verification_deadline_optional(self):
-
-        """Verify that submitting a course verification deadline is optional."""
-        self.data.pop('verification_deadline')
-        self._toggle_publication(True)
-
+    def _post_create_request(self):
+        """Send a successful POST request to the publish create endpoint."""
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             mock_publish.return_value = None
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
-            self.assert_course_saved(self.course_id, expected=self.data)
+
+    def test_verification_deadline_optional(self):
+        """Verify that submitting a course verification deadline is optional."""
+        self.data.pop('verification_deadline')
+        self._toggle_publication(True)
+
+        self._post_create_request()
+        self.assert_course_saved(self.course_id, expected=self.data)
+
+    def _enable_enrollment_codes_settings(self):
+        """Enable settings necessary for creating enrollment codes."""
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        site_config = self.site.siteconfiguration
+        site_config.enable_enrollment_codes = True
+        site_config.save()
+
+    def test_create_enrollment_code(self):
+        """Verify an enrollment code is created."""
+        self._enable_enrollment_codes_settings()
+        self.data['create_or_activate_enrollment_code'] = True
+        self._post_create_request()
+
+        course = Course.objects.get(id=self.course_id)
+        self.assertIsNotNone(course.enrollment_code_product)
+        self.assertTrue(course.enrollment_code_product.attr.is_active)
+
+    def test_deactivate_enrollment_code(self):
+        """Verify the enrollment code is not active."""
+        self._enable_enrollment_codes_settings()
+        self.data['create_or_activate_enrollment_code'] = True
+        self._post_create_request()
+        self.data['create_or_activate_enrollment_code'] = False
+
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            mock_publish.return_value = None
+            response = self.client.put(self.update_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 200)
+
+        enrollment_code = Product.objects.filter(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).first()
+        self.assertIsNotNone(enrollment_code)
+        self.assertFalse(enrollment_code.attr.is_active)

@@ -42,6 +42,7 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
                                                  kwargs={'parent_lookup_course_id': course.id}))
 
         last_edited = course.history.latest().history_date.strftime(ISO_8601_FORMAT)
+        enrollment_code = course.enrollment_code_product
 
         data = {
             'id': course.id,
@@ -50,7 +51,8 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
             'type': course.type,
             'url': self.get_full_url(reverse('api:v2:course-detail', kwargs={'pk': course.id})),
             'products_url': products_url,
-            'last_edited': last_edited
+            'last_edited': last_edited,
+            'has_active_bulk_enrollment_code': True if enrollment_code else False
         }
 
         if include_products:

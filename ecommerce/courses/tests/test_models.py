@@ -145,12 +145,14 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, seat_type)
+        self.assertTrue(enrollment_code.attr.is_active)
 
         # Second time should skip over the enrollment code creation logic but result in the same data
         course.create_or_update_seat(seat_type, True, price, self.partner)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, seat_type)
+        self.assertTrue(enrollment_code.attr.is_active)
 
         stock_record = StockRecord.objects.get(product=enrollment_code)
         self.assertEqual(stock_record.price_excl_tax, price)
@@ -309,3 +311,13 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         # One parent product, three seat products, one enrollment code product (verified) -> five total products
         self.assertEqual(course.products.count(), 5)
         self.assertEqual(len(course.seat_products), 3)  # Definitely three seat products...
+
+    @ddt.data(True, False)
+    def test_toggle_enrollment_code_status(self, is_active):
+        """Verify enrollment code active attribute is set correctly."""
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course = Course.objects.create()
+        course.create_or_update_seat('verified', False, 0, self.partner, create_enrollment_code=True)
+
+        course.toggle_enrollment_code_status(is_active)
+        self.assertEqual(course.get_enrollment_code().attr.is_active, is_active)
