@@ -270,6 +270,15 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_get_context_data_course_filter(self):
+        """ Verify the course filter works as expected """
+        code = 'VALIDCODE'
+        voucher, product = prepare_voucher(code=code)
+        self.client.logout()
+        url = self.path + '?code={0}&course={1}'.format(code, product.course_id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
 
 class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, EnterpriseServiceMockMixin,
                             TestCase):
