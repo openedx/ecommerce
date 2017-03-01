@@ -338,9 +338,9 @@ class LmsApiMockMixin(object):
         httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type=CONTENT_TYPE)
 
     def mock_enrollment_api(self, request, user, course_id, is_active=True, mode='audit'):
-        """ Returns a successful response indicating self.user is enrolled in the specified course mode. """
-        url = '{host}/enrollment/{username},{course_id}'.format(
-            host=request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
+        """ Returns a successful response indicating user is enrolled in the specified course mode. """
+        url = '{host}enrollment/{username},{course_id}'.format(
+            host=request.site.siteconfiguration.enrollment_api_url,
             username=user.username,
             course_id=course_id
         )
