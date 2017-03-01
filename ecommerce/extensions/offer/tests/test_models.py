@@ -187,6 +187,37 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
 
     @httpretty.activate
     @mock_course_catalog_api_client
+    @ddt.data(
+        (1, 'verified,professional', True),
+        (1, 'verified', True),
+        (2, 'professional', False),
+    )
+    @ddt.unpack
+    def test_course_catalog_range_contains_product(self, course_catalog, course_seat_types, is_product_in_range):
+        """
+        Verify that the method "contains_product" returns True (boolean) if a
+        product is in it's range for a course catalog else return False.
+        """
+        catalog_query = 'key:*'
+        course, seat = self.create_course_and_seat()
+        self.assertEqual(len(self.range.all_products()), 1)
+        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[course.id])
+
+        course_catalog_id = 1
+        self.mock_course_discovery_api_for_catalog_by_resource_id(
+            catalog_id=course_catalog_id, catalog_query=catalog_query
+        )
+
+        self.range.course_seat_types = course_seat_types
+        self.range.course_catalog = course_catalog
+        self.range.save()
+
+        response = self.range.contains_product(seat)
+
+        self.assertEqual(is_product_in_range, response)
+
+    @httpretty.activate
+    @mock_course_catalog_api_client
     def test_query_range_all_products(self):
         """
         all_products() should return seats from the query.

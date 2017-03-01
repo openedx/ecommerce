@@ -263,20 +263,23 @@ class Range(AbstractRange):
         """
         Assert if the range contains the product.
         """
-        if self.course_catalog:
-            request = get_current_request()
-            try:
-                course_catalog = get_course_catalogs(site=request.site, resource_id=self.course_catalog)
-            except (ConnectionError, SlumberBaseException, Timeout):
-                raise Exception(
-                    'Unable to connect to Course Catalog service for catalog with id [%s].' % self.course_catalog
-                )
+        # course_catalog is associated with course_seat_types.
+        if self.course_catalog and self.course_seat_types:
+            # Product certificate type should belongs to range seat types.
+            if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
+                request = get_current_request()
+                try:
+                    course_catalog = get_course_catalogs(site=request.site, resource_id=self.course_catalog)
+                except (ConnectionError, SlumberBaseException, Timeout):
+                    raise Exception(
+                        'Unable to connect to Course Catalog service for catalog with id [%s].' % self.course_catalog
+                    )
 
-            response = self.run_catalog_query(product, course_catalog.get('query'))
-            # Range can have a catalog query and 'regular' products in it,
-            # therefor an OR is used to check for both possibilities.
-            return ((response['course_runs'][product.course_id]) or
-                    super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
+                response = self.run_catalog_query(product, course_catalog.get('query'))
+                # Range can have a catalog query and 'regular' products in it,
+                # therefor an OR is used to check for both possibilities.
+                return ((response['course_runs'][product.course_id]) or
+                        super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
         elif self.catalog_query and self.course_seat_types:
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
                 response = self.run_catalog_query(product)
