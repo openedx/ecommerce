@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import time
 from urllib import urlencode
@@ -65,8 +66,8 @@ class SDNCheckTests(TestCase):
             'sources': self.site_configuration.sdn_api_list,
             'api_key': self.site_configuration.sdn_api_key,
             'type': 'individual',
-            'name': self.name,
-            'address': self.address,
+            'name': unicode(self.name).encode('utf-8'),
+            'address': unicode(self.address).encode('utf-8'),
             'countries': self.country
         })
         sdn_check_url = '{api_url}?{params}'.format(
@@ -109,6 +110,15 @@ class SDNCheckTests(TestCase):
     def test_sdn_check_match(self):
         """ Verify the SDN check returns the number of matches and records the match. """
         sdn_response = {'total': 1}
+        self.mock_sdn_response(json.dumps(sdn_response))
+        response = self.sdn_validator.search(self.name, self.address, self.country)
+        self.assertEqual(response, sdn_response)
+
+    @httpretty.activate
+    def test_sdn_check_unicode_match(self):
+        """ Verify the SDN check returns the number of matches and records the match. """
+        sdn_response = {'total': 1}
+        self.name = u'Keyser Söze'
         self.mock_sdn_response(json.dumps(sdn_response))
         response = self.sdn_validator.search(self.name, self.address, self.country)
         self.assertEqual(response, sdn_response)
