@@ -37,7 +37,7 @@ from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import StockRecordFactory
-from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
+from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin, SiteMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -57,7 +57,8 @@ COUPON_CODE = 'COUPONTEST'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase,
+                                SiteMixin):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -143,6 +144,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
         self.mock_enrollment_api_success_enrolled(self.course.id)
+        self.mock_access_token_response()
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
@@ -167,6 +169,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         (The Enrollment API call being used returns an active enrollment record in this case)
         """
         course = CourseFactory()
+        self.mock_access_token_response()
         self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
         product = course.create_or_update_seat(mode, id_verification, 0, self.partner, create_enrollment_code=False)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
@@ -188,6 +191,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         (The Enrollment API call being used returns an inactive enrollment record in this case)
         """
         course = CourseFactory()
+        self.mock_access_token_response()
         self.mock_enrollment_api_success_unenrolled(course.id, mode=mode)
         product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
