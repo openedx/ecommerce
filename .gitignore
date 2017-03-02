@@ -79,6 +79,9 @@ override.cfg
 # OS X
 .DS_Store
 
+# pyenv
+.python-version
+
 *.trace
 private.py
 docs/_build
