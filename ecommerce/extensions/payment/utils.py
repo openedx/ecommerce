@@ -88,13 +88,12 @@ class SDNClient(object):
         Returns:
             dict: SDN API response.
         """
-
         params = urlencode({
             'sources': self.sdn_list,
             'api_key': self.api_key,
             'type': 'individual',
-            'name': name,
-            'address': address,
+            'name': unicode(name).encode('utf-8'),
+            'address': unicode(address).encode('utf-8'),
             'countries': country
         })
         sdn_check_url = '{api_url}?{params}'.format(
