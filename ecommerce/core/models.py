@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
-from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+from slumber.exceptions import HttpNotFoundError, SlumberBaseException, HttpClientError
 
 from ecommerce.core.exceptions import VerificationStatusError
 from ecommerce.core.url_utils import get_lms_url
@@ -434,11 +434,11 @@ class User(AbstractUser):
         try:
             api = EdxRestApiClient(
                 request.site.siteconfiguration.build_lms_url('/api/enrollment/v1'),
-                oauth_access_token=self.access_token,
+                jwt=request.site.siteconfiguration.access_token,
                 append_slash=False
             )
             status = api.enrollment(','.join([self.username, course_key])).get()
-        except (ConnectionError, SlumberBaseException, Timeout):
+        except (ConnectionError, SlumberBaseException, Timeout, HttpClientError):
             log.exception(
                 'Failed to retrieve enrollment details for [%s] in course [%s]',
                 self.username,
