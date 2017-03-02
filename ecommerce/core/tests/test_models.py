@@ -78,7 +78,6 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         """ Verify check for user enrollment in a course. """
         user = self.create_user()
         self.request.user = user
-        self.mock_access_token_response()
         course_id1 = 'course-v1:test+test+test'
         __, enrolled_seat = self.create_course_and_seat(
             course_id=course_id1, seat_type=mode, id_verification=id_verification
