@@ -37,7 +37,7 @@ from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import StockRecordFactory
-from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin, SiteMixin
+from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -57,8 +57,7 @@ COUPON_CODE = 'COUPONTEST'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase,
-                                SiteMixin):
+class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -144,7 +143,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
         self.mock_enrollment_api_success_enrolled(self.course.id)
-        self.mock_access_token_response()
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
@@ -169,14 +167,14 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         (The Enrollment API call being used returns an active enrollment record in this case)
         """
         course = CourseFactory()
-        self.mock_access_token_response()
         self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
-        product = course.create_or_update_seat(mode, id_verification, 0, self.partner, create_enrollment_code=False)
+        product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
+        self.create_coupon(catalog=catalog, code=COUPON_CODE, benefit_value=5)
 
-        url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
+        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=stock_record.partner_sku, code=COUPON_CODE)
         expected_content = 'You are already enrolled in {product}.'.format(product=product.course.name)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
@@ -191,7 +189,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         (The Enrollment API call being used returns an inactive enrollment record in this case)
         """
         course = CourseFactory()
-        self.mock_access_token_response()
         self.mock_enrollment_api_success_unenrolled(course.id, mode=mode)
         product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
@@ -206,29 +203,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.assertEqual(response.wsgi_request.GET['sku'], sku)
 
     @httpretty.activate
-    @ddt.data(('verified', False), ('professional', True), ('no-id-professional', False))
-    @ddt.unpack
-    def test_enrolled_verified_student_for_enrollment_code(self, mode, id_verification):
-        """
-        Verify the view return HTTP 303 if the student is enrolled as verified and purchasing enrollment code
-        (The Enrollment API call being used returns an inactive enrollment record in this case)
-        """
-        course = CourseFactory()
-        self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course.create_or_update_seat(mode, id_verification, 10, self.partner, create_enrollment_code=True)
-        product = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        stock_record = StockRecordFactory(product=product, partner=self.partner)
-        catalog = Catalog.objects.create(partner=self.partner)
-        catalog.stock_records.add(stock_record)
-
-        url = '{path}?sku={sku}'.format(path=self.path, sku=stock_record.partner_sku)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 303)
-        self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
-        self.assertEqual(response.wsgi_request.GET['sku'], stock_record.partner_sku)
-
-    @httpretty.activate
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_enrollment_api_failure(self, error):
         """
@@ -236,7 +210,8 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         """
         self.request.user = self.user
         self.mock_enrollment_api_error(self.request, self.user, self.course.id, error)
-        url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku, code=COUPON_CODE)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 

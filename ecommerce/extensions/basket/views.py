@@ -62,9 +62,10 @@ class BasketSingleItemView(View):
             msg = _('Product [{product}] not available to buy.').format(product=product.title)
             return HttpResponseBadRequest(msg)
 
-        # If the product is not an Enrollment Code, we check to see if the user is already
-        # enrolled to prevent double-enrollment and/or accidental coupon usage
-        if not product.is_enrollment_code_product:
+        # If the product is not an Enrollment Code and this is a Coupon Redemption request,
+        # we check to see if the user is already enrolled
+        # to prevent double-enrollment and/or accidental coupon usage.
+        if not product.is_enrollment_code_product and code:
             try:
                 if request.user.is_user_already_enrolled(request, product):
                     logger.warning(
