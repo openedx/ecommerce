@@ -351,17 +351,18 @@
                 }
 
                 .form-input-elements {
+                    input, select {
+                        border: 1px solid $gray-color;
+                        border-radius: 0;
+                        color: $gray-color;
+                    }
+
                     div:not(.payment-button) {
                         margin: 0;
 
                         label {
-                            color: gray;
+                            color: $gray-color;
                             font-weight: normal;
-                        }
-
-                        input, select {
-                            border: 1px solid palette(grayscale, base);
-                            border-radius: 0;
                         }
                     }
 
@@ -447,7 +448,7 @@
 
             .amount {
                 padding-bottom: 20px;
-                color: palette(grayscale, base);
+                color: $gray-color;
                 font-size: 18px;
 
                 .price {
@@ -464,6 +465,21 @@
                 .use-voucher {
                     padding: 0;
 
+                    label {
+                        color: $gray-color;
+                        font-size: 16px;
+                        font-weight: normal;
+
+                        span {
+                            font-size: 14px;
+                        }
+                    }
+
+                    #id_code {
+                        width: 180px;
+                        border: 1px solid $gray-color;
+                    }
+
                     > button {
                         padding-left: 0;
                         border: 0;
@@ -478,6 +494,10 @@
                     margin: 0 10px 0 0;
                     line-height: 24px;
                 }
+            }
+
+            #voucher_form_container {
+                display: block;
             }
 
             .product {

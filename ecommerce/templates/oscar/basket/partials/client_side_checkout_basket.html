@@ -71,9 +71,7 @@
                         {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
                         {% if voucher_form %}
                             <div class="use-voucher">
-                                <button type="button" class="btn btn-default" id="voucher_form_link">
-                                    {% trans "Add Coupon Code" %}
-                                </button>
+                                <label for="id_code">{% trans "Add coupon code" %} <span>{% trans "(optional)" %}</span></label>
                                 {% include 'basket/partials/add_voucher_form.html' %}
                             </div>
                         {% endif %}
