@@ -19,7 +19,7 @@ def create_enrollment_code_product_class(apps, schema_editor):
         track_stock=False,
         requires_shipping=False,
         name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-        slug=slugify(ENROLLMENT_CODE_PRODUCT_CLASS_NAME),
+        slug='enrollment_code',
     )
 
     ProductAttribute.objects.create(
