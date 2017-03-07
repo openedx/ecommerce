@@ -1,6 +1,7 @@
 import datetime
 import urllib
 
+import ddt
 import httpretty
 import pytz
 from django.conf import settings
@@ -183,9 +184,12 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
         self.assert_error_messages(voucher, product, user, error_msg)
 
 
+@ddt.ddt
 @httpretty.activate
-class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, EnterpriseServiceMockMixin,
+                           LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
+    credit_seat = None
 
     def setUp(self):
         super(CouponOfferViewTests, self).setUp()
@@ -238,17 +242,25 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
         response = self.client.get(url)
         self.assertEqual(response.context['error'], 'The voucher is not applicable to your current basket.')
 
-    def prepare_url_for_credit_seat(self, code='CREDIT'):
+    def prepare_url_for_credit_seat(self, code='CREDIT', enterprise_customer=None):
         """Helper method for creating a credit seat and construct the URL to its offer landing page.
 
         Returns:
             URL to its offer landing page.
         """
         __, credit_seat = self.create_course_and_seat(seat_type='credit')
+        self.credit_seat = credit_seat
         # Make sure to always pair `course_seat_types` and `catalog_query` parameters because
         # if one of them is missing it could result in a SEGFAULT error when running tests
         # with migrations enabled.
-        _range = RangeFactory(products=[credit_seat, ], course_seat_types='credit', catalog_query='*:*')
+        range_kwargs = {
+            'products': [credit_seat, ],
+            'course_seat_types': 'credit',
+            'catalog_query': '*:*',
+        }
+        if enterprise_customer:
+            range_kwargs['enterprise_customer'] = enterprise_customer
+        _range = RangeFactory(**range_kwargs)
         prepare_voucher(code=code, _range=_range)
 
         url = '{path}?code={code}'.format(path=self.path, code=code)
@@ -269,6 +281,50 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, Lm
         url = self.prepare_url_for_credit_seat()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_consent_failed_invalid(self):
+        """ Verify that an error is returned if the consent_failed parameter is not a valid SKU. """
+        url = '{}&consent_failed={}'.format(self.prepare_url_for_credit_seat(), 'INVALID')
+        response = self.client.get(url)
+        self.assertEqual(response.context['error'], 'SKU INVALID does not exist.')
+
+    def test_consent_failed_no_enterprise_customer(self):
+        """ Verify that an error is returned if the voucher has no associated EnterpriseCustomer. """
+        base_url = self.prepare_url_for_credit_seat(enterprise_customer=None)
+        sku = self.credit_seat.stockrecords.first().partner_sku
+        url = '{}&consent_failed={}'.format(base_url, sku)
+        response = self.client.get(url)
+        self.assertEqual(
+            response.context['error'],
+            'There is no Enterprise Customer associated with SKU {sku}.'.format(sku=sku)
+        )
+
+    @ddt.data(
+        ('', 'If you have concerns about sharing your data, please contact your administrator at TestShib.'),
+        (
+            'contact@example.com',
+            'If you have concerns about sharing your data, please contact your administrator at TestShib at '
+            'contact@example.com.',
+        ),
+    )
+    @ddt.unpack
+    def test_consent_failed_message(self, contact_email, expected_response):
+        """ Verify that the consent failure message shows up when the consent_failed parameter is a valid SKU. """
+        self.mock_specific_enterprise_customer_api(
+            ENTERPRISE_CUSTOMER,
+            name='TestShib',
+            contact_email=contact_email
+        )
+        base_url = self.prepare_url_for_credit_seat(enterprise_customer=ENTERPRISE_CUSTOMER)
+        sku = self.credit_seat.stockrecords.first().partner_sku
+        url = '{}&consent_failed={}'.format(base_url, sku)
+        response = self.client.get(url)
+        self.assertContains(
+            response,
+            'Enrollment in {course_name} was not complete.'.format(course_name=self.credit_seat.course.name),
+            status_code=200
+        )
+        self.assertContains(response, expected_response, status_code=200)
 
 
 class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, EnterpriseServiceMockMixin,

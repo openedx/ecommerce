@@ -20,13 +20,13 @@ class EnterpriseServiceMockMixin(object):
         super(EnterpriseServiceMockMixin, self).setUp()
         cache.clear()
 
-    def mock_specific_enterprise_customer_api(self, uuid):
+    def mock_specific_enterprise_customer_api(self, uuid, name='TestShib', contact_email=''):
         """
         Helper function to register the enterprise customer API endpoint.
         """
         enterprise_customer_api_response = {
             'uuid': uuid,
-            'name': 'TestShib',
+            'name': name,
             'catalog': 0,
             'active': True,
             'site': {
@@ -47,7 +47,8 @@ class EnterpriseServiceMockMixin(object):
                     'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
                     'entitlement_id': 0
                 }
-            ]
+            ],
+            'contact_email': contact_email,
         }
         enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
 

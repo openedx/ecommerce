@@ -22,12 +22,14 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.utils import (
     get_enterprise_course_consent_url,
+    get_enterprise_customer_consent_failed_context_data,
     get_enterprise_customer_data_sharing_consent_token,
     get_enterprise_customer_from_voucher,
 )
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
+
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -100,20 +102,26 @@ class CouponOfferView(TemplateView):
 
     def get_context_data(self, **kwargs):
         code = self.request.GET.get('code', None)
-        if code is not None:
-            try:
-                voucher, products = get_voucher_and_products_from_code(code=code)
-            except Voucher.DoesNotExist:
-                return {'error': _('Coupon does not exist')}
-            except exceptions.ProductNotFoundError:
-                return {'error': _('The voucher is not applicable to your current basket.')}
-            valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
-            if valid_voucher:
-                self.template_name = 'coupons/offer.html'
-                return
+        if code is None:
+            return {'error': _('This coupon code is invalid.')}
 
+        try:
+            voucher, products = get_voucher_and_products_from_code(code=code)
+        except Voucher.DoesNotExist:
+            return {'error': _('Coupon does not exist')}
+        except exceptions.ProductNotFoundError:
+            return {'error': _('The voucher is not applicable to your current basket.')}
+        valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
+        if not valid_voucher:
             return {'error': msg}
-        return {'error': _('This coupon code is invalid.')}
+
+        context_data = super(CouponOfferView, self).get_context_data(**kwargs)
+        context_data.update(get_enterprise_customer_consent_failed_context_data(self.request, voucher))
+
+        if context_data and 'error' not in context_data:
+            self.template_name = 'coupons/offer.html'
+
+        return context_data
 
     @method_decorator(login_required_for_credit)
     def get(self, request, *args, **kwargs):

@@ -11,8 +11,11 @@ define([
             // Base/root path of the app
             root: '/coupons/',
 
-            routes: {
-                'offer/?code=:code': 'showOfferPage'
+            initialize: function(options) {
+                // This is where views will be rendered
+                this.$el = options.$el;
+
+                this.route(/^offer\/\?code=(\w+)/, 'showOfferPage');
             },
 
             showOfferPage: function(code) {
