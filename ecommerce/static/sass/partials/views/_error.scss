@@ -11,3 +11,28 @@
     font-weight: bold;
   }
 }
+
+#info-message {
+  background-color: #0075b4;
+
+  .container {
+    background: none;
+    color: white;
+
+    h3 {
+      margin-bottom: 0;
+      font-weight: bold;
+      color: white;
+    }
+
+    i.fa-info-circle {
+      font-size: 2.5em;
+      float: left;
+      padding-top: 20px;
+    }
+  }
+}
+
+.message-info-content {
+  margin-left: 40px;
+}
