@@ -36,6 +36,7 @@ def prepare_basket(request, product, voucher=None):
     """
     basket = Basket.get_basket(request.user, request.site)
     basket.flush()
+    basket.save()
     basket.add_product(product, 1)
     if product.is_enrollment_code_product:
         basket.clear_vouchers()
