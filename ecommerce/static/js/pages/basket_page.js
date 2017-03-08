@@ -66,6 +66,7 @@ define([
             field.find('~.help-block').append('<span>' + msg + '</span>');
             field.focus();
             event.preventDefault();
+            $('.payment-form').attr('data-has-error', true);
         }
 
         function appendCardHolderValidationErrorMsg(field, msg) {
@@ -91,6 +92,7 @@ define([
                 if ($(field).val() === '') {
                     event.preventDefault();
                     appendCardHolderValidationErrorMsg($(field), gettext('This field is required'));
+                    $('.payment-form').attr('data-has-error', true);
                 }
             });
 
@@ -323,12 +325,13 @@ define([
                 _.each($('.help-block'), function (errorMsg) {
                     $(errorMsg).empty();  // Clear existing validation error messages.
                 });
+                $('.payment-form').attr('data-has-error', false);
                 if ($('#card-number').val()) {
                     detectCreditCard();
                 }
                 cardInfoValidation(e);
                 cardHolderInfoValidation(e);
-                if ($('input[name=sdn-check]').val() === 'enabled') {
+                if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
                     sdnCheck(e);
                 }
             });
