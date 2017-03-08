@@ -17,7 +17,7 @@ Basket = get_model('basket', 'Basket')
 
 def country_choices():
     """ Returns a tuple of tuples, each containing an ISO 3166 country code. """
-    countries = [(country.alpha2, country.name) for country in pycountry.countries]
+    countries = [(country.alpha_2, country.name) for country in pycountry.countries]
     countries.insert(0, ('', _('<Choose country>')))
     return countries
 
@@ -114,7 +114,10 @@ class PaymentForm(forms.Form):
             code = '{country}-{state}'.format(country=country, state=state)
 
             try:
-                pycountry.subdivisions.get(code=code)
+                # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
+                # is fixed.
+                if not pycountry.subdivisions.get(code=code):
+                    raise KeyError
             except KeyError:
                 msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
                 logger.debug(msg)
