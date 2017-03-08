@@ -27,9 +27,9 @@ ndg-httpsclient==0.4.0
 path.py==7.2
 paypalrestsdk==1.11.5
 premailer==2.9.2
-pycountry==1.18
+pycountry==17.1.8
 python-dateutil==2.4.2
-pytz==2015.7
+pytz==2016.10
 requests==2.9.1
 sailthru-client==2.2.3
 six==1.10.0
