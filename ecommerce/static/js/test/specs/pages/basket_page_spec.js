@@ -229,7 +229,7 @@ define([
 
                     $('input[name=first_name]').val('Joey');
                     $('input[name=last_name]').val('Tribbiani');
-                    $('input[name=address_line1]').val('Central Park');
+                    $('input[name=address_line1]').val('Central Perk');
                     $('input[name=city]').val('New York City');
                     $('select[name=country]').val('US');
                     $('select[name=state]').val('NY');
@@ -247,15 +247,16 @@ define([
                             'select[name=country]'
                         ];
 
+                        spyOn(BasketPage, 'sdnCheck');
                         _.each(requiredFields, function (field) {
                             $(field).val('');
                             $('#payment-button').click();
 
                             expect(
-                                $(field).parentsUntil(
-                                    'form-item'
-                                ).find('~.help-block span').text()
+                                $(field).parentsUntil('form-item').find('~.help-block span').text()
                             ).toEqual('This field is required');
+                            expect($('.payment-form').attr('data-has-error')).toEqual('true');
+                            expect(BasketPage.sdnCheck).not.toHaveBeenCalled();
                         });
                     });
 
@@ -286,7 +287,6 @@ define([
                         $('input[name=address_line1]').val(address);
                         $('input[name=city]').val(city);
                         $('select[name=country]').val(country);
-                        $('input[name=sdn-check]').val('enabled');
 
                         spyOn(Utils, 'redirect');
                         spyOn(event, 'preventDefault');
@@ -325,26 +325,40 @@ define([
                         // We are using moment here to get number of month instead of
                         // hard coding it, so that it conforms to js date time style.
                         spyOn(Date.prototype, 'getMonth').and.returnValue(thisMonth);
+                        spyOn(BasketPage, 'sdnCheck');
+
+                        $('#card-number').val(validCardNumber);
+                        $('#card-cvn').val(validCvn);
+                        $('#card-expiry-month').val(12);
+                        $('#card-expiry-year').val(today.year());
                     });
+
+                    function expectFormSubmitted(fieldName) {
+                        expect($(fieldName + '~ .help-block').has('span').length).toEqual(0);
+                        expect($('.payment-form').attr('data-has-error')).toEqual('false');
+                        expect(BasketPage.sdnCheck).not.toHaveBeenCalled();
+                    }
 
                     it('should validate card number', function () {
                         $('#card-number').val('123invalid456');
                         $('#payment-button').click();
                         expect($('#card-number ~ .help-block span').text()).toEqual('Invalid card number');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $('#card-number').val(validCardNumber);
                         $('#payment-button').click();
-                        expect($('#card-number ~ .help-block').has('span').length).toEqual(0);
+                        expectFormSubmitted('#card-number');
                     });
 
                     it('should validate card type', function () {
                         $('#card-number').val(enRouteCardNumber);
                         $('#payment-button').click();
                         expect($('#card-number~.help-block span').text()).toEqual('Unsupported card type');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $('#card-number').val(validCardNumber);
                         $('#payment-button').click();
-                        expect($('#card-number ~ .help-block').has('span').length).toEqual(0);
+                        expectFormSubmitted('#card-number');
                     });
 
                     it('should validate CVN number', function () {
@@ -359,14 +373,16 @@ define([
                         $cvn.val('123');
                         $paymentBtn.click();
                         expect($cvn.find('~.help-block span').text()).toEqual('Invalid security number');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $cvn.val('123b');
                         $paymentBtn.click();
                         expect($cvn.find('~.help-block span').text()).toEqual('Invalid security number');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $cvn.val(validCvn);
                         $paymentBtn.click();
-                        expect($number.find('~ .help-block').has('span').length).toEqual(0);
+                        expectFormSubmitted('#card-cvn');
                     });
 
                     it('should validate expiry month', function () {
@@ -375,10 +391,11 @@ define([
                         $('#card-expiry-month').val('99');
                         $('#payment-button').click();
                         expect($('#card-expiry-month~.help-block span').text()).toEqual('Invalid month');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $('#card-expiry-month').val('12');
                         $('#payment-button').click();
-                        expect($('#card-expiry-month ~ .help-block').has('span').length).toEqual(0);
+                        expectFormSubmitted('#card-expiry-month');
                     });
 
                     it('should validate expiry year', function () {
@@ -388,10 +405,11 @@ define([
                         $('#card-expiry-year').val('2015');
                         $('#payment-button').click();
                         expect($('#card-expiry-year ~ .help-block span').text()).toEqual('Invalid year');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
-                        expect($('#card-expiry-year ~ .help-block').has('span').length).toEqual(0);
+                        expectFormSubmitted('#card-expiry-year');
                     });
 
                     it('should validate card expiration', function () {
@@ -401,11 +419,12 @@ define([
                         $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
                         expect($('#card-expiry-month ~ .help-block span').text()).toEqual('Card expired');
+                        expect($('.payment-form').attr('data-has-error')).toEqual('true');
 
                         $('#card-expiry-month').val('12');
                         $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
-                        expect($('#card-expiry-month ~ .help-block').has('span').length).toEqual(0);
+                        expectFormSubmitted('#card-expiry-month');
                     });
                 });
             });
