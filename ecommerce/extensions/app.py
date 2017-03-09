@@ -9,7 +9,6 @@ class EdxShop(app.Shop):
     # Override core app instances with blank application instances to exclude their URLs.
     promotions_app = Application()
     catalogue_app = Application()
-    offer_app = Application()
     search_app = Application()
 
 
