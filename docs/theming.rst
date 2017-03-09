@@ -58,16 +58,16 @@ This structure mirrors the Otto directory structure and looks like this
                 |             └── index.html
                 └── 404.html
 
------------
-- Templates
------------
+---------
+Templates
+---------
 Any template included in ``ecommerce/templates`` directory is themable. However, make sure not to override
 class names or id values of html elements inside a template, as these are used by javascript and/or css and overriding
 these could cause unwanted behavior.
 
----------------
-- Static Assets
----------------
+-------------
+Static Assets
+-------------
 Any static asset included in ``ecommerce/static`` can be overridden except css files present in ``ecommerce/static/css``.
 Css styles can be overridden via sass overrides explained below.
 
@@ -75,9 +75,9 @@ Css styles can be overridden via sass overrides explained below.
     Theme names should be unique and no static asset and/or directory name should be same as theme's name.
     Otherwise static assets would not work correctly.
 
-------
-- Sass
-------
+----
+Sass
+----
 Sass overrides are a little different from static asset or template overrides.
 There are two types of styles included in ``ecommerce/static/sass``:
 
