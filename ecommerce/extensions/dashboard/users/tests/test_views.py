@@ -1,9 +1,9 @@
 import json
 
-from django.contrib.messages import constants as MSG
-from django.core.urlresolvers import reverse
 import httpretty
 import mock
+from django.contrib.messages import constants as MSG
+from django.core.urlresolvers import reverse
 from requests import Timeout
 from testfixtures import LogCapture
 

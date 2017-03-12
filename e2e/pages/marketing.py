@@ -1,7 +1,7 @@
-from bok_choy.page_object import PageObject
 import requests
+from bok_choy.page_object import PageObject
 
-from e2e.config import MARKETING_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD
+from e2e.config import BASIC_AUTH_PASSWORD, BASIC_AUTH_USERNAME, MARKETING_URL_ROOT
 
 
 class MarketingCourseAboutPage(PageObject):

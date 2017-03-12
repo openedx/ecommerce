@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
+
 from StringIO import StringIO
 
 from django.contrib.sites.models import Site
-from django.core.management import call_command, CommandError
+from django.core.management import CommandError, call_command
 from oscar.core.loading import get_model
 from oscar.test import factories
 

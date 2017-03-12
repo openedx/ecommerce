@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 import hashlib
 import re
 
@@ -309,4 +310,4 @@ class Range(AbstractRange):
         return super(Range, self).all_products()  # pylint: disable=bad-super-call
 
 
-from oscar.apps.offer.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
+from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

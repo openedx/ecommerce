@@ -1,6 +1,6 @@
 from oscar.test import factories
 
-from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 
 
 class FulfillmentTestMixin(object):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.template import Template, Context, TemplateSyntaxError
+from django.template import Context, Template, TemplateSyntaxError
 
 from ecommerce.tests.testcases import TestCase
 

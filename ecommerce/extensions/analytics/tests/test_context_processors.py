@@ -1,4 +1,5 @@
 from django.test import RequestFactory
+
 from ecommerce.extensions.analytics.context_processors import analytics
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.tests.testcases import TestCase

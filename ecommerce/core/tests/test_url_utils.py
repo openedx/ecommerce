@@ -1,7 +1,7 @@
 import mock
 
 from ecommerce.core.exceptions import MissingRequestError
-from ecommerce.core.url_utils import (get_ecommerce_url, get_lms_url)
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 

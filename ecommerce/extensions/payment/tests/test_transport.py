@@ -2,8 +2,8 @@ import uuid
 
 from suds.transport import Request
 
-from ecommerce.extensions.payment.transport import RequestsTransport
 from ecommerce.core.tests.patched_httpretty import httpretty
+from ecommerce.extensions.payment.transport import RequestsTransport
 from ecommerce.tests.testcases import TestCase
 
 API_URL = 'https://example.com/api.wsdl'

@@ -14,7 +14,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from ecommerce.extensions.dashboard.orders.views import queryset_orders_for_user
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
-from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import LiveServerTestCase, TestCase
 

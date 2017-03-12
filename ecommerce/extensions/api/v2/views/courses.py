@@ -1,16 +1,16 @@
 """HTTP endpoints for interacting with courses."""
+import waffle
 from django.db.models import Prefetch
+from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.decorators import detail_route
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from oscar.core.loading import get_model
-import waffle
 
 from ecommerce.core.constants import COURSE_ID_REGEX
 from ecommerce.courses.models import Course
-from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 from ecommerce.extensions.api import serializers
+from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
 
 Product = get_model('catalogue', 'Product')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')

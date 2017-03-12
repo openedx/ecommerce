@@ -5,8 +5,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from e2e.config import PROFESSIONAL_COURSE_ID, MARKETING_URL_ROOT
-from e2e.mixins import LogistrationMixin, EnrollmentApiMixin
+from e2e.config import MARKETING_URL_ROOT, PROFESSIONAL_COURSE_ID
+from e2e.mixins import EnrollmentApiMixin, LogistrationMixin
 from e2e.pages.lms import LMSCourseModePage
 from e2e.pages.marketing import MarketingCourseAboutPage
 

@@ -3,8 +3,8 @@ import json
 from django.core.urlresolvers import reverse
 
 from ecommerce.extensions.api.serializers import SiteConfigurationSerializer
-from ecommerce.tests.testcases import TestCase
 from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.testcases import TestCase
 
 
 class SiteConfigurationViewSetTests(TestCase):

@@ -7,7 +7,7 @@ import httpretty
 import mock
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from oscar.test.factories import create_basket
 from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
@@ -15,7 +15,7 @@ from testfixtures import LogCapture
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.checkout.utils import get_receipt_page_url, format_currency
+from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus

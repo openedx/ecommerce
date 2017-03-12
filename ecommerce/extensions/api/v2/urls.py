@@ -1,26 +1,24 @@
-from django.conf.urls import url, include
+from django.conf.urls import include, url
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN
-from ecommerce.extensions.api.v2.views import (
-    baskets as basket_views,
-    catalog as catalog_views,
-    checkout as checkout_views,
-    coupons as coupon_views,
-    courses as course_views,
-    orders as order_views,
-    partners as partner_views,
-    payments as payment_views,
-    products as product_views,
-    providers as provider_views,
-    publication as publication_views,
-    refunds as refund_views,
-    sdn as sdn_views,
-    siteconfiguration as siteconfiguration_views,
-    stockrecords as stockrecords_views,
-    vouchers as voucher_views,
-    enterprise as enterprise_views,
-)
+from ecommerce.extensions.api.v2.views import baskets as basket_views
+from ecommerce.extensions.api.v2.views import catalog as catalog_views
+from ecommerce.extensions.api.v2.views import checkout as checkout_views
+from ecommerce.extensions.api.v2.views import coupons as coupon_views
+from ecommerce.extensions.api.v2.views import courses as course_views
+from ecommerce.extensions.api.v2.views import enterprise as enterprise_views
+from ecommerce.extensions.api.v2.views import orders as order_views
+from ecommerce.extensions.api.v2.views import partners as partner_views
+from ecommerce.extensions.api.v2.views import payments as payment_views
+from ecommerce.extensions.api.v2.views import products as product_views
+from ecommerce.extensions.api.v2.views import providers as provider_views
+from ecommerce.extensions.api.v2.views import publication as publication_views
+from ecommerce.extensions.api.v2.views import refunds as refund_views
+from ecommerce.extensions.api.v2.views import sdn as sdn_views
+from ecommerce.extensions.api.v2.views import siteconfiguration as siteconfiguration_views
+from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
+from ecommerce.extensions.api.v2.views import vouchers as voucher_views
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'

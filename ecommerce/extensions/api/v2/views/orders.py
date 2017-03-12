@@ -1,18 +1,17 @@
 """HTTP endpoints for interacting with orders."""
 import logging
 
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.filters import OrderFilter
 from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
-
 
 logger = logging.getLogger(__name__)
 

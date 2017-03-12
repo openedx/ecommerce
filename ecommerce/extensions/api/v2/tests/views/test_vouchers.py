@@ -11,20 +11,20 @@ from django.http import Http404
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
-from oscar.test.factories import BenefitFactory, OrderLineFactory, OrderFactory, RangeFactory
+from oscar.test.factories import BenefitFactory, OrderFactory, OrderLineFactory, RangeFactory
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin, CouponMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
-from ecommerce.extensions.test.factories import prepare_voucher, VoucherFactory, ConditionalOfferFactory
+from ecommerce.extensions.test.factories import ConditionalOfferFactory, VoucherFactory, prepare_voucher
 from ecommerce.tests.mixins import Catalog, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 

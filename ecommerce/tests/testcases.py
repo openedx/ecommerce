@@ -1,11 +1,9 @@
 from django.core.cache import cache
-from django.test import (
-    TestCase as DjangoTestCase,
-    LiveServerTestCase as DjangoLiveServerTestCase,
-    TransactionTestCase as DjangoTransactionTestCase
-)
+from django.test import LiveServerTestCase as DjangoLiveServerTestCase
+from django.test import TestCase as DjangoTestCase
+from django.test import TransactionTestCase as DjangoTransactionTestCase
 
-from ecommerce.tests.mixins import SiteMixin, UserMixin, TestServerUrlMixin
+from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 
 
 class CacheMixin(object):

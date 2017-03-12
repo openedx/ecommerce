@@ -4,10 +4,9 @@ import ddt
 import httpretty
 
 from ecommerce.core.tests.decorators import mock_enterprise_api_client
-from ecommerce.enterprise.utils import get_enterprise_customer, get_or_create_enterprise_customer_user
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.enterprise.utils import get_enterprise_customer, get_or_create_enterprise_customer_user
 from ecommerce.tests.testcases import TestCase
-
 
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 

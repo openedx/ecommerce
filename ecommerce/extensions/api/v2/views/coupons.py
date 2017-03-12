@@ -18,7 +18,7 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
-from ecommerce.extensions.api.serializers import CategorySerializer, CouponSerializer, CouponListSerializer
+from ecommerce.extensions.api.serializers import CategorySerializer, CouponListSerializer, CouponSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin

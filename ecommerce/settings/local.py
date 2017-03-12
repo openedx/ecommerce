@@ -1,9 +1,9 @@
 """Development settings and globals."""
 from __future__ import absolute_import
+
 from urlparse import urljoin
 
 from ecommerce.settings.base import *
-
 
 # DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug and

@@ -1,8 +1,8 @@
 """HTTP endpoint for displaying information about providers."""
 import logging
 
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ecommerce.extensions.api.serializers import ProviderSerializer
 from ecommerce.extensions.checkout.utils import get_credit_provider_details

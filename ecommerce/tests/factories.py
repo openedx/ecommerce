@@ -1,8 +1,9 @@
-from django.contrib.sites.models import Site
 import factory
-from factory.fuzzy import FuzzyText
+from django.contrib.sites.models import Site
+from factory.fuzzy import FuzzyText     # pylint: disable=ungrouped-imports
 from oscar.core.loading import get_model
-from oscar.test.factories import ProductFactory, StockRecordFactory as OscarStockRecordFactory
+from oscar.test.factories import StockRecordFactory as OscarStockRecordFactory
+from oscar.test.factories import ProductFactory
 
 from ecommerce.core.models import SiteConfiguration
 

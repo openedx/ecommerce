@@ -4,7 +4,7 @@ from oscar.core.loading import get_model
 from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from ecommerce.extensions.refund.api import find_orders_associated_with_course, create_refunds
+from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase

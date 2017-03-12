@@ -1,15 +1,14 @@
 """
 Tests of comprehensive theming.
 """
-from mock import patch
-
+from django.conf import ImproperlyConfigured, settings
 from django.test import override_settings
-from django.conf import settings, ImproperlyConfigured
+from mock import patch
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.helpers import (
-    get_themes, Theme, get_current_theme, get_current_site_theme,
-    get_all_theme_template_dirs, get_theme_base_dirs, get_theme_base_dir,
+    Theme, get_all_theme_template_dirs, get_current_site_theme, get_current_theme, get_theme_base_dir,
+    get_theme_base_dirs, get_themes
 )
 from ecommerce.theming.test_utils import with_comprehensive_theme
 

@@ -1,5 +1,6 @@
 """Order Utility Classes. """
 from __future__ import unicode_literals
+
 import logging
 
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator

@@ -4,7 +4,7 @@ Theming aware template loaders.
 from django.template.loaders.filesystem import Loader
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.theming.helpers import get_current_theme, get_all_theme_template_dirs
+from ecommerce.theming.helpers import get_all_theme_template_dirs, get_current_theme
 
 
 class ThemeTemplateLoader(Loader):

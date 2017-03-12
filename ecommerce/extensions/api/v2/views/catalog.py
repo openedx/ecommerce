@@ -5,7 +5,7 @@ from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.decorators import list_route
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin

@@ -3,7 +3,6 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
-
 PRODUCT_OBJECTS_MISSING_DEVELOPER_MESSAGE = u"No product objects could be found in the request body"
 PRODUCT_OBJECTS_MISSING_USER_MESSAGE = _("You can't check out with an empty basket.")
 

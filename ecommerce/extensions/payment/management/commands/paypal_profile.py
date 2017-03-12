@@ -1,11 +1,11 @@
 import json
 import logging
 
+import paypalrestsdk
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
-import paypalrestsdk
-from paypalrestsdk import WebProfile
+from paypalrestsdk import WebProfile    # pylint: disable=ungrouped-imports
 
 from ecommerce.extensions.payment.models import PaypalWebProfile
 

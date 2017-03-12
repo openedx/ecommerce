@@ -8,12 +8,12 @@ import datetime
 import json
 import logging
 
+import requests
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
 from rest_framework import status
-import requests
-from requests.exceptions import ConnectionError, Timeout
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
@@ -373,7 +373,6 @@ class CouponFulfillmentModule(BaseFulfillmentModule):
 
 
 class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
-
     def supports_line(self, line):
         """
         Check whether the product in line is an Enrollment code.

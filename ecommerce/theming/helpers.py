@@ -1,12 +1,11 @@
 """
     Helpers for accessing comprehensive theming related variables.
 """
-import os
 import logging
-
-from django.conf import settings, ImproperlyConfigured
+import os
 
 import waffle
+from django.conf import ImproperlyConfigured, settings
 from path import Path
 from threadlocals.threadlocals import get_current_request
 

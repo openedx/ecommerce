@@ -24,7 +24,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
-from ecommerce.extensions.payment.helpers import get_processor_class_by_name, get_processor_class
+from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
 
 log = logging.getLogger(__name__)
 

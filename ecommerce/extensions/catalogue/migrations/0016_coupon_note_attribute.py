@@ -6,7 +6,6 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 
-
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductClass = get_model("catalogue", "ProductClass")
 

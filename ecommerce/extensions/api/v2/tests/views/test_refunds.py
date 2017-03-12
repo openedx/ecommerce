@@ -12,7 +12,7 @@ from ecommerce.extensions.api.serializers import RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.refund.status import REFUND
-from ecommerce.extensions.refund.tests.factories import RefundLineFactory, RefundFactory
+from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase

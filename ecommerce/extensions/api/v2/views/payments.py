@@ -5,7 +5,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from ecommerce.extensions.api import serializers
 
-
 PAYMENT_PROCESSOR_CACHE_KEY = 'PAYMENT_PROCESSOR_LIST'
 PAYMENT_PROCESSOR_CACHE_TIMEOUT = 60 * 30
 

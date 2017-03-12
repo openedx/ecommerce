@@ -1,14 +1,15 @@
 # encoding: utf-8
 from __future__ import unicode_literals
+
 import datetime
 import json
 import logging
-import mock
-from pytz import UTC
 
 import ddt
-from django.core.management import call_command, CommandError
 import httpretty
+import mock
+from django.core.management import CommandError, call_command
+from pytz import UTC
 from slumber.exceptions import HttpClientError
 from testfixtures import LogCapture
 

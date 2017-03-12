@@ -1,6 +1,6 @@
 from decimal import Decimal
-import ddt
 
+import ddt
 from oscar.core.loading import get_model
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 

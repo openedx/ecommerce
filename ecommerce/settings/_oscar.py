@@ -1,16 +1,15 @@
 """Oscar-specific settings"""
 from __future__ import absolute_import
 
-from os.path import abspath, join, dirname
+from os.path import abspath, dirname, join
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
-from oscar.defaults import *
 from oscar import get_core_apps
+from oscar.defaults import *
 
-from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-
 
 # URL CONFIGURATION
 OSCAR_HOMEPAGE = reverse_lazy('dashboard:index')

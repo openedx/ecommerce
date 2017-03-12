@@ -3,10 +3,10 @@ Test helpers for Comprehensive Theming.
 """
 import re
 from functools import wraps
-from mock import patch
 
-from django.core.management import call_command
 from django.contrib.sites.models import Site
+from django.core.management import call_command
+from mock import patch
 
 from .models import SiteTheme
 

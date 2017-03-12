@@ -1,7 +1,7 @@
 """HTTP endpoints for interacting with products."""
 from oscar.core.loading import get_model
 from rest_framework import filters
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ecommerce.extensions.api import serializers

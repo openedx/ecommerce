@@ -11,12 +11,12 @@ import mock
 from django.conf import settings
 from django.test import override_settings
 from freezegun import freeze_time
-from oscar.apps.payment.exceptions import UserCancelled, TransactionDeclined, GatewayError
+from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.payment.exceptions import (
-    InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
+    InvalidCybersourceDecision, InvalidSignatureError, PartialAuthorizationError, PCIViolation,
     ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.processors.cybersource import Cybersource, suds_response_to_dict

@@ -1,7 +1,7 @@
 """ Payment-related URLs """
 from django.conf.urls import url
 
-from ecommerce.extensions.payment.views import cybersource, PaymentFailedView, SDNFailure
+from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView, PaypalProfileAdminView
 
 urlpatterns = [

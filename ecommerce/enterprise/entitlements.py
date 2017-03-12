@@ -19,11 +19,9 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.utils import get_course_catalogs
+from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.utils import is_enterprise_feature_enabled
 from ecommerce.extensions.api.serializers import retrieve_all_vouchers
-
-from ecommerce.enterprise import api as enterprise_api
-
 
 logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')

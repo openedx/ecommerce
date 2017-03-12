@@ -1,9 +1,9 @@
 """API endpoint for performing an SDN check on users."""
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ecommerce.extensions.payment.utils import SDNClient
 

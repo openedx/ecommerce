@@ -1,4 +1,4 @@
-from django.conf.urls import url, include
+from django.conf.urls import include, url
 
 from ecommerce.extensions.app import application
 from ecommerce.extensions.payment.app import application as payment

@@ -3,8 +3,8 @@ import json
 import time
 from urllib import urlencode
 
-import mock
 import httpretty
+import mock
 from django.conf import settings
 from django.test import override_settings
 from oscar.test import factories
@@ -12,7 +12,7 @@ from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.models import SDNCheckFailure
-from ecommerce.extensions.payment.utils import clean_field_value, middle_truncate, SDNClient
+from ecommerce.extensions.payment.utils import SDNClient, clean_field_value, middle_truncate
 from ecommerce.tests.testcases import TestCase
 
 

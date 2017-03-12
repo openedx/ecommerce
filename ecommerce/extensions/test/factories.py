@@ -2,11 +2,9 @@ from datetime import datetime
 
 import factory
 from django.utils.timezone import now
+from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOfferFactory
+from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
-from oscar.test.factories import (
-    ConditionalOfferFactory as BaseConditionalOfferFactory,
-    VoucherFactory as BaseVoucherFactory,
-)
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')

@@ -1,10 +1,10 @@
 # coding=utf-8
 
+import mock
 from django.conf import settings
 from django.test import override_settings
-import mock
 from mock_django import mock_signal_receiver
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 

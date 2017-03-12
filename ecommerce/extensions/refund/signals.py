@@ -1,8 +1,7 @@
-from django.dispatch import receiver, Signal
+from django.dispatch import Signal, receiver
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import is_segment_configured, parse_tracking_context, silence_exceptions
-
 
 # This signal should be emitted after a refund is completed - payment credited AND fulfillment revoked.
 post_refund = Signal(providing_args=["refund"])

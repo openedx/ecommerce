@@ -1,13 +1,12 @@
 from decimal import Decimal
 
-from django.conf import settings
 import factory
+from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-
 
 Category = get_model("catalogue", "Category")
 Partner = get_model('partner', 'Partner')

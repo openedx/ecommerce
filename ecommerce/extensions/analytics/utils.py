@@ -1,9 +1,8 @@
-from functools import wraps
 import json
 import logging
+from functools import wraps
 
 from threadlocals.threadlocals import get_current_request
-
 
 logger = logging.getLogger(__name__)
 

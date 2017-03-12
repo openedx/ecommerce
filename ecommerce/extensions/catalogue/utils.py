@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-from hashlib import md5
 import logging
+from hashlib import md5
 
 from django.conf import settings
 from django.db.utils import IntegrityError

@@ -8,7 +8,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from oscar.apps.payment.exceptions import UserCancelled, GatewayError, TransactionDeclined
+from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from suds.client import Client
 from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
@@ -18,7 +18,7 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
-    InvalidSignatureError, InvalidCybersourceDecision, PartialAuthorizationError, PCIViolation,
+    InvalidCybersourceDecision, InvalidSignatureError, PartialAuthorizationError, PCIViolation,
     ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.helpers import sign

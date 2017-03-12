@@ -1,9 +1,9 @@
 import datetime
 
 import ddt
+import pytz
 from django.test import RequestFactory
 from oscar.apps.partner import availability
-import pytz
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin

@@ -5,13 +5,13 @@ from django.test.client import RequestFactory
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test.factories import create_order
-from oscar.test.newfactories import UserFactory, BasketFactory
+from oscar.test.newfactories import BasketFactory, UserFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.sailthru.signals import process_checkout_complete, process_basket_addition, SAILTHRU_CAMPAIGN
+from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN, process_basket_addition, process_checkout_complete
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 

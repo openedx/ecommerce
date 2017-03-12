@@ -5,7 +5,7 @@ import httpretty
 import mock
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
-from django.test import override_settings, RequestFactory
+from django.test import RequestFactory, override_settings
 from oscar.core.loading import get_model
 from oscar.test import factories
 

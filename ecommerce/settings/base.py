@@ -10,7 +10,6 @@ from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.settings._oscar import *
 
-
 # PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))

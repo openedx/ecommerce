@@ -5,8 +5,8 @@ See https://docs.djangoproject.com/en/1.8/ref/contrib/staticfiles/
 import os.path
 
 from django.conf import settings
-from django.utils._os import safe_join
 from django.contrib.staticfiles.storage import StaticFilesStorage
+from django.utils._os import safe_join
 
 from ecommerce.theming.helpers import get_current_theme, get_theme_base_dir, is_comprehensive_theming_enabled
 

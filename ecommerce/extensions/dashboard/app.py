@@ -1,5 +1,5 @@
 from auth_backends.urls import auth_urlpatterns
-from django.conf.urls import url, include
+from django.conf.urls import include, url
 from oscar.apps.dashboard import app
 from oscar.core.loading import get_class
 

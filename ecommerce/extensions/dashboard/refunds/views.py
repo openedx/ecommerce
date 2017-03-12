@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView, ListView
 from oscar.core.loading import get_class, get_model
 from oscar.views import sort_queryset
 
