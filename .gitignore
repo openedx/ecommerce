@@ -87,3 +87,6 @@ private.py
 docs/_build
 *.backup
 *.log
+
+# Visual Studio Code
+.vscode
