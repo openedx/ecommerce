@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 import logging
 import time
 from optparse import make_option
@@ -10,7 +11,6 @@ from slumber.exceptions import HttpClientError
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
-
 
 logger = logging.getLogger(__name__)
 

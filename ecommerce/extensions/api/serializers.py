@@ -1,18 +1,18 @@
 """Serializers for data manipulated by ecommerce API endpoints."""
 from __future__ import unicode_literals
 
-from decimal import Decimal
 import logging
+from decimal import Decimal
 
+import waffle
 from dateutil.parser import parse
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth import get_user_model
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
-import waffle
 
 from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.models import Site, SiteConfiguration

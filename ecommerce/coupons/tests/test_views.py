@@ -9,9 +9,7 @@ from django.core.urlresolvers import reverse
 from django.utils.timezone import now
 from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import (
-    ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
-)
+from oscar.test.factories import ConditionalOfferFactory, OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 from oscar.test.utils import RequestFactory
 from rest_framework import status
 
@@ -21,8 +19,7 @@ from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
-    get_enterprise_course_consent_url,
-    get_enterprise_customer_data_sharing_consent_token,
+    get_enterprise_course_consent_url, get_enterprise_customer_data_sharing_consent_token
 )
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -30,7 +27,6 @@ from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')

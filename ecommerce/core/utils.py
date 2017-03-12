@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import hashlib
 import logging
-import six
 
+import six
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)

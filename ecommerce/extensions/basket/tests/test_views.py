@@ -25,8 +25,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data

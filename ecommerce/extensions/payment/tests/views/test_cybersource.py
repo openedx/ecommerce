@@ -8,11 +8,11 @@ import mock
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from freezegun import freeze_time
-from oscar.apps.payment.exceptions import PaymentError, UserCancelled, TransactionDeclined
+from oscar.apps.payment.exceptions import PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
-from ecommerce.extensions.payment.exceptions import InvalidSignatureError, InvalidBasketError
+from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView, CybersourceNotifyView
 from ecommerce.tests.testcases import TestCase

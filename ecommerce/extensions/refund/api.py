@@ -2,7 +2,6 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.fulfillment.status import ORDER
 
-
 Refund = get_model('refund', 'Refund')
 RefundLine = get_model('refund', 'RefundLine')
 

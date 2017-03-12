@@ -7,7 +7,7 @@ from django.test import override_settings
 from waffle.models import Switch
 
 from ecommerce.core.models import SiteConfiguration
-from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
+from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.testcases import TestCase
 
 

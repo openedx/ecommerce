@@ -1,13 +1,13 @@
 import abc
-import urllib
 import socket
+import urllib
 
-from bok_choy.page_object import PageObject, PageLoadError, unguarded
+from bok_choy.page_object import PageLoadError, PageObject, unguarded
 from bok_choy.promise import EmptyPromise
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.select import Select
 
-from e2e.config import LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, MARKETING_URL_ROOT
+from e2e.config import BASIC_AUTH_PASSWORD, BASIC_AUTH_USERNAME, LMS_URL_ROOT, MARKETING_URL_ROOT
 from e2e.pages import submit_lms_login_form
 
 

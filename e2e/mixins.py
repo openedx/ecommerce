@@ -1,8 +1,8 @@
+import datetime
 import logging
 import time
 import uuid
 
-import datetime
 import requests
 from edx_rest_api_client.client import EdxRestApiClient
 from selenium.common.exceptions import TimeoutException
@@ -13,14 +13,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from e2e.api import EnrollmentApiClient, get_access_token
 from e2e.config import (
-    LMS_AUTO_AUTH, ECOMMERCE_URL_ROOT, LMS_PASSWORD, LMS_EMAIL, LMS_URL_ROOT, BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD,
-    ECOMMERCE_API_URL, LMS_USERNAME, MAX_COMPLETION_RETRIES, PAYPAL_PASSWORD, PAYPAL_EMAIL, LMS_HTTPS,
-    MARKETING_URL_ROOT
+    BASIC_AUTH_PASSWORD, BASIC_AUTH_USERNAME, ECOMMERCE_API_URL, ECOMMERCE_URL_ROOT, LMS_AUTO_AUTH, LMS_EMAIL,
+    LMS_HTTPS, LMS_PASSWORD, LMS_URL_ROOT, LMS_USERNAME, MARKETING_URL_ROOT, MAX_COMPLETION_RETRIES, PAYPAL_EMAIL,
+    PAYPAL_PASSWORD
 )
 from e2e.expected_conditions import input_provided
 from e2e.pages import submit_lms_login_form
 from e2e.pages.ecommerce import EcommerceLoginPage
-from e2e.pages.lms import LMSLoginPage, LMSDashboardPage, LMSRegistrationPage, LMSLogoutPage
+from e2e.pages.lms import LMSDashboardPage, LMSLoginPage, LMSLogoutPage, LMSRegistrationPage
 
 log = logging.getLogger(__name__)
 

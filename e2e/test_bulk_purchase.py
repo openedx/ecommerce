@@ -3,14 +3,8 @@ from unittest import skipUnless
 from bok_choy.web_app_test import WebAppTest
 
 from e2e.config import BULK_PURCHASE_SKU, LMS_EMAIL, LMS_PASSWORD
-from e2e.mixins import (
-    EcommerceApiMixin,
-    EnrollmentApiMixin,
-    LogistrationMixin,
-    PaymentMixin
-)
-
-from e2e.pages.basket import BasketPage, BasketAddProductPage
+from e2e.mixins import EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, PaymentMixin
+from e2e.pages.basket import BasketAddProductPage, BasketPage
 
 
 @skipUnless(BULK_PURCHASE_SKU, 'Bulk Purchase SKU not provided, skipping Bulk Purchase tests.')

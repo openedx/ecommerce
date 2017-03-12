@@ -7,29 +7,26 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
-from django.shortcuts import render
-from django.utils import timezone
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
-from ecommerce.extensions.api import exceptions
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.utils import (
-    get_enterprise_course_consent_url,
-    get_enterprise_customer_consent_failed_context_data,
-    get_enterprise_customer_data_sharing_consent_token,
-    get_enterprise_customer_from_voucher,
+    get_enterprise_course_consent_url, get_enterprise_customer_consent_failed_context_data,
+    get_enterprise_customer_data_sharing_consent_token, get_enterprise_customer_from_voucher
 )
+from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
-
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')

@@ -1,11 +1,11 @@
-from cStringIO import StringIO
 import json
+from cStringIO import StringIO
 
 import ddt
+import mock
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import override_settings
-import mock
 
 from ecommerce.extensions.payment.management.commands.paypal_profile import Command as PaypalProfileCommand
 from ecommerce.extensions.payment.models import PaypalWebProfile

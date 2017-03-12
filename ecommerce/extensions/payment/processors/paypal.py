@@ -12,7 +12,7 @@ from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
 
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.extensions.payment.models import PaypalWebProfile, PaypalProcessorConfiguration
+from ecommerce.extensions.payment.models import PaypalProcessorConfiguration, PaypalWebProfile
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.utils import middle_truncate
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from ecommerce.tests.testcases import TestCase
 from ecommerce.extensions.payment.models import SDNCheckFailure
+from ecommerce.tests.testcases import TestCase
 
 
 class SDNCheckFailureTests(TestCase):

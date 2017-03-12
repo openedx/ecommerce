@@ -3,13 +3,12 @@ from __future__ import unicode_literals
 import logging
 
 import pycountry
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML, Div, Layout
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
-
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, HTML, Layout
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')

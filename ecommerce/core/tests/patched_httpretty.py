@@ -2,8 +2,8 @@
 # See https://github.com/gabrielfalcao/HTTPretty/issues/242, and remove this once an proper fix is in place.
 
 import httpretty
-from httpretty import HTTPretty as OriginalHTTPretty
 import httpretty.core
+from httpretty import HTTPretty as OriginalHTTPretty
 
 try:
     from requests.packages.urllib3.contrib.pyopenssl import inject_into_urllib3, extract_from_urllib3

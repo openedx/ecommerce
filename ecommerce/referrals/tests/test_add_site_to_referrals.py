@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import six
-from django.core.management import call_command, CommandError
+from django.core.management import CommandError, call_command
 
 from ecommerce.referrals.models import Referral
 from ecommerce.referrals.tests.factories import ReferralFactory

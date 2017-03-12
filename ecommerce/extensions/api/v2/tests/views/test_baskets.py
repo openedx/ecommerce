@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
+import json
 from collections import namedtuple
 from decimal import Decimal
-import json
 
 import ddt
+import mock
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import override_settings
-import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
 
 from ecommerce.extensions.api import exceptions as api_exceptions
-from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin, JSON_CONTENT_TYPE
+from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.tests.mixins import ThrottlingMixin, BasketCreationMixin
+from ecommerce.tests.mixins import BasketCreationMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Basket = get_model('basket', 'Basket')

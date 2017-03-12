@@ -2,21 +2,20 @@
 """Contains the tests for publish to lms command."""
 
 from __future__ import unicode_literals
+
 import logging
 import os
 import tempfile
 
 import ddt
-from django.core.management import call_command, CommandError
 import mock
-from mock import call
+from django.core.management import CommandError, call_command
 from testfixtures import LogCapture
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TransactionTestCase
-
 
 logger = logging.getLogger(__name__)
 LOGGER_NAME = 'ecommerce.courses.management.commands.publish_to_lms'
@@ -109,7 +108,7 @@ class PublishCoursesToLMSTests(CourseCatalogTestMixin, TransactionTestCase):
                 call_command('publish_to_lms', course_ids_file=self.tmp_file_path)
                 lc.check(*expected)
         # Check that the mocked function was called twice.
-        self.assertListEqual(mock_publish.call_args_list, [call(self.course), call(second_course)])
+        self.assertListEqual(mock_publish.call_args_list, [mock.call(self.course), mock.call(second_course)])
 
     def test_course_publish_failed(self):
         """ Verify failed courses are logged."""

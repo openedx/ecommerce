@@ -5,9 +5,9 @@ import uuid
 import requests
 from auth_backends.views import EdxOpenIdConnectLogoutView
 from django.conf import settings
-from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.decorators import login_required
-from django.db import transaction, connection, DatabaseError
+from django.db import DatabaseError, connection, transaction
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator

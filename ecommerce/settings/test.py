@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-from path import Path
 from urlparse import urljoin
 
-from ecommerce.settings.base import *
+from path import Path
 
+from ecommerce.settings.base import *
 
 SITE_ID = 1
 PROTOCOL = 'http'

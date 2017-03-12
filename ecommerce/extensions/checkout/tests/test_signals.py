@@ -1,7 +1,7 @@
 import json
 
-from django.core import mail
 import httpretty
+from django.core import mail
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory
 from testfixtures import LogCapture

@@ -2,16 +2,16 @@ import datetime
 import json
 
 import ddt
-from django.test import override_settings
 import httpretty
 import mock
+from django.test import override_settings
 from oscar.core.loading import get_model
 from requests import Timeout
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-from ecommerce.core.url_utils import get_lms_url, get_lms_commerce_api_url
 from ecommerce.core.tests import toggle_switch
+from ecommerce.core.url_utils import get_lms_commerce_api_url, get_lms_url
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin

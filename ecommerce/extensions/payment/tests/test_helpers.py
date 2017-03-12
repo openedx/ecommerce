@@ -3,7 +3,7 @@ from django.test import override_settings
 
 from ecommerce.extensions.payment import helpers
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
-from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
+from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.testcases import TestCase
 
 

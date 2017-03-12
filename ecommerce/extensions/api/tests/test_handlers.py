@@ -1,10 +1,10 @@
 """ Tests for handler functions. """
 from time import time
 
-from django.conf import settings
-from django.test import TestCase
 import jwt
 import mock
+from django.conf import settings
+from django.test import TestCase
 from oscar.test.factories import UserFactory
 
 from ecommerce.extensions.api.handlers import jwt_decode_handler

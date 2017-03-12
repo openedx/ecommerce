@@ -1,17 +1,17 @@
 """
 Helper methods for enterprise app.
 """
-from collections import OrderedDict
 import hashlib
 import hmac
+from collections import OrderedDict
 from urllib import urlencode
 
+import waffle
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
-import waffle
 from slumber.exceptions import HttpNotFoundError
 
 from ecommerce.courses.utils import traverse_pagination

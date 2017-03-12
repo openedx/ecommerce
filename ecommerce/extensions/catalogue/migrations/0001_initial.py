@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
-import oscar.models.fields.autoslugfield
-import django.db.models.deletion
 import django.core.validators
+import django.db.models.deletion
 import oscar.models.fields
+import oscar.models.fields.autoslugfield
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):

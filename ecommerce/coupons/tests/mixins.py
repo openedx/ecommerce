@@ -10,11 +10,11 @@ from oscar.test import factories
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
-from ecommerce.extensions.catalogue.utils import create_coupon_product
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
+from ecommerce.extensions.catalogue.utils import create_coupon_product
 from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import ProductClass, Catalog, Benefit, Voucher, Applicator
+from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, Voucher
 
 
 class CourseCatalogMockMixin(object):

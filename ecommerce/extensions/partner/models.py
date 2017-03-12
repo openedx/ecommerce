@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from oscar.apps.partner.abstract_models import AbstractPartner, AbstractStockRecord
 from simple_history.models import HistoricalRecords
 
@@ -23,4 +22,4 @@ class Partner(AbstractPartner):
 
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.partner.models import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,ungrouped-imports
+from oscar.apps.partner.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,ungrouped-imports

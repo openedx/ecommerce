@@ -1,6 +1,6 @@
 import os
-from e2e.utils import str2bool
 
+from e2e.utils import str2bool
 
 OAUTH_ACCESS_TOKEN_URL = os.environ.get('OAUTH_ACCESS_TOKEN_URL')
 OAUTH_CLIENT_ID = os.environ.get('OAUTH_CLIENT_ID')

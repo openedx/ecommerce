@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from ddt import ddt, data
+from ddt import data, ddt
 from django.contrib.sites.models import Site
-from django.core.management import call_command, CommandError
+from django.core.management import CommandError, call_command
 from oscar.core.loading import get_model
 
 from ecommerce.tests.testcases import TestCase

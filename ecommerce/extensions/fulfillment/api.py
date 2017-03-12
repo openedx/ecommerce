@@ -12,7 +12,7 @@ from django.conf import settings
 from django.utils.timezone import now
 
 from ecommerce.extensions.fulfillment import exceptions
-from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.refund.status import REFUND_LINE
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 """Test Order Utility classes """
 import logging
-import mock
 
+import mock
 from django.test.client import RequestFactory
 from oscar.core.loading import get_class
 from oscar.test.factories import create_basket as oscar_create_basket
@@ -10,7 +10,7 @@ from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.referrals.models import Referral
-from ecommerce.tests.factories import SiteConfigurationFactory, PartnerFactory
+from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.order.utils'

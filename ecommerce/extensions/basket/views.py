@@ -8,8 +8,9 @@ import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
+from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
+from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
-from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView, VoucherRemoveView as BaseVoucherRemoveView
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 

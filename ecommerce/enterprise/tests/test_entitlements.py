@@ -1,27 +1,25 @@
 
 import ddt
-from django.conf import settings
 import httpretty
+from django.conf import settings
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_enterprise_api_client
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
+from ecommerce.core.tests.decorators import mock_course_catalog_api_client, mock_enterprise_api_client
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.enterprise.entitlements import (
-    get_entitlement_voucher, get_course_entitlements_for_learner,
-    get_course_vouchers_for_learner, is_course_in_enterprise_catalog
+    get_course_entitlements_for_learner, get_course_vouchers_for_learner, get_entitlement_voucher,
+    is_course_in_enterprise_catalog
 )
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.tests.testcases import TestCase
-
 
 COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
 Catalog = get_model('catalogue', 'Catalog')

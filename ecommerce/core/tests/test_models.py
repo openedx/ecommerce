@@ -11,10 +11,10 @@ from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
 
 from ecommerce.core.exceptions import VerificationStatusError
-from ecommerce.core.models import BusinessClient, User, SiteConfiguration
+from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.payment.tests.processors import DummyProcessor, AnotherDummyProcessor
+from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase

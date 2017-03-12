@@ -15,9 +15,9 @@ from rest_framework.response import Response
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
+from ecommerce.coupons.utils import fetch_course_catalog, get_catalog_course_runs
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_catalog
-from ecommerce.coupons.utils import get_catalog_course_runs, fetch_course_catalog
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet

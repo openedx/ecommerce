@@ -1,16 +1,15 @@
 """
 Tests for Management commands of comprehensive theming.
 """
-from mock import patch, Mock
-
 from django.conf import settings
+from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
-from django.core.management import call_command, CommandError
+from mock import Mock, patch
 from path import Path
 
 from ecommerce.theming.helpers import get_themes
 from ecommerce.theming.management.commands.update_assets import (
-    get_sass_directories, compile_sass, Command, SYSTEM_SASS_PATHS,
+    SYSTEM_SASS_PATHS, Command, compile_sass, get_sass_directories
 )
 
 

@@ -1,6 +1,5 @@
 from abc import ABCMeta
-from unittest import skip
-from unittest import skipUnless
+from unittest import skip, skipUnless
 
 import ddt
 from bok_choy.web_app_test import WebAppTest
@@ -8,10 +7,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from e2e.config import (VERIFIED_COURSE_ID, MARKETING_URL_ROOT, PAYPAL_PASSWORD, PAYPAL_EMAIL, BULK_PURCHASE_SKU)
-from e2e.constants import ADDRESS_US, ADDRESS_FR
-from e2e.mixins import (LogistrationMixin, EnrollmentApiMixin, EcommerceApiMixin,
-                        PaymentMixin, UnenrollmentMixin)
+from e2e.config import BULK_PURCHASE_SKU, MARKETING_URL_ROOT, PAYPAL_EMAIL, PAYPAL_PASSWORD, VERIFIED_COURSE_ID
+from e2e.constants import ADDRESS_FR, ADDRESS_US
+from e2e.mixins import EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, PaymentMixin, UnenrollmentMixin
 from e2e.pages.basket import BasketAddProductPage
 from e2e.pages.lms import LMSCourseModePage
 from e2e.pages.marketing import MarketingCourseAboutPage

@@ -1,10 +1,9 @@
 """HTTP endpoints for interacting with partners."""
 from oscar.core.loading import get_model
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from ecommerce.extensions.api import serializers
-
 
 Partner = get_model('partner', 'Partner')
 

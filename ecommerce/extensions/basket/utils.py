@@ -2,11 +2,11 @@ import datetime
 import json
 import logging
 
+import pytz
 from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
-import pytz
 
 from ecommerce.referrals.models import Referral
 

@@ -1,17 +1,17 @@
 from __future__ import unicode_literals
+
 import logging
 from optparse import make_option
 
+import requests
+import waffle
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.db import transaction
-import requests
-import waffle
 
 from ecommerce.courses.models import Course
-
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """Functions used for data retrieval and manipulation by the API."""
 import logging
 
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.api import exceptions
 

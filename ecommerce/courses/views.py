@@ -1,13 +1,13 @@
-from io import StringIO
 import json
 import logging
 import os
+from io import StringIO
 
 from django.conf import settings
 from django.core.cache import cache
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
-from django.views.generic import View, TemplateView
+from django.views.generic import TemplateView, View
 from edx_rest_api_client.client import EdxRestApiClient
 from requests import Timeout
 from slumber.exceptions import SlumberBaseException
@@ -17,7 +17,6 @@ from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-
 
 logger = logging.getLogger(__name__)
 

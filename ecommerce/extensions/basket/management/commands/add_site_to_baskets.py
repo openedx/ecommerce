@@ -1,6 +1,7 @@
 """ Adds a Site to Baskets that do not already have one. """
 
 from __future__ import unicode_literals
+
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand, CommandError
 from oscar.core.loading import get_model

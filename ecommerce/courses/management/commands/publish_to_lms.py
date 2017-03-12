@@ -1,13 +1,13 @@
 """ This command publish the courses to LMS."""
 from __future__ import unicode_literals
+
 import logging
-from optparse import make_option
 import os
+from optparse import make_option
 
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.courses.models import Course
-
 
 logger = logging.getLogger(__name__)
 

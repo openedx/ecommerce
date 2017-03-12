@@ -1,16 +1,15 @@
-from django.core.cache import cache
-from django.conf import settings
 import httpretty
+from django.conf import settings
+from django.core.cache import cache
 from oscar.core.loading import get_model
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_enterprise_api_client
+from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.tests.testcases import TestCase
-from ecommerce.core.utils import get_cache_key
-
 
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')

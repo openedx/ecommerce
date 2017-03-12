@@ -8,7 +8,6 @@ from waffle.models import Switch
 
 from ecommerce.extensions.api.v2.views.payments import PAYMENT_PROCESSOR_CACHE_KEY
 
-
 logger = logging.getLogger(__name__)
 
 

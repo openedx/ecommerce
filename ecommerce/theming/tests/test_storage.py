@@ -1,14 +1,13 @@
 """
 Tests for comprehensive theme static files storage classes.
 """
+from django.conf import settings
+from django.test import override_settings
 from mock import patch
 
-from django.test import override_settings
-from django.conf import settings
-
 from ecommerce.tests.testcases import TestCase
-from ecommerce.theming.storage import ThemeStorage
 from ecommerce.theming.helpers import Theme, get_theme_base_dir
+from ecommerce.theming.storage import ThemeStorage
 
 
 @override_settings(DEBUG=True)

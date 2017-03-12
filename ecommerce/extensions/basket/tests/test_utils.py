@@ -1,24 +1,24 @@
 import datetime
 import json
-import mock
 
 import ddt
+import mock
+import pytz
 from django.db import transaction
 from django.test import RequestFactory, TransactionTestCase
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
-import pytz
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.utils import prepare_basket, attribute_cookie_data
+from ecommerce.extensions.basket.utils import attribute_cookie_data, prepare_basket
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.tests.mixins import UserMixin
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.mixins import UserMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')

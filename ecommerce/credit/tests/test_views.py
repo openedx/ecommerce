@@ -23,7 +23,6 @@ from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import JwtMixin
 from ecommerce.tests.testcases import TestCase
 
-
 JSON = 'application/json'
 Benefit = get_model('offer', 'Benefit')
 

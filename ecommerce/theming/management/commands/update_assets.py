@@ -3,17 +3,16 @@ Managements for asset compilation and collection.
 """
 
 from __future__ import unicode_literals
-import logging
-import datetime
 
-from django.conf import settings
-from django.core.management import BaseCommand, CommandError
-from django.core.management import call_command
+import datetime
+import logging
 
 import sass
+from django.conf import settings
+from django.core.management import BaseCommand, CommandError, call_command
 from path import Path
 
-from ecommerce.theming.helpers import get_themes, get_theme_base_dirs, is_comprehensive_theming_enabled
+from ecommerce.theming.helpers import get_theme_base_dirs, get_themes, is_comprehensive_theming_enabled
 
 logger = logging.getLogger(__name__)
 

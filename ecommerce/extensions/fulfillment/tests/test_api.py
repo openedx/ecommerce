@@ -6,9 +6,9 @@ from nose.tools import raises
 from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment import api, exceptions
-from ecommerce.extensions.fulfillment.api import get_fulfillment_modules, get_fulfillment_modules_for_line, \
-    revoke_fulfillment_for_refund
-from ecommerce.extensions.fulfillment.status import ORDER, LINE
+from ecommerce.extensions.fulfillment.api import (get_fulfillment_modules, get_fulfillment_modules_for_line,
+                                                  revoke_fulfillment_for_refund)
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.fulfillment.tests.modules import FakeFulfillmentModule
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE

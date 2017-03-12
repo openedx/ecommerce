@@ -14,7 +14,7 @@ from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import audit_log
-from ecommerce.extensions.checkout.utils import get_receipt_page_url, format_currency
+from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name

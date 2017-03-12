@@ -1,10 +1,9 @@
 import logging
 
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from premailer import transform
 
 from ecommerce.extensions.analytics.utils import parse_tracking_context
-
 
 log = logging.getLogger(__name__)
 CommunicationEventType = get_model('customer', 'CommunicationEventType')

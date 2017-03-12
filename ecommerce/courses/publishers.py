@@ -1,16 +1,17 @@
 from __future__ import unicode_literals
+
 import json
 import logging
 
+import requests
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
-import requests
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
-from ecommerce.core.url_utils import get_lms_url, get_lms_commerce_api_url
+from ecommerce.core.url_utils import get_lms_commerce_api_url, get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 
 logger = logging.getLogger(__name__)

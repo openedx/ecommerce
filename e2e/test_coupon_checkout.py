@@ -2,9 +2,10 @@ import ddt
 from bok_choy.web_app_test import WebAppTest
 
 from e2e.config import VERIFIED_COURSE_ID
-from e2e.constants import CODE, ADDRESS_US, ADDRESS_FR
-from e2e.mixins import (CouponMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, UnenrollmentMixin,
-                        PaymentMixin)
+from e2e.constants import ADDRESS_FR, ADDRESS_US, CODE
+from e2e.mixins import (
+    CouponMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, PaymentMixin, UnenrollmentMixin
+)
 from e2e.pages.basket import BasketPage
 from e2e.pages.coupons import CouponsCreatePage, CouponsDetailsPage, CouponsListPage, RedeemVoucherPage
 from e2e.pages.ecommerce import EcommerceDashboardHomePage

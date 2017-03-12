@@ -1,17 +1,18 @@
 # coding=utf-8
 from __future__ import unicode_literals
+
 import datetime
-from decimal import Decimal
 import json
 import logging
+from decimal import Decimal
 from urlparse import urljoin, urlparse
 
-from django.core.management import call_command
-from django.test import override_settings
 import httpretty
 import mock
-from oscar.core.loading import get_model
 import pytz
+from django.core.management import call_command
+from django.test import override_settings
+from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT

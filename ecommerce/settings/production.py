@@ -2,14 +2,12 @@
 from os import environ
 from urlparse import urljoin
 
+import yaml
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 
-import yaml
-
 from ecommerce.settings.base import *
-
 
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'https'
