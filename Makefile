@@ -73,6 +73,7 @@ fast_validate_python: clean
 	make quality
 
 quality:
+	isort --check-only --recursive e2e/ ecommerce/
 	pep8 --config=.pep8 ecommerce e2e
 	pylint --rcfile=pylintrc ecommerce e2e
 
