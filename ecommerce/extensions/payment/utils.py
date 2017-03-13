@@ -104,11 +104,11 @@ class SDNClient(object):
         try:
             response = requests.get(sdn_check_url, timeout=settings.SDN_CHECK_REQUEST_TIMEOUT)
         except requests.exceptions.Timeout:
-            logger.exception('Connection to US Treasury SDN API timed out for [%s].', name)
+            logger.warning('Connection to US Treasury SDN API timed out for [%s].', name)
             raise
 
         if response.status_code != 200:
-            logger.exception(
+            logger.warning(
                 'Unable to connect to US Treasury SDN API for [%s]. Status code [%d] with message: [%s]',
                 name, response.status_code, response.content
             )
