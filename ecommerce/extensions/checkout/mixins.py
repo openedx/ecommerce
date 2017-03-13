@@ -93,6 +93,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                                billing_address,
                                order_total,
                                request=None,
+                               async=True,
                                **kwargs):
         """
         Place an order and mark the corresponding basket as submitted.
@@ -119,9 +120,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
                 basket.submit()
 
-            return self.handle_successful_order(order, request)
+            return self.handle_successful_order(order, request, async)
 
-    def handle_successful_order(self, order, request=None):  # pylint: disable=arguments-differ
+    def handle_successful_order(self, order, request=None, async=True):  # pylint: disable=arguments-differ
         """Send a signal so that receivers can perform relevant tasks (e.g., fulfill the order)."""
         audit_log(
             'order_placed',
@@ -133,7 +134,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             contains_coupon=order.contains_coupon
         )
 
-        if waffle.sample_is_active('async_order_fulfillment'):
+        if async and waffle.sample_is_active('async_order_fulfillment'):
             # Always commit transactions before sending tasks depending on state from the current transaction!
             # There's potential for a race condition here if the task starts executing before the active
             # transaction has been committed; the necessary order doesn't exist in the database yet.
@@ -181,7 +182,8 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             shipping_address=None,
             shipping_charge=order_metadata['shipping_charge'],
             shipping_method=order_metadata['shipping_method'],
-            user=basket.owner
+            user=basket.owner,
+            async=False
         )
 
         return order

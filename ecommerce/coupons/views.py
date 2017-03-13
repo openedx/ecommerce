@@ -19,7 +19,9 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.extensions.api import exceptions
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.enterprise.utils import (
     get_enterprise_course_consent_url,
     get_enterprise_customer_consent_failed_context_data,
@@ -217,11 +219,12 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == 0:
-            self.place_free_order(basket)
-        else:
-            return HttpResponseRedirect(reverse('basket:summary'))
-
-        return HttpResponseRedirect(request.site.siteconfiguration.student_dashboard_url)
+            order = self.place_free_order(basket)
+            if order.status == ORDER.COMPLETE:
+                return HttpResponseRedirect(get_receipt_page_url(self.request.site.siteconfiguration, order.number))
+            else:
+                return HttpResponseRedirect(reverse('checkout:error'))
+        return HttpResponseRedirect(reverse('basket:summary'))
 
 
 class EnrollmentCodeCsvView(View):
