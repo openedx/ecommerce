@@ -231,10 +231,18 @@ class OrderSerializer(serializers.ModelSerializer):
             return None
 
     def get_payment_processor(self, obj):
-        try:
-            return obj.sources.all()[0].source_type.name
-        except IndexError:
-            return None
+        source = obj.sources.first()
+        if source:
+            card_type = number = None
+            if source.card_type:
+                card_type = source.get_card_type_display()
+                number = source.label
+            return {
+                'name': source.source_type.name,
+                'card_type': card_type,
+                'number': number
+            }
+        return None
 
     def get_discount(self, obj):
         try:
@@ -255,6 +263,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'payment_processor',
             'status',
             'total_excl_tax',
+            'total_before_discounts_incl_tax',
             'user',
             'vouchers',
         )

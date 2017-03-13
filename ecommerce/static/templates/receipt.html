@@ -1,0 +1,72 @@
+<h2 class="thank-you"><%- gettext('Thank you for your order!') %></h2>
+
+      <div class="list-info">
+        <div class="info-item payment-info row">
+          <div class="copy col-md-8">
+            <div class="confirm-message">
+            <%
+                var emailLink = '<a href="mailto:' + userEmail + '">' + userEmail + '</a>';
+            %>
+            <%- gettext('Your order is complete. If you need a receipt, you can print this page. You will also receive a confirmation message with this information at ') %>
+            <a href="mailto:<%= userEmail %>"><%= userEmail %></a>.
+            </div>
+
+            <% if (billingAddress) { %>
+              <address class="billing-address">
+                <% for (var key in billingAddress) { %>
+                    <%= billingAddress[key] %> <br />
+                <% } %>
+              </address>
+            <% } %>
+          </div>
+
+            <div class="order-headers order-summary col-md-4">
+              <dl>
+                <dt><%- gettext('Order Number:') %></dt>
+                <dd><%= orderNumber %></dd>
+                <% if (paymentMethod) { %>
+                  <dt><%- gettext('Payment Method:') %></dt>
+                  <dd><%= paymentMethod %></dd>
+                <% } %>
+                <dt><%- gettext('Order Date:') %></dt>
+                <dd><%= orderDate %></dd>
+              </dl>
+            </div>
+          </div>
+
+          <h2><%- gettext('Order Information') %></h2>
+          <div class="table">
+            <dl class="order-lines">
+              <div class="header">
+                <dt aria-hidden="true"><%- gettext('Quantity') %></dt>
+                <dt aria-hidden="true"><%- gettext('Description') %></dt>
+                <dt aria-hidden="true"><%- gettext('Item Price') %></dt>
+              </div>
+                <div class="order-lines-data"></div>
+            </dl>
+            <div class="order-total">
+              <div class="description"><%- gettext('Subtotal:') %></div>
+              <div class="price"><%= subtotalPrice %></div>
+            </div>
+
+            <% if (voucherData) { %>
+              <% _.each(voucherData, function(voucher) { %>
+                <div class="order-total">
+                  <div class="description">
+                    <span><%- gettext('Coupon applied:') %></span>
+                    <p><%= voucher.code %></p>
+                  </div>
+                  <div class="price">
+                    -<%= voucher.benefit %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+
+              <div class="order-total">
+                <div class="description"><%- gettext('Total:') %></div>
+                <div class="price"><%= totalPrice %></div>
+              </div>
+            </div>
+          </div>
+        </div>

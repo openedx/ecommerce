@@ -152,7 +152,7 @@ class ReceiptResponseView(ThankYouView):
 
     def get_object(self):
         kwargs = {
-            'number': self.request.GET['order_number'],
+            'number': self.request.GET.get('order_number'),
             'site': self.request.site,
         }
 
