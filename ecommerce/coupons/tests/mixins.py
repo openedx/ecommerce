@@ -166,7 +166,7 @@ class CourseCatalogMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_get_catalog_contains_api_for_failure(self, partner_code, course_run_ids, query, error):
+    def mock_get_catalog_contains_api_for_failure(self, course_run_ids, catalog_id, error):
         """
         Helper function to register a course catalog API endpoint with failure
         for getting course runs information.
@@ -174,11 +174,10 @@ class CourseCatalogMockMixin(object):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
 
-        catalog_contains_course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}&partner={}'.format(
+        catalog_contains_course_run_url = '{}catalogs/{}/contains/?course_run_id={}'.format(
             settings.COURSE_CATALOG_API_URL,
-            (course_run_id for course_run_id in course_run_ids),
-            query,
-            partner_code,
+            catalog_id,
+            ','.join(course_run_id for course_run_id in course_run_ids),
         )
         httpretty.register_uri(
             method=httpretty.GET,

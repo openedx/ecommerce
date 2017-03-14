@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import hashlib
 import re
 
 from django.conf import settings
@@ -12,8 +11,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.core.utils import log_message_and_raise_validation_error
-from ecommerce.courses.utils import get_course_catalogs
+from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 
 
 class Benefit(AbstractBenefit):
@@ -229,34 +227,58 @@ class Range(AbstractRange):
         if self.course_seat_types:
             validate_credit_seat_type(self.course_seat_types)
 
-    def run_catalog_query(self, product, query=None):
+    def run_catalog_query(self, product):
         """
         Retrieve the results from running the query contained in catalog_query field.
         """
-        if not query:
-            query = self.catalog_query
-
         request = get_current_request()
         partner_code = request.site.siteconfiguration.partner.short_code
-        cache_key = hashlib.md5(
-            '{site_domain}_{partner_code}_catalog_query_contains_{course_id}_{query}'.format(
-                site_domain=request.site.domain,
-                partner_code=partner_code,
-                course_id=product.course_id,
-                query=query
-            )
-        ).hexdigest()
+        cache_key = get_cache_key(
+            site_domain=request.site.domain,
+            partner_code=partner_code,
+            resource='course_runs.contains',
+            course_id=product.course_id,
+            query=self.catalog_query
+        )
         response = cache.get(cache_key)
         if not response:  # pragma: no cover
             try:
                 response = request.site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
-                    query=query,
+                    query=self.catalog_query,
                     course_run_ids=product.course_id,
                     partner=partner_code
                 )
                 cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             except:  # pylint: disable=bare-except
                 raise Exception('Could not contact Course Catalog Service.')
+
+        return response
+
+    def catalog_contains_product(self, product):
+        """
+        Retrieve the results from using the catalog contains endpoint for
+        catalog service for the catalog id contained in field "course_catalog".
+        """
+        request = get_current_request()
+        partner_code = request.site.siteconfiguration.partner.short_code
+        cache_key = get_cache_key(
+            site_domain=request.site.domain,
+            partner_code=partner_code,
+            resource='catalogs.contains',
+            course_id=product.course_id,
+            catalog_id=self.course_catalog
+        )
+        response = cache.get(cache_key)
+        if not response:
+            course_catalog_api_client = request.site.siteconfiguration.course_catalog_api_client
+            try:
+                # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
+                response = course_catalog_api_client.catalogs(self.course_catalog).contains.get(
+                    course_run_id=product.course_id
+                )
+                cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+            except (ConnectionError, SlumberBaseException, Timeout):
+                raise Exception('Unable to connect to Course Catalog service for catalog contains endpoint.')
 
         return response
 
@@ -268,18 +290,10 @@ class Range(AbstractRange):
         if self.course_catalog and self.course_seat_types:
             # Product certificate type should belongs to range seat types.
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
-                request = get_current_request()
-                try:
-                    course_catalog = get_course_catalogs(site=request.site, resource_id=self.course_catalog)
-                except (ConnectionError, SlumberBaseException, Timeout):
-                    raise Exception(
-                        'Unable to connect to Course Catalog service for catalog with id [%s].' % self.course_catalog
-                    )
-
-                response = self.run_catalog_query(product, course_catalog.get('query'))
+                response = self.catalog_contains_product(product)
                 # Range can have a catalog query and 'regular' products in it,
                 # therefor an OR is used to check for both possibilities.
-                return ((response['course_runs'][product.course_id]) or
+                return ((response['courses'][product.course_id]) or
                         super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
         elif self.catalog_query and self.course_seat_types:
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
