@@ -7,7 +7,6 @@ customers with which they are affiliated. The coupon product id's for the
 enterprise entitlements are provided by the Enterprise Service on the basis
 of the learner's enterprise eligibility criterion.
 """
-import hashlib
 import logging
 
 from django.conf import settings
@@ -17,8 +16,8 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.views import voucher_is_valid
-from ecommerce.courses.utils import get_course_catalogs
 from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.utils import is_enterprise_feature_enabled
 from ecommerce.extensions.api.serializers import retrieve_all_vouchers
@@ -159,60 +158,30 @@ def is_course_in_enterprise_catalog(site, course_id, enterprise_catalog_id):
         Boolean
 
     """
-    try:
-        enterprise_course_catalog = get_course_catalogs(site=site, resource_id=enterprise_catalog_id)
-    except (ConnectionError, SlumberBaseException, Timeout):
-        logger.exception('Unable to connect to Course Catalog service for course catalogs.')
-        return None
-
-    if is_course_in_catalog_query(site, course_id, enterprise_course_catalog.get('query')):
-        return True
-
-    return False
-
-
-def is_course_in_catalog_query(site, course_id, enterprise_catalog_query):
-    """
-    Find out if the provided course exists in list of courses against the
-    enterprise course catalog query.
-
-    Arguments:
-        site: (django.contrib.sites.Site) site instance
-        course_id (Int): Course catalog id of enterprise
-        enterprise_catalog_query (Str): Enterprise course catalog query
-
-    Returns:
-        Boolean
-
-    """
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = hashlib.md5(
-        '{site_domain}_{partner_code}_catalog_query_contains_{course_id}_{query}'.format(
-            site_domain=site.domain,
-            partner_code=partner_code,
-            course_id=course_id,
-            query=enterprise_catalog_query
-        )
-    ).hexdigest()
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        partner_code=partner_code,
+        resource='catalogs.contains',
+        course_id=course_id,
+        catalog_id=enterprise_catalog_id
+    )
     response = cache.get(cache_key)
     if not response:
         try:
-            response = site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
-                query=enterprise_catalog_query,
-                course_run_ids=course_id,
-                partner=partner_code
+            # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
+            response = site.siteconfiguration.course_catalog_api_client.catalogs(enterprise_catalog_id).contains.get(
+                course_run_id=course_id
             )
             cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.exception('Unable to connect to Course Catalog service for course runs.')
+            logger.exception('Unable to connect to Course Catalog service for catalog contains endpoint.')
             return False
 
     try:
-        is_course_in_course_runs = response['course_runs'][course_id]
+        return response['courses'][course_id]
     except KeyError:
         return False
-
-    return is_course_in_course_runs
 
 
 def get_available_voucher_for_product(request, product, vouchers):

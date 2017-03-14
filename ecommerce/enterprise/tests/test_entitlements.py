@@ -141,14 +141,15 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         coupon = self.create_coupon(catalog=self.catalog)
         expected_voucher = coupon.attr.coupon_vouchers.vouchers.first()
 
-        catalog_query = '*:*'
+        enterprise_catalog_id = 1
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
-        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
+        )
 
         entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
-        self._assert_num_requests(4)
+        self._assert_num_requests(3)
         self.assertEqual(expected_voucher, entitlement_voucher)
 
     @mock_enterprise_api_client
@@ -164,17 +165,14 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             catalog_id=non_existing_coupon_id, entitlement_id=non_existing_coupon_id
         )
         self.mock_enterprise_learner_entitlements_api(entitlement_id=non_existing_coupon_id)
-
-        catalog_query = '*:*'
-        self.mock_course_discovery_api_for_catalog_by_resource_id(
-            catalog_id=non_existing_coupon_id, catalog_query=catalog_query
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=non_existing_coupon_id, course_run_ids=[self.course.id]
         )
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         logger_name = 'ecommerce.enterprise.entitlements'
         with LogCapture(logger_name) as logger:
             entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
-            self._assert_num_requests(4)
+            self._assert_num_requests(3)
 
             logger.check(
                 (
@@ -197,20 +195,18 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         coupon = self._create_course_catalog_coupon(catalog_id, coupon_quantity)
         expected_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
 
-        catalog_query = '*:*'
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
-        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_id=catalog_id, catalog_query=catalog_query)
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
-
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=catalog_id, course_run_ids=[self.course.id]
+        )
         course_vouchers = get_course_vouchers_for_learner(self.request.site, self.request.user, self.course.id)
 
-        # Verify that there were total four calls. two for getting
+        # Verify that there were total three calls. Two for getting
         # enterprise learner data and enterprise learner entitlements
-        # from enterprise service and other two for
-        # getting enterprise catalog and course runs against the enterprise
-        # catalog query respectively from the course catalog service.
-        self._assert_num_requests(4)
+        # from enterprise service and one for checking course run against
+        # the enterprise catalog from the course catalog service.
+        self._assert_num_requests(3)
         self.assertEqual(coupon_quantity, len(course_vouchers))
         self.assertListEqual(list(expected_vouchers), list(course_vouchers))
 
@@ -249,17 +245,15 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         there is an error while accessing the learner entitlements.
         """
         learner_id = 1
-        catalog_query = '*:*'
         self.mock_enterprise_learner_api(learner_id=learner_id)
         self.mock_learner_entitlements_api_failure(learner_id=learner_id)
-        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+        self.mock_course_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
 
         self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='ERROR',
             log_message='Failed to retrieve entitlements for enterprise learner [%s].' % learner_id,
-            expected_request_count=4,
+            expected_request_count=3,
         )
 
     @mock_enterprise_api_client
@@ -270,18 +264,16 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         there is an error while accessing the learner entitlements.
         """
         learner_id = 1
-        catalog_query = '*:*'
         self.mock_enterprise_learner_api(learner_id=learner_id)
         self.mock_learner_entitlements_api_failure(learner_id=learner_id, status=200)
-        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+        self.mock_course_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
 
         self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
             log_level='ERROR',
             log_message='Invalid structure for enterprise learner entitlements API response for enterprise learner'
                         ' [%s].' % learner_id,
-            expected_request_count=4,
+            expected_request_count=3,
         )
 
     @mock_enterprise_api_client
@@ -342,21 +334,21 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         in the related enterprise course catalog.
         """
         enterprise_catalog_id = 1
-        catalog_query = '*:*'
         self.mock_enterprise_learner_api(entitlement_id=enterprise_catalog_id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=enterprise_catalog_id)
-        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
+        )
 
         non_enterprise_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
         entitlements = get_course_entitlements_for_learner(
             self.request.site, self.request.user, non_enterprise_course
         )
-        # Verify that there were total three calls. First for getting
-        # enterprise learner data from enterprise service and other two for
-        # getting enterprise catalog and course runs against the enterprise
-        # catalog query respectively from the course catalog service.
-        self._assert_num_requests(3)
+        # Verify that there were total two calls. First for getting
+        # enterprise learner data from enterprise service and other one for
+        # checking course run against the enterprise catalog query from the
+        # course catalog service.
+        self._assert_num_requests(2)
         self.assertIsNone(entitlements)
 
     @mock_course_catalog_api_client
@@ -366,18 +358,15 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         the provided course is available in the enterprise course catalog.
         """
         enterprise_catalog_id = 1
-        catalog_query = '*:*'
-        self.mock_course_discovery_api_for_catalog_by_resource_id(
-            catalog_id=enterprise_catalog_id, catalog_query=catalog_query
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
         )
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         is_course_available = is_course_in_enterprise_catalog(self.request.site, self.course.id, enterprise_catalog_id)
 
-        # Verify that there were two calls for the course discovery API, one
-        # for getting enterprise course catalog and the other for verifying if
-        # course exists in course runs against the course catalog query
-        self._assert_num_requests(2)
+        # Verify that there only one call for the course discovery API for
+        # checking if course exists in course runs against the course catalog.
+        self._assert_num_requests(1)
         self.assertTrue(is_course_available)
 
     @mock_course_catalog_api_client
@@ -387,19 +376,16 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         the provided course is not available in the enterprise course catalog.
         """
         enterprise_catalog_id = 1
-        catalog_query = '*:*'
-        self.mock_course_discovery_api_for_catalog_by_resource_id(
-            catalog_id=enterprise_catalog_id, catalog_query=catalog_query
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
         )
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[self.course.id])
 
         test_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
         is_course_available = is_course_in_enterprise_catalog(self.request.site, test_course.id, enterprise_catalog_id)
 
-        # Verify that there were two calls for the course discovery API, one
-        # for getting enterprise course catalog and the other for verifying if
-        # course exists in course runs against the course catalog query
-        self._assert_num_requests(2)
+        # Verify that there only one call for the course discovery API for
+        # checking if course exists in course runs against the course catalog.
+        self._assert_num_requests(1)
         self.assertFalse(is_course_available)
 
     @mock_course_catalog_api_client
@@ -414,7 +400,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.mock_catalog_api_failure(error, enterprise_catalog_id)
 
         expected_number_of_requests = 1
-        log_message = 'Unable to connect to Course Catalog service for course catalogs.'
+        log_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
         self._assert_is_course_in_enterprise_catalog_for_failure(expected_number_of_requests, log_message)
 
     @mock_course_catalog_api_client
@@ -426,13 +412,11 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         unable to validate the given course against the course runs for the
         provided enterprise catalog.
         """
-        catalog_query = '*:*'
-        self.mock_course_discovery_api_for_catalog_by_resource_id(catalog_query=catalog_query)
-        partner_code = self.request.site.siteconfiguration.partner.short_code
+        enterprise_catalog_id = 1
         self.mock_get_catalog_contains_api_for_failure(
-            partner_code=partner_code, course_run_ids=[self.course.id], query=catalog_query, error=error
+            course_run_ids=[self.course.id], catalog_id=enterprise_catalog_id, error=error
         )
 
-        expected_number_of_requests = 2
-        log_message = 'Unable to connect to Course Catalog service for course runs.'
+        expected_number_of_requests = 1
+        log_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
         self._assert_is_course_in_enterprise_catalog_for_failure(expected_number_of_requests, log_message)

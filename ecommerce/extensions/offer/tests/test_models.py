@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import hashlib
-
 import ddt
 import httpretty
 import mock
@@ -11,8 +9,11 @@ from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test import factories
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
+from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -24,6 +25,7 @@ Range = get_model('offer', 'Range')
 
 
 @ddt.ddt
+@httpretty.activate
 class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
     def setUp(self):
         super(RangeTests, self).setUp()
@@ -38,6 +40,16 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range_with_catalog.catalog = self.catalog
         self.stock_record = factories.create_stockrecord(self.product, num_in_stock=2)
         self.catalog.stock_records.add(self.stock_record)
+
+    def tearDown(self):
+        # Reset HTTPretty state (clean up registered urls and request history)
+        httpretty.reset()
+
+    def _assert_num_requests(self, count):
+        """
+        DRY helper for verifying request counts.
+        """
+        self.assertEqual(len(httpretty.httpretty.latest_requests), count)
 
     def test_range_contains_product(self):
         """
@@ -90,7 +102,6 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         with self.assertRaises(Exception):
             self.range.run_catalog_query(self.product)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
     def test_run_catalog_query(self):
         """
@@ -103,14 +114,13 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.catalog_query = 'key:*'
 
         partner_code = request.site.siteconfiguration.partner.short_code
-        cache_key = hashlib.md5(
-            '{site_domain}_{partner_code}_catalog_query_contains_{course_id}_{query}'.format(
-                site_domain=request.site.domain,
-                partner_code=partner_code,
-                course_id=seat.course_id,
-                query=self.range.catalog_query
-            )
-        ).hexdigest()
+        cache_key = get_cache_key(
+            site_domain=request.site.domain,
+            partner_code=partner_code,
+            resource='course_runs.contains',
+            course_id=seat.course_id,
+            query=self.range.catalog_query
+        )
         cached_response = cache.get(cache_key)
         self.assertIsNone(cached_response)
 
@@ -120,7 +130,6 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
             cached_response = cache.get(cache_key)
             self.assertEqual(response, cached_response)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
     def test_query_range_contains_product(self):
         """
@@ -137,7 +146,6 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         response = self.range.contains_product(seat)
         self.assertTrue(response)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
     def test_course_catalog_query_range_contains_product(self):
         """
@@ -152,8 +160,8 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.assertFalse(false_response)
 
         course_catalog_id = 1
-        self.mock_course_discovery_api_for_catalog_by_resource_id(
-            catalog_id=course_catalog_id, catalog_query=catalog_query
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=course_catalog_id, course_run_ids=[course.id]
         )
         self.range.catalog_query = None
         self.range.course_seat_types = 'verified'
@@ -162,13 +170,16 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
 
         response = self.range.contains_product(seat)
         self.assertTrue(response)
+        # Verify that there only one call for the course discovery API for
+        # checking if course exists in course runs against the course catalog.
+        self._assert_num_requests(1)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
-    def test_course_catalog_query_range_contains_product_for_failure(self):
+    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    def test_course_catalog_query_range_contains_product_for_failure(self, error):
         """
         Verify that the method "contains_product" raises exception if the
-        method "get_course_catalogs" is unable to get the catalog from course
+        method "catalog_contains_product" is unable to get the catalog from
         catalog service for a course catalog Range.
         """
         __, seat = self.create_course_and_seat()
@@ -178,45 +189,69 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.course_catalog = course_catalog_id
         self.range.save()
 
+        self.mock_catalog_api_failure(error, course_catalog_id)
         with self.assertRaises(Exception) as error:
             self.range.contains_product(seat)
 
-        expected_exception_message = 'Unable to connect to Course Catalog service for catalog with id [%s].' %\
-                                     self.range.course_catalog
+        expected_exception_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
         self.assertEqual(error.exception.message, expected_exception_message)
+        # Verify that there only one call for the course discovery API for
+        # checking if course exists in course runs against the course catalog.
+        self._assert_num_requests(1)
 
-    @httpretty.activate
     @mock_course_catalog_api_client
     @ddt.data(
-        (1, 'verified,professional', True),
-        (1, 'verified', True),
-        (2, 'professional', False),
+        'verified',
+        'verified,professional',
     )
-    @ddt.unpack
-    def test_course_catalog_range_contains_product(self, course_catalog, course_seat_types, is_product_in_range):
+    def test_course_catalog_range_contains_product(self, range_course_seat_types):
         """
         Verify that the method "contains_product" returns True (boolean) if a
-        product is in it's range for a course catalog else return False.
+        product seat is in it's range for a course catalog.
         """
-        catalog_query = 'key:*'
+        # Create a course with verified seat type
         course, seat = self.create_course_and_seat()
-        self.assertEqual(len(self.range.all_products()), 1)
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[course.id])
 
-        course_catalog_id = 1
-        self.mock_course_discovery_api_for_catalog_by_resource_id(
-            catalog_id=course_catalog_id, catalog_query=catalog_query
-        )
-
-        self.range.course_seat_types = course_seat_types
+        course_catalog = 1
+        self.range.catalog_query = None
+        self.range.course_seat_types = range_course_seat_types
         self.range.course_catalog = course_catalog
         self.range.save()
 
-        response = self.range.contains_product(seat)
+        self.mock_course_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        is_product_in_range = self.range.contains_product(seat)
+        self.assertTrue(is_product_in_range)
+        # Verify that there only one call for the course discovery API for
+        # checking if course exists in course runs against the course catalog.
+        self._assert_num_requests(1)
 
-        self.assertEqual(is_product_in_range, response)
+    @mock_course_catalog_api_client
+    @ddt.data(
+        ('verified', 'professional'),
+        ('professional', 'verified'),
+    )
+    @ddt.unpack
+    def test_course_catalog_range_contains_product_for_invalid_seat(self, range_course_seat_type, invalid_seat_type):
+        """
+        Verify that the method "contains_product" returns False (boolean) if a
+        product seat is not in it's range for a course catalog.
+        """
+        course, __ = self.create_course_and_seat(seat_type=range_course_seat_type)
+        __, invalid_course_seat = self.create_course_and_seat(seat_type=invalid_seat_type)
 
-    @httpretty.activate
+        course_catalog = 1
+        self.range.catalog_query = None
+        self.range.course_seat_types = range_course_seat_type
+        self.range.course_catalog = course_catalog
+        self.range.save()
+
+        self.mock_course_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        is_product_in_range = self.range.contains_product(invalid_course_seat)
+        self.assertFalse(is_product_in_range)
+        # Verify that there was no call for the course discovery API as Range
+        # doesn't have the provide course seat types.
+        self._assert_num_requests(0)
+
     @mock_course_catalog_api_client
     def test_query_range_all_products(self):
         """
