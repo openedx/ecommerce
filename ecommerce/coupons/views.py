@@ -172,7 +172,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             return render(request, template_name, {'error': _('You are already enrolled in the course.')})
 
         try:
-            enterprise_customer = get_enterprise_customer_from_voucher(request.site, request.user.access_token, voucher)
+            enterprise_customer = get_enterprise_customer_from_voucher(request.site, voucher)
         except EnterpriseDoesNotExist as e:
             # If an EnterpriseException is caught while pulling the EnterpriseCustomer, that means there's no
             # corresponding EnterpriseCustomer in the Enterprise service (which should never happen).

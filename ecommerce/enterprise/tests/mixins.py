@@ -1,11 +1,14 @@
+import copy
 import json
+from uuid import uuid4
 
 import httpretty
 from django.conf import settings
-from django.core.cache import cache
+
+from ecommerce.tests.testcases import TestCase
 
 
-class EnterpriseServiceMockMixin(object):
+class EnterpriseServiceMockMixin(TestCase):
     """
     Mocks for the Open edX service 'Enterprise Service' responses.
     """
@@ -18,7 +21,57 @@ class EnterpriseServiceMockMixin(object):
 
     def setUp(self):
         super(EnterpriseServiceMockMixin, self).setUp()
-        cache.clear()
+
+    def mock_enterprise_customer_list_api_get(self):
+        """
+        Helper function to register the enterprise customer API endpoint.
+        """
+        enterprise_customer_data = {
+            'uuid': str(uuid4()),
+            'name': "Enterprise Customer 1",
+            'catalog': 0,
+            'active': True,
+            'site': {
+                'domain': 'example.com',
+                'name': 'example.com'
+            },
+            'enable_data_sharing_consent': True,
+            'enforce_data_sharing_consent': 'at_login',
+            'enterprise_customer_users': [
+                1
+            ],
+            'branding_configuration': {
+                'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
+            },
+            'enterprise_customer_entitlements': [
+                {
+                    'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+                    'entitlement_id': 0
+                }
+            ],
+            'contact_email': "administrator@enterprisecustomer.com",
+        }
+
+        enterprise_customer2_data = copy.deepcopy(enterprise_customer_data)
+        enterprise_customer2_data['uuid'] = str(uuid4())
+        enterprise_customer2_data['name'] = 'Enterprise Customer 2'
+
+        enterprise_customer_api_response = {
+            'results':
+                [
+                    enterprise_customer_data,
+                    enterprise_customer2_data
+                ]
+        }
+
+        enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=self.ENTERPRISE_CUSTOMER_URL,
+            body=enterprise_customer_api_response_json,
+            content_type='application/json'
+        )
 
     def mock_specific_enterprise_customer_api(self, uuid, name='TestShib', contact_email=''):
         """

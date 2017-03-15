@@ -181,7 +181,6 @@ class GetVoucherTests(CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-@httpretty.activate
 class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, EnterpriseServiceMockMixin,
                            LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
@@ -304,8 +303,10 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, En
         ),
     )
     @ddt.unpack
+    @httpretty.activate
     def test_consent_failed_message(self, contact_email, expected_response):
         """ Verify that the consent failure message shows up when the consent_failed parameter is a valid SKU. """
+        self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(
             ENTERPRISE_CUSTOMER,
             name='TestShib',

@@ -5,27 +5,39 @@ import httpretty
 
 from ecommerce.core.tests.decorators import mock_enterprise_api_client
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
-from ecommerce.enterprise.utils import get_enterprise_customer, get_or_create_enterprise_customer_user
-from ecommerce.tests.testcases import TestCase
+from ecommerce.enterprise.utils import (get_enterprise_customer, get_enterprise_customers,
+                                        get_or_create_enterprise_customer_user)
 
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 
 @ddt.ddt
 @httpretty.activate
-class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
+class EnterpriseUtilsTests(EnterpriseServiceMockMixin):
     def setUp(self):
         super(EnterpriseUtilsTests, self).setUp()
         self.learner = self.create_user(is_staff=True)
         self.client.login(username=self.learner.username, password=self.password)
+
+    def test_get_enterprise_customers(self):
+        """
+        Verify that "get_enterprise_customers" returns an appropriate response from the
+        "enterprise-customer" Enterprise service API endpoint.
+        """
+        self.mock_access_token_response()
+        self.mock_enterprise_customer_list_api_get()
+        response = get_enterprise_customers(self.site)
+        self.assertEqual(response[0]['name'], "Enterprise Customer 1")
+        self.assertEqual(response[1]['name'], "Enterprise Customer 2")
 
     def test_get_enterprise_customer(self):
         """
         Verify that "get_enterprise_customer" returns an appropriate response from the
         "enterprise-customer" Enterprise service API endpoint.
         """
+        self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(TEST_ENTERPRISE_CUSTOMER_UUID)
-        response = get_enterprise_customer(self.site, self.learner.access_token, TEST_ENTERPRISE_CUSTOMER_UUID)
+        response = get_enterprise_customer(self.site, TEST_ENTERPRISE_CUSTOMER_UUID)
 
         self.assertEqual(TEST_ENTERPRISE_CUSTOMER_UUID, response.get('id'))
 

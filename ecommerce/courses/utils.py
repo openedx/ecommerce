@@ -1,9 +1,10 @@
 import hashlib
-from urlparse import parse_qs, urlparse
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
+
+from ecommerce.core.utils import traverse_pagination
 
 
 def mode_for_seat(product):
@@ -70,33 +71,6 @@ def get_course_catalogs(site, resource_id=None):
         results = traverse_pagination(response, endpoint)
 
     cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
-    return results
-
-
-def traverse_pagination(response, endpoint):
-    """
-    Traverse a paginated API response.
-
-    Extracts and concatenates "results" (list of dict) returned by DRF-powered
-    APIs.
-
-    Arguments:
-        response (Dict): Current response dict from service API
-        endpoint (slumber Resource object): slumber Resource object from edx-rest-api-client
-
-    Returns:
-        list of dict.
-
-    """
-    results = response.get('results', [])
-
-    next_page = response.get('next')
-    while next_page:
-        querystring = parse_qs(urlparse(next_page).query, keep_blank_values=True)
-        response = endpoint.get(**querystring)
-        results += response.get('results', [])
-        next_page = response.get('next')
-
     return results
 
 

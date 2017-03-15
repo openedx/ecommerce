@@ -7,8 +7,7 @@ from django.core.cache import cache
 from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError
 
-from ecommerce.core.utils import get_cache_key
-from ecommerce.courses.utils import traverse_pagination
+from ecommerce.core.utils import get_cache_key, traverse_pagination
 
 Product = get_model('catalogue', 'Product')
 
