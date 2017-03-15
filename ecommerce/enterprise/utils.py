@@ -14,7 +14,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError
 
-from ecommerce.courses.utils import traverse_pagination
+from ecommerce.core.utils import traverse_pagination
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -39,13 +39,13 @@ def is_enterprise_feature_enabled():
     return is_enterprise_enabled
 
 
-def get_enterprise_customer(site, token, uuid):
+def get_enterprise_customer(site, uuid):
     """
     Return a single enterprise customer
     """
     client = EdxRestApiClient(
         site.siteconfiguration.enterprise_api_url,
-        oauth_access_token=token
+        oauth_access_token=site.siteconfiguration.access_token
     )
     path = ['enterprise-customer', str(uuid)]
     client = reduce(getattr, path, client)
@@ -62,11 +62,11 @@ def get_enterprise_customer(site, token, uuid):
     }
 
 
-def get_enterprise_customers(site, token):
+def get_enterprise_customers(site):
     resource = 'enterprise-customer'
     client = EdxRestApiClient(
         site.siteconfiguration.enterprise_api_url,
-        oauth_access_token=token
+        oauth_access_token=site.siteconfiguration.access_token
     )
     endpoint = getattr(client, resource)
     response = endpoint.get()
@@ -102,7 +102,6 @@ def get_enterprise_customer_consent_failed_context_data(request, voucher):
     # Return the view with an info message informing the user that the enrollment didn't complete.
     enterprise_customer = get_enterprise_customer_from_voucher(
         request.site,
-        request.user.access_token,
         voucher
     )
     if not enterprise_customer:
@@ -151,7 +150,7 @@ def get_or_create_enterprise_customer_user(site, enterprise_customer_uuid, usern
     return response
 
 
-def get_enterprise_customer_from_voucher(site, token, voucher):
+def get_enterprise_customer_from_voucher(site, voucher):
     """
     Given a Voucher, find the associated Enterprise Customer and retrieve data about
     that customer from the Enterprise service. If there is no Enterprise Customer
@@ -165,7 +164,7 @@ def get_enterprise_customer_from_voucher(site, token, voucher):
 
     # Get information about the enterprise customer from the Enterprise service.
     enterprise_customer_uuid = offer.benefit.range.enterprise_customer
-    enterprise_customer = get_enterprise_customer(site, token, enterprise_customer_uuid)
+    enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
     if enterprise_customer is None:
         raise EnterpriseDoesNotExist(
             'Enterprise customer with UUID {uuid} does not exist in the Enterprise service.'.format(

@@ -1,12 +1,14 @@
 from __future__ import unicode_literals
 
+import httpretty
 import mock
+
 from django.core.urlresolvers import reverse
 
-from ecommerce.tests.testcases import TestCase
+from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 
 
-class TestEnterpriseCustomerView(TestCase):
+class TestEnterpriseCustomerView(EnterpriseServiceMockMixin):
 
     dummy_enterprise_customer_data = {
         'results': [
@@ -23,7 +25,9 @@ class TestEnterpriseCustomerView(TestCase):
     }
 
     @mock.patch('ecommerce.enterprise.utils.EdxRestApiClient')
+    @httpretty.activate
     def test_get_customers(self, mock_client):
+        self.mock_access_token_response()
         instance = mock_client.return_value
         setattr(
             instance,

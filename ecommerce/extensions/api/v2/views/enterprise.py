@@ -11,4 +11,4 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 
     def get(self, request):
         site = request.site
-        return Response(data={'results': get_enterprise_customers(site, token=request.user.access_token)})
+        return Response(data={'results': get_enterprise_customers(site)})
