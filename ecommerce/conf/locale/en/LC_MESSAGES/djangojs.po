@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-07 14:54+0000\n"
+"POT-Creation-Date: 2017-03-16 07:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,41 +58,41 @@ msgstr ""
 msgid "Must occur before end date"
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:55
+#: ecommerce/static/js/models/course_model.js:56
 msgid "You must select a course type."
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:61
+#: ecommerce/static/js/models/course_model.js:62
 msgid "You must choose if an honor seat should be created."
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:78
+#: ecommerce/static/js/models/course_model.js:79
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:85
+#: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:91
+#: ecommerce/static/js/models/course_model.js:92
 #: ecommerce/static/js/views/dynamic_catalog_view.js:66
 msgid "Course ID"
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:92
+#: ecommerce/static/js/models/course_model.js:93
 msgid "Course Name"
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:93
+#: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/course_list_view.js:73
 msgid "Course Type"
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:94
+#: ecommerce/static/js/models/course_model.js:95
 msgid "Verification Deadline"
 msgstr ""
 
-#: ecommerce/static/js/models/course_model.js:95
+#: ecommerce/static/js/models/course_model.js:96
 msgid "Include Honor Seat"
 msgstr ""
 
@@ -158,39 +158,39 @@ msgstr ""
 msgid "Problem occurred during checkout. Please contact support"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:93
+#: ecommerce/static/js/pages/basket_page.js:94
 msgid "This field is required"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:120
+#: ecommerce/static/js/pages/basket_page.js:122
 msgid "Invalid card number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:122
+#: ecommerce/static/js/pages/basket_page.js:124
 msgid "Unsupported card type"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:124
+#: ecommerce/static/js/pages/basket_page.js:126
 msgid "Invalid security number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:129
+#: ecommerce/static/js/pages/basket_page.js:131
 msgid "Invalid month"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:131
+#: ecommerce/static/js/pages/basket_page.js:133
 msgid "Invalid year"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:133
+#: ecommerce/static/js/pages/basket_page.js:135
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:301
+#: ecommerce/static/js/pages/basket_page.js:303
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:302
+#: ecommerce/static/js/pages/basket_page.js:304
 msgid "State/Province (required)"
 msgstr ""
 
@@ -236,6 +236,10 @@ msgstr ""
 
 #: ecommerce/static/js/utils/validation_patterns.js:15
 msgid "The course ID is invalid."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:23
+msgid "The product name cannot contain HTML."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107

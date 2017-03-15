@@ -14,5 +14,13 @@ define([
         _.extend(Backbone.Validation.messages, {
             courseId: gettext('The course ID is invalid.')
         });
+
+        _.extend(Backbone.Validation.patterns, {
+            productName: /^((?!&\w+;|<\/*\w+>).)*$/
+        });
+
+        _.extend(Backbone.Validation.messages, {
+            productName: gettext('The product name cannot contain HTML.')
+        });
     }
 );

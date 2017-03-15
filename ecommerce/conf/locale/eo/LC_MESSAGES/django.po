@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-07 14:54+0000\n"
+"POT-Creation-Date: 2017-03-16 07:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -219,14 +219,14 @@ msgstr ""
 "¢σηѕє¢тєтυя#"
 
 #: ecommerce/coupons/views.py
+msgid "This coupon code is invalid."
+msgstr "Thïs çöüpön çödé ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/coupons/views.py
 msgid "The voucher is not applicable to your current basket."
 msgstr ""
 "Thé vöüçhér ïs nöt äpplïçäßlé tö ýöür çürrént ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт"
 " αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/coupons/views.py
-msgid "This coupon code is invalid."
-msgstr "Thïs çöüpön çödé ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/coupons/views.py
 msgid "Code not provided."
@@ -334,6 +334,39 @@ msgid ""
 msgstr ""
 "Àn érrör häs öççürréd. Wé çöüld nöt çönfïrm thät thé ïnstïtütïön ýöü "
 "séléçtéd öfférs thïs çöürsé çrédït. Trý thé tränsäçtïön ägäïn. Ⱡ#"
+
+#: ecommerce/enterprise/utils.py
+msgid "SKU {sku} does not exist."
+msgstr "SKÛ {sku} döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/enterprise/utils.py
+msgid "There is no Enterprise Customer associated with SKU {sku}."
+msgstr ""
+"Théré ïs nö Éntérprïsé Çüstömér ässöçïätéd wïth SKÛ {sku}. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/enterprise/utils.py
+msgid ""
+"If you have concerns about sharing your data, please contact your "
+"administrator at {enterprise}."
+msgstr ""
+"Ìf ýöü hävé çönçérns äßöüt shärïng ýöür dätä, pléäsé çöntäçt ýöür "
+"ädmïnïsträtör ät {enterprise}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: ecommerce/enterprise/utils.py
+msgid ""
+"If you have concerns about sharing your data, please contact your "
+"administrator at {enterprise} at {contact_info}."
+msgstr ""
+"Ìf ýöü hävé çönçérns äßöüt shärïng ýöür dätä, pléäsé çöntäçt ýöür "
+"ädmïnïsträtör ät {enterprise} ät {contact_info}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢#"
+
+#: ecommerce/enterprise/utils.py
+msgid "Enrollment in {course_name} was not complete."
+msgstr ""
+"Énröllmént ïn {course_name} wäs nöt çömplété. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєт#"
 
 #: ecommerce/extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."

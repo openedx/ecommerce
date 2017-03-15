@@ -48,7 +48,8 @@ define([
                     pattern: 'courseId'
                 },
                 name: {
-                    required: true
+                    required: true,
+                    pattern: 'productName'
                 },
                 type: {
                     required: true,
