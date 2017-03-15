@@ -476,6 +476,19 @@ define([
                     });
                 });
             });
+
+            describe('product title validation', function () {
+                it('succeeds if the product title does not contain HTML', function () {
+                    model.set('name', 'edX Demonstration Course');
+                    expect(model.isValid(true)).toBeTruthy();
+                });
+
+                it('fails if the product title contains HTML', function () {
+                    model.set('name', 'edx Demo Course &amp; test with <a>html</a>');
+                    expect(model.validate().name).toEqual('The product name cannot contain HTML.');
+                    expect(model.isValid(true)).toBeFalsy();
+                });
+            });
         });
     }
 );
