@@ -43,17 +43,23 @@ class SDNCheckViewSetTests(TestCase):
     @ddt.data(0, 1)
     def test_sdn_check_match(self, hits):
         """Verify the endpoint returns the number of hits SDN check made."""
-        with mock.patch.object(SDNClient, 'search') as sdn_validator_mock:
-            with mock.patch.object(User, 'deactivate_account') as deactivate_account_mock:
-                sdn_validator_mock.return_value = {'total': hits}
-                deactivate_account_mock.return_value = True
+        with mock.patch.object(SDNClient, 'search', return_value={'total': hits}) as sdn_validator_mock:
+            with mock.patch.object(User, 'deactivate_account', return_value=True):
                 response = self.make_request()
-                self.assertEqual(json.loads(response.content)['hits'], hits)
                 self.assertTrue(sdn_validator_mock.called)
+                self.assertEqual(json.loads(response.content)['hits'], hits)
+
+    def test_user_logged_out(self):
+        """User is logged out after an SDN match."""
+        with mock.patch.object(SDNClient, 'search', return_value={'total': 1}) as sdn_validator_mock:
+            with mock.patch.object(User, 'deactivate_account', return_value=True):
+                self.make_request()
+                self.assertTrue(sdn_validator_mock.called)
+                self.assertEqual(self.make_request().status_code, status.HTTP_401_UNAUTHORIZED)
 
     @ddt.data(HTTPError, Timeout)
     def test_sdn_check_error(self, side_effect):
-        """Verify zero hits are returned when an exception happens."""
+        """Zero hits are returned when an exception happens."""
         with mock.patch.object(SDNClient, 'search') as sdn_validator_mock:
             sdn_validator_mock.side_effect = side_effect
             response = self.make_request()
