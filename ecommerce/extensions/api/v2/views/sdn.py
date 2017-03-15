@@ -1,4 +1,5 @@
 """API endpoint for performing an SDN check on users."""
+from django.contrib.auth import logout
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
 from rest_framework.permissions import IsAuthenticated
@@ -45,6 +46,7 @@ class SDNCheckViewSet(APIView):
                         country,
                         response
                     )
+                    logout(request)
             except (HTTPError, Timeout):
                 # If the SDN API endpoint is down or times out
                 # the user is allowed to make the purchase.
