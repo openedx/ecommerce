@@ -1,12 +1,14 @@
 define([
         'backbone',
         'backbone.validation',
+        'jquery',
         'moment',
         'pikaday',
         'punycode',
         'underscore'],
     function (Backbone,
               BackboneValidation,
+              $,
               moment,
               Pikaday,
               punycode,
@@ -226,6 +228,17 @@ define([
              */
             redirect: function(path) {
                 window.location.href = path;
+            },
+
+            /**
+             * Sets the click event on header mobile menu.
+             * The menu items should show/hide on click.
+             */
+            toogleMobileMenuClickEvent: function() {
+                $('#hamburger-button').on('click', function () {
+                    $(this).attr('aria-expanded', $(this).attr('aria-expanded') === 'false' ? 'true' : 'false');
+                    $('#main-navbar-collapse').toggle();
+                });
             }
         };
     }

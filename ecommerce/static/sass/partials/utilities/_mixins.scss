@@ -1,5 +1,5 @@
 // Sets the logo background and scales it to a given height.
-@mixin brand-logo($brand-logo-path, $width, $height, $scaled-height:"") {
+@mixin brand-logo($width, $height, $scaled-height:"") {
   display: inline-block;
 
   @if $scaled-height != "" {
@@ -10,8 +10,6 @@
   width: $width;
   height: $height;
   margin-right: 10px;
-  background: url($brand-logo-path) no-repeat;
-  background-size: contain;
 }
 
 // Vertically center an element

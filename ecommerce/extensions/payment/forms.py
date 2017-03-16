@@ -86,7 +86,7 @@ class PaymentForm(forms.Form):
                 bound_field.field.widget.attrs['required'] = 'required'
                 bound_field.field.widget.attrs['aria-required'] = 'true'
 
-    basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput())
+    basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput(), required=False)
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
     address_line1 = forms.CharField(max_length=60, label=_('Address'))

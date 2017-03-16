@@ -1,6 +1,9 @@
 define(['backbone',
-        'backbone.super'],
-    function (Backbone) {
+        'backbone.super',
+        'utils/utils'],
+    function (Backbone,
+              BackboneSuper,
+              Utils) {
         'use strict';
 
         /***
@@ -60,6 +63,7 @@ define(['backbone',
              * @returns {Page} current instance
              */
             render: function () {
+                Utils.toogleMobileMenuClickEvent();
                 this.renderTitle();
                 this.renderNestedView();
                 return this;
