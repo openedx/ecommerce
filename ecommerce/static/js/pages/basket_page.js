@@ -202,6 +202,8 @@ define([
             var $paymentButtons = $('.payment-buttons'),
                 basketId = $paymentButtons.data('basket-id');
 
+            Utils.toogleMobileMenuClickEvent();
+
             $('#voucher_form_link').on('click', function (event) {
                 event.preventDefault();
                 showVoucherForm();

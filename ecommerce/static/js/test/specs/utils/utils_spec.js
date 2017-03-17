@@ -94,6 +94,22 @@ define([
                     expect(button).not.toHaveClass('is-disabled');
                 });
             });
+
+            describe('toogleMobileMenuClickEvent', function () {
+                it('should show/hide menu on click', function () {
+                    jasmine.getFixtures().fixturesPath = '/base/ecommerce/static/js/test/fixtures';
+                    loadFixtures('mobile-header-menu.html');
+                    Utils.toogleMobileMenuClickEvent();
+
+                    $('#hamburger-button').trigger('click');
+                    expect($('#hamburger-button').attr('aria-expanded')).toBe('true');
+                    expect($('#main-navbar-collapse')).not.toBeHidden();
+
+                    $('#hamburger-button').trigger('click');
+                    expect($('#hamburger-button').attr('aria-expanded')).toBe('false');
+                    expect($('#main-navbar-collapse')).toBeHidden();
+                });
+            });
         });
     }
 );
