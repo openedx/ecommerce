@@ -11,35 +11,37 @@
         {% csrf_token %}
         {{ formset.management_form }}
 
-        <p class="title">{% trans "IN YOUR CART" %}</p>
-        {% for form, line_data in formset_lines_data %}
-            {{ form.id }}
-            <div class="product col-sm-12">
-                <div class="product-image col-sm-5 col-xs-5">
-                    <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}"
-                         alt="{{ line_data.product_title|default_if_none:'' }}"/>
-                </div>
-                <div class="product-information col-sm-7 col-xs-7">
-                    <p class="product-name">{{ line_data.product_title }}</p>
-                    {% include 'oscar/basket/partials/seat_type.html' %}
-                </div>
-                {% if line_data.enrollment_code %}
-                    <div class="col-sm-12 col-xs-12 form-inline quantity-group">
-                        <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
-                        <div class="checkout-quantity form-group">
-                            <div class="input-group spinner {% if form.errors %}error{% endif %}">
-                                {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
-                            </div>
-                            <button class="btn btn-primary update-button quantity-update" type="submit"
-                                    data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
-                        </div>
+        <div role="region" aria-labelledby="cart-region">
+            <h2 id="cart-region" class="title">{% trans "IN YOUR CART" %}</h2>
+            {% for form, line_data in formset_lines_data %}
+                {{ form.id }}
+                <div class="product col-sm-12">
+                    <div class="product-image col-sm-5 col-xs-5">
+                        <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}"
+                             alt="{{ line_data.product_title|default_if_none:'' }}"/>
                     </div>
-                {% endif %}
-            </div>
-        {% endfor %}
+                    <div class="product-information col-sm-7 col-xs-7">
+                        <p class="product-name">{{ line_data.product_title }}</p>
+                        {% include 'oscar/basket/partials/seat_type.html' %}
+                    </div>
+                    {% if line_data.enrollment_code %}
+                        <div class="col-sm-12 col-xs-12 form-inline quantity-group">
+                            <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
+                            <div class="checkout-quantity form-group">
+                                <div class="input-group spinner {% if form.errors %}error{% endif %}">
+                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
+                                </div>
+                                <button class="btn btn-primary update-button quantity-update" type="submit"
+                                        data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     </form>
-    <fieldset aria-live="polite">
-        <legend>{% trans "SUMMARY" %}</legend>
+    <div role="region" aria-labelledby="summary-region" aria-live="polite">
+        <h2 id="summary-region" class="title">{% trans "SUMMARY" %}</h2>
         <div id="line-price" class="amount row">
             <span class="description">{% trans "Price" %}</span>
             <span class="price">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
@@ -83,10 +85,10 @@
             <span id="total-price-desc" class="description">{% trans "TOTAL" %}</span>
             <span class="price">{{ order_total.incl_tax|currency:basket.currency }}</span>
         </div>
-    </fieldset>
+    </div>
     {% if order_details_msg %}
-        <div id="order-details">
-            <p class="title">{% trans "ORDER DETAILS" %}</p>
+        <div role="region" aria-labelledby="order-details-region">
+            <h2 id="order-details-region" class="title">{% trans "ORDER DETAILS" %}</h2>
             <p>{{ order_details_msg }}</p>
         </div>
     {% endif %}
@@ -100,8 +102,8 @@
         {% if not free_basket %}
         {% if paypal_enabled %}
         <div id="payment-method-information" class="placeholder row">
-            <fieldset>
-                <legend>{% trans "SELECT PAYMENT METHOD" %}</legend>
+            <div role="region" aria-labelledby="payment-method-region">
+                <h2 id="payment-method-region" class="title">{% trans "SELECT PAYMENT METHOD" %}</h2>
                 <div class="col-sm-12 payment-methods">
                     <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
                         <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}"></a>
@@ -121,23 +123,23 @@
                         </button>
                     </div>
                 </div>
-            </fieldset>
+            </div>
         </div>
         {% endif %}
         <div id="card-holder-information" class="form-input-elements placeholder row">
-            <fieldset>
-                <legend aria-label={% trans "Card holder information" %}>{% trans "CARD HOLDER INFORMATION" %}</legend>
+            <div role="region" aria-labelledby="card-holder-information-region">
+                <h2 id="card-holder-information-region" class="title">{% trans "CARD HOLDER INFORMATION" %}</h2>
                 {% if sdn_check %}
                     <input type="hidden" name="sdn-check" value="enabled">
                 {% endif %}
                 {% crispy payment_form %}
-            </fieldset>
+            </div>
         </div>
         {% endif %}
         <div class="form-input-elements placeholder">
-            <fieldset>
+            <div role="region" {% if not free_basket %}aria-labelledby="billing-information-region"{% endif %}>
                 {% if not free_basket %}
-                <legend aria-label={% trans "Billing information" %}>{% trans "BILLING INFORMATION" %}</legend>
+                <h2 id="billing-information-region" class="title">{% trans "BILLING INFORMATION" %}</h2>
                 {% if not paypal_enabled %}
                 <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}">
                 {% endif %}
@@ -205,7 +207,7 @@
                     </button>
                 {% endif %}
                 </div>
-            </fieldset>
+            </div>
         </div>
     </div>
 </form>
