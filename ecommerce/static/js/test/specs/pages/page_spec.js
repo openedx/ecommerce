@@ -1,11 +1,13 @@
 define([
         'backbone',
         'jquery',
-        'pages/page'
+        'pages/page',
+        'utils/utils'
     ],
     function(Backbone,
              $,
-             Page
+             Page,
+             Utils
              ) {
         'use strict';
 
@@ -21,6 +23,18 @@ define([
                 page.refresh();
                 expect(page.view.remove).toHaveBeenCalled();
                 expect(page.render).toHaveBeenCalled();
+            });
+
+            it('should check if render calls the required functions', function() {
+                page = new Page();
+                spyOn(page, 'renderTitle');
+                spyOn(page, 'renderNestedView');
+                spyOn(Utils, 'toogleMobileMenuClickEvent');
+
+                page.render();
+                expect(page.renderTitle).toHaveBeenCalled();
+                expect(page.renderNestedView).toHaveBeenCalled();
+                expect(Utils.toogleMobileMenuClickEvent).toHaveBeenCalled();
             });
         });
 });

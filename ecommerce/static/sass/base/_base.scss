@@ -42,3 +42,47 @@ a {
   background: #fcfcfc;
   box-shadow: 0 1px 2px 1px rgba(167, 164, 164, 0.25);
 }
+
+#skip-link {
+  position: absolute;
+  z-index: 1050;
+  left: 50%;
+  width: 12em;
+  padding: 0 0.5em;
+  margin-top: 0;
+  margin-left: -6.5em;
+
+  a {
+    display: block;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    line-height: 2;
+    text-align: center;
+    text-decoration: none;
+
+    &:focus {
+      outline: 0;
+    }
+  }
+}
+
+.element-invisible {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  word-wrap: normal;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px,1px,1px,1px);
+}
+
+.element-invisible.element-focusable:focus {
+    position: static !important;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    clip: auto;
+}

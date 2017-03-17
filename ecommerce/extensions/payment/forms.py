@@ -84,9 +84,8 @@ class PaymentForm(forms.Form):
                 # required, so this would read "First name (required)".
                 self.fields[bound_field.name].label = _('{label} (required)'.format(label=bound_field.label))
                 bound_field.field.widget.attrs['required'] = 'required'
-                bound_field.field.widget.attrs['aria-required'] = 'true'
 
-    basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput())
+    basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput(), required=False)
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
     address_line1 = forms.CharField(max_length=60, label=_('Address'))
