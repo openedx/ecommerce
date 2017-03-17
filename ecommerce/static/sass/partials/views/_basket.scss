@@ -250,10 +250,24 @@
     .discounted {
         color: green;
     }
+
+    #apply-voucher-button,
+    #payment-button {
+        background: #065683;
+        color: white;
+
+        &:hover,
+        &.is-hovered,
+        &:focus,
+        &.is-focused {
+            border-color: #0075b4;
+            background: #0075b4;
+        }
+    }
 }
 
 .basket-client-side {
-    legend, p.title {
+    .title {
         color: #337ab7;
         font-size: 16px;
         font-weight: bold;
@@ -312,6 +326,11 @@
             height: 50px;
             &.payment-processor-paypal {
                 background-image: url('/static/images/paypal_logo.png');
+
+                &:hover,
+                &:focus {
+                    outline: dotted 1px #000;
+                }
             }
         }
     }
@@ -341,7 +360,7 @@
             #payment-information {
                 border-left: 1px solid palette(grayscale, base);
 
-                legend {
+                h2 {
                     padding-left: 15px;
                 }
 
