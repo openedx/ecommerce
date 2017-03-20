@@ -19,7 +19,6 @@ from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
-from ecommerce.core.exceptions import VerificationStatusError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.courses.utils import mode_for_seat
@@ -525,10 +524,6 @@ class User(AbstractUser):
 
         Returns:
             True if the user is verified, false otherwise.
-
-        Raises:
-            ConnectionError, SlumberBaseException and Timeout for failures in
-            establishing a connection with the LMS verification status API endpoint.
         """
         try:
             cache_key = 'verification_status_{username}'.format(username=self.username)
@@ -552,7 +547,7 @@ class User(AbstractUser):
         except (ConnectionError, SlumberBaseException, Timeout):
             msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
             log.exception(msg)
-            raise VerificationStatusError(msg)
+            return False
 
     def deactivate_account(self, site_configuration):
         """Deactive the user's account.

@@ -10,7 +10,6 @@ from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
 
-from ecommerce.core.exceptions import VerificationStatusError
 from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -158,8 +157,7 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     def test_user_verification_connection_error(self):
         """ Verify verification status exception is raised for connection issues. """
         user = self.create_user()
-        with self.assertRaises(VerificationStatusError):
-            user.is_verified(self.site)
+        self.assertFalse(user.is_verified(self.site))
 
     @httpretty.activate
     def test_user_verification_status_cache(self):
@@ -179,8 +177,7 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         self.assertFalse(user.is_verified(self.site))
 
         httpretty.disable()
-        with self.assertRaises(VerificationStatusError):
-            user.is_verified(self.site)
+        self.assertFalse(user.is_verified(self.site))
 
     @httpretty.activate
     def test_deactivation(self):
