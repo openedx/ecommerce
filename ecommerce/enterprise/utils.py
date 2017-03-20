@@ -39,14 +39,21 @@ def is_enterprise_feature_enabled():
     return is_enterprise_enabled
 
 
+def get_enterprise_api_client(site):
+    """
+    Constructs a REST client for to communicate with the Open edX Enterprise Service
+    """
+    return EdxRestApiClient(
+        site.siteconfiguration.enterprise_api_url,
+        jwt=site.siteconfiguration.access_token
+    )
+
+
 def get_enterprise_customer(site, uuid):
     """
     Return a single enterprise customer
     """
-    client = EdxRestApiClient(
-        site.siteconfiguration.enterprise_api_url,
-        oauth_access_token=site.siteconfiguration.access_token
-    )
+    client = get_enterprise_api_client(site)
     path = ['enterprise-customer', str(uuid)]
     client = reduce(getattr, path, client)
 
@@ -64,10 +71,7 @@ def get_enterprise_customer(site, uuid):
 
 def get_enterprise_customers(site):
     resource = 'enterprise-customer'
-    client = EdxRestApiClient(
-        site.siteconfiguration.enterprise_api_url,
-        oauth_access_token=site.siteconfiguration.access_token
-    )
+    client = get_enterprise_api_client(site)
     endpoint = getattr(client, resource)
     response = endpoint.get()
     return [
