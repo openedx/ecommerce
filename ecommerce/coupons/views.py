@@ -26,6 +26,7 @@ from ecommerce.enterprise.utils import (
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -214,11 +215,15 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         basket = prepare_basket(request, product, voucher)
         if basket.total_excl_tax == 0:
-            self.place_free_order(basket)
-        else:
-            return HttpResponseRedirect(reverse('basket:summary'))
-
-        return HttpResponseRedirect(request.site.siteconfiguration.student_dashboard_url)
+            try:
+                order = self.place_free_order(basket)
+                return HttpResponseRedirect(get_receipt_page_url(self.request.site.siteconfiguration, order.number))
+            except Exception as e:  # pylint: disable=broad-except
+                # If any error happens when creating an order the user is redirected
+                # to the checkout error page.
+                logger.exception('Failed to create an order with message: %s', e.message)
+                return HttpResponseRedirect(reverse('checkout:error'))
+        return HttpResponseRedirect(reverse('basket:summary'))
 
 
 class EnrollmentCodeCsvView(View):
