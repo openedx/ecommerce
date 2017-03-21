@@ -307,11 +307,6 @@ class SiteConfiguration(models.Model):
         return self.build_lms_url('/api/enrollment/v1/')
 
     @property
-    def lms_heartbeat_url(self):
-        """ Returns the URL for the LMS heartbeat page. """
-        return self.build_lms_url('/heartbeat')
-
-    @property
     def oauth2_provider_url(self):
         """ Returns the URL for the OAuth 2.0 provider. """
         return self.build_lms_url('/oauth2')

@@ -56,11 +56,6 @@ def get_lms_enrollment_base_api_url():
     return site_configuration.enrollment_api_url
 
 
-def get_lms_heartbeat_url():
-    site_configuration = _get_site_configuration()
-    return site_configuration.lms_heartbeat_url
-
-
 def get_lms_url(path=''):
     """
     Returns path joined with the appropriate LMS URL root for the current site

@@ -2,7 +2,6 @@
 import logging
 import uuid
 
-import requests
 from auth_backends.views import EdxOpenIdConnectLogoutView
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login
@@ -13,8 +12,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
-from ecommerce.core.constants import Status, UnavailabilityMessage
-from ecommerce.core.url_utils import get_lms_heartbeat_url
+from ecommerce.core.constants import Status
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -24,8 +22,7 @@ User = get_user_model()
 def health(_):
     """Allows a load balancer to verify that the ecommerce front-end service is up.
 
-    Checks the status of the database connection and the LMS, the two services
-    on which the ecommerce front-end currently depends.
+    Checks the status of the database connection.
 
     Returns:
         HttpResponse: 200 if the ecommerce front-end is available, with JSON data
@@ -38,9 +35,9 @@ def health(_):
         >>> response.status_code
         200
         >>> response.content
-        '{"overall_status": "OK", "detailed_status": {"database_status": "OK", "lms_status": "OK"}}'
+        '{"overall_status": "OK", "detailed_status": {"database_status": "OK"}}'
     """
-    overall_status = database_status = lms_status = Status.UNAVAILABLE
+    overall_status = database_status = Status.UNAVAILABLE
 
     try:
         cursor = connection.cursor()
@@ -51,25 +48,12 @@ def health(_):
     except DatabaseError:
         database_status = Status.UNAVAILABLE
 
-    try:
-        response = requests.get(get_lms_heartbeat_url(), timeout=1)
-
-        if response.status_code == 200:
-            lms_status = Status.OK
-        else:
-            logger.critical(UnavailabilityMessage.LMS)
-            lms_status = Status.UNAVAILABLE
-    except requests.exceptions.RequestException:
-        logger.critical(UnavailabilityMessage.LMS)
-        lms_status = Status.UNAVAILABLE
-
     overall_status = Status.OK if (database_status == Status.OK) else Status.UNAVAILABLE
 
     data = {
         'overall_status': overall_status,
         'detailed_status': {
             'database_status': database_status,
-            'lms_status': lms_status,
         },
     }
 
