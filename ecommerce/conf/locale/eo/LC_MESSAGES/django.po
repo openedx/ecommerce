@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-16 07:59+0000\n"
+"POT-Creation-Date: 2017-03-23 11:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -194,8 +194,8 @@ msgid "Name"
 msgstr "Nämé Ⱡ'σяєм ι#"
 
 #: ecommerce/coupons/views.py ecommerce/coupons/views.py
-msgid "Coupon does not exist"
-msgstr "Çöüpön döés nöt éxïst Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+msgid "Coupon does not exist."
+msgstr "Çöüpön döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: ecommerce/coupons/views.py
 msgid "This coupon code is not yet valid."
@@ -1970,16 +1970,8 @@ msgid "Pay with PayPal"
 msgstr "Päý wïth PäýPäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
-msgid "Card holder information"
-msgstr "Çärd höldér ïnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "CARD HOLDER INFORMATION"
 msgstr "ÇÀRD HÖLDÉR ÌNFÖRMÀTÌÖN Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
-msgid "Billing information"
-msgstr "Bïllïng ïnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "BILLING INFORMATION"
@@ -2171,25 +2163,27 @@ msgid "Checkout Error"
 msgstr "Çhéçköüt Érrör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/templates/oscar/checkout/error.html
-msgid ""
-" An error has occurred with your payment. <b>You have not been charged.</b>\n"
-"        "
+msgid "An error has occurred with your payment."
 msgstr ""
-" Àn érrör häs öççürréd wïth ýöür päýmént. <b>Ýöü hävé nöt ßéén çhärgéd.</b>\n"
-"         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+"Àn érrör häs öççürréd wïth ýöür päýmént. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: ecommerce/templates/oscar/checkout/error.html
+msgid "You have not been charged."
+msgstr "Ýöü hävé nöt ßéén çhärgéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/templates/oscar/checkout/error.html
 #, python-format
 msgid ""
 "\n"
-"            Please try to submit your payment again. If this problem persists, contact %(start_link)s\n"
-"            %(payment_support_email)s%(end_link)s.\n"
-"            "
+"                    Please try to submit your payment again. If this problem persists, contact %(start_link)s\n"
+"                    %(payment_support_email)s%(end_link)s.\n"
+"                    "
 msgstr ""
 "\n"
-"            Pléäsé trý tö süßmït ýöür päýmént ägäïn. Ìf thïs prößlém pérsïsts, çöntäçt %(start_link)s\n"
-"            %(payment_support_email)s%(end_link)s.\n"
-"             Ⱡ'σяєм ι#"
+"                    Pléäsé trý tö süßmït ýöür päýmént ägäïn. Ìf thïs prößlém pérsïsts, çöntäçt %(start_link)s\n"
+"                    %(payment_support_email)s%(end_link)s.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
 #: ecommerce/templates/oscar/checkout/payment_error.html

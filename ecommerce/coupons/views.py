@@ -57,7 +57,7 @@ def voucher_is_valid(voucher, products, request):
     """
 
     if voucher is None:
-        return False, _('Coupon does not exist')
+        return False, _('Coupon does not exist.')
 
     if not voucher.is_active():
         now = timezone.now()
@@ -106,7 +106,7 @@ class CouponOfferView(TemplateView):
         try:
             voucher, products = get_voucher_and_products_from_code(code=code)
         except Voucher.DoesNotExist:
-            return {'error': _('Coupon does not exist')}
+            return {'error': _('Coupon does not exist.')}
         except exceptions.ProductNotFoundError:
             return {'error': _('The voucher is not applicable to your current basket.')}
         valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
