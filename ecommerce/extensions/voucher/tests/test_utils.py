@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _
+from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
@@ -14,11 +15,14 @@ from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.extensions.voucher.utils import (
-    create_vouchers, generate_coupon_report, get_voucher_discount_info, update_voucher_offer
+    create_vouchers, generate_coupon_report, get_voucher_and_products_from_code,
+    get_voucher_discount_info, update_voucher_offer
 )
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -568,3 +572,29 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(new_offer.benefit.value, 50.00)
         self.assertEqual(new_offer.benefit.range.catalog, self.catalog)
         self.assertEqual(new_offer.email_domains, new_email_domains)
+
+    def test_get_voucher_and_products_from_code(self):
+        """ Verify that get_voucher_and_products_from_code() returns products and voucher. """
+        original_voucher, original_product = prepare_voucher(code=VOUCHER_CODE)
+        voucher, products = get_voucher_and_products_from_code(code=VOUCHER_CODE)
+
+        self.assertIsNotNone(voucher)
+        self.assertEqual(voucher, original_voucher)
+        self.assertEqual(voucher.code, VOUCHER_CODE)
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0], original_product)
+
+    def test_no_product(self):
+        """ Verify that an exception is raised if there is no product. """
+        code = FuzzyText().fuzz()
+        voucher = VoucherFactory(code=code)
+        offer = ConditionalOfferFactory()
+        voucher.offers.add(offer)
+
+        with self.assertRaises(exceptions.ProductNotFoundError):
+            get_voucher_and_products_from_code(code=code)
+
+    def test_get_non_existing_voucher(self):
+        """ Verify that get_voucher_and_products_from_code() raises exception for a non-existing voucher. """
+        with self.assertRaises(Voucher.DoesNotExist):
+            get_voucher_and_products_from_code(code=FuzzyText().fuzz())
