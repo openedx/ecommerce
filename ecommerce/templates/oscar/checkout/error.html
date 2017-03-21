@@ -16,8 +16,7 @@
             <div class="depth depth-2 message-error-content">
                 <h1>{% trans "Checkout Error" %}</h1>
                 <h3>{{ error }}</h3>
-                <p>{% blocktrans %} An error has occurred with your payment. <b>You have not been charged.</b>
-                {% endblocktrans %}</p>
+                <p>{% trans "An error has occurred with your payment." %} <b>{% trans "You have not been charged." %}</b></p>
                 <p>{% with "<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe as start_link %}
                     {% blocktrans with end_link="</a>"|safe %}
                     Please try to submit your payment again. If this problem persists, contact {{ start_link }}
