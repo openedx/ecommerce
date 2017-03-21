@@ -347,7 +347,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.stock_record = StockRecord.objects.get(product=self.seat)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(StockRecord.objects.get(product=self.seat))
-        self.student_dashboard_url = get_lms_url(self.site.siteconfiguration.student_dashboard_url)
 
     def redeem_url_with_params(self, code=COUPON_CODE, consent_token=None):
         """ Constructs the coupon redemption URL with the proper string query parameters. """
@@ -378,22 +377,28 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.assertEqual(Voucher.objects.filter(code=coupon_code).count(), 1)
         return coupon_code
 
-    def assert_redemption_page_redirects(
-            self, expected_url, target=200, code=COUPON_CODE, consent_token=None, query_string=''
-    ):
-        """ Verify redirect from redeem page to expected page. """
+    def redeem_coupon(self, code=COUPON_CODE, consent_token=None):
         self.request.user = self.user
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
-        response = self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
+        return self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
 
-        if query_string:
-            order = Order.objects.first()
-            expected_url = '{url}?{query_string}={order_num}'.format(
-                url=expected_url,
-                query_string=query_string,
-                order_num=order.number
-            )
+    def assert_redirects_to_receipt_page(self, code=COUPON_CODE, consent_token=None):
+        response = self.redeem_coupon(code=code, consent_token=consent_token)
 
+        order = Order.objects.first()
+        receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
+        expected_url = '{url}?{params}'.format(
+            url=receipt_page_url,
+            params=urllib.urlencode({'order_number': order.number})
+        )
+
+        self.assertRedirects(
+            response, expected_url, status_code=302, fetch_redirect_response=False
+        )
+
+    def assert_redemption_page_redirects(self, expected_url, target=200, code=COUPON_CODE, consent_token=None):
+        """ Verify redirect from redeem page to expected page. """
+        response = self.redeem_coupon(code=code, consent_token=consent_token)
         self.assertRedirects(
             response, expected_url, status_code=302, target_status_code=target, fetch_redirect_response=False
         )
@@ -454,28 +459,15 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.assert_redemption_page_redirects(expected_url)
 
     @httpretty.activate
-    @ddt.data(
-        (True, 'order_number'),
-        (False, 'orderNum')
-    )
-    @ddt.unpack
-    def test_basket_redirect_enrollment_code(self, ecomm_receipt, query_string):
+    def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to the receipt page when an enrollment code is provided. """
-        self.toggle_ecommerce_receipt_page(ecomm_receipt)
+        self.toggle_ecommerce_receipt_page(True)
         code = self.create_and_test_coupon_and_return_code(benefit_value=100, code='')
-        receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
-        enrollment_api_url = '{root}enrollment'.format(root=self.site.siteconfiguration.enrollment_api_url)
-        httpretty.register_uri(httpretty.POST, enrollment_api_url, status=status.HTTP_200_OK)
-        httpretty.register_uri(httpretty.GET, receipt_page_url, status=status.HTTP_301_MOVED_PERMANENTLY)
+
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
 
-        self.assert_redemption_page_redirects(
-            receipt_page_url,
-            target=status.HTTP_301_MOVED_PERMANENTLY,
-            code=code,
-            query_string=query_string
-        )
+        self.assert_redirects_to_receipt_page(code=code)
 
     @httpretty.activate
     @mock.patch.object(EdxOrderPlacementMixin, 'place_free_order')
@@ -564,23 +556,15 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.assertEqual(response.context['error'], 'Couldn\'t find a matching Enterprise Customer for this coupon.')
 
     @httpretty.activate
-    @ddt.data(
-        (True, 'order_number'),
-        (False, 'orderNum')
-    )
-    @ddt.unpack
-    def test_enterprise_customer_successful_redemption(self, ecomm_receipt, query_string):
+    def test_enterprise_customer_successful_redemption(self):
         """ Verify the view redirects to LMS when valid consent is provided. """
-        self.toggle_ecommerce_receipt_page(ecomm_receipt)
-        receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
+        self.toggle_ecommerce_receipt_page(True)
         code = self.create_and_test_coupon_and_return_code(
             benefit_value=100,
             code='',
             enterprise_customer=ENTERPRISE_CUSTOMER
         )
         self.request.user = self.user
-        enrollment_api_url = '{root}enrollment'.format(root=self.site.siteconfiguration.enrollment_api_url)
-        httpretty.register_uri(httpretty.POST, enrollment_api_url, status=status.HTTP_200_OK)
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
@@ -594,42 +578,26 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
             ENTERPRISE_CUSTOMER
         )
 
-        self.assert_redemption_page_redirects(
-            receipt_page_url,
-            target=status.HTTP_301_MOVED_PERMANENTLY,
+        self.assert_redirects_to_receipt_page(
             code=code,
-            consent_token=consent_token,
-            query_string=query_string
+            consent_token=consent_token
         )
         last_request = httpretty.last_request()
         self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
         self.assertEqual(last_request.method, 'POST')
 
     @httpretty.activate
-    @ddt.data(
-        (True, 'order_number'),
-        (False, 'orderNum')
-    )
-    @ddt.unpack
-    def test_multiple_vouchers(self, ecomm_receipt, query_string):
+    def test_multiple_vouchers(self):
         """ Verify a redirect to LMS happens when a basket with already existing vouchers is used. """
-        self.toggle_ecommerce_receipt_page(ecomm_receipt)
-        receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
+        self.toggle_ecommerce_receipt_page(True)
         code = self.create_and_test_coupon_and_return_code(benefit_value=100, code='')
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=code))
-        enrollment_api_url = '{root}enrollment'.format(root=self.site.siteconfiguration.enrollment_api_url)
-        httpretty.register_uri(httpretty.POST, enrollment_api_url, status=status.HTTP_200_OK)
+
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        httpretty.register_uri(httpretty.GET, receipt_page_url, status=status.HTTP_301_MOVED_PERMANENTLY)
         self.mock_access_token_response()
 
-        self.assert_redemption_page_redirects(
-            receipt_page_url,
-            target=status.HTTP_301_MOVED_PERMANENTLY,
-            code=code,
-            query_string=query_string
-        )
+        self.assert_redirects_to_receipt_page(code=code)
 
     @httpretty.activate
     def test_already_enrolled_rejection(self):
