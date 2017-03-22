@@ -38,6 +38,13 @@ class Benefit(AbstractBenefit):
                 'Failed to create Benefit. Benefit value may not be a negative number.'
             )
 
+class EnterpriseCustomerUserLinkBenefit(Benefit):
+    """
+    This custom benefit covers use cases having to do with establishing relationships between an
+    Open edX user/learner and an enterprise customer (ref: http://github.com/edx/edx-enterprise)
+    """
+    pass
+
 
 class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
