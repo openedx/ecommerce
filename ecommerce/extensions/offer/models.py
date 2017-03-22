@@ -48,6 +48,47 @@ class EnterpriseCustomerUserLinkBenefit(Benefit):
         help_text='UUID for an EnterpriseCustomer from the Enterprise Service.'
     )
 
+    # The below code was bootstrapped from the example found at
+    # http://django-oscar.readthedocs.io/en/releases-1.4/howto/how_to_create_a_custom_benefit.html
+
+    # Note that we are adding a new UUID field above -- I am assuming that this cannot be a proxy
+    # model because of this, since the intent of a proxy model is to include additional behavior on
+    # top of an existing model class and in this case we also need to include additional state
+    # class Meta:
+    #     proxy = True
+
+    @property
+    def description(self):
+        """
+        This custom benefit links users to enterprise customers when orders are finalized.
+        """
+
+    def apply(self, basket, condition, offer):
+        """
+        Apply the benefit to the passed basket and mark the appropriate
+        items as consumed.
+
+        The condition and offer are passed as these are sometimes required
+        to implement the correct consumption behaviour.
+
+        Should return an instance of
+        ``oscar.apps.offer.models.ApplicationResult``
+        """
+
+        # TODO: ADD IMPLEMENTATION TO CHECK FOR DATA SHARING CONSENT REQUIREMENT,
+        # AND RESCIND OFFER IF REQUIREMENT HAS NOT BEEN MET.
+
+    def apply_deferred(self, basket, order, application):
+        """
+        Perform a 'post-order action' if one is defined for this benefit
+
+        Should return a message indicating what has happend.  This will be
+        stored with the order to provide audit of post-order benefits.
+        """
+
+        # TODO: ADD IMPLEMENTATION TO LINK CURRENT USER TO SPECIFIED ENTERPRISE CUSTOMER
+
+
 
 class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
