@@ -218,9 +218,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             try:
                 order = self.place_free_order(basket)
                 return HttpResponseRedirect(get_receipt_page_url(self.request.site.siteconfiguration, order.number))
-            except Exception as e:  # pylint: disable=broad-except
-                # If any error happens when creating an order the user is redirected
-                # to the checkout error page.
+            except:  # pylint: disable=bare-except
                 logger.exception('Failed to create a free order for basket [%d]', basket.id)
                 return HttpResponseRedirect(reverse('checkout:error'))
         return HttpResponseRedirect(reverse('basket:summary'))
