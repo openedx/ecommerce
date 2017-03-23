@@ -1,19 +1,19 @@
 {% load i18n %}
+{% load staticfiles %}
 
-<nav class="navbar navbar-default" aria-label="Account">
+<header class="navbar navbar-default">
   <div class="container">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-              data-target="#main-navbar-collapse" aria-expanded="false">
+      <button id="hamburger-button" class="navbar-toggle collapsed" type="button" aria-expanded="false">
         <span class="sr-only">{% trans "Toggle navigation" %}</span>
         <span aria-hidden="true" class="icon-bar"></span>
         <span aria-hidden="true" class="icon-bar"></span>
         <span aria-hidden="true" class="icon-bar"></span>
       </button>
-      <div class="navbar-brand">
-        <div class="navbar-brand-logo" alt="{{ platform_name }}"></div>
-      </div>
+      <h1 class="navbar-brand">
+        <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+      </h1>
     </div>
 
     <div class="collapse navbar-collapse" id="main-navbar-collapse">
@@ -45,4 +45,4 @@
       </ul>
     </div>
   </div>
-</nav>
+</header>

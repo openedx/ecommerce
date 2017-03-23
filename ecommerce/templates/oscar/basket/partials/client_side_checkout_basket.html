@@ -106,20 +106,19 @@
                 <h2 id="payment-method-region" class="title">{% trans "SELECT PAYMENT METHOD" %}</h2>
                 <div class="col-sm-12 payment-methods">
                     <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
-                        <a href="#payment-information" id="payment-method-image" aria-label={% trans "Pay with a Credit Card" %} role="button"><img aria-hidden="true" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}"></a>
+                        <a href="#payment-information" id="payment-method-image" title="{% trans "Pay with a Credit Card" %}" role="button"><img src="/static/images/credit_card_options.png" alt=""></a>
                     </div>
                     <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
                         {# Translators: Do NOT translate the name PayPal. #}
-                        <button aria-label={% trans "Pay with PayPal" %}
-                                data-track-type="click"
+                        <button data-track-type="click"
                                 data-track-event="edx.bi.ecommerce.basket.payment_selected"
                                 data-track-category="checkout"
                                 data-processor-name="paypal"
                                 data-course-id="{{ course_key }}"
                                 class="btn payment-button payment-processor-paypal"
                                 value="paypal"
-                                type="button"
-                                role="button">
+                                title="{% trans "Pay with PayPal" %}"
+                                type="button">
                         </button>
                     </div>
                 </div>
@@ -164,10 +163,11 @@
                         <i class="fa fa-lock" aria-hidden="true"></i>
                         <p class="help-block"></p>
                     </div>
-                    <label id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration (required)" %}</label>
+                    <p id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration (required)" %}</p>
                     <div class="form-group col-sm-6 col-xs-7">
-                        <select id="card-expiry-month" class="form-control pci-field" required aria-required="true">
-                            <option>{% trans "(Month)" %}</option>
+                        <select id="card-expiry-month" class="form-control pci-field" required 
+                        aria-labelledby="month-label expiration-label">
+                            <option id="month-label">{% trans "Month" %}</option>
                             {% for month in months %}
                                 <option value="{{forloop.counter|stringformat:'02d'}}">{{month}}</option>
                             {% endfor %}
@@ -175,8 +175,9 @@
                         <p class="help-block"></p>
                     </div>
                     <div class="form-group col-sm-6 col-xs-5">
-                        <select id="card-expiry-year" class="form-control pci-field" required aria-required="true">
-                            <option>{% trans "(Year)" %}</option>
+                        <select id="card-expiry-year" class="form-control pci-field" required 
+                        aria-labelledby="year-label expiration-label">
+                            <option id="year-label">{% trans "Year" %}</option>
                             {% for year in years %}
                                 <option value="{{year}}">{{year}}</option>
                             {% endfor %}
