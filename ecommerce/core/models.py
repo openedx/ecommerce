@@ -541,7 +541,7 @@ class User(AbstractUser):
             return False
         except (ConnectionError, SlumberBaseException, Timeout):
             msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
-            log.exception(msg)
+            log.warning(msg)
             return False
 
     def deactivate_account(self, site_configuration):
