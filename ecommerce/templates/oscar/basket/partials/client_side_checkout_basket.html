@@ -109,20 +109,81 @@
                     </div>
                     <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
                         {# Translators: Do NOT translate the name PayPal. #}
-                        <button data-track-type="click"
+                        <a id="paypalBtn" data-track-type="click"
                                 data-track-event="edx.bi.ecommerce.basket.payment_selected"
                                 data-track-category="checkout"
                                 data-processor-name="paypal"
                                 data-course-id="{{ course_key }}"
                                 class="btn payment-button payment-processor-paypal"
-                                value="paypal"
-                                title="{% trans "Pay with PayPal" %}"
-                                type="button">
-                        </button>
+                                title="{% trans "Pay with PayPal" %}">
+                          {% trans "Pay with PayPal" %}
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+
+          {# TODO: Obtain via npm/bower #}
+          <script src="https://js.braintreegateway.com/web/3.11.0/js/client.min.js"></script>
+          <script src="https://js.braintreegateway.com/web/3.11.0/js/paypal.min.js"></script>
+
+          <script>
+            // Fetch the button you are using to initiate the PayPal flow
+            var paypalButton = document.getElementById('paypalBtn');
+
+            // Create a Client component
+            braintree.client.create({
+              // TODO Pass via context
+              authorization: '{{ braintree_token }}'
+            }, function (clientErr, clientInstance) {
+              if (clientErr) {
+                // TODO Handle errors
+                debugger;
+              }
+              // Create PayPal component
+              braintree.paypal.create({
+                client: clientInstance
+              }, function (err, paypalInstance) {
+                // TODO Handle errors
+                paypalButton.addEventListener('click', function () {
+                  // Tokenize here!
+                  var paypalHandle = paypalInstance.tokenize({
+                    flow: 'checkout', // Required
+                    amount: {{ basket.total_incl_tax }}, // Required
+                    currency: '{{ basket.currency }}', // Required
+                    // TODO How to handle this?
+                    locale: 'en_US',
+                    enableShippingAddress: false,
+                    useraction: 'commit'
+                  }, function (tokenizeErr, tokenizationPayload) {
+                    if (tokenizeErr) {
+                      // Handle tokenization errors or premature flow closure
+
+                      switch (tokenizeErr.code) {
+                        case 'PAYPAL_POPUP_CLOSED':
+                          console.error('Customer closed PayPal popup.');
+                          break;
+                        case 'PAYPAL_ACCOUNT_TOKENIZATION_FAILED':
+                          console.error('PayPal tokenization failed. See details:', tokenizeErr.details);
+                          break;
+                        case 'PAYPAL_FLOW_FAILED':
+                          console.error('Unable to initialize PayPal flow. Are your options correct?', tokenizeErr.details);
+                          break;
+                        default:
+                          console.error('Error!', tokenizeErr);
+                      }
+                    } else {
+                      // TODO Submit payload.nonce to your server
+                      // TODO See https://developer.paypal.com/docs/accept-payments/express-checkout/ec-braintree-sdk/server-side/python/
+                      debugger;
+                    }
+                  });
+
+                  paypalHandle.focus();
+                });
+              });
+            });
+          </script>
         {% endif %}
         <div id="card-holder-information" class="form-input-elements placeholder row">
             <div role="region" aria-labelledby="card-holder-information-region">

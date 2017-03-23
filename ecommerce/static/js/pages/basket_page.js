@@ -345,36 +345,37 @@ define([
                 detectCreditCard();
             });
 
-            $('#payment-button').click(function (e) {
-                _.each($('.help-block'), function (errorMsg) {
-                    $(errorMsg).empty();  // Clear existing validation error messages.
-                });
-                $('.payment-form').attr('data-has-error', false);
-                if ($('#card-number').val()) {
-                    detectCreditCard();
-                }
-                cardInfoValidation(e);
-                cardHolderInfoValidation(e);
-                if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
-                    sdnCheck(e);
-                }
-            });
+            // TODO This should only be done for credit card payment processors.
+            // $('#payment-button').click(function (e) {
+            //     _.each($('.help-block'), function (errorMsg) {
+            //         $(errorMsg).empty();  // Clear existing validation error messages.
+            //     });
+            //     $('.payment-form').attr('data-has-error', false);
+            //     if ($('#card-number').val()) {
+            //         detectCreditCard();
+            //     }
+            //     cardInfoValidation(e);
+            //     cardHolderInfoValidation(e);
+            //     if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
+            //         sdnCheck(e);
+            //     }
+            // });
 
-            $paymentButtons.find('.payment-button').click(function (e) {
-                var $btn = $(e.target),
-                    deferred = new $.Deferred(),
-                    promise = deferred.promise(),
-                    paymentProcessor = $btn.data('processor-name'),
-                    data = {
-                        basket_id: basketId,
-                        payment_processor: paymentProcessor
-                    };
-
-                Utils.disableElementWhileRunning($btn, function () {
-                    return promise;
-                });
-                checkoutPayment(data);
-            });
+            // $paymentButtons.find('.payment-button').click(function (e) {
+            //     var $btn = $(e.target),
+            //         deferred = new $.Deferred(),
+            //         promise = deferred.promise(),
+            //         paymentProcessor = $btn.data('processor-name'),
+            //         data = {
+            //             basket_id: basketId,
+            //             payment_processor: paymentProcessor
+            //         };
+            //
+            //     Utils.disableElementWhileRunning($btn, function () {
+            //         return promise;
+            //     });
+            //     checkoutPayment(data);
+            // });
 
             // Increment the quantity field until max
             $('.spinner .btn:first-of-type').on('click', function () {

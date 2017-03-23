@@ -102,6 +102,9 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
+        'braintree': {
+            'access_token': None,
+        },
     },
 }
 # END PAYMENT PROCESSING

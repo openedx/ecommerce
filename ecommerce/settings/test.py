@@ -97,7 +97,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
-        'invoice': {}
+        'invoice': {},
+        'braintree': {
+            'access_token': None,
+        },
     },
     'other': {
         'cybersource': {
@@ -120,7 +123,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
-        'invoice': {}
+        'invoice': {},
+        'braintree': {
+            'access_token': None,
+        },
     }
 }
 

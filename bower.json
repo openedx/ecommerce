@@ -18,6 +18,7 @@
     "backbone.stickit": "~0.9.2",
     "bootstrap-sass": "~3.3.4",
     "bootstrapaccessibilityplugin": "~1.0.4",
+    "braintree-web": "~3.11.0",
     "datatables": "1.10.10",
     "edx-ux-pattern-library": "https://github.com/edx/ux-pattern-library.git#82fa1c823bc322ba8b0742f0c546a89b0c69e952",
     "fontawesome": "~4.3.0",
