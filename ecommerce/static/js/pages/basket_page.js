@@ -8,6 +8,7 @@ define([
         'underscore.string',
         'utils/utils',
         'utils/credit_card',
+        'utils/key_codes',
         'js-cookie'
     ],
     function ($,
@@ -15,6 +16,7 @@ define([
               _s,
               Utils,
               CreditCardUtils,
+              KeyCodes,
               Cookies) {
         'use strict';
 
@@ -203,6 +205,27 @@ define([
 
             Utils.toogleMobileMenuClickEvent();
 
+            $(document).keyup(function(e) {
+                switch(e.which){
+                    case KeyCodes.Escape:
+                        hideCvvTooltip();
+                        break;
+                    case KeyCodes.Tab:
+                        if($('#card-cvn-help').is(':focus')){
+                            showCvvTooltip();
+                        }
+                        break;
+                }
+            });
+
+            $('#card-cvn-help').on('click touchstart', function (event) {
+                event.preventDefault();
+                toggleCvvTooltip();
+            });
+
+            $('#card-cvn-help').blur(hideCvvTooltip);
+            $('#card-cvn-help').hover(showCvvTooltip, hideCvvTooltip);
+
             $('#voucher_form_link').on('click', function (event) {
                 event.preventDefault();
                 showVoucherForm();
@@ -388,17 +411,45 @@ define([
             $('#id_code').focus();
         }
 
+        function showCvvTooltip() {
+            $('#cvvtooltip').show();
+            $('#card-cvn-help').attr('aria-haspopup', 'false');
+            $('#card-cvn-help').attr('aria-expanded', 'true');
+        }
+
+        function hideCvvTooltip() {
+            $('#cvvtooltip').hide();
+            $('#card-cvn-help').attr('aria-haspopup', 'true');
+            $('#card-cvn-help').attr('aria-expanded', 'false');
+        }
+
+        function toggleCvvTooltip() {
+            var $cvnHelpButton = $('#card-cvn-help');
+            $('#cvvtooltip').toggle();
+            $cvnHelpButton.attr(
+                'aria-haspopup',
+                $cvnHelpButton.attr('aria-haspopup')==='true'?'false':'true'
+            );
+            $cvnHelpButton.attr(
+                'aria-expanded',
+                $cvnHelpButton.attr('aria-expanded')==='true'?'false':'true'
+            );
+        }
+
         return {
             appendCardHolderValidationErrorMsg: appendCardHolderValidationErrorMsg,
             cardInfoValidation: cardInfoValidation,
             checkoutPayment: checkoutPayment,
+            hideCvvTooltip: hideCvvTooltip,
             hideVoucherForm: hideVoucherForm,
             isCardTypeSupported: isCardTypeSupported,
             onFail: onFail,
             onReady: onReady,
             onSuccess: onSuccess,
             sdnCheck: sdnCheck,
-            showVoucherForm: showVoucherForm
+            showCvvTooltip: showCvvTooltip,
+            showVoucherForm: showVoucherForm,
+            toggleCvvTooltip: toggleCvvTooltip
         };
     }
 );

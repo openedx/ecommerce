@@ -49,6 +49,12 @@ define([
                     method: 'POST',
                     'accept-method': 'UTF-8'
                 });
+
+                /* jshint ignore:start */
+                // jscs:disable
+                window.analytics = window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.0.1";}
+                // jscs:enable
+                /* jshint ignore:end */
             });
 
             afterEach(function () {
@@ -196,6 +202,69 @@ define([
                     _.each(invalidCardTypes, function (cardType) {
                         expect(BasketPage.isCardTypeSupported(cardType)).toBeFalsy();
                     });
+                });
+
+                it('should prevent default on click behavior of the CVN help button', function () {
+                    var event = $.Event('click');
+                    BasketPage.onReady();
+                    spyOn(event, 'preventDefault');
+                    $('#card-cvn-help').trigger(event);
+                    expect(event.preventDefault).toHaveBeenCalled();
+                });
+
+                it('should close cvv help tooltip once the escape button is pressed', function () {
+                    BasketPage.onReady();
+                    $(document).trigger($.Event('keyup', { which: 27 }));
+                    expect($('#cvvtooltip').is(':visible')).toBeFalsy();
+                });
+
+                it('should toggle cvv help tooltip on help button click', function () {
+                    var $cvvtooltip = $('#cvvtooltip'),
+                        $helpbutton = $('#card-cvn-help');
+                    BasketPage.onReady();
+
+                    $helpbutton.click();
+                    expect($cvvtooltip.is(':visible')).toBeTruthy();
+                    expect($helpbutton.attr('aria-haspopup')).toEqual('false');
+                    expect($helpbutton.attr('aria-expanded')).toEqual('true');
+
+                    $helpbutton.click();
+                    expect($cvvtooltip.is(':visible')).toBeFalsy();
+                    expect($helpbutton.attr('aria-haspopup')).toEqual('true');
+                    expect($helpbutton.attr('aria-expanded')).toEqual('false');
+                });
+
+                it('should toggle cvv help tooltip on mouse hover', function () {
+                    var $cvvtooltip = $('#cvvtooltip'),
+                        $helpbutton = $('#card-cvn-help');
+                    BasketPage.onReady();
+
+                    $helpbutton.trigger('mouseover');
+                    expect($cvvtooltip.is(':visible')).toBeTruthy();
+                    expect($helpbutton.attr('aria-haspopup')).toEqual('false');
+                    expect($helpbutton.attr('aria-expanded')).toEqual('true');
+
+                    $helpbutton.trigger('mouseout');
+                    expect($cvvtooltip.is(':visible')).toBeFalsy();
+                    expect($helpbutton.attr('aria-haspopup')).toEqual('true');
+                    expect($helpbutton.attr('aria-expanded')).toEqual('false');
+                });
+
+                it('should toggle cvv help tooltip on focus for keyboard users', function () {
+                    var $cvvtooltip = $('#cvvtooltip'),
+                        $helpbutton = $('#card-cvn-help');
+                    BasketPage.onReady();
+
+                    $helpbutton.trigger('focus');
+                    $(document).trigger($.Event('keyup', { which: 9 }));
+                    expect($cvvtooltip.is(':visible')).toBeTruthy();
+                    expect($helpbutton.attr('aria-haspopup')).toEqual('false');
+                    expect($helpbutton.attr('aria-expanded')).toEqual('true');
+
+                    $helpbutton.trigger('blur');
+                    expect($cvvtooltip.is(':visible')).toBeFalsy();
+                    expect($helpbutton.attr('aria-haspopup')).toEqual('true');
+                    expect($helpbutton.attr('aria-expanded')).toEqual('false');
                 });
             });
 
