@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-23 11:31+0000\n"
+"POT-Creation-Date: 2017-03-23 03:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "A valid course ID is required"
 msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:102
-#, c-format
+#, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
@@ -186,11 +186,11 @@ msgstr ""
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:303
+#: ecommerce/static/js/pages/basket_page.js:305
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:304
+#: ecommerce/static/js/pages/basket_page.js:306
 msgid "State/Province (required)"
 msgstr ""
 
@@ -230,16 +230,8 @@ msgstr ""
 msgid "Redeem"
 msgstr ""
 
-#: ecommerce/static/js/utils/utils.js:181
+#: ecommerce/static/js/utils/utils.js:183
 msgid "Trailing comma not allowed."
-msgstr ""
-
-#: ecommerce/static/js/utils/validation_patterns.js:15
-msgid "The course ID is invalid."
-msgstr ""
-
-#: ecommerce/static/js/utils/validation_patterns.js:23
-msgid "The product name cannot contain HTML."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
@@ -341,12 +333,15 @@ msgid "Professional Education"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:68
-msgid "Paid certificate track with initial verification and Professional "
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:74
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.

@@ -138,6 +138,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         template_name = 'coupons/_offer_error.html'
         code = request.GET.get('code')
         sku = request.GET.get('sku')
+        failure_url = request.GET.get('failure_url')
 
         if not code:
             return render(request, template_name, {'error': _('Code not provided.')})
@@ -209,7 +210,8 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                     sku,
                     consent_token,
                     product.course.id,
-                    enterprise_customer['id']
+                    enterprise_customer['id'],
+                    failure_url=failure_url
                 )
                 return HttpResponseRedirect(redirect_url)
 

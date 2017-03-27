@@ -5,11 +5,13 @@ import urllib
 
 import ddt
 import httpretty
+import mock
 import pytz
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.test import override_settings
 from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
@@ -539,6 +541,28 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
             self.assertEqual(line_data['course_start'], expected_result)
             self.assertEqual(line_data['course_end'], expected_result)
 
+    def test_failed_enterprise_consent_sends_message(self):
+        """
+        Test that if we receive an indication via a query parameter that data sharing
+        consent was attempted, but failed, we send a message indicating such.
+        """
+        seat = self.create_seat(self.course)
+        self.create_basket_and_add_product(seat)
+
+        params = 'consent_failed=THISISACOUPONCODE'
+
+        url = '{path}?{params}'.format(
+            path=self.get_full_url(self.path),
+            params=params
+        )
+        response = self.client.get(url)
+        message = list(response.context['messages'])[0]
+
+        self.assertEqual(
+            str(message),
+            'Could not apply the code \'THISISACOUPONCODE\'; it requires data sharing consent.'
+        )
+
 
 class VoucherAddViewTests(TestCase):
     """ Tests for VoucherAddView. """
@@ -621,6 +645,30 @@ class VoucherAddViewTests(TestCase):
         voucher = factories.VoucherFactory(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
         self.form.cleaned_data = {'code': voucher.code}
         self.assert_form_valid_message("Coupon code '{code}' is not active.".format(code=voucher.code))
+
+    @mock.patch('ecommerce.extensions.basket.views.get_enterprise_customer_from_voucher')
+    def test_redirects_with_enterprise_customer(self, get_ec):
+        """
+        Test that when a coupon code is entered on the checkout page, and that coupon code is
+        linked to an EnterpriseCustomer, the user is kicked over to the RedeemCoupon flow.
+        """
+        get_ec.return_value = {'value': 'othervalue'}
+        __, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
+        resp = self.view.form_valid(self.form)
+        self.assertIsInstance(resp, HttpResponseRedirect)
+
+        stock_record = Selector().strategy().fetch_for_product(product).stockrecord
+
+        expected_url_parts = (
+            reverse('coupons:redeem'),
+            'sku={sku}'.format(sku=stock_record.partner_sku),
+            'code={code}'.format(code=COUPON_CODE),
+            'failure_url=http%3A%2F%2Ftestserver%2Fbasket%2F%3Fconsent_failed%3D{code}'.format(code=COUPON_CODE)
+        )
+
+        for part in expected_url_parts:
+            self.assertIn(part, resp.url)
 
 
 class VoucherRemoveViewTests(TestCase):

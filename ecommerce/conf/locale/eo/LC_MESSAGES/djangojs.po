@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-23 11:31+0000\n"
+"POT-Creation-Date: 2017-03-23 03:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,7 +46,7 @@ msgid "A valid course ID is required"
 msgstr "À välïd çöürsé ÌD ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/static/js/models/coupon_model.js
-#, c-format
+#, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "Émäïl dömäïn {%s} ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
@@ -255,16 +255,6 @@ msgstr "Rédéém Ⱡ'σяєм ιρѕυ#"
 msgid "Trailing comma not allowed."
 msgstr "Träïlïng çömmä nöt ällöwéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
-#: ecommerce/static/js/utils/validation_patterns.js
-msgid "The course ID is invalid."
-msgstr "Thé çöürsé ÌD ïs ïnvälïd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
-
-#: ecommerce/static/js/utils/validation_patterns.js
-msgid "The product name cannot contain HTML."
-msgstr ""
-"Thé prödüçt nämé çännöt çöntäïn HTML. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυ#"
-
 #: ecommerce/static/js/views/coupon_detail_view.js
 #: ecommerce/static/js/views/coupon_form_view.js
 msgid "Can be used once by one customer"
@@ -376,17 +366,20 @@ msgid "Professional Education"
 msgstr "Pröféssïönäl Édüçätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: ecommerce/static/js/views/course_form_view.js
-msgid "Paid certificate track with initial verification and Professional "
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
 msgstr ""
-"Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Pröféssïönäl  Ⱡ'σяєм "
-"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+"Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Pröféssïönäl Édüçätïön "
+"Çértïfïçäté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
 #: ecommerce/static/js/views/course_form_view.js
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
 msgstr ""
-"Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Vérïfïéd Çértïfïçäté,  "
-"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
+"Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Vérïfïéd Çértïfïçäté, "
+"änd öptïön tö pürçhäsé çrédït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
