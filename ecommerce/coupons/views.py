@@ -20,8 +20,11 @@ from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.utils import (
-    get_enterprise_course_consent_url, get_enterprise_customer_consent_failed_context_data,
-    get_enterprise_customer_data_sharing_consent_token, get_enterprise_customer_from_voucher
+    enterprise_customer_user_needs_consent,
+    get_enterprise_course_consent_url,
+    get_enterprise_customer_consent_failed_context_data,
+    get_enterprise_customer_data_sharing_consent_token,
+    get_enterprise_customer_from_voucher
 )
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
@@ -185,7 +188,12 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 {'error': _('Couldn\'t find a matching Enterprise Customer for this coupon.')}
             )
 
-        if enterprise_customer is not None and enterprise_customer.get('enable_data_sharing_consent'):
+        if enterprise_customer is not None and enterprise_customer_user_needs_consent(
+                request.site,
+                enterprise_customer['id'],
+                product.course.id,
+                request.user.username,
+        ):
             consent_token = get_enterprise_customer_data_sharing_consent_token(
                 request.user.access_token,
                 product.course.id,
