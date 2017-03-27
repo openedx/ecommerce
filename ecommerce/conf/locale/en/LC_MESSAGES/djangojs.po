@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-23 03:51+0000\n"
+"POT-Creation-Date: 2017-03-30 13:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "A valid course ID is required"
 msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:102
-#, javascript-format
+#, c-format
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
@@ -154,43 +154,43 @@ msgstr ""
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:27
+#: ecommerce/static/js/pages/basket_page.js:29
 msgid "Problem occurred during checkout. Please contact support"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:94
+#: ecommerce/static/js/pages/basket_page.js:96
 msgid "This field is required"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:122
+#: ecommerce/static/js/pages/basket_page.js:124
 msgid "Invalid card number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:124
+#: ecommerce/static/js/pages/basket_page.js:126
 msgid "Unsupported card type"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:126
+#: ecommerce/static/js/pages/basket_page.js:128
 msgid "Invalid security number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:131
+#: ecommerce/static/js/pages/basket_page.js:133
 msgid "Invalid month"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:133
+#: ecommerce/static/js/pages/basket_page.js:135
 msgid "Invalid year"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:135
+#: ecommerce/static/js/pages/basket_page.js:137
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:305
+#: ecommerce/static/js/pages/basket_page.js:327
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:306
+#: ecommerce/static/js/pages/basket_page.js:328
 msgid "State/Province (required)"
 msgstr ""
 
@@ -232,6 +232,14 @@ msgstr ""
 
 #: ecommerce/static/js/utils/utils.js:183
 msgid "Trailing comma not allowed."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:15
+msgid "The course ID is invalid."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:23
+msgid "The product name cannot contain HTML."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
@@ -333,15 +341,12 @@ msgid "Professional Education"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:68
-msgid ""
-"Paid certificate track with initial verification and Professional Education "
-"Certificate"
+msgid "Paid certificate track with initial verification and Professional "
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:74
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
-"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.

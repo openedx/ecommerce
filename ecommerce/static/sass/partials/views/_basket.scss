@@ -328,7 +328,6 @@
             &.payment-processor-paypal {
                 background-image: url('/static/images/paypal_logo.png');
 
-                &:hover,
                 &:focus {
                     outline: dotted 1px #000;
                 }
@@ -398,6 +397,17 @@
 
                     #payment-button {
                         margin-top: 20px;
+                    }
+
+                    #card-cvn-help {
+                        border: none;
+                        padding: 0;
+                        background: white;
+                    }
+
+                    #cvvtooltip {
+                        top: 29px;
+                        left: 20%;
                     }
 
                     .fa-lock {

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-23 03:51+0000\n"
+"POT-Creation-Date: 2017-03-30 13:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,7 +182,6 @@ msgid "This coupon code has expired."
 msgstr ""
 
 #: ecommerce/coupons/views.py:82
-#, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr ""
 
@@ -235,7 +234,6 @@ msgid "Last date/time on which verification for this product can be submitted."
 msgstr ""
 
 #: ecommerce/courses/publishers.py:86
-#, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr ""
 
@@ -266,7 +264,6 @@ msgid ""
 msgstr ""
 
 #: ecommerce/credit/views.py:63
-#, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
 "currently enrolled in the course, please try again after all grading is "
@@ -281,31 +278,26 @@ msgid ""
 msgstr ""
 
 #: ecommerce/enterprise/utils.py:105
-#, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr ""
 
 #: ecommerce/enterprise/utils.py:113
-#, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr ""
 
 #: ecommerce/enterprise/utils.py:121
-#, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr ""
 
 #: ecommerce/enterprise/utils.py:124
-#, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr ""
 
 #: ecommerce/enterprise/utils.py:130
-#, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr ""
 
@@ -328,7 +320,6 @@ msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:341
-#, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
@@ -341,7 +332,6 @@ msgid "Products must have a price."
 msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:380
-#, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
 "[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not "
@@ -370,7 +360,6 @@ msgid "Site"
 msgstr ""
 
 #: ecommerce/extensions/basket/models.py:54
-#, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr ""
 
@@ -401,17 +390,14 @@ msgid "No SKU provided."
 msgstr ""
 
 #: ecommerce/extensions/basket/views.py:57
-#, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr ""
 
 #: ecommerce/extensions/basket/views.py:66
-#, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr ""
 
 #: ecommerce/extensions/basket/views.py:81
-#, python-brace-format
 msgid "You are already enrolled in {course}."
 msgstr ""
 
@@ -436,46 +422,38 @@ msgid ""
 msgstr ""
 
 #: ecommerce/extensions/basket/views.py:203
-#, python-brace-format
 msgid "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr ""
 
 #: ecommerce/extensions/basket/views.py:284
-#, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:339
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:338
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:346
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:345
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:353
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:352
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:377
+#: ecommerce/extensions/basket/views.py:376
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:382
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:381
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:392
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:391
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:400
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:399
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
 
@@ -500,10 +478,9 @@ msgid "Email"
 msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:72
-#, python-brace-format
 msgid ""
-"{link_start}Refund #{refund_id}{link_end} created! Click {link_start}"
-"here{link_end} to view it."
+"{link_start}Refund #{refund_id}{link_end} created! Click {link_start}here"
+"{link_end} to view it."
 msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:76
@@ -552,12 +529,10 @@ msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:61
-#, python-brace-format
 msgid "{benefit_value}%"
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:64
-#, python-brace-format
 msgid "${benefit_value}"
 msgstr ""
 
@@ -616,7 +591,6 @@ msgstr ""
 #. fields on the payment form. For example, the first name field is
 #. required, so this would read "First name (required)".
 #: ecommerce/extensions/payment/forms.py:85
-#, python-brace-format
 msgid "{label} (required)"
 msgstr ""
 
@@ -659,7 +633,6 @@ msgid "This field is required."
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:120
-#, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
 msgstr ""
 
@@ -779,7 +752,6 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:307
 #: ecommerce/extensions/voucher/utils.py:78
 #: ecommerce/extensions/voucher/utils.py:116
-#, python-brace-format
 msgid "{percentage} %"
 msgstr ""
 
@@ -899,12 +871,10 @@ msgid "Email Domains"
 msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:473
-#, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr ""
 
 #: ecommerce/extensions/voucher/views.py:29
-#, python-brace-format
 msgid "Coupon Report for {coupon_name}"
 msgstr ""
 
@@ -1760,26 +1730,30 @@ msgstr ""
 msgid "Security Code (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:159
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:161
+msgid "Help with CVV"
+msgstr ""
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:164
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:165
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:171
 msgid "Expiration (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:169
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:175
 msgid "Month"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:185
 msgid "Year"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:197
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:207
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:203
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:213
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:148
 msgid "Place Order"
 msgstr ""
