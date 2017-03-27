@@ -68,7 +68,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             Applicator().apply(basket, basket.owner, self.request)
             return basket
         except MultipleObjectsReturned:
-            logger.exception(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
+            logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
             return None
         except Exception:  # pylint: disable=broad-except
             logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")

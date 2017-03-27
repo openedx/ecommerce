@@ -256,7 +256,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 ),
                 (
                     logger_name,
-                    'ERROR',
+                    'WARNING',
                     'Duplicate payment ID [{payment_id}] received from PayPal.'.format(payment_id=self.PAYMENT_ID),
                 ),
             )
