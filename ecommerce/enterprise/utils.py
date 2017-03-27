@@ -179,7 +179,15 @@ def get_enterprise_customer_from_voucher(site, voucher):
     return enterprise_customer
 
 
-def get_enterprise_course_consent_url(site, code, sku, consent_token, course_id, enterprise_customer_uuid):
+def get_enterprise_course_consent_url(
+        site,
+        code,
+        sku,
+        consent_token,
+        course_id,
+        enterprise_customer_uuid,
+        failure_url=None
+):
     """
     Construct the URL that should be used for redirecting the user to the Enterprise service for
     collecting consent. The URL contains a specially crafted "next" parameter that will result
@@ -198,7 +206,7 @@ def get_enterprise_course_consent_url(site, code, sku, consent_token, course_id,
             'consent_token': consent_token,
         })
     )
-    failure_url = '{base}{resource}?{params}'.format(
+    failure_url = failure_url or '{base}{resource}?{params}'.format(
         base=base_url,
         resource=reverse('coupons:offer'),
         params=urlencode(OrderedDict([
