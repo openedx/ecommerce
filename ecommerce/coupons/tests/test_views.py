@@ -446,6 +446,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         )
         self.request.user = self.user
         self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        self.mock_enterprise_learner_api(consent_provided=False)
+        self.mock_enterprise_course_enrollment_api(results_present=False)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
@@ -477,6 +479,14 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     def test_enterprise_customer_invalid_consent_token(self):
         """ Verify that the view renders an error when the consent token doesn't match. """
         code = self.prepare_enterprise_data()
+        self.request.user = self.user
+        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        self.mock_access_token_response()
+        self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
+        self.mock_enterprise_learner_api(consent_provided=False)
+        self.mock_enterprise_course_enrollment_api(results_present=False)
+
         response = self.client.get(self.redeem_url_with_params(code=code, consent_token='invalid_consent_token'))
         self.assertEqual(response.context['error'], 'Invalid data sharing consent token provided.')
 
@@ -488,6 +498,7 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         """
         code = self.prepare_enterprise_data()
         self.mock_enterprise_customer_api_not_found(ENTERPRISE_CUSTOMER)
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         response = self.client.get(self.redeem_url_with_params(code=code))
         self.assertEqual(response.context['error'], 'Couldn\'t find a matching Enterprise Customer for this coupon.')
 

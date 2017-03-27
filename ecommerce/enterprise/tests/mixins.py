@@ -18,6 +18,9 @@ class EnterpriseServiceMockMixin(TestCase):
     ENTERPRISE_LEARNER_URL = '{}enterprise-learner/'.format(
         settings.ENTERPRISE_API_URL,
     )
+    ENTERPRISE_COURSE_ENROLLMENT_URL = '{}enterprise-course-enrollment/'.format(
+        settings.ENTERPRISE_API_URL,
+    )
 
     def setUp(self):
         super(EnterpriseServiceMockMixin, self).setUp()
@@ -73,7 +76,7 @@ class EnterpriseServiceMockMixin(TestCase):
             content_type='application/json'
         )
 
-    def mock_specific_enterprise_customer_api(self, uuid, name='TestShib', contact_email=''):
+    def mock_specific_enterprise_customer_api(self, uuid, name='TestShib', contact_email='', consent_enabled=True):
         """
         Helper function to register the enterprise customer API endpoint.
         """
@@ -86,7 +89,7 @@ class EnterpriseServiceMockMixin(TestCase):
                 'domain': 'example.com',
                 'name': 'example.com'
             },
-            'enable_data_sharing_consent': True,
+            'enable_data_sharing_consent': consent_enabled,
             'enforce_data_sharing_consent': 'at_login',
             'enterprise_customer_users': [
                 1
@@ -134,7 +137,9 @@ class EnterpriseServiceMockMixin(TestCase):
             catalog_id=1,
             entitlement_id=1,
             learner_id=1,
-            enterprise_customer_uuid='cf246b88-d5f6-4908-a522-fc307e0b0c59'
+            enterprise_customer_uuid='cf246b88-d5f6-4908-a522-fc307e0b0c59',
+            consent_enabled=True,
+            consent_provided=True
     ):
         """
         Helper function to register enterprise learner API endpoint.
@@ -155,7 +160,7 @@ class EnterpriseServiceMockMixin(TestCase):
                             'domain': 'example.com',
                             'name': 'example.com'
                         },
-                        'enable_data_sharing_consent': True,
+                        'enable_data_sharing_consent': consent_enabled,
                         'enforce_data_sharing_consent': 'at_login',
                         'enterprise_customer_users': [
                             1
@@ -184,8 +189,8 @@ class EnterpriseServiceMockMixin(TestCase):
                     'data_sharing_consent': [
                         {
                             'user': 1,
-                            'state': 'enabled',
-                            'enabled': True
+                            'state': 'enabled' if consent_provided else 'disabled',
+                            'enabled': consent_provided
                         }
                     ]
                 }
@@ -375,5 +380,48 @@ class EnterpriseServiceMockMixin(TestCase):
                 base_url=self.ENTERPRISE_LEARNER_URL, learner_id=learner_id,
             ),
             body=learner_entitlements_json,
+            content_type='application/json'
+        )
+
+    def mock_enterprise_course_enrollment_api(
+            self,
+            ec_user_id=1,
+            consent_granted=True,
+            course_id='course-v1:edX+DemoX+Demo_Course',
+            results_present=True
+    ):
+        """
+        Helper function to register enterprise course enrollment API endpoint for a
+        learner with an existing enterprise enrollment in a course.
+        """
+        enterprise_enrollment_api_response = {
+            'count': 1,
+            'num_pages': 1,
+            'current_page': 1,
+            'results': [
+                {
+                    'enterprise_customer_user': ec_user_id,
+                    'consent_granted': consent_granted,
+                    'course_id': course_id,
+                }
+            ],
+            'next': None,
+            'start': 0,
+            'previous': None
+        } if results_present else {
+            'count': 0,
+            'num_pages': 1,
+            'current_page': 1,
+            'results': [],
+            'next': None,
+            'start': 0,
+            'previous': None
+        }
+        enterprise_enrollment_api_response_json = json.dumps(enterprise_enrollment_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=self.ENTERPRISE_COURSE_ENROLLMENT_URL,
+            body=enterprise_enrollment_api_response_json,
             content_type='application/json'
         )
