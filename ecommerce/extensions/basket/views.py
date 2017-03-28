@@ -295,7 +295,6 @@ class BasketSummaryView(BasketView):
             'analytics_data': prepare_analytics_data(
                 user,
                 site_configuration.segment_key,
-                unicode(course_key)
             ),
             'enable_client_side_checkout': False,
             'sdn_check': site_configuration.enable_sdn_check

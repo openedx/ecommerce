@@ -17,9 +17,8 @@ class UtilsTest(TestCase):
             email='test@example.com',
             tracking_context={'lms_user_id': '1235123'}
         )
-        data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key, 'a/b/c')
+        data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key)
         self.assertDictEqual(json.loads(data), {
-            'course': {'courseId': 'a/b/c'},
             'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
             'user': {'user_tracking_id': '1235123', 'name': 'John Doe', 'email': 'test@example.com'}
         })
@@ -27,9 +26,8 @@ class UtilsTest(TestCase):
     def test_anon_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for an anonymous user."""
         user = AnonymousUser()
-        data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key, 'a/b/c')
+        data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key)
         self.assertDictEqual(json.loads(data), {
-            'course': {'courseId': 'a/b/c'},
             'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
             'user': 'AnonymousUser'
         })

@@ -87,21 +87,17 @@ def audit_log(name, **kwargs):
     logger.info(message)
 
 
-def prepare_analytics_data(user, segment_key, course_id=None):
+def prepare_analytics_data(user, segment_key):
     """ Helper function for preparing necessary data for analytics.
 
     Arguments:
         user (User): The user making the request.
         segment_key (str): Segment write/API key.
-        course_id (str): The course ID.
 
     Returns:
         str: JSON object with the data for analytics.
     """
     data = {
-        'course': {
-            'courseId': course_id
-        },
         'tracking': {
             'segmentApplicationId': segment_key
         }

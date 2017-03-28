@@ -7,7 +7,6 @@ define([
         'utils/analytics_utils',
         'models/tracking_model',
         'models/user_model',
-        'views/analytics_view',
         'js-cookie',
         'moment'
     ],
@@ -19,7 +18,6 @@ define([
               AnalyticsUtils,
               TrackingModel,
               UserModel,
-              AnalyticsView,
               Cookies,
               moment) {
         'use strict';
@@ -468,15 +466,15 @@ define([
                     spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function () {
                         return true;
                     });
-                    spyOn(AnalyticsView.prototype, 'track');
+                    spyOn(window.analytics, 'page');
+                    spyOn(window.analytics, 'track');
                     AnalyticsUtils.analyticsSetUp();
                     BasketPage.onReady();
-                    spyOn(window.analytics, 'page');
                 });
 
                 it('should trigger voucher applied analytics event', function () {
                     $('button.apply_voucher').trigger('click');
-                    expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
+                    expect(window.analytics.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.basket.voucher_applied',
                         {type: 'click'}
                     );
@@ -484,14 +482,14 @@ define([
 
                 it('should trigger checkout analytics event', function () {
                     $('button.payment-button').trigger('click');
-                    expect(AnalyticsView.prototype.track).toHaveBeenCalledWith(
+                    expect(window.analytics.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.basket.payment_selected',
                         {category: 'cybersource', type: 'click'}
                     );
                 });
 
                 it('should trigger page load analytics event', function () {
-                    $('<script type="text/javascript">var initModelData = {"course": {"courseId": "a/b/c"}};</script>')
+                    $('<script type="text/javascript">var initModelData = {};</script>')
                         .appendTo('body');
                     AnalyticsUtils.analyticsSetUp();
                     expect(window.analytics.page).toHaveBeenCalled();

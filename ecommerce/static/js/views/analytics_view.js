@@ -1,9 +1,8 @@
 define([
         'jquery',
-        'backbone',
-        'underscore'
+        'backbone'
     ],
-    function ($, Backbone, _) {
+    function ($, Backbone) {
         'use strict';
 
         /**
@@ -42,7 +41,7 @@ define([
                     // kick off segment
                     this.initSegment(trackId);
                     this.logUser();
-                    this.recordPageData();
+                    analytics.page();
 
                     // now segment has been loaded, we can track events
                     this.listenTo(this.model, 'segment:track', this.track);
@@ -68,19 +67,6 @@ define([
             },
 
             /**
-             * Get data for initializing segment and record the initial page load.
-             */
-            recordPageData: function () {
-                var pageData = {};
-
-                if (this.options.courseModel.get('courseId')) {
-                    pageData = this.buildCourseProperties();
-                }
-
-                analytics.page(pageData);
-            },
-
-            /**
              * Log the user.
              */
             logUser: function () {
@@ -102,31 +88,16 @@ define([
                 );
             },
 
-            buildCourseProperties: function() {
-                var course = {};
-
-                if (this.options.courseModel) {
-                    course.courseId = this.options.courseModel.get('courseId');
-                }
-
-                if (this.model.has('page')) {
-                    course.label = this.model.get('page');
-                }
-
-                return course;
-            },
-
-            /**
-             * Catch 'segment:track' events and create events and send
-             * to Segment.
-             *
-             * @param eventType String event type.
-             */
+          /**
+           * Catch 'segment:track' events and create events and send
+           * to Segment.
+           *
+           * @param eventType String event type.
+           * @param properties Event properties.
+           */
             track: function (eventType, properties) {
-                var course = this.buildCourseProperties();
-
-                // send event to segment including the course ID
-                analytics.track(eventType, _.extend(course, properties));
+                // https://segment.com/docs/sources/website/analytics.js/#track
+                analytics.track(eventType, properties);
             }
         });
     }
