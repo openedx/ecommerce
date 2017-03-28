@@ -12,7 +12,6 @@ from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -37,13 +36,16 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
         return super(FreeCheckoutView, self).dispatch(*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
-        basket = Basket.get_basket(self.request.user, self.request.site)
+        request = self.request
+        site = request.site
+        basket = Basket.get_basket(request.user, site)
+
         if not basket.is_empty:
             # Need to re-apply the voucher to the basket.
-            Applicator().apply(basket, self.request.user, self.request)
+            Applicator().apply(basket, request.user, request)
             if basket.total_incl_tax != Decimal(0):
                 raise BasketNotFreeError(
-                    "Basket [{}] is not free. User affected [{}]".format(
+                    'Basket [{}] is not free. User affected [{}]'.format(
                         basket.id,
                         basket.owner.id
                     )
@@ -54,7 +56,8 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                 order_number=order.number,
                 site_configuration=order.site.siteconfiguration
             )
-            url = get_lms_url(receipt_path)
+
+            url = site.siteconfiguration.build_lms_url(receipt_path)
         else:
             # If a user's basket is empty redirect the user to the basket summary
             # page which displays the appropriate message for empty baskets.
@@ -182,9 +185,11 @@ class ReceiptResponseView(ThankYouView):
     def get_order_verification_context(self, order):
         context = {}
         verified_course_id = None
+        request = self.request
+        site = request.site
 
         # NOTE: Only display verification and credit completion details to the user who actually placed the order.
-        if self.request.user == order.user:
+        if request.user == order.user:
             for line in order.lines.all():
                 product = line.product
 
@@ -193,12 +198,8 @@ class ReceiptResponseView(ThankYouView):
 
             if verified_course_id:
                 context.update({
-                    'verification_url': get_lms_url(
-                        'verify_student/verify-now/{course_id}'.format(
-                            course_id=verified_course_id
-                        )
-                    ),
-                    'user_verified': self.request.user.is_verified(self.request.site),
+                    'verification_url': site.siteconfiguration.build_lms_url('verify_student/reverify'),
+                    'user_verified': request.user.is_verified(site),
                 })
 
         return context
