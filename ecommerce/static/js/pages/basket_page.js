@@ -171,7 +171,6 @@ define([
         function sdnCheck(event) {
             var first_name = $('input[name=first_name]').val(),
                 last_name = $('input[name=last_name]').val(),
-                address = $('input[name=address_line1]').val(),
                 city = $('input[name=city]').val(),
                 country = $('select[name=country]').val();
 
@@ -185,7 +184,7 @@ define([
                 },
                 data: JSON.stringify({
                     'name': _s.sprintf('%s %s', first_name, last_name),
-                    'address': _s.sprintf('%s, %s', address, city),
+                    'address': city,
                     'country': country
                 }),
                 async: false,
