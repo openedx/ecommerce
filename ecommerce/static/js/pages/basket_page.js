@@ -184,7 +184,7 @@ define([
                 },
                 data: JSON.stringify({
                     'name': _s.sprintf('%s %s', first_name, last_name),
-                    'address': city,
+                    'city': city,
                     'country': country
                 }),
                 async: false,

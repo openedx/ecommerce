@@ -21,7 +21,7 @@ class SDNCheckViewSet(APIView):
         or failed.
         """
         name = request.data['name']
-        address = request.data['address']
+        city = request.data['city']
         country = request.data['country']
         hits = 0
 
@@ -35,13 +35,13 @@ class SDNCheckViewSet(APIView):
                 sdn_list=site_configuration.sdn_api_list
             )
             try:
-                response = sdn_check.search(name, address, country)
+                response = sdn_check.search(name, city, country)
                 hits = response['total']
                 if hits > 0:
                     sdn_check.deactivate_user(
                         basket,
                         name,
-                        address,
+                        city,
                         country,
                         response
                     )
