@@ -304,7 +304,7 @@ define([
                         expect(args.url).toEqual('/api/v2/sdn/search/');
                         expect(args.contentType).toEqual('application/json; charset=utf-8');
                         expect(ajaxData.name).toEqual(_s.sprintf('%s %s', first_name, last_name));
-                        expect(ajaxData.address).toEqual(_s.sprintf('%s, %s', address, city));
+                        expect(ajaxData.address).toEqual(city);
                         expect(ajaxData.country).toEqual(country);
                     });
                 });
