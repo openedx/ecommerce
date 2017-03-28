@@ -6,7 +6,6 @@ define([
         'utils/utils',
         'models/user_model',
         'models/tracking_model',
-        'models/course_model',
         'views/clickable_view',
         'views/analytics_view'
     ],
@@ -17,28 +16,24 @@ define([
               Utils,
               UserModel,
               TrackingModel,
-              CourseModel,
               ClickableView,
               AnalyticsView) {
         'use strict';
 
         return {
             analyticsSetUp: function () {
-                var courseModel = new CourseModel(),
-                    trackingModel = new TrackingModel(),
+                var trackingModel = new TrackingModel(),
                     userModel = new UserModel();
 
                 /* jshint ignore:start */
                 // initModelData is set by the Django template at render time.
                 trackingModel.set(initModelData.tracking);
                 userModel.set(initModelData.user);
-                courseModel.set(initModelData.course);
                 /* jshint ignore:end */
 
                 new AnalyticsView({
                     model: trackingModel,
-                    userModel: userModel,
-                    courseModel: courseModel
+                    userModel: userModel
                 });
 
                 // instrument the click events

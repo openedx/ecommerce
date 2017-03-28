@@ -83,7 +83,6 @@ class Checkout(TemplateView):
             'analytics_data': prepare_analytics_data(
                 self.request.user,
                 self.request.site.siteconfiguration.segment_key,
-                course.id
             ),
             'course': course,
             'deadline': deadline,
