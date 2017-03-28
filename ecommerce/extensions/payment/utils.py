@@ -73,7 +73,7 @@ class SDNClient(object):
         self.api_key = api_key
         self.sdn_list = sdn_list
 
-    def search(self, name, address, country):
+    def search(self, name, city, country):
         """
         Searches the OFAC list for an individual with the specified details.
         The check returns zero hits if:
@@ -83,7 +83,7 @@ class SDNClient(object):
 
         Args:
             name (str): Individual's full name.
-            address (str): Individual's address.
+            city (str): Individual's city.
             country (str): ISO 3166-1 alpha-2 country code where the individual is from.
         Returns:
             dict: SDN API response.
@@ -93,7 +93,9 @@ class SDNClient(object):
             'api_key': self.api_key,
             'type': 'individual',
             'name': unicode(name).encode('utf-8'),
-            'address': unicode(address).encode('utf-8'),
+            # We are using the city as the address parameter value as indicated in the documentation:
+            # http://developer.trade.gov/consolidated-screening-list.html
+            'address': unicode(city).encode('utf-8'),
             'countries': country
         })
         sdn_check_url = '{api_url}?{params}'.format(
@@ -116,13 +118,13 @@ class SDNClient(object):
 
         return json.loads(response.content)
 
-    def deactivate_user(self, basket, name, address, country, search_results):
+    def deactivate_user(self, basket, name, city, country, search_results):
         """ Deactivates a user account.
 
         Args:
             basket (Basket): The user's basket.
             name (str): The user's name.
-            address (str): The user's address.
+            city (str): The user's city.
             country (str): ISO 3166-1 alpha-2 country code where the individual is from.
             search_results (dict): Results from a call to `search` that will
                 be recorded as the reason for the deactivation.
@@ -131,7 +133,7 @@ class SDNClient(object):
         snd_failure = SDNCheckFailure.objects.create(
             full_name=name,
             username=basket.owner.username,
-            address=address,
+            city=city,
             country=country,
             site=site,
             sdn_check_response=search_results

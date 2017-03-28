@@ -44,7 +44,7 @@ class SDNCheckTests(TestCase):
     def setUp(self):
         super(SDNCheckTests, self).setUp()
         self.name = 'Dr. Evil'
-        self.address = 'Top-secret lair'
+        self.city = 'Top-secret lair'
         self.country = 'EL'
         self.user = self.create_user(full_name=self.name)
         self.site_configuration = self.site.siteconfiguration
@@ -67,7 +67,7 @@ class SDNCheckTests(TestCase):
             'api_key': self.site_configuration.sdn_api_key,
             'type': 'individual',
             'name': unicode(self.name).encode('utf-8'),
-            'address': unicode(self.address).encode('utf-8'),
+            'address': unicode(self.city).encode('utf-8'),
             'countries': self.country
         })
         sdn_check_url = '{api_url}?{params}'.format(
@@ -94,7 +94,7 @@ class SDNCheckTests(TestCase):
         self.mock_sdn_response(mock_timeout, status_code=200)
         with self.assertRaises(Timeout):
             with mock.patch('ecommerce.extensions.payment.utils.logger.exception') as mock_logger:
-                self.sdn_validator.search(self.name, self.address, self.country)
+                self.sdn_validator.search(self.name, self.city, self.country)
                 self.assertTrue(mock_logger.called)
 
     @httpretty.activate
@@ -103,7 +103,7 @@ class SDNCheckTests(TestCase):
         self.mock_sdn_response(json.dumps({'total': 1}), status_code=400)
         with self.assertRaises(HTTPError):
             with mock.patch('ecommerce.extensions.payment.utils.logger.exception') as mock_logger:
-                self.sdn_validator.search(self.name, self.address, self.country)
+                self.sdn_validator.search(self.name, self.city, self.country)
                 self.assertTrue(mock_logger.called)
 
     @httpretty.activate
@@ -111,7 +111,7 @@ class SDNCheckTests(TestCase):
         """ Verify the SDN check returns the number of matches and records the match. """
         sdn_response = {'total': 1}
         self.mock_sdn_response(json.dumps(sdn_response))
-        response = self.sdn_validator.search(self.name, self.address, self.country)
+        response = self.sdn_validator.search(self.name, self.city, self.country)
         self.assertEqual(response, sdn_response)
 
     @httpretty.activate
@@ -120,7 +120,7 @@ class SDNCheckTests(TestCase):
         sdn_response = {'total': 1}
         self.name = u'Keyser Söze'
         self.mock_sdn_response(json.dumps(sdn_response))
-        response = self.sdn_validator.search(self.name, self.address, self.country)
+        response = self.sdn_validator.search(self.name, self.city, self.country)
         self.assertEqual(response, sdn_response)
 
     def test_deactivate_user(self):
@@ -137,7 +137,7 @@ class SDNCheckTests(TestCase):
             self.sdn_validator.deactivate_user(
                 basket,
                 self.name,
-                self.address,
+                self.city,
                 self.country,
                 response
             )
@@ -145,7 +145,7 @@ class SDNCheckTests(TestCase):
             self.assertEqual(SDNCheckFailure.objects.count(), 1)
             sdn_object = SDNCheckFailure.objects.first()
             self.assertEqual(sdn_object.full_name, self.name)
-            self.assertEqual(sdn_object.address, self.address)
+            self.assertEqual(sdn_object.city, self.city)
             self.assertEqual(sdn_object.country, self.country)
             self.assertEqual(sdn_object.site, self.site_configuration.site)
             self.assertEqual(sdn_object.sdn_check_response, response)
