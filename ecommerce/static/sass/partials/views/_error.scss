@@ -36,3 +36,38 @@
 .message-info-content {
   margin-left: 40px;
 }
+
+.account-activation-message {
+
+  .enrollment-message-container {
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  .course-title {
+    display: block;
+    font-weight: 100;
+    font-size: 24px;
+  }
+
+  .instruction-info {
+    font-size: 24px;
+    font-weight: 100;
+    color: #57595a;
+    margin-bottom: 30px;
+  }
+  .fa.fa-envelope-o {
+    color: #b92167;
+    font-size: 26px;
+    margin-right: 8px;
+  }
+
+  .activate {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+  }
+}

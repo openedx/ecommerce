@@ -169,8 +169,11 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not request.user.account_details(request).get('is_active'):
             return render(
                 request,
-                template_name,
-                {'error': _('You need to activate your account in order to redeem this coupon.')}
+                'edx/email_confirmation_required.html',
+                {
+                    'course_name': product.course and product.course.name,
+                    'user_email': request.user and request.user.email,
+                }
             )
 
         if request.user.is_user_already_enrolled(request, product):
