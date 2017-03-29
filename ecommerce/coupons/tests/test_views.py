@@ -566,8 +566,8 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.mock_access_token_response()
 
         response = self.client.get(self.redeem_url_with_params())
-        msg = 'You need to activate your account in order to redeem this coupon.'
-        self.assertEqual(response.context['error'], msg)
+        self.assertEqual(response.context['course_name'], self.course.name)
+        self.assertEqual(response.context['user_email'], self.user.email)
 
 
 class EnrollmentCodeCsvViewTests(TestCase):
