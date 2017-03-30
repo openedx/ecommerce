@@ -262,7 +262,7 @@ class CybersourceMixin(PaymentEventsMixin):
             'amount': unicode(basket.total_incl_tax),
             'currency': basket.currency,
             'override_custom_receipt_page': basket.site.siteconfiguration.build_ecommerce_url(
-                reverse('cybersource_redirect')
+                reverse('cybersource:redirect')
             ),
             'override_custom_cancel_page': processor.cancel_page_url,
         }
