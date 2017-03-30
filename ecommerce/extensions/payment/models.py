@@ -46,7 +46,7 @@ class PaypalProcessorConfiguration(SingletonModel):
     )
 
     class Meta(object):
-        verbose_name = "Paypal Processor Configuration"
+        verbose_name = 'Paypal Processor Configuration'
 
 
 class SDNCheckFailure(TimeStampedModel):

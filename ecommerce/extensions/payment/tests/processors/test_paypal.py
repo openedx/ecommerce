@@ -10,6 +10,7 @@ import ddt
 import mock
 import paypalrestsdk
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
 from factory.fuzzy import FuzzyInteger
@@ -441,3 +442,36 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
             ids.append(payment_response.id)
 
         return ids
+
+    def test_verify_dispute_webhook_event_with_invalid_settings(self):
+        """ Verify an ImproperlyConfigured exception is raised if no dispute webhook ID is set. """
+        self.processor.dispute_webhook_id = None
+        transmission_id = '123'
+        timestamp = 1234
+        event_body = {}
+        cert_url = 'http://example.com/certs/'
+        actual_signature = 'abc'
+        auth_algo = 'sha256'
+
+        with self.assertRaises(ImproperlyConfigured):
+            self.processor.verify_webhook_event(
+                transmission_id, timestamp, event_body, cert_url, actual_signature, auth_algo
+            )
+
+    def test_verify_dispute_webhook_event(self):
+        """ Verify the method calls the PayPal SDK to verify the event. """
+        transmission_id = '123'
+        timestamp = 1234
+        event_body = {}
+        cert_url = 'http://example.com/certs/'
+        actual_signature = 'abc'
+        auth_algo = 'sha256'
+
+        with mock.patch('paypalrestsdk.notifications.WebhookEvent.verify', return_value=True) as mock_verify:
+            self.assertTrue(self.processor.verify_webhook_event(
+                transmission_id, timestamp, event_body, cert_url, actual_signature, auth_algo
+            ))
+            mock_verify.assert_called_once_with(
+                transmission_id, timestamp, self.processor.dispute_webhook_id, event_body, cert_url, actual_signature,
+                auth_algo
+            )

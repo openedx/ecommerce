@@ -151,6 +151,10 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
+    enable_paypal_webhooks = models.BooleanField(
+        verbose_name=_('Enable PayPal webhook event handler'),
+        default=False
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')

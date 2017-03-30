@@ -1,10 +1,13 @@
 """ Tests of the Payment Views. """
 from __future__ import unicode_literals
 
+import json
+
 import ddt
 import mock
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from faker import Faker
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
@@ -336,3 +339,74 @@ class PaypalProfileAdminViewTests(TestCase):
         mock_call_command.side_effect = Exception("oof")
         self.get_response(True, 500, {"action": "list"})
         self.assertTrue(mock_call_command.called)
+
+
+class PaypalWebhookViewTests(TestCase):
+    path = reverse('paypal:webhook')
+
+    def setUp(self):
+        super(PaypalWebhookViewTests, self).setUp()
+        self.site_configuration = self.site.siteconfiguration
+        self.site_configuration.enable_paypal_webhooks = True
+        self.site_configuration.save()
+
+    @mock.patch('paypalrestsdk.notifications.WebhookEvent.verify', mock.Mock(return_value=False))
+    def test_invalid_signature(self):
+        """ Verify the view returns HTTP status 403 if the signature is not valid. """
+        response = self.client.post(self.path, {}, content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    def test_feature_disabled(self):
+        """ Verify the view returns HTTP 404 if the webhook is disabled. """
+        self.site.siteconfiguration.enable_paypal_webhooks = False
+        self.site_configuration.save()
+
+        response = self.client.post(self.path, {}, content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
+    @mock.patch('paypalrestsdk.notifications.WebhookEvent.verify')
+    def test_success(self, mock_verify):
+        """ Verify the view returns HTTP 202 for a successful request. """
+        logger_name = 'ecommerce.extensions.payment.views.paypal'
+        faker = Faker()
+        dispute_id = faker.word()
+        webhook_id = Paypal(self.site).dispute_webhook_id
+
+        body = json.dumps({
+            'resource': {
+                'dispute_id': dispute_id,
+            },
+        })
+
+        auth_algo = faker.word()
+        cert_url = faker.url()
+        transmission_id = faker.word()
+        transmission_sig = faker.word()
+        transmission_time = faker.word()
+
+        headers = {
+            'HTTP_PAYPAL_AUTH_ALGO': auth_algo,
+            'HTTP_PAYPAL_CERT_URL': cert_url,
+            'HTTP_PAYPAL_TRANSMISSION_ID': transmission_id,
+            'HTTP_PAYPAL_TRANSMISSION_SIG': transmission_sig,
+            'HTTP_PAYPAL_TRANSMISSION_TIME': transmission_time,
+        }
+
+        mock_verify.return_value = True
+        with LogCapture(logger_name) as l:
+            response = self.client.post(self.path, body, content_type='application/json', **headers)
+
+        self.assertEqual(response.status_code, 202)
+
+        mock_verify.assert_called_with(
+            transmission_id, transmission_time, webhook_id, body, cert_url, transmission_sig, auth_algo
+        )
+
+        msg = 'Dispute opened at https://www.paypal.com/us/cgi-bin/webscr?cmd=_unauth-view-details&cid={}'
+        l.check(
+            (
+                logger_name,
+                'INFO',
+                msg.format(dispute_id)
+            ),
+        )
