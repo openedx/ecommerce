@@ -149,7 +149,7 @@ class Cybersource(BaseClientSidePaymentProcessor):
                 site_configuration=site.siteconfiguration,
                 order_number=basket.order_number,
                 override_url=site.siteconfiguration.build_ecommerce_url(
-                    reverse('cybersource_redirect')
+                    reverse('cybersource:redirect')
                 )
             ),
             'override_custom_cancel_page': self.cancel_page_url,

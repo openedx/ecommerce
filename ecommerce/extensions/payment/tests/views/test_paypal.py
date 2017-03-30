@@ -62,7 +62,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         creation_response = self.mock_payment_creation_response(self.basket, find=True)
         execution_response = self.mock_payment_execution_response(self.basket, payer_info=payer_info)
 
-        response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
+        response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
         self.assertRedirects(
             response,
             url_redirect or get_receipt_page_url(
@@ -114,7 +114,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.processor.get_transaction_parameters(self.basket, request=self.request)
         self.mock_payment_execution_response(self.basket)
 
-        response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
+        response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
         self.assertRedirects(
             response,
             get_receipt_page_url(
@@ -293,7 +293,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
     def _assert_error_page_redirect(self):
         """Verify redirection to the configured checkout error page after attempted failed payment execution."""
-        response = self.client.get(reverse('paypal_execute'), self.RETURN_DATA)
+        response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
 
         self.assertRedirects(
             response,
@@ -304,7 +304,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
 @mock.patch('ecommerce.extensions.payment.views.paypal.call_command')
 class PaypalProfileAdminViewTests(TestCase):
-    path = reverse('paypal_profiles')
+    path = reverse('paypal:profiles')
 
     def get_response(self, is_superuser, expected_status, data=None):
         user = self.create_user(is_superuser=is_superuser)

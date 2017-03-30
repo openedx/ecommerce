@@ -32,7 +32,7 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 @ddt.ddt
 class CybersourceNotifyViewTests(CybersourceNotificationTestsMixin, TestCase):
     """ Test processing of CyberSource notifications. """
-    path = reverse('cybersource_notify')
+    path = reverse('cybersource:notify')
     view = CybersourceNotifyView
 
     def setUp(self):
@@ -53,7 +53,7 @@ class CybersourceNotifyViewTests(CybersourceNotificationTestsMixin, TestCase):
 
 @ddt.ddt
 class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
-    path = reverse('cybersource_submit')
+    path = reverse('cybersource:submit')
 
     def setUp(self):
         super(CybersourceSubmitViewTests, self).setUp()
@@ -185,7 +185,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
 @ddt.ddt
 class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCase):
     """ Test interstitial view for Cybersource Payments. """
-    path = reverse('cybersource_redirect')
+    path = reverse('cybersource:redirect')
     view = CybersourceInterstitialView
 
     @ddt.data(InvalidSignatureError, InvalidBasketError, KeyError)
