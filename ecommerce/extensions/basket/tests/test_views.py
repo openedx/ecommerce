@@ -123,6 +123,45 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, expected_content)
 
+    @mock.patch('ecommerce.extensions.basket.views.get_entitlement_voucher')
+    def test_with_entitlement_voucher(self, mock_get_entitlement_voucher):
+        """
+        The view ought to redirect to the coupon redemption flow, which is consent-aware.
+        """
+        voucher = mock_get_entitlement_voucher.return_value
+        voucher.code = 'FAKECODE'
+        sku = self.stock_record.partner_sku
+        url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
+        response = self.client.get(url)
+
+        expected_failure_url = (
+            'http%3A%2F%2Ftestserver.fake%2Fbasket%2Fsingle-item%2F%3Fconsent_failed%3DTrue%26sku%3D{sku}'.format(
+                sku=sku
+            )
+        )
+
+        expected_url = reverse('coupons:redeem') + '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
+            sku=sku,
+            failure_url=expected_failure_url,
+        )
+        self.assertRedirects(response, expected_url)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.basket.views.get_entitlement_voucher')
+    def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
+        """
+        Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
+        """
+        voucher = mock_get_entitlement_voucher.return_value
+        voucher.code = 'FAKECODE'
+        sku = self.stock_record.partner_sku
+        url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
+        self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
+        self.mock_enrollment_api_success_unenrolled(self.course.id, mode='verified')
+        response = self.client.get(url)
+        expected_url = self.get_full_url(reverse('basket:summary'))
+        self.assertRedirects(response, expected_url, status_code=303)
+
     @httpretty.activate
     def test_unavailable_product(self):
         """ The view should return HTTP 400 if the product is not available for purchase. """

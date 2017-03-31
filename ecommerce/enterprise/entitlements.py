@@ -131,9 +131,7 @@ def get_course_entitlements_for_learner(site, user, course_id):
         return None
 
     try:
-        # Currently, we are returning only those entitlements that
-        # do not require any further action on part of enterprise learner
-        entitlements = [item['entitlement_id'] for item in entitlements['entitlements'] if not item['requires_consent']]
+        entitlements = [item['entitlement_id'] for item in entitlements['entitlements']]
     except KeyError:
         logger.exception(
             'Invalid structure for enterprise learner entitlements API response for enterprise learner [%s].',
