@@ -309,7 +309,7 @@ class CouponMixin(object):
         request.user = factories.UserFactory()
         request.COOKIES = {}
 
-        self.basket = prepare_basket(request, coupon)
+        self.basket = prepare_basket(request, [coupon])
 
         view = CouponViewSet()
         view.request = request

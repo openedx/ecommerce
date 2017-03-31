@@ -14,6 +14,7 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
+from oscar.core.decorators import deprecated
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
@@ -31,10 +32,12 @@ from ecommerce.extensions.payment.forms import PaymentForm
 
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
+Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 
+@deprecated
 class BasketSingleItemView(View):
     """
     View that adds a single product to a user's basket.
@@ -124,7 +127,31 @@ class BasketSingleItemView(View):
 
         # At this point we're either adding an Enrollment Code product to the basket,
         # or the user is adding a Seat product for which they are not already enrolled
-        prepare_basket(request, product, voucher)
+        prepare_basket(request, [product], voucher)
+        return HttpResponseRedirect(reverse('basket:summary'), status=303)
+
+
+class BasketMultipleItemsView(View):
+    """
+    View that adds multiple products to a user's basket.
+    An additional coupon code can be supplied so the offer is applied to the basket.
+    """
+
+    def get(self, request):
+        partner = get_partner_for_site(request)
+
+        skus = request.GET.getlist('sku')
+        code = request.GET.get('code', None)
+
+        if not skus:
+            return HttpResponseBadRequest(_('No SKUs provided.'))
+
+        products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
+        if not products:
+            return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+
+        voucher = Voucher.objects.get(code=code) if code else None
+        prepare_basket(request, products, voucher)
         return HttpResponseRedirect(reverse('basket:summary'), status=303)
 
 

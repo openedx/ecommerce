@@ -49,7 +49,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         stock_record = StockRecord.objects.get(product=product)
         self.assertEqual(stock_record.price_excl_tax, 100.00)
 
-        basket = prepare_basket(self.request, product, voucher)
+        basket = prepare_basket(self.request, [product], voucher)
         self.assertIsNotNone(basket)
         self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
@@ -67,12 +67,12 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         voucher, product = prepare_voucher()
 
-        basket = prepare_basket(self.request, product, voucher)
+        basket = prepare_basket(self.request, [product], voucher)
         self.assertIsNotNone(basket)
         self.assertEqual(basket.all_lines()[0].product, product)
         self.assertTrue(basket.contains_a_voucher)
 
-        basket = prepare_basket(self.request, enrollment_code, voucher)
+        basket = prepare_basket(self.request, [enrollment_code], voucher)
         self.assertIsNotNone(basket)
         self.assertEqual(basket.all_lines()[0].product, enrollment_code)
         self.assertFalse(basket.contains_a_voucher)
@@ -81,12 +81,12 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         """ Verify only the last entered voucher is contained in the basket. """
         product = ProductFactory()
         voucher1 = VoucherFactory(code='FIRST')
-        basket = prepare_basket(self.request, product, voucher1)
+        basket = prepare_basket(self.request, [product], voucher1)
         self.assertEqual(basket.vouchers.count(), 1)
         self.assertEqual(basket.vouchers.first(), voucher1)
 
         voucher2 = VoucherFactory(code='SECOND')
-        new_basket = prepare_basket(self.request, product, voucher2)
+        new_basket = prepare_basket(self.request, [product], voucher2)
         self.assertEqual(basket, new_basket)
         self.assertEqual(new_basket.vouchers.count(), 1)
         self.assertEqual(new_basket.vouchers.first(), voucher2)
@@ -94,7 +94,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
     def test_prepare_basket_without_voucher(self):
         """ Verify a basket is returned and does not contain a voucher. """
         product = ProductFactory()
-        basket = prepare_basket(self.request, product)
+        basket = prepare_basket(self.request, [product])
         self.assertIsNotNone(basket)
         self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
@@ -106,8 +106,8 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         """ Verify a basket is returned and only contains a single product. """
         product1 = ProductFactory(stockrecords__partner__short_code='test1')
         product2 = ProductFactory(stockrecords__partner__short_code='test2')
-        basket = prepare_basket(self.request, product1)
-        basket = prepare_basket(self.request, product2)
+        basket = prepare_basket(self.request, [product1])
+        basket = prepare_basket(self.request, [product2])
         self.assertIsNotNone(basket)
         self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), 1)
@@ -118,7 +118,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         """ Verify a basket is returned and referral method called. """
         with mock.patch('ecommerce.extensions.basket.utils.attribute_cookie_data') as mock_attr_method:
             product = ProductFactory()
-            basket = prepare_basket(self.request, product)
+            basket = prepare_basket(self.request, [product])
             mock_attr_method.assert_called_with(basket, self.request)
 
     def test_attribute_cookie_data_affiliate_cookie_lifecycle(self):
@@ -328,7 +328,7 @@ class BasketUtilsTransactionTests(UserMixin, TransactionTestCase):
                 # We actually would handle the exception in the attribute_cookie_data method.
                 # Only causing the true database conflict like what we are doing here, would cause the roll back
                 mock_get_referral.return_value = Referral(basket=existing_basket, site=self.request.site)
-                basket = prepare_basket(self.request, product)
+                basket = prepare_basket(self.request, [product])
                 referral = Referral.objects.filter(basket=basket)
 
         self.assertEqual(len(referral), 1)

@@ -226,7 +226,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 )
                 return HttpResponseRedirect(redirect_url)
 
-        basket = prepare_basket(request, product, voucher)
+        basket = prepare_basket(request, [product], voucher)
         if basket.total_excl_tax == 0:
             try:
                 order = self.place_free_order(basket)

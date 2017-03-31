@@ -107,7 +107,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 except (KeyError, IntegrityError) as error:
                     return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
 
-                basket = prepare_basket(request, coupon_product)
+                basket = prepare_basket(request, [coupon_product])
 
                 # Create an order now since payment is handled out of band via an invoice.
                 client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
