@@ -17,18 +17,18 @@ StockRecord = get_model('partner', 'StockRecord')
 logger = logging.getLogger(__name__)
 
 
-def prepare_basket(request, product, voucher=None):
+def prepare_basket(request, products, voucher=None):
     """
-    Create or get the basket, add the product, apply a voucher, and record referral data.
+    Create or get the basket, add products, apply a voucher, and record referral data.
 
-    Existing baskets are merged. The specified product will
+    Existing baskets are merged. Specified products will
     be added to the remaining open basket. If voucher is passed, all existing
     vouchers added to the basket are removed because we allow only one voucher per basket.
     Vouchers are not applied if an enrollment code product is in the basket.
 
     Arguments:
         request (Request): The request object made to the view.
-        product (Product): Product to be added to the basket.
+        product (List): List of products to be added to the basket.
         voucher (Voucher): Voucher to apply to the basket.
 
     Returns:
@@ -37,8 +37,13 @@ def prepare_basket(request, product, voucher=None):
     basket = Basket.get_basket(request.user, request.site)
     basket.flush()
     basket.save()
-    basket.add_product(product, 1)
-    if product.is_enrollment_code_product:
+    basket_addition = get_class('basket.signals', 'basket_addition')
+    for product in products:
+        basket.add_product(product, 1)
+        # Call signal handler to notify listeners that something has been added to the basket
+        basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request, basket=basket)
+
+    if len(products) == 1 and products[0].is_enrollment_code_product:
         basket.clear_vouchers()
     elif voucher:
         basket.clear_vouchers()
@@ -47,11 +52,6 @@ def prepare_basket(request, product, voucher=None):
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
 
     attribute_cookie_data(basket, request)
-
-    # Call signal handler to notify listeners that something has been added to the basket
-    basket_addition = get_class('basket.signals', 'basket_addition')
-    basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request, basket=basket)
-
     return basket
 
 

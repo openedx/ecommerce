@@ -37,7 +37,7 @@ from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAM
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import prepare_voucher
-from ecommerce.tests.factories import StockRecordFactory
+from ecommerce.tests.factories import ProductFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -254,6 +254,62 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku, code=COUPON_CODE)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
+
+
+@ddt.ddt
+class BasketMultipleItemsViewTests(CourseCatalogTestMixin, TestCase):
+    """ BasketMultipleItemsView view tests. """
+    path = reverse('basket:add-multi')
+
+    def setUp(self):
+        super(BasketMultipleItemsViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+    def test_add_multiple_products_to_basket(self):
+        """ Verify the basket accepts multiple products. """
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 303)
+
+        basket = response.wsgi_request.basket
+        self.assertEqual(basket.status, Basket.OPEN)
+        self.assertEqual(basket.lines.count(), len(products))
+
+    def test_add_multiple_products_no_skus_provided(self):
+        """ Verify the Bad request exception is thrown when no skus are provided. """
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, 'No SKUs provided.')
+
+    def test_add_multiple_products_no_available_products(self):
+        """ Verify the Bad request exception is thrown when no skus are provided. """
+        response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, 'Products with SKU(s) [1, 2] do not exist.')
+
+    @ddt.data(Voucher.SINGLE_USE, Voucher.MULTI_USE)
+    def test_add_multiple_products_and_use_voucher(self, usage):
+        """ Verify the basket accepts multiple products and a single use voucher. """
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        voucher = factories.VoucherFactory(usage=usage)
+        product_range = factories.RangeFactory(products=products)
+        voucher.offers.add(factories.ConditionalOfferFactory(
+            benefit=factories.BenefitFactory(range=product_range),
+            condition=factories.ConditionFactory(range=product_range)
+        ))
+        qs = urllib.urlencode({
+            'sku': [product.stockrecords.first().partner_sku for product in products],
+            'code': voucher.code
+        }, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 303)
+        basket = response.wsgi_request.basket
+        self.assertEqual(basket.status, Basket.OPEN)
+        self.assertTrue(basket.contains_voucher(voucher.code))
 
 
 @httpretty.activate
