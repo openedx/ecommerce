@@ -6,7 +6,7 @@
 {% load staticfiles %}
 
 {% block title %}
-  {% blocktrans with order_number=order.number %}
+  {% blocktrans trimmed with order_number=order.number %}
     Receipt for {{ order_number }}
   {% endblocktrans %}
 {% endblock title %}
@@ -35,7 +35,7 @@
               {% captureas link_start %}
                 <a href="mailto:{{ order.user.email }}">
               {% endcaptureas %}
-              {% blocktrans with email=order.user.email link_end="</a>" %}
+              {% blocktrans trimmed with email=order.user.email link_end="</a>" %}
                 Your order is complete. If you need a receipt, you can print this page.
                 You will also receive a confirmation message with this information at
                 {{ link_start }}{{ email }}{{ link_end }}.
@@ -88,30 +88,37 @@
             {% endfor %}
           </dl>
           <div class="order-total">
-            <div class="description">{% trans "Subtotal:" %}</div>
+            <div class="description">{% trans "Subtotal" %}</div>
             <div class="price">{{ order.total_before_discounts_incl_tax|currency:order.currency }}</div>
           </div>
 
-          {% if order.total_discount_incl_tax %}
-            {% for voucher in order.basket.vouchers.all %}
-              <div class="order-total">
-                <div class="description">
-                  <span>{% trans "Coupon applied:" %}</span>
-                  <p>
-                    {% blocktrans with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
-                      {{ voucher_code }} {{ voucher_discount_amount }} off
-                    {% endblocktrans %}
-                  </p>
+          {% with discounts=order.basket_discounts %}
+            {% if discounts %}
+              {% for discount in discounts %}
+                <div class="order-total">
+                  <div class="description">
+                    <span class="label label-success">{% trans "Discount" %}</span>
+
+                    {% if discount.voucher_code %}
+                      {% with voucher=discount.voucher %}
+                        {% blocktrans trimmed with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
+                          {{ voucher_code }} {{ voucher_discount_amount }} off
+                        {% endblocktrans %}
+                      {% endwith %}
+                    {% else %}
+                      {{ discount.offer_name }}
+                    {% endif %}
+
+                  </div>
+                  <div class="price">-{{ discount.amount|currency:order.currency }}</div>
                 </div>
-                <div class="price">
-                  -{{ order.total_discount_incl_tax|currency:order.currency }}
-                </div>
-              </div>
-            {% endfor %}
-          {% endif %}
+              {% endfor %}
+
+            {% endif %}
+          {% endwith %}
 
           <div class="order-total">
-            <div class="description">{% trans "Total:" %}</div>
+            <div class="description">{% trans "Total" %}</div>
             <div class="price">{{ order.total_incl_tax|currency:order.currency }}</div>
           </div>
         </div>
@@ -124,7 +131,7 @@
           <div class="nav-wizard row">
             <p class="header">{% trans "Get Your Course Credit" %}</p>
             <p class="message">
-              {% blocktrans with link_end="</a>" %}
+              {% blocktrans trimmed with link_end="</a>" %}
                 To receive academic credit for this course, you must apply for credit at the organization that offers the credit.
                 You can find a link to the organization’s website on your {{ link_start }}dashboard{{ link_end }}, next to the course name.
               {% endblocktrans %}
@@ -135,7 +142,7 @@
 
       {% if verification_url and not user_verified %}
         <div class="nav-wizard row">
-            {% include 'oscar/checkout/_verification_data.html' with verification_url=verification_url %}
+            {% include 'oscar/checkout/_verification_data.html' %}
         </div>
       {% else %}
         <div id="dashboard-link">
