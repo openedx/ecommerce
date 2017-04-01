@@ -1,36 +1,18 @@
-/**
- * Basket page scripts.
- **/
-
 define([
-        'jquery'
+        'views/receipt_view',
+        'pages/page'
     ],
-    function ($) {
+    function (ReceiptView,
+              Page) {
         'use strict';
 
-        function trackPurchase(order_id, total_amount, currency) {
-            window.analytics.track('Completed Purchase', {
-                orderId: order_id,
-                total: total_amount,
-                currency: currency
-            });
-        }
+        return Page.extend({
+            title: gettext('Receipt'),
 
-        function onReady() {
-            var el = $('#receipt-container'),
-                order_id = el.data('order-id'),
-                fire_tracking_events = el.data('fire-tracking-events'),
-                total_amount = el.data('total-amount'),
-                currency = el.data('currency');
-            if (order_id && fire_tracking_events) {
-                trackPurchase(order_id, total_amount, currency);
+            initialize: function (options) {
+                this.view = new ReceiptView({orderNumber: options.orderNumber});
+                this.render();
             }
-        }
-
-        $(document).ready(onReady);
-
-        return {
-            onReady: onReady
-        };
+        });
     }
 );
