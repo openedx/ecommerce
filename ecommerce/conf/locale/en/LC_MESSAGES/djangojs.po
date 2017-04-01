@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-30 13:19+0000\n"
+"POT-Creation-Date: 2017-03-30 21:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "A valid course ID is required"
 msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:102
-#, c-format
+#, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
@@ -234,14 +234,6 @@ msgstr ""
 msgid "Trailing comma not allowed."
 msgstr ""
 
-#: ecommerce/static/js/utils/validation_patterns.js:15
-msgid "The course ID is invalid."
-msgstr ""
-
-#: ecommerce/static/js/utils/validation_patterns.js:23
-msgid "The product name cannot contain HTML."
-msgstr ""
-
 #: ecommerce/static/js/views/coupon_detail_view.js:107
 #: ecommerce/static/js/views/coupon_form_view.js:60
 msgid "Can be used once by one customer"
@@ -341,12 +333,15 @@ msgid "Professional Education"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:68
-msgid "Paid certificate track with initial verification and Professional "
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:74
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.

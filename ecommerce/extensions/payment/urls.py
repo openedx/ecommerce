@@ -11,6 +11,7 @@ CYBERSOURCE_URLS = [
 PAYPAL_URLS = [
     url(r'^execute/$', paypal.PaypalPaymentExecutionView.as_view(), name='execute'),
     url(r'^profiles/$', paypal.PaypalProfileAdminView.as_view(), name='profiles'),
+    url(r'^webhook/$', paypal.PaypalWebhookView.as_view(), name='webhook'),
 ]
 
 SDN_URLS = [

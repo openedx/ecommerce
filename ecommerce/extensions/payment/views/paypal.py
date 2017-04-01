@@ -1,6 +1,7 @@
 """ Views for interacting with the payment processor. """
 from __future__ import unicode_literals
 
+import json
 import logging
 import os
 from cStringIO import StringIO
@@ -8,9 +9,10 @@ from cStringIO import StringIO
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
@@ -182,3 +184,46 @@ class PaypalProfileAdminView(View):
         logger.removeHandler(log_handler)
 
         return HttpResponse(output, content_type='text/plain', status=200 if success else 500)
+
+
+class PaypalWebhookView(View):
+    """ PayPal webhook event handler.
+
+    This view processes webhook event requests.
+
+    Notes:
+        - https://developer.paypal.com/docs/integration/direct/rest-webhooks-overview/
+    """
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(PaypalWebhookView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, *_args, **_kwargs):
+        site = self.request.site
+
+        if not site.siteconfiguration.enable_paypal_webhooks:
+            raise Http404
+
+        processor = Paypal(site)
+        body = request.body
+
+        try:
+            auth_algo = request.META['HTTP_PAYPAL_AUTH_ALGO']
+            cert_url = request.META['HTTP_PAYPAL_CERT_URL']
+            transmission_id = request.META['HTTP_PAYPAL_TRANSMISSION_ID']
+            transmission_sig = request.META['HTTP_PAYPAL_TRANSMISSION_SIG']
+            transmission_time = request.META['HTTP_PAYPAL_TRANSMISSION_TIME']
+        except KeyError:
+            logger.debug('Invalid headers received for PayPal webhook', exc_info=True)
+            return HttpResponseForbidden()
+
+        if not processor.verify_webhook_event(transmission_id, transmission_time, body, cert_url, transmission_sig,
+                                              auth_algo):
+            return HttpResponseForbidden()
+
+        body = json.loads(body)
+        dispute_id = body['resource']['dispute_id']
+        logger.info('Dispute opened at https://www.paypal.com/us/cgi-bin/webscr?cmd=_unauth-view-details&cid=%s',
+                    dispute_id)
+        return HttpResponse(status=202)

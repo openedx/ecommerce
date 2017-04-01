@@ -7,6 +7,7 @@ from urlparse import urljoin
 
 import paypalrestsdk
 import waffle
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
@@ -40,6 +41,7 @@ class Paypal(BasePaymentProcessor):
 
         # Number of times payment execution is retried after failure.
         self.retry_attempts = PaypalProcessorConfiguration.get_solo().retry_attempts
+        self.dispute_webhook_id = self.configuration['webhook_ids']['dispute']
 
     @cached_property
     def paypal_api(self):
@@ -328,3 +330,22 @@ class Paypal(BasePaymentProcessor):
                   "PayPal's response was recorded in entry [{response_id}].".format(sale_id=sale.id,
                                                                                     response_id=entry.id)
             raise GatewayError(msg)
+
+    def verify_webhook_event(self, transmission_id, timestamp, event_body, cert_url, actual_signature,
+                             auth_algo):
+        """ Verifies the authenticity of a webhook request.
+
+        We only handle dispute webhooks for now.
+
+        Notes:
+            See https://developer.paypal.com/docs/integration/direct/rest-webhooks-overview/ for more information on
+            webhooks.
+
+        Returns:
+            bool: Indicates if the request is valid.
+        """
+        if not self.dispute_webhook_id:
+            raise ImproperlyConfigured('No PayPal dispute webhook ID set. Unable to verify webhook events.')
+
+        return paypalrestsdk.notifications.WebhookEvent.verify(
+            transmission_id, timestamp, self.dispute_webhook_id, event_body, cert_url, actual_signature, auth_algo)
