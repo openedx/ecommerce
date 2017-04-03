@@ -14,7 +14,7 @@ $(document).ready(function () {
             url: '/api/v2/orders/' + order_number + '/fulfill/',
             method: 'PUT',
             headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')}
-        }).success(function (data) {
+        }).done(function (data) {
             $('tr[data-order-number=' + order_number + '] .order-status').text(data.status);
 
             message = interpolate(

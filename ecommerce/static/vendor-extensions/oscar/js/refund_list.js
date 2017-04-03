@@ -17,7 +17,7 @@ $(document).ready(function () {
             data: { action: decision },
             method: 'PUT',
             headers: {'X-CSRFToken': Cookies.get('ecommerce_csrftoken')}
-        }).success(function (data) {
+        }).done(function (data) {
             $('tr[data-refund-id=' + refund_id + '] .refund-status').text(data.status);
 
             message = interpolate(
