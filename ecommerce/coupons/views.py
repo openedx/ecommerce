@@ -120,6 +120,11 @@ class CouponOfferView(TemplateView):
         context_data.update(get_enterprise_customer_consent_failed_context_data(self.request, voucher))
 
         if context_data and 'error' not in context_data:
+            context_data.update({
+                'offer_app_page_heading': _('Welcome to edX'),
+                'offer_app_page_heading_message': _('Please choose from the courses selected by your '
+                                                    'organization to start learning.')
+            })
             self.template_name = 'coupons/offer.html'
 
         return context_data

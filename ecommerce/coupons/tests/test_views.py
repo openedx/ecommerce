@@ -234,6 +234,20 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, En
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_offer_page_context_for_heading(self):
+        """
+        Verify the response context for logged in user and valid code, contains
+        expected heading and heading detail message.
+        """
+        url = self.prepare_url_for_credit_seat()
+        response = self.client.get(url)
+        expected_offer_page_heading = 'Welcome to edX'
+        expected_offer_page_heading_message = 'Please choose from the courses selected by your ' \
+                                              'organization to start learning.'
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['offer_app_page_heading'], expected_offer_page_heading)
+        self.assertEqual(response.context['offer_app_page_heading_message'], expected_offer_page_heading_message)
+
     def test_consent_failed_invalid(self):
         """ Verify that an error is returned if the consent_failed parameter is not a valid SKU. """
         url = '{}&consent_failed={}'.format(self.prepare_url_for_credit_seat(), 'INVALID')

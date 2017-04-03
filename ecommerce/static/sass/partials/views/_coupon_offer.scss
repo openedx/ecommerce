@@ -149,10 +149,14 @@
                     }
                 }
                 .course-name {
-                    margin: 0 0 5px 0;
-                    font-size: 1.1em;
-                    font-weight: 600;
-                    @include multiline-ellipsis($lineHeight: 1.35em, $lineCount: 2);
+                    min-height: 50px;
+
+                    p {
+                        margin: 0 0 5px 0;
+                        font-size: 1.1em;
+                        font-weight: 600;
+                        @include multiline-ellipsis($lineHeight: 1.35em, $lineCount: 2);
+                    }
                 }
                 .course-org {
                     font-size: 1em;
@@ -308,4 +312,19 @@
         color: #6B6969;
     }
 
+    .offer-page-heading {
+        padding: 0 0 15px;
+        margin: 0 15px 30px;
+        border-bottom: 1px solid $offer-page-light-grey;
+
+        .heading {
+            color: $offer-page-blue;
+            margin-bottom: 5px;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+    }
 }

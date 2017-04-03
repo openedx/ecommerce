@@ -36,6 +36,8 @@ define([
                 this.$el.html(
                     this.template({
                         code: this.code,
+                        pageHeading: this.$el.closest('#offerApp').data('offerAppPageHeading'),
+                        pageHeadingMessage: this.$el.closest('#offerApp').data('offerAppPageHeadingMessage'),
                         courses: this.collection,
                         isCredit: this.isCredit,
                         isEnrollmentCode: this.isEnrollmentCode,
@@ -55,6 +57,8 @@ define([
                     this.$el.html(
                         this.template({
                             code: this.code,
+                            pageHeading: this.$el.closest('#offerApp').data('offerAppPageHeading'),
+                            pageHeadingMessage: this.$el.closest('#offerApp').data('offerAppPageHeadingMessage'),
                             courses: this.collection,
                             isCredit: this.isCredit,
                             isEnrollmentCode: this.isEnrollmentCode,
