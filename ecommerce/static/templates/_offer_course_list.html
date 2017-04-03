@@ -1,7 +1,10 @@
 <section class="col-xs-12 col-md-8 <% if (courses.length == 1) { %>col-lg-8 col-lg-offset-2<% }else { %>col-lg-12<% } %>">
 
     <% if (courses.length > 1) { %>
-    <h3 class="number-of-products-header col-xs-12"><%- gettext('Select one of the following courses.') %></h3>
+        <div class="offer-page-heading">
+            <h3 class="heading"><%= pageHeading %></h3>
+            <p><%= pageHeadingMessage %></p>
+        </div>
     <% } %>
 
     <% if (courses) { %>
@@ -31,7 +34,9 @@
                         </div>
                     </div>
                     <div class="col-sm-7 col-xs-12">
-                        <p class="course-name"><%= course.attributes.title %></p>
+                        <div class="course-name">
+                            <p><%= course.attributes.title %></p>
+                        </div>
 
                         <p class="course-org"><%= course.attributes.organization %></p>
 
