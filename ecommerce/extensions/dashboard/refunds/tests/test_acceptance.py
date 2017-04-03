@@ -164,7 +164,6 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             'Please try again, or contact the E-Commerce Development Team.'.format(refund_id=refund_id)
         )
 
-    @skip("This test is flaky in Travis.  Move to e2e and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_cancel_action(self, approve):
         """
