@@ -144,6 +144,22 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         self.assertDictContainsSubset(expected_headers, actual_headers)
         self.assertEqual(expected_body, actual_body)
 
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
+    def test_enrollment_module_fulfill_order_with_discount_no_voucher(self, parse_tracking_context):
+        """
+        Test that components of the Fulfillment Module which trigger on the presence of a voucher do
+        not cause failures in cases where a discount does not have a voucher included
+        (such as with a Conditional Offer)
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        self.order.discounts.create()
+        __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+        # No exceptions should be raised and the order should be fulfilled
+        self.assertEqual(lines[0].status, 'Complete')
+
     @override_settings(EDX_API_KEY=None)
     def test_enrollment_module_not_configured(self):
         """Test that lines receive a configuration error status if fulfillment configuration is invalid."""
