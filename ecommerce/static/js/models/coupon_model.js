@@ -239,7 +239,7 @@ define([
                 this.set('catalog_type', catalogType);
 
                 if (this.get('catalog_type') === this.catalogTypes.single_course) {
-                    if (seats[0]) {
+                    if (seats !== null && seats[0]) {
                         seat_data = seats[0].attribute_values;
 
                         this.set('seat_type', this.getCertificateType(seat_data));
