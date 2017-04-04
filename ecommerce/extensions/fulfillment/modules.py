@@ -213,10 +213,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 # Collect the EnterpriseCustomer UUID from the coupon, if any.
                 enterprise_customer_uuid = None
                 for discount in order.discounts.all():
-                    enterprise_customer_uuid = discount.voucher.benefit.range.enterprise_customer
-                    if enterprise_customer_uuid is not None:
-                        data['enterprise_course_consent'] = True
-                        break
+                    if discount.voucher:
+                        enterprise_customer_uuid = discount.voucher.benefit.range.enterprise_customer
+                        if enterprise_customer_uuid is not None:
+                            data['enterprise_course_consent'] = True
+                            break
 
                 # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
                 # on the Enterprise service if one doesn't already exist.
