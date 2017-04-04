@@ -517,6 +517,22 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(response_data['title'], 'New title')
         self.assertIsNone(response_data['email_domains'])
 
+    def test_update_enterprise_with_catalog(self):
+        """Test updating a coupon enterprise and seat type."""
+        enterprise_customer_id = str(uuid4()).decode('utf-8')
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data={
+                'catalog_query': 'key:*',
+                'course_catalog': None,
+                'course_seat_types': ['verified'],
+                'enterprise_customer': {'name': 'test enterprise', 'id': enterprise_customer_id}
+            }
+        )
+        self.assertEqual(response_data['id'], self.coupon.id)
+        self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
+
     def test_update_name(self):
         """Test updating voucher name."""
         data = {

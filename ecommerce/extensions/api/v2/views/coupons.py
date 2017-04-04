@@ -278,9 +278,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return None
 
         voucher_range = vouchers.first().offers.first().benefit.range
+        enterprise_customer_data = request.data.get('enterprise_customer')
+
         # Remove catalog if switching from single course to dynamic query
+        # In case of enterprise, range_data has enterprise data in it as enterprise is defined in UPDATABLE_RANGE_FIELDS
+        # so Catalog should not be None if there is an enterprise is associated with it.
         if voucher_range.catalog:
-            range_data['catalog'] = None
+            if not enterprise_customer_data:
+                range_data['catalog'] = None
+
+            if enterprise_customer_data and range_data.get('catalog_query'):
+                range_data['catalog'] = None
 
         course_catalog_data = request.data.get('course_catalog')
         if course_catalog_data:
@@ -293,7 +301,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         else:
             range_data['course_catalog'] = None
 
-        enterprise_customer_data = request.data.get('enterprise_customer')
         if enterprise_customer_data:
             range_data['enterprise_customer'] = enterprise_customer_data.get('id')
         else:
