@@ -86,7 +86,9 @@ class EnterpriseCustomerUserLinkBenefit(Benefit):
         stored with the order to provide audit of post-order benefits.
         """
 
-        # TODO: ADD IMPLEMENTATION TO LINK CURRENT USER TO SPECIFIED ENTERPRISE CUSTOMER
+        # WE DO NOT NEED A POST-ORDER ACTION TO LINK LEARNERS TO ENTERPRISE CUSTOMERS
+        # BECAUSE LEARNERS WILL ALREADY BE LINKED TO ENTERPRISE CUSTOMERS THROUGH THE
+        # REGISTRATION/AUTHENTICATION PROCESS
 
 
 
@@ -205,6 +207,24 @@ class ConditionalOffer(AbstractConditionalOffer):
         if not self.is_email_valid(basket.owner.email):
             return False
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
+
+
+class EnterpriseCustomerUserConditionalOffer(ConditionalOffer):
+    """
+    This custom conditional offer covers use cases having to do with relationships between an
+    Open edX user/learner and a specific Enterprise Customer (ref: http://github.com/edx/edx-enterprise)
+    """
+    enterprise_customer_uuid = UUIDField()
+
+    def is_condition_satisfied(self, basket):
+        """
+        In addition to the parent's check to see if the condition is satisfied,
+        a check for if basket owners email domain is within the allowed email domains.
+        """
+        # If the learner is linked to the specified Enterprise Customer, they qualify for the offer
+        if not is_user_linked_to_enterprise_customer(enterprise_customer_uuid, basket.owner):
+            return False
+        return super(EnterpriseCustomerUserConditionalOffer, self).is_condition_satisfied(basket)
 
 
 def validate_credit_seat_type(course_seat_types):
