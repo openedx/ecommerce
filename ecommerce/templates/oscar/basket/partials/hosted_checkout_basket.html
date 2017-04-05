@@ -143,7 +143,6 @@
                        data-track-type="click"
                        data-track-event="edx.bi.ecommerce.basket.free_checkout"
                        data-track-category="checkout"
-                       data-course-id="{{ course_key }}"
                        class="btn btn-success checkout-button">
                         {% trans "Place Order" %}
                     </a>
@@ -153,7 +152,6 @@
                                 data-track-event="edx.bi.ecommerce.basket.payment_selected"
                                 data-track-category="checkout"
                                 data-processor-name="{{ processor.NAME|lower }}"
-                                data-course-id="{{ course_key }}"
                                 data-track-checkout-type="hosted"
                                 class="btn payment-button"
                                 id="{{ processor.NAME|lower }}">

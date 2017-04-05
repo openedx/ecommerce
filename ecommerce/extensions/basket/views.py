@@ -354,7 +354,6 @@ class BasketSummaryView(BasketView):
         context_updates, lines_data = self._process_basket_lines(lines)
         context.update(context_updates)
 
-        course_key = lines_data[0].get('course_key') if len(lines) == 1 else None
         user = self.request.user
         context.update({
             'analytics_data': prepare_analytics_data(
@@ -383,7 +382,6 @@ class BasketSummaryView(BasketView):
             total_benefit = None
 
         context.update({
-            'course_key': course_key,
             'formset_lines_data': zip(formset, lines_data),
             'free_basket': context['order_total'].incl_tax == 0,
             'homepage_url': get_lms_url(''),
