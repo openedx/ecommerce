@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-01 11:48-0400\n"
+"POT-Creation-Date: 2017-04-05 12:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -1197,6 +1197,14 @@ msgstr "Vöüçhérs Ⱡ'σяєм ιρѕυм ∂#"
 msgid "Reports"
 msgstr "Répörts Ⱡ'σяєм ιρѕυм #"
 
+#: ecommerce/templates/base.html
+msgid "Build"
+msgstr "Büïld Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/templates/base.html
+msgid "Version:"
+msgstr "Vérsïön: Ⱡ'σяєм ιρѕυм ∂#"
+
 #: ecommerce/templates/coupons/_offer_error.html
 #: ecommerce/templates/coupons/offer.html
 #: ecommerce/templates/edx/email_confirmation_required.html
@@ -1950,6 +1958,12 @@ msgstr "Àpplý Ⱡ'σяєм ιρѕ#"
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "in your cart"
 msgstr "ïn ýöür çärt Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+msgid "Your purchase contains the following"
+msgstr ""
+"Ýöür pürçhäsé çöntäïns thé föllöwïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
