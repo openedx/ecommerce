@@ -114,7 +114,6 @@
                                 data-track-event="edx.bi.ecommerce.basket.payment_selected"
                                 data-track-category="checkout"
                                 data-processor-name="paypal"
-                                data-course-id="{{ course_key }}"
                                 class="btn payment-button payment-processor-paypal"
                                 value="paypal"
                                 title="{% trans "Pay with PayPal" %}"
@@ -199,7 +198,6 @@
                        data-track-type="click"
                        data-track-event="edx.bi.ecommerce.basket.free_checkout"
                        data-track-category="checkout"
-                       data-course-id="{{ course_key }}"
                        class="btn btn-primary btn-large col-sm-12 col-xs-12">
                         {% trans "Place Order" %}
                     </a>
@@ -209,7 +207,6 @@
                             data-track-event="edx.bi.ecommerce.basket.payment_selected"
                             data-track-category="checkout"
                             data-processor-name="{{ client_side_payment_processor.NAME }}"
-                            data-course-id="{{ course_key }}"
                             data-track-checkout-type="client_side">
                       {% trans "Place Order" %}
                     </button>
