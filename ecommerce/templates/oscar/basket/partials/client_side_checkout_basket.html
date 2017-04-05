@@ -13,6 +13,7 @@
 
         <div role="region" aria-labelledby="cart-region">
             <h2 id="cart-region" class="title">{% trans "in your cart" %}</h2>
+            <p>{% trans "Your purchase contains the following" %}:</p>
             {% for form, line_data in formset_lines_data %}
                 {{ form.id }}
                 <div class="product col-sm-12">
