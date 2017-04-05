@@ -4,44 +4,53 @@ from oscar.test.newfactories import UserFactory
 from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
 
 
 @patch.object(SegmentClient, 'track')
-class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
+class RefundTrackingTests(RefundTestMixin, TestCase):
     """Tests verifying the behavior of refund tracking."""
 
     def setUp(self):
         super(RefundTrackingTests, self).setUp()
 
         self.user = UserFactory()
-        self.order = self.create_order()
-        self.refund = create_refunds([self.order], self.course.id)[0]
+        self.refund = create_refunds([self.create_order()], self.course.id)[0]
+
+    def assert_refund_event_fired(self, mock_track, refund, tracking_context=None):
+        tracking_context = tracking_context or {}
+        (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
+
+        self.assertTrue(mock_track.called)
+        self.assertEqual(event_user_id, tracking_context.get('lms_user_id', 'ecommerce-{}'.format(refund.user.id)))
+        self.assertEqual(event_name, 'Order Refunded')
+
+        expected_context = {
+            'ip': tracking_context.get('lms_ip'),
+            'Google Analytics': {
+                'clientId': tracking_context.get('lms_client_id')
+            }
+        }
+        self.assertEqual(kwargs['context'], expected_context)
+
+        self.assertEqual(event_payload['orderId'], refund.order.number)
+
+        expected_products = [
+            {
+                'id': line.order_line.partner_sku,
+                'quantity': line.quantity,
+            } for line in refund.lines.all()
+        ]
+        self.assertEqual(event_payload['products'], expected_products)
 
     def test_successful_refund_tracking(self, mock_track):
         """Verify that a successfully placed refund is tracked when Segment is enabled."""
         tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id', 'lms_ip': '127.0.0.1'}
         self.refund.user.tracking_context = tracking_context
         self.refund.user.save()
-
-        # Approve the refund.
         self.approve(self.refund)
 
-        # Verify that a corresponding business intelligence event was emitted.
-        self.assertTrue(mock_track.called)
-
-        # Verify the event's payload.
-        self.assert_correct_event(
-            mock_track,
-            self.refund,
-            tracking_context['lms_user_id'],
-            tracking_context['lms_client_id'],
-            tracking_context['lms_ip'],
-            self.order.number,
-            self.refund.currency,
-            self.refund.total_credit_excl_tax
-        )
+        self.assert_refund_event_fired(mock_track, self.refund, tracking_context)
 
     def test_successful_zero_dollar_refund_no_tracking(self, mock_track):
         """
@@ -50,50 +59,28 @@ class RefundTrackingTests(BusinessIntelligenceMixin, RefundTestMixin, TestCase):
         """
         order = self.create_order(free=True)
         create_refunds([order], self.course.id)
-
-        # Verify that no business intelligence event was emitted. Refunds corresponding
-        # to a total credit of 0 are automatically approved upon creation.
         self.assertFalse(mock_track.called)
 
     def test_successful_refund_tracking_without_context(self, mock_track):
         """Verify that a successfully placed refund is tracked, even if no tracking context is available."""
-        # Approve the refund.
         self.approve(self.refund)
-
-        # Verify that a corresponding business intelligence event was emitted.
-        self.assertTrue(mock_track.called)
-
-        # Verify the event's payload.
-        self.assert_correct_event(
-            mock_track,
-            self.refund,
-            'ecommerce-{}'.format(self.user.id),
-            None,
-            None,
-            self.order.number,
-            self.refund.currency,
-            self.refund.total_credit_excl_tax
-        )
+        self.assert_refund_event_fired(mock_track, self.refund)
 
     def test_successful_refund_no_segment_key(self, mock_track):
         """Verify that a successfully placed refund is not tracked when Segment is disabled."""
         self.site.siteconfiguration.segment_key = None
-
-        # Approve the refund.
         self.approve(self.refund)
-
-        # Verify that no business intelligence event was emitted.
         self.assertFalse(mock_track.called)
 
     def test_successful_refund_tracking_segment_error(self, mock_track):
         """Verify that errors during refund tracking are logged."""
         # Approve the refund, forcing an exception to be raised when attempting to emit a corresponding event
         with patch('ecommerce.extensions.analytics.utils.logger.exception') as mock_log_exc:
-            mock_track.side_effect = Exception("boom!")
+            mock_track.side_effect = Exception('boom!')
             self.approve(self.refund)
 
         # Verify that an attempt was made to emit a business intelligence event.
         self.assertTrue(mock_track.called)
 
         # Verify that an error message was logged.
-        self.assertTrue(mock_log_exc.called_with("Failed to emit tracking event upon refund completion."))
+        self.assertTrue(mock_log_exc.called_with('Failed to emit tracking event upon refund completion.'))

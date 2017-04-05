@@ -227,17 +227,6 @@ class BusinessIntelligenceMixin(object):
                 self.assertEqual(line.quantity, tracked_product['quantity'])
                 self.assertEqual(mode_for_seat(line.product), tracked_product['sku'])
                 self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
-        elif model_name == 'Refund':
-            self.assertEqual(event_payload['total'], '-{}'.format(total))
-
-            for line in lines:
-                tracked_product = tracked_products_dict.get(line.order_line.partner_sku)
-                self.assertIsNotNone(tracked_product)
-                self.assertEqual(line.order_line.product.course.id, tracked_product['name'])
-                self.assertEqual(str(line.line_credit_excl_tax), tracked_product['price'])
-                self.assertEqual(-1 * line.quantity, tracked_product['quantity'])
-                self.assertEqual(mode_for_seat(line.order_line.product), tracked_product['sku'])
-                self.assertEqual(line.order_line.product.get_product_class().name, tracked_product['category'])
         else:
             # Payload validation is currently limited to order and refund events
             self.fail()
