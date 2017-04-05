@@ -9,7 +9,7 @@ define([
         'use strict';
 
         function trackPurchase(order_id, total_amount, currency) {
-            window.analytics.track('Completed Order', {
+            window.analytics.track('Order Completed', {
                 orderId: order_id,
                 total: total_amount,
                 currency: currency

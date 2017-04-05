@@ -27,7 +27,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
     order.site.siteconfiguration.segment_client.track(
         user_tracking_id,
-        'Completed Order',
+        'Order Completed',
         {
             'orderId': order.number,
             'total': str(order.total_excl_tax),

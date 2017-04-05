@@ -197,7 +197,7 @@ class BusinessIntelligenceMixin(object):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
         self.assertEqual(event_user_id, expected_user_id)
-        self.assertEqual(event_name, 'Completed Order')
+        self.assertEqual(event_name, 'Order Completed')
         self.assertEqual(kwargs['context'], {'ip': expected_ip, 'Google Analytics': {'clientId': expected_client_id}})
         self.assert_correct_event_payload(instance, event_payload, order_number, currency, total)
 
