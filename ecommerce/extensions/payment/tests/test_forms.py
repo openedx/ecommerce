@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import ddt
+import pycountry
 from oscar.test import factories
 
 from ecommerce.extensions.payment.forms import PaymentForm
@@ -8,9 +9,9 @@ from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-class CyberSourceSubmitFormTests(TestCase):
+class PaymentFormTests(TestCase):
     def setUp(self):
-        super(CyberSourceSubmitFormTests, self).setUp()
+        super(PaymentFormTests, self).setUp()
         self.user = self.create_user()
         self.basket = factories.create_basket()
         self.basket.owner = self.user
@@ -92,3 +93,12 @@ class CyberSourceSubmitFormTests(TestCase):
 
         invalid_postal_code = ''.join(['a' for __ in range(0, 11)])
         self.assert_form_not_valid(country='IN', postal_code=invalid_postal_code)
+
+    def test_countries_sorting(self):
+        """ Verify the country choices are sorted by country name. """
+        data = self._generate_data()
+        form = PaymentForm(user=self.user, data=data)
+        expected = sorted([(country.alpha_2, country.name) for country in pycountry.countries], key=lambda x: x[1])
+        actual = list(form.fields['country'].choices)
+        actual.pop(0)   # Remove the "Choose country" placeholder
+        self.assertEqual(actual, expected)

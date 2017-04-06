@@ -15,8 +15,13 @@ Basket = get_model('basket', 'Basket')
 
 
 def country_choices():
-    """ Returns a tuple of tuples, each containing an ISO 3166 country code. """
-    countries = [(country.alpha_2, country.name) for country in pycountry.countries]
+    """ Returns a tuple of tuples, each containing an ISO 3166 country code and the country name. """
+    countries = sorted(
+        [(country.alpha_2, country.name) for country in pycountry.countries],
+        key=lambda x: x[1]
+    )
+    # Inserting a placeholder here so that the first option
+    # when rendering the dropdown isn't a valid country.
     countries.insert(0, ('', _('<Choose country>')))
     return countries
 
