@@ -101,12 +101,15 @@
 
                     {% if discount.voucher_code %}
                       {% with voucher=discount.voucher %}
-                        {% blocktrans trimmed with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
-                          {{ voucher_code }} {{ voucher_discount_amount }} off
-                        {% endblocktrans %}
+                        <span class="discount">{{ voucher.code }}</span>
+                        <span class="discount">
+                          {% blocktrans trimmed with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
+                            {{ voucher_discount_amount }} off
+                          {% endblocktrans %}
+                        </span>
                       {% endwith %}
                     {% else %}
-                      {{ discount.offer_name }}
+                      <span class="discount">{{ discount.offer_name }}</span>
                     {% endif %}
 
                   </div>
