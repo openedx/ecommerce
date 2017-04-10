@@ -4,6 +4,6 @@
 nick: ecom
 oeps: {}
 openedx-release: {ref: master}
-owner: edx/ecommerce
+owner: edx/learner
 tags: [ecom]
 track-pulls: true
