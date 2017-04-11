@@ -201,16 +201,6 @@ define([
             });
 
             describe('enterprise customers', function () {
-                it('enterprise customer dropdown should be hidden when a catalog is selected', function () {
-                    view.$('#single-course').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
-
-                    view.$('#catalog').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toBeVisible();
-
-                    view.$('#multiple-courses').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
-                });
 
                 it('enterprise customer is setting properly', function() {
                     view.$('#single-course').prop('checked', true).trigger('change');

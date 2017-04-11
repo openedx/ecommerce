@@ -480,6 +480,35 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(coupon_data['category']['name'], self.data['category']['name'])
         self.assertEqual(coupon_data['client'], self.data['client'])
 
+    def test_list_coupons_by_enterprise_customer(self):
+        """
+        Test the behavior of the coupon list view when filtering by EnterpriseCustomer UUID
+        """
+        ec_uuid = 'ec1f642c-3e5f-4e30-bdba-2d683d7bcba9'
+        # First, test that when we filter by a UUID that isn't present, we don't get a result.
+        response = self.client.get(COUPONS_LINK, {'enterprise_customer': ec_uuid})
+        self.assertEqual(len(json.loads(response.content)['results']), 0)
+        # Next, test that when we don't pass a real UUID, we don't attempt to filter.
+        response = self.client.get(COUPONS_LINK, {'enterprise_customer': 'fake_uuid'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        coupon_data = json.loads(response.content)['results'][0]
+        self.assertEqual(coupon_data['title'], self.data['title'])
+        self.assertEqual(coupon_data['category']['name'], self.data['category']['name'])
+        self.assertEqual(coupon_data['client'], self.data['client'])
+        # Finally, add a new coupon that has that UUID, and test that we only get that back when filtering.
+        self.data['enterprise_customer'] = {'id': ec_uuid}
+        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        response = self.client.get(COUPONS_LINK, {'enterprise_customer': ec_uuid})
+        self.assertEqual(len(json.loads(response.content)['results']), 1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        coupon_data = json.loads(response.content)['results'][0]
+        self.assertEqual(coupon_data['title'], self.data['title'])
+        self.assertEqual(coupon_data['category']['name'], self.data['category']['name'])
+        self.assertEqual(coupon_data['client'], self.data['client'])
+        response = self.client.get(COUPONS_LINK)
+        # And test that without filtering, we get both coupons.
+        self.assertEqual(len(json.loads(response.content)['results']), 2)
+
     def test_list_and_details_endpoint_return_custom_code(self):
         """Test that the list and details endpoints return the correct code."""
         self.data.update({
