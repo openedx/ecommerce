@@ -165,3 +165,26 @@ class CourseCatalogServiceMockMixin(object):
                 httpretty.Response(body=callback, content_type='application/json', status_code=500)
             ]
         )
+
+    def mock_catalog_program_list(self, uuid, course_key, seat=None):
+        api = '{}programs/{}/'.format(
+            settings.COURSE_CATALOG_API_URL,
+            uuid
+        )
+        data = {
+            'title': 'Test Program',
+            'applicable_seat_types': ['verified'],
+            'courses': [{
+                'course_runs': [{
+                    'key': course_key,
+                    'seats': [
+                        {'title': seat.title} if seat else None
+                    ]
+                }]
+            }]
+        }
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=api,
+            body=json.dumps(data)
+        )
