@@ -39,7 +39,8 @@ define([
                     client: coupon.get('client'),
                     code: coupon.get('code'),
                     id: coupon.get('id'),
-                    title: coupon.get('title')
+                    title: coupon.get('title'),
+                    dateCreated: moment(coupon.get('date_created')).format('MMMM DD, YYYY, h:mm A')
                 };
             },
 
@@ -78,6 +79,10 @@ define([
                                 }, this)
                             },
                             {
+                                title: gettext('Created'),
+                                data: 'dateCreated'
+                            },
+                            {
                                 title: gettext('Custom Code'),
                                 data: 'code'
                             },
@@ -96,7 +101,7 @@ define([
                                     $(nTd).html(this.downloadTpl(oData));
                                 }, this),
                                 orderable: false
-                             }
+                            }
                         ]
                     });
 
