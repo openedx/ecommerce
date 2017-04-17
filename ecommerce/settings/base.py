@@ -383,7 +383,6 @@ AUTH_USER_MODEL = 'core.User'
 # See: http://getblimp.github.io/django-rest-framework-jwt/#additional-settings
 JWT_AUTH = {
     'JWT_SECRET_KEY': None,
-    'JWT_ALGORITHM': 'HS256',
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 1,
     'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
