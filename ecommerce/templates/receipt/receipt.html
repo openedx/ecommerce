@@ -1,0 +1,23 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}{% trans "Receipt" %}{% endblock %}
+
+{% block content %}
+    <div id="app" class="container">
+        <div class="row">
+            <h3 class="bold">{% trans "Thank you!" %}</h3>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    {% if footer %}
+    <footer class="footer">
+        <div class="container">
+            {{ footer }}
+        </div>
+    </footer>
+    {% endif %}
+{% endblock footer %}
