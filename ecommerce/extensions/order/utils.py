@@ -31,7 +31,6 @@ class OrderNumberGenerator(object):
         if not site:
             site = get_current_request().site
             logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
-
         partner = site.siteconfiguration.partner
         return self.order_number_from_basket_id(partner, basket.id)
 
@@ -64,25 +63,28 @@ class OrderNumberGenerator(object):
 
 
 class OrderCreator(OscarOrderCreator):
-    def create_order_model(self, user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
-                           total, order_number, status, **extra_order_fields):
+    def create_order_model(self, user, basket, shipping_address, shipping_method, shipping_charge,
+                           billing_address, total, order_number, status, **extra_order_fields):
         """
         Create an order model.
 
-        This override ensures the order's site is set to that of the basket. If the basket has no site, the default
-        site is used. The site value can be overridden by setting the `site` kwarg.
-        """
+        This override ensures the order's site is set to that of the basket. If the basket has no
+        site, the default site is used. The site value can be overridden by setting the `site` kwarg.
 
-        # If a site was not passed in with extra_order_fields,
-        # use the basket's site if it has one, else get the site
-        # from the current request.
-        site = basket.site
-        if not site:
-            site = get_current_request().site
+        NOTE:
+        Most of what follows is a duplication of the OrderCreator.create_order_model implementation,
+        with some modification to actually support the site override expectation mentioned above.
+
+        See the following links for more information on why we've done this:
+            * https://github.com/django-oscar/django-oscar/issues/2013
+            * https://github.com/django-oscar/django-oscar/pulls/2014
+
+        When the update has been made in the upstream django-oscar project, and a new version has
+        been released, we can revert to the original call to super that existed in this override.
+        """
 
         order_data = {'basket': basket,
                       'number': order_number,
-                      'site': site,
                       'currency': total.currency,
                       'total_incl_tax': total.incl_tax,
                       'total_excl_tax': total.excl_tax,
@@ -98,8 +100,20 @@ class OrderCreator(OscarOrderCreator):
             order_data['user_id'] = user.id
         if status:
             order_data['status'] = status
+
+        # Append any additional fields provided by the caller to the order data container
         if extra_order_fields:
             order_data.update(extra_order_fields)
+
+        # If no site was explicitly provided, attempt to locate one in the provided basket.
+        if basket.site and 'site' not in order_data:
+            order_data['site'] = basket.site
+
+        # If we still don't have a site, grab the current site from the Django Sites framework
+        if 'site' not in order_data:
+            order_data['site'] = get_current_request().site
+
+        # Create and store a new order model, then hand it back to the caller
         order = Order(**order_data)
         order.save()
 

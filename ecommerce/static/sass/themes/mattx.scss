@@ -1,0 +1,17 @@
+// local variables
+// --------------------
+$brand-logo-path: '/static/images/mattx-logo.png' !default;
+$brand-logo-width: 72px !default;
+$brand-logo-height: 48px !default;
+
+// utilities
+// --------------------
+@import "../utilities/mixins";
+
+// overrides
+// --------------------
+.navbar-brand {
+    .navbar-brand-logo {
+        @include brand-logo($brand-logo-path, $brand-logo-width, $brand-logo-height, 39px);
+    }
+}
