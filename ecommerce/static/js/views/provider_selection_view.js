@@ -11,6 +11,8 @@ define([
             },
 
             render: function () {
+                // Uncheck the radio button so that the change event is triggered.
+                this.$el.find('input[name=provider]').prop('checked', false);
                 this.$el.find('input[name=provider]:first').click();
                 return this;
             },
