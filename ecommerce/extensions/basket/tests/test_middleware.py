@@ -89,3 +89,10 @@ class BasketMiddlewareTests(TestCase):
         """ Verify the method returns a site-specific key. """
         expected = '{base}_{site_id}'.format(base=settings.OSCAR_BASKET_COOKIE_OPEN, site_id=self.site.id)
         self.assertEqual(self.middleware.get_cookie_key(self.request), expected)
+
+    def test_frozen_basket_thaw(self):
+        """ Verify frozen basket gets thawed. """
+        self.request.user = self.create_user()
+        BasketFactory(owner=self.request.user, site=self.site, status=Basket.FROZEN)
+        basket = self.middleware.get_basket(self.request)
+        self.assertEqual(basket.staus, Basket.OPEN)
