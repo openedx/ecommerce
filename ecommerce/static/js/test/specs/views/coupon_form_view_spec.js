@@ -201,6 +201,16 @@ define([
             });
 
             describe('enterprise customers', function () {
+                it('enterprise customer dropdown should be visible, no matter what coupon scope is selected', function () {
+                    view.$('#single-course').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+
+                    view.$('#catalog').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+
+                    view.$('#multiple-courses').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+                });
 
                 it('enterprise customer is setting properly', function() {
                     view.$('#single-course').prop('checked', true).trigger('change');

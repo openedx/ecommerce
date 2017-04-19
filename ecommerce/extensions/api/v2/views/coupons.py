@@ -59,7 +59,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         Handle cases where we need to filter by fields that aren't
         natively supported on the Coupon object.
         """
-        ec_filter = self.request.GET.get('enterprise_customer', None)
+        ec_filter = self.request.GET.get('enterprise_customer')
         objs = super(CouponViewSet, self).get_queryset()
         if ec_filter is not None:
             try:
