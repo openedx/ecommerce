@@ -115,6 +115,7 @@ BROKER_URL = 'amqp://'
 # END CELERY
 
 
+WAFFLE_SECURE = False
 ENABLE_AUTO_AUTH = True
 
 #####################################################################
