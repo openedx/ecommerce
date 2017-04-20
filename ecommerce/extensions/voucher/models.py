@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from django.db import models
-from oscar.apps.voucher.abstract_models import AbstractVoucher
+from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
 
@@ -63,4 +63,4 @@ class Voucher(AbstractVoucher):
             return False
 
 
-from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order
+from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
