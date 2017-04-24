@@ -80,7 +80,9 @@
                 <dt class="course-description sr">{% trans "Description:" %}</dt>
                 <dd class="course-description">
                   <span>{{ line.description }}</span>
-                  <p>{{ line.product.course.id|course_organization }}</p>
+                  {% if line.product.course %}
+                    <p>{{ line.product.course.id|course_organization }}</p>
+                  {% endif %}
                 </dd>
                 <dt class="line-price sr">{% trans "Item Price:" %}</dt>
                 <dd class="line-price price">{{ line.line_price_before_discounts_incl_tax|currency:order.currency }}</dd>
