@@ -22,6 +22,7 @@ from ecommerce.enterprise.utils import (
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -346,7 +347,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
     def redeem_coupon(self, code=COUPON_CODE, consent_token=None):
         self.request.user = self.user
-        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
         return self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
 
     def assert_redirects_to_receipt_page(self, code=COUPON_CODE, consent_token=None):
@@ -459,7 +459,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
             enterprise_customer=ENTERPRISE_CUSTOMER
         )
         self.request.user = self.user
-        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
         self.mock_enterprise_learner_api(consent_provided=False)
         self.mock_enterprise_course_enrollment_api(results_present=False)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
@@ -494,7 +493,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         """ Verify that the view renders an error when the consent token doesn't match. """
         code = self.prepare_enterprise_data()
         self.request.user = self.user
-        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=False, mode=self.course_mode)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
@@ -553,20 +551,18 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
 
     @httpretty.activate
     def test_already_enrolled_rejection(self):
-        """ Verify a user is rejected from redeeming a coupon for a course she's already enrolled in."""
-        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
+        """ Verify a user is rejected from redeeming a coupon for a course he's already enrolled in."""
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
-
         self.create_coupon_and_get_code()
-        response = self.client.get(self.redeem_url_with_params())
-        msg = 'You are already enrolled in the course.'
-        self.assertEqual(response.context['error'], msg)
+        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
+            response = self.client.get(self.redeem_url_with_params())
+            msg = 'You have already purchased {course} seat.'.format(course=self.course.name)
+            self.assertEqual(response.context['error'], msg)
 
     @httpretty.activate
     def test_invalid_email_domain_rejection(self):
         """ Verify a user with invalid email domain is rejected. """
-        self.mock_enrollment_api(self.request, self.user, self.course.id, is_active=True, mode=self.course_mode)
         self.create_coupon_and_get_code(email_domains='example.com')
         response = self.client.get(self.redeem_url_with_params())
         msg = 'You are not eligible to use this coupon.'
