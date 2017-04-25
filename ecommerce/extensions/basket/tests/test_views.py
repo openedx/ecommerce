@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import json
 import urllib
 
 import ddt
@@ -17,6 +16,7 @@ from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import newfactories as factories
+from oscar.test.factories import create_order
 from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -27,12 +27,13 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_url
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
+from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
@@ -41,12 +42,14 @@ from ecommerce.tests.factories import ProductFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
+
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+OrderLine = get_model('order', 'Line')
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 Selector = get_class('partner.strategy', 'Selector')
@@ -75,32 +78,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.stock_record = StockRecordFactory(product=product, partner=self.partner)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
-
-    def mock_enrollment_api_success_enrolled(self, course_id, mode='audit'):
-        """
-        Returns a successful Enrollment API response indicating self.user is enrolled in the specified course mode.
-        """
-        self.assertTrue(httpretty.is_enabled())
-        url = '{host}/{username},{course_id}'.format(
-            host=get_lms_enrollment_api_url(),
-            username=self.user.username,
-            course_id=course_id
-        )
-        json_body = json.dumps({'mode': mode, 'is_active': True})
-        httpretty.register_uri(httpretty.GET, url, body=json_body, content_type='application/json')
-
-    def mock_enrollment_api_success_unenrolled(self, course_id, mode='audit'):
-        """
-        Returns a successful Enrollment API response indicating self.user is unenrolled in the specified course mode.
-        """
-        self.assertTrue(httpretty.is_enabled())
-        url = '{host}/{username},{course_id}'.format(
-            host=get_lms_enrollment_api_url(),
-            username=self.user.username,
-            course_id=course_id
-        )
-        json_body = json.dumps({'mode': mode, 'is_active': False})
-        httpretty.register_uri(httpretty.GET, url, body=json_body, content_type='application/json')
 
     def test_login_required(self):
         """ The view should redirect to login page if the user is not logged in. """
@@ -148,7 +125,6 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         )
         self.assertRedirects(response, expected_url)
 
-    @httpretty.activate
     @mock.patch('ecommerce.extensions.basket.views.get_entitlement_voucher')
     def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
         """
@@ -159,15 +135,12 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         sku = self.stock_record.partner_sku
         url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
-        self.mock_enrollment_api_success_unenrolled(self.course.id, mode='verified')
         response = self.client.get(url)
         expected_url = self.get_full_url(reverse('basket:summary'))
         self.assertRedirects(response, expected_url, status_code=303)
 
-    @httpretty.activate
     def test_unavailable_product(self):
         """ The view should return HTTP 400 if the product is not available for purchase. """
-        self.mock_enrollment_api_success_enrolled(self.course.id)
         product = self.stock_record.product
         product.expires = pytz.utc.localize(datetime.datetime.min)
         product.save()
@@ -179,12 +152,10 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, expected_content)
 
-    @httpretty.activate
     def test_redirect_to_basket_summary(self):
         """
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
-        self.mock_enrollment_api_success_enrolled(self.course.id)
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
@@ -200,39 +171,31 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.assertTrue(basket.contains_a_voucher)
         self.assertEqual(basket.lines.first().product, self.stock_record.product)
 
-    @httpretty.activate
-    @ddt.data(('verified', False), ('professional', True), ('no-id-professional', False))
-    @ddt.unpack
-    def test_enrolled_verified_student(self, mode, id_verification):
+    def test_already_purchased_product(self):
         """
-        Verify the view return HTTP 400 if the student is already enrolled as verified student in the course
-        (The Enrollment API call being used returns an active enrollment record in this case)
+        Verify student can not place multiple orders for single course seat
         """
         course = CourseFactory()
-        self.mock_enrollment_api_success_enrolled(course.id, mode=mode)
-        product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
+        product = course.create_or_update_seat("Verified", True, 0, self.partner)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
-        self.create_coupon(catalog=catalog, code=COUPON_CODE, benefit_value=5)
-
-        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=stock_record.partner_sku, code=COUPON_CODE)
-        expected_content = 'You are already enrolled in {product}.'.format(product=product.course.name)
+        sku = stock_record.partner_sku
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(product, 1)
+        create_order(user=self.user, basket=basket)
+        url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
+        expected_content = 'You have already purchased {course} seat.'.format(course=product.course.name)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, expected_content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['error'], expected_content)
 
-    @httpretty.activate
-    @ddt.data(('verified', False), ('professional', True), ('no-id-professional', False))
-    @ddt.unpack
-    def test_unenrolled_verified_student(self, mode, id_verification):
+    def test_not_already_purchased_product(self):
         """
-        Verify the view return HTTP 303 if the student is unenrolled as verified student in the course
-        (The Enrollment API call being used returns an inactive enrollment record in this case)
+        Verify student can place order for not purchased product
         """
         course = CourseFactory()
-        self.mock_enrollment_api_success_unenrolled(course.id, mode=mode)
-        product = course.create_or_update_seat(mode, id_verification, 0, self.partner)
+        product = course.create_or_update_seat("Verified", True, 0, self.partner)
         stock_record = StockRecordFactory(product=product, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
@@ -240,22 +203,10 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
 
         url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, 303)
         self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
         self.assertEqual(response.wsgi_request.GET['sku'], sku)
-
-    @httpretty.activate
-    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
-    def test_enrollment_api_failure(self, error):
-        """
-        Verify the view returns HTTP status 400 if the Enrollment API is not available.
-        """
-        self.request.user = self.user
-        self.mock_enrollment_api_error(self.request, self.user, self.course.id, error)
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku, code=COUPON_CODE)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
 
 
 @ddt.ddt
@@ -312,6 +263,52 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, TestCase):
         basket = response.wsgi_request.basket
         self.assertEqual(basket.status, Basket.OPEN)
         self.assertTrue(basket.contains_voucher(voucher.code))
+
+    def test_all_already_purchased_products(self):
+        """
+        Test user can not purchase products again using the multiple item view
+        """
+        course = CourseFactory()
+        product1 = course.create_or_update_seat("Verified", True, 0, self.partner)
+        product2 = course.create_or_update_seat("Professional", True, 0, self.partner)
+        stock_record = StockRecordFactory(product=product1, partner=self.partner)
+        catalog = Catalog.objects.create(partner=self.partner)
+        catalog.stock_records.add(stock_record)
+        stock_record = StockRecordFactory(product=product2, partner=self.partner)
+        catalog.stock_records.add(stock_record)
+
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in [product1, product2]]},
+                              True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.context['error'], 'You have already purchased these products')
+
+    def test_not_already_purchased_products(self):
+        """
+        Test user can purchase products which have not been already purchased
+        """
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=False):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 303)
+
+    def test_one_already_purchased_product(self):
+        """
+        Test prepare_basket removes already purchased product and checkout for the rest of products
+        """
+        order = create_order(user=self.user)
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        products.append(OrderLine.objects.get(order=order).product)
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        response = self.client.get(url)
+        basket = response.wsgi_request.basket
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(basket.lines.count(), len(products) - 1)
 
 
 @httpretty.activate

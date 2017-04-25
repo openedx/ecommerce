@@ -30,6 +30,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -182,9 +183,6 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 }
             )
 
-        if request.user.is_user_already_enrolled(request, product):
-            return render(request, template_name, {'error': _('You are already enrolled in the course.')})
-
         try:
             enterprise_customer = get_enterprise_customer_from_voucher(request.site, voucher)
         except EnterpriseDoesNotExist as e:
@@ -232,7 +230,12 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 )
                 return HttpResponseRedirect(redirect_url)
 
-        basket = prepare_basket(request, [product], voucher)
+        try:
+            basket = prepare_basket(request, [product], voucher)
+        except AlreadyPlacedOrderException:
+            msg = _('You have already purchased {course} seat.').format(course=product.course.name)
+            return render(request, template_name, {'error': msg})
+
         if basket.total_excl_tax == 0:
             try:
                 order = self.place_free_order(basket)

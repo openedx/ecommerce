@@ -8,11 +8,16 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.courses.utils import mode_for_seat
+from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
+from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 StockRecord = get_model('partner', 'StockRecord')
+OrderLine = get_model('order', 'Line')
+Refund = get_model('refund', 'Refund')
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ def prepare_basket(request, products, voucher=None):
 
     Arguments:
         request (Request): The request object made to the view.
-        product (List): List of products to be added to the basket.
+        products (List): List of products to be added to the basket.
         voucher (Voucher): Voucher to apply to the basket.
 
     Returns:
@@ -38,10 +43,24 @@ def prepare_basket(request, products, voucher=None):
     basket.flush()
     basket.save()
     basket_addition = get_class('basket.signals', 'basket_addition')
+    already_purchased_products = []
     for product in products:
-        basket.add_product(product, 1)
-        # Call signal handler to notify listeners that something has been added to the basket
-        basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request, basket=basket)
+        if product.is_enrollment_code_product or \
+                not UserAlreadyPlacedOrder.user_already_placed_order(request.user, product):
+            basket.add_product(product, 1)
+            # Call signal handler to notify listeners that something has been added to the basket
+            basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request,
+                                 basket=basket)
+        else:
+            already_purchased_products.append(product)
+            logger.warning(
+                'User [%s] attempted to repurchase the [%s] seat of course [%s]',
+                request.user.username,
+                mode_for_seat(product),
+                product.course_id
+            )
+    if already_purchased_products and basket.is_empty:
+        raise AlreadyPlacedOrderException
 
     if len(products) == 1 and products[0].is_enrollment_code_product:
         basket.clear_vouchers()

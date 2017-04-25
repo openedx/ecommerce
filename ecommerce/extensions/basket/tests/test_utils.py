@@ -14,6 +14,8 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import attribute_cookie_data, prepare_basket
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
+from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
@@ -281,6 +283,27 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         # test referral record is deleted when no cookies are set
         with self.assertRaises(Referral.DoesNotExist):
             Referral.objects.get(basket_id=basket.id)
+
+    def test_prepare_basket_raises_exception_for_purchased_product(self):
+        """
+        Test prepare_basket raises AlreadyPlacedOrderException if the product is already purchased by user
+        """
+        product = ProductFactory()
+        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
+            with self.assertRaises(AlreadyPlacedOrderException):
+                prepare_basket(self.request, [product])
+
+    def test_prepare_basket_for_purchased_enrollment_code(self):
+        """
+        Test prepare_basket returns basket with product even if its already been purchased by user
+        """
+        course = CourseFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
+            basket = prepare_basket(self.request, [enrollment_code])
+            self.assertIsNotNone(basket)
 
 
 class BasketUtilsTransactionTests(UserMixin, TransactionTestCase):
