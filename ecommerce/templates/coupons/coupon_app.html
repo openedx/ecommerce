@@ -10,53 +10,7 @@
 {% endblock %}
 
 {% block navbar %}
-    <nav class="navbar navbar-default" aria-label="Account">
-        <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                        data-target="#main-navbar-collapse" aria-expanded="false">
-                    <span class="sr-only">{% trans "Toggle navigation" %}</span>
-                    <span aria-hidden="true" class="icon-bar"></span>
-                    <span aria-hidden="true" class="icon-bar"></span>
-                    <span aria-hidden="true" class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/coupons/">
-                    <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
-                    <div class="navbar-brand-app">{% trans "E-Commerce Code Administration" %}</div>
-                </a>
-            </div>
-
-            <div class="collapse navbar-collapse" id="main-navbar-collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    {% if user.is_authenticated %}
-                        <li class="btn-group user-menu">
-                            <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
-                                    onclick="window.open('{{ lms_dashboard_url }}');">
-                                <i class="icon fa fa-home" aria-hidden="true"></i>
-                                <span class="sr-only">{% trans "Dashboard for:" %}</span>
-                                {{ user.username }}
-                            </button>
-                            <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true">
-                                <span class="caret"></span>
-                                <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
-                            </button>
-                            <ul class="dropdown-menu" aria-expanded="false">
-                                {% include "courses/menu_options.html" %}
-                            </ul>
-                            {% include "courses/menu_options.html" with additional_class="visible-xs" %}
-                        </li>
-                    {% else %}
-                        <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" %}</a>
-                        <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
-                        </a>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include "edx/partials/_staff_navbar.html" %}
     {% include "edx/partials/_administration_menu.html" %}
 {% endblock navbar %}
 
