@@ -1,4 +1,24 @@
 {% extends 'edx/partials/_base_navbar.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block navbar_brand %}
+    {% if admin == "course" %}
+        <h1 class="navbar-brand" href="/courses/">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+            <div class="navbar-brand-app">{% trans "E-Commerce Course Administration" %}</div>
+        </h1>
+    {% elif admin == "coupon" %}
+        <h1 class="navbar-brand" href="/coupons/">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+            <div class="navbar-brand-app">{% trans "E-Commerce Coupon Administration" %}</div>
+        </h1>
+    {% else %}
+        <h1 class="navbar-brand">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+        </h1>
+    {% endif %}
+{% endblock navbar_brand %}
 
 {% block dropdown_menu %}
   {% include "courses/menu_options.html" %}
