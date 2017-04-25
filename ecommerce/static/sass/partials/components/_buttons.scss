@@ -8,6 +8,7 @@
 
 // Use the Pattern Library's decoration (border-bottom)
 .btn-link {
+    white-space: normal;
     &:focus, &:hover {
         text-decoration: none;
     }
