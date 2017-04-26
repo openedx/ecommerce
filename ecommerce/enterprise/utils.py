@@ -15,6 +15,7 @@ from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError
 
 from ecommerce.core.utils import traverse_pagination
+from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -68,6 +69,30 @@ def get_enterprise_customer(site, uuid):
         'enforce_data_sharing_consent': response['enforce_data_sharing_consent'],
         'contact_email': response.get('contact_email', ''),
     }
+
+
+def get_enterprise_learner(site, user):
+    """
+    Get the EnterpriseCustomerUser with a particular username if it exists;
+    otherwise, return None.
+
+    Arguments:
+        site (Site): The site which is handling the current request
+        user (User): Django User object
+
+    Returns:
+        (dict): The single EnterpriseCustomerUser structure provided by the API
+            or returns None if EnterpriseCustomerUser with given username is not found.
+    """
+    # Handle the case when user is anonymous. We need this condition as
+    # filtering enterprise learners for anonymous user will return all learners.
+    if user.is_anonymous():
+        return None
+
+    response = enterprise_api.fetch_enterprise_learner_data(site, user)
+    results = response.get('results')
+
+    return results[0] if results else None
 
 
 def get_enterprise_customers(site):
@@ -364,3 +389,24 @@ def get_enterprise_customer_data_sharing_consent_token(access_token, course_id, 
         digestmod=hashlib.sha256,
     )
     return consent_token_hmac.hexdigest()
+
+
+def is_user_linked_to_enterprise_customer(site, enterprise_customer_uuid, user):
+    """
+    Does given user belongs to the given enterprise customer ?
+
+    Arguments:
+     site (Site): The site which is handling the current request
+     enterprise_customer_uuid (string): UUID for the enterprise customer
+     user (User): django user object
+
+    Returns:
+        (bool): `True` if given user belongs to enterprise customer `False` of it does not.
+    """
+    if not is_enterprise_feature_enabled():
+        return False
+
+    if user.is_anonymous():
+        return False
+
+    return bool(get_enterprise_customer_user(site, user.username, enterprise_customer_uuid))
