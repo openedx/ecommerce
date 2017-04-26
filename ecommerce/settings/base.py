@@ -274,6 +274,7 @@ LOCAL_APPS = [
     'ecommerce.coupons',
     'ecommerce.courses',
     'ecommerce.invoice',
+    'ecommerce.programs',
     'ecommerce.referrals',
 
     # Theming app for customizing visual and behavioral attributes of a site

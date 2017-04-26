@@ -1,0 +1,18 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}{% trans "Programs" %}{% endblock %}
+
+{% block navbar %}
+    {% include "edx/partials/_staff_navbar.html" %}
+    {% include "edx/partials/_administration_menu.html" %}
+{% endblock navbar %}
+
+{% block content %}
+    <div id="app" class="container"></div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/apps/program_admin_app.js' %}"></script>
+{% endblock %}

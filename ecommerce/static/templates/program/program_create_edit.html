@@ -1,0 +1,18 @@
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/programs/"><%= gettext('Programs') %></a></li>
+        <% if(editing){ %>
+            <li><a href="/programs/<%= uuid %>/"><%= name %></a></li>
+            <li class="active"><%= gettext('Edit') %></li>
+        <% } else { %>
+            <li class="active"><%= gettext('Create') %></li>
+        <% } %>
+    </ol>
+    <div class="page-header">
+        <h1 class="hd-1 emphasized">
+            <%= gettext(editing ? 'Edit Program' : 'Create New Program') %>
+        </h1>
+    </div>
+
+    <div class="program-form-outer"></div>
+</div>
