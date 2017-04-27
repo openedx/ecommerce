@@ -36,6 +36,7 @@ BASKET_URLS = [
         basket_views.OrderByBasketRetrieveView.as_view(),
         name='retrieve_order'
     ),
+    url(r'^calculate/$', basket_views.BasketCalculateView.as_view(), name='calculate'),
 ]
 
 PAYMENT_URLS = [
