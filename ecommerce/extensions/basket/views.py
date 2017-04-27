@@ -417,6 +417,8 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
 
             return
 
+        # Reset any site offers that are applied so that only one offer is active.
+        self.request.basket.reset_offer_applications()
         self.request.basket.vouchers.add(voucher)
 
         # Raise signal

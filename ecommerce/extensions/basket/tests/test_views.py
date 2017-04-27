@@ -45,6 +45,8 @@ Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Condition = get_model('offer', 'Condition')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 Selector = get_class('partner.strategy', 'Selector')
@@ -764,6 +766,51 @@ class VoucherAddViewTests(TestCase):
 
         for part in expected_url_parts:
             self.assertIn(part, resp.url)
+
+    def assert_basket_discounts(self, expected_offer_discounts=None, expected_voucher_discounts=None):
+        """Helper to determine if the expected offer is applied to a basket.
+        The basket is retrieved from the response because Oscar uses
+        SimpleLazyObjects to operate with baskets."""
+        expected_offer_discounts = expected_offer_discounts or []
+        expected_voucher_discounts = expected_voucher_discounts or []
+
+        response = self.client.get(reverse('basket:summary'))
+        basket = response.context['basket']
+
+        actual_offer_discounts = [discount['offer'] for discount in basket.offer_discounts]
+        actual_voucher_discounts = [discount['offer'] for discount in basket.voucher_discounts]
+
+        self.assertEqual(actual_offer_discounts, expected_offer_discounts)
+        self.assertEqual(actual_voucher_discounts, expected_voucher_discounts)
+
+    def test_coupon_applied_on_site_offer(self):
+        """Coupon offer supersedes site offer."""
+        product_price = 100
+        site_offer_discount = 20
+        voucher_discount = 10
+
+        voucher, product = prepare_voucher(benefit_value=voucher_discount)
+        stockrecord = product.stockrecords.first()
+        stockrecord.price_excl_tax = product_price
+        stockrecord.save()
+
+        _range = factories.RangeFactory(includes_all_products=True)
+        site_offer = factories.ConditionalOfferFactory(
+            offer_type=ConditionalOffer.SITE,
+            benefit=factories.BenefitFactory(range=_range, value=site_offer_discount),
+            condition=factories.ConditionFactory(type=Condition.COVERAGE, value=1, range=_range)
+        )
+        self.basket.add_product(product)
+        # Only site offer is applied to the basket.
+        self.assert_basket_discounts([site_offer])
+
+        # Only the voucher offer is applied to the basket.
+        self.client.post(reverse('basket:vouchers-add'), data={'code': voucher.code})
+        self.assert_basket_discounts(expected_voucher_discounts=[voucher.offers.first()])
+
+        # Site offer discount is still present after removing voucher.
+        self.client.post(reverse('basket:vouchers-remove', kwargs={'pk': voucher.id}))
+        self.assert_basket_discounts([site_offer])
 
 
 class VoucherRemoveViewTests(TestCase):
