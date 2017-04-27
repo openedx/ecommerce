@@ -5,7 +5,9 @@ import logging
 import warnings
 
 from django.db import transaction
+from django.http import HttpResponseBadRequest
 from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext as _
 from edx_rest_framework_extensions.permissions import IsSuperuser
 from oscar.core.loading import get_class, get_model
 from rest_framework import generics, status
@@ -18,13 +20,18 @@ from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import attribute_cookie_data
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import get_default_processor_class, get_processor_class_by_name
 
+Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
+Product = get_model('catalogue', 'Product')
+Selector = get_class('partner.strategy', 'Selector')
+Voucher = get_model('voucher', 'Voucher')
 
 
 class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
@@ -318,3 +325,70 @@ class BasketDestroyView(generics.DestroyAPIView):
     lookup_url_kwarg = 'basket_id'
     permission_classes = (IsAuthenticated, IsSuperuser,)
     queryset = Basket.objects.all()
+
+
+class BasketCalculateView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """ Calculate basket totals given a list of sku's
+
+        Create a temporary basket add the sku's and apply an optional voucher code.
+        Then calculate the total proce less discounts.
+
+        Arguments:
+            sku (string): A list of sku(s) to calculate
+            code (string): Optional voucher code to apply to the basket.
+
+        Returns:
+            JSON: {
+                    'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
+                    'total_incl_tax': basket.total_incl_tax,
+                    'currency': basket.currency
+                }
+        """
+        partner = get_partner_for_site(request)
+        skus = request.GET.getlist('sku')
+        if not skus:
+            return HttpResponseBadRequest(_('No SKUs provided.'))
+
+        code = request.GET.get('code', None)
+        voucher = Voucher.objects.get(code=code) if code else None
+
+        products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
+        if not products:
+            return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+
+        # We wrap this in an atomic operation so we never commit this to the db.
+        # This is to avoid merging this temporary basket with a real user basket.
+        try:
+            with transaction.atomic():
+                basket = Basket(owner=request.user)
+                basket.strategy = Selector().strategy(user=request.user)
+
+                for product in products:
+                    basket.add_product(product, 1)
+
+                if voucher:
+                    basket.vouchers.add(voucher)
+
+                # Calculate any discounts on the basket.
+                Applicator().apply(basket, request)
+
+                discounts = []
+
+                if basket.offer_discounts:
+                    discounts = basket.offer_discounts
+                if basket.voucher_discounts:
+                    discounts.extend(basket.voucher_discounts)
+
+                response = {
+                    'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
+                    'total_incl_tax': basket.total_incl_tax,
+                    'currency': basket.currency
+                }
+                raise Exception
+        except:  # pylint: disable=bare-except
+            pass
+
+        return Response(response)

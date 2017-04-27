@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+import datetime
 import json
+import urllib
 from collections import namedtuple
 from decimal import Decimal
 
@@ -18,10 +22,15 @@ from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDeta
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.mixins import BasketCreationMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
+Condition = get_model('offer', 'Condition')
 Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Refund = get_model('refund', 'Refund')
@@ -293,3 +302,98 @@ class BasketDestroyViewTests(TestCase):
 
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Basket.objects.filter(id=self.basket.id).exists())
+
+
+class BasketCalculateViewTests(TestCase):
+
+    def setUp(self):
+        super(BasketCalculateViewTests, self).setUp()
+        self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in self.products]}, True)
+        self.path = reverse('api:v2:baskets:calculate')
+        self.url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        self.range = factories.RangeFactory(includes_all_products=True)
+        self.product_total = sum(product.stockrecords.first().price_excl_tax for product in self.products)
+
+        self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+
+    def test_no_sku(self):
+        """ Verify bad response when not providing sku(s) """
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_sku(self):
+        """ Verify bad response when sending an invalid sku """
+        response = self.client.get(self.path + '?sku=foo')
+        self.assertEqual(response.status_code, 400)
+
+    def test_no_authentication(self):
+        """ Verify that un-authenticated users are rejected """
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_basket_calculate_no_offers(self):
+        """ Verify a successful basket calculation with no offers"""
+
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': self.product_total,
+            'currency': 'GBP'
+        }
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    def test_basket_calculate_site_offer(self):
+        """ Verify successful basket calculation with a site offer """
+
+        discount_value = 10.00
+        benefit = factories.BenefitFactory(type=Benefit.PERCENTAGE, range=self.range, value=discount_value)
+        condition = factories.ConditionFactory(value=3, range=self.range, type=Condition.COVERAGE)
+        factories.ConditionalOfferFactory(name='Test Offer', benefit=benefit, condition=condition,
+                                          offer_type=ConditionalOffer.SITE, start_datetime=datetime.datetime.now(),
+                                          end_datetime=datetime.datetime.now() + datetime.timedelta(days=1))
+
+        response = self.client.get(self.url)
+
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': Decimal('27.00'),
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    def test_basket_calculate_percentage_coupon(self):
+        """ Verify successful basket calculation when passing a voucher """
+        voucher, _ = prepare_voucher(_range=self.range)
+        response = self.client.get(self.url + '&code={code}'.format(code=voucher.code))
+
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    def test_basket_calculate_fixed_coupon(self):
+        """ Verufy successful basket calculation for a fixed price voucher """
+        discount = 5
+        voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount)
+
+        response = self.client.get(self.url + '&code={code}'.format(code=voucher.code))
+
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': self.product_total - discount,
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
