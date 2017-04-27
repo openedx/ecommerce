@@ -8,6 +8,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Default = get_class('partner.strategy', 'Default')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -81,13 +82,17 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
     condition = ConditionFactory(value=1, range=_range)
     if max_usage:
         offer = ConditionalOfferFactory(
-            name='PrepareVoucherOffer',
+            offer_type=ConditionalOffer.VOUCHER,
             benefit=benefit,
             condition=condition,
             max_global_applications=max_usage
         )
     else:
-        offer = ConditionalOfferFactory(name='PrepareVoucherOffer', benefit=benefit, condition=condition)
+        offer = ConditionalOfferFactory(
+            offer_type=ConditionalOffer.VOUCHER,
+            benefit=benefit,
+            condition=condition
+        )
     voucher.offers.add(offer)
     return voucher, product
 
