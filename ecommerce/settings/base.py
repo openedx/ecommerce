@@ -218,7 +218,7 @@ MIDDLEWARE_CLASSES = (
     # MUST appear AFTER CurrentSiteMiddleware.
     'ecommerce.extensions.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'threadlocals.middleware.ThreadLocalMiddleware',
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
@@ -266,6 +266,7 @@ DJANGO_APPS = [
     'release_util',
     'crispy_forms',
     'solo',
+    'social_django',
 ]
 
 # Apps specific to this project go here.
@@ -407,8 +408,6 @@ ENABLE_AUTO_AUTH = False
 # Prefix for auto auth usernames. This value must be set in order for auto-auth to function.
 # If it were not set, we would be unable to automatically remove all auto-auth users.
 AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
-
-INSTALLED_APPS += ['social.apps.django_app.default']
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOpenIdConnect',) + AUTHENTICATION_BACKENDS
 

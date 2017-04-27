@@ -16,7 +16,7 @@ from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.utils import RequestFactory
-from social.apps.django_app.default.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.core.url_utils import get_lms_url

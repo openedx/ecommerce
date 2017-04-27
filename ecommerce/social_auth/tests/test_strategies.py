@@ -1,6 +1,6 @@
 """Tests of social auth strategies."""
 from django.conf import settings
-from social.apps.django_app.default.models import DjangoStorage
+from social_django.models import DjangoStorage
 
 from ecommerce.social_auth.strategies import CurrentSiteDjangoStrategy
 from ecommerce.tests.testcases import TestCase
