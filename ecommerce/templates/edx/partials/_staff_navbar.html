@@ -4,15 +4,15 @@
 
 {% block navbar_brand %}
     {% if admin == "course" %}
-        <h1 class="navbar-brand" href="/courses/">
+        <a class="navbar-brand" href="/courses/">
             <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
             <div class="navbar-brand-app">{% trans "E-Commerce Course Administration" %}</div>
-        </h1>
+        </a>
     {% elif admin == "coupon" %}
-        <h1 class="navbar-brand" href="/coupons/">
+        <a class="navbar-brand" href="/coupons/">
             <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
             <div class="navbar-brand-app">{% trans "E-Commerce Coupon Administration" %}</div>
-        </h1>
+        </a>
     {% else %}
         <h1 class="navbar-brand">
             <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
