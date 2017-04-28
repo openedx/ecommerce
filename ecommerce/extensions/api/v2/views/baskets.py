@@ -353,7 +353,10 @@ class BasketCalculateView(generics.GenericAPIView):
             return HttpResponseBadRequest(_('No SKUs provided.'))
 
         code = request.GET.get('code', None)
-        voucher = Voucher.objects.get(code=code) if code else None
+        try:
+            voucher = Voucher.objects.get(code=code) if code else None
+        except Voucher.DoesNotExist:
+            voucher = None
 
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:

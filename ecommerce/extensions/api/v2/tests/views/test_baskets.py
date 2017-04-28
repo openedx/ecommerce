@@ -368,6 +368,20 @@ class BasketCalculateViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
+    def test_basket_calculate_invalid_coupon(self):
+        """ Verify successful basket calculation when passing an invalid voucher """
+        response = self.client.get(self.url + '&code=foo')
+
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': self.product_total,
+            'currency': 'GBP'
+        }
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
     def test_basket_calculate_percentage_coupon(self):
         """ Verify successful basket calculation when passing a voucher """
         voucher, _ = prepare_voucher(_range=self.range)
