@@ -1,17 +1,15 @@
 """Devstack settings"""
+from ecommerce.settings._debug_toolbar import *
 from ecommerce.settings.production import *
 
 DEBUG = True
+INTERNAL_IPS = ['127.0.0.1']
 ENABLE_AUTO_AUTH = True
-PROTOCOL = 'http'
 
 # Docker does not support the syslog socket at /dev/log. Rely on the console.
 LOGGING['handlers']['local'] = {
     'class': 'logging.NullHandler',
 }
-
-# Determine which requests should render Django Debug Toolbar
-INTERNAL_IPS = ('127.0.0.1',)
 
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 

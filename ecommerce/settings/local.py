@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 from urlparse import urljoin
 
+from ecommerce.settings._debug_toolbar import *
 from ecommerce.settings.base import *
 
 # DEBUG CONFIGURATION
@@ -10,6 +11,7 @@ from ecommerce.settings.base import *
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 DEBUG = True
 ALLOWED_HOSTS = ['*']
+INTERNAL_IPS = ['127.0.0.1']
 # END DEBUG CONFIGURATION
 
 # EMAIL CONFIGURATION
@@ -42,21 +44,6 @@ CACHES = {
     }
 }
 # END CACHE CONFIGURATION
-
-
-# TOOLBAR CONFIGURATION
-# See: http://django-debug-toolbar.readthedocs.org/en/latest/installation.html#explicit-setup
-if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
-    INSTALLED_APPS += (
-        'debug_toolbar',
-    )
-
-    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
-
-# http://django-debug-toolbar.readthedocs.org/en/latest/installation.html
-INTERNAL_IPS = ('127.0.0.1',)
-# END TOOLBAR CONFIGURATION
-
 
 # AUTHENTICATION
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
