@@ -582,3 +582,15 @@ ENTERPRISE_API_CACHE_TIMEOUT = 3600  # Value is in seconds
 # Name for waffle switch to use for enabling enterprise features on runtime.
 ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH = 'enable_enterprise_on_runtime'
 # END ENTERPRISE APP CONFIGURATION
+
+# DJANGO DEBUG TOOLBAR CONFIGURATION
+# http://django-debug-toolbar.readthedocs.org/en/latest/installation.html
+if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
+
+    MIDDLEWARE_CLASSES += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+# END DJANGO DEBUG TOOLBAR CONFIGURATION
