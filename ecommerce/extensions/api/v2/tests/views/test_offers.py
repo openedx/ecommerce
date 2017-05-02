@@ -1,4 +1,5 @@
 import json
+import uuid
 
 import ddt
 import httpretty
@@ -63,14 +64,16 @@ class OfferViewSetTests(CourseCatalogTestMixin, CourseCatalogServiceMockMixin, T
         def callback(*args):  # pylint: disable=unused-argument
             raise error
 
+        dummy_uuid = str(uuid.uuid4())
+
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}programs/dummy-uuid/'.format(settings.COURSE_CATALOG_API_URL),
+            uri='{}programs/{}/'.format(settings.COURSE_CATALOG_API_URL, dummy_uuid),
             body=callback
         )
 
         with mock.patch('ecommerce.extensions.api.v2.views.offers.log.warning') as mock_logger:
-            response = self.client.post(self.path, json.dumps({'program_uuid': 'dummy-uuid'}), JSON_CONTENT_TYPE)
+            response = self.client.post(self.path, json.dumps({'program_uuid': dummy_uuid}), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 500)
             self.assertTrue(mock_logger.called)
 
@@ -78,15 +81,16 @@ class OfferViewSetTests(CourseCatalogTestMixin, CourseCatalogServiceMockMixin, T
     @mock_course_catalog_api_client
     def test_create(self):
         """New ConditionalOffer is created."""
+        program_uuid = str(uuid.uuid4())
         data = {
-            'program_uuid': 123,
+            'program_uuid': program_uuid,
             'benefit_value': 15,
             'start_datetime': str(now()),
             'end_datetime': str(now())
         }
         course = CourseFactory()
         course.create_or_update_seat('verified', False, 0, self.partner)
-        self.mock_catalog_program_list(123, course.id)
+        self.mock_catalog_program_list(program_uuid, course.id)
         response = self.client.post(self.path, json.dumps(data), JSON_CONTENT_TYPE)
         self.assert_offer_data(json.loads(response.content), data)
 
@@ -129,7 +133,7 @@ class OfferViewSetTests(CourseCatalogTestMixin, CourseCatalogServiceMockMixin, T
         path = reverse('api:v2:offers-detail', kwargs={'pk': offer.id})
         response = self.client.patch(path, json.dumps({
             'id': offer.id,
-            'program_uuid': 'dummy-uuid'
+            'program_uuid': str(uuid.uuid4())
         }), JSON_CONTENT_TYPE)
 
         benefit = Benefit.objects.get(id=json.loads(response.content)['benefit'])
