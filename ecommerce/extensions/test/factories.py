@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 import factory
@@ -5,6 +6,10 @@ from django.utils.timezone import now
 from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOfferFactory
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+
+from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
+from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
+from ecommerce.programs.custom import class_path
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -104,3 +109,36 @@ class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined
 
 class ConditionalOfferFactory(BaseConditionalOfferFactory):  # pylint: disable=function-redefined
     name = factory.Faker('word')
+
+
+class AbsoluteDiscountBenefitWithoutRangeFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(AbsoluteDiscountBenefitWithoutRange)
+
+
+class PercentageDiscountBenefitWithoutRangeFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(PercentageDiscountBenefitWithoutRange)
+
+
+class ProgramCourseRunSeatsConditionFactory(ConditionFactory):
+    range = None
+    type = ''
+    value = None
+    program_uuid = factory.LazyFunction(uuid.uuid4)
+    proxy_class = class_path(ProgramCourseRunSeatsCondition)
+
+    class Meta(object):
+        model = ProgramCourseRunSeatsCondition
+
+
+class ProgramOfferFactory(ConditionalOfferFactory):
+    benefit = factory.SubFactory(PercentageDiscountBenefitWithoutRangeFactory)
+    condition = factory.SubFactory(ProgramCourseRunSeatsConditionFactory)
+    max_basket_applications = 1
+    offer_type = ConditionalOffer.SITE
+    status = ConditionalOffer.OPEN

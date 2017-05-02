@@ -6,7 +6,9 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditionalOffer, AbstractRange
+from oscar.apps.offer.abstract_models import (
+    AbstractBenefit, AbstractCondition, AbstractConditionalOffer, AbstractRange
+)
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
@@ -313,6 +315,10 @@ class Range(AbstractRange):
             catalog_products = [record.product for record in self.catalog.stock_records.all()]
             return catalog_products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call
         return super(Range, self).all_products()  # pylint: disable=bad-super-call
+
+
+class Condition(AbstractCondition):
+    program_uuid = models.UUIDField(null=True, blank=True)
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
