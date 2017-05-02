@@ -359,6 +359,7 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Course Catalog service.
         """
 
+        # TODO Use URL from SiteConfiguration model.
         return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 
     @cached_property

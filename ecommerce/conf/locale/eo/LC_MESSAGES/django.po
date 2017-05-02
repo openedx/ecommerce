@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-05 10:04+0000\n"
+"POT-Creation-Date: 2017-05-09 16:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -228,6 +228,18 @@ msgid "The voucher is not applicable to your current basket."
 msgstr ""
 "Thé vöüçhér ïs nöt äpplïçäßlé tö ýöür çürrént ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт"
 " αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/coupons/views.py
+msgid "Welcome to edX"
+msgstr "Wélçömé tö édX Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: ecommerce/coupons/views.py
+msgid ""
+"Please choose from the courses selected by your organization to start "
+"learning."
+msgstr ""
+"Pléäsé çhöösé fröm thé çöürsés séléçtéd ßý ýöür örgänïzätïön tö stärt "
+"léärnïng. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
 #: ecommerce/coupons/views.py
 msgid "Code not provided."
@@ -445,6 +457,19 @@ msgstr "ÀÇTÌVÉ Ⱡ'σяєм ιρѕυ#"
 msgid "INACTIVE"
 msgstr "ÌNÀÇTÌVÉ Ⱡ'σяєм ιρѕυм ∂#"
 
+#: ecommerce/extensions/api/v2/views/baskets.py
+#: ecommerce/extensions/basket/views.py
+msgid "No SKUs provided."
+msgstr "Nö SKÛs prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/extensions/api/v2/views/baskets.py
+#: ecommerce/extensions/basket/views.py
+#, python-brace-format
+msgid "Products with SKU(s) [{skus}] do not exist."
+msgstr ""
+"Prödüçts wïth SKÛ(s) [{skus}] dö nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
 #: ecommerce/extensions/basket/models.py
 #: ecommerce/extensions/payment/models.py
 msgid "Site"
@@ -511,17 +536,6 @@ msgid ""
 msgstr ""
 "Àn érrör öççürréd whïlé rétrïévïng énröllmént détäïls. Pléäsé trý ägäïn. "
 "Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
-
-#: ecommerce/extensions/basket/views.py
-msgid "No SKUs provided."
-msgstr "Nö SKÛs prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Products with SKU(s) [{skus}] do not exist."
-msgstr ""
-"Prödüçts wïth SKÛ(s) [{skus}] dö nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя#"
 
 #: ecommerce/extensions/basket/views.py
 msgid ""
@@ -1082,13 +1096,160 @@ msgstr "Pöstpäïd Ⱡ'σяєм ιρѕυм ∂#"
 msgid "Not applicable"
 msgstr "Nöt äpplïçäßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/invoice/models.py
+#: ecommerce/invoice/models.py ecommerce/programs/constants.py
 msgid "Percentage"
 msgstr "Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
 #: ecommerce/invoice/models.py
 msgid "Fixed"
 msgstr "Fïxéd Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/programs/benefits.py
+#, python-brace-format
+msgid "{value}% program discount"
+msgstr "{value}% prögräm dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/programs/benefits.py
+#, python-brace-format
+msgid "{value} fixed-price program discount"
+msgstr ""
+"{value} fïxéd-prïçé prögräm dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/programs/constants.py
+msgid "Absolute"
+msgstr "Àßsölüté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/programs/forms.py
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Program UUID"
+msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/programs/forms.py
+msgid "Discount Type"
+msgstr "Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/programs/forms.py
+msgid "Discount Value"
+msgstr "Dïsçöünt Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: ecommerce/programs/forms.py
+msgid "Start Date"
+msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: ecommerce/programs/forms.py
+msgid "End Date"
+msgstr "Énd Däté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/programs/forms.py
+msgid "An offer already exists for this program."
+msgstr ""
+"Àn öffér älréädý éxïsts för thïs prögräm. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: ecommerce/programs/forms.py
+msgid "Percentage discounts cannot be greater than 100%."
+msgstr ""
+"Pérçéntägé dïsçöünts çännöt ßé gréätér thän 100%. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/programs/forms.py
+msgid "A start date must be specified when specifying an end date."
+msgstr ""
+"À stärt däté müst ßé spéçïfïéd whén spéçïfýïng än énd däté. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/programs/forms.py
+msgid "The start date must occur before the end date."
+msgstr ""
+"Thé stärt däté müst öççür ßéföré thé énd däté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#, python-format
+msgid "Edit Program Offer: %(program_title)s"
+msgstr ""
+"Édït Prögräm Öffér: %(program_title)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Create Program Offer"
+msgstr "Çréäté Prögräm Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+#: ecommerce/templates/edx/partials/_administration_menu.html
+msgid "Program Offers"
+msgstr "Prögräm Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+msgid "Edit"
+msgstr "Édït Ⱡ'σяєм ι#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+msgid "Create"
+msgstr "Çréäté Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+msgid "Edit Program Offer"
+msgstr "Édït Prögräm Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+msgid "Save Changes"
+msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+msgid "Cancel"
+msgstr "Çänçél Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+#, python-format
+msgid "%(platform_name)s Program Offer Administration Tool"
+msgstr ""
+"%(platform_name)s Prögräm Öffér Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυ#"
+
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Current program offers"
+msgstr "Çürrént prögräm öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Program Title"
+msgstr "Prögräm Tïtlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/programs/templates/programs/programoffer_list.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+msgid "Type"
+msgstr "Týpé Ⱡ'σяєм ι#"
+
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Value"
+msgstr "Välüé Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Start"
+msgstr "Stärt Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "End"
+msgstr "Énd Ⱡ'σяєм#"
+
+#: ecommerce/programs/views.py
+msgid "Program offer updated!"
+msgstr "Prögräm öffér üpdätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/programs/views.py
+msgid "Program offer created!"
+msgstr "Prögräm öffér çréätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: ecommerce/referrals/models.py
 msgid "Affiliate ID"
@@ -1226,37 +1387,6 @@ msgstr "Rédéém Ⱡ'σяєм ιρѕυ#"
 msgid "Coupon Codes"
 msgstr "Çöüpön Çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
-msgid "Toggle navigation"
-msgstr "Tögglé nävïgätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
-
-#: ecommerce/templates/coupons/coupon_app.html
-msgid "E-Commerce Code Administration"
-msgstr "É-Çömmérçé Çödé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
-
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
-msgid "Dashboard for:"
-msgstr "Däshßöärd för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
-
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
-msgid "Toggle Dropdown"
-msgstr "Tögglé Dröpdöwn Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
-
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/coupons/coupon_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/courses/course_app.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
-#: ecommerce/templates/edx/partials/_base_navbar.html
-msgid "Login"
-msgstr "Lögïn Ⱡ'σяєм ιρѕ#"
-
 #: ecommerce/templates/coupons/offer.html
 msgid ""
 "Earn a verified certificate in one of our popular courses to advance your "
@@ -1319,10 +1449,6 @@ msgstr ""
 #: ecommerce/templates/edx/partials/_administration_menu.html
 msgid "Courses"
 msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
-
-#: ecommerce/templates/courses/course_app.html
-msgid "E-Commerce Administration"
-msgstr "É-Çömmérçé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/templates/courses/course_app.html
 #, python-format
@@ -1715,8 +1841,8 @@ msgstr "Süßtötäl Ⱡ'σяєм ιρѕυм ∂#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 #, python-format
-msgid "%(voucher_code)s %(voucher_discount_amount)s off"
-msgstr "%(voucher_code)s %(voucher_discount_amount)s öff Ⱡ'σяєм ιρѕυм ∂σłσя #"
+msgid "%(voucher_discount_amount)s off"
+msgstr "%(voucher_discount_amount)s öff Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 msgid "Total"
@@ -1940,6 +2066,39 @@ msgstr ""
 #: ecommerce/templates/edx/partials/_administration_menu.html
 msgid "Coupons"
 msgstr "Çöüpöns Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/templates/edx/partials/_base_navbar.html
+msgid "Toggle navigation"
+msgstr "Tögglé nävïgätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/templates/edx/partials/_base_navbar.html
+msgid "Dashboard for:"
+msgstr "Däshßöärd för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: ecommerce/templates/edx/partials/_base_navbar.html
+msgid "Toggle Dropdown"
+msgstr "Tögglé Dröpdöwn Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: ecommerce/templates/edx/partials/_base_navbar.html
+#: ecommerce/templates/edx/partials/_base_navbar.html
+msgid "Login"
+msgstr "Lögïn Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/templates/edx/partials/_staff_navbar.html
+msgid "E-Commerce Course Administration"
+msgstr ""
+"É-Çömmérçé Çöürsé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/templates/edx/partials/_staff_navbar.html
+msgid "E-Commerce Coupon Administration"
+msgstr ""
+"É-Çömmérçé Çöüpön Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/templates/edx/partials/_staff_navbar.html
+msgid "E-Commerce Program Offers Administration"
+msgstr ""
+"É-Çömmérçé Prögräm Öfférs Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
 
 #: ecommerce/templates/oscar/basket/basket.html
 msgid "Your basket is empty"
@@ -2436,12 +2595,6 @@ msgstr ""
 msgid "Edit again"
 msgstr "Édït ägäïn Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-msgid "Edit"
-msgstr "Édït Ⱡ'σяєм ι#"
-
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 #, python-format
 msgid ""
@@ -2566,11 +2719,6 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 msgid "Recommended products"
 msgstr "Réçömméndéd prödüçts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
-msgid "Cancel"
-msgstr "Çänçél Ⱡ'σяєм ιρѕυ#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 msgid "or"
@@ -3069,11 +3217,6 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 msgid "Transactions"
 msgstr "Tränsäçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
-
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-msgid "Type"
-msgstr "Týpé Ⱡ'σяєм ι#"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 msgid "Voucher"

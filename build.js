@@ -39,6 +39,14 @@
         {
             name: 'js/apps/order_receipt_app',
             exclude: ['js/common']
+        },
+        {
+            name: 'js/pages/program_offer_list_page',
+            exclude: ['js/common']
+        },
+        {
+            name: 'js/pages/program_offer_form_page',
+            exclude: ['js/common']
         }
     ]
 })

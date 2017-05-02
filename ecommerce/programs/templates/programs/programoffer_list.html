@@ -1,0 +1,67 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load programs %}
+{% load staticfiles %}
+
+{% block title %}{% trans "Program Offers" %}{% endblock %}
+
+{% block navbar %}
+  {% include "edx/partials/_staff_navbar.html" %}
+  {% include "edx/partials/_administration_menu.html" %}
+{% endblock navbar %}
+
+{% block content %}
+  <div class="container">
+    <div class="page-header">
+      <h1 class="hd-1 emphasized">
+        {% trans "Program Offers" %}
+        <div class="pull-right">
+          <a href="{% url 'programs:offers:new' %}"
+             class="btn btn-primary btn-small">{% trans "Create Program Offer" %}</a>
+        </div>
+      </h1>
+    </div>
+
+    <table id="programOfferTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
+      <caption class="sr-only">{% trans "Current program offers" %}</caption>
+      <thead>
+      <tr>
+        <th>{% trans 'Program Title' %}</th>
+        <th>{% trans 'Program UUID' %}</th>
+        <th>{% trans 'Type' %}</th>
+        <th>{% trans 'Value' %}</th>
+        <th>{% trans 'Start' %}</th>
+        <th>{% trans 'End' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for offer in object_list %}
+        <tr>
+          <td><a href="{% url 'programs:offers:edit' pk=offer.pk %}">{{ offer.program.title }}</a></td>
+          <td>{{ offer.program.uuid }}</td>
+          <td>{{ offer.benefit|benefit_type|capfirst }}</td>
+          <td>{{ offer.benefit.value }}</td>
+          <td>{{ offer.start_datetime|default_if_none:'--' }}</td>
+          <td>{{ offer.end_datetime|default_if_none:'--' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 text-right">
+          <em>{% blocktrans %}{{ platform_name }} Program Offer Administration Tool{% endblocktrans %}</em>
+        </div>
+      </div>
+    </div>
+  </footer>
+{% endblock footer %}
+
+{% block javascript %}
+  <script src="{% static 'js/pages/program_offer_list_page.js' %}"></script>
+{% endblock %}

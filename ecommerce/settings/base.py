@@ -236,6 +236,7 @@ COMMERCE_API_TIMEOUT = 7
 
 # Cache course info from course API.
 COURSES_API_CACHE_TIMEOUT = 3600  # Value is in seconds
+PROGRAM_CACHE_TIMEOUT = 3600  # Value is in seconds.
 
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
@@ -275,6 +276,7 @@ LOCAL_APPS = [
     'ecommerce.coupons',
     'ecommerce.courses',
     'ecommerce.invoice',
+    'ecommerce.programs',
     'ecommerce.referrals',
 
     # Theming app for customizing visual and behavioral attributes of a site

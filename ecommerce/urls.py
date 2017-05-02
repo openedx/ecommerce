@@ -55,6 +55,7 @@ urlpatterns = AUTH_URLS + [
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', javascript_catalog, js_info_dict, name='javascript-catalog'),
+    url(r'^programs/', include('ecommerce.programs.urls', namespace='programs')),
 ]
 
 # Install Oscar extension URLs

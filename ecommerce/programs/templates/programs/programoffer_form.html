@@ -1,0 +1,82 @@
+{% extends 'edx/base.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+  {% if editing %}
+    {% blocktrans trimmed with program_title=program.title %}
+      Edit Program Offer: {{ program_title }}
+    {% endblocktrans %}
+  {% else %}
+    {% trans "Create Program Offer" %}
+  {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'bower_components/pikaday/css/pikaday.css' %}" type="text/x-scss">
+{% endblock %}
+
+{% block navbar %}
+  {% include "edx/partials/_staff_navbar.html" %}
+  {% include "edx/partials/_administration_menu.html" %}
+{% endblock navbar %}
+
+{% block content %}
+  <div class="container">
+    <ol class="breadcrumb">
+      <li><a href="{% url 'programs:offers:list' %}">{% trans "Program Offers" %}</a></li>
+
+      {% if editing %}
+        <li>{{ program.title }}</li>
+        <li>{% trans "Edit" %}</li>
+      {% else %}
+        <li>{% trans "Create" %}</li>
+      {% endif %}
+    </ol>
+
+    {% include 'partials/alert_messages.html' %}
+
+    <div class="page-header">
+      <h1 class="hd-1 emphasized">
+        {% if editing %}
+          {% trans "Edit Program Offer" %}
+        {% else %}
+          {% trans "Create Program Offer" %}
+        {% endif %}
+      </h1>
+    </div>
+
+    <form id="programOfferForm" method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+
+      <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="{% if editing %}
+            {% trans "Save Changes" %}
+          {% else %}
+            {% trans "Create Program Offer" %}
+          {% endif %}">
+        <a class="btn btn-default" href="{% url 'programs:offers:list' %}">{% trans "Cancel" %}</a>
+      </div>
+
+    </form>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 text-right">
+          <em>{% blocktrans %}{{ platform_name }} Program Offer Administration Tool{% endblocktrans %}</em>
+        </div>
+      </div>
+    </div>
+  </footer>
+{% endblock footer %}
+
+
+{% block javascript %}
+  <script src="{% static 'js/pages/program_offer_form_page.js' %}"></script>
+{% endblock %}
