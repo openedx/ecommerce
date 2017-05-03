@@ -321,7 +321,6 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
                 order_number=notification.get('req_reference_number'),
                 site_configuration=self.request.site.siteconfiguration
             )
-            self.request.session['fire_tracking_events'] = True
             return redirect(receipt_page_url)
         except:  # pylint: disable=bare-except
             return redirect(reverse('payment_error'))

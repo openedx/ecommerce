@@ -147,7 +147,6 @@ class ReceiptResponseView(ThankYouView):
         order = context[self.context_object_name]
         context.update({
             'payment_method': self.get_payment_method(order),
-            'fire_tracking_events': self.request.session.pop('fire_tracking_events', False),
             'display_credit_messaging': self.order_contains_credit_seat(order),
         })
         context.update(self.get_order_verification_context(order))

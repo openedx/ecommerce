@@ -23,7 +23,6 @@
   <div id="receipt-container"
        class="receipt container content-container"
        data-currency="{{ order.currency }}"
-       data-fire-tracking-events="{{ fire_tracking_events|yesno:"true,false" }}"
        data-order-id="{{ order.number }}"
        data-total-amount="{{ order.total_incl_tax }}">
       <h2 class="thank-you">{% trans "Thank you for your order!" %}</h2>
