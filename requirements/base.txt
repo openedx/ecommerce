@@ -34,3 +34,7 @@ requests==2.9.1
 sailthru-client==2.2.3
 six==1.10.0
 suds==0.4
+
+# We are installing social-core from GitHub until https://github.com/python-social-auth/social-core/pull/74
+# is released.
+git+https://github.com/python-social-auth/social-core.git@e868d5ca5c0d1d17311b3e05e3364b94a8f4a374#egg=social-auth-core[openidconnect]==1.2.1
