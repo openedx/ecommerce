@@ -1,30 +1,31 @@
 {
   "name": "edx-ecommerce",
+  "license": "AGPL-3.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/edx/ecommerce"
   },
   "dependencies": {
-    "bower": "^1.8.0",
-    "requirejs": "^2.3.2"
+    "bower": "1.8.0",
+    "requirejs": "2.3.3"
   },
   "devDependencies": {
-    "geckodriver": "^1.4.0",
-    "gulp": "^3.9.1",
+    "geckodriver": "1.6.1",
+    "gulp": "3.9.1",
     "gulp-jscs": "4.0.0",
     "gulp-jshint": "2.0.4",
-    "jasmine-core": "^2.5.2",
-    "jasmine-jquery": "^2.1.1",
+    "jasmine-core": "2.6.1",
+    "jasmine-jquery": "2.1.1",
     "jshint": "2.9.4",
-    "karma": "^1.4.1",
-    "karma-coverage": "^1.1.1",
-    "karma-firefox-launcher": "^1.0.0",
-    "karma-jasmine": "^1.1.0",
-    "karma-jasmine-jquery": "^0.1.1",
-    "karma-requirejs": "^1.1.0",
-    "karma-sinon": "^1.0.5",
+    "karma": "1.5.0",
+    "karma-coverage": "1.1.1",
+    "karma-firefox-launcher": "1.0.1",
+    "karma-jasmine": "1.1.0",
+    "karma-jasmine-jquery": "0.1.1",
+    "karma-requirejs": "1.1.0",
+    "karma-sinon": "1.0.5",
     "karma-spec-reporter": "0.0.26",
-    "phantomjs": "^2.1.7",
-    "sinon": "^1.17.7"
+    "phantomjs": "2.1.7",
+    "sinon": "1.17.7"
   }
 }
