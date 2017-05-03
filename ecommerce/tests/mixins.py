@@ -2,6 +2,7 @@
 """Broadly-useful mixins for use in automated tests."""
 import datetime
 import json
+import re
 from decimal import Decimal
 
 import httpretty
@@ -261,14 +262,21 @@ class SiteMixin(object):
         self.request.site = self.site
         set_thread_variable('request', self.request)
 
-    def mock_access_token_response(self, status=200):
+    def mock_access_token_response(self, status=200, **token_data):
         """ Mock the response from the OAuth provider's access token endpoint. """
-        url = '{root}/access_token'.format(root=self.site.siteconfiguration.oauth2_provider_url)
+        assert httpretty.is_enabled(), 'httpretty must be enabled to mock the access token response.'
+
+        # Use a regex to account for the optional trailing slash
+        url = '{root}/access_token/?'.format(root=self.site.siteconfiguration.oauth2_provider_url)
+        url = re.compile(url)
+
         token = 'abc123'
-        body = json.dumps({
+        data = {
             'access_token': token,
             'expires_in': 3600,
-        })
+        }
+        data.update(token_data)
+        body = json.dumps(data)
         httpretty.register_uri(httpretty.POST, url, body=body, content_type=CONTENT_TYPE, status=status)
 
         return token
