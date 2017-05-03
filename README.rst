@@ -1,63 +1,52 @@
-edX E-Commerce Service  |Travis|_ |Codecov|_
-============================================
-.. |Travis| image:: https://travis-ci.org/edx/ecommerce.svg?branch=master
-.. _Travis: https://travis-ci.org/edx/ecommerce
+This branch demonstrates the Karma failure logged at https://github.com/karma-runner/karma/issues/2675.
 
-.. |Codecov| image:: http://codecov.io/github/edx/ecommerce/coverage.svg?branch=master
-.. _Codecov: http://codecov.io/github/edx/ecommerce?branch=master
+Run the following steps to recreate the failure:
 
-This repository contains the edX E-Commerce Service, which relies heavily on `django-oscar <https://django-oscar.readthedocs.org/en/latest/>`_, as well as all frontend and backend code used to manage edX's product catalog and handle orders for those products.
+   .. code-block:: bash
 
-Prerequisites
--------------
-* Python 2.7.x (not tested with Python 3.x)
-* `gettext <http://www.gnu.org/software/gettext/>`_
-* `npm <https://www.npmjs.org/>`_
+    npm install
+    make validate_js
 
-Documentation |ReadtheDocs|_
-----------------------------
-.. |ReadtheDocs| image:: https://readthedocs.org/projects/edx/badge/?version=latest
-.. _ReadtheDocs: http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html
 
-`Documentation <http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html>`_ is hosted on Read the Docs. To contribute, please open a PR against https://github.com/edx/edx-documentation.
+My output resembles:
 
-License
--------
+   .. code-block:: text
 
-The code in this repository is licensed under the AGPL unless otherwise noted. Please see ``LICENSE.txt`` for details.
+    maCCB-MacBook-Pro:ecommerce clintonb$ make validate_js
+    rm -rf coverage
+    ./node_modules/.bin/gulp test
+    [19:00:31] Using gulpfile ~/workspace/ecommerce/gulpfile.js
+    [19:00:31] Starting 'test'...
+    03 05 2017 19:00:31.922:WARN [watcher]: Pattern "/Users/clintonb/workspace/ecommerce/ecommerce/static/vendor/**/*.js" does not match any file.
+    03 05 2017 19:00:32.094:WARN [watcher]: All files matched by "/Users/clintonb/workspace/ecommerce/ecommerce/static/js/config.js" were excluded or matched by prior matchers.
+    03 05 2017 19:00:32.095:WARN [watcher]: All files matched by "/Users/clintonb/workspace/ecommerce/ecommerce/static/js/test/spec-runner.js" were excluded or matched by prior matchers.
+    03 05 2017 19:00:32.573:INFO [karma]: Karma v1.6.0 server started at http://0.0.0.0:9876/
+    03 05 2017 19:00:32.573:INFO [launcher]: Launching browser Firefox with unlimited concurrency
+    03 05 2017 19:00:32.582:INFO [launcher]: Starting browser Firefox
+    03 05 2017 19:00:34.490:INFO [Firefox 53.0.0 (Mac OS X 10.12.0)]: Connected on socket IBIdKiF8Vkwac0ruAAAA with id 14472089
+    03 05 2017 19:00:44.498:WARN [Firefox 53.0.0 (Mac OS X 10.12.0)]: Disconnected (1 times), because no message in 10000 ms.
+    Firefox 53.0.0 (Mac OS X 10.12.0) ERROR
+      Disconnected, because no message in 10000 ms.
 
-How To Contribute
------------------
+    Firefox 53.0.0 (Mac OS X 10.12.0): Executed 0 of 0 DISCONNECTED (10.009 secs / 0 secs)
 
-Contributions are welcome. Please read `How To Contribute <https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst>`_ for details. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
+    [19:00:44] 'test' errored after 13 s
+    [19:00:44] Error: 1
+        at formatError (/Users/clintonb/workspace/ecommerce/node_modules/gulp/bin/gulp.js:169:10)
+        at Gulp.<anonymous> (/Users/clintonb/workspace/ecommerce/node_modules/gulp/bin/gulp.js:195:15)
+        at emitOne (events.js:96:13)
+        at Gulp.emit (events.js:188:7)
+        at Gulp.Orchestrator._emitTaskDone (/Users/clintonb/workspace/ecommerce/node_modules/orchestrator/index.js:264:8)
+        at /Users/clintonb/workspace/ecommerce/node_modules/orchestrator/index.js:275:23
+        at finish (/Users/clintonb/workspace/ecommerce/node_modules/orchestrator/lib/runTask.js:21:8)
+        at cb (/Users/clintonb/workspace/ecommerce/node_modules/orchestrator/lib/runTask.js:29:3)
+        at removeAllListeners (/Users/clintonb/workspace/ecommerce/node_modules/karma/lib/server.js:380:7)
+        at Server.<anonymous> (/Users/clintonb/workspace/ecommerce/node_modules/karma/lib/server.js:391:9)
+        at Server.g (events.js:292:16)
+        at emitNone (events.js:91:20)
+        at Server.emit (events.js:185:7)
+        at emitCloseNT (net.js:1544:8)
+        at _combinedTickCallback (internal/process/next_tick.js:71:11)
+        at process._tickCallback (internal/process/next_tick.js:98:9)
+    make: *** [validate_js] Error 1
 
-E-Commerce Team SLA
--------------------
-
-Pull Requests made by teams internal to edX will be reviewed within certain timeframes based on the size/complexity of the PR.
-
-+-------------+---------------+----------------+--------------------------+
-|             | Lines of Code | Files Modified | SLA                      |
-+=============+===============+================+==========================+
-| SMALL       | < 10          | 1 - 2          | 2 Days                   |
-+-------------+---------------+----------------+--------------------------+
-| MEDIUM      | < 300         | 2 - 10         | 7 Days                   |
-+-------------+---------------+----------------+--------------------------+
-| LARGE       | > 300         | > 10           | 14 Days                  |
-+-------------+---------------+----------------+--------------------------+
-| EXTRA LARGE | >1000         | > 100          | Team recommends breaking |
-|             |               |                | PRs of this size into    |
-|             |               |                | smaller chunks of work.  |
-+-------------+---------------+----------------+--------------------------+
-
-If the PR is time sensitive, the contributor is encouraged to notify the team well in advance of the need for code review so that the team can plan for the work involved.
-
-Reporting Security Issues
--------------------------
-
-Please do not report security issues in public. Please email security@edx.org.
-
-Mailing List and Slack
-----------------------
-
-You can discuss this code on the `edx-code Google Group <https://groups.google.com/forum/#!forum/edx-code>`_ or on  `Open edX <https://openedx.slack.com/messages/general/>`_  on Slack.
