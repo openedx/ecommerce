@@ -12,7 +12,7 @@ define([
             beforeEach(function () {
                 $('<script type="text/javascript">var initModelData = {};</script>').appendTo('body');
                 $(
-                    '<div id="receipt-container" data-fire-tracking-events="true" data-order-id="ORDER_ID"></div>'
+                    '<div id="receipt-container" data-order-id="ORDER_ID"></div>'
                 ).appendTo('body');
                 AnalyticsUtils.analyticsSetUp();
 

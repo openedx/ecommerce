@@ -254,7 +254,6 @@ class ReceiptResponseViewTests(CourseCatalogMockMixin, LmsApiMockMixin, RefundTe
         response = self._get_receipt_response(order.number)
         context_data = {
             'payment_method': None,
-            'fire_tracking_events': False,
             'display_credit_messaging': False,
             'verification_url': self.site.siteconfiguration.build_lms_url('verify_student/reverify'),
         }
@@ -270,7 +269,6 @@ class ReceiptResponseViewTests(CourseCatalogMockMixin, LmsApiMockMixin, RefundTe
         response = self._visit_receipt_page_with_another_user(order, staff_user)
         context_data = {
             'payment_method': None,
-            'fire_tracking_events': False,
             'display_credit_messaging': False,
         }
 
