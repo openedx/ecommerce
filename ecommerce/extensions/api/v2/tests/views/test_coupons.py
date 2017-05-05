@@ -418,17 +418,20 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(response_data.status_code, status.HTTP_404_NOT_FOUND)
 
     @ddt.data(
-        ('benefit_type', ['', 'Incorrect benefit type']),
-        ('benefit_value', ['', 'Incorrect benefit value', -1, 101]),
-        ('category', [{'a': 'a', 'b': 'b'}]),
+        {'benefit_type': ''},
+        {'benefit_type': 'foo'},
+        {'benefit_value': ''},
+        {'benefit_value': 'foo'},
+        {'benefit_value': -1},
+        {'benefit_value': 121},
+        {'category': {'a': 'a', 'b': 'b'}},
     )
-    @ddt.unpack
-    def test_create_coupon_product_invalid_data(self, key, values):
+    def test_create_coupon_product_invalid_data(self, invalid_data):
         """Test creating coupon when provided data is invalid."""
-        for value in values:
-            self.data.update({key: value})
-            response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
-            self.assertEqual(response_data.status_code, status.HTTP_400_BAD_REQUEST)
+        self.data.update(invalid_data)
+        response_data = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+        self.assertEqual(response_data.status_code, 400,
+                         'Request should fail for invalid data: {}'.format(invalid_data))
 
     @ddt.data('benefit_type', 'benefit_value')
     def test_create_coupon_product_no_data_provided(self, key):
