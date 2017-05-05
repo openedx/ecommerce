@@ -37,7 +37,7 @@
             exclude: ['js/common']
         },
         {
-            name: 'js/pages/receipt_page',
+            name: 'js/apps/order_receipt_app',
             exclude: ['js/common']
         }
     ]
