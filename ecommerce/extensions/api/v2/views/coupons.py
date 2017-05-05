@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -52,6 +53,28 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if self.action == 'list':
             return CouponListSerializer
         return CouponSerializer
+
+    def get_queryset(self):
+        """
+        Handle cases where we need to filter by fields that aren't
+        natively supported on the Coupon object.
+        """
+        ec_filter = self.request.GET.get('enterprise_customer')
+        objs = super(CouponViewSet, self).get_queryset()
+        if ec_filter is not None:
+            try:
+                # Check to make sure we got a real UUID
+                uuid.UUID(ec_filter)
+            except ValueError:
+                # If we didn't get a valid UUID for enterprise_customer, then skip the filtration
+                pass
+            else:
+                # We got a valid, UUID-like argument for enterprise_customer, for which we
+                # have to do an excessively complicated query to filter on.
+                objs = objs.filter(
+                    coupon_vouchers__vouchers__offers__condition__range__enterprise_customer=ec_filter
+                ).distinct()
+        return objs
 
     def create(self, request, *args, **kwargs):
         """Adds coupon to the user's basket.
