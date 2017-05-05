@@ -15,22 +15,13 @@ from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation
 
 
 class Benefit(AbstractBenefit):
-    VALID_BENEFIT_TYPES = [AbstractBenefit.PERCENTAGE, AbstractBenefit.FIXED]
-
     def save(self, *args, **kwargs):
         self.clean()
         super(Benefit, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
     def clean(self):
-        self.clean_type()
         self.clean_value()
         super(Benefit, self).clean()  # pylint: disable=bad-super-call
-
-    def clean_type(self):
-        if self.type not in self.VALID_BENEFIT_TYPES:
-            log_message_and_raise_validation_error(
-                'Failed to create Benefit. Unrecognised benefit type [{type}]'.format(type=self.type)
-            )
 
     def clean_value(self):
         if self.value < 0:
@@ -45,12 +36,12 @@ class ConditionalOffer(AbstractConditionalOffer):
 
     def save(self, *args, **kwargs):
         self.clean()
-        super(ConditionalOffer, self).save(*args, **kwargs)   # pylint: disable=bad-super-call
+        super(ConditionalOffer, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
     def clean(self):
         self.clean_email_domains()
         self.clean_max_global_applications()  # Our frontend uses the name max_uses instead of max_global_applications
-        super(ConditionalOffer, self).clean()   # pylint: disable=bad-super-call
+        super(ConditionalOffer, self).clean()  # pylint: disable=bad-super-call
 
     def clean_email_domains(self):
         if self.email_domains == '':

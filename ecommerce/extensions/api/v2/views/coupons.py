@@ -28,6 +28,7 @@ from ecommerce.extensions.voucher.utils import update_voucher_offer
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
+Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -80,7 +81,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     cleaned_voucher_data = self.clean_voucher_request_data(request)
                 except ValidationError as error:
                     logger.exception('Failed to create coupon. %s', error.message)
-                    return Response(error.message, status=error.code)
+                    # FIXME This should ALWAYS return 400.
+                    return Response(error.message, status=error.code or 400)
 
                 try:
                     coupon_product = create_coupon_product(
@@ -105,6 +107,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         voucher_type=cleaned_voucher_data['voucher_type'],
                     )
                 except (KeyError, IntegrityError) as error:
+                    logger.exception('Coupon creation failed!')
                     return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
 
                 basket = prepare_basket(request, [coupon_product])
@@ -130,6 +133,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             request (HttpRequest): request with voucher data
 
         """
+        benefit_type = request.data.get('benefit_type')
         category_data = request.data.get('category')
         code = request.data.get('code')
         course_catalog_data = request.data.get('course_catalog')
@@ -140,42 +144,46 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         stock_record_ids = request.data.get('stock_record_ids')
         voucher_type = request.data.get('voucher_type')
 
+        if benefit_type not in (Benefit.PERCENTAGE, Benefit.FIXED,):
+            raise ValidationError('Benefit type [{type}] is not allowed'.format(type=benefit_type))
+
         if code and Voucher.does_exist(code):
             validation_message = 'A coupon with code {code} already exists.'.format(code=code)
-            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(validation_message)
 
         if course_seat_types:
             try:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
             except (AttributeError, TypeError) as exception:
                 validation_message = 'Invalid course seat types data: {}'.format(exception.message)
-                raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+                raise ValidationError(validation_message)
 
         try:
             category = Category.objects.get(name=category_data['name'])
         except Category.DoesNotExist:
             validation_message = 'Category "{category_name}" not found.'.format(category_name=category_data['name'])
+            # FIXME 404 is the wrong response code to use here.
             raise ValidationError(validation_message, code=status.HTTP_404_NOT_FOUND)
         except (KeyError, TypeError):
             validation_message = 'Invalid Coupon Category data.'
-            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(validation_message)
 
         try:
             course_catalog = course_catalog_data['id'] if course_catalog_data else None
         except (KeyError, TypeError):
             validation_message = 'Unexpected catalog data format received for coupon.'
-            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(validation_message)
 
         try:
             enterprise_customer = enterprise_customer_data['id'] if enterprise_customer_data else None
         except (KeyError, TypeError):
             validation_message = 'Unexpected EnterpriseCustomer data format received for coupon.'
-            raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(validation_message)
 
         coupon_catalog = cls.get_coupon_catalog(stock_record_ids, partner)
 
         return {
-            'benefit_type': request.data.get('benefit_type'),
+            'benefit_type': benefit_type,
             'benefit_value': request.data.get('benefit_value'),
             'coupon_catalog': coupon_catalog,
             'catalog_query': request.data.get('catalog_query'),
@@ -213,10 +221,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             try:
                 if seat.attr.certificate_type in settings.BLACK_LIST_COUPON_COURSE_MODES:
                     validation_message = 'Course mode not supported'
-                    raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+                    raise ValidationError(validation_message)
             except AttributeError:
                 validation_message = 'Course mode not supported'
-                raise ValidationError(validation_message, code=status.HTTP_400_BAD_REQUEST)
+                raise ValidationError(validation_message)
 
         stock_records_string = ' '.join(str(id) for id in stock_record_ids)
         coupon_catalog, __ = get_or_create_catalog(
