@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import hashlib
 import re
 
 from django.conf import settings
@@ -7,11 +8,14 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.offer.abstract_models import AbstractBenefit, AbstractConditionalOffer, AbstractRange
+from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
+
+Product = get_model('catalogue', 'Product')
 
 
 class Benefit(AbstractBenefit):
@@ -29,7 +33,7 @@ class Benefit(AbstractBenefit):
     def clean_type(self):
         if self.type not in self.VALID_BENEFIT_TYPES:
             log_message_and_raise_validation_error(
-                'Failed to create Benefit. Unrecognised benefit type [{type}]'.format(type=self.type)
+                'Failed to create Benefit. Unrecognized benefit type [{type}]'.format(type=self.type)
             )
 
     def clean_value(self):
@@ -202,6 +206,11 @@ class Range(AbstractRange):
         blank=True,
         null=True
     )
+    program_uuid = models.UUIDField(
+        help_text=_('UUID of the program stored in the Course Catalog service.'),
+        null=True,
+        blank=True
+    )
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -282,6 +291,36 @@ class Range(AbstractRange):
 
         return response
 
+    def get_program_seats(self):
+        """Retrieves the program seats from the Catalog Service.
+
+        Raises:
+            Exception: if it fails to establish a connection with the Catalog Service.
+        """
+        cache_key = hashlib.md5(
+            'program_{uuid}_seats'.format(uuid=self.program_uuid)
+        ).hexdigest()
+        program_seat_skus = cache.get(cache_key)
+
+        if not program_seat_skus:
+            request = get_current_request()
+            api = request.site.siteconfiguration.course_catalog_api_client
+            try:
+                program = api.programs(self.program_uuid).get()
+                skus = []
+                seat_types = program['applicable_seat_types']
+                for course in program['courses']:
+                    for course_run in course['course_runs']:
+                        for seat in course_run['seats']:
+                            if seat['type'] in seat_types:
+                                skus.append(seat['sku'])
+
+                cache.set(cache_key, skus, settings.PROGRAM_CACHE_TIMEOUT)
+            except (ConnectionError, SlumberBaseException, Timeout):
+                raise Exception('Unable to connect to Course Catalog service for catalog contains endpoint.')
+        program_seats = Product.objects.filter(stockrecords__partner_sku__in=program_seat_skus)
+        return program_seats
+
     def contains_product(self, product):
         """
         Assert if the range contains the product.
@@ -291,7 +330,7 @@ class Range(AbstractRange):
             # Product certificate type should belongs to range seat types.
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
                 response = self.catalog_contains_product(product)
-                # Range can have a catalog query and 'regular' products in it,
+                # Range can have a course catalog and 'regular' products in it,
                 # therefor an OR is used to check for both possibilities.
                 return ((response['courses'][product.course_id]) or
                         super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
@@ -302,6 +341,9 @@ class Range(AbstractRange):
                 # therefor an OR is used to check for both possibilities.
                 return ((response['course_runs'][product.course_id]) or
                         super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
+        elif self.program_uuid:
+            program_seats = self.get_program_seats()
+            return product in program_seats
         elif self.catalog:
             return (
                 product.id in self.catalog.stock_records.values_list('product', flat=True) or
@@ -312,12 +354,14 @@ class Range(AbstractRange):
     contains = contains_product
 
     def num_products(self):
-        return len(self.all_products())
+        return self.all_products()
 
     def all_products(self):
         if (self.catalog_query or self.course_catalog) and self.course_seat_types:
             # Backbone calls the Voucher Offers API endpoint which gets the products from the Course Catalog Service
             return []
+        if self.program_uuid:
+            return self.get_program_seats()
         if self.catalog:
             catalog_products = [record.product for record in self.catalog.stock_records.all()]
             return catalog_products + list(super(Range, self).all_products())  # pylint: disable=bad-super-call

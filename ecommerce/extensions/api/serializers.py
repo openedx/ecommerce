@@ -27,6 +27,7 @@ Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Line = get_model('order', 'Line')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
@@ -717,3 +718,8 @@ class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-me
     status_url = serializers.CharField()
     thumbnail_url = serializers.CharField()
     url = serializers.CharField()
+
+
+class ConditionalOfferSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = ConditionalOffer
