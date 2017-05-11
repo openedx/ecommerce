@@ -2,6 +2,7 @@
 {% load core_extras %}
 {% load currency_filters %}
 {% load i18n %}
+{% load l10n %}
 {% load offer_tags %}
 {% load staticfiles %}
 
@@ -24,7 +25,7 @@
        class="receipt container content-container"
        data-currency="{{ order.currency }}"
        data-order-id="{{ order.number }}"
-       data-total-amount="{{ order.total_incl_tax }}">
+       data-total-amount="{{ order.total_incl_tax | unlocalize }}">
       <h2 class="thank-you">{% trans "Thank you for your order!" %}</h2>
 
       <div class="list-info">

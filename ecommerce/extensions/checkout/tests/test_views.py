@@ -304,3 +304,13 @@ class ReceiptResponseViewTests(CourseCatalogMockMixin, LmsApiMockMixin, RefundTe
         body['course_key'] = seat.attr.course_key
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context_data['display_credit_messaging'])
+
+    @httpretty.activate
+    def test_order_value_unlocalized_for_tracking(self):
+        order = self._create_order_for_receipt(self.user)
+        self.client.cookies.load({settings.LANGUAGE_COOKIE_NAME: 'fr'})
+        response = self._get_receipt_response(order.number)
+
+        self.assertEqual(response.status_code, 200)
+        order_value_string = 'data-total-amount="{}"'.format(order.total_incl_tax)
+        self.assertContains(response, order_value_string)
