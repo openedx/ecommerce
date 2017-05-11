@@ -39,6 +39,7 @@ def create_coupon_product(
         title,
         voucher_type,
         course_catalog,
+        program_uuid,
 ):
     """
     Creates a coupon product and a stock record for it.
@@ -63,6 +64,7 @@ def create_coupon_product(
         start_datetime (Datetime): Voucher start Datetime.
         title (str): The name of the coupon.
         voucher_type (str): Voucher type
+        program_uuid (str): Program UUID for the Coupon
 
     Returns:
         A coupon Product object.
@@ -96,7 +98,8 @@ def create_coupon_product(
             name=title,
             quantity=int(quantity),
             start_datetime=start_datetime,
-            voucher_type=voucher_type
+            voucher_type=voucher_type,
+            program_uuid=program_uuid,
         )
     except IntegrityError:
         logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)

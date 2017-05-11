@@ -247,7 +247,7 @@ class CouponMixin(object):
     def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None,
                       catalog_query=None, client=None, code='', course_seat_types=None, email_domains=None,
                       enterprise_customer=None, max_uses=None, note=None, partner=None, price=100, quantity=5,
-                      title='Test coupon', voucher_type=Voucher.SINGLE_USE, course_catalog=None):
+                      title='Test coupon', voucher_type=Voucher.SINGLE_USE, course_catalog=None, program_uuid=None):
         """Helper method for creating a coupon.
 
         Arguments:
@@ -268,6 +268,7 @@ class CouponMixin(object):
             quantity (int): Number of vouchers to be created and associated with the coupon
             title(str): Title of the coupon
             voucher_type (str): Voucher type
+            program_uuid (str): Program UUID
 
         Returns:
             coupon (Coupon)
@@ -277,7 +278,7 @@ class CouponMixin(object):
             partner = PartnerFactory(name='Tester')
         if client is None:
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None and not ((catalog_query or course_catalog) and course_seat_types):
+        if catalog is None and not ((catalog_query or course_catalog or program_uuid) and course_seat_types):
             catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
@@ -301,7 +302,8 @@ class CouponMixin(object):
             quantity=quantity,
             start_datetime=datetime.datetime(2015, 1, 1),
             title=title,
-            voucher_type=voucher_type
+            voucher_type=voucher_type,
+            program_uuid=program_uuid,
         )
 
         request = RequestFactory()
