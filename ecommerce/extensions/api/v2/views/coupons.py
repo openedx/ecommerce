@@ -26,11 +26,13 @@ from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import update_voucher_offer
 from ecommerce.invoice.models import Invoice
+from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
+Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
@@ -105,6 +107,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         start_datetime=cleaned_voucher_data['start_datetime'],
                         title=cleaned_voucher_data['title'],
                         voucher_type=cleaned_voucher_data['voucher_type'],
+                        program_uuid=cleaned_voucher_data['program_uuid'],
                     )
                 except (KeyError, IntegrityError) as error:
                     logger.exception('Coupon creation failed!')
@@ -143,6 +146,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         partner = request.site.siteconfiguration.partner
         stock_record_ids = request.data.get('stock_record_ids')
         voucher_type = request.data.get('voucher_type')
+        program_uuid = request.data.get('program_uuid')
 
         if benefit_type not in (Benefit.PERCENTAGE, Benefit.FIXED,):
             raise ValidationError('Benefit type [{type}] is not allowed'.format(type=benefit_type))
@@ -202,6 +206,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'start_datetime': request.data.get('start_datetime'),
             'title': request.data.get('title'),
             'voucher_type': voucher_type,
+            'program_uuid': program_uuid,
         }
 
     @classmethod
@@ -334,9 +339,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             self.update_range_data(request, vouchers)
 
+            program_uuid = request.data.get('program_uuid')
             benefit_value = request.data.get('benefit_value')
-            if benefit_value:
-                self.update_coupon_benefit_value(benefit_value=benefit_value, vouchers=vouchers, coupon=coupon)
+            if benefit_value or program_uuid:
+                self.update_coupon_offer(benefit_value=benefit_value, vouchers=vouchers,
+                                         coupon=coupon, program_uuid=program_uuid)
 
             category_data = request.data.get('category')
             if category_data:
@@ -395,23 +402,30 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def update_coupon_benefit_value(self, benefit_value, coupon, vouchers):
+    def update_coupon_offer(self, coupon, vouchers, benefit_value=None, program_uuid=None):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
-            benefit_value (Decimal): Benefit value associated with a new offer
             coupon (Product): Coupon product associated with vouchers
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
+            benefit_value (Decimal): Benefit value associated with a new offer
+            program_uuid (str): Program UUID
         """
         voucher_offers = vouchers.first().offers
         voucher_offer = voucher_offers.first()
 
+        if program_uuid:
+            Condition.objects.filter(
+                program_uuid=voucher_offer.condition.program_uuid
+            ).update(program_uuid=program_uuid)
+
         new_offer = update_voucher_offer(
             offer=voucher_offer,
-            benefit_value=benefit_value,
-            benefit_type=voucher_offer.benefit.type,
+            benefit_value=benefit_value or voucher_offer.benefit.value,
+            benefit_type=voucher_offer.benefit.type or BENEFIT_PROXY_CLASS_MAP[voucher_offer.benefit.proxy_class],
             coupon=coupon,
-            max_uses=voucher_offer.max_global_applications
+            max_uses=voucher_offer.max_global_applications,
+            program_uuid=program_uuid
         )
         for voucher in vouchers.all():
             voucher.offers.clear()

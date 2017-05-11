@@ -133,6 +133,7 @@ class CouponCreationTests(CouponMixin, TestCase):
             start_datetime='2015-1-1',
             title=title,
             voucher_type=Voucher.ONCE_PER_CUSTOMER,
+            program_uuid=None,
         )
 
     def test_custom_code_integrity_error(self):

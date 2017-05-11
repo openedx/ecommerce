@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import uuid
+
 import ddt
 import httpretty
 from django.core.exceptions import ValidationError
@@ -280,6 +282,27 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
         course_catalog_voucher_range = course_catalog_vouchers.first().offers.first().benefit.range
         self.assertEqual(course_catalog_voucher_range.course_catalog, course_catalog)
+
+    def test_create_program_coupon(self):
+        """
+        Test program coupon voucher creation with specified program uuid.
+        """
+        coupon_title = 'Program coupon'
+        quantity = 1
+        program_uuid = uuid.uuid4()
+
+        program_coupon = self.create_coupon(
+            title=coupon_title,
+            quantity=quantity,
+            program_uuid=program_uuid,
+            course_seat_types='verified',
+        )
+        self.assertEqual(program_coupon.title, coupon_title)
+
+        program_vouchers = program_coupon.attr.coupon_vouchers.vouchers.all()
+        program_voucher_offer = program_vouchers.first().offers.first()
+        self.assertEqual(program_vouchers.count(), quantity)
+        self.assertEqual(program_voucher_offer.condition.program_uuid, program_uuid)
 
     def assert_report_first_row(self, row, coupon, voucher):
         """

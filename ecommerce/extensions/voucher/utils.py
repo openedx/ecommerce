@@ -21,6 +21,9 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
+from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
+from ecommerce.programs.constants import BENEFIT_MAP
+from ecommerce.programs.custom import class_path, create_condition
 
 logger = logging.getLogger(__name__)
 
@@ -265,7 +268,7 @@ def generate_coupon_report(coupon_vouchers):
 
 def _get_or_create_offer(
         product_range, benefit_type, benefit_value, coupon_id=None,
-        max_uses=None, offer_number=None, email_domains=None
+        max_uses=None, offer_number=None, email_domains=None, program_uuid=None
 ):
     """
     Return an offer for a catalog with condition and benefit.
@@ -284,28 +287,49 @@ def _get_or_create_offer(
                             multi-use coupon
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer
+        program_uuid (str): the Program UUID
 
     Returns:
         Offer
     """
-    offer_condition, __ = Condition.objects.get_or_create(
-        range=product_range,
-        type=Condition.COUNT,
-        value=1,
-    )
-    try:
-        offer_benefit, __ = Benefit.objects.get_or_create(
+
+    if program_uuid:
+        try:
+            offer_condition = ProgramCourseRunSeatsCondition.objects.get(program_uuid=program_uuid)
+        except ProgramCourseRunSeatsCondition.DoesNotExist:
+            offer_condition = create_condition(ProgramCourseRunSeatsCondition, program_uuid=program_uuid)
+    else:
+        offer_condition, __ = Condition.objects.get_or_create(
             range=product_range,
-            type=benefit_type,
-            value=Decimal(benefit_value),
-            max_affected_items=1,
+            type=Condition.COUNT,
+            value=1,
         )
+    try:
+        if program_uuid:
+            proxy_class = class_path(BENEFIT_MAP[benefit_type])
+            offer_benefit = Benefit.objects.filter(proxy_class=proxy_class, value=benefit_value).first()
+
+            if not offer_benefit:
+                offer_benefit = Benefit()
+                offer_benefit.proxy_class = proxy_class
+                offer_benefit.value = benefit_value
+                offer_benefit.save()
+
+            offer_name = "Coupon [{}]-{}".format(coupon_id, offer_benefit.name)
+        else:
+            offer_benefit, __ = Benefit.objects.get_or_create(
+                range=product_range,
+                type=benefit_type,
+                value=Decimal(benefit_value),
+                max_affected_items=1,
+            )
+            offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
+
     except (TypeError, DecimalException):  # If the benefit_value parameter is not sent TypeError will be raised
         log_message_and_raise_validation_error(
             'Failed to create Benefit. Benefit value must be a positive number or 0.'
         )
 
-    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
     if offer_number:
         offer_name = "{} [{}]".format(offer_name, offer_number)
 
@@ -417,6 +441,7 @@ def create_vouchers(
         course_seat_types=None,
         email_domains=None,
         course_catalog=None,
+        program_uuid=None,
 ):
     """
     Create vouchers.
@@ -440,6 +465,7 @@ def create_vouchers(
         start_datetime (datetime): Start date for voucher offer.
         voucher_type (str): Type of voucher.
         _range (Range): Product range. Defaults to None.
+        program_uuid (str): Program UUID. Defaults to None.
 
     Returns:
         List[Voucher]
@@ -475,14 +501,18 @@ def create_vouchers(
         course_catalog = course_catalog if course_catalog else None
         # make sure enterprise_customer is None if it's empty
         enterprise_customer = enterprise_customer or None
-        product_range, __ = Range.objects.get_or_create(
-            name=range_name,
-            catalog=catalog,
-            catalog_query=catalog_query,
-            course_catalog=course_catalog,
-            course_seat_types=course_seat_types,
-            enterprise_customer=enterprise_customer,
-        )
+        # we do not need a range if this is for a Program
+        if program_uuid:
+            product_range = None
+        else:
+            product_range, __ = Range.objects.get_or_create(
+                name=range_name,
+                catalog=catalog,
+                catalog_query=catalog_query,
+                course_catalog=course_catalog,
+                course_seat_types=course_seat_types,
+                enterprise_customer=enterprise_customer,
+            )
 
     # In case of more than 1 multi-usage coupon, each voucher needs to have an individual
     # offer because the usage is tied to the offer so that a usage on one voucher would
@@ -500,7 +530,8 @@ def create_vouchers(
             max_uses=max_uses,
             coupon_id=coupon.id,
             offer_number=num,
-            email_domains=email_domains
+            email_domains=email_domains,
+            program_uuid=program_uuid
         )
         offers.append(offer)
 
@@ -560,7 +591,8 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None):
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None,
+                         email_domains=None, program_uuid=None):
     """
     Update voucher offer with new benefit value.
 
@@ -574,6 +606,7 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         max_uses (int): number of maximum global application number an offer can have.
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
+        program_uuid (str): Program UUID
 
     Returns:
         Offer
@@ -584,7 +617,8 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         benefit_type=benefit_type,
         coupon_id=coupon.id,
         max_uses=max_uses,
-        email_domains=email_domains
+        email_domains=email_domains,
+        program_uuid=program_uuid
     )
 
 
