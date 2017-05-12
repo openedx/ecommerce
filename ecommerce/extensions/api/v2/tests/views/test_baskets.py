@@ -8,6 +8,7 @@ from collections import namedtuple
 from decimal import Decimal
 
 import ddt
+import httpretty
 import mock
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -22,7 +23,9 @@ from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDeta
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.test.factories import (PercentageDiscountBenefitWithoutRangeFactory, ProgramOfferFactory,
+                                                 prepare_voucher)
+from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.mixins import BasketCreationMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
@@ -304,7 +307,7 @@ class BasketDestroyViewTests(TestCase):
         self.assertFalse(Basket.objects.filter(id=self.basket.id).exists())
 
 
-class BasketCalculateViewTests(TestCase):
+class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     def setUp(self):
         super(BasketCalculateViewTests, self).setUp()
@@ -362,6 +365,24 @@ class BasketCalculateViewTests(TestCase):
         expected = {
             'total_incl_tax_excl_discounts': self.product_total,
             'total_incl_tax': Decimal('27.00'),
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    def test_basket_calculate_program_offer(self):
+        """ Verify successful basket calculation with a program offer """
+
+        offer = ProgramOfferFactory(benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100))
+        program_uuid = offer.condition.program_uuid
+        self.mock_program_detail_endpoint(program_uuid)
+
+        response = self.client.get(self.url)
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': self.product_total,
             'currency': 'GBP'
         }
 
