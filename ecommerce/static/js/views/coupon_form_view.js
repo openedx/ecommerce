@@ -267,6 +267,9 @@ define([
                             name: $('select[name=enterprise_customer] option:selected').text()
                         };
                     }
+                },
+                'input[name=program_uuid]': {
+                    observe: 'program_uuid',
                 }
             },
 
@@ -309,6 +312,7 @@ define([
                         'max_uses',
                         'note',
                         'price',
+                        'program_uuid',
                         'start_date',
                         'tax_deducted_source',
                         'title',
@@ -464,52 +468,88 @@ define([
                 }
             },
 
-            toggleCatalogTypeField: function() {
-                if (this.model.get('catalog_type') === this.model.catalogTypes.single_course) {
+            toggleCourseCatalogRelatedFields: function(hide) {
+                this.formGroup('[name=course_catalog]').toggleClass(this.hiddenClass, hide);
+
+                if (hide) {
+                    this.model.unset('course_catalog');
+                    this.$('.catalog_buttons').removeClass(this.hiddenClass);
+                } else {
+                    this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
+                    this.model.set('course_seat_types', []);
+                    this.$('.catalog_buttons').addClass(this.hiddenClass);
+                }
+            },
+
+            toggleEnterpriseRelatedFields: function(hide) {
+                this.formGroup('[name=enterprise_customer]').toggleClass(this.hiddenClass, hide);
+
+                if (hide) {
+                    this.model.unset('enterprise_customer');
+                }
+            },
+
+            toggleMultiCourseRelatedFields: function(hide) {
+                this.formGroup('[name=catalog_query]').toggleClass(this.hiddenClass, hide);
+                this.formGroup('[name=course_seat_types]').toggleClass(this.hiddenClass, hide);
+
+                if (hide) {
                     this.model.unset('course_seat_types');
                     this.model.unset('catalog_query');
-                    this.model.set('course_catalog', this.model.defaults.course_catalog);
-                    this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
-                    this.formGroup('[name=course_seat_types]').addClass(this.hiddenClass);
-                    this.formGroup('[name=course_id]').removeClass(this.hiddenClass);
-                    this.formGroup('[name=seat_type]').removeClass(this.hiddenClass);
-                    this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
-                    this.formGroup('[name=enterprise_customer]').removeClass(this.hiddenClass);
-                } else if (this.model.get('catalog_type') === this.model.catalogTypes.catalog) {
-                    this.model.unset('course_id');
-                    this.model.unset('seat_type');
-                    this.model.unset('stock_record_ids');
-                    this.model.unset('catalog_query');
-                    this.formGroup('[name=enterprise_customer]').addClass(this.hiddenClass);
-                    this.model.unset('enterprise_customer');
-                    this.formGroup('[name=catalog_query]').addClass(this.hiddenClass);
-                    this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
-                    this.formGroup('[name=course_id]').addClass(this.hiddenClass);
-                    this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
-                    this.formGroup('[name=course_catalog]').removeClass(this.hiddenClass);
-                    this.formGroup('[name=seat_type] option').remove();
-
-                    this.$('.catalog_buttons').addClass(this.hiddenClass);
-                    if (!this.model.get('course_seat_types')) {
-                        this.model.set('course_seat_types', []);
-                    }
                 } else {
-                    this.formGroup('[name=catalog_query]').removeClass(this.hiddenClass);
-                    this.formGroup('[name=course_seat_types]').removeClass(this.hiddenClass);
-                    this.formGroup('[name=course_id]').addClass(this.hiddenClass);
-                    this.formGroup('[name=seat_type]').addClass(this.hiddenClass);
-                    this.formGroup('[name=course_catalog]').addClass(this.hiddenClass);
-                    this.formGroup('[name=enterprise_customer]').removeClass(this.hiddenClass);
-                    this.$('[name=seat_type] option').remove();
-                    this.model.unset('course_id');
-                    this.model.unset('seat_type');
-                    this.model.unset('stock_record_ids');
-                    this.model.set('course_catalog', this.model.defaults.course_catalog);
-
-                    this.$('.catalog_buttons').removeClass(this.hiddenClass);
                     if (!this.model.get('course_seat_types')) {
                         this.model.set('course_seat_types', []);
                     }
+                }
+            },
+
+            toggleProgramRelatedFields: function(hide) {
+                this.formGroup('[name=program_uuid]').toggleClass(this.hiddenClass, hide);
+
+                if (hide) {
+                    this.model.unset('program_uuid');
+                }
+            },
+
+            toggleSingleCourseRealtedFields: function(hide) {
+                this.formGroup('[name=course_id]').toggleClass(this.hiddenClass, hide);
+                this.formGroup('[name=seat_type]').toggleClass(this.hiddenClass, hide);
+
+                if (hide) {
+                    this.model.unset('course_id');
+                    this.model.unset('seat_type');
+                    this.$('[name=seat_type] option').remove();
+                    this.model.unset('stock_record_ids');
+                }
+            },
+
+            toggleCatalogTypeField: function() {
+                var catalog_type = this.model.get('catalog_type');
+
+                if (catalog_type === this.model.catalogTypes.single_course) {
+                    this.toggleMultiCourseRelatedFields(true);
+                    this.toggleCourseCatalogRelatedFields(true);
+                    this.toggleEnterpriseRelatedFields(false);
+                    this.toggleProgramRelatedFields(true);
+                    this.toggleSingleCourseRealtedFields(false);
+                } else if (catalog_type === this.model.catalogTypes.catalog) {
+                    this.toggleMultiCourseRelatedFields(true);
+                    this.toggleCourseCatalogRelatedFields(false);
+                    this.toggleEnterpriseRelatedFields(true);
+                    this.toggleProgramRelatedFields(true);
+                    this.toggleSingleCourseRealtedFields(true);
+                } else if (catalog_type === this.model.catalogTypes.multiple_courses) {
+                    this.toggleMultiCourseRelatedFields(false);
+                    this.toggleCourseCatalogRelatedFields(true);
+                    this.toggleEnterpriseRelatedFields(false);
+                    this.toggleProgramRelatedFields(true);
+                    this.toggleSingleCourseRealtedFields(true);
+                } else if (catalog_type === this.model.catalogTypes.program) {
+                    this.toggleMultiCourseRelatedFields(true);
+                    this.toggleCourseCatalogRelatedFields(true);
+                    this.toggleEnterpriseRelatedFields(true);
+                    this.toggleProgramRelatedFields(false);
+                    this.toggleSingleCourseRealtedFields(true);
                 }
             },
 
@@ -717,6 +757,9 @@ define([
                         // API returns a string value for enterprise customer
                         customerId = this.model.get('enterprise_customer');
                         this.model.set('enterprise_customer', {'id': customerId});
+                    }
+                    if (this.model.get('program_uuid')) {
+                        this.$('.catalog-type input').attr('disabled', true);
                     }
 
                     this.disableNonEditableFields();

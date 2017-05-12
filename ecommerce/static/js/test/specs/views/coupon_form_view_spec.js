@@ -453,6 +453,46 @@ define([
                     expect(view.model.get('seat_type')).toEqual(undefined);
                     expect(view.model.get('stock_record_ids')).toEqual(undefined);
                 });
+
+                it('should verify only fields related to selected course catalog type are shown', function () {
+                    view.model.set('catalog_type', model.catalogTypes.single_course);
+                    view.toggleCatalogTypeField();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toBeVisible();
+
+                    view.model.set('catalog_type', model.catalogTypes.multiple_courses);
+                    view.toggleCatalogTypeField();
+                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toBeVisible();
+
+                    view.model.set('catalog_type', model.catalogTypes.catalog);
+                    view.toggleCatalogTypeField();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toBeVisible();
+                    expect(view.$('.catalog_buttons').hasClass('hidden')).toBeTruthy();
+                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toBeVisible();
+
+                    view.model.set('catalog_type', model.catalogTypes.program);
+                    view.toggleCatalogTypeField();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                });
             });
         });
     }
