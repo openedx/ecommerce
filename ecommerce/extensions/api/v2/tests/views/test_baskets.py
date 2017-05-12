@@ -411,3 +411,13 @@ class BasketCalculateViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
+
+    @mock.patch('ecommerce.extensions.basket.models.Basket.add_product', mock.Mock(side_effect=Exception))
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
+    def test_exception_log(self, mocked_logger):
+        """A log entry is filed when an exception happens."""
+        voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=5)
+
+        with self.assertRaises(Exception):
+            self.client.get(self.url + '&code={code}'.format(code=voucher.code))
+            self.assertTrue(mocked_logger.called)
