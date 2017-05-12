@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-09 16:59-0400\n"
+"POT-Creation-Date: 2017-05-12 08:20-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -701,6 +701,11 @@ msgstr ""
 "ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
+#: ecommerce/extensions/offer/models.py ecommerce/programs/forms.py
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Program UUID"
+msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
 #: ecommerce/extensions/offer/utils.py
 #, python-brace-format
 msgid "{benefit_value}%"
@@ -1118,11 +1123,6 @@ msgstr ""
 #: ecommerce/programs/constants.py
 msgid "Absolute"
 msgstr "Àßsölüté Ⱡ'σяєм ιρѕυм ∂#"
-
-#: ecommerce/programs/forms.py
-#: ecommerce/programs/templates/programs/programoffer_list.html
-msgid "Program UUID"
-msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: ecommerce/programs/forms.py
 msgid "Discount Type"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-09 16:59-0400\n"
+"POT-Creation-Date: 2017-05-12 08:20-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -568,6 +568,11 @@ msgstr ""
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
+#: ecommerce/extensions/offer/models.py:321 ecommerce/programs/forms.py:17
+#: ecommerce/programs/templates/programs/programoffer_list.html:30
+msgid "Program UUID"
+msgstr ""
+
 #: ecommerce/extensions/offer/utils.py:61
 #, python-brace-format
 msgid "{benefit_value}%"
@@ -971,11 +976,6 @@ msgstr ""
 
 #: ecommerce/programs/constants.py:19
 msgid "Absolute"
-msgstr ""
-
-#: ecommerce/programs/forms.py:17
-#: ecommerce/programs/templates/programs/programoffer_list.html:30
-msgid "Program UUID"
 msgstr ""
 
 #: ecommerce/programs/forms.py:18

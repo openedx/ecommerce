@@ -318,7 +318,7 @@ class Range(AbstractRange):
 
 
 class Condition(AbstractCondition):
-    program_uuid = models.UUIDField(null=True, blank=True)
+    program_uuid = models.UUIDField(null=True, blank=True, verbose_name=_('Program UUID'))
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
