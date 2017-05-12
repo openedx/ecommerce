@@ -390,8 +390,14 @@ class BasketCalculateView(generics.GenericAPIView):
                     'total_incl_tax': basket.total_incl_tax,
                     'currency': basket.currency
                 }
-                raise Exception
-        except:  # pylint: disable=bare-except
+                raise api_exceptions.TemporaryBasketException
+        except api_exceptions.TemporaryBasketException:
             pass
+        except:  # pylint: disable=bare-except
+            logger.exception(
+                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
+                skus, code
+            )
+            raise
 
         return Response(response)

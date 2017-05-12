@@ -28,3 +28,9 @@ class ProductNotFoundError(ApiError):
 
 class BadRequestException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
+
+
+class TemporaryBasketException(Exception):
+    """Exception raised to force a transaction rollback so that the temporary basket
+    is not saved to the database."""
+    pass
