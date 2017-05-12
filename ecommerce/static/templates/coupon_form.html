@@ -166,6 +166,8 @@
                 <label for="multiple-courses"><%= gettext('Multiple courses') %></label>
                 <input id="catalog" type="radio" name="catalog_type" value="Catalog">
                 <label for="catalog"><%= gettext('Catalog') %></label>
+                <input id="program" type="radio" class="non-editable" name="catalog_type" value="Program">
+                <label for="program"><%= gettext('Program') %></label>
             </div>
             <p class="help-block"></p>
         </div>
@@ -214,6 +216,11 @@
         <div class="form-group enterprise-customer">
             <label for="enterprise-customer"><%= gettext('Enterprise Customer:') %></label>
             <select id="enterprise-customer" class="form-control" name="enterprise_customer"></select>
+            <p class="help-block"></p>
+        </div>
+        <div class="form-group program-uuid">
+            <label for="program-uuid"><%= gettext('Program UUID') %> *</label>
+            <input id="program-uuid" type="text" class="form-control" name="program_uuid">
             <p class="help-block"></p>
         </div>
         <div class="form-group email-domains">

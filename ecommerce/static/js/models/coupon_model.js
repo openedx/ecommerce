@@ -33,7 +33,8 @@ define([
         var CATALOG_TYPES = {
             single_course: 'Single course',
             multiple_courses: 'Multiple courses',
-            catalog: 'Catalog'
+            catalog: 'Catalog',
+            program: 'Program',
         };
 
         return Backbone.RelationalModel.extend({
@@ -153,6 +154,12 @@ define([
                         return this.isPrepaidInvoiceType();
                     }
                 },
+                program_uuid: {
+                    msg: gettext('A valid Program UUID is required.'),
+                    required: function () {
+                        return this.get('catalog_type') === CATALOG_TYPES.program;
+                    }
+                },
                 quantity: {pattern: 'number'},
                 // seat_type is for validation only, stock_record_ids holds the values
                 seat_type: {
@@ -233,6 +240,8 @@ define([
                     catalogType = this.catalogTypes.multiple_courses;
                 } else if (catalogId !== '') {
                     catalogType = this.catalogTypes.catalog;
+                } else if (this.has('program_uuid')) {
+                    catalogType = this.catalogTypes.program;
                 } else {
                     catalogType = this.catalogTypes.single_course;
                 }
