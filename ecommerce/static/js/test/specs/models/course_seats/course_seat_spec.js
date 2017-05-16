@@ -121,19 +121,23 @@ define([
                 function assertExpiresInvalid(expires, verification_deadline) {
                     var msg = 'The upgrade deadline must occur BEFORE the verification deadline.';
                     model.set('expires', expires);
-                    model.course = Course.findOrCreate({id: 'a/b/c', verification_deadline: verification_deadline});
+                    model.course = CourseSeat.findOrCreate({id: 'a/b/c', verification_deadline: verification_deadline});
                     expect(model.validate().expires).toEqual(msg);
                     expect(model.isValid(true)).toBeFalsy();
                 }
 
                 it('should do nothing if the CourseSeat has no associated Course', function () {
                     model.course = null;
+                    model.validation.expires = model.validation.expires.bind(model);
                     expect(model.validation.expires('2015-01-01')).toBeUndefined();
                 });
 
-                it('should do nothing if the CourseSeat has no expiration value set', function () {
-                    expect(model.validation.expires(null)).toBeUndefined();
-                    expect(model.validation.expires(undefined)).toBeUndefined();
+                it('should return a message if the CourseSeat has no expiration value set', function () {
+                    var msg = 'Verified seats must have an upgrade deadline.';
+                    model.validation.expires = model.validation.expires.bind(model);
+                    model.set('certificate_type', 'verified');
+                    expect(model.validation.expires(null)).toEqual(msg);
+                    expect(model.validation.expires(undefined)).toEqual(msg);
                 });
 
                 it('should return a message if the CourseSeat expires after the Course verification deadline',
