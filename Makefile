@@ -36,6 +36,7 @@ requirements.js:
 	$(NODE_BIN)/bower install --allow-root
 
 requirements: requirements.js
+	pip install -r e2e/requirements.txt --exists-action w
 	pip install -r requirements/local.txt --exists-action w
 
 production-requirements: requirements.js

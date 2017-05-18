@@ -4,4 +4,5 @@ ddt==1.1.1
 django-nose==1.4.4
 edx-rest-api-client==1.7.1
 nose-ignore-docstring==0.2
+python-dotenv==0.6.4
 selenium==3.4.2
