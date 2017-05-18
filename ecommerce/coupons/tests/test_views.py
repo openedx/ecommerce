@@ -583,6 +583,21 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         self.assertEqual(response.context['course_name'], self.course.name)
         self.assertEqual(response.context['user_email'], self.user.email)
 
+    @httpretty.activate
+    def test_active_user_requirement_disabled(self):
+        """
+        Verify that a user who hasn't activated their account is redirected to the basket single-item view
+        when the account activation requirement has been disabled.
+        """
+        self.site.siteconfiguration.require_account_activation = False
+        self.site.siteconfiguration.save()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        self.mock_access_token_response()
+
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+        expected_url = self.get_full_url(path=reverse('basket:summary'))
+        self.assert_redemption_page_redirects(expected_url)
+
 
 class EnrollmentCodeCsvViewTests(TestCase):
     """ Tests for the EnrollmentCodeCsvView view. """

@@ -171,7 +171,8 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not voucher.offers.first().is_email_valid(request.user.email):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
-        if not request.user.account_details(request).get('is_active'):
+        require_account_activation = request.site.siteconfiguration.require_account_activation
+        if require_account_activation and not request.user.account_details(request).get('is_active'):
             return render(
                 request,
                 'edx/email_confirmation_required.html',
