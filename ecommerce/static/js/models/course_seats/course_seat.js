@@ -34,10 +34,6 @@ define([
 
                     // No validation is needed for empty values or seats not linked to courses.
                     if (_.isEmpty(value) || !course) {
-                        // Do not allow empty upgrade deadline for verified seats.
-                        if (this.getSeatType() === 'verified') {
-                            return gettext('Verified seats must have an upgrade deadline.');
-                        }
                         return;
                     }
 
