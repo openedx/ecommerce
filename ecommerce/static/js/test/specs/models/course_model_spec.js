@@ -73,7 +73,7 @@ define([
                 product_class: 'Seat',
                 title: 'Seat in edX Demonstration Course with verified certificate (and ID verification)',
                 price: '15.00',
-                expires: '2015-01-01T00:00:00+00:00',
+                expires: null,
                 attribute_values: [
                     {
                         name: 'certificate_type',
