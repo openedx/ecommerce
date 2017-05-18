@@ -151,6 +151,11 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
+    require_account_activation = models.BooleanField(
+        verbose_name=_('Require Account Activation'),
+        help_text=_('Require users to activate their account before allowing them to redeem a coupon.'),
+        default=True
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
