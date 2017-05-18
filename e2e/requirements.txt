@@ -1,7 +1,7 @@
 # Packages required to run e2e tests
-bok-choy==0.6.2
+bok-choy==0.7.0
 ddt==1.1.1
 django-nose==1.4.4
 edx-rest-api-client==1.7.1
 nose-ignore-docstring==0.2
-selenium>=3.0.2
+selenium==3.4.2

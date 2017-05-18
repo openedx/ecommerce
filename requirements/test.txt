@@ -1,7 +1,7 @@
 # Packages required for testing
 -r base.txt
 
-bok-choy==0.6.2
+bok-choy==0.7.0
 coverage==4.3.4
 ddt==1.1.1
 django-nose==1.4.4
@@ -14,6 +14,6 @@ mock-django==0.6.9
 nose-ignore-docstring==0.2
 pep8==1.6.2
 pylint==1.6.4
-selenium>=3.0.1
+selenium==3.4.2
 testfixtures==4.5.0
 diff-cover==0.9.6
