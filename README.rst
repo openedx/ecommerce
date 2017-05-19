@@ -17,9 +17,9 @@ Prerequisites
 Documentation |ReadtheDocs|_
 ----------------------------
 .. |ReadtheDocs| image:: https://readthedocs.org/projects/edx/badge/?version=latest
-.. _ReadtheDocs: http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html
+.. _ReadtheDocs: http://open-edx-ecommerce-guide.readthedocs.io/en/latest/
 
-`Documentation <http://edx.readthedocs.org/projects/edx-installing-configuring-and-running/en/latest/ecommerce/index.html>`_ is hosted on Read the Docs. To contribute, please open a PR against https://github.com/edx/edx-documentation.
+`Documentation <http://open-edx-ecommerce-guide.readthedocs.io/en/latest/>`_ is hosted on Read the Docs. The source is hosted in this repo's `docs <https://github.com/edx/ecommerce/tree/master/docs>`_ directory. To contribute, please open a PR against this repo.
 
 License
 -------
