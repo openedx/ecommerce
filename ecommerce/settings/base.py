@@ -548,7 +548,7 @@ COMPREHENSIVE_THEME_DIRS = [
 
 # Theme to use when no site or site theme is defined,
 # set to None if you want to use openedx theme
-DEFAULT_SITE_THEME = None
+DEFAULT_SITE_THEME = os.environ.get('DEFAULT_SITE_THEME', None)
 
 # Cache time out for theme templates and related assets
 
