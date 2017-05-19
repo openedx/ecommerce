@@ -1,18 +1,20 @@
 import uuid
 
+import httpretty
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.test import factories
 from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_PROXY_CLASS_MAP
 from ecommerce.programs.custom import class_path
 from ecommerce.programs.forms import ProgramOfferForm
+from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
-class ProgramOfferFormTests(TestCase):
+class ProgramOfferFormTests(ProgramTestMixin, TestCase):
     def generate_data(self, **kwargs):
         data = {
             'program_uuid': uuid.uuid4(),
@@ -24,7 +26,7 @@ class ProgramOfferFormTests(TestCase):
 
     def assert_program_offer_conditions(self, offer, program_uuid, expected_benefit_value, expected_benefit_type):
         """ Assert the given offer's parameters match the expected values. """
-        self.assertEqual(offer.name, 'Discount for program {}'.format(program_uuid))
+        self.assertEqual(str(offer.name), 'Discount for the Test Program MicroMockers Program')
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
@@ -68,30 +70,47 @@ class ProgramOfferFormTests(TestCase):
         data = self.generate_data(program_uuid=offer.condition.program_uuid)
         self.assert_form_errors(data, {'program_uuid': ['An offer already exists for this program.']})
 
+    @httpretty.activate
     def test_save_create(self):
         """ A new ConditionalOffer, Benefit, and Condition should be created. """
         data = self.generate_data()
-        form = ProgramOfferForm(data=data)
+        self.mock_program_detail_endpoint(data['program_uuid'])
+        form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])
 
+    @httpretty.activate
     def test_save_edit(self):
         """ Previously-created ConditionalOffer, Benefit, and Condition instances should be updated. """
         offer = factories.ProgramOfferFactory()
         data = self.generate_data(program_uuid=offer.condition.program_uuid, benefit_type=Benefit.FIXED)
-        form = ProgramOfferForm(data=data, instance=offer)
+        self.mock_program_detail_endpoint(data['program_uuid'])
+        form = ProgramOfferForm(request=self.request, data=data, instance=offer)
         form.is_valid()
         form.save()
 
         offer.refresh_from_db()
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])
 
+    @httpretty.activate
     def test_save_without_commit(self):
         """ No data should be persisted to the database if the commit kwarg is set to False. """
-        form = ProgramOfferForm(data=self.generate_data())
+        data = self.generate_data()
+        form = ProgramOfferForm(request=self.request, data=data)
+        self.mock_program_detail_endpoint(data['program_uuid'])
         form.is_valid()
         instance = form.save(commit=False)
         self.assertIsNone(instance.pk)
         self.assertFalse(hasattr(instance, 'benefit'))
         self.assertFalse(hasattr(instance, 'condition'))
+
+    @httpretty.activate
+    def test_save_offer_name(self):
+        """ If a request object is sent, the offer name should include program title and type. """
+        data = self.generate_data()
+        self.mock_program_detail_endpoint(data['program_uuid'])
+        form = ProgramOfferForm(request=self.request, data=data)
+        form.is_valid()
+        offer = form.save()
+        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])

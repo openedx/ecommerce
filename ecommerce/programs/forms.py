@@ -3,6 +3,7 @@ from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
+from ecommerce.programs.api import ProgramsApiClient
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_PROXY_CLASS_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.programs.custom import class_path, create_condition
@@ -32,8 +33,9 @@ class ProgramOfferForm(forms.ModelForm):
         }
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
-                 label_suffix=None, empty_permitted=False, instance=None):
+                 label_suffix=None, empty_permitted=False, instance=None, request=None):
         initial = initial or {}
+        self.request = request
         if instance:
             initial.update({
                 'program_uuid': instance.condition.program_uuid,
@@ -72,7 +74,14 @@ class ProgramOfferForm(forms.ModelForm):
     def save(self, commit=True):
         program_uuid = self.cleaned_data['program_uuid']
 
-        self.instance.name = 'Discount for program {}'.format(program_uuid)
+        client = ProgramsApiClient(self.request.site.siteconfiguration.course_catalog_api_client)
+        program = client.get_program(program_uuid)
+        offer_name = _('Discount for the {program_title} {program_type} Program'.format(
+            program_title=program['title'],
+            program_type=program['type']
+        ))
+
+        self.instance.name = offer_name
         self.instance.status = ConditionalOffer.OPEN
         self.instance.offer_type = ConditionalOffer.SITE
         self.instance.max_basket_applications = 1

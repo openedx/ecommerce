@@ -40,6 +40,8 @@ class ProgramTestMixin(CourseCatalogTestMixin):
         program_uuid = str(program_uuid)
         data = {
             'uuid': program_uuid,
+            'title': 'Test Program',
+            'type': 'MicroMockers',
             'courses': courses,
             'applicable_seat_types': [
                 'verified',
