@@ -19,6 +19,13 @@ class Command(BaseCommand):
 
     help = 'Update seat expire with the course enrollment end date.'
 
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    logger.addHandler(ch)
+    enrollment_date_not_found = set()
+    pause_time = 5
+    max_tries = 5
+
     def add_arguments(self, par):
         par.add_argument('--commit',
                          action='store_true',
@@ -26,13 +33,6 @@ class Command(BaseCommand):
                          default=False,
                          help='Save the data to the database. If this is not set, '
                               'expires date will not be updated')
-
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    logger.addHandler(ch)
-    enrollment_date_not_found = set()
-    pause_time = 5
-    max_tries = 5
 
     def handle(self, *args, **options):
         seats_to_update = ['honor', 'audit', 'no-id-professional', 'professional']

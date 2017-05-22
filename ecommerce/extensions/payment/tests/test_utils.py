@@ -48,7 +48,7 @@ class SDNCheckTests(TestCase):
         self.country = 'EL'
         self.user = self.create_user(full_name=self.name)
         self.site_configuration = self.site.siteconfiguration
-        self.site_configuration.enable_sdn_check = True,
+        self.site_configuration.enable_sdn_check = True
         self.site_configuration.sdn_api_url = 'http://sdn-test.fake/'
         self.site_configuration.sdn_api_key = 'fake-key'
         self.site_configuration.sdn_api_list = 'SDN,TEST'

@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
-from django.views.i18n import javascript_catalog
+from django.views.i18n import JavaScriptCatalog
 
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
@@ -36,10 +36,6 @@ def handler403(_):
 
 admin.autodiscover()
 
-js_info_dict = {
-    'packages': ('courses',),
-}
-
 # NOTE 1: Add our logout override first to ensure it is registered by Django as the actual logout view.
 # NOTE 2: These same patterns are used for rest_framework's browseable API authentication links.
 AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + auth_urlpatterns
@@ -54,7 +50,7 @@ urlpatterns = AUTH_URLS + [
     url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'^jsi18n/$', javascript_catalog, js_info_dict, name='javascript-catalog'),
+    url(r'^jsi18n/$', JavaScriptCatalog.as_view(packages=['courses']), name='javascript-catalog'),
     url(r'^programs/', include('ecommerce.programs.urls', namespace='programs')),
 ]
 
