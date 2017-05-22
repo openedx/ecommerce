@@ -1093,6 +1093,25 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assertEqual(Benefit.objects.filter(proxy_class=proxy_class).count(), 1)
         self.assertEqual(Condition.objects.filter(program_uuid=edited_program_uuid).count(), 1)
 
+    def test_update_program_coupon_benefit_value(self):
+        """Verify update benefit value for program coupon."""
+        self.data.update({
+            'program_uuid': str(uuid4()),
+            'title': 'Program Coupon',
+            'enterprise_customer': None,
+            'stock_record_ids': []
+        })
+        self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
+
+        edited_benefit_value = 92
+        coupon = Product.objects.get(title=self.data['title'])
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': coupon.pk}),
+            data={'benefit_value': edited_benefit_value}
+        )
+        self.assertEqual(response_data['benefit_value'], edited_benefit_value)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """

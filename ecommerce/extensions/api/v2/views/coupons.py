@@ -419,6 +419,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 program_uuid=voucher_offer.condition.program_uuid
             ).update(program_uuid=program_uuid)
 
+        # The program uuid (if program coupon) is required for the benefit and condition update logic
+        program_uuid = program_uuid or voucher_offer.condition.program_uuid
+
         new_offer = update_voucher_offer(
             offer=voucher_offer,
             benefit_value=benefit_value or voucher_offer.benefit.value,
