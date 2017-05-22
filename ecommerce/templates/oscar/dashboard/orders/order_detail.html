@@ -14,7 +14,7 @@
   {{ block.super }}
 
   {# Translation support for JavaScript strings. #}
-  <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+  <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 
   {% compress js %}
       <script src="{% static 'bower_components/js-cookie/src/js.cookie.js' %}" type="text/javascript"></script>

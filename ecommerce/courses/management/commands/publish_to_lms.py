@@ -16,16 +16,16 @@ class Command(BaseCommand):
 
     help = 'Publish the courses to LMS'
 
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    logger.addHandler(ch)
+
     def add_arguments(self, parser):
         parser.add_argument('--course_ids_file',
                             action='store',
                             dest='course_ids_file',
                             default=None,
                             help='Path to file to read courses from.')
-
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    logger.addHandler(ch)
 
     def handle(self, *args, **options):
         failed = 0

@@ -17,9 +17,10 @@ class Migration(migrations.Migration):
         # Django has finished running migrations, meaning that when migrations are
         # run against a fresh database (e.g., while running tests), any which depend
         # on the existence of a permission will fail.
-        apps.models_module = True
-        create_permissions(apps, verbosity=0)
-        apps.models_module = None
+        for app_config in apps.get_app_configs():
+            app_config.models_module = True
+            create_permissions(app_config, verbosity=0, apps=apps)
+            app_config.models_module = None
 
         service_user = User.objects.get(username=settings.ECOMMERCE_SERVICE_WORKER_USERNAME)
 
