@@ -10,6 +10,7 @@ from ecommerce.programs.benefits import PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 from ecommerce.programs.custom import class_path
 from ecommerce.programs.tests.mixins import ProgramTestMixin
+from ecommerce.programs.views import ProgramOfferListView
 from ecommerce.tests.testcases import CacheMixin, TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -81,6 +82,24 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         httpretty.disable()
         response = self.assert_get_response_status(200)
         self.assertEqual(list(response.context['object_list']), program_offers)
+
+    def test_get_queryset(self):
+        """ Should return only Conditional Offers with Site offer type. """
+
+        # Conditional Offer should contain a condition with program uuid set in order to be returned
+        program_condition = factories.ProgramCourseRunSeatsConditionFactory()
+        site_conditional_offer = factories.ConditionalOfferFactory(
+            condition=program_condition,
+            offer_type=ConditionalOffer.SITE
+        )
+        factories.ConditionalOfferFactory(
+            condition=program_condition,
+            offer_type=ConditionalOffer.VOUCHER
+        )
+        factories.ConditionalOfferFactory(
+            offer_type=ConditionalOffer.SITE
+        )
+        self.assertEqual(list(ProgramOfferListView().get_queryset()), [site_conditional_offer])
 
 
 class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
