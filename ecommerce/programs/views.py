@@ -37,7 +37,10 @@ class ProgramOfferViewMixin(StaffOnlyMixin):
         return details
 
     def get_queryset(self):
-        return super(ProgramOfferViewMixin, self).get_queryset().filter(condition__program_uuid__isnull=False)
+        return super(ProgramOfferViewMixin, self).get_queryset().filter(
+            condition__program_uuid__isnull=False,
+            offer_type=ConditionalOffer.SITE
+        )
 
 
 class ProgramOfferProcessFormViewMixin(ProgramOfferViewMixin):
