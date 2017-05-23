@@ -30,10 +30,18 @@ define([
                 },
                 expires: function (value) {
                     var verificationDeadline,
-                        course = this.course;
+                        course = this.get('course');
 
-                    // No validation is needed for empty values or seats not linked to courses.
-                    if (_.isEmpty(value) || !course) {
+                    // No validation is needed when the Seat is not linked to the course
+                    if (!course || !course.get('id')) {
+                        return;
+                    }
+
+                    if (_.isEmpty(value)) {
+                        // Do not allow empty upgrade deadline for verified seats.
+                        if (this.getSeatType() === 'verified') {
+                            return gettext('Verified seats must have an upgrade deadline.');
+                        }
                         return;
                     }
 
