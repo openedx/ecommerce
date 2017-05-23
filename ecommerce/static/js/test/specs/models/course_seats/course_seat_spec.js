@@ -118,22 +118,46 @@ define([
             });
 
             describe('expires validation', function () {
+                beforeAll(function () {
+                    model.validation.expires = model.validation.expires.bind(model);
+                });
+
+                beforeEach(function () {
+                    model.set('course', Course.findOrCreate({id: 'a/b/c'}));
+                });
+
+                afterAll(function () {
+                    model.unset('course');
+                });
+
                 function assertExpiresInvalid(expires, verification_deadline) {
                     var msg = 'The upgrade deadline must occur BEFORE the verification deadline.';
                     model.set('expires', expires);
-                    model.course = Course.findOrCreate({id: 'a/b/c', verification_deadline: verification_deadline});
-                    expect(model.validate().expires).toEqual(msg);
+                    model.get('course').set('verification_deadline', verification_deadline);
+                    expect(model.validation.expires(expires)).toEqual(msg);
                     expect(model.isValid(true)).toBeFalsy();
+                    model.unset('expires');
+                    model.get('course').unset('verification_deadline');
                 }
 
                 it('should do nothing if the CourseSeat has no associated Course', function () {
-                    model.course = null;
+                    model.unset('course');
                     expect(model.validation.expires('2015-01-01')).toBeUndefined();
                 });
 
-                it('should do nothing if the CourseSeat has no expiration value set', function () {
+                it('should do nothing if a not verified type CourseSeat has no expiration value set', function () {
+                    model.set('certificate_type', 'not-verified');
                     expect(model.validation.expires(null)).toBeUndefined();
                     expect(model.validation.expires(undefined)).toBeUndefined();
+                    model.unset('certificate_type');
+                });
+
+                it('should return a message if a verified CourseSeat has no expiration value set', function () {
+                    var msg = 'Verified seats must have an upgrade deadline.';
+                    model.set('certificate_type', 'verified');
+                    expect(model.validation.expires(null)).toEqual(msg);
+                    expect(model.validation.expires(undefined)).toEqual(msg);
+                    model.unset('certificate_type');
                 });
 
                 it('should return a message if the CourseSeat expires after the Course verification deadline',
