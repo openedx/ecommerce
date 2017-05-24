@@ -10,7 +10,6 @@ from ecommerce.programs.benefits import PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 from ecommerce.programs.custom import class_path
 from ecommerce.programs.tests.mixins import ProgramTestMixin
-from ecommerce.programs.views import ProgramOfferListView
 from ecommerce.tests.testcases import CacheMixin, TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -87,19 +86,18 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         """ Should return only Conditional Offers with Site offer type. """
 
         # Conditional Offer should contain a condition with program uuid set in order to be returned
-        program_condition = factories.ProgramCourseRunSeatsConditionFactory()
-        site_conditional_offer = factories.ConditionalOfferFactory(
-            condition=program_condition,
-            offer_type=ConditionalOffer.SITE
-        )
-        factories.ConditionalOfferFactory(
-            condition=program_condition,
-            offer_type=ConditionalOffer.VOUCHER
-        )
-        factories.ConditionalOfferFactory(
-            offer_type=ConditionalOffer.SITE
-        )
-        self.assertEqual(list(ProgramOfferListView().get_queryset()), [site_conditional_offer])
+        site_conditional_offer = factories.ProgramOfferFactory()
+        program_offers = [
+            site_conditional_offer,
+            factories.ProgramOfferFactory(offer_type=ConditionalOffer.VOUCHER),
+            factories.ConditionalOfferFactory(offer_type=ConditionalOffer.SITE)
+        ]
+
+        for offer in program_offers:
+            self.mock_program_detail_endpoint(offer.condition.program_uuid)
+
+        response = self.client.get(self.path)
+        self.assertEqual(list(response.context['object_list']), [site_conditional_offer])
 
 
 class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
