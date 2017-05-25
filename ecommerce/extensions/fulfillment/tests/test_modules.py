@@ -17,7 +17,6 @@ from ecommerce.core.constants import (COUPON_PRODUCT_CLASS_NAME, ENROLLMENT_CODE
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -55,7 +54,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         super(EnrollmentFulfillmentModuleTests, self).setUp()
 
         self.user = UserFactory()
-        self.course = Course.objects.create(id=self.course_id, name='Demo Course')
+        self.course = CourseFactory(id=self.course_id, name='Demo Course', site=self.site)
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 

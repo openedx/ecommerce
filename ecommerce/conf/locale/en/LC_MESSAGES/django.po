@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-30 03:59-0400\n"
+"POT-Creation-Date: 2017-05-30 11:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -259,7 +259,12 @@ msgstr ""
 msgid "You have already purchased {course} seat."
 msgstr ""
 
-#: ecommerce/courses/models.py:36
+#: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:12
+#: ecommerce/extensions/payment/models.py:58
+msgid "Site"
+msgstr ""
+
+#: ecommerce/courses/models.py:37
 msgid "Last date/time on which verification for this product can be submitted."
 msgstr ""
 
@@ -356,20 +361,20 @@ msgstr ""
 msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:346
+#: ecommerce/extensions/api/serializers.py:352
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:352
+#: ecommerce/extensions/api/serializers.py:358
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:356
+#: ecommerce/extensions/api/serializers.py:362
 msgid "Products must have a price."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:385
+#: ecommerce/extensions/api/serializers.py:391
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -377,19 +382,19 @@ msgid ""
 "been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:598
+#: ecommerce/extensions/api/serializers.py:604
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:599
+#: ecommerce/extensions/api/serializers.py:605
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:613
+#: ecommerce/extensions/api/serializers.py:619
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:613
+#: ecommerce/extensions/api/serializers.py:619
 msgid "INACTIVE"
 msgstr ""
 
@@ -402,11 +407,6 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py:139
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
-msgstr ""
-
-#: ecommerce/extensions/basket/models.py:12
-#: ecommerce/extensions/payment/models.py:58
-msgid "Site"
 msgstr ""
 
 #: ecommerce/extensions/basket/models.py:54
@@ -794,7 +794,6 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
-#: ecommerce/extensions/voucher/utils.py:126
 #: ecommerce/templates/edx/checkout/receipt.html:102
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
@@ -806,7 +805,6 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
-#: ecommerce/extensions/voucher/utils.py:126
 msgid "Enrollment"
 msgstr ""
 
@@ -1006,23 +1004,23 @@ msgstr ""
 msgid "End Date"
 msgstr ""
 
-#: ecommerce/programs/forms.py:61
+#: ecommerce/programs/forms.py:66
 msgid "An offer already exists for this program."
 msgstr ""
 
-#: ecommerce/programs/forms.py:64
+#: ecommerce/programs/forms.py:69
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr ""
 
-#: ecommerce/programs/forms.py:67
+#: ecommerce/programs/forms.py:72
 msgid "A start date must be specified when specifying an end date."
 msgstr ""
 
-#: ecommerce/programs/forms.py:70
+#: ecommerce/programs/forms.py:75
 msgid "The start date must occur before the end date."
 msgstr ""
 
-#: ecommerce/programs/forms.py:79
+#: ecommerce/programs/forms.py:84
 #, python-brace-format
 msgid "Discount for the {program_title} {program_type} Program"
 msgstr ""

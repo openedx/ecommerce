@@ -13,6 +13,8 @@ from ecommerce.core.constants import ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.api.serializers import SiteSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -34,7 +36,7 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         self.course = self.create_course()
 
     def create_course(self):
-        return Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
+        return CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', site=self.site)
 
     def serialize_course(self, course, include_products=False):
         """ Serializes a course to a Python dict. """
@@ -47,6 +49,7 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         data = {
             'id': course.id,
             'name': course.name,
+            'site': SiteSerializer(course.site).data,
             'verification_deadline': course.verification_deadline,
             'type': course.type,
             'url': self.get_full_url(reverse('api:v2:course-detail', kwargs={'pk': course.id})),
@@ -156,7 +159,9 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         course_id = self.course.id
         path = reverse('api:v2:course-detail', kwargs={'pk': course_id})
         name = 'Something awesome!'
-        response = self.client.put(path, json.dumps({'id': course_id, 'name': name}), JSON_CONTENT_TYPE)
+        response = self.client.put(path, json.dumps(
+            {'id': course_id, 'name': name}
+        ), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 200, response.content)
 
         # Reload the Course

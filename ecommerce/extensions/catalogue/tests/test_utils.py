@@ -7,6 +7,7 @@ from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
 from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.catalogue.utils import create_coupon_product, generate_sku, get_or_create_catalog
 from ecommerce.tests.factories import ProductFactory
@@ -14,7 +15,6 @@ from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
-Course = get_model('courses', 'Course')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -27,7 +27,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(UtilsTests, self).setUp()
-        self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
+        self.course = CourseFactory(id=COURSE_ID, name='Test Course', site=self.site)
         self.seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
@@ -45,7 +45,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
     def test_generate_sku_for_course_seat(self):
         """Verify the method generates a SKU for a course seat."""
         course_id = 'sku/test/course'
-        course = Course.objects.create(id=course_id, name='Test Course')
+        course = CourseFactory(id=course_id, name='Test Course', site=self.site)
         certificate_type = 'honor'
         product = course.create_or_update_seat(certificate_type, False, 0, self.partner)
 
@@ -71,7 +71,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(Catalog.objects.count(), 1)
 
         course_id = 'sku/test2/course'
-        course = Course.objects.create(id=course_id, name='Test Course 2')
+        course = CourseFactory(id=course_id, name='Test Course 2', site=self.site)
         seat_2 = course.create_or_update_seat('verified', False, 0, self.partner)
         stock_record_2 = seat_2.stockrecords.first()
 
@@ -88,7 +88,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
 class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
-        self.course = Course.objects.create(id=COURSE_ID, name='Test Course')
+        self.course = CourseFactory(id=COURSE_ID, name='Test Course', site=self.site)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
     def test_generate_sku_for_coupon(self):

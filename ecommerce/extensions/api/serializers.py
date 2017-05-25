@@ -280,8 +280,14 @@ class RefundSerializer(serializers.ModelSerializer):
         model = Refund
 
 
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Site
+
+
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
+    site = SiteSerializer(read_only=True)
     products = ProductSerializer(many=True)
     products_url = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
@@ -309,9 +315,9 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta(object):
         model = Course
         fields = (
-            'id', 'url', 'name', 'verification_deadline', 'type',
+            'id', 'url', 'name', 'verification_deadline', 'type', 'site',
             'products_url', 'last_edited', 'products', 'has_active_bulk_enrollment_code')
-        read_only_fields = ('type', 'products')
+        read_only_fields = ('type', 'products', 'site')
         extra_kwargs = {
             'url': {'view_name': COURSE_DETAIL_VIEW}
         }
@@ -391,14 +397,14 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
             # Explicitly delimit operations which will be rolled back if an exception is raised.
             with transaction.atomic():
-                course, created = Course.objects.get_or_create(id=course_id)
+                site = self.context['request'].site
+                course, created = Course.objects.get_or_create(id=course_id, site=site)
                 course.name = course_name
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
                 create_enrollment_code = False
-                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and \
-                        self.context['request'].site.siteconfiguration.enable_enrollment_codes:
+                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
                     create_enrollment_code = create_or_activate_enrollment_code
 
                 for product in products:
@@ -561,6 +567,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     code_status = serializers.SerializerMethodField()
     coupon_type = serializers.SerializerMethodField()
     course_seat_types = serializers.SerializerMethodField()
+    email_domains = serializers.SerializerMethodField()
     enterprise_customer = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
@@ -570,10 +577,9 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     payment_information = serializers.SerializerMethodField()
     program_uuid = serializers.SerializerMethodField()
     quantity = serializers.SerializerMethodField()
+    seats = serializers.SerializerMethodField()
     start_date = serializers.SerializerMethodField()
     voucher_type = serializers.SerializerMethodField()
-    seats = serializers.SerializerMethodField()
-    email_domains = serializers.SerializerMethodField()
 
     def get_benefit_type(self, obj):
         return retrieve_benefit(obj).type
@@ -710,11 +716,6 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Invoice
-
-
-class SiteSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = Site
 
 
 class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-method
