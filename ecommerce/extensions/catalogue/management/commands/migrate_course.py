@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 
 class MigratedCourse(object):
     def __init__(self, course_id, site_domain):
-        self.course, _created = Course.objects.get_or_create(id=course_id)
-        self.site_configuration = Site.objects.get(domain=site_domain).siteconfiguration
+        site = Site.objects.get(domain=site_domain)
+        self.course, _created = Course.objects.get_or_create(id=course_id, site=site)
+        self.site_configuration = site.siteconfiguration
 
     def load_from_lms(self, access_token):
         """

@@ -7,7 +7,7 @@ from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
@@ -31,7 +31,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
 
-        self.course = Course.objects.create(id='a/b/c', name='Demo Course')
+        self.course = CourseFactory(id='a/b/c', name='Demo Course', site=self.site)
         self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
 
         self.processor = self.processor_class(self.site)  # pylint: disable=not-callable

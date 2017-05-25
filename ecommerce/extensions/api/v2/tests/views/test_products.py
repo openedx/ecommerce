@@ -10,7 +10,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -28,7 +28,7 @@ class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         super(ProductViewSetBase, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Test Course')
+        self.course = CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', site=self.site)
 
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)
@@ -87,7 +87,7 @@ class ProductViewSetTests(ProductViewSetBase):
     def test_list_for_course(self):
         """ Verify the view supports listing products for a single course. """
         # Create another course and seat to confirm filtering.
-        other_course = Course.objects.create(id='edX/DemoX/XYZ', name='Test Course 2')
+        other_course = CourseFactory(id='edX/DemoX/XYZ', name='Test Course 2', site=self.site)
         other_course.create_or_update_seat('honor', False, 0, self.partner)
 
         path = reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': self.course.id})

@@ -12,3 +12,4 @@ class CourseFactory(factory.DjangoModelFactory):
 
     id = FuzzyText(prefix='course-v1:test-org+course+')
     name = FuzzyText(prefix='course-name-')
+    site = factory.SubFactory('ecommerce.tests.factories.SiteFactory')

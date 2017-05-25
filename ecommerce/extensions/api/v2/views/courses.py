@@ -47,6 +47,15 @@ class CourseViewSet(NonDestroyableModelViewSet):
         """
         return super(CourseViewSet, self).list(request, *args, **kwargs)
 
+    def create(self, request, *args, **kwargs):
+        course = Course.objects.create(
+            id=request.data['id'],
+            name=request.data['name'],
+            site=request.site
+        )
+        data = serializers.CourseSerializer(course, context={'request': request}).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieve details for a course.

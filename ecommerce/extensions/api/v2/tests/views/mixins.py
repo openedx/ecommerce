@@ -1,7 +1,7 @@
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 
-from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -17,7 +17,7 @@ class CatalogMixin(CourseCatalogTestMixin):
         self.user = self.create_user(is_staff=True)
 
         # Create course seat for edx partner
-        self.course = Course.objects.create(id='edX/DemoX/Demo_Course', name='Demo Course')
+        self.course = CourseFactory(id='edX/DemoX/Demo_Course', name='Demo Course', site=self.site)
         self.seat = self.course.create_or_update_seat('honor', False, 0, self.partner)
 
         # Create Catalog and stockRecord objects.

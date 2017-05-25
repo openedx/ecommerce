@@ -25,7 +25,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
     def test_unicode(self):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'
-        course = Course.objects.create(id=course_id)
+        course = CourseFactory(id=course_id, site=self.site)
         self.assertEqual(unicode(course), course_id)
 
     def test_seat_products(self):
@@ -85,7 +85,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
     def test_save_creates_parent_seat(self):
         """ Verify the save method creates a parent seat if one does not exist. """
-        course = Course.objects.create(id='a/b/c', name='Test Course')
+        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
         self.assertEqual(course.products.count(), 1)
 
         parent = course.parent_seat_product
@@ -114,7 +114,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
     def test_create_or_update_seat(self):
         """ Verify the method creates or updates a seat Product. """
-        course = Course.objects.create(id='a/b/c', name='Test Course')
+        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
 
         # Test seat creation
         certificate_type = 'verified'
@@ -159,7 +159,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
 
     def test_create_credit_seats(self):
         """Verify that the model's seat creation method allows the creation of multiple credit seats."""
-        course = Course.objects.create(id='a/b/c', name='Test Course')
+        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
         credit_data = {'MIT': 2, 'Harvard': 1}
         certificate_type = 'credit'
         id_verification_required = True
@@ -194,8 +194,8 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         Sanity check verifying that course IDs which produced collisions due to a
         lossy slug generation process no longer do so.
         """
-        dotted_course = Course.objects.create(id='a/...course.../id')
-        regular_course = Course.objects.create(id='a/course/id')
+        dotted_course = CourseFactory(id='a/...course.../id', site=self.site)
+        regular_course = CourseFactory(id='a/course/id', site=self.site)
 
         certificate_type = 'honor'
         id_verification_required = False
@@ -263,9 +263,15 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(product_mode.attr.id_verification_required, False)
         self.assertEqual(product_mode.attr.certificate_type, 'professional')
 
+    def test_partner_property(self):
+        """ Partner property should return the correct partner. """
+        partner = self.site.siteconfiguration.partner
+        course = CourseFactory(id='abc', name='Test Course', site=self.site)
+        self.assertEqual(course.partner, partner)
+
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
-        course = Course.objects.create(id='a/b/c', name='Test Course')
+        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
         self.assertEqual(course.type, 'audit')
 
         course.create_or_update_seat('audit', False, 0, self.partner)
@@ -288,7 +294,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
     def test_enrollment_code_seat_type_filter(self):
         """ Verify that the ENROLLMENT_CODE_SEAT_TYPES constant is properly applied during seat creation """
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        course = Course.objects.create(id='test/course/123', name='Test Course 123')
+        course = CourseFactory(id='test/course/123', name='Test Course 123', site=self.site)
 
         # Audit seat products should not have a corresponding enrollment code
         course.create_or_update_seat('audit', False, 0, self.partner, create_enrollment_code=True)

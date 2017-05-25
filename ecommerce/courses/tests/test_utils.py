@@ -9,7 +9,6 @@ from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
-from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.courses.utils import (
@@ -35,7 +34,7 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
     )
     def test_mode_for_seat(self, certificate_type, id_verification_required, mode):
         """ Verify the correct enrollment mode is returned for a given seat. """
-        course = Course.objects.create(id='edx/Demo_Course/DemoX')
+        course = CourseFactory(id='edx/Demo_Course/DemoX', site=self.site)
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00, self.partner)
         self.assertEqual(mode_for_seat(seat), mode)

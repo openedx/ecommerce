@@ -8,7 +8,7 @@ from oscar.test.newfactories import BasketFactory, UserFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN, process_basket_addition, process_checkout_complete
 from ecommerce.tests.testcases import TestCase
@@ -35,7 +35,7 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
         # create some test course objects
         self.course_id = 'edX/toy/2012_Fall'
         self.course_url = 'http://lms.testserver.fake/courses/edX/toy/2012_Fall/info'
-        self.course = Course.objects.create(id=self.course_id, name='Demo Course')
+        self.course = CourseFactory(id=self.course_id, name='Demo Course', site=self.site)
 
         self.basket_attribute_type, __ = BasketAttributeType.objects.get_or_create(name=SAILTHRU_CAMPAIGN)
 

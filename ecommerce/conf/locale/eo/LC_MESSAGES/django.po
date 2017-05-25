@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-30 03:59-0400\n"
+"POT-Creation-Date: 2017-05-30 11:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -304,6 +304,11 @@ msgstr ""
 "Ýöü hävé älréädý pürçhäséd {course} séät. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυ#"
 
+#: ecommerce/courses/models.py ecommerce/extensions/basket/models.py
+#: ecommerce/extensions/payment/models.py
+msgid "Site"
+msgstr "Sïté Ⱡ'σяєм ι#"
+
 #: ecommerce/courses/models.py
 msgid ""
 "Last date/time on which verification for this product can be submitted."
@@ -496,11 +501,6 @@ msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
 "Prödüçts wïth SKÛ(s) [{skus}] dö nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
-
-#: ecommerce/extensions/basket/models.py
-#: ecommerce/extensions/payment/models.py
-msgid "Site"
-msgstr "Sïté Ⱡ'σяєм ι#"
 
 #: ecommerce/extensions/basket/models.py
 #, python-brace-format
@@ -940,7 +940,6 @@ msgstr "Rédééméd Ⱡ'σяєм ιρѕυм ∂#"
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
-#: ecommerce/extensions/voucher/utils.py
 #: ecommerce/templates/edx/checkout/receipt.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
@@ -951,7 +950,6 @@ msgstr "Dïsçöünt Ⱡ'σяєм ιρѕυм ∂#"
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
-#: ecommerce/extensions/voucher/utils.py
 msgid "Enrollment"
 msgstr "Énröllmént Ⱡ'σяєм ιρѕυм ∂σłσ#"
 

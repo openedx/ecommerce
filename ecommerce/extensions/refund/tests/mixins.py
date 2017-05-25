@@ -8,7 +8,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 
-from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
@@ -24,7 +24,9 @@ SourceType = get_model('payment', 'SourceType')
 class RefundTestMixin(CourseCatalogTestMixin):
     def setUp(self):
         super(RefundTestMixin, self).setUp()
-        self.course, __ = Course.objects.get_or_create(id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course')
+        self.course = CourseFactory(
+            id=u'edX/DemoX/Demo_Course', name=u'edX Demó Course', site=self.site
+        )
         self.honor_product = self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.verified_product = self.course.create_or_update_seat('verified', True, 10, self.partner)
         self.credit_product = self.course.create_or_update_seat(

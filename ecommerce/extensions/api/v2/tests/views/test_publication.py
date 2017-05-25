@@ -15,6 +15,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -149,10 +150,11 @@ class AtomicPublicationTests(CourseCatalogTestMixin, TestCase):
         Course.objects.all().delete()
 
         # Create a Course.
-        course = Course.objects.create(
+        course = CourseFactory(
             id=self.course_id,
             name=self.course_name,
             verification_deadline=EXPIRES,
+            site=self.site
         )
 
         # Create associated products.
