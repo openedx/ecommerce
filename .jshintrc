@@ -126,6 +126,8 @@
         "expect",
         "waitsFor",
         "runs",
+        "beforeAll",
+        "afterAll",
 
         // jQuery-Jasmine library.
         "loadFixtures",
