@@ -71,7 +71,7 @@ class Command(BaseCommand):
             return
 
         self.partner = Partner.objects.get(code__iexact=options['partner'])  # pylint: disable=attribute-defined-outside-init
-        site = self.partner.siteconfiguration_set.first().site
+        site = self.partner.siteconfiguration.site
         self._install_current_request(site)
 
         if options.get('direction') == HONOR_TO_AUDIT:
