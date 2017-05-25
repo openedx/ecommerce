@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-25 13:55-0400\n"
+"POT-Creation-Date: 2017-05-25 21:32-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,161 +29,157 @@ msgstr ""
 msgid "Important dates"
 msgstr ""
 
-#: ecommerce/core/models.py:41
+#: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
 msgstr ""
 
-#: ecommerce/core/models.py:42
+#: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr ""
 
-#: ecommerce/core/models.py:47
+#: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
 msgstr ""
 
-#: ecommerce/core/models.py:48
-msgid "Path to scss files of the custom site theme"
-msgstr ""
-
-#: ecommerce/core/models.py:54
+#: ecommerce/core/models.py:53
 msgid "Payment processors"
 msgstr ""
 
-#: ecommerce/core/models.py:55
+#: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr ""
 
-#: ecommerce/core/models.py:61
+#: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
 msgstr ""
 
-#: ecommerce/core/models.py:62
+#: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
 msgstr ""
 
-#: ecommerce/core/models.py:68
+#: ecommerce/core/models.py:67
 msgid "OAuth settings"
 msgstr ""
 
-#: ecommerce/core/models.py:69
+#: ecommerce/core/models.py:68
 msgid "JSON string containing OAuth backend settings."
 msgstr ""
 
-#: ecommerce/core/models.py:75
+#: ecommerce/core/models.py:74
 msgid "Segment key"
 msgstr ""
 
-#: ecommerce/core/models.py:76
+#: ecommerce/core/models.py:75
 msgid "Segment write/API key."
 msgstr ""
 
-#: ecommerce/core/models.py:82
+#: ecommerce/core/models.py:81
 msgid "From email"
 msgstr ""
 
-#: ecommerce/core/models.py:83
+#: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
 msgstr ""
 
-#: ecommerce/core/models.py:89
+#: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
 msgstr ""
 
-#: ecommerce/core/models.py:90
+#: ecommerce/core/models.py:89
 msgid "Enable the creation of enrollment codes."
 msgstr ""
 
-#: ecommerce/core/models.py:95
+#: ecommerce/core/models.py:94
 msgid "Payment support email"
 msgstr ""
 
-#: ecommerce/core/models.py:96
+#: ecommerce/core/models.py:95
 msgid "Contact email for payment support issues."
 msgstr ""
 
-#: ecommerce/core/models.py:102
+#: ecommerce/core/models.py:101
 msgid "Payment support url"
 msgstr ""
 
-#: ecommerce/core/models.py:103
+#: ecommerce/core/models.py:102
 msgid "URL for payment support issues."
 msgstr ""
 
-#: ecommerce/core/models.py:108
+#: ecommerce/core/models.py:107
 msgid "UTM Cookie Name"
 msgstr ""
 
-#: ecommerce/core/models.py:109
+#: ecommerce/core/models.py:108
 msgid "Name of cookie storing UTM data."
 msgstr ""
 
-#: ecommerce/core/models.py:115
+#: ecommerce/core/models.py:114
 msgid "Affiliate Cookie Name"
 msgstr ""
 
-#: ecommerce/core/models.py:116
+#: ecommerce/core/models.py:115
 msgid "Name of cookie storing affiliate data."
 msgstr ""
 
-#: ecommerce/core/models.py:122
+#: ecommerce/core/models.py:121
 msgid "Enable Otto receipt page"
 msgstr ""
 
-#: ecommerce/core/models.py:123
+#: ecommerce/core/models.py:122
 msgid "Enable the usage of Otto receipt page."
 msgstr ""
 
-#: ecommerce/core/models.py:128
+#: ecommerce/core/models.py:127
 msgid "Send refund email notification"
 msgstr ""
 
-#: ecommerce/core/models.py:133
+#: ecommerce/core/models.py:132
 msgid "Enable SDN check"
 msgstr ""
 
-#: ecommerce/core/models.py:134
+#: ecommerce/core/models.py:133
 msgid "Enable SDN check at checkout."
 msgstr ""
 
-#: ecommerce/core/models.py:138
+#: ecommerce/core/models.py:137
 msgid "US Treasury SDN API URL"
 msgstr ""
 
-#: ecommerce/core/models.py:143
+#: ecommerce/core/models.py:142
 msgid "US Treasury SDN API key"
 msgstr ""
 
-#: ecommerce/core/models.py:148
+#: ecommerce/core/models.py:147
 msgid "SDN lists"
 msgstr ""
 
-#: ecommerce/core/models.py:149
+#: ecommerce/core/models.py:148
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr ""
 
-#: ecommerce/core/models.py:154
+#: ecommerce/core/models.py:153
 msgid "Require Account Activation"
 msgstr ""
 
-#: ecommerce/core/models.py:155
+#: ecommerce/core/models.py:154
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr ""
 
-#: ecommerce/core/models.py:159
+#: ecommerce/core/models.py:158
 msgid "Optimizely snippet source URL"
 msgstr ""
 
-#: ecommerce/core/models.py:160
+#: ecommerce/core/models.py:159
 msgid "This script will be loaded on every page."
 msgstr ""
 
-#: ecommerce/core/models.py:403
+#: ecommerce/core/models.py:402
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:548 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:547 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr ""
 

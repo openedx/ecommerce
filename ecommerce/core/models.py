@@ -28,11 +28,10 @@ log = logging.getLogger(__name__)
 
 
 class SiteConfiguration(models.Model):
-    """Custom Site model for custom sites/microsites.
+    """Tenant configuration.
 
-    This model will enable the basic theming and payment processor
-    configuration for each custom site.
-    The multi-tenant implementation has one site per partner.
+    Each site/tenant should have an instance of this model. This model is responsible for
+    providing databased-backed configuration specific to each site.
     """
 
     site = models.OneToOneField('sites.Site', null=False, blank=False, on_delete=models.CASCADE)
@@ -45,10 +44,10 @@ class SiteConfiguration(models.Model):
     )
     theme_scss_path = models.CharField(
         verbose_name=_('Path to custom site theme'),
-        help_text=_('Path to scss files of the custom site theme'),
+        help_text='DEPRECATED: THIS FIELD WILL BE REMOVED!',
         max_length=255,
-        null=False,
-        blank=False
+        null=True,
+        blank=True
     )
     payment_processors = models.CharField(
         verbose_name=_('Payment processors'),
