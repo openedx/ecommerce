@@ -31,6 +31,10 @@
     {# Additional CSS - specific to certain pages #}
     {% block extrastyles %}{% endblock %}
 
+    {% if optimizely_snippet_src %}
+      <script src="{{ optimizely_snippet_src }}"></script>
+    {% endif %}
+
     {% block extrahead %}{% endblock %}
 
     {% block tracking %}

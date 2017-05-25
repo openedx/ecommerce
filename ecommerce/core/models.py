@@ -155,6 +155,12 @@ class SiteConfiguration(models.Model):
         help_text=_('Require users to activate their account before allowing them to redeem a coupon.'),
         default=True
     )
+    optimizely_snippet_src = models.CharField(
+        verbose_name=_('Optimizely snippet source URL'),
+        help_text=_('This script will be loaded on every page.'),
+        max_length=255,
+        blank=True
+    )
 
     class Meta(object):
         unique_together = ('site', 'partner')
