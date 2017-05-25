@@ -1,7 +1,6 @@
 """Tests of ecommerce sailthru signal handlers."""
 import logging
 
-from django.test.client import RequestFactory
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test.factories import create_order
@@ -12,7 +11,6 @@ from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN, process_basket_addition, process_checkout_complete
-from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -27,13 +25,12 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(SailthruSignalTests, self).setUp()
-        self.request_factory = RequestFactory()
-        self.request = self.request_factory.get('foo')
         self.request.COOKIES['sailthru_bid'] = CAMPAIGN_COOKIE
-        self.request.site = self.site
         self.user = UserFactory.create(username='test', email=TEST_EMAIL)
 
         toggle_switch('sailthru_enable', True)
+        self.site_configuration.enable_sailthru = True
+        self.site_configuration.save()
 
         # create some test course objects
         self.course_id = 'edX/toy/2012_Fall'
@@ -55,16 +52,15 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     @patch('ecommerce.sailthru.signals.logger.error')
     def test_partner_not_supported(self, mock_log_error, mock_update_course_enrollment):
-        """ Verify Sailthru is not contacted if the Partner does not support Sailthru. """
-        site_configuration = SiteConfigurationFactory(partner__name='TestX')
-        site_configuration.partner.enable_sailthru = False
-        self.request.site.siteconfiguration = site_configuration
+        """ Verify Sailthru is not contacted if the feature is disabled for the site. """
+        self.site_configuration.enable_sailthru = False
+        self.site_configuration.save()
+
         process_basket_addition(None, request=self.request)
         self.assertFalse(mock_update_course_enrollment.called)
         self.assertFalse(mock_log_error.called)
 
         __, order = self._create_order(99)
-        order.site.siteconfiguration = site_configuration
         process_checkout_complete(None, order=order)
         self.assertFalse(mock_update_course_enrollment.called)
         self.assertFalse(mock_log_error.called)
@@ -229,6 +225,6 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
 
         basket = BasketFactory()
         basket.add_product(seat, 1)
-        order = create_order(number=1, basket=basket, user=self.user)
+        order = create_order(number=1, basket=basket, user=self.user, site=self.site)
         order.total_excl_tax = price
         return seat, order

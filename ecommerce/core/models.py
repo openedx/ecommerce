@@ -160,6 +160,11 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
+    enable_sailthru = models.BooleanField(
+        verbose_name=_('Enable Sailthru Reporting'),
+        help_text=_('Determines if purchases should be reported to Sailthru.'),
+        default=False
+    )
 
     @property
     def payment_processors_set(self):

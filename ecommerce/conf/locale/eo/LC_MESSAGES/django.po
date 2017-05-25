@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-25 21:32-0400\n"
+"POT-Creation-Date: 2017-05-25 21:38-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -200,6 +200,16 @@ msgid "This script will be loaded on every page."
 msgstr ""
 "Thïs sçrïpt wïll ßé löädéd ön évérý pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
+
+#: ecommerce/core/models.py ecommerce/extensions/partner/models.py
+msgid "Enable Sailthru Reporting"
+msgstr "Énäßlé Säïlthrü Répörtïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/core/models.py
+msgid "Determines if purchases should be reported to Sailthru."
+msgstr ""
+"Détérmïnés ïf pürçhäsés shöüld ßé répörtéd tö Säïlthrü. Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/core/models.py
 msgid "Full Name"
@@ -735,16 +745,6 @@ msgid "Click 'Save and Continue Editing' to add stock records"
 msgstr ""
 "Çlïçk 'Sävé änd Çöntïnüé Édïtïng' tö ädd stöçk réçörds Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/extensions/partner/models.py
-msgid "Enable Sailthru Reporting"
-msgstr "Énäßlé Säïlthrü Répörtïng Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
-
-#: ecommerce/extensions/partner/models.py
-msgid "Determines if purchases/enrolls should be reported to Sailthru."
-msgstr ""
-"Détérmïnés ïf pürçhäsés/énrölls shöüld ßé répörtéd tö Säïlthrü. Ⱡ'σяєм ιρѕυм"
-" ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/partner/models.py
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html

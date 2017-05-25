@@ -30,8 +30,8 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
     if not waffle.switch_is_active('sailthru_enable'):
         return
 
-    partner = order.site.siteconfiguration.partner
-    if not partner.enable_sailthru:
+    site_configuration = order.site.siteconfiguration
+    if not site_configuration.enable_sailthru:
         return
 
     # get campaign id from cookies, or saved value in basket
@@ -65,8 +65,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
             update_course_enrollment.delay(order.user.email, _build_course_url(course_id),
                                            False, mode_for_seat(product),
                                            unit_cost=price, course_id=course_id, currency=order.currency,
-                                           site_code=partner.short_code,
-                                           message_id=message_id)
+                                           site_code=site_configuration.partner.short_code, message_id=message_id)
 
 
 @receiver(basket_addition)
@@ -82,8 +81,8 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
     if not waffle.switch_is_active('sailthru_enable'):
         return
 
-    partner = request.site.siteconfiguration.partner
-    if not partner.enable_sailthru:
+    site_configuration = request.site.siteconfiguration
+    if not site_configuration.enable_sailthru:
         return
 
     # ignore everything except course seats.  no support for coupons as of yet
@@ -110,8 +109,7 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
         if price:
             update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_seat(product),
                                            unit_cost=price, course_id=course_id, currency=currency,
-                                           site_code=partner.short_code,
-                                           message_id=message_id)
+                                           site_code=site_configuration.partner.short_code, message_id=message_id)
 
 
 def _build_course_url(course_id):
