@@ -242,7 +242,7 @@ class SiteMixin(object):
         self.client = self.client_class(SERVER_NAME=domain)
 
         Site.objects.all().delete()
-        site_configuration = SiteConfigurationFactory(
+        self.site_configuration = SiteConfigurationFactory(
             from_email='from@example.com',
             oauth_settings={
                 'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
@@ -254,8 +254,8 @@ class SiteMixin(object):
             site__domain=domain,
             site__id=settings.SITE_ID,
         )
-        self.partner = site_configuration.partner
-        self.site = site_configuration.site
+        self.partner = self.site_configuration.partner
+        self.site = self.site_configuration.site
 
         self.request = RequestFactory().get('')
         self.request.session = None

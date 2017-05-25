@@ -56,4 +56,4 @@ class CatalogAdmin(admin.ModelAdmin):
 class PartnerAdmin(admin.ModelAdmin):
     # NOTE: Do not include the users field. The users table will grow so large
     # as to make the page timeout. Additionally, we don't actually make use of the field.
-    fields = ('name', 'short_code', 'enable_sailthru')
+    fields = ('name', 'short_code',)

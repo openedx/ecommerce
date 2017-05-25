@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-25 21:32-0400\n"
+"POT-Creation-Date: 2017-05-25 21:38-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -175,11 +175,19 @@ msgstr ""
 msgid "This script will be loaded on every page."
 msgstr ""
 
-#: ecommerce/core/models.py:402
+#: ecommerce/core/models.py:164 ecommerce/extensions/partner/models.py:14
+msgid "Enable Sailthru Reporting"
+msgstr ""
+
+#: ecommerce/core/models.py:165
+msgid "Determines if purchases should be reported to Sailthru."
+msgstr ""
+
+#: ecommerce/core/models.py:404
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:547 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:549 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr ""
 
@@ -601,21 +609,13 @@ msgstr ""
 msgid "Click 'Save and Continue Editing' to add stock records"
 msgstr ""
 
-#: ecommerce/extensions/partner/models.py:14
-msgid "Enable Sailthru Reporting"
-msgstr ""
-
-#: ecommerce/extensions/partner/models.py:16
-msgid "Determines if purchases/enrolls should be reported to Sailthru."
-msgstr ""
-
-#: ecommerce/extensions/partner/models.py:20
+#: ecommerce/extensions/partner/models.py:19
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:191
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:73
 msgid "Partner"
 msgstr ""
 
-#: ecommerce/extensions/partner/models.py:21 ecommerce/settings/_oscar.py:213
+#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:213
 msgid "Partners"
 msgstr ""
 
