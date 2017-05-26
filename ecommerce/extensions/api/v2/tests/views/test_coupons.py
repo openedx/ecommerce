@@ -1112,6 +1112,19 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         )
         self.assertEqual(response_data['benefit_value'], edited_benefit_value)
 
+    @ddt.data(Benefit.PERCENTAGE, Benefit.FIXED)
+    def test_program_coupon_benefit_type(self, benefit_type):
+        """Verify that the coupon serializer returns benefit type for program coupons."""
+        self.data.update({
+            'benefit_type': benefit_type,
+            'program_uuid': str(uuid4()),
+            'title': 'Test Program Coupon Benefit Type',
+            'enterprise_customer': None,
+            'stock_record_ids': [],
+        })
+        details = self._create_and_get_coupon_details()
+        self.assertEqual(details['benefit_type'], benefit_type)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """
