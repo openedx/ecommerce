@@ -18,6 +18,7 @@ from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, IS
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.invoice.models import Invoice
+from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -575,7 +576,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     voucher_type = serializers.SerializerMethodField()
 
     def get_benefit_type(self, obj):
-        return retrieve_benefit(obj).type
+        return retrieve_benefit(obj).type or BENEFIT_PROXY_CLASS_MAP[retrieve_benefit(obj).proxy_class]
 
     def get_benefit_value(self, obj):
         return retrieve_benefit(obj).value

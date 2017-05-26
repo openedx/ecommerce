@@ -2,12 +2,12 @@ from decimal import Decimal
 
 import ddt
 from oscar.core.loading import get_model
-from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.utils import add_currency
 from ecommerce.extensions.offer.utils import _remove_exponent_and_trailing_zeros, format_benefit_value
+from ecommerce.extensions.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -35,6 +35,17 @@ class UtilTests(CourseCatalogTestMixin, TestCase):
         benefit_value = format_benefit_value(self.value_benefit)
         expected_benefit = add_currency(Decimal((self.seat_price - 10)))
         self.assertEqual(benefit_value, '${expected_benefit}'.format(expected_benefit=expected_benefit))
+
+    def test_format_program_benefit_value(self):
+        """ format_benefit_value(program_benefit) should format benefit value based on proxy class. """
+        percentage_benefit = PercentageDiscountBenefitWithoutRangeFactory()
+        benefit_value = format_benefit_value(percentage_benefit)
+        self.assertEqual(benefit_value, '{}%'.format(percentage_benefit.value))
+
+        absolute_benefit = AbsoluteDiscountBenefitWithoutRangeFactory()
+        benefit_value = format_benefit_value(absolute_benefit)
+        expected_value = add_currency(Decimal(absolute_benefit.value))
+        self.assertEqual(benefit_value, '${}'.format(expected_value))
 
     @ddt.data(
         ('1.0', '1'),
