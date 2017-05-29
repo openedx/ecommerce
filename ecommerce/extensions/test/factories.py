@@ -108,7 +108,7 @@ class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined
 
 
 class ConditionalOfferFactory(BaseConditionalOfferFactory):  # pylint: disable=function-redefined
-    name = factory.Faker('word')
+    name = factory.Sequence(lambda n: 'ConditionalOffer {number}'.format(number=n))
 
 
 class AbsoluteDiscountBenefitWithoutRangeFactory(BenefitFactory):
