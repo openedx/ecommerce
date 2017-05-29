@@ -16,7 +16,6 @@ from ecommerce.extensions.api.v2.views import providers as provider_views
 from ecommerce.extensions.api.v2.views import publication as publication_views
 from ecommerce.extensions.api.v2.views import refunds as refund_views
 from ecommerce.extensions.api.v2.views import sdn as sdn_views
-from ecommerce.extensions.api.v2.views import siteconfiguration as siteconfiguration_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
 from ecommerce.extensions.voucher.views import CouponReportCSVView
@@ -107,7 +106,6 @@ router.register(r'partners', partner_views.PartnerViewSet) \
               base_name='partner-product', parents_query_lookups=['stockrecords__partner_id'])
 router.register(r'products', product_views.ProductViewSet)
 router.register(r'vouchers', voucher_views.VoucherViewSet, base_name='vouchers')
-router.register(r'siteconfiguration', siteconfiguration_views.SiteConfigurationViewSet, base_name='siteconfiguration')
 router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
 
 urlpatterns += router.urls
