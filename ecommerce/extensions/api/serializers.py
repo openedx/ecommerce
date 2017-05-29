@@ -15,7 +15,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.models import Site, SiteConfiguration
+from ecommerce.core.models import Site
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.invoice.models import Invoice
@@ -715,13 +715,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
 class SiteSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Site
-
-
-class SiteConfigurationSerializer(serializers.ModelSerializer):
-    site = SiteSerializer(read_only=True)
-
-    class Meta(object):
-        model = SiteConfiguration
 
 
 class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-method
