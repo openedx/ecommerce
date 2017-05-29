@@ -11,7 +11,7 @@ from django.http import Http404
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
-from oscar.test.factories import BenefitFactory, OrderFactory, OrderLineFactory, RangeFactory
+from oscar.test.factories import BenefitFactory, OrderFactory, OrderLineFactory, ProductFactory, RangeFactory
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
@@ -25,12 +25,15 @@ from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test.factories import ConditionalOfferFactory, VoucherFactory, prepare_voucher
+from ecommerce.extensions.voucher.models import CouponVouchers
+from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import Catalog, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 
 
 @ddt.ddt
@@ -43,15 +46,24 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-    def test_list(self):
-        """ Verify the endpoint lists all vouchers. """
-        vouchers = VoucherFactory.create_batch(3)
-
+    def create_vouchers(self, partner=None, count=1):
+        """Helper function that creates vouchers with a mocked coupon relation."""
+        vouchers = VoucherFactory.create_batch(count)
+        partner = partner or self.partner
+        coupon_vouchers = CouponVouchers.objects.create(
+            coupon=ProductFactory(stockrecords__partner=partner)
+        )
         for voucher in vouchers:
             voucher.offers.add(ConditionalOfferFactory())
+            coupon_vouchers.vouchers.add(voucher)
+        return vouchers
 
+    def test_list(self):
+        """ Verify the endpoint lists all vouchers. """
+        vouchers = self.create_vouchers(count=3)
+        self.create_vouchers(partner=PartnerFactory())
         response = self.client.get(self.path)
-
+        self.assertEqual(Voucher.objects.count(), 4)
         self.assertEqual(response.data['count'], len(vouchers))
 
         actual_codes = [datum['code'] for datum in response.data['results']]
@@ -60,8 +72,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
 
     def test_list_with_code_filter(self):
         """ Verify the endpoint list all vouchers, filtered by the specified code. """
-        voucher = VoucherFactory()
-        voucher.offers.add(ConditionalOfferFactory())
+        voucher = self.create_vouchers()[0]
 
         url = '{path}?code={code}'.format(path=self.path, code=voucher.code)
         response = self.client.get(url)

@@ -14,6 +14,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.tests.factories import PartnerFactory, ProductFactory
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -21,6 +22,8 @@ Catalog = get_model('catalogue', 'Catalog')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Voucher = get_model('voucher', 'Voucher')
+
+PRODUCT_LIST_PATH = reverse('api:v2:product-list')
 
 
 class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
@@ -37,9 +40,11 @@ class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
 
 class ProductViewSetTests(ProductViewSetBase):
     def test_list(self):
-        """ Verify a list of products is returned. """
-        path = reverse('api:v2:product-list')
-        response = self.client.get(path)
+        """The list endpoint should return only products with current site's partner."""
+        ProductFactory.create_batch(3, stockrecords__partner=PartnerFactory())
+
+        response = self.client.get(PRODUCT_LIST_PATH)
+        self.assertEqual(Product.objects.count(), 5)
         self.assertEqual(response.status_code, 200)
         results = [self.serialize_product(p) for p in self.course.products.all()]
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
@@ -47,7 +52,7 @@ class ProductViewSetTests(ProductViewSetBase):
 
         # If no products exist, the view should return an empty result set.
         Product.objects.all().delete()
-        response = self.client.get(path)
+        response = self.client.get(PRODUCT_LIST_PATH)
         self.assertEqual(response.status_code, 200)
         expected = {'count': 0, 'next': None, 'previous': None, 'results': []}
         self.assertDictEqual(json.loads(response.content), expected)
@@ -133,7 +138,7 @@ class ProductViewSetTests(ProductViewSetBase):
 class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
     def test_coupon_product_details(self):
         """Verify the endpoint returns all coupon information."""
-        coupon = self.create_coupon()
+        coupon = self.create_coupon(partner=self.partner)
         url = reverse('api:v2:product-detail', kwargs={'pk': coupon.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -146,7 +151,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
 
     def test_coupon_voucher_serializer(self):
         """Verify that the vouchers of a coupon are properly serialized."""
-        coupon = self.create_coupon()
+        coupon = self.create_coupon(partner=self.partner)
         url = reverse('api:v2:product-detail', kwargs={'pk': coupon.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -160,14 +165,13 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
 
     def test_product_filtering(self):
         """Verify products are filtered."""
-        self.create_coupon()
-        url = reverse('api:v2:product-list')
-        response = self.client.get(url)
+        self.create_coupon(partner=self.partner)
+        response = self.client.get(PRODUCT_LIST_PATH)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
         self.assertEqual(response_data['count'], 3)
 
-        filtered_url = '{}?product_class=CoUpOn'.format(url)
+        filtered_url = '{}?product_class=CoUpOn'.format(PRODUCT_LIST_PATH)
         response = self.client.get(filtered_url)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)

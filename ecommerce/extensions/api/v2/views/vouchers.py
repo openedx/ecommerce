@@ -43,11 +43,15 @@ class VoucherFilter(django_filters.FilterSet):
 
 class VoucherViewSet(NonDestroyableModelViewSet):
     """ View set for vouchers. """
-    queryset = Voucher.objects.all()
     serializer_class = serializers.VoucherSerializer
     permission_classes = (IsOffersOrIsAuthenticatedAndStaff,)
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = VoucherFilter
+
+    def get_queryset(self):
+        return Voucher.objects.filter(
+            coupon_vouchers__coupon__stockrecords__partner=self.request.site.siteconfiguration.partner
+        )
 
     @list_route()
     def offers(self, request):

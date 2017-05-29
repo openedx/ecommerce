@@ -4,7 +4,6 @@ import ddt
 import httpretty
 import mock
 from django.core.urlresolvers import reverse
-from django.test import RequestFactory
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -14,6 +13,7 @@ from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
+from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import ApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -31,12 +31,6 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
     def setUp(self):
         super(CatalogViewSetTest, self).setUp()
         self.client.login(username=self.user.username, password=self.password)
-
-    def prepare_request(self, url):
-        factory = RequestFactory()
-        request = factory.get(url)
-        request.site = self.site
-        return request
 
     def test_staff_authorization_required(self):
         """Verify that only users with staff permissions can access the API. """
@@ -57,7 +51,9 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         self.assertEqual(response.status_code, 403)
 
     def test_catalog_list(self):
-        """Verify the endpoint returns all catalogs."""
+        """The list endpoint should return only catalogs with current site's partner."""
+        Catalog.objects.create(name='New catalog', partner=PartnerFactory())
+        self.assertEqual(Catalog.objects.count(), 2)
         response = self.client.get(self.catalog_list_path)
         expected_data = self.serialize_catalog(self.catalog)
         response_data = json.loads(response.content)

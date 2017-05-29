@@ -46,10 +46,15 @@ Voucher = get_model('voucher', 'Voucher')
 
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
-    queryset = Product.objects.filter(product_class__name=COUPON_PRODUCT_CLASS_NAME)
     permission_classes = (IsAuthenticated, IsAdminUser)
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = ProductFilter
+
+    def get_queryset(self):
+        return Product.objects.filter(
+            product_class__name=COUPON_PRODUCT_CLASS_NAME,
+            stockrecords__partner=self.request.site.siteconfiguration.partner
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':

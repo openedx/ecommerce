@@ -25,7 +25,6 @@ User = get_user_model()
 
 
 class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
-    maxDiff = None
     list_path = reverse('api:v2:course-list')
 
     def setUp(self):
@@ -98,6 +97,9 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
 
     def test_list(self):
         """ Verify the view returns a list of Courses. """
+        CourseFactory()
+        self.assertEqual(Course.objects.count(), 2)
+
         response = self.client.get(self.list_path)
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(json.loads(response.content)['results'], [self.serialize_course(self.course)])

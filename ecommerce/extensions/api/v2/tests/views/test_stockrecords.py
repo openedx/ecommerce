@@ -7,6 +7,7 @@ from oscar.core.loading import get_model
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.tests.factories import StockRecordFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -15,7 +16,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 class StockRecordViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
-    maxDiff = None
     list_path = reverse('api:v2:stockrecords-list')
     detail_path = 'api:v2:stockrecords-detail'
 
@@ -30,10 +30,14 @@ class StockRecordViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, Th
 
     def test_list(self):
         """ Verify a list of stock records is returned. """
+        StockRecordFactory(partner__short_code='Tester')
         StockRecord.objects.create(partner=self.partner, product=self.product, partner_sku='dummy-sku',
                                    price_currency='USD', price_excl_tax=200.00)
+
         response = self.client.get(self.list_path)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(StockRecord.objects.count(), 4)
+
         results = [self.serialize_stockrecord(stockrecord) for stockrecord in
                    self.product.stockrecords.all()]
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}

@@ -1,4 +1,5 @@
 """HTTP endpoints for interacting with products."""
+from django.db.models import Q
 from oscar.core.loading import get_model
 from rest_framework import filters
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -12,8 +13,19 @@ Product = get_model('catalogue', 'Product')
 
 
 class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
-    queryset = Product.objects.all()
     serializer_class = serializers.ProductSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = ProductFilter
     permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    def get_queryset(self):
+        self.queryset = Product.objects.all()
+        # We are calling the super's .get_queryset() in case of nested
+        # products so that they are propery filtered by parent ID first.
+        # Products are then filtered by:
+        #   - stockrecord partner: for products that have stockrecords (seats, coupons, ...)
+        #   - course site: for products that don't have a stockrecord (parent course)
+        return super(ProductViewSet, self).get_queryset().filter(
+            Q(stockrecords__partner=self.request.site.siteconfiguration.partner) |
+            Q(course__site=self.request.site)
+        )

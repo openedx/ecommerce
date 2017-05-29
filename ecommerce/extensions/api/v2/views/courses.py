@@ -21,17 +21,18 @@ class CourseViewSet(NonDestroyableModelViewSet):
         'products__attribute_values',
         queryset=ProductAttributeValue.objects.select_related('attribute').all()
     )
-
     products_prefetch = Prefetch(
         'products',
         queryset=Product.objects.select_related('parent__product_class').all()
     )
     lookup_value_regex = COURSE_ID_REGEX
-    queryset = Course.objects.all().prefetch_related(
-        products_prefetch, product_attribute_value_prefetch, 'products__stockrecords'
-    ).all()
     serializer_class = serializers.CourseSerializer
     permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    def get_queryset(self):
+        return Course.objects.filter(site=self.request.site).prefetch_related(
+            self.products_prefetch, self.product_attribute_value_prefetch, 'products__stockrecords'
+        )
 
     def list(self, request, *args, **kwargs):
         """

@@ -258,7 +258,7 @@ class SiteMixin(object):
         self.partner = self.site_configuration.partner
         self.site = self.site_configuration.site
 
-        self.request = RequestFactory().get('')
+        self.request = RequestFactory(SERVER_NAME=domain).get('')
         self.request.session = None
         self.request.site = self.site
         set_thread_variable('request', self.request)
