@@ -22,7 +22,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
-from ecommerce.programs.constants import BENEFIT_MAP
+from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_PROXY_CLASS_MAP
 from ecommerce.programs.custom import class_path, create_condition
 
 logger = logging.getLogger(__name__)
@@ -95,29 +95,39 @@ def _get_info_for_coupon_report(coupon, voucher):
     except AttributeError:
         note = ''
 
-    offer = voucher.offers.first()
     coupon_stockrecord = StockRecord.objects.get(product=coupon)
     invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-    if offer.condition.range.catalog:
-        seat_stockrecord = offer.condition.range.catalog.stock_records.first()
+    offer = voucher.offers.first()
+    offer_range = offer.condition.range
+    program_uuid = offer.condition.program_uuid
+    benefit = offer.benefit
+
+    if program_uuid:
+        course_id = None
+    elif offer_range.catalog:
+        seat_stockrecord = offer_range.catalog.stock_records.first()
         course_id = seat_stockrecord.product.attr.course_key
         course_organization = CourseKey.from_string(course_id).org
+    elif offer_range.catalog_query:
+        catalog_query = offer_range.catalog_query
+        course_id = None
+        course_seat_types = offer_range.course_seat_types
+
+    if course_id:
         price = currency(seat_stockrecord.price_excl_tax)
-        discount_data = get_voucher_discount_info(offer.benefit, seat_stockrecord.price_excl_tax)
+        discount_data = get_voucher_discount_info(benefit, seat_stockrecord.price_excl_tax)
         coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
     else:
-        # Note (multi-courses): Need to account for multiple seats.
-        catalog_query = offer.condition.range.catalog_query
-        if offer.benefit.type == Benefit.PERCENTAGE:
-            coupon_type = _('Discount') if offer.benefit.value < 100 else _('Enrollment')
+        benefit_type = benefit.type or BENEFIT_PROXY_CLASS_MAP[benefit.proxy_class]
+
+        if benefit_type == Benefit.PERCENTAGE:
+            coupon_type = _('Discount') if benefit.value < 100 else _('Enrollment')
         else:
             coupon_type = None
-        course_id = None
-        course_organization = None
-        course_seat_types = offer.condition.range.course_seat_types
-        discount_amount = None
+
         discount_percentage = _('{percentage} %').format(
-            percentage=offer.benefit.value) if offer.benefit.type == Benefit.PERCENTAGE else None
+            percentage=benefit.value) if benefit_type == Benefit.PERCENTAGE else None
+        discount_amount = None
         price = None
 
     coupon_data = {
@@ -140,6 +150,8 @@ def _get_info_for_coupon_report(coupon, voucher):
     if course_id:
         coupon_data['Course ID'] = course_id
         coupon_data['Organization'] = course_organization
+    elif program_uuid:
+        coupon_data['Program UUID'] = program_uuid
     else:
         coupon_data['Catalog Query'] = catalog_query
         coupon_data['Course Seat Types'] = course_seat_types
@@ -198,6 +210,7 @@ def generate_coupon_report(coupon_vouchers):
         _('Coupon Type'),
         _('URL'),
         _('Course ID'),
+        _('Program UUID'),
         _('Catalog Query'),
         _('Course Seat Types'),
         _('Organization'),
@@ -252,16 +265,23 @@ def generate_coupon_report(coupon_vouchers):
                         'Maximum Coupon Usage': 1,
                         'Redemption Count': 1,
                     })
-
                     rows.append(new_row)
 
-    if 'Catalog Query' in rows[0]:
+    if 'Program UUID' in rows[0]:
         field_names.remove('Course ID')
         field_names.remove('Organization')
+        field_names.remove('Catalog Query')
+        field_names.remove('Course Seat Types')
+        field_names.remove('Redeemed For Course ID')
+    elif 'Catalog Query' in rows[0]:
+        field_names.remove('Course ID')
+        field_names.remove('Organization')
+        field_names.remove('Program UUID')
     else:
         field_names.remove('Catalog Query')
         field_names.remove('Course Seat Types')
         field_names.remove('Redeemed For Course ID')
+        field_names.remove('Program UUID')
 
     return field_names, rows
 

@@ -472,6 +472,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
         self.assertNotIn('Course ID', field_names)
         self.assertNotIn('Organization', field_names)
+        self.assertNotIn('Program UUID', field_names)
 
         self.assertIn('Catalog Query', field_names)
         self.assertEqual(rows[0]['Catalog Query'], catalog_query)
@@ -621,3 +622,23 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         """ Verify that get_voucher_and_products_from_code() raises exception for a non-existing voucher. """
         with self.assertRaises(Voucher.DoesNotExist):
             get_voucher_and_products_from_code(code=FuzzyText().fuzz())
+
+    def test_generate_coupon_report_for_program_coupon(self):
+        """ Only program coupon applicable fields should be shown. """
+        program_uuid = uuid.uuid4()
+        program_coupon = self.create_coupon(
+            title='Program Coupon Report',
+            program_uuid=program_uuid,
+        )
+        program_coupon.history.update(history_user=self.user)
+        field_names, rows = generate_coupon_report([program_coupon.attr.coupon_vouchers])
+
+        for field in ('Discount Amount', 'Price'):
+            self.assertIsNone(rows[0][field])
+
+        removed_fields = ('Catalog Query', 'Course ID', 'Course Seat Types', 'Organization', 'Redeemed For Course ID',)
+        for field_name in removed_fields:
+            self.assertNotIn(field_name, field_names)
+
+        self.assertIn('Program UUID', field_names)
+        self.assertEqual(rows[0]['Program UUID'], program_uuid)

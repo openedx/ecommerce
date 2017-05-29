@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-25 21:38-0400\n"
+"POT-Creation-Date: 2017-05-30 03:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -559,7 +559,7 @@ msgstr ""
 #: ecommerce/extensions/dashboard/refunds/forms.py:14
 #: ecommerce/extensions/refund/models.py:73
 #: ecommerce/extensions/refund/models.py:302
-#: ecommerce/extensions/voucher/utils.py:211
+#: ecommerce/extensions/voucher/utils.py:224
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:70
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:72
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:141
@@ -585,7 +585,8 @@ msgstr ""
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:321 ecommerce/programs/forms.py:18
+#: ecommerce/extensions/offer/models.py:321
+#: ecommerce/extensions/voucher/utils.py:213 ecommerce/programs/forms.py:18
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
 msgstr ""
@@ -785,14 +786,15 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:175
 #: ecommerce/extensions/voucher/utils.py:61
-#: ecommerce/extensions/voucher/utils.py:249
+#: ecommerce/extensions/voucher/utils.py:262
 msgid "Redeemed"
 msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:321
 #: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
-#: ecommerce/extensions/voucher/utils.py:112
+#: ecommerce/extensions/voucher/utils.py:124
+#: ecommerce/extensions/voucher/utils.py:126
 #: ecommerce/templates/edx/checkout/receipt.html:102
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
@@ -803,14 +805,15 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:321
 #: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
-#: ecommerce/extensions/voucher/utils.py:112
+#: ecommerce/extensions/voucher/utils.py:124
+#: ecommerce/extensions/voucher/utils.py:126
 msgid "Enrollment"
 msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:322
 #: ecommerce/extensions/voucher/tests/test_utils.py:330
 #: ecommerce/extensions/voucher/utils.py:81
-#: ecommerce/extensions/voucher/utils.py:119
+#: ecommerce/extensions/voucher/utils.py:128
 #, python-brace-format
 msgid "{percentage} %"
 msgstr ""
@@ -825,112 +828,112 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:194
+#: ecommerce/extensions/voucher/utils.py:206
 msgid "Code"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:195
+#: ecommerce/extensions/voucher/utils.py:207
 msgid "Coupon Name"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:196
+#: ecommerce/extensions/voucher/utils.py:208
 msgid "Maximum Coupon Usage"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:197
+#: ecommerce/extensions/voucher/utils.py:209
 msgid "Redemption Count"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:198
+#: ecommerce/extensions/voucher/utils.py:210
 msgid "Coupon Type"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:199
+#: ecommerce/extensions/voucher/utils.py:211
 msgid "URL"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:200
+#: ecommerce/extensions/voucher/utils.py:212
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:201
+#: ecommerce/extensions/voucher/utils.py:214
 msgid "Catalog Query"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:202
+#: ecommerce/extensions/voucher/utils.py:215
 msgid "Course Seat Types"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:203
+#: ecommerce/extensions/voucher/utils.py:216
 msgid "Organization"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:204
+#: ecommerce/extensions/voucher/utils.py:217
 msgid "Client"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:205
+#: ecommerce/extensions/voucher/utils.py:218
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:124
 msgid "Category"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:206
+#: ecommerce/extensions/voucher/utils.py:219
 msgid "Note"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:207
+#: ecommerce/extensions/voucher/utils.py:220
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:46
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
 msgid "Price"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:208
+#: ecommerce/extensions/voucher/utils.py:221
 msgid "Invoiced Amount"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:209
+#: ecommerce/extensions/voucher/utils.py:222
 msgid "Discount Percentage"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:210
+#: ecommerce/extensions/voucher/utils.py:223
 msgid "Discount Amount"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:212
+#: ecommerce/extensions/voucher/utils.py:225
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
 msgid "Order Number"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:213
+#: ecommerce/extensions/voucher/utils.py:226
 msgid "Redeemed By Username"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:214
+#: ecommerce/extensions/voucher/utils.py:227
 msgid "Redeemed For Course ID"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:215
+#: ecommerce/extensions/voucher/utils.py:228
 msgid "Created By"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:216
+#: ecommerce/extensions/voucher/utils.py:229
 msgid "Create Date"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:217
+#: ecommerce/extensions/voucher/utils.py:230
 msgid "Coupon Start Date"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:218
+#: ecommerce/extensions/voucher/utils.py:231
 msgid "Coupon Expiry Date"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:219
+#: ecommerce/extensions/voucher/utils.py:232
 msgid "Email Domains"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:499
+#: ecommerce/extensions/voucher/utils.py:519
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr ""
