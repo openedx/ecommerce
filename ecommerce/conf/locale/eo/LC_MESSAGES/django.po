@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-25 21:38-0400\n"
+"POT-Creation-Date: 2017-05-30 03:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -721,7 +721,8 @@ msgstr ""
 "ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/extensions/offer/models.py ecommerce/programs/forms.py
+#: ecommerce/extensions/offer/models.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/programs/forms.py
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Program UUID"
 msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
@@ -939,6 +940,7 @@ msgstr "Rédééméd Ⱡ'σяєм ιρѕυм ∂#"
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py
 #: ecommerce/templates/edx/checkout/receipt.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
@@ -949,6 +951,7 @@ msgstr "Dïsçöünt Ⱡ'σяєм ιρѕυм ∂#"
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py
 msgid "Enrollment"
 msgstr "Énröllmént Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
