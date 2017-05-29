@@ -27,7 +27,7 @@ from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.constants import BENEFIT_MAP
 from ecommerce.programs.custom import class_path
-from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
+from ecommerce.tests.factories import PartnerFactory, ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -480,7 +480,9 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assert_post_response_status(self.data, status.HTTP_403_FORBIDDEN)
 
     def test_list_coupons(self):
-        """Test that the endpoint returns information needed for the details page."""
+        """The list endpoint should return only coupons with current site's partner."""
+        self.create_coupon(partner=PartnerFactory())
+        self.assertEqual(Product.objects.filter(product_class__name='Coupon').count(), 2)
         response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         coupon_data = json.loads(response.content)['results'][0]

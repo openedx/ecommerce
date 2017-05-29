@@ -837,7 +837,10 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
             reverse('coupons:redeem'),
             'sku={sku}'.format(sku=stock_record.partner_sku),
             'code={code}'.format(code=COUPON_CODE),
-            'failure_url=http%3A%2F%2Ftestserver%2Fbasket%2F%3Fconsent_failed%3D{code}'.format(code=COUPON_CODE)
+            'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'.format(
+                domain=self.site.domain,
+                code=COUPON_CODE
+            )
         )
 
         for part in expected_url_parts:

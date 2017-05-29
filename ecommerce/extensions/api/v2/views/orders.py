@@ -38,9 +38,9 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
             if username and user.username != username:
                 raise PermissionDenied
 
-            queryset = queryset.filter(user=user, site=self.request.site)
+            queryset = queryset.filter(user=user)
 
-        return queryset
+        return queryset.filter(site=self.request.site)
 
     @detail_route(methods=['put', 'patch'])
     def fulfill(self, request, number=None):  # pylint: disable=unused-argument

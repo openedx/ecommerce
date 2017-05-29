@@ -11,7 +11,9 @@ StockRecord = get_model('partner', 'StockRecord')
 class StockRecordViewSet(viewsets.ModelViewSet):
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     serializer_class = serializers.StockRecordSerializer
-    queryset = StockRecord.objects.all()
+
+    def get_queryset(self):
+        return StockRecord.objects.filter(partner=self.request.site.siteconfiguration.partner)
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
