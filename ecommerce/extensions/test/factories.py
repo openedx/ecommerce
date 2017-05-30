@@ -104,7 +104,7 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
 
 class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined
     name = factory.Faker('word')
-    code = factory.Faker('word')
+    code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
 
 
 class ConditionalOfferFactory(BaseConditionalOfferFactory):  # pylint: disable=function-redefined
