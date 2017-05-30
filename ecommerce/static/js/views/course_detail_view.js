@@ -1,16 +1,16 @@
 define([
-        'jquery',
-        'backbone',
-        'underscore',
-        'underscore.string',
-        'moment',
-        'text!templates/course_detail.html',
-        'text!templates/_course_seat.html',
-        'text!templates/_course_credit_seats.html',
-        'utils/course_utils',
-        'ecommerce'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'underscore',
+    'underscore.string',
+    'moment',
+    'text!templates/course_detail.html',
+    'text!templates/_course_seat.html',
+    'text!templates/_course_credit_seats.html',
+    'utils/course_utils',
+    'ecommerce'
+],
+    function($,
               Backbone,
               _,
               _s,
@@ -25,11 +25,11 @@ define([
         return Backbone.View.extend({
             className: 'course-detail-view',
 
-            initialize: function () {
+            initialize: function() {
                 this.listenTo(this.model, 'change', this.render);
             },
 
-            render: function () {
+            render: function() {
                 var html,
                     verificationDeadline = this.model.get('verification_deadline'),
                     templateData;
@@ -48,7 +48,7 @@ define([
                 return this;
             },
 
-            renderSeats: function () {
+            renderSeats: function() {
                 var creditProvider,
                     html = '',
                     seats = CourseUtils.orderSeatsForDisplay(this.model.seats()),
@@ -56,12 +56,12 @@ define([
 
                 seats = CourseUtils.filterSeats(seats, 'credit');
 
-                _.each(seats.residual, function (seat) {
+                _.each(seats.residual, function(seat) {
                     html += _.template(CourseSeatTemplate)({seat: seat, moment: moment});
                 });
 
                 if (seats.filtered && seats.filtered.length > 0) {
-                    _.each(seats.filtered, function (seat) {
+                    _.each(seats.filtered, function(seat) {
                         creditProvider = ecommerce.credit.providers.get(seat.get('credit_provider'));
 
                         if (creditProvider) {

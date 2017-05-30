@@ -1,17 +1,19 @@
 // jscs:disable requireCapitalizedConstructors
 
 define([
-        'views/course_seat_form_fields/course_seat_form_field_view',
-        'views/course_seat_form_fields/credit_course_seat_form_field_row_view',
-        'text!templates/credit_course_seat_form_field.html',
-        'utils/course_utils',
-        'utils/utils'
-    ],
-    function (CourseSeatFormFieldView,
-              CreditCourseSeatFormFieldRowView,
-              FieldTemplate,
-              CourseUtils,
-              Utils) {
+    'underscore',
+    'views/course_seat_form_fields/course_seat_form_field_view',
+    'views/course_seat_form_fields/credit_course_seat_form_field_row_view',
+    'text!templates/credit_course_seat_form_field.html',
+    'utils/course_utils',
+    'utils/utils'
+],
+    function(_,
+             CourseSeatFormFieldView,
+             CreditCourseSeatFormFieldRowView,
+             FieldTemplate,
+             CourseUtils,
+             Utils) {
         'use strict';
 
         return CourseSeatFormFieldView.extend({
@@ -25,17 +27,17 @@ define([
                 'click .add-seat': 'addSeatTableRow'
             },
 
-            className: function () {
+            className: function() {
                 return 'row ' + this.seatType;
             },
 
-            initialize: function (options) {
+            initialize: function(options) {
                 this.course = options.course;
 
                 Utils.bindValidation(this);
             },
 
-            render: function () {
+            render: function() {
                 this.renderSeatTable();
 
                 return this;
@@ -44,7 +46,7 @@ define([
             /**
              * Renders a table of course seats sharing a common seat type.
              */
-            renderSeatTable: function () {
+            renderSeatTable: function() {
                 var row,
                     $tableBody,
                     rows = [];
@@ -53,7 +55,7 @@ define([
                 $tableBody = this.$el.find('tbody');
 
                 // Instantiate new Views handling data binding for each Model in the Collection.
-                this.collection.each( function (seat) {
+                this.collection.each(function(seat) {
                     row = new this.rowView({
                         model: seat,
                         isRemovable: false,
@@ -72,11 +74,11 @@ define([
             /**
              * Adds a new row to the seat table.
              */
-            addSeatTableRow: function () {
+            addSeatTableRow: function() {
                 var seatClass = CourseUtils.getCourseSeatModel(this.seatType),
-                    /*jshint newcap: false */
+                    /* jshint newcap: false */
                     seat = new seatClass(),
-                    /*jshint newcap: true */
+                    /* jshint newcap: true */
                     row = new this.rowView({
                         model: seat,
                         isRemovable: true,

@@ -1,13 +1,13 @@
 define([
-        'jquery',
-        'backbone',
-        'backbone.validation',
-        'backbone.stickit',
-        'underscore',
-        'underscore.string',
-        'utils/utils'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'backbone.validation',
+    'backbone.stickit',
+    'underscore',
+    'underscore.string',
+    'utils/utils'
+],
+    function($,
               Backbone,
               BackboneValidation,
               BackboneStickit,
@@ -41,22 +41,22 @@ define([
                 }
             },
 
-            className: function () {
+            className: function() {
                 return 'row ' + this.seatType + ' course-seat';
             },
 
-            initialize: function () {
+            initialize: function() {
                 Utils.bindValidation(this);
             },
 
-            render: function () {
+            render: function() {
                 this.$el.html(this.template(this.model.attributes));
                 this.stickit();
 
                 return this;
             },
 
-            cleanIdVerificationRequired: function (val) {
+            cleanIdVerificationRequired: function(val) {
                 return _s.toBoolean(val);
             }
         });

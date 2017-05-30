@@ -1,11 +1,11 @@
 define([
-        'backbone'
-    ],
-    function (Backbone) {
+    'backbone'
+],
+    function(Backbone) {
         'use strict';
 
         return Backbone.Collection.extend({
-            parse: function (response) {
+            parse: function(response) {
                 // Continue retrieving the remaining data
                 if (response.next) {
                     this.url = response.next;

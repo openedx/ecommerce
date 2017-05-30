@@ -1,12 +1,11 @@
 require([
-        'jquery',
-        'dataTablesBootstrap'
-    ],
-    function ($) {
-
+    'jquery',
+    'dataTablesBootstrap'
+],
+    function($) {
         'use strict';
 
-        $(function () {
+        $(function() {
             $('#programOfferTable').DataTable({
                 paging: true
             });

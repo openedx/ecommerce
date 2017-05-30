@@ -1,9 +1,9 @@
 define([
-        'jquery',
-        'underscore.string',
-        'backbone',
-    ],
-    function ($,
+    'jquery',
+    'underscore.string',
+    'backbone'
+],
+    function($,
               _s,
               Backbone) {
         'use strict';
@@ -13,7 +13,7 @@ define([
                 'click .payment-button': 'checkout'
             },
 
-            setSku: function (sku) {
+            setSku: function(sku) {
                 var button = this.$('.payment-button'),
                     code = window.location.search.substring(1).split('=')[1],
                     href;

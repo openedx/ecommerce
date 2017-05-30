@@ -1,8 +1,8 @@
 define([
-        'collections/paginated_collection',
-        'models/enterprise_customer_model'
-    ],
-    function (PaginatedCollection,
+    'collections/paginated_collection',
+    'models/enterprise_customer_model'
+],
+    function(PaginatedCollection,
               EnterpriseCustomer) {
         'use strict';
 

@@ -1,14 +1,15 @@
+/* global Cybersource */
 /**
  * CyberSource payment processor specific actions.
  */
 require([
     'jquery',
     'pages/basket_page'
-], function ($, BasketPage) {
+], function($, BasketPage) {
     'use strict';
 
     var CyberSourceClient = {
-        init: function () {
+        init: function() {
             var $paymentForm = $('#paymentForm'),
                 $pciFields = $('.pci-field', $paymentForm),
                 cardMap = {
@@ -24,7 +25,7 @@ require([
             $paymentForm.attr('action', Cybersource.postUrl);   // jshint ignore:line
 
             // Add name attributes to the PCI fields
-            $pciFields.each(function () {
+            $pciFields.each(function() {
                 var $this = $(this);
                 $this.attr('name', $this.data('name'));
             });
@@ -36,7 +37,7 @@ require([
             $paymentForm.append($('<input type="hidden" name="card_type" class="pci-field">'));
 
             // Add an event listener to populate the CyberSource card type field
-            $paymentForm.on('cardType:detected', function (event, data) {
+            $paymentForm.on('cardType:detected', function(event, data) {
                 $('input[name=card_type]', $paymentForm).val(cardMap[data.type]);
             });
         },
@@ -49,7 +50,7 @@ require([
          *
          * @param event
          */
-        onSubmit: function (event) {
+        onSubmit: function(event) {
             var $form = $(event.target),
                 $signedFields = $('input,select', $form).not('.pci-field'),
                 expMonth = $('#card-expiry-month', $form).val(),
@@ -65,8 +66,9 @@ require([
                 url: this.signingUrl,
                 data: $signedFields.serialize(),
                 async: false,
-                success: function (data) {
-                    var formData = data.form_fields;
+                success: function(data) {
+                    var formData = data.form_fields,
+                        key;
 
                     // Format the date for CyberSource (MM-YYYY)
                     $('input[name=card_expiry_date]', $form).val(expMonth + '-' + expYear);
@@ -76,8 +78,9 @@ require([
                     // and post them.
                     $signedFields.attr('disabled', 'disabled');
 
-                    for (var key in formData) {
-                        if (formData.hasOwnProperty(key)) {
+                    // eslint-disable-next-line no-restricted-syntax
+                    for (key in formData) {
+                        if (Object.prototype.hasOwnProperty.call(formData, key)) {
                             $form.append(
                                 '<input type="hidden" name="' + key + '" value="' + formData[key] + '" />'
                             );
@@ -85,26 +88,32 @@ require([
                     }
                 },
 
-                error: function (jqXHR, textStatus) {
+                error: function(jqXHR, textStatus) {
+                    var $field,
+                        cardHolderFields,
+                        error,
+                        k;
+
                     // Don't allow the form to submit.
                     event.preventDefault();
                     event.stopPropagation();
 
-                    var cardHolderFields = [
+                    cardHolderFields = [
                         'first_name', 'last_name', 'address_line1', 'address_line2', 'state', 'city', 'country',
                         'postal_code'
                     ];
 
                     if (textStatus === 'error') {
-                        var error = JSON.parse(jqXHR.responseText);
+                        error = JSON.parse(jqXHR.responseText);
 
                         if (error.field_errors) {
-                            for (var k in error.field_errors) {
+                            // eslint-disable-next-line no-restricted-syntax
+                            for (k in error.field_errors) {
                                 if (cardHolderFields.indexOf(k) !== -1) {
-                                    var field = $('input[name=' + k + ']');
+                                    $field = $('input[name=' + k + ']');
                                     // TODO Use custom events to remove this dependency.
-                                    BasketPage.appendCardHolderValidationErrorMsg(field, error.field_errors[k]);
-                                    field.focus();
+                                    BasketPage.appendCardHolderValidationErrorMsg($field, error.field_errors[k]);
+                                    $field.focus();
                                 }
                             }
                         } else {
@@ -117,7 +126,7 @@ require([
         }
     };
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         CyberSourceClient.init();
     });
 });

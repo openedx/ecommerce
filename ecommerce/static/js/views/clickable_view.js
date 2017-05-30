@@ -1,5 +1,5 @@
 define(['underscore', 'backbone'],
-    function (_, Backbone) {
+    function(_, Backbone) {
         'use strict';
 
         /**
@@ -8,7 +8,7 @@ define(['underscore', 'backbone'],
          */
         return Backbone.View.extend({
 
-            initialize: function (options) {
+            initialize: function(options) {
                 var self = this;
                 self.options = options;
 
@@ -17,11 +17,11 @@ define(['underscore', 'backbone'],
                 }
             },
 
-            render: function () {
+            render: function() {
                 var self = this;
 
                 // track the click
-                self.$el.click(function () {
+                self.$el.click(function() {
                     // track this event type along with properties
                     self.model.trigger('segment:track',
                         self.options.trackEventType,

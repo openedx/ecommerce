@@ -1,8 +1,9 @@
 define([
-        'collections/course_collection'
-    ],
-    function (CourseCollection) {
+    'collections/course_collection'
+],
+    function(CourseCollection) {
         'use strict';
+
         var collection,
             response = {
                 count: 1,
@@ -21,17 +22,17 @@ define([
                 ]
             };
 
-        beforeEach(function () {
+        beforeEach(function() {
             collection = new CourseCollection();
         });
 
-        describe('Course collection', function () {
-            describe('parse', function () {
-                it('should return the results list in the response', function () {
+        describe('Course collection', function() {
+            describe('parse', function() {
+                it('should return the results list in the response', function() {
                     expect(collection.parse(response)).toEqual(response.results);
                 });
 
-                it('should fetch the next page of results', function () {
+                it('should fetch the next page of results', function() {
                     spyOn(collection, 'fetch').and.returnValue(null);
                     response.next = '/api/v2/courses/?page=2';
 

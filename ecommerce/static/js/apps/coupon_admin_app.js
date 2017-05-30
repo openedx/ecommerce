@@ -1,13 +1,13 @@
 require([
-        'backbone',
-        'collections/category_collection',
-        'collections/catalog_collection',
-        'collections/enterprise_customer_collection',
-        'ecommerce',
-        'routers/coupon_router',
-        'utils/navigate',
-    ],
-    function (Backbone,
+    'backbone',
+    'collections/category_collection',
+    'collections/catalog_collection',
+    'collections/enterprise_customer_collection',
+    'ecommerce',
+    'routers/coupon_router',
+    'utils/navigate'
+],
+    function(Backbone,
               CategoryCollection,
               CatalogCollection,
               EnterpriseCustomerCollection,
@@ -16,20 +16,20 @@ require([
               navigate) {
         'use strict';
 
-        $(function () {
+        $(function() {
             var $app = $('#app'),
                 couponApp = new CouponRouter({$el: $app});
 
             ecommerce.coupons = ecommerce.coupons || {};
             ecommerce.coupons.categories = new CategoryCollection();
             ecommerce.coupons.categories.url = '/api/v2/coupons/categories/';
-            ecommerce.coupons.categories.fetch({ async: false });
+            ecommerce.coupons.categories.fetch({async: false});
 
             ecommerce.coupons.catalogs = new CatalogCollection();
-            ecommerce.coupons.catalogs.fetch({ async: false });
+            ecommerce.coupons.catalogs.fetch({async: false});
 
             ecommerce.coupons.enterprise_customers = new EnterpriseCustomerCollection();
-            ecommerce.coupons.enterprise_customers.fetch({ async: false });
+            ecommerce.coupons.enterprise_customers.fetch({async: false});
 
             couponApp.start();
 

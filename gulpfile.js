@@ -1,11 +1,13 @@
-'use strict';
-
 var gulp = require('gulp'),
     jscs = require('gulp-jscs'),
-    jshint = require('gulp-jshint'),
+    eslint = require('gulp-eslint'),
     KarmaServer = require('karma').Server,
-    path = require('path'),
-    paths = {
+    path = require('path');
+
+(function() {
+    'use strict';
+
+    var paths = {
         spec: [
             'ecommerce/static/js/**/*.js',
             'ecommerce/static/js/test/**/*.js',
@@ -23,40 +25,41 @@ var gulp = require('gulp'),
 /**
  * Runs the JS unit tests
  */
-gulp.task('test', function (cb) {
-    new KarmaServer({
-        configFile: path.resolve('karma.conf.js')
-    }, cb).start();
-});
+    gulp.task('test', function(cb) {
+        new KarmaServer({
+            configFile: path.resolve('karma.conf.js')
+        }, cb).start();
+    });
 
 /**
- * Runs the JSHint linter.
+ * Runs the ESLint linter.
  *
- * http://jshint.com/about/
+ * http://eslint.org/docs/about/
  */
-gulp.task('lint', function () {
-    return gulp.src(paths.lint)
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(jshint.reporter('fail'));
-});
+    gulp.task('lint', function() {
+        return gulp.src(paths.lint)
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
+    });
 
 /**
  * Runs the JavaScript Code Style (JSCS) linter.
  *
  * http://jscs.info/
  */
-gulp.task('jscs', function () {
-    return gulp.src(paths.lint)
+    gulp.task('jscs', function() {
+        return gulp.src(paths.lint)
         .pipe(jscs());
-});
+    });
 
 /**
  * Monitors the source and test files, running tests
  * and linters when changes detected.
  */
-gulp.task('watch', function () {
-    gulp.watch(paths.spec, ['test', 'lint', 'jscs']);
-});
+    gulp.task('watch', function() {
+        gulp.watch(paths.spec, ['test', 'lint', 'jscs']);
+    });
 
-gulp.task('default', ['test']);
+    gulp.task('default', ['test']);
+}());

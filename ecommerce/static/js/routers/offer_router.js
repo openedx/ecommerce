@@ -1,8 +1,8 @@
 define([
-        'routers/page_router',
-        'pages/offer_page'
-    ],
-    function (PageRouter,
+    'routers/page_router',
+    'pages/offer_page'
+],
+    function(PageRouter,
               OfferPage) {
         'use strict';
 

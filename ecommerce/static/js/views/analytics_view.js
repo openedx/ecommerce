@@ -1,8 +1,9 @@
+/* global analytics */
 define([
-        'jquery',
-        'backbone'
-    ],
-    function ($, Backbone) {
+    'jquery',
+    'backbone'
+],
+    function($, Backbone) {
         'use strict';
 
         /**
@@ -20,7 +21,7 @@ define([
              * loading.
              */
 
-            initialize: function (options) {
+            initialize: function(options) {
                 this.options = options || {};
 
                 // wait until you have a segment application ID before kicking
@@ -33,7 +34,7 @@ define([
                 }
             },
 
-            applicationIdSet: function () {
+            applicationIdSet: function() {
                 var trackId = this.model.get('segmentApplicationId');
 
                 // if no ID is supplied, then don't track
@@ -53,14 +54,13 @@ define([
              *
              * this.segment is set for convenience.
              */
-            initSegment: function (applicationKey) {
+            initSegment: function(applicationKey) {
                 var analytics;
 
-                /* jshint ignore:start */
                 // jscs:disable
-                analytics = window.analytics = window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.0.1";}
+                // eslint-disable-next-line
+                analytics = window.analytics = window.analytics || []; if (!analytics.initialize) if (analytics.invoked)window.console && console.error && console.error('Segment snippet included twice.'); else { analytics.invoked = !0; analytics.methods = ['trackSubmit', 'trackClick', 'trackLink', 'trackForm', 'pageview', 'identify', 'group', 'track', 'ready', 'alias', 'page', 'once', 'off', 'on']; analytics.factory = function(t) { return function() { var e = Array.prototype.slice.call(arguments); e.unshift(t); analytics.push(e); return analytics; }; }; for (var t = 0; t < analytics.methods.length; t++) { var e = analytics.methods[t]; analytics[e] = analytics.factory(e); }analytics.load = function(t) { var e = document.createElement('script'); e.type = 'text/javascript'; e.async = !0; e.src = (document.location.protocol === 'https:' ? 'https://' : 'http://') + 'cdn.segment.com/analytics.js/v1/' + t + '/analytics.min.js'; var n = document.getElementsByTagName('script')[0]; n.parentNode.insertBefore(e, n); }; analytics.SNIPPET_VERSION = '3.0.1'; }
                 // jscs:enable
-                /* jshint ignore:end */
 
                 // provide our application key for logging
                 analytics.load(applicationKey);
@@ -69,7 +69,7 @@ define([
             /**
              * Log the user.
              */
-            logUser: function () {
+            logUser: function() {
                 var userModel = this.options.userModel;
                 analytics.identify(
                     userModel.get('user_tracking_id'),
@@ -95,7 +95,7 @@ define([
            * @param eventType String event type.
            * @param properties Event properties.
            */
-            track: function (eventType, properties) {
+            track: function(eventType, properties) {
                 // https://segment.com/docs/sources/website/analytics.js/#track
                 analytics.track(eventType, properties);
             }

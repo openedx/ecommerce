@@ -241,7 +241,7 @@
 .. _Django sites framework: https://docs.djangoproject.com/en/1.8/ref/contrib/sites
 .. _Jasmine: http://jasmine.github.io/2.3/introduction.html
 .. _edX JavaScript standards: https://github.com/edx/edx-platform/wiki/Javascript-standards-for-the-edx-platform
-.. _JSHint: http://www.jshint.com/
+.. _ESLint: http://www.eslint.org
 .. _jscs: https://www.npmjs.org/package/jscs
 .. _Waffle: http://waffle.readthedocs.org/en/latest
 .. _Waffle documentation: http://waffle.readthedocs.org/en/latest

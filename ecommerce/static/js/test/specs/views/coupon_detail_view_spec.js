@@ -1,45 +1,37 @@
 define([
-        'jquery',
-        'underscore.string',
-        'models/coupon_model',
-        'utils/alert_utils',
-        'ecommerce',
-        'collections/catalog_collection',
-        'views/coupon_detail_view',
-        'test/mock_data/coupons',
-        'test/spec-utils',
-        'test/custom-matchers'
-    ],
-    function ($,
+    'jquery',
+    'underscore.string',
+    'models/coupon_model',
+    'utils/alert_utils',
+    'ecommerce',
+    'collections/catalog_collection',
+    'views/coupon_detail_view',
+    'test/mock_data/coupons',
+    'test/spec-utils',
+    'test/custom-matchers'
+],
+    function($,
               _s,
               Coupon,
               AlertUtils,
               ecommerce,
               CatalogCollection,
               CouponDetailView,
-              Mock_Coupons,
+              MockCoupons,
               SpecUtils) {
         'use strict';
 
         describe('coupon detail view', function() {
             var data,
-                enrollmentCodeVoucher,
                 lastEditData,
                 model,
-                percentageDiscountCodeVoucher,
-                valueDiscountCodeVoucher,
-                verifiedSeat,
                 view;
 
-            beforeEach(function () {
-                data = Mock_Coupons.enrollmentCodeCouponData;
+            beforeEach(function() {
+                data = MockCoupons.enrollmentCodeCouponData;
                 model = Coupon.findOrCreate(data, {parse: true});
                 view = new CouponDetailView({model: model});
-                enrollmentCodeVoucher = Mock_Coupons.enrollmentCodeVoucher;
-                lastEditData = Mock_Coupons.lastEditData;
-                percentageDiscountCodeVoucher = Mock_Coupons.percentageDiscountCodeVoucher;
-                valueDiscountCodeVoucher = Mock_Coupons.valueDiscountCodeVoucher;
-                verifiedSeat = Mock_Coupons.verifiedSeat;
+                lastEditData = MockCoupons.lastEditData;
             });
 
             afterEach(function() {
@@ -48,17 +40,17 @@ define([
                 view.model.unset('course_seat_types');
             });
 
-            it('should compare view.model with model sent', function () {
+            it('should compare view.model with model sent', function() {
                 expect(view.model).toBe(model);
             });
 
-            it('should get discount value from voucher data', function () {
+            it('should get discount value from voucher data', function() {
                 expect(view.discountValue()).toBe('100%');
-                view.model.set({'benefit_type': 'Absolute', 'benefit_value': 12.0});
+                view.model.set({benefit_type: 'Absolute', benefit_value: 12.0});
                 expect(view.discountValue()).toBe('$12');
             });
 
-            it('should get usage limitation from voucher data', function () {
+            it('should get usage limitation from voucher data', function() {
                 expect(view.usageLimitation()).toBe('Can be used once by one customer');
 
                 view.model.set('voucher_type', 'Once per customer');
@@ -71,11 +63,11 @@ define([
                 expect(view.usageLimitation()).toBe('');
             });
 
-            it('should format date time as MM/DD/YYYY h:mm A', function () {
+            it('should format date time as MM/DD/YYYY h:mm A', function() {
                 expect(view.formatDateTime('2015-01-01T00:00:00Z')).toBe('01/01/2015 12:00 AM');
             });
 
-            it('should format last edit data', function () {
+            it('should format last edit data', function() {
                 expect(view.formatLastEditedData(lastEditData)).toBe('user - 01/15/2016 7:26 AM');
             });
 
@@ -84,7 +76,7 @@ define([
                 expect(view.taxDeductedSource()).toBe(null);
             });
 
-            it('should display correct data upon rendering', function () {
+            it('should display correct data upon rendering', function() {
                 var category = model.get('category').name;
 
                 view.render();
@@ -111,7 +103,7 @@ define([
                 expect(view.$('.invoiced-amount > .value').text()).toEqual(
                     _s.sprintf('$%s', model.get('price'))
                 );
-                expect(parseInt(view.$('.max-uses > .value').text())).toEqual(parseInt(model.get('max_uses')));
+                expect(parseInt(view.$('.max-uses > .value').text(), 10)).toEqual(parseInt(model.get('max_uses'), 10));
                 expect(view.$('.invoice-type > .value').text()).toEqual(model.get('invoice_type'));
                 expect(view.$('.invoice-number > .value').text()).toEqual(model.get('invoice_number'));
                 expect(view.$('.invoice-payment-date > .value').text()).toEqual(
@@ -131,7 +123,7 @@ define([
             });
 
             it('should not display invoice discount type on render.', function() {
-                data = Mock_Coupons.enrollmentCodeCouponData;
+                data = MockCoupons.enrollmentCodeCouponData;
                 data.invoice_discount_value = null;
                 model = Coupon.findOrCreate(data, {parse: true});
                 view = new CouponDetailView({model: model});
@@ -140,52 +132,53 @@ define([
                 expect(view.$('.invoice-discount-type > .value').text()).toEqual('');
             });
 
-             it('should display course catalog name and course seats without preview button on render.', function() {
-                 ecommerce.coupons.catalogs = new CatalogCollection([{id: 1, name: 'Test Catalog'}]);
+            it('should display course catalog name and course seats without preview button on render.', function() {
+                ecommerce.coupons.catalogs = new CatalogCollection([{id: 1, name: 'Test Catalog'}]);
 
-                 data.course_catalog = 1;
-                 data.course_seat_types = ['verified'];
-                 model = Coupon.findOrCreate(data, {parse: true, create: true});
-                 view = new CouponDetailView({model: model});
-                 view.render();
+                data.course_catalog = 1;
+                data.course_seat_types = ['verified'];
+                model = Coupon.findOrCreate(data, {parse: true, create: true});
+                view = new CouponDetailView({model: model});
+                view.render();
 
-                 expect(view.$('.catalog-name > .value').text()).toEqual('Test Catalog');
-                 expect(view.$('.seat-types .value').text()).toEqual(
+                expect(view.$('.catalog-name > .value').text()).toEqual('Test Catalog');
+                expect(view.$('.seat-types .value').text()).toEqual(
                      data.course_seat_types.join(', ')
                  );
-                 expect(view.$('.catalog_buttons').text()).toEqual('');
-             });
+                expect(view.$('.catalog_buttons').text()).toEqual('');
+            });
 
             it('should format seat types.', function() {
                 view.model.unset('course_seat_types');
                 expect(view.formatSeatTypes()).toEqual(null);
 
-                view.model.set({'course_seat_types': ['verified']});
+                view.model.set({course_seat_types: ['verified']});
                 expect(view.formatSeatTypes()).toEqual('verified');
 
-                view.model.set({'course_seat_types': ['verified', 'professional']});
+                view.model.set({course_seat_types: ['verified', 'professional']});
                 expect(view.formatSeatTypes()).toEqual('verified, professional');
             });
 
-            it('should render course data', function () {
+            it('should render course data', function() {
+                var courseInfo;
                 view.model.set({
-                    'catalog_type': 'Single course',
-                    'course_id': 'a/b/c',
-                    'seat_type': 'Verified',
-                    'course_seat_types': ['verified']
+                    catalog_type: 'Single course',
+                    course_id: 'a/b/c',
+                    seat_type: 'Verified',
+                    course_seat_types: ['verified']
                 });
 
                 view.render();
 
-                var course_info = view.$('.course-info .value');
-                expect(course_info.length).toEqual(1);
-                expect(course_info.text()).toEqual('a/b/cVerified');
+                courseInfo = view.$('.course-info .value');
+                expect(courseInfo.length).toEqual(1);
+                expect(courseInfo.text()).toEqual('a/b/cVerified');
                 expect(view.$('.seat-types .value').text()).toEqual('verified');
 
                 view.model.set({
-                    'catalog_type': 'Multiple courses',
-                    'catalog_query': 'id:*',
-                    'course_seat_types': ['verified', 'professional']
+                    catalog_type: 'Multiple courses',
+                    catalog_query: 'id:*',
+                    course_seat_types: ['verified', 'professional']
                 });
 
                 view.render();
@@ -196,10 +189,10 @@ define([
 
             it('should render prepaid invoice data.', function() {
                 view.model.set({
-                    'invoice_type': 'Prepaid',
-                    'invoice_number': 'INV-001',
-                    'price': 1000,
-                    'invoice_payment_date': new Date(2016, 1, 1, 1, 0, 0)
+                    invoice_type: 'Prepaid',
+                    invoice_number: 'INV-001',
+                    price: 1000,
+                    invoice_payment_date: new Date(2016, 1, 1, 1, 0, 0)
                 });
                 view.render();
 
@@ -216,9 +209,9 @@ define([
 
             it('should render postpaid invoice data.', function() {
                 view.model.set({
-                    'invoice_type': 'Postpaid',
-                    'invoice_discount_type': 'Percentage',
-                    'invoice_discount_value': 50,
+                    invoice_type: 'Postpaid',
+                    invoice_discount_type: 'Percentage',
+                    invoice_discount_value: 50
                 });
                 view.render();
                 expect(view.$('.invoice-discount-value .value').text()).toEqual(
@@ -250,10 +243,10 @@ define([
                 expect(SpecUtils.formGroup(view, '.tax-deducted-source-value')).not.toBeVisible();
             });
 
-            it('should download voucher report in the new tab', function () {
+            it('should download voucher report in the new tab', function() {
                 var e = $.Event('click'),
                     url = _s.sprintf('/api/v2/coupons/coupon_reports/%d', model.id);
-                spyOn($, 'ajax').and.callFake(function (options) {
+                spyOn($, 'ajax').and.callFake(function(options) {
                     options.success();
                 });
                 spyOn(e, 'preventDefault');
@@ -263,9 +256,9 @@ define([
                 expect(window.open).toHaveBeenCalledWith(url, '_blank');
             });
 
-            it('should display error when download voucher fails', function () {
+            it('should display error when download voucher fails', function() {
                 var e = $.Event('click');
-                spyOn($, 'ajax').and.callFake(function (options) {
+                spyOn($, 'ajax').and.callFake(function(options) {
                     options.error(data);
                 });
                 spyOn(AlertUtils, 'clearAlerts');
@@ -274,7 +267,6 @@ define([
                 expect(AlertUtils.clearAlerts).toHaveBeenCalled();
                 expect(AlertUtils.renderAlert).toHaveBeenCalled();
             });
-
         });
     }
 );

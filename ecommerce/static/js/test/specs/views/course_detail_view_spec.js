@@ -1,20 +1,22 @@
 define([
-        'jquery',
-        'underscore.string',
-        'views/course_detail_view',
-        'models/course_model',
-        'collections/credit_provider_collection',
-        'ecommerce'
-    ],
-    function ($,
-              _s,
-              CourseDetailView,
-              Course,
-              CreditProviderCollection,
-              ecommerce) {
+    'jquery',
+    'underscore',
+    'underscore.string',
+    'views/course_detail_view',
+    'models/course_model',
+    'collections/credit_provider_collection',
+    'ecommerce'
+],
+    function($,
+             _,
+             _s,
+             CourseDetailView,
+             Course,
+             CreditProviderCollection,
+             ecommerce) {
         'use strict';
 
-        describe('course detail view', function () {
+        describe('course detail view', function() {
             var view,
                 model,
                 data = {
@@ -157,20 +159,20 @@ define([
                     ]
                 };
 
-            beforeEach(function () {
+            beforeEach(function() {
                 ecommerce.credit.providers = new CreditProviderCollection();
                 model = Course.findOrCreate(data, {parse: true});
                 view = new CourseDetailView({model: model}).render();
             });
 
-            it('should display course details', function () {
+            it('should display course details', function() {
                 expect(view.$el.find('.course-name').text()).toEqual(model.get('name'));
                 expect(view.$el.find('.course-id').text()).toEqual(model.get('id'));
                 expect(view.$el.find('.course-type').text()).toEqual(_s.capitalize(model.get('type')));
                 expect(view.$el.find('.course-verification-deadline').length).toEqual(0);
             });
 
-            it('should list the course seats', function () {
+            it('should list the course seats', function() {
                 var $seats = view.$el.find('.course-seat'),
                     $creditSeats = view.$el.find('.credit-seats .course-seat'),
                     products = _.where(data.products, {structure: 'child'});

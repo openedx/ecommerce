@@ -1,12 +1,12 @@
 define([
-        'backbone',
-        'backbone.route-filter',
-        'backbone.super'
-    ],
-    function (Backbone) {
+    'backbone',
+    'backbone.route-filter',
+    'backbone.super'
+],
+    function(Backbone) {
         'use strict';
 
-        /***
+        /** *
          * Base Router class.
          */
         return Backbone.Router.extend({
@@ -32,7 +32,7 @@ define([
              * @param {Object} options - Data used to initialize the router. This should include a key, $el, that
              * refers to a jQuery Element where the pages will be rendered.
              */
-            initialize: function (options) {
+            initialize: function(options) {
                 // This is where views will be rendered
                 this.$el = options.$el;
             },
@@ -40,7 +40,7 @@ define([
             /**
              * Starts the router.
              */
-            start: function () {
+            start: function() {
                 Backbone.history.start({pushState: true, root: this.root});
                 return this;
             },
@@ -48,7 +48,7 @@ define([
             /**
              * Removes the current view.
              */
-            clearView: function () {
+            clearView: function() {
                 if (this.currentView) {
                     this.currentView.remove();
                     this.currentView = null;
@@ -61,12 +61,11 @@ define([
              * 404 page
              * @param {String} path - Invalid path.
              */
-            notFound: function (path) {
+            notFound: function(path) {
                 // TODO Render something!
-                alert(path + ' is invalid.');
+                alert(path + ' is invalid.'); // eslint-disable-line no-alert
             }
 
         });
-
     }
 );

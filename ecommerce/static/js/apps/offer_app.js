@@ -1,12 +1,12 @@
 require([
-        'jquery',
-        'routers/offer_router'
-    ],
-    function ($,
+    'jquery',
+    'routers/offer_router'
+],
+    function($,
               OfferRouter) {
         'use strict';
 
-        $(function () {
+        $(function() {
             var $app = $('#offerApp'),
                 offerApp = new OfferRouter({$el: $app});
             offerApp.start();

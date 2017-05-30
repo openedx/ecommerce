@@ -1,21 +1,21 @@
 // jscs:disable requireCapitalizedConstructors
 
 define([
-        'backbone',
-        'backbone.relational',
-        'backbone.super',
-        'backbone.validation',
-        'jquery',
-        'js-cookie',
-        'moment',
-        'underscore',
-        'collections/product_collection',
-        'models/course_seats/course_seat',
-        'utils/course_utils',
-        'utils/utils',
-        'utils/validation_patterns'
-    ],
-    function (Backbone,
+    'backbone',
+    'backbone.relational',
+    'backbone.super',
+    'backbone.validation',
+    'jquery',
+    'js-cookie',
+    'moment',
+    'underscore',
+    'collections/product_collection',
+    'models/course_seats/course_seat',
+    'utils/course_utils',
+    'utils/utils',
+    'utils/validation_patterns'
+],
+    function(Backbone,
               BackboneRelational,
               BackboneSuper,
               BackboneValidation,
@@ -56,21 +56,21 @@ define([
                     msg: gettext('You must select a course type.')
                 },
                 honor_mode: {
-                    required: function () {
+                    required: function() {
                         return this.includeHonorMode();
                     },
                     msg: gettext('You must choose if an honor seat should be created.')
                 },
-                verification_deadline: function (value) {
+                verification_deadline: function(value) {
                     var invalid;
 
                     // No validation is needed for empty values
                     if (_.isEmpty(value)) {
-                        return;
+                        return undefined;
                     }
 
                     // Find seats where the verification deadline occurs before the upgrade deadline.
-                    invalid = _.some(this.seats(), function (seat) {
+                    invalid = _.some(this.seats(), function(seat) {
                         var expires = seat.get('expires');
                         return expires && moment(value).isBefore(expires);
                     });
@@ -78,13 +78,17 @@ define([
                     if (invalid) {
                         return gettext('The verification deadline must occur AFTER the upgrade deadline.');
                     }
+
+                    return undefined;
                 },
-                products: function (value) {
+                products: function(value) {
                     // NOTE (CCB): When syncing from the server, the value is an array. We can safely ignore
                     // validation in this case since the values from the server should be valid.
                     if (!_.isArray(value) && !value.isValid()) {
                         return gettext('Product validation failed.');
                     }
+
+                    return undefined;
                 }
             },
 
@@ -103,7 +107,7 @@ define([
                 relatedModel: CourseSeat,
                 includeInJSON: false,
                 parse: true,
-                collectionOptions: function (model) {
+                collectionOptions: function(model) {
                     return {course: model};
                 }
             }],
@@ -133,24 +137,25 @@ define([
              */
             creatableSeatTypes: ['audit', 'honor', 'verified', 'professional', 'credit'],
 
-            initialize: function () {
+            initialize: function() {
                 this.get('products').on('change:id_verification_required', this.triggerIdVerified, this);
                 this.on('sync', this.prepareProducts, this);
                 this.on('sync', this.honorModeInit, this);
             },
 
-            parse: function (response) {
-                response = this._super(response);
+            parse: function(response) {
+                var responseReassigned = this._super(response);
 
                 // Form fields display date-times in the user's local timezone. We want all
                 // times to be displayed in UTC to avoid confusion. Strip the timezone data to workaround the UI
                 // deficiencies. We will restore the UTC timezone in toJSON().
-                response.verification_deadline = Utils.stripTimezone(response.verification_deadline);
+                // eslint-disable-next-line
+                responseReassigned.verification_deadline = Utils.stripTimezone(responseReassigned.verification_deadline);
 
-                return response;
+                return responseReassigned;
             },
 
-            toJSON: function () {
+            toJSON: function() {
                 var data = this._super();
 
                 // Restore the timezone component, and output the ISO 8601 format expected by the server.
@@ -162,41 +167,43 @@ define([
             /**
              * Alerts listeners that this Course's ID verification status MAY have changed.
              */
-            triggerIdVerified: function () {
+            triggerIdVerified: function() {
                 this.trigger('change:id_verification_required', this.isIdVerified());
             },
 
             /**
              * Return boolean if this Course has seats and one of them is Honor.
              */
-            honorModeInit: function () {
-                var honor_seat;
+            honorModeInit: function() {
+                var honorSeat;
 
-                if( this.seats().length > 0 ) {
-                    honor_seat = _.find(
+                if (this.seats().length > 0) {
+                    honorSeat = _.find(
                         this.seats(),
-                        function (seat) {
+                        function(seat) {
                             return seat.attributes.certificate_type === 'honor';
                         }
                     );
 
-                    this.set('honor_mode', !!honor_seat);
+                    this.set('honor_mode', !!honorSeat);
                 }
             },
 
             /**
              * Returns the subset of pertinent child seat products from the Product collection.
              */
-            prepareProducts: function () {
+            prepareProducts: function() {
+                var products, parents, seats;
+
                 // Create a reference to the current product collection
-                var products = this.get('products');
+                products = this.get('products');
 
                 // Ignore any parent product models
-                var parents = products.where({structure: 'parent'});
+                parents = products.where({structure: 'parent'});
                 products.remove(parents);
 
                 // Ignore any non-Seat models (such as an Enrollment Code)
-                var seats = products.where({product_class: 'Seat'});
+                seats = products.where({product_class: 'Seat'});
                 products.reset(seats);
             },
 
@@ -205,8 +212,8 @@ define([
              *
              * @returns {CourseSeat[]}
              */
-            seats: function () {
-                return this.get('products').filter(function (product) {
+            seats: function() {
+                return this.get('products').filter(function(product) {
                     // Filter out parent products since there is no need to display or modify.
                     return (product instanceof CourseSeat) &&
                         product.get('structure') !== 'parent' &&
@@ -221,9 +228,9 @@ define([
              * @param {String} seatType
              * @returns {CourseSeat[]}
              */
-            getOrCreateSeats: function (seatType) {
+            getOrCreateSeats: function(seatType) {
                 var seatClass,
-                    seats = _.filter(this.seats(), function (product) {
+                    seats = _.filter(this.seats(), function(product) {
                         // Find the seats with the specific seat type
                         return product.getSeatType() === seatType;
                     }),
@@ -231,9 +238,9 @@ define([
 
                 if (_.isEmpty(seats) && _.contains(this.creatableSeatTypes, seatType)) {
                     seatClass = CourseUtils.getCourseSeatModel(seatType);
-                    /*jshint newcap: false */
+                    /* jshint newcap: false */
                     seat = new seatClass({course: this});
-                    /*jshint newcap: true */
+                    /* jshint newcap: true */
                     this.get('products').add(seat);
                     seats.push(seat);
                 }
@@ -248,8 +255,8 @@ define([
              *
              * @returns {boolean}
              */
-            isIdVerified: function () {
-                return Boolean(_.find(this.getCleanProducts(), function (seat) {
+            isIdVerified: function() {
+                return Boolean(_.find(this.getCleanProducts(), function(seat) {
                     return seat.get('id_verification_required');
                 }, this));
             },
@@ -259,7 +266,7 @@ define([
              *
              * @returns {boolean}
              */
-            includeHonorMode: function () {
+            includeHonorMode: function() {
                 return this.get('type') && this.get('type') !== 'professional';
             },
 
@@ -268,7 +275,7 @@ define([
              *
              * @returns {String[]} - Array of course seat types, or an empty array if the course type is unrecognized.
              */
-            validSeatTypes: function () {
+            validSeatTypes: function() {
                 return _.result(this.validCourseTypeSeatMapping, this.get('type'), []);
             },
 
@@ -277,7 +284,7 @@ define([
              *
              * @returns {String[]} - Array of course seat types, or an empty array if the course type is unrecognized.
              */
-            activeSeatTypes: function () {
+            activeSeatTypes: function() {
                 return _.result(this.activeCourseTypeSeatMapping, this.get('type'), []);
             },
 
@@ -289,8 +296,8 @@ define([
              *
              * @returns {Product[]}
              */
-            getCleanProducts: function () {
-                return this.seats().filter(function (seat) {
+            getCleanProducts: function() {
+                return this.seats().filter(function(seat) {
                     return _.contains(this.validSeatTypes(), seat.getSeatType());
                 }, this);
             },
@@ -302,7 +309,7 @@ define([
              * to external systems, in an atomic fashion. This is desirable to
              * avoid synchronization issues across systems.
              */
-            save: function (attributes, options) {
+            save: function(attributes, options) {
                 var verificationDeadline,
                     honorMode,
                     honorSeatClass,
@@ -321,9 +328,9 @@ define([
 
                     if (honorMode) {
                         honorSeatClass = CourseUtils.getCourseSeatModel('honor');
-                        /*jshint newcap: false */
+                        /* jshint newcap: false */
                         honorSeat = new honorSeatClass({course: this});
-                        /*jshint newcap: true */
+                        /* jshint newcap: true */
 
                         products = this.get('products');
                         auditSeat = products.where({certificate_type: null});
@@ -334,7 +341,7 @@ define([
                 }
 
                 // Submit only the relevant products
-                data.products = _.map(this.getCleanProducts(), function (product) {
+                data.products = _.map(this.getCleanProducts(), function(product) {
                     return product.toJSON();
                 }, this);
 
@@ -346,6 +353,7 @@ define([
                     }
                 }
 
+                // eslint-disable-next-line no-param-reassign
                 _.defaults(options || (options = {}), {
                     // Always use POST to avoid having to create a parameterized URL
                     type: 'POST',
@@ -361,6 +369,7 @@ define([
                 });
 
                 // Override the data and URL to use the publication endpoint.
+                // eslint-disable-next-line no-param-reassign
                 options.data = JSON.stringify(data);
 
                 return this._super(null, options);

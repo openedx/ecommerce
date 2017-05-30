@@ -1,13 +1,15 @@
 define([
-        'backbone',
-        'backbone.stickit',
-        'text!templates/credit_course_seat_form_field_row.html',
-        'ecommerce'
-    ],
-    function (Backbone,
-              BackboneStickit,
-              CreditSeatTableRowTemplate,
-              ecommerce) {
+    'underscore',
+    'backbone',
+    'backbone.stickit',
+    'text!templates/credit_course_seat_form_field_row.html',
+    'ecommerce'
+],
+    function(_,
+             Backbone,
+             BackboneStickit,
+             CreditSeatTableRowTemplate,
+             ecommerce) {
         'use strict';
 
         return Backbone.View.extend({
@@ -24,7 +26,7 @@ define([
                 'select[name=credit_provider]': {
                     observe: 'credit_provider',
                     selectOptions: {
-                        collection: function () {
+                        collection: function() {
                             return ecommerce.credit.providers;
                         },
                         labelPath: 'display_name',
@@ -58,12 +60,12 @@ define([
                 }
             },
 
-            initialize: function (options) {
+            initialize: function(options) {
                 this.course = options.course;
                 this.isRemovable = options.isRemovable;
             },
 
-            render: function () {
+            render: function() {
                 var context = _.extend({}, this.model.attributes, {isRemovable: this.isRemovable});
 
                 this.$el.html(this.template(context));
@@ -75,7 +77,7 @@ define([
             /**
              * Removes the selected row from the seat table.
              */
-            removeSeatTableRow: function () {
+            removeSeatTableRow: function() {
                 // Remove deleted seat from course product collection.
                 this.course.get('products').remove(this.model);
                 this.remove();

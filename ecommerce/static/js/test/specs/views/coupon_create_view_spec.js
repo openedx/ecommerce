@@ -1,46 +1,46 @@
 define([
-        'jquery',
-        'views/coupon_create_edit_view',
-        'views/alert_view',
-        'models/coupon_model',
-        'test/mock_data/categories',
-        'test/mock_data/catalogs',
-        'test/mock_data/enterprise_customers',
-        'ecommerce'
-    ],
-    function ($,
+    'jquery',
+    'views/coupon_create_edit_view',
+    'views/alert_view',
+    'models/coupon_model',
+    'test/mock_data/categories',
+    'test/mock_data/catalogs',
+    'test/mock_data/enterprise_customers',
+    'ecommerce'
+],
+    function($,
               CouponCreateEditView,
               AlertView,
               Coupon,
-              Mock_Categories,
-              Mock_Catalogs,
-              Mock_Customers,
+              MockCategories,
+              MockCatalogs,
+              MockCustomers,
               ecommerce) {
         'use strict';
 
-        describe('coupon create view', function () {
+        describe('coupon create view', function() {
             var view,
                 model;
 
-            beforeEach(function () {
+            beforeEach(function() {
                 ecommerce.coupons = {
-                    categories: Mock_Categories,
-                    catalogs: Mock_Catalogs,
-                    enterprise_customers: Mock_Customers,
+                    categories: MockCategories,
+                    catalogs: MockCatalogs,
+                    enterprise_customers: MockCustomers
                 };
                 model = new Coupon();
-                view = new CouponCreateEditView({ model: model, editing: false }).render();
+                view = new CouponCreateEditView({model: model, editing: false}).render();
                 spyOn(model, 'save');
             });
 
-            it('should throw an error if submitted with blank fields', function () {
+            it('should throw an error if submitted with blank fields', function() {
                 var errorHTML = '<strong></strong> Please complete all required fields.';
                 view.formView.submit($.Event('click'));
                 expect(view.$('.alert').length).toBe(1);
                 expect(view.$('.alert').html()).toBe(errorHTML);
             });
 
-            it('should submit form with valid fields', function () {
+            it('should submit form with valid fields', function() {
                 view.$('[name=title]').val('Test Enrollment').trigger('change');
                 view.$('[name=code_type]').val('enrollment').trigger('change');
                 view.$('[name=client]').val('test_client').trigger('change');
@@ -50,7 +50,7 @@ define([
                 view.$('[name=category]').val('4').trigger('change');
                 view.$('[name=enterprise_customer]').val('42a30ade47834489a607cd0f52ba13cf').trigger('change');
                 view.$('#not-applicable').prop('checked', true).trigger('change');
-                spyOn(view.formView, 'fillFromCourse').and.callFake(function () {
+                spyOn(view.formView, 'fillFromCourse').and.callFake(function() {
                     var seatTypes = [$('<option></option>')
                         .text('Verified')
                         .val('Verified')
@@ -68,7 +68,6 @@ define([
                 expect(model.isValid()).toBe(true);
                 expect(model.save).toHaveBeenCalled();
             });
-
         });
     }
 );

@@ -1,7 +1,7 @@
 define([
-        'backbone'
-    ],
-    function (Backbone) {
+    'backbone'
+],
+    function(Backbone) {
         'use strict';
 
         return {
@@ -10,7 +10,7 @@ define([
              *
              * @param {Boolean} valid - Indicates if the model should pass or fail validation.
              */
-            getModelForValidation: function (valid) {
+            getModelForValidation: function(valid) {
                 return Backbone.Model.extend({
                     defaults: {
                         id: null,
@@ -23,11 +23,11 @@ define([
                         catalog: 'Catalog'
                     },
 
-                    isValid: function () {
+                    isValid: function() {
                         return valid;
                     },
 
-                    validate: function () {
+                    validate: function() {
                         if (valid) {
                             return {};
                         }

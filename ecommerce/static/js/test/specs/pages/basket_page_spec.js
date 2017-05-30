@@ -1,16 +1,16 @@
 define([
-        'jquery',
-        'underscore',
-        'underscore.string',
-        'pages/basket_page',
-        'utils/utils',
-        'utils/analytics_utils',
-        'models/tracking_model',
-        'models/user_model',
-        'js-cookie',
-        'moment'
-    ],
-    function ($,
+    'jquery',
+    'underscore',
+    'underscore.string',
+    'pages/basket_page',
+    'utils/utils',
+    'utils/analytics_utils',
+    'models/tracking_model',
+    'models/user_model',
+    'js-cookie',
+    'moment'
+],
+    function($,
               _,
               _s,
               BasketPage,
@@ -22,15 +22,14 @@ define([
               moment) {
         'use strict';
 
-        describe('Basket Page', function () {
-            var data,
-                form;
+        describe('Basket Page', function() {
+            var data;
 
-            beforeEach(function () {
+            beforeEach(function() {
                 jasmine.getFixtures().fixturesPath = '/base/ecommerce/static/js/test/fixtures';
             });
 
-            beforeEach(function () {
+            beforeEach(function() {
                 loadFixtures('basket.html');
 
                 data = {
@@ -44,25 +43,19 @@ define([
                     }
                 };
 
-                form = $('<form>', {
-                    action: data.payment_page_url,
-                    method: 'POST',
-                    'accept-method': 'UTF-8'
-                });
-
-                /* jshint ignore:start */
+                /* eslint-disable */
                 // jscs:disable
-                window.analytics = window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","group","track","ready","alias","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement("script");e.type="text/javascript";e.async=!0;e.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION="3.0.1";}
+                window.analytics = window.analytics || []; if (!analytics.initialize) if (analytics.invoked)window.console && console.error && console.error('Segment snippet included twice.'); else { analytics.invoked = !0; analytics.methods = ['trackSubmit', 'trackClick', 'trackLink', 'trackForm', 'pageview', 'identify', 'group', 'track', 'ready', 'alias', 'page', 'once', 'off', 'on']; analytics.factory = function(t) { return function() { var e = Array.prototype.slice.call(arguments); e.unshift(t); analytics.push(e); return analytics; }; }; for (var t = 0; t < analytics.methods.length; t++) { var e = analytics.methods[t]; analytics[e] = analytics.factory(e); }analytics.load = function(t) { var e = document.createElement('script'); e.type = 'text/javascript'; e.async = !0; e.src = (document.location.protocol === 'https:' ? 'https://' : 'http://') + 'cdn.segment.com/analytics.js/v1/' + t + '/analytics.min.js'; var n = document.getElementsByTagName('script')[0]; n.parentNode.insertBefore(e, n); }; analytics.SNIPPET_VERSION = '3.0.1'; }
                 // jscs:enable
-                /* jshint ignore:end */
+                /* eslint-enable */
             });
 
-            afterEach(function () {
+            afterEach(function() {
                 $('body').empty();
             });
 
-            describe('showVoucherForm', function () {
-                it('should show voucher form', function () {
+            describe('showVoucherForm', function() {
+                it('should show voucher form', function() {
                     BasketPage.showVoucherForm();
                     expect($('#voucher_form_container').is(':visible')).toBeTruthy();
                     expect($('#voucher_form_link').is(':visible')).toBeFalsy();
@@ -70,8 +63,8 @@ define([
                 });
             });
 
-            describe('hideVoucherForm', function () {
-                it('should hide voucher form', function () {
+            describe('hideVoucherForm', function() {
+                it('should hide voucher form', function() {
                     BasketPage.showVoucherForm();
                     BasketPage.hideVoucherForm();
                     expect($('#voucher_form_container').is(':visible')).toBeFalsy();
@@ -79,8 +72,8 @@ define([
                 });
             });
 
-            describe('onReady', function () {
-                it('should toggle voucher form on click', function () {
+            describe('onReady', function() {
+                it('should toggle voucher form on click', function() {
                     BasketPage.onReady();
 
                     $('#voucher_form_link a').trigger('click');
@@ -93,7 +86,7 @@ define([
                     expect($('#voucher_form_link').is(':visible')).toBeTruthy();
                 });
 
-                it('should make the states input field dropdown for US and CA', function () {
+                it('should make the states input field dropdown for US and CA', function() {
                     $(
                         '<fieldset>' +
                         '<div class="form-item"><div><select name="country">' +
@@ -119,7 +112,7 @@ define([
                     expect($('#div_id_state').find('label').text()).toEqual('State/Province (required)');
                 });
 
-                it('should disable payment button before making ajax call', function () {
+                it('should disable payment button before making ajax call', function() {
                     spyOn(Utils, 'disableElementWhileRunning').and.callThrough();
                     BasketPage.onReady();
                     $('button.payment-button').trigger('click');
@@ -127,7 +120,7 @@ define([
                     expect($('button#cybersource').hasClass('is-disabled')).toBeTruthy();
                 });
 
-                it('should increment basket quantity on clicking up arrow', function () {
+                it('should increment basket quantity on clicking up arrow', function() {
                     BasketPage.onReady();
 
                     $('input.quantity').first().val(5);
@@ -136,7 +129,7 @@ define([
                     expect($('input.quantity').first().val()).toEqual('6');
                 });
 
-                it('should not increment quantity once reached to max value', function () {
+                it('should not increment quantity once reached to max value', function() {
                     BasketPage.onReady();
 
                     $('input.quantity').first().val(10);
@@ -144,7 +137,7 @@ define([
                     expect($('input.quantity').first().val()).toEqual('10');
                 });
 
-                it('should decrement basket quantity on clicking down arrow', function () {
+                it('should decrement basket quantity on clicking down arrow', function() {
                     BasketPage.onReady();
 
                     $('input.quantity').first().val(5);
@@ -153,7 +146,7 @@ define([
                     expect($('input.quantity').first().val()).toEqual('4');
                 });
 
-                it('should not decrement quantity once reached to min value', function () {
+                it('should not decrement quantity once reached to min value', function() {
                     var $quantity = $('input.quantity');
                     BasketPage.onReady();
 
@@ -162,12 +155,12 @@ define([
                     expect($quantity.first().val()).toEqual('1');
                 });
 
-                it('should recognize the credit card', function () {
+                it('should recognize the credit card', function() {
                     var validCardList = [
-                            {'number': '378282246310005', 'name': 'amex'},
-                            {'number': '6011111111111117', 'name': 'discover'},
-                            {'number': '5105105105105100', 'name': 'mastercard'},
-                            {'number': '4111111111111111', 'name': 'visa'}
+                            {number: '378282246310005', name: 'amex'},
+                            {number: '6011111111111117', name: 'discover'},
+                            {number: '5105105105105100', name: 'mastercard'},
+                            {number: '4111111111111111', name: 'visa'}
                         ],
                         cardNumberSelector = '#card-number',
                         $cardNumber = $(cardNumberSelector),
@@ -182,7 +175,7 @@ define([
                     $cardNumber.val('123123123123123').trigger('input');
                     expect($cardTypeIcon.attr('src')).toEqual('');
 
-                    _.each(validCardList, function (card) {
+                    _.each(validCardList, function(card) {
                         var expectedImage = '/static/images/credit_cards/' + card.name + '.png';
 
                         $cardNumber.val(card.number).trigger('input');
@@ -191,20 +184,20 @@ define([
                     });
                 });
 
-                it('should determine if credit card type is supported', function () {
+                it('should determine if credit card type is supported', function() {
                     var validCardTypes = ['amex', 'discover', 'mastercard', 'visa'],
                         invalidCardTypes = ['diners', 'jcb', 'maestro'];
 
-                    _.each(validCardTypes, function (cardType) {
+                    _.each(validCardTypes, function(cardType) {
                         expect(BasketPage.isCardTypeSupported(cardType)).toBeTruthy();
                     });
 
-                    _.each(invalidCardTypes, function (cardType) {
+                    _.each(invalidCardTypes, function(cardType) {
                         expect(BasketPage.isCardTypeSupported(cardType)).toBeFalsy();
                     });
                 });
 
-                it('should prevent default on click behavior of the CVN help button', function () {
+                it('should prevent default on click behavior of the CVN help button', function() {
                     var event = $.Event('click');
                     BasketPage.onReady();
                     spyOn(event, 'preventDefault');
@@ -212,13 +205,13 @@ define([
                     expect(event.preventDefault).toHaveBeenCalled();
                 });
 
-                it('should close cvv help tooltip once the escape button is pressed', function () {
+                it('should close cvv help tooltip once the escape button is pressed', function() {
                     BasketPage.onReady();
-                    $(document).trigger($.Event('keyup', { which: 27 }));
+                    $(document).trigger($.Event('keyup', {which: 27}));
                     expect($('#cvvtooltip').is(':visible')).toBeFalsy();
                 });
 
-                it('should toggle cvv help tooltip on help button click', function () {
+                it('should toggle cvv help tooltip on help button click', function() {
                     var $cvvtooltip = $('#cvvtooltip'),
                         $helpbutton = $('#card-cvn-help');
                     BasketPage.onReady();
@@ -234,7 +227,7 @@ define([
                     expect($helpbutton.attr('aria-expanded')).toEqual('false');
                 });
 
-                it('should toggle cvv help tooltip on mouse hover', function () {
+                it('should toggle cvv help tooltip on mouse hover', function() {
                     var $cvvtooltip = $('#cvvtooltip'),
                         $helpbutton = $('#card-cvn-help');
                     BasketPage.onReady();
@@ -250,13 +243,13 @@ define([
                     expect($helpbutton.attr('aria-expanded')).toEqual('false');
                 });
 
-                it('should toggle cvv help tooltip on focus for keyboard users', function () {
+                it('should toggle cvv help tooltip on focus for keyboard users', function() {
                     var $cvvtooltip = $('#cvvtooltip'),
                         $helpbutton = $('#card-cvn-help');
                     BasketPage.onReady();
 
                     $helpbutton.trigger('focus');
-                    $(document).trigger($.Event('keyup', { which: 9 }));
+                    $(document).trigger($.Event('keyup', {which: 9}));
                     expect($cvvtooltip.is(':visible')).toBeTruthy();
                     expect($helpbutton.attr('aria-haspopup')).toEqual('false');
                     expect($helpbutton.attr('aria-expanded')).toEqual('true');
@@ -268,8 +261,8 @@ define([
                 });
             });
 
-            describe('clientSideCheckoutValidation', function () {
-                var cc_expiry_months = {
+            describe('clientSideCheckoutValidation', function() {
+                var ccExpiryMonths = {
                     JAN: '01',
                     FEB: '02',
                     MAR: '03',
@@ -285,11 +278,11 @@ define([
                 };
 
 
-                beforeEach(function () {
+                beforeEach(function() {
                     loadFixtures('client-side-checkout-validation.html');
 
                     $('#card-expiry-month').append(
-                        _.reduce(_.toArray(cc_expiry_months), function (memo, value) {
+                        _.reduce(_.toArray(ccExpiryMonths), function(memo, value) {
                             return memo + '<option value="' + value + '">' + value + '</option>';
                         }, '')
                     );
@@ -304,8 +297,8 @@ define([
                     BasketPage.onReady();
                 });
 
-                describe('cardHolderInformationValidation', function () {
-                    it('should validate required fields', function () {
+                describe('cardHolderInformationValidation', function() {
+                    it('should validate required fields', function() {
                         var requiredFields = [
                             'input[name=first_name]',
                             'input[name=last_name]',
@@ -315,7 +308,7 @@ define([
                         ];
 
                         spyOn(BasketPage, 'sdnCheck');
-                        _.each(requiredFields, function (field) {
+                        _.each(requiredFields, function(field) {
                             $(field).val('');
                             $('#payment-button').click();
 
@@ -327,7 +320,7 @@ define([
                         });
                     });
 
-                    it('should validate state field', function () {
+                    it('should validate state field', function() {
                         $('select[name=country]').val('US').trigger('change');
                         $('select[name=state]').val('');
                         $('#payment-button').click();
@@ -338,25 +331,25 @@ define([
                         ).toEqual('This field is required');
                     });
 
-                    it('should perform the SDN check', function () {
-                        var first_name = 'Darth',
-                            last_name = 'Vader',
+                    it('should perform the SDN check', function() {
+                        var firstName = 'Darth',
+                            lastName = 'Vader',
                             city = 'Death Star',
                             country = 'DS',
                             args,
                             ajaxData,
                             event = $.Event('click'),
-                            data = {'hits': 1};
+                            testCaseData = {hits: 1};
 
-                        $('input[name=first_name]').val(first_name);
-                        $('input[name=last_name]').val(last_name);
+                        $('input[name=first_name]').val(firstName);
+                        $('input[name=last_name]').val(lastName);
                         $('input[name=city]').val(city);
                         $('select[name=country]').val(country);
 
                         spyOn(Utils, 'redirect');
                         spyOn(event, 'preventDefault');
-                        spyOn($, 'ajax').and.callFake(function (options) {
-                            options.success(data);
+                        spyOn($, 'ajax').and.callFake(function(options) {
+                            options.success(testCaseData);
                         });
                         BasketPage.sdnCheck(event);
 
@@ -368,13 +361,13 @@ define([
                         expect(args.method).toEqual('POST');
                         expect(args.url).toEqual('/api/v2/sdn/search/');
                         expect(args.contentType).toEqual('application/json; charset=utf-8');
-                        expect(ajaxData.name).toEqual(_s.sprintf('%s %s', first_name, last_name));
+                        expect(ajaxData.name).toEqual(_s.sprintf('%s %s', firstName, lastName));
                         expect(ajaxData.city).toEqual(city);
                         expect(ajaxData.country).toEqual(country);
                     });
                 });
 
-                describe('cardInfoValidation', function () {
+                describe('cardInfoValidation', function() {
                     var validCardNumber = '378282246310005',  // AMEX (CVN length 4)
                         validCvn = '1234',
                         enRouteCardNumber = '201401173701274', // Unsupported type (Dec, 2016)
@@ -382,7 +375,7 @@ define([
                         cardExpirationMonth = 'FEB',  // Card Expires in February
                         thisMonth = moment().month('MAR').month(); // Let's say this month is March
 
-                    beforeEach(function () {
+                    beforeEach(function() {
                         $('#card-expiry-year').append('<option value="' +
                             today.year() + '">' + today.year() + '</option>'
                         );
@@ -404,7 +397,7 @@ define([
                         expect(BasketPage.sdnCheck).not.toHaveBeenCalled();
                     }
 
-                    it('should validate card number', function () {
+                    it('should validate card number', function() {
                         $('#card-number').val('123invalid456');
                         $('#payment-button').click();
                         expect($('#card-number ~ .help-block span').text()).toEqual('Invalid card number');
@@ -415,7 +408,7 @@ define([
                         expectFormSubmitted('#card-number');
                     });
 
-                    it('should validate card type', function () {
+                    it('should validate card type', function() {
                         $('#card-number').val(enRouteCardNumber);
                         $('#payment-button').click();
                         expect($('#card-number~.help-block span').text()).toEqual('Unsupported card type');
@@ -426,7 +419,7 @@ define([
                         expectFormSubmitted('#card-number');
                     });
 
-                    it('should validate CVN number', function () {
+                    it('should validate CVN number', function() {
                         var amexCardNumber = '378282246310005',
                             $number = $('#card-number'),
                             $cvn = $('#card-cvn'),
@@ -450,7 +443,7 @@ define([
                         expectFormSubmitted('#card-cvn');
                     });
 
-                    it('should validate expiry month', function () {
+                    it('should validate expiry month', function() {
                         $('#card-number').val(validCardNumber);
                         $('#card-cvn').val(validCvn);
                         $('#card-expiry-month').val('99');
@@ -463,7 +456,7 @@ define([
                         expectFormSubmitted('#card-expiry-month');
                     });
 
-                    it('should validate expiry year', function () {
+                    it('should validate expiry year', function() {
                         $('#card-number').val(validCardNumber);
                         $('#card-cvn').val(validCvn);
                         $('#card-expiry-month').val('12');
@@ -477,10 +470,10 @@ define([
                         expectFormSubmitted('#card-expiry-year');
                     });
 
-                    it('should validate card expiration', function () {
+                    it('should validate card expiration', function() {
                         $('#card-number').val(validCardNumber);
                         $('#card-cvn').val(validCvn);
-                        $('#card-expiry-month').val(cc_expiry_months[cardExpirationMonth]);
+                        $('#card-expiry-month').val(ccExpiryMonths[cardExpirationMonth]);
                         $('#card-expiry-year').val(today.year());
                         $('#payment-button').click();
                         expect($('#card-expiry-month ~ .help-block span').text()).toEqual('Card expired');
@@ -494,19 +487,20 @@ define([
                 });
             });
 
-            describe('onFail', function () {
-                it('should report error to message div element', function () {
+            describe('onFail', function() {
+                it('should report error to message div element', function() {
+                    var $errorMessagesDiv;
                     $('<div id="messages"></div>').appendTo('body');
-                    var error_messages_div = $('#messages');
+                    $errorMessagesDiv = $('#messages');
                     BasketPage.onFail();
-                    expect(error_messages_div.text()).toEqual(
+                    expect($errorMessagesDiv.text()).toEqual(
                         'Problem occurred during checkout. Please contact support'
                     );
                 });
             });
 
-            describe('checkoutPayment', function () {
-                it('should POST to the checkout endpoint', function () {
+            describe('checkoutPayment', function() {
+                it('should POST to the checkout endpoint', function() {
                     var args,
                         cookie = 'checkout-payment-test';
 
@@ -528,9 +522,9 @@ define([
                 });
             });
 
-            describe('Analytics', function () {
-                beforeEach(function () {
-                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function () {
+            describe('Analytics', function() {
+                beforeEach(function() {
+                    spyOn(TrackingModel.prototype, 'isTracking').and.callFake(function() {
                         return true;
                     });
                     spyOn(window.analytics, 'page');
@@ -539,7 +533,7 @@ define([
                     BasketPage.onReady();
                 });
 
-                it('should trigger voucher applied analytics event', function () {
+                it('should trigger voucher applied analytics event', function() {
                     $('button.apply_voucher').trigger('click');
                     expect(window.analytics.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.basket.voucher_applied',
@@ -547,7 +541,7 @@ define([
                     );
                 });
 
-                it('should trigger checkout analytics event', function () {
+                it('should trigger checkout analytics event', function() {
                     $('button.payment-button').trigger('click');
                     expect(window.analytics.track).toHaveBeenCalledWith(
                         'edx.bi.ecommerce.basket.payment_selected',
@@ -555,7 +549,7 @@ define([
                     );
                 });
 
-                it('should trigger page load analytics event', function () {
+                it('should trigger page load analytics event', function() {
                     $('<script type="text/javascript">var initModelData = {};</script>')
                         .appendTo('body');
                     AnalyticsUtils.analyticsSetUp();

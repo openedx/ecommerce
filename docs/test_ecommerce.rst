@@ -111,7 +111,7 @@ directory, and add a ``_spec`` suffix. For example, your test name may be
 ``ecommerce/static/js/test/specs/course_list_view_spec.js``.
 
 All JavaScript code must adhere to the `edX JavaScript standards`_. These
-standards are enforced using `JSHint`_ and `jscs`_.
+standards are enforced using `ESLint`_ and `jscs`_.
 
 * To run all JavaScript unit tests and linting checks, run the following
   command.

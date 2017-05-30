@@ -1,7 +1,9 @@
 define([
-        'models/course_seats/course_seat'
-    ],
-    function (CourseSeat) {
+    'underscore',
+    'models/course_seats/course_seat'
+],
+    function(_,
+             CourseSeat) {
         'use strict';
 
         return CourseSeat.extend({

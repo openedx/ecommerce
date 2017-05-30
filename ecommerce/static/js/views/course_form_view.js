@@ -1,45 +1,46 @@
+/* global gettext */
 // jscs:disable requireCapitalizedConstructors
 
 define([
-        'jquery',
-        'backbone',
-        'backbone.super',
-        'backbone.validation',
-        'backbone.stickit',
-        'moment',
-        'underscore',
-        'underscore.string',
-        'collections/product_collection',
-        'text!templates/_alert_div.html',
-        'text!templates/course_form.html',
-        'text!templates/_course_type_radio_field.html',
-        'views/course_seat_form_fields/audit_course_seat_form_field_view',
-        'views/course_seat_form_fields/verified_course_seat_form_field_view',
-        'views/course_seat_form_fields/professional_course_seat_form_field_view',
-        'views/course_seat_form_fields/credit_course_seat_form_field_view',
-        'views/form_view',
-        'utils/course_utils',
-        'utils/utils'
-    ],
-    function ($,
-              Backbone,
-              BackboneSuper,
-              BackboneValidation,
-              BackboneStickit,
-              moment,
-              _,
-              _s,
-              ProductCollection,
-              AlertDivTemplate,
-              CourseFormTemplate,
-              CourseTypeRadioTemplate,
-              AuditCourseSeatFormFieldView,
-              VerifiedCourseSeatFormFieldView,
-              ProfessionalCourseSeatFormFieldView,
-              CreditCourseSeatFormFieldView,
-              FormView,
-              CourseUtils,
-              Utils) {
+    'jquery',
+    'backbone',
+    'backbone.super',
+    'backbone.validation',
+    'backbone.stickit',
+    'moment',
+    'underscore',
+    'underscore.string',
+    'collections/product_collection',
+    'text!templates/_alert_div.html',
+    'text!templates/course_form.html',
+    'text!templates/_course_type_radio_field.html',
+    'views/course_seat_form_fields/audit_course_seat_form_field_view',
+    'views/course_seat_form_fields/verified_course_seat_form_field_view',
+    'views/course_seat_form_fields/professional_course_seat_form_field_view',
+    'views/course_seat_form_fields/credit_course_seat_form_field_view',
+    'views/form_view',
+    'utils/course_utils',
+    'utils/utils'
+],
+    function($,
+             Backbone,
+             BackboneSuper,
+             BackboneValidation,
+             BackboneStickit,
+             moment,
+             _,
+             _s,
+             ProductCollection,
+             AlertDivTemplate,
+             CourseFormTemplate,
+             CourseTypeRadioTemplate,
+             AuditCourseSeatFormFieldView,
+             VerifiedCourseSeatFormFieldView,
+             ProfessionalCourseSeatFormFieldView,
+             CreditCourseSeatFormFieldView,
+             FormView,
+             CourseUtils,
+             Utils) {
         'use strict';
 
         return FormView.extend({
@@ -85,7 +86,7 @@ define([
             },
 
             events: {
-                'submit': 'submit'
+                submit: 'submit'
             },
 
             bindings: {
@@ -126,7 +127,7 @@ define([
                 }
             },
 
-            initialize: function (options) {
+            initialize: function(options) {
                 this.courseSeatViews = {};
                 this.editing = options.editing || false;
 
@@ -135,7 +136,7 @@ define([
                     this.renderVerificationDeadline);
                 this.listenTo(this.model, 'change:type change:honor_mode',
                     this.renderHonorMode);
-                this.listenTo(this.model, 'change:id' , this.validateCourseID);
+                this.listenTo(this.model, 'change:id', this.validateCourseID);
                 this.listenTo(this.model, 'change:type', this.toggleBulkEnrollmentField);
 
                 // Listen for the sync event so that we can keep track of the original course type.
@@ -146,8 +147,8 @@ define([
                 this._super();
             },
 
-            remove: function () {
-                _.each(this.courseSeatViews, function (view) {
+            remove: function() {
+                _.each(this.courseSeatViews, function(view) {
                     view.remove();
                 }, this);
 
@@ -161,40 +162,40 @@ define([
              *
              * @returns {Array}
              */
-            getActiveCourseTypes: function () {
+            getActiveCourseTypes: function() {
                 var activeCourseTypes,
                     courseType = this.editing ? this.lockedCourseType : this.model.get('type');
 
                 switch (courseType) {
-                    case 'audit':
-                        activeCourseTypes = ['audit', 'verified', 'credit'];
-                        break;
-                    case 'verified':
-                        activeCourseTypes = ['verified', 'credit'];
-                        break;
-                    case 'professional':
-                        activeCourseTypes = ['professional'];
-                        break;
-                    case 'credit':
-                        activeCourseTypes = ['credit'];
-                        break;
-                    default:
-                        activeCourseTypes = ['audit', 'verified', 'professional', 'credit'];
-                        break;
+                case 'audit':
+                    activeCourseTypes = ['audit', 'verified', 'credit'];
+                    break;
+                case 'verified':
+                    activeCourseTypes = ['verified', 'credit'];
+                    break;
+                case 'professional':
+                    activeCourseTypes = ['professional'];
+                    break;
+                case 'credit':
+                    activeCourseTypes = ['credit'];
+                    break;
+                default:
+                    activeCourseTypes = ['audit', 'verified', 'professional', 'credit'];
+                    break;
                 }
 
                 return activeCourseTypes;
             },
 
-            setLockedCourseType: function () {
+            setLockedCourseType: function() {
                 this.lockedCourseType = this.model.get('type');
             },
 
-            cleanBooleanValue: function (val) {
+            cleanBooleanValue: function(val) {
                 return _s.toBoolean(val);
             },
 
-            render: function () {
+            render: function() {
                 // Render the parent form/template
                 this.$el.html(this.template(this.model.attributes));
 
@@ -216,7 +217,7 @@ define([
             /**
              * Renders the course type
              */
-            renderCourseTypes: function () {
+            renderCourseTypes: function() {
                 var $courseTypesContainer,
                     html = '',
                     activeCourseTypes = this.getActiveCourseTypes();
@@ -224,11 +225,13 @@ define([
                 // Render the course type radio fields
                 $courseTypesContainer = this.$el.find('.course-types');
 
-                _.each(this.courseTypes, function (data, courseType) {
+                /* eslint-disable no-param-reassign */
+                _.each(this.courseTypes, function(data, courseType) {
                     data.disabled = !_.contains(activeCourseTypes, courseType);
                     data.checked = (this.model.get('type') === courseType);
                     html += this.courseTypeRadioTemplate(data);
                 }, this);
+                /* eslint-enable no-param-reassign */
 
                 $courseTypesContainer.html(html);
                 this.delegateEvents();
@@ -239,7 +242,7 @@ define([
             /**
              * Displays, or hides, the verification deadline based on the course type.
              */
-            renderVerificationDeadline: function () {
+            renderVerificationDeadline: function() {
                 var $verificationDeadline = this.$el.find('.verification-deadline');
 
                 // TODO Make this display a bit smoother with a slide.
@@ -251,7 +254,7 @@ define([
             /**
              * Displays, or hides, the honor mode based on the course type.
              */
-            renderHonorMode: function () {
+            renderHonorMode: function() {
                 var $honorModeContainer = this.$el.find('.honor-mode');
 
                 $honorModeContainer.toggleClass('hidden', !this.model.includeHonorMode());
@@ -265,7 +268,7 @@ define([
             disableHonorMode: function() {
                 var $honorModeRadioButtons = this.$el.find('input[name=honor_mode]');
 
-                if( this.model.seats().length > 0 ){
+                if (this.model.seats().length > 0) {
                     $honorModeRadioButtons.attr('disabled', true);
                 }
             },
@@ -273,7 +276,7 @@ define([
             /**
              * Renders the course seats based upon the course model's type field.
              */
-            renderCourseSeats: function () {
+            renderCourseSeats: function() {
                 var $courseSeats,
                     $courseSeatsContainer = this.$el.find('.course-seats'),
                     activeSeats = this.model.activeSeatTypes();
@@ -282,7 +285,7 @@ define([
                 if (activeSeats.length < 1) {
                     activeSeats = ['empty'];
                 } else {
-                    _.each(CourseUtils.orderSeatTypesForDisplay(activeSeats), function (seatType) {
+                    _.each(CourseUtils.orderSeatTypesForDisplay(activeSeats), function(seatType) {
                         var seats,
                             viewClass,
                             view = this.courseSeatViews[seatType];
@@ -292,7 +295,6 @@ define([
                             viewClass = this.courseSeatViewMappings[seatType];
 
                             if (viewClass && seats.length > 0) {
-                                /*jshint newcap: false */
                                 if (_.isEqual(seatType, 'credit')) {
                                     seats = new ProductCollection(seats);
                                     view = new viewClass({collection: seats, course: this.model});
@@ -301,7 +303,6 @@ define([
                                 }
 
                                 this.$el.find('.course-seat.empty').addClass('hidden');
-                                /*jshint newcap: true */
                                 view.render();
 
                                 this.courseSeatViews[seatType] = view;
@@ -317,7 +318,7 @@ define([
                 // Hide all seats
                 $courseSeats.hide();
 
-                _.each(activeSeats, function (seat) {
+                _.each(activeSeats, function(seat) {
                     $courseSeats.filter('.' + seat).show();
                 });
 
@@ -346,7 +347,7 @@ define([
                         this.$('[name=bulk_enrollment_code]').attr('disabled', true);
                     }
                 }
-            },
+            }
         });
     }
 );

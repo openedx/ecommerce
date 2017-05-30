@@ -1,8 +1,8 @@
 require([
-        'jquery',
-        'pages/credit_checkout'
-    ],
-    function ($,
+    'jquery',
+    'pages/credit_checkout'
+],
+    function($,
               CreditCheckoutPage) {
         'use strict';
 

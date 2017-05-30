@@ -1,7 +1,7 @@
 require([
-        'pages/receipt_page'
-    ],
-    function (ReceiptPage) {
+    'pages/receipt_page'
+],
+    function(ReceiptPage) {
         'use strict';
 
         new ReceiptPage();

@@ -1,25 +1,26 @@
 define([
-        'jquery',
-        'underscore.string',
-        'moment',
-        'views/course_create_edit_view',
-        'models/course_model',
-        'utils/utils',
-        'collections/credit_provider_collection',
-        'ecommerce'
-    ],
-    function ($,
-              _s,
-              moment,
-              CourseCreateEditView,
-              Course,
-              Utils,
-              CreditProviderCollection,
-              ecommerce) {
-
+    'jquery',
+    'underscore',
+    'underscore.string',
+    'moment',
+    'views/course_create_edit_view',
+    'models/course_model',
+    'utils/utils',
+    'collections/credit_provider_collection',
+    'ecommerce'
+],
+    function($,
+             _,
+             _s,
+             moment,
+             CourseCreateEditView,
+             Course,
+             Utils,
+             CreditProviderCollection,
+             ecommerce) {
         'use strict';
 
-        describe('course edit view', function () {
+        describe('course edit view', function() {
             var view,
                 model,
                 auditSeat = {
@@ -154,22 +155,22 @@ define([
                     ]
                 };
 
-            beforeEach(function () {
+            beforeEach(function() {
                 ecommerce.credit.providers = new CreditProviderCollection([{id: 'harvard', display_name: 'Harvard'}]);
                 model = Course.findOrCreate(data, {parse: true});
                 view = new CourseCreateEditView({model: model, editing: true}).render();
             });
 
-            it('should display course details in form fields', function () {
-                var checked_radios = view.$el.find('.course-types input[type=radio]:checked'),
-                    type_label = checked_radios.siblings('.course-type-display-name');
+            it('should display course details in form fields', function() {
+                var checkedRadios = view.$el.find('.course-types input[type=radio]:checked'),
+                    typeLabel = checkedRadios.siblings('.course-type-display-name');
 
                 expect(view.$el.find('[name=id]').val()).toEqual(model.get('id'));
                 expect(view.$el.find('[name=name]').val()).toEqual(model.get('name'));
-                expect(type_label.text()).toEqual(_s.capitalize(model.get('type')));
+                expect(typeLabel.text()).toEqual(_s.capitalize(model.get('type')));
             });
 
-            it('should display correct course seats given course type', function () {
+            it('should display correct course seats given course type', function() {
                 var $auditElement = view.$el.find('.row.course-seat.audit'),
                     $verifiedElement = view.$el.find('.row.course-seat.verified'),
                     $creditElement = view.$el.find('.row.credit'),
@@ -204,7 +205,7 @@ define([
                 expect($professionalElement.find('[name=expires]').val()).toBe('');
             });
 
-            it('should remove the edit form if the view is removed', function () {
+            it('should remove the edit form if the view is removed', function() {
                 view.remove();
                 expect(view.$el.find('.course-form-view').length).toEqual(0);
             });

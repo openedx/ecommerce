@@ -1,11 +1,13 @@
 define(['jquery',
-        'backbone',
-        'underscore.string',
-        'collections/course_collection',
-        'text!templates/dynamic_catalog_buttons.html'
-    ],
-    function ($,
+    'backbone',
+    'underscore',
+    'underscore.string',
+    'collections/course_collection',
+    'text!templates/dynamic_catalog_buttons.html'
+],
+    function($,
               Backbone,
+              _,
               _s,
               Courses,
               DynamicCatalogButtons) {
@@ -19,35 +21,37 @@ define(['jquery',
                 'click .pagination .disabled, .pagination .active': 'stopEventPropagation'
             },
 
-            initialize: function (options) {
+            initialize: function(options) {
                 this.query = options.query;
                 this.seat_types = options.seat_types;
-                this._super();
+                this._super(); // eslint-disable-line no-underscore-dangle
             },
 
             stopEventPropagation: function(event) {
                 event.stopPropagation();
             },
 
-            getRowData: function (seat) {
-                var course_key_attr = _.find(seat.attribute_values, function(attr) {
-                    if (attr.name === 'course_key'){
+            getRowData: function(seat) {
+                var courseKeyAttr = _.find(seat.attribute_values, function(attr) {
+                    if (attr.name === 'course_key') {
                         return attr;
                     }
+                    return undefined;
                 });
-                var certificate_type = _.find(seat.attribute_values, function(attr) {
-                    if (attr.name === 'certificate_type'){
+                var certificateType = _.find(seat.attribute_values, function(attr) {
+                    if (attr.name === 'certificate_type') {
                         return attr;
                     }
+                    return undefined;
                 });
                 return {
-                    id: course_key_attr.value,
+                    id: courseKeyAttr.value,
                     name: seat.title,
-                    type: _s(certificate_type.value).capitalize().value()
+                    type: _s(certificateType.value).capitalize().value()
                 };
             },
 
-            previewCatalog: function (event) {
+            previewCatalog: function(event) {
                 this.limit = 10;
                 this.offset = 0;
                 event.preventDefault();
@@ -88,7 +92,7 @@ define(['jquery',
                     type: 'GET',
                     url: window.location.origin + '/api/v2/catalogs/preview/',
                     data: {
-                        query : this.query,
+                        query: this.query,
                         seat_types: this.seat_types.join(),
                         limit: this.limit,
                         offset: this.offset
@@ -106,7 +110,7 @@ define(['jquery',
                 }
             },
 
-            render: function () {
+            render: function() {
                 this.$el.html(this.template({}));
                 return this;
             }

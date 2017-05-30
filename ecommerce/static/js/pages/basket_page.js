@@ -3,15 +3,15 @@
  **/
 
 define([
-        'jquery',
-        'underscore',
-        'underscore.string',
-        'utils/utils',
-        'utils/credit_card',
-        'utils/key_codes',
-        'js-cookie'
-    ],
-    function ($,
+    'jquery',
+    'underscore',
+    'underscore.string',
+    'utils/utils',
+    'utils/credit_card',
+    'utils/key_codes',
+    'js-cookie'
+],
+    function($,
               _,
               _s,
               Utils,
@@ -38,7 +38,7 @@ define([
                 'accept-method': 'UTF-8'
             });
 
-            _.each(data.payment_form_data, function (value, key) {
+            _.each(data.payment_form_data, function(value, key) {
                 $('<input>').attr({
                     type: 'hidden',
                     name: key,
@@ -90,7 +90,7 @@ define([
                 requiredFields.push('select[name=state]');
             }
 
-            _.each(requiredFields, function (field) {
+            _.each(requiredFields, function(field) {
                 if ($(field).val() === '') {
                     event.preventDefault();
                     appendCardHolderValidationErrorMsg($(field), gettext('This field is required'));
@@ -99,7 +99,14 @@ define([
             });
 
             // Focus the first element that has an error message.
-            $('.help-block > span').first().parentsUntil('fieldset').last().find('input').focus();
+            $('.help-block > span')
+            .first().parentsUntil('fieldset').last()
+            .find('input')
+            .focus();
+        }
+
+        function isCardTypeSupported(cardType) {
+            return $.inArray(cardType, ['amex', 'discover', 'mastercard', 'visa']) > -1;
         }
 
         function cardInfoValidation(event) {
@@ -138,10 +145,6 @@ define([
             }
         }
 
-        function isCardTypeSupported(cardType) {
-            return $.inArray(cardType, ['amex', 'discover', 'mastercard', 'visa']) > -1;
-        }
-
         function detectCreditCard() {
             var card,
                 $input = $('#card-number'),
@@ -171,8 +174,8 @@ define([
         }
 
         function sdnCheck(event) {
-            var first_name = $('input[name=first_name]').val(),
-                last_name = $('input[name=last_name]').val(),
+            var firstName = $('input[name=first_name]').val(),
+                lastName = $('input[name=last_name]').val(),
                 city = $('input[name=city]').val(),
                 country = $('select[name=country]').val();
 
@@ -185,222 +188,16 @@ define([
                     'X-CSRFToken': Cookies.get('ecommerce_csrftoken')
                 },
                 data: JSON.stringify({
-                    'name': _s.sprintf('%s %s', first_name, last_name),
-                    'city': city,
-                    'country': country
+                    name: _s.sprintf('%s %s', firstName, lastName),
+                    city: city,
+                    country: country
                 }),
                 async: false,
-                success: function (data) {
+                success: function(data) {
                     if (data.hits > 0) {
                         event.preventDefault();
                         Utils.redirect('/payment/sdn/failure/');
                     }
-                }
-            });
-        }
-
-        function onReady() {
-            var $paymentButtons = $('.payment-buttons'),
-                basketId = $paymentButtons.data('basket-id');
-
-            Utils.toogleMobileMenuClickEvent();
-
-            $(document).keyup(function(e) {
-                switch(e.which){
-                    case KeyCodes.Escape:
-                        hideCvvTooltip();
-                        break;
-                    case KeyCodes.Tab:
-                        if($('#card-cvn-help').is(':focus')){
-                            showCvvTooltip();
-                        }
-                        break;
-                }
-            });
-
-            $('#card-cvn-help').on('click touchstart', function (event) {
-                event.preventDefault();
-                toggleCvvTooltip();
-            });
-
-            $('#card-cvn-help').blur(hideCvvTooltip);
-            $('#card-cvn-help').hover(showCvvTooltip, hideCvvTooltip);
-
-            $('#voucher_form_link').on('click', function (event) {
-                event.preventDefault();
-                showVoucherForm();
-            });
-
-            $('#voucher_form_cancel').on('click', function (event) {
-                event.preventDefault();
-                hideVoucherForm();
-            });
-
-            $('select[name=country]').on('change', function () {
-                var country = $('select[name=country]').val(),
-                    inputDiv = $('#div_id_state .controls'),
-                    states = {
-                        'US': {
-                            'Alabama': 'AL',
-                            'Alaska': 'AK',
-                            'American': 'AS',
-                            'Arizona': 'AZ',
-                            'Arkansas': 'AR',
-                            'California': 'CA',
-                            'Colorado': 'CO',
-                            'Connecticut': 'CT',
-                            'Delaware': 'DE',
-                            'Dist. of Columbia': 'DC',
-                            'Florida': 'FL',
-                            'Georgia': 'GA',
-                            'Guam': 'GU',
-                            'Hawaii': 'HI',
-                            'Idaho': 'ID',
-                            'Illinois': 'IL',
-                            'Indiana': 'IN',
-                            'Iowa': 'IA',
-                            'Kansas': 'KS',
-                            'Kentucky': 'KY',
-                            'Louisiana': 'LA',
-                            'Maine': 'ME',
-                            'Maryland': 'MD',
-                            'Marshall Islands': 'MH',
-                            'Massachusetts': 'MA',
-                            'Michigan': 'MI',
-                            'Micronesia': 'FM',
-                            'Minnesota': 'MN',
-                            'Mississippi': 'MS',
-                            'Missouri': 'MO',
-                            'Montana': 'MT',
-                            'Nebraska': 'NE',
-                            'Nevada': 'NV',
-                            'New Hampshire': 'NH',
-                            'New Jersey': 'NJ',
-                            'New Mexico': 'NM',
-                            'New York': 'NY',
-                            'North Carolina': 'NC',
-                            'North Dakota': 'ND',
-                            'Northern Marianas': 'MP',
-                            'Ohio': 'OH',
-                            'Oklahoma': 'OK',
-                            'Oregon': 'OR',
-                            'Palau': 'PW',
-                            'Pennsylvania': 'PA',
-                            'Puerto Rico': 'PR',
-                            'Rhode Island': 'RI',
-                            'South Carolina': 'SC',
-                            'South Dakota': 'SD',
-                            'Tennessee': 'TN',
-                            'Texas': 'TX',
-                            'Utah': 'UT',
-                            'Vermont': 'VT',
-                            'Virginia': 'VA',
-                            'Virgin Islands': 'VI',
-                            'Washington': 'WA',
-                            'West Virginia': 'WV',
-                            'Wisconsin': 'WI',
-                            'Wyoming': 'WY'
-                        },
-                        'CA': {
-                            'Alberta': 'AB',
-                            'British Columbia': 'BC',
-                            'Manitoba': 'MB',
-                            'New Brunswick': 'NB',
-                            'Newfoundland and Labrador': 'NL',
-                            'Northwest Territories': 'NT',
-                            'Nova Scotia': 'NS',
-                            'Nunavut': 'NU',
-                            'Ontario': 'ON',
-                            'Prince Edward Island': 'PE',
-                            'Quebec': 'QC',
-                            'Saskatchewan': 'SK',
-                            'Yukon': 'YT'
-                        }
-                    };
-
-                if (country === 'US' || country === 'CA') {
-                    $(inputDiv).empty();
-                    $(inputDiv).append(
-                        '<select name="state" class="select form-control" id="id_state"' +
-                        'aria-required="true" required></select>'
-                    );
-                    $('#id_state').append($('<option>', {value: '', text: gettext('<Choose state/province>')}));
-                    $('#div_id_state').find('label').text(gettext('State/Province (required)'));
-
-                    _.each(states[country], function (value, key) {
-                        $('#id_state').append($('<option>', {value: value, text: key}));
-                    });
-                } else {
-                    $(inputDiv).empty();
-                    $('#div_id_state').find('label').text('State/Province');
-                    // In order to change the maxlength attribute, the same needs to be changed in the Django form.
-                    $(inputDiv).append(
-                        '<input class="textinput textInput form-control" id="id_state"' +
-                        'maxlength="60" name="state" type="text">'
-                    );
-                }
-            });
-
-            $('#card-number').on('input', function () {
-                detectCreditCard();
-            });
-
-            $('#payment-button').click(function (e) {
-                _.each($('.help-block'), function (errorMsg) {
-                    $(errorMsg).empty();  // Clear existing validation error messages.
-                });
-                $('.payment-form').attr('data-has-error', false);
-                if ($('#card-number').val()) {
-                    detectCreditCard();
-                }
-                cardInfoValidation(e);
-                cardHolderInfoValidation(e);
-                if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
-                    sdnCheck(e);
-                }
-            });
-
-            $paymentButtons.find('.payment-button').click(function (e) {
-                var $btn = $(e.target),
-                    deferred = new $.Deferred(),
-                    promise = deferred.promise(),
-                    paymentProcessor = $btn.data('processor-name'),
-                    data = {
-                        basket_id: basketId,
-                        payment_processor: paymentProcessor
-                    };
-
-                Utils.disableElementWhileRunning($btn, function () {
-                    return promise;
-                });
-                checkoutPayment(data);
-            });
-
-            // Increment the quantity field until max
-            $('.spinner .btn:first-of-type').on('click', function () {
-                var btn = $(this),
-                    input = btn.closest('.spinner').find('input'),
-                    max = input.attr('max');
-
-                // Stop if max attribute is defined and value is reached to given max value
-                if (_.isUndefined(max) || parseInt(input.val()) < parseInt(max)) {
-                    input.val(parseInt(input.val()) + 1);
-                } else {
-                    btn.next('disabled', true);
-                }
-            });
-
-            // Decrement the quantity field until min
-            $('.spinner .btn:last-of-type').on('click', function () {
-                var btn = $(this),
-                    input = btn.closest('.spinner').find('input'),
-                    min = input.attr('min');
-
-                // Stop if min attribute is defined and value is reached to given min value
-                if (_.isUndefined(min) || parseInt(input.val()) > parseInt(min)) {
-                    input.val(parseInt(input.val()) - 1);
-                } else {
-                    btn.prev('disabled', true);
                 }
             });
         }
@@ -428,12 +225,220 @@ define([
             $('#cvvtooltip').toggle();
             $cvnHelpButton.attr(
                 'aria-haspopup',
-                $cvnHelpButton.attr('aria-haspopup')==='true'?'false':'true'
+                $cvnHelpButton.attr('aria-haspopup') === 'true' ? 'false' : 'true'
             );
             $cvnHelpButton.attr(
                 'aria-expanded',
-                $cvnHelpButton.attr('aria-expanded')==='true'?'false':'true'
+                $cvnHelpButton.attr('aria-expanded') === 'true' ? 'false' : 'true'
             );
+        }
+
+        function onReady() {
+            var $paymentButtons = $('.payment-buttons'),
+                basketId = $paymentButtons.data('basket-id');
+
+            Utils.toogleMobileMenuClickEvent();
+
+            $(document).keyup(function(e) {
+                switch (e.which) {
+                case KeyCodes.Escape:
+                    hideCvvTooltip();
+                    break;
+                case KeyCodes.Tab:
+                    if ($('#card-cvn-help').is(':focus')) {
+                        showCvvTooltip();
+                    }
+                    break;
+                default:
+                    break;
+                }
+            });
+
+            $('#card-cvn-help').on('click touchstart', function(event) {
+                event.preventDefault();
+                toggleCvvTooltip();
+            });
+
+            $('#card-cvn-help').blur(hideCvvTooltip);
+            $('#card-cvn-help').hover(showCvvTooltip, hideCvvTooltip);
+
+            $('#voucher_form_link').on('click', function(event) {
+                event.preventDefault();
+                showVoucherForm();
+            });
+
+            $('#voucher_form_cancel').on('click', function(event) {
+                event.preventDefault();
+                hideVoucherForm();
+            });
+
+            $('select[name=country]').on('change', function() {
+                var country = $('select[name=country]').val(),
+                    $inputDiv = $('#div_id_state .controls'),
+                    states = {
+                        US: {
+                            Alabama: 'AL',
+                            Alaska: 'AK',
+                            American: 'AS',
+                            Arizona: 'AZ',
+                            Arkansas: 'AR',
+                            California: 'CA',
+                            Colorado: 'CO',
+                            Connecticut: 'CT',
+                            Delaware: 'DE',
+                            'Dist. of Columbia': 'DC',
+                            Florida: 'FL',
+                            Georgia: 'GA',
+                            Guam: 'GU',
+                            Hawaii: 'HI',
+                            Idaho: 'ID',
+                            Illinois: 'IL',
+                            Indiana: 'IN',
+                            Iowa: 'IA',
+                            Kansas: 'KS',
+                            Kentucky: 'KY',
+                            Louisiana: 'LA',
+                            Maine: 'ME',
+                            Maryland: 'MD',
+                            'Marshall Islands': 'MH',
+                            Massachusetts: 'MA',
+                            Michigan: 'MI',
+                            Micronesia: 'FM',
+                            Minnesota: 'MN',
+                            Mississippi: 'MS',
+                            Missouri: 'MO',
+                            Montana: 'MT',
+                            Nebraska: 'NE',
+                            Nevada: 'NV',
+                            'New Hampshire': 'NH',
+                            'New Jersey': 'NJ',
+                            'New Mexico': 'NM',
+                            'New York': 'NY',
+                            'North Carolina': 'NC',
+                            'North Dakota': 'ND',
+                            'Northern Marianas': 'MP',
+                            Ohio: 'OH',
+                            Oklahoma: 'OK',
+                            Oregon: 'OR',
+                            Palau: 'PW',
+                            Pennsylvania: 'PA',
+                            'Puerto Rico': 'PR',
+                            'Rhode Island': 'RI',
+                            'South Carolina': 'SC',
+                            'South Dakota': 'SD',
+                            Tennessee: 'TN',
+                            Texas: 'TX',
+                            Utah: 'UT',
+                            Vermont: 'VT',
+                            Virginia: 'VA',
+                            'Virgin Islands': 'VI',
+                            Washington: 'WA',
+                            'West Virginia': 'WV',
+                            Wisconsin: 'WI',
+                            Wyoming: 'WY'
+                        },
+                        CA: {
+                            Alberta: 'AB',
+                            'British Columbia': 'BC',
+                            Manitoba: 'MB',
+                            'New Brunswick': 'NB',
+                            'Newfoundland and Labrador': 'NL',
+                            'Northwest Territories': 'NT',
+                            'Nova Scotia': 'NS',
+                            Nunavut: 'NU',
+                            Ontario: 'ON',
+                            'Prince Edward Island': 'PE',
+                            Quebec: 'QC',
+                            Saskatchewan: 'SK',
+                            Yukon: 'YT'
+                        }
+                    };
+
+                if (country === 'US' || country === 'CA') {
+                    $($inputDiv).empty();
+                    $($inputDiv).append(
+                        '<select name="state" class="select form-control" id="id_state"' +
+                        'aria-required="true" required></select>'
+                    );
+                    $('#id_state').append($('<option>', {value: '', text: gettext('<Choose state/province>')}));
+                    $('#div_id_state').find('label').text(gettext('State/Province (required)'));
+
+                    _.each(states[country], function(value, key) {
+                        $('#id_state').append($('<option>', {value: value, text: key}));
+                    });
+                } else {
+                    $($inputDiv).empty();
+                    $('#div_id_state').find('label').text('State/Province');
+                    // In order to change the maxlength attribute, the same needs to be changed in the Django form.
+                    $($inputDiv).append(
+                        '<input class="textinput textInput form-control" id="id_state"' +
+                        'maxlength="60" name="state" type="text">'
+                    );
+                }
+            });
+
+            $('#card-number').on('input', function() {
+                detectCreditCard();
+            });
+
+            $('#payment-button').click(function(e) {
+                _.each($('.help-block'), function(errorMsg) {
+                    $(errorMsg).empty();  // Clear existing validation error messages.
+                });
+                $('.payment-form').attr('data-has-error', false);
+                if ($('#card-number').val()) {
+                    detectCreditCard();
+                }
+                cardInfoValidation(e);
+                cardHolderInfoValidation(e);
+                if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
+                    sdnCheck(e);
+                }
+            });
+
+            $paymentButtons.find('.payment-button').click(function(e) {
+                var $btn = $(e.target),
+                    deferred = new $.Deferred(),
+                    promise = deferred.promise(),
+                    paymentProcessor = $btn.data('processor-name'),
+                    data = {
+                        basket_id: basketId,
+                        payment_processor: paymentProcessor
+                    };
+
+                Utils.disableElementWhileRunning($btn, function() {
+                    return promise;
+                });
+                checkoutPayment(data);
+            });
+
+            // Increment the quantity field until max
+            $('.spinner .btn:first-of-type').on('click', function() {
+                var $btn = $(this),
+                    input = $btn.closest('.spinner').find('input'),
+                    max = input.attr('max');
+
+                // Stop if max attribute is defined and value is reached to given max value
+                if (_.isUndefined(max) || parseInt(input.val(), 10) < parseInt(max, 10)) {
+                    input.val(parseInt(input.val(), 10) + 1);
+                } else {
+                    $btn.next('disabled', true);
+                }
+            });
+
+            // Decrement the quantity field until min
+            $('.spinner .btn:last-of-type').on('click', function() {
+                var $btn = $(this),
+                    input = $btn.closest('.spinner').find('input'),
+                    min = input.attr('min');
+
+                // Stop if min attribute is defined and value is reached to given min value
+                if (_.isUndefined(min) || parseInt(input.val(), 10) > parseInt(min, 10)) {
+                    input.val(parseInt(input.val(), 10) - 1);
+                } else {
+                    $btn.prev('disabled', true);
+                }
+            });
         }
 
         return {

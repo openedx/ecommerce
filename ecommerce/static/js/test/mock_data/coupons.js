@@ -1,28 +1,28 @@
-define([], function () {
+define([], function() {
     'use strict';
 
     var enrollmentCodeVoucher = {
-            'id': 1,
-            'name': 'Test Enrollment Code',
-            'code': 'XP54BC4M',
-            'redeem_url': 'http://localhost:8002/coupons/offer/?code=XP54BC4M',
-            'usage': 'Single use',
-            'start_datetime': '2015-01-01T00:00:00Z',
-            'end_datetime': '3500-01-01T00:00:00Z',
-            'num_basket_additions': 0,
-            'num_orders': 0,
-            'total_discount': '0.00',
-            'date_created': '2015-12-23',
-            'offers': [
+            id: 1,
+            name: 'Test Enrollment Code',
+            code: 'XP54BC4M',
+            redeem_url: 'http://localhost:8002/coupons/offer/?code=XP54BC4M',
+            usage: 'Single use',
+            start_datetime: '2015-01-01T00:00:00Z',
+            end_datetime: '3500-01-01T00:00:00Z',
+            num_basket_additions: 0,
+            num_orders: 0,
+            total_discount: '0.00',
+            date_created: '2015-12-23',
+            offers: [
                 1
             ],
-            'is_available_to_user': [
+            is_available_to_user: [
                 true,
                 ''
             ],
-            'benefit': {
-                'type': 'Percentage',
-                'value': 100.0
+            benefit: {
+                type: 'Percentage',
+                value: 100.0
             }
         },
         lastEditData = [
@@ -30,50 +30,50 @@ define([], function () {
             '2016-01-15T07:26:22.926Z'
         ],
         percentageDiscountCodeVoucher = {
-            'id': 1,
-            'name': 'Test Discount Code',
-            'code': 'TST1234',
-            'redeem_url': 'http://localhost:8002/coupons/offer/?code=TST1234',
-            'usage': 'Single use',
-            'start_datetime': '2015-01-01T00:00:00Z',
-            'end_datetime': '3500-01-01T00:00:00Z',
-            'num_basket_additions': 0,
-            'num_orders': 0,
-            'total_discount': '0.00',
-            'date_created': '2015-12-23',
-            'offers': [
+            id: 1,
+            name: 'Test Discount Code',
+            code: 'TST1234',
+            redeem_url: 'http://localhost:8002/coupons/offer/?code=TST1234',
+            usage: 'Single use',
+            start_datetime: '2015-01-01T00:00:00Z',
+            end_datetime: '3500-01-01T00:00:00Z',
+            num_basket_additions: 0,
+            num_orders: 0,
+            total_discount: '0.00',
+            date_created: '2015-12-23',
+            offers: [
                 1
             ],
-            'is_available_to_user': [
+            is_available_to_user: [
                 true,
                 ''
             ],
-            'benefit': {
-                'type': 'Percentage',
-                'value': 50.0
+            benefit: {
+                type: 'Percentage',
+                value: 50.0
             }
         },
         valueDiscountCodeVoucher = {
-            'id': 1,
-            'name': 'Test Discount Code',
-            'code': 'TST1234',
-            'redeem_url': 'http://localhost:8002/coupons/offer/?code=TST1234',
-            'usage': 'Once per customer',
-            'start_datetime': '2015-01-01T00:00:00Z',
-            'end_datetime': '3500-01-01T00:00:00Z',
-            'num_basket_additions': 0,
-            'num_orders': 0,
-            'total_discount': '0.00',
-            'date_created': '2015-12-23',
-            'offers': [
+            id: 1,
+            name: 'Test Discount Code',
+            code: 'TST1234',
+            redeem_url: 'http://localhost:8002/coupons/offer/?code=TST1234',
+            usage: 'Once per customer',
+            start_datetime: '2015-01-01T00:00:00Z',
+            end_datetime: '3500-01-01T00:00:00Z',
+            num_basket_additions: 0,
+            num_orders: 0,
+            total_discount: '0.00',
+            date_created: '2015-12-23',
+            offers: [
                 1
             ],
-            'is_available_to_user': [
+            is_available_to_user: [
                 true,
                 ''
             ],
-            'benefit_type': 'Absolute',
-            'benefit_value': 12.0
+            benefit_type: 'Absolute',
+            benefit_value: 12.0
         },
         verifiedSeat = {
             id: 9,
@@ -146,24 +146,24 @@ define([], function () {
             ]
         },
         discountCodeCouponData = {
-            'id': 11,
-            'title': 'Test Discount Code',
-            'coupon_type': 'Discount code',
-            'last_edited': lastEditData,
-            'seats': [verifiedSeat],
-            'client': 'Client Name',
-            'price': '100.00',
-            'categories': [
+            id: 11,
+            title: 'Test Discount Code',
+            coupon_type: 'Discount code',
+            last_edited: lastEditData,
+            seats: [verifiedSeat],
+            client: 'Client Name',
+            price: '100.00',
+            categories: [
                 {
-                    'id': 4,
-                    'name': 'TESTCAT'
+                    id: 4,
+                    name: 'TESTCAT'
                 }
             ],
-            'start_date': '2015-01-01T00:00:00Z',
-            'end_date': '2016-01-01T00:00:00Z',
-            'voucher_type': 'Single use',
-            'benefit_type': 'Percentage',
-            'benefit_value': 25
+            start_date: '2015-01-01T00:00:00Z',
+            end_date: '2016-01-01T00:00:00Z',
+            voucher_type: 'Single use',
+            benefit_type: 'Percentage',
+            benefit_value: 25
         },
         discountCodeCouponModelData = {
             title: 'Test Discount',
@@ -184,32 +184,32 @@ define([], function () {
             invoice_type: 'Not-Applicable'
         },
         enrollmentCodeCouponData = {
-            'id': 10,
-            'title': 'Test Enrollment Code',
-            'code_type': 'Enrollment code',
-            'last_edited': lastEditData,
-            'seats': [verifiedSeat],
-            'client': 'Client Name',
-            'category': {
-                'id': 4,
-                'name': 'TESTCAT'
+            id: 10,
+            title: 'Test Enrollment Code',
+            code_type: 'Enrollment code',
+            last_edited: lastEditData,
+            seats: [verifiedSeat],
+            client: 'Client Name',
+            category: {
+                id: 4,
+                name: 'TESTCAT'
             },
-            'course_catalog': null,
-            'enterprise_customer': '42a30ade47834489a607cd0f52ba13cf',
-            'price': '100.00',
-            'invoice_type': 'Prepaid',
-            'invoice_discount_type': 'Percentage',
-            'invoice_discount_value': 40,
-            'invoice_number': 'INV-00001',
-            'invoice_payment_date': '2015-01-01T00:00:00Z',
-            'tax_deducted_source': 50,
-            'start_date': '2015-01-01T00:00:00Z',
-            'end_date': '2016-01-01T00:00:00Z',
-            'voucher_type': 'Single use',
-            'code_status': 'ACTIVE',
-            'coupon_type': 'Enrollment Code',
-            'benefit_type': 'Percentage',
-            'benefit_value': 100
+            course_catalog: null,
+            enterprise_customer: '42a30ade47834489a607cd0f52ba13cf',
+            price: '100.00',
+            invoice_type: 'Prepaid',
+            invoice_discount_type: 'Percentage',
+            invoice_discount_value: 40,
+            invoice_number: 'INV-00001',
+            invoice_payment_date: '2015-01-01T00:00:00Z',
+            tax_deducted_source: 50,
+            start_date: '2015-01-01T00:00:00Z',
+            end_date: '2016-01-01T00:00:00Z',
+            voucher_type: 'Single use',
+            code_status: 'ACTIVE',
+            coupon_type: 'Enrollment Code',
+            benefit_type: 'Percentage',
+            benefit_value: 100
         },
         enrollmentCodeCouponModelData = {
             title: 'Test Enrollment',
@@ -249,27 +249,27 @@ define([], function () {
             ]
         },
         dynamicCouponData = {
-            'id': 12,
-            'title': 'Test Dynamic Code',
-            'coupon_type': 'Enrollment code',
-            'last_edited': lastEditData,
-            'seats': [],
-            'client': 'Client Name',
-            'price': '100.00',
-            'categories': [
+            id: 12,
+            title: 'Test Dynamic Code',
+            coupon_type: 'Enrollment code',
+            last_edited: lastEditData,
+            seats: [],
+            client: 'Client Name',
+            price: '100.00',
+            categories: [
                 {
-                    'id': 4,
-                    'name': 'TESTCAT'
+                    id: 4,
+                    name: 'TESTCAT'
                 }
             ],
-            'start_date': '2015-01-01T00:00:00Z',
-            'end_date': '2017-01-01T00:00:00Z',
-            'voucher_type': 'Single use',
-            'benefit_type': 'Percentage',
-            'benefit_value': 10,
-            'catalog_type': 'Multiple courses',
-            'catalog_query': 'org:edX',
-            'course_seat_types': [
+            start_date: '2015-01-01T00:00:00Z',
+            end_date: '2017-01-01T00:00:00Z',
+            voucher_type: 'Single use',
+            benefit_type: 'Percentage',
+            benefit_value: 10,
+            catalog_type: 'Multiple courses',
+            catalog_query: 'org:edX',
+            course_seat_types: [
                 'verified', 'professional'
             ]
         },
@@ -310,40 +310,40 @@ define([], function () {
             }
         },
         enrollmentMultiUseCouponData = {
-            'id': 13,
-            'title': 'Test enrollment Muti-use coupon',
-            'coupon_type': 'Enrollment code',
-            'last_edited': lastEditData,
-            'seats': [verifiedSeat],
-            'client': 'Client Name',
-            'price': '100.00',
-            'categories': [
+            id: 13,
+            title: 'Test enrollment Muti-use coupon',
+            coupon_type: 'Enrollment code',
+            last_edited: lastEditData,
+            seats: [verifiedSeat],
+            client: 'Client Name',
+            price: '100.00',
+            categories: [
                 {
-                    'id': 4,
-                    'name': 'TESTCAT'
+                    id: 4,
+                    name: 'TESTCAT'
                 }
             ],
-            'start_date': '2015-01-01T00:00:00Z',
-            'end_date': '3500-01-01T00:00:00Z',
-            'voucher_type': 'Multi-use',
-            'max_uses': '5',
-            'benefit_type': 'Percentage',
-            'benefit_value': 100
+            start_date: '2015-01-01T00:00:00Z',
+            end_date: '3500-01-01T00:00:00Z',
+            voucher_type: 'Multi-use',
+            max_uses: '5',
+            benefit_type: 'Percentage',
+            benefit_value: 100
         };
     return {
-        'couponAPIResponseData': couponAPIResponseData,
-        'couponWithInvoiceData': couponWithInvoiceData,
-        'courseData': courseData,
-        'discountCodeCouponData': discountCodeCouponData,
-        'discountCodeCouponModelData': discountCodeCouponModelData,
-        'dynamicCouponData': dynamicCouponData,
-        'enrollmentCodeCouponData': enrollmentCodeCouponData,
-        'enrollmentCodeCouponModelData': enrollmentCodeCouponModelData,
-        'enrollmentCodeVoucher': enrollmentCodeVoucher,
-        'enrollmentMultiUseCouponData': enrollmentMultiUseCouponData,
-        'lastEditData': lastEditData,
-        'percentageDiscountCodeVoucher': percentageDiscountCodeVoucher,
-        'valueDiscountCodeVoucher': valueDiscountCodeVoucher,
-        'verifiedSeat': verifiedSeat
+        couponAPIResponseData: couponAPIResponseData,
+        couponWithInvoiceData: couponWithInvoiceData,
+        courseData: courseData,
+        discountCodeCouponData: discountCodeCouponData,
+        discountCodeCouponModelData: discountCodeCouponModelData,
+        dynamicCouponData: dynamicCouponData,
+        enrollmentCodeCouponData: enrollmentCodeCouponData,
+        enrollmentCodeCouponModelData: enrollmentCodeCouponModelData,
+        enrollmentCodeVoucher: enrollmentCodeVoucher,
+        enrollmentMultiUseCouponData: enrollmentMultiUseCouponData,
+        lastEditData: lastEditData,
+        percentageDiscountCodeVoucher: percentageDiscountCodeVoucher,
+        valueDiscountCodeVoucher: valueDiscountCodeVoucher,
+        verifiedSeat: verifiedSeat
     };
 });

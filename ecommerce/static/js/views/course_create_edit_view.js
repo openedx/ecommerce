@@ -1,39 +1,39 @@
 define([
-        'jquery',
-        'backbone',
-        'backbone.super',
-        'underscore',
-        'views/course_form_view',
-        'text!templates/course_create_edit.html',
-        'bootstrap'
-    ],
-    function ($,
-              Backbone,
-              BackboneSuper,
-              _,
-              CourseFormView,
-              CourseCreateEditTemplate) {
+    'jquery',
+    'backbone',
+    'backbone.super',
+    'underscore',
+    'views/course_form_view',
+    'text!templates/course_create_edit.html',
+    'bootstrap'
+],
+    function($,
+             Backbone,
+             BackboneSuper,
+             _,
+             CourseFormView,
+             CourseCreateEditTemplate) {
         'use strict';
 
         return Backbone.View.extend({
             template: _.template(CourseCreateEditTemplate),
             className: 'course-create-edit-view',
 
-            initialize: function (options) {
+            initialize: function(options) {
                 // This indicates if we are editing or creating a course.
                 this.editing = options.editing;
             },
 
-            remove: function () {
+            remove: function() {
                 if (this.formView) {
                     this.formView.remove();
                     this.formView = null;
                 }
 
-                this._super();
+                this._super(); // eslint-disable-line no-underscore-dangle
             },
 
-            render: function () {
+            render: function() {
                 var $html,
                     data = this.model.attributes;
 

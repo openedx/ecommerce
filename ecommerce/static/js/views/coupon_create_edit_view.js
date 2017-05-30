@@ -1,13 +1,13 @@
 define([
-        'jquery',
-        'backbone',
-        'backbone.super',
-        'underscore',
-        'views/coupon_form_view',
-        'text!templates/coupon_create_edit.html',
-        'bootstrap'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'backbone.super',
+    'underscore',
+    'views/coupon_form_view',
+    'text!templates/coupon_create_edit.html',
+    'bootstrap'
+],
+    function($,
               Backbone,
               BackboneSuper,
               _,
@@ -19,21 +19,21 @@ define([
             template: _.template(CouponCreateEditTemplate),
             className: 'coupon-create-edit-view',
 
-            initialize: function (options) {
+            initialize: function(options) {
                 // This indicates if we are editing or creating a code.
                 this.editing = options.editing;
             },
 
-            remove: function () {
+            remove: function() {
                 if (this.formView) {
                     this.formView.remove();
                     this.formView = null;
                 }
 
-                this._super();
+                this._super(); // eslint-disable-line no-underscore-dangle
             },
 
-            render: function () {
+            render: function() {
                 var $html,
                     data = this.model.attributes;
 

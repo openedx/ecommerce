@@ -1,11 +1,11 @@
 define([
-        'jquery',
-        'underscore',
-        'models/offer_model',
-        'views/offer_view',
-        'collections/offer_collection'
-    ],
-    function ($,
+    'jquery',
+    'underscore',
+    'models/offer_model',
+    'views/offer_view',
+    'collections/offer_collection'
+],
+    function($,
               _,
               OfferModel,
               OfferView,
@@ -65,7 +65,7 @@ define([
                 $('body').append('<div class="verified-info"></div>');
                 code = 'ABCDE';
                 collection = new OfferCollection(null, {code: code});
-                collection.add([ course, course2 ]);
+                collection.add([course, course2]);
                 view = new OfferView({code: code, collection: collection}).render();
             });
 
@@ -183,7 +183,8 @@ define([
             });
 
             it('should render pagination correct in all cases', function() {
-                var ellipsisSpyCounter = 1;
+                var ellipsisSpyCounter = 1,
+                    i;
 
                 spyOn(view, 'createEllipsisItem');
                 spyOn(view, 'createPreviousItem');
@@ -193,18 +194,18 @@ define([
                 collection.numberOfPages = 10;
                 collection.perPage = 1;
 
-                for (var i=1; i<=collection.numberOfPages; i++) {
+                for (i = 1; i <= collection.numberOfPages; i += 1) {
                     collection.page = i;
                     view.renderPagination();
 
                     expect(view.createPreviousItem).toHaveBeenCalled();
                     expect(view.createNextItem).toHaveBeenCalled();
                     if (collection.page - 4 >= 1 && collection.page + 4 <= collection.numberOfPages) {
-                        expect(view.createEllipsisItem.calls.count()).toBe(ellipsisSpyCounter+1);
+                        expect(view.createEllipsisItem.calls.count()).toBe(ellipsisSpyCounter + 1);
                         ellipsisSpyCounter += 2;
-                    }else {
+                    } else {
                         expect(view.createEllipsisItem.calls.count()).toBe(ellipsisSpyCounter);
-                        ++ellipsisSpyCounter;
+                        ellipsisSpyCounter += 1;
                     }
                     expect(view.createListItem).toHaveBeenCalledWith(collection.page, true);
                 }
@@ -230,22 +231,22 @@ define([
             });
 
             it('should get next page from the collection', function() {
-                var next_collection_page = {'1': 1, '2': 2};
-                spyOn(view.collection, 'nextPage').and.returnValue(next_collection_page);
+                var nextCollectionPage = {1: 1, 2: 2};
+                spyOn(view.collection, 'nextPage').and.returnValue(nextCollectionPage);
                 spyOn(view, 'changePage');
                 view.next();
                 expect(view.collection.nextPage).toHaveBeenCalled();
-                expect(view.page).toEqual(next_collection_page);
+                expect(view.page).toEqual(nextCollectionPage);
                 expect(view.changePage).toHaveBeenCalled();
             });
 
             it('should get previous page from the collection', function() {
-                var previous_collection_page = {'1': 1, '2': 2};
-                spyOn(view.collection, 'previousPage').and.returnValue(previous_collection_page);
+                var previousCollectionPage = {1: 1, 2: 2};
+                spyOn(view.collection, 'previousPage').and.returnValue(previousCollectionPage);
                 spyOn(view, 'changePage');
                 view.previous();
                 expect(view.collection.previousPage).toHaveBeenCalled();
-                expect(view.page).toEqual(previous_collection_page);
+                expect(view.page).toEqual(previousCollectionPage);
                 expect(view.changePage).toHaveBeenCalled();
             });
 

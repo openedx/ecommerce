@@ -1,15 +1,15 @@
 define([
-        'jquery',
-        'moment',
-        'underscore',
-        'collections/product_collection',
-        'models/course_model',
-        'models/course_seats/professional_seat',
-        'models/course_seats/audit_seat',
-        'models/course_seats/honor_seat',
-        'js-cookie'
-    ],
-    function ($,
+    'jquery',
+    'moment',
+    'underscore',
+    'collections/product_collection',
+    'models/course_model',
+    'models/course_seats/professional_seat',
+    'models/course_seats/audit_seat',
+    'models/course_seats/honor_seat',
+    'js-cookie'
+],
+    function($,
               moment,
               _,
               ProductCollection,
@@ -174,7 +174,7 @@ define([
                     {
                         name: 'id_verification_required',
                         value: true
-                    },
+                    }
                 ],
                 is_available_to_buy: true
             },
@@ -213,16 +213,16 @@ define([
                 ]
             };
 
-        describe('Course model', function () {
-            beforeEach(function () {
+        describe('Course model', function() {
+            beforeEach(function() {
                 model = Course.findOrCreate(data, {parse: true});
 
                 // Remove the non-essential products
                 model.prepareProducts();
             });
 
-            describe('prepareProducts', function () {
-                it('should remove all non-essential products from the products collection', function () {
+            describe('prepareProducts', function() {
+                it('should remove all non-essential products from the products collection', function() {
                     var products;
 
                     // Re-initialize the model since the beforeEach removes the products we don't need
@@ -243,19 +243,19 @@ define([
 
             // NOTE (CCB): There is a bug preventing this from being called 'toJSON'.
             // See https://github.com/karma-runner/karma/issues/1534.
-            describe('#toJSON', function () {
-                it('should not modify verification_deadline if verification_deadline is empty', function () {
+            describe('#toJSON', function() {
+                it('should not modify verification_deadline if verification_deadline is empty', function() {
                     var json,
                         values = [null, ''];
 
-                    _.each(values, function (value) {
+                    _.each(values, function(value) {
                         model.set('verification_deadline', value);
                         json = model.toJSON();
                         expect(json.verification_deadline).toEqual(value);
                     });
                 });
 
-                it('should add a timezone to verification_deadline if verification_deadline is not empty', function () {
+                it('should add a timezone to verification_deadline if verification_deadline is not empty', function() {
                     var json,
                         deadline = '2015-01-01T00:00:00';
 
@@ -266,8 +266,8 @@ define([
                 });
             });
 
-            describe('save', function () {
-                var expectedAjaxData = function (data) {
+            describe('save', function() {
+                var expectedAjaxData = function() {
                     var products,
                         expected = {
                             id: data.id,
@@ -276,18 +276,18 @@ define([
                             create_or_activate_enrollment_code: false
                         };
 
-                    products = _.filter(data.products, function (product) {
+                    products = _.filter(data.products, function(product) {
                         return product.structure === 'child';
                     });
 
-                    expected.products = _.map(products, function (product) {
+                    expected.products = _.map(products, function(product) {
                         return product;
                     });
 
                     return expected;
                 };
 
-                it('should POST to the publication endpoint', function () {
+                it('should POST to the publication endpoint', function() {
                     var args,
                         cookie = 'save-test';
 
@@ -341,25 +341,25 @@ define([
             });
 
             // FIXME: These tests timeout when run. This is tracked by LEARNER-824.
-            xdescribe('getOrCreateSeats', function () {
-                it('should return existing seats', function () {
+            xdescribe('getOrCreateSeats', function() {
+                it('should return existing seats', function() {
                     var mapping = {
-                            'audit': [auditSeat],
-                            'honor': [honorSeat],
-                            'verified': [verifiedSeat],
-                            'credit': [creditSeat, alternateCreditSeat]
+                            audit: [auditSeat],
+                            honor: [honorSeat],
+                            verified: [verifiedSeat],
+                            credit: [creditSeat, alternateCreditSeat]
                         },
                         seats;
 
-                    _.each(mapping, function (expected, seatType) {
+                    _.each(mapping, function(expected, seatType) {
                         seats = model.getOrCreateSeats(seatType);
-                        _.each(seats, function (seat) {
+                        _.each(seats, function(seat) {
                             expect(expected).toContain(seat.toJSON());
                         });
                     });
                 });
 
-                it('should create a new CourseSeat if one does not exist', function () {
+                it('should create a new CourseSeat if one does not exist', function() {
                     var seat;
 
                     // Sanity check to confirm a new seat is created later
@@ -375,14 +375,14 @@ define([
             });
 
             // FIXME: This test times out when run. This is tracked by LEARNER-824.
-            xdescribe('products', function () {
-                it('is a ProductCollection', function () {
+            xdescribe('products', function() {
+                it('is a ProductCollection', function() {
                     expect(model.get('products')).toEqual(jasmine.any(ProductCollection));
                 });
             });
 
-            describe('verification deadline validation', function () {
-                it('succeeds if the verification deadline is after the course seats\' expiration dates', function () {
+            describe('verification deadline validation', function() {
+                it('succeeds if the verification deadline is after the course seats\' expiration dates', function() {
                     var seat = model.getOrCreateSeats('verified')[0];
                     model.set('verification_deadline', '2016-01-01T00:00:00Z');
                     seat.set('expires', '2015-01-01T00:00:00Z');
@@ -391,7 +391,7 @@ define([
                     expect(model.isValid(true)).toBeTruthy();
                 });
 
-                it('fails if the verification deadline is before the course seats\' expiration dates', function () {
+                it('fails if the verification deadline is before the course seats\' expiration dates', function() {
                     var seat = model.getOrCreateSeats('verified')[0],
                         msg = 'The verification deadline must occur AFTER the upgrade deadline.';
                     model.set('verification_deadline', '2014-01-01T00:00:00Z');
@@ -402,9 +402,9 @@ define([
                 });
             });
 
-            describe('products validation', function () {
-                describe('with single value', function () {
-                    it('should return an error message if any product is invalid', function () {
+            describe('products validation', function() {
+                describe('with single value', function() {
+                    it('should return an error message if any product is invalid', function() {
                         var msg = 'Product validation failed.',
                             products = model.get('products');
 
@@ -416,16 +416,16 @@ define([
                     });
                 });
 
-                describe('with non-products', function () {
-                    it('should have an undefined return value', function () {
+                describe('with non-products', function() {
+                    it('should have an undefined return value', function() {
                         expect(model.validation.products([])).toBeUndefined();
                     });
                 });
             });
 
-            describe('honorModeInit', function () {
-                describe('with seats', function () {
-                    it('sets honor_mode to true', function () {
+            describe('honorModeInit', function() {
+                describe('with seats', function() {
+                    it('sets honor_mode to true', function() {
                         model.set('honor_mode', null);
                         model.set('products', []);
                         model.get('products').push(new AuditSeat({}));
@@ -434,7 +434,7 @@ define([
                         expect(model.get('honor_mode')).toBeTruthy();
                     });
 
-                    it('sets honor_mode to false', function () {
+                    it('sets honor_mode to false', function() {
                         model.set('honor_mode', null);
                         model.set('products', []);
                         model.get('products').push(new AuditSeat({}));
@@ -443,8 +443,8 @@ define([
                     });
                 });
 
-                describe('without seats', function () {
-                    it('should have an undefined return value', function () {
+                describe('without seats', function() {
+                    it('should have an undefined return value', function() {
                         model.set('honor_mode', null);
                         model.set('products', []);
                         model.honorModeInit();
@@ -453,9 +453,9 @@ define([
                 });
             });
 
-            describe('honor mode validation', function () {
-                describe('without an honor mode', function () {
-                    beforeEach(function () {
+            describe('honor mode validation', function() {
+                describe('without an honor mode', function() {
+                    beforeEach(function() {
                         model = Course.findOrCreate({
                             id: 'test/testX/testcourse',
                             name: 'Test Course',
@@ -465,13 +465,13 @@ define([
                         });
                     });
 
-                    it('is valid for professional education courses', function () {
+                    it('is valid for professional education courses', function() {
                         model.set('type', 'professional');
                         expect(model.isValid(true)).toBeTruthy();
                     });
 
-                    it('is not valid for non-prof-ed courses', function () {
-                        _.each(['audit', 'verified', 'credit'], function (type) {
+                    it('is not valid for non-prof-ed courses', function() {
+                        _.each(['audit', 'verified', 'credit'], function(type) {
                             model.set('type', type);
                             expect(model.isValid(true)).toBeFalsy();
                         });
@@ -479,13 +479,13 @@ define([
                 });
             });
 
-            describe('product title validation', function () {
-                it('succeeds if the product title does not contain HTML', function () {
+            describe('product title validation', function() {
+                it('succeeds if the product title does not contain HTML', function() {
                     model.set('name', 'edX Demonstration Course');
                     expect(model.isValid(true)).toBeTruthy();
                 });
 
-                it('fails if the product title contains HTML', function () {
+                it('fails if the product title contains HTML', function() {
                     model.set('name', 'edx Demo Course &amp; test with <a>html</a>');
                     expect(model.validate().name).toEqual('The product name cannot contain HTML.');
                     expect(model.isValid(true)).toBeFalsy();

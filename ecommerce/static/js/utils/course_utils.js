@@ -1,13 +1,13 @@
 define([
-        'underscore',
-        'models/course_seats/audit_seat',
-        'models/course_seats/course_seat',
-        'models/course_seats/honor_seat',
-        'models/course_seats/professional_seat',
-        'models/course_seats/verified_seat',
-        'models/course_seats/credit_seat'
-    ],
-    function (_,
+    'underscore',
+    'models/course_seats/audit_seat',
+    'models/course_seats/course_seat',
+    'models/course_seats/honor_seat',
+    'models/course_seats/professional_seat',
+    'models/course_seats/verified_seat',
+    'models/course_seats/credit_seat'
+],
+    function(_,
               AuditSeat,
               CourseSeat,
               HonorSeat,
@@ -28,7 +28,7 @@ define([
              *
              * @returns {CourseSeat[]}
              */
-            getSeatModelMap: _.memoize(function () {
+            getSeatModelMap: _.memoize(function() {
                 return _.indexBy([AuditSeat, HonorSeat, ProfessionalSeat, VerifiedSeat, CreditSeat], 'seatType');
             }),
 
@@ -38,7 +38,7 @@ define([
              * @param {String} seatType
              * @returns {CourseSeat} - CourseSeat subclass, or CourseSeat if seatType is not mapped to a specific class.
              */
-            getCourseSeatModel: function (seatType) {
+            getCourseSeatModel: function(seatType) {
                 return this.getSeatModelMap()[seatType] || CourseSeat;
             },
 
@@ -47,14 +47,14 @@ define([
              * @param {CourseSeat[]} seats
              * @returns {CourseSeat[]}
              */
-            orderSeatsForDisplay: function (seats) {
-                return _.sortBy(seats, function (seat) {
+            orderSeatsForDisplay: function(seats) {
+                return _.sortBy(seats, function(seat) {
                     return this.seatSortObj[seat.getSeatType()];
                 }, this);
             },
 
-            orderSeatTypesForDisplay: function (seatTypes) {
-                return _.sortBy(seatTypes, function (seatType) {
+            orderSeatTypesForDisplay: function(seatTypes) {
+                return _.sortBy(seatTypes, function(seatType) {
                     return this.seatSortObj[seatType];
                 }, this);
             },
@@ -68,8 +68,8 @@ define([
              * @param {String} seatType
              * @returns {Object}
              */
-            filterSeats: function (seats, seatType) {
-                return _.groupBy(seats, function (seat) {
+            filterSeats: function(seats, seatType) {
+                return _.groupBy(seats, function(seat) {
                     if (seat.getSeatType() === seatType) {
                         return 'filtered';
                     }

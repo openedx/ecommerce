@@ -1,9 +1,11 @@
 define([
-        'moment',
-        'models/product_model'
-    ],
-    function (moment,
-              Product) {
+    'underscore',
+    'moment',
+    'models/product_model'
+],
+    function(_,
+             moment,
+             Product) {
         'use strict';
 
         return Product.extend({
@@ -28,13 +30,13 @@ define([
                 product_class: {
                     oneOf: ['Seat']
                 },
-                expires: function (value) {
+                expires: function(value) {
                     var verificationDeadline,
                         course = this.course || this.get('course');
 
                     // No validation is needed when the Seat is not linked to the course
                     if (!course || !course.get('id')) {
-                        return;
+                        return undefined;
                     }
 
                     if (_.isEmpty(value)) {
@@ -42,7 +44,7 @@ define([
                         if (this.getSeatType() === 'verified') {
                             return gettext('Verified seats must have an upgrade deadline.');
                         }
-                        return;
+                        return undefined;
                     }
 
                     // Determine if the supplied expiration date occurs after the course verification deadline.
@@ -50,60 +52,61 @@ define([
                     if (verificationDeadline && !moment(value).isBefore(verificationDeadline)) {
                         return gettext('The upgrade deadline must occur BEFORE the verification deadline.');
                     }
+                    return undefined;
                 }
             },
 
             // TODO Determine how to use the extended seatType attribute of child classes with Backbone.Relational
             // http://backbonerelational.org/#RelationalModel-subModelTypes
-            getSeatType: function () {
+            getSeatType: function() {
                 switch (this.get('certificate_type')) {
-                    case 'verified':
+                case 'verified':
                     {
                         return 'verified';
                     }
-                    case 'credit':
-                        return 'credit';
-                    case 'professional':
-                    case 'no-id-professional':
-                        return 'professional';
-                    case 'honor':
-                        return 'honor';
-                    default:
-                        return 'audit';
+                case 'credit':
+                    return 'credit';
+                case 'professional':
+                case 'no-id-professional':
+                    return 'professional';
+                case 'honor':
+                    return 'honor';
+                default:
+                    return 'audit';
                 }
             },
 
-            getSeatTypeDisplayName: function () {
+            getSeatTypeDisplayName: function() {
                 switch (this.get('certificate_type')) {
-                    case 'verified':
-                        return gettext('Verified');
-                    case 'credit':
-                        return gettext('Credit');
-                    case 'professional':
-                    case 'no-id-professional':
-                        return gettext('Professional');
-                    case 'honor':
-                        return gettext('Honor');
-                    default:
-                        return gettext('Audit');
+                case 'verified':
+                    return gettext('Verified');
+                case 'credit':
+                    return gettext('Credit');
+                case 'professional':
+                case 'no-id-professional':
+                    return gettext('Professional');
+                case 'honor':
+                    return gettext('Honor');
+                default:
+                    return gettext('Audit');
                 }
             },
 
-            getCertificateDisplayName: function () {
+            getCertificateDisplayName: function() {
                 switch (this.get('certificate_type')) {
-                    case 'verified':
-                    case 'credit':
-                        return gettext('Verified Certificate');
+                case 'verified':
+                case 'credit':
+                    return gettext('Verified Certificate');
 
-                    case 'professional':
-                    case 'no-id-professional':
-                        return gettext('Professional Certificate');
+                case 'professional':
+                case 'no-id-professional':
+                    return gettext('Professional Certificate');
 
-                    case 'honor':
-                        return gettext('Honor Certificate');
+                case 'honor':
+                    return gettext('Honor Certificate');
 
-                    default:
-                        return '(' + gettext('No Certificate') + ')';
+                default:
+                    return '(' + gettext('No Certificate') + ')';
                 }
             }
         });
