@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-from optparse import make_option
 
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -27,43 +26,36 @@ class Command(BaseCommand):
     help = 'Convert a list of courses from honor to audit, or vice versa. For use with courses '
     'which already have enrollments.'
 
-    option_list = BaseCommand.option_list + (
-        make_option(
-            '--access_token',
-            action='store',
-            dest='access_token',
-            default=None,
-            help='OAuth2 access token used to authenticate against the LMS APIs.'
-        ),
-        make_option(
-            '--commit',
-            action='store_true',
-            dest='commit',
-            default=False,
-            help='Save the changes to the database. If this is not set,'
-            ' migrated data will NOT be saved to the database.'
-        ),
-        make_option(
-            '--partner',
-            action='store',
-            dest='partner',
-            default=None,
-            help='Partner code for the site whose courses should be updated.'
-        ),
-        make_option(
-            '--direction',
-            action='store',
-            dest='direction',
-            type='choice',
-            choices=(HONOR_TO_AUDIT, AUDIT_TO_HONOR),
-            default=HONOR_TO_AUDIT,
-            help='Which direction to convert the courses. Options are honor_to_audit, or audit_to_honor.'
-        )
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('course_ids', nargs='+', type=str)
+
+        parser.add_argument('--access_token',
+                            action='store',
+                            dest='access_token',
+                            default=None,
+                            help='OAuth2 access token used to authenticate against the LMS APIs.')
+        parser.add_argument('--commit',
+                            action='store_true',
+                            dest='commit',
+                            default=False,
+                            help='Save the changes to the database. If this is not set,'
+                                 ' migrated data will NOT be saved to the database.')
+        parser.add_argument('--partner',
+                            action='store',
+                            dest='partner',
+                            default=None,
+                            help='Partner code for the site whose courses should be updated.')
+        parser.add_argument('--direction',
+                            action='store',
+                            dest='direction',
+                            choices=(HONOR_TO_AUDIT, AUDIT_TO_HONOR),
+                            default=HONOR_TO_AUDIT,
+                            help='Which direction to convert the courses. Options are honor_to_audit, or audit_to_'
+                                 'honor.')
 
     def handle(self, *args, **options):
         self.options = options  # pylint: disable=attribute-defined-outside-init
-        course_ids = map(unicode, args)
+        course_ids = map(unicode, self.options.get('course_ids', []))
 
         self.access_token = options.get('access_token')  # pylint: disable=attribute-defined-outside-init
         if not self.access_token:

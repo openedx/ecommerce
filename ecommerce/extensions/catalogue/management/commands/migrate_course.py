@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-from optparse import make_option
 
 import requests
 import waffle
@@ -153,27 +152,28 @@ class MigratedCourse(object):
 class Command(BaseCommand):
     help = 'Migrate course modes and pricing from LMS to Oscar.'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--access_token',
-                    action='store',
-                    dest='access_token',
-                    default=None,
-                    help='OAuth2 access token used to authenticate against some LMS APIs.'),
-        make_option('--commit',
-                    action='store_true',
-                    dest='commit',
-                    default=False,
-                    help='Save the migrated data to the database. If this is not set, '
-                         'migrated data will NOT be saved to the database.'),
-        make_option('--site',
-                    action='store',
-                    dest='site_domain',
-                    default=None,
-                    help='Domain for the ecommerce site providing the course.'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('course_ids', nargs='+', type=str)
+
+        parser.add_argument('--access_token',
+                            action='store',
+                            dest='access_token',
+                            default=None,
+                            help='OAuth2 access token used to authenticate against some LMS APIs.')
+        parser.add_argument('--commit',
+                            action='store_true',
+                            dest='commit',
+                            default=False,
+                            help='Save the migrated data to the database. If this is not set, '
+                                 'migrated data will NOT be saved to the database.')
+        parser.add_argument('--site',
+                            action='store',
+                            dest='site_domain',
+                            default=None,
+                            help='Domain for the ecommerce site providing the course.')
 
     def handle(self, *args, **options):
-        course_ids = args
+        course_ids = options.get('course_ids', [])
         access_token = options.get('access_token')
         site_domain = options.get('site_domain')
         if not access_token:
