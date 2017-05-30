@@ -1,14 +1,14 @@
 define([
-        'jquery',
-        'backbone',
-        'backbone.super',
-        'backbone.validation',
-        'underscore',
-        'underscore.string',
-        'utils/alert_utils',
-        'utils/utils',
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'backbone.super',
+    'backbone.validation',
+    'underscore',
+    'underscore.string',
+    'utils/alert_utils',
+    'utils/utils'
+],
+    function($,
               Backbone,
               BackboneSuper,
               BackboneValidation,
@@ -22,10 +22,10 @@ define([
             tagName: 'form',
 
             events: {
-                'submit': 'submit'
+                submit: 'submit'
             },
 
-            initialize: function () {
+            initialize: function() {
                 this.alertViews = [];
 
                 if (this.editing && _.has(this, 'editableAttributes')) {
@@ -36,20 +36,20 @@ define([
                 Utils.bindValidation(this);
             },
 
-            remove: function () {
+            remove: function() {
                 Backbone.Validation.unbind(this);
 
                 AlertUtils.clearAlerts(this);
-                return this._super();
+                return this._super(); // eslint-disable-line no-underscore-dangle
             },
 
-            render: function () {
+            render: function() {
                 // Avoid the need to create this jQuery object every time an alert has to be rendered.
                 this.$alerts = this.$el.find('.alerts');
                 return this;
             },
 
-            validateCourseID : function(){
+            validateCourseID: function() {
                 var self = this;
                 var courseIdInput = self.$('input[name=id]');
                 courseIdInput.focusout(function() {
@@ -60,10 +60,12 @@ define([
             /**
              * Validate the courseId input if it already exists
              */
-            checkCourseAlreadyExist : function(courseId){
-                var courseIDFound = false, _this = this, url = '/api/v2/courses/' + courseId,
-                    redirected_url = '/courses/' + courseId,
-                    html = '<a href="'+redirected_url+'"> Click here to view the existing course</a>',
+            checkCourseAlreadyExist: function(courseId) {
+                var courseIDFound = false,
+                    self = this,
+                    url = '/api/v2/courses/' + courseId,
+                    redirectedUrl = '/courses/' + courseId,
+                    html = '<a href="' + redirectedUrl + '"> Click here to view the existing course</a>',
                     message = gettext('A course with the specified ID already exists.' + html);
 
                 $.ajax({
@@ -71,21 +73,20 @@ define([
                     method: 'get',
                     contentType: 'application/json',
                     async: false,
-                    success: function (data) {
-                        if(data.id === courseId) {
-                            AlertUtils.clearAlerts(_this);
-                            AlertUtils.renderAlert('danger', gettext('Error!'), message, _this);
+                    success: function(data) {
+                        if (data.id === courseId) {
+                            AlertUtils.clearAlerts(self);
+                            AlertUtils.renderAlert('danger', gettext('Error!'), message, self);
                             courseIDFound = true;
                         }
                     },
-                    error: function (response) {
+                    error: function(response) {
                         if (response.status === 404) {
-                            AlertUtils.clearAlerts(_this);
+                            AlertUtils.clearAlerts(self);
                         }
                     }
                 });
                 return courseIDFound;
-
             },
 
             /**
@@ -93,14 +94,14 @@ define([
              *
              * @param {String} fragment
              */
-            goTo: function (fragment) {
+            goTo: function(fragment) {
                 Backbone.history.navigate(fragment, {trigger: true});
             },
 
             /**
              * Callback to run on save success.
              */
-            saveSuccess: function (model) {
+            saveSuccess: function(model) {
                 this.goTo(model.id);
             },
 
@@ -112,8 +113,10 @@ define([
              *
              * @param e
              */
-            submit: function (e) {
-                var $buttons,
+            submit: function(e) {
+                var changedAttributes,
+                    editableAttributes,
+                    $buttons,
                     $submitButton,
                     btnDefaultText,
                     self = this,
@@ -129,11 +132,9 @@ define([
                 if (!this.model.isValid(true)) {
                     AlertUtils.clearAlerts(self);
                     AlertUtils.renderAlert('danger', '', gettext('Please complete all required fields.'), self);
-                    return;
-                }
-                // Check if the courseID already exists.
-                else if(courseId && !self.editing && self.checkCourseAlreadyExist(courseId)){
-                    return;
+                    return undefined;
+                } else if (courseId && !self.editing && self.checkCourseAlreadyExist(courseId)) {
+                    return undefined;
                 }
 
                 $buttons = this.$el.find('.form-actions .btn');
@@ -146,7 +147,7 @@ define([
                 // Disable all buttons by setting the attribute (for <button>) and class (for <a>)
                 $buttons.attr('disabled', 'disabled').addClass('disabled');
 
-                onSaveComplete = function () {
+                onSaveComplete = function() {
                     // Restore the button text
                     $submitButton.text(btnDefaultText);
 
@@ -154,17 +155,17 @@ define([
                     $buttons.removeAttr('disabled').removeClass('disabled');
                 };
 
-                onSaveError = function (model, response) {
+                onSaveError = function(model, response) {
                     var message = gettext('An error occurred while saving the data.');
 
                     if (response.responseJSON && response.responseJSON.error) {
                         message = response.responseJSON.error;
 
                         // Log the error to the console for debugging purposes
-                        console.error(message);
+                        console.error(message); // eslint-disable-line no-console
                     } else {
                         // Log the error to the console for debugging purposes
-                        console.error(response.responseText);
+                        console.error(response.responseText); // eslint-disable-line no-console
                     }
 
                     AlertUtils.clearAlerts(self);
@@ -172,10 +173,10 @@ define([
                 };
 
                 if (this.editing && _.has(this, 'editableAttributes')) {
-                    var editableAttributes = this.model.pick(this.editableAttributes),
-                        changedAttributes = _.omit(editableAttributes, function(value, key) {
-                            return value === this.modelServerState[key];
-                        }, this);
+                    editableAttributes = this.model.pick(this.editableAttributes);
+                    changedAttributes = _.omit(editableAttributes, function(value, key) {
+                        return value === this.modelServerState[key];
+                    }, this);
 
                     this.model.save(
                         changedAttributes,
@@ -204,7 +205,7 @@ define([
         /**
          * Override Backbone.View.extend so that the child view inherits events.
          */
-        FormView.extend = function (child) {
+        FormView.extend = function(child) {
             var view = Backbone.View.extend.apply(this, arguments);
             view.prototype.events = _.extend({}, this.prototype.events, child.events);
             return view;

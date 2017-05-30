@@ -1,8 +1,8 @@
 define([
-        'underscore',
-        'models/product_model'
-    ],
-    function (_,
+    'underscore',
+    'models/product_model'
+],
+    function(_,
               Product) {
         'use strict';
 
@@ -32,26 +32,26 @@ define([
                 is_available_to_buy: true
             };
 
-        beforeEach(function () {
+        beforeEach(function() {
             model = Product.findOrCreate(data, {parse: true});
         });
 
-        describe('Product model', function () {
+        describe('Product model', function() {
             // NOTE (CCB): There is a bug preventing this from being called 'toJSON'.
             // See https://github.com/karma-runner/karma/issues/1534.
-            describe('#toJSON', function () {
-                it('should not modify expires if expires is empty', function () {
+            describe('#toJSON', function() {
+                it('should not modify expires if expires is empty', function() {
                     var json,
                         values = [null, ''];
 
-                    _.each(values, function (value) {
+                    _.each(values, function(value) {
                         model.set('expires', value);
                         json = model.toJSON();
                         expect(json.expires).toEqual(value);
                     });
                 });
 
-                it('should add a timezone to expires if expires is not empty', function () {
+                it('should add a timezone to expires if expires is not empty', function() {
                     var json,
                         deadline = '2015-01-01T00:00:00';
 
@@ -61,7 +61,7 @@ define([
                     expect(json.expires).toEqual(deadline + '+00:00');
                 });
 
-                it('should re-nest the un-nested attributes', function () {
+                it('should re-nest the un-nested attributes', function() {
                     var json = model.toJSON();
 
                     // Sanity check

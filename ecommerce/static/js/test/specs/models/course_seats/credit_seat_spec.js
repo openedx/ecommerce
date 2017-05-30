@@ -1,12 +1,12 @@
 define([
 
-        'collections/credit_provider_collection',
-        'ecommerce',
-        'models/course_seats/credit_seat'
-    ],
-    function (CreditProviderCollection,
-              ecommerce,
-              CreditSeat) {
+    'collections/credit_provider_collection',
+    'ecommerce',
+    'models/course_seats/credit_seat'
+],
+    function(CreditProviderCollection,
+             ecommerce,
+             CreditSeat) {
         'use strict';
 
         var model,
@@ -35,35 +35,34 @@ define([
                 is_available_to_buy: true
             };
 
-        beforeEach(function () {
+        beforeEach(function() {
             model = CreditSeat.findOrCreate(data, {parse: true});
             ecommerce.credit.providers = new CreditProviderCollection([{id: 'harvard', display_name: 'Harvard'}]);
         });
 
-        describe('Credit course seat model', function () {
-
-            describe('credit provider validation', function () {
-                function assertCreditProviderInvalid(credit_provider, expected_msg) {
-                    model.set('credit_provider', credit_provider);
-                    expect(model.validate().credit_provider).toEqual(expected_msg);
+        describe('Credit course seat model', function() {
+            describe('credit provider validation', function() {
+                function assertCreditProviderInvalid(creditProvider, expectedMsg) {
+                    model.set('credit_provider', creditProvider);
+                    expect(model.validate().credit_provider).toEqual(expectedMsg);
                     expect(model.isValid(true)).toBeFalsy();
                 }
 
-                it('should do nothing if the credit provider is valid', function () {
+                it('should do nothing if the credit provider is valid', function() {
                     model.set('credit_provider', ecommerce.credit.providers.at(0).get('id'));
                     expect(model.validate().credit_provider).toBeUndefined();
                 });
 
-                it('should return a message if the credit provider is not set', function () {
+                it('should return a message if the credit provider is not set', function() {
                     var msg = 'All credit seats must have a credit provider.',
                         values = [null, undefined, ''];
 
-                    values.forEach(function (value) {
+                    values.forEach(function(value) {
                         assertCreditProviderInvalid(value, msg);
                     });
                 });
 
-                it('should return a message if the credit provider is not a valid credit provider', function () {
+                it('should return a message if the credit provider is not a valid credit provider', function() {
                     var msg = 'Please select a valid credit provider.';
                     assertCreditProviderInvalid('acme', msg);
                 });

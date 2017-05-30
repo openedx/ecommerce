@@ -1,13 +1,13 @@
 require([
-        'jquery',
-        'backbone',
-        'backbone.validation',
-        'bootstrap',
-        'bootstrap_accessibility',
-        'underscore',
-        'utils/analytics_utils'
-    ],
-    function (
+    'jquery',
+    'backbone',
+    'backbone.validation',
+    'bootstrap',
+    'bootstrap_accessibility',
+    'underscore',
+    'utils/analytics_utils'
+],
+    function(
         $,
         Backbone,
         BackboneValidation,
@@ -17,7 +17,7 @@ require([
         AnalyticsUtils) {
         'use strict';
 
-        $(function () {
+        $(function() {
             // Activate all pre-rendered tooltips.
             $('[data-toggle="tooltip"]').tooltip();
 

@@ -1,20 +1,19 @@
 define([
-        'jquery',
-        'backbone',
-        'underscore',
-        'underscore.string',
-        'moment',
-        'text!templates/_offer_course_list.html',
-        'text!templates/_offer_error.html'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'underscore',
+    'underscore.string',
+    'moment',
+    'text!templates/_offer_course_list.html',
+    'text!templates/_offer_error.html'
+],
+    function($,
               Backbone,
               _,
               _s,
               moment,
               OfferCourseListTemplate,
               OfferErrorTemplate) {
-
         'use strict';
 
         return Backbone.View.extend({
@@ -27,7 +26,7 @@ define([
                 'click .page-number': 'goToPage'
             },
 
-            initialize: function (options) {
+            initialize: function(options) {
                 this.listenTo(this.collection, 'sync', this.render);
                 this.code = options.code;
             },
@@ -62,7 +61,7 @@ define([
                             courses: this.collection,
                             isCredit: this.isCredit,
                             isEnrollmentCode: this.isEnrollmentCode,
-                            page: this.collection.goToPage(this.collection.page),
+                            page: this.collection.goToPage(this.collection.page)
                         })
                     );
                     this.renderPagination();
@@ -78,9 +77,9 @@ define([
             },
 
             refreshData: function() {
-                var benefit_data = this.collection.at(0).get('benefit');
+                var benefitData = this.collection.at(0).get('benefit');
 
-                this.isEnrollmentCode = benefit_data.type === 'Percentage' && Math.round(benefit_data.value) === 100;
+                this.isEnrollmentCode = benefitData.type === 'Percentage' && Math.round(benefitData.value) === 100;
                 _.each(this.collection.models, this.formatValues, this);
 
                 this.isCredit = this.collection.at(0).get('seat_type') === 'credit';
@@ -92,14 +91,14 @@ define([
 
             formatBenefitValue: function(course) {
                 var benefit = course.get('benefit'),
-                    benefit_value = Math.round(benefit.value);
+                    benefitValue = Math.round(benefit.value);
                 if (benefit.type === 'Percentage') {
-                    benefit_value = benefit_value + '%';
+                    benefitValue += '%';
                 } else {
-                    benefit_value = '$' + benefit_value;
+                    benefitValue = '$' + benefitValue;
                 }
 
-                course.set({benefit_value: benefit_value});
+                course.set({benefit_value: benefitValue});
             },
 
             formatDate: function(course) {
@@ -122,7 +121,7 @@ define([
 
             setNewPrice: function(course) {
                 var benefit = course.get('benefit'),
-                    new_price,
+                    newPrice,
                     price;
 
                 if (course.get('seat_type') === 'credit' && !course.multiple_credit_providers) {
@@ -132,16 +131,17 @@ define([
                 }
 
                 if (benefit.type === 'Percentage') {
-                    new_price = price - (price * (benefit.value / 100));
+                    newPrice = price - (price * (benefit.value / 100));
                 } else {
-                    new_price = price - benefit.value;
-                    if (new_price < 0) {
-                        new_price = 0;
+                    newPrice = price - benefit.value;
+                    if (newPrice < 0) {
+                        newPrice = 0;
                     }
                 }
 
+                // eslint-disable-next-line no-param-reassign
                 course.get('stockrecords').price_excl_tax = price;
-                course.set({new_price: new_price.toFixed(2)});
+                course.set({new_price: newPrice.toFixed(2)});
             },
 
             showVerifiedCertificate: function() {
@@ -244,7 +244,7 @@ define([
                     this.page = isPreviousAvailable;
                     this.changePage();
                 }
-            },
+            }
         });
     }
 );

@@ -1,20 +1,21 @@
 define([
-        'collections/catalog_collection',
-        'test/mock_data/catalogs'
-    ],
-    function (CatalogCollection,
-              Mock_Catalogs) {
+    'collections/catalog_collection',
+    'test/mock_data/catalogs'
+],
+    function(CatalogCollection,
+             MockCatalogs) {
         'use strict';
-        var collection,
-            response = Mock_Catalogs;
 
-        beforeEach(function () {
+        var collection,
+            response = MockCatalogs;
+
+        beforeEach(function() {
             collection = new CatalogCollection();
         });
 
-        describe('Catalog collection', function () {
-            describe('parse', function () {
-                it('should fetch the next page of results', function () {
+        describe('Catalog collection', function() {
+            describe('parse', function() {
+                it('should fetch the next page of results', function() {
                     spyOn(collection, 'fetch').and.returnValue(null);
                     response.next = '/api/v2/catalogs/course_catalogs/?page=2';
 
@@ -22,7 +23,6 @@ define([
                     expect(collection.url).toEqual(response.next);
                     expect(collection.fetch).toHaveBeenCalledWith({remove: false});
                 });
-
             });
         });
     }

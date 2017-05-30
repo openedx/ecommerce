@@ -1,16 +1,16 @@
 define([
-        'backbone',
-        'backbone.super',
-        'backbone.validation',
-        'jquery',
-        'js-cookie',
-        'underscore',
-        'underscore.string',
-        'utils/utils',
-        'moment',
-        'backbone.relational'
-    ],
-    function (Backbone,
+    'backbone',
+    'backbone.super',
+    'backbone.validation',
+    'jquery',
+    'js-cookie',
+    'underscore',
+    'underscore.string',
+    'utils/utils',
+    'moment',
+    'backbone.relational'
+],
+    function(Backbone,
               BackboneSuper,
               BackboneValidation,
               $,
@@ -21,6 +21,14 @@ define([
               moment) {
         'use strict';
 
+        /* eslint-env es6: true */
+        var CATALOG_TYPES = {
+            single_course: 'Single course',
+            multiple_courses: 'Multiple courses',
+            catalog: 'Catalog',
+            program: 'Program'
+        };
+
         _.extend(Backbone.Validation.messages, {
             required: gettext('This field is required.'),
             number: gettext('This value must be a number.'),
@@ -28,14 +36,6 @@ define([
             seat_types: gettext('At least one seat type must be selected.')
         });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
-
-        /* jshint esnext: true */
-        var CATALOG_TYPES = {
-            single_course: 'Single course',
-            multiple_courses: 'Multiple courses',
-            catalog: 'Catalog',
-            program: 'Program',
-        };
 
         return Backbone.RelationalModel.extend({
             urlRoot: '/api/v2/coupons/',
@@ -59,17 +59,17 @@ define([
             validation: {
                 benefit_value: {
                     pattern: 'number',
-                    required: function () {
+                    required: function() {
                         return this.get('coupon_type') === 'Discount code';
                     }
                 },
                 catalog_query: {
-                    required: function () {
+                    required: function() {
                         return this.get('catalog_type') === CATALOG_TYPES.multiple_courses;
                     }
                 },
                 course_catalog: {
-                    required: function () {
+                    required: function() {
                         return this.get('catalog_type') === CATALOG_TYPES.catalog;
                     }
                 },
@@ -84,28 +84,32 @@ define([
                 course_id: {
                     pattern: 'courseId',
                     msg: gettext('A valid course ID is required'),
-                    required: function () {
+                    required: function() {
                         return this.get('catalog_type') === CATALOG_TYPES.single_course;
                     }
                 },
-                course_seat_types: function (val) {
+                course_seat_types: function(val) {
                     // add validation only for dynamic coupons, e.g. dynamic query coupon or catalog coupon
                     var dynamicCoupons = [CATALOG_TYPES.multiple_courses, CATALOG_TYPES.catalog];
                     if (dynamicCoupons.indexOf(this.get('catalog_type')) !== -1 && val.length === 0) {
                         return Backbone.Validation.messages.seat_types;
                     }
+                    return undefined;
                 },
-                email_domains: function (val) {
+                email_domains: function(val) {
+                    var invalidDomain;
+
                     if (!_.isEmpty(val)) {
-                        var invalidDomain = Utils.validateDomains(val);
+                        invalidDomain = Utils.validateDomains(val);
 
                         if (invalidDomain) {
                             return _s.sprintf(gettext('Email domain {%s} is invalid.'), invalidDomain);
                         }
                     }
+                    return undefined;
                 },
                 enterprise_customer: {required: false},
-                end_date: function (val) {
+                end_date: function(val) {
                     var startDate,
                         endDate;
                     if (_.isEmpty(val)) {
@@ -119,25 +123,27 @@ define([
                     if (startDate && endDate.isBefore(startDate)) {
                         return gettext('Must occur after start date');
                     }
+
+                    return undefined;
                 },
                 invoice_discount_value: {
                     pattern: 'number',
-                    required: function () {
+                    required: function() {
                         return this.get('invoice_type') === 'Postpaid';
                     }
                 },
                 invoice_number: {
-                    required: function () {
+                    required: function() {
                         return this.isPrepaidInvoiceType();
                     }
                 },
                 invoice_payment_date: {
-                    required: function () {
+                    required: function() {
                         return this.isPrepaidInvoiceType();
                     }
                 },
                 invoice_type: {required: true},
-                max_uses: function (val) {
+                max_uses: function(val) {
                     var numberPattern = new RegExp('[0-9]+');
                     if (val === '') {
                         this.unset('max_uses');
@@ -147,27 +153,29 @@ define([
                     } else if (val && val < 2 && this.get('voucher_type') === 'Multi-use') {
                         return gettext('Max uses for multi-use coupons must be higher than 2.');
                     }
+
+                    return undefined;
                 },
                 price: {
                     pattern: 'number',
-                    required: function () {
+                    required: function() {
                         return this.isPrepaidInvoiceType();
                     }
                 },
                 program_uuid: {
                     msg: gettext('A valid Program UUID is required.'),
-                    required: function () {
+                    required: function() {
                         return this.get('catalog_type') === CATALOG_TYPES.program;
                     }
                 },
                 quantity: {pattern: 'number'},
                 // seat_type is for validation only, stock_record_ids holds the values
                 seat_type: {
-                    required: function () {
+                    required: function() {
                         return this.get('catalog_type') === CATALOG_TYPES.single_course;
                     }
                 },
-                start_date: function (val) {
+                start_date: function(val) {
                     var startDate,
                         endDate;
                     if (_.isEmpty(val)) {
@@ -181,11 +189,13 @@ define([
                     if (endDate && startDate.isAfter(endDate)) {
                         return gettext('Must occur before end date');
                     }
+
+                    return undefined;
                 },
                 title: {required: true}
             },
 
-            url: function () {
+            url: function() {
                 var url = this._super();
 
                 // Ensure the URL always ends with a trailing slash
@@ -194,37 +204,37 @@ define([
                 return url;
             },
 
-            initialize: function () {
+            initialize: function() {
                 this.on('change:seats', this.updateSeatData);
                 this.on('change:quantity', this.updateTotalValue(this.getSeatPrice));
                 this.on('change:payment_information', this.updatePaymentInformation);
             },
 
-            isPrepaidInvoiceType: function () {
+            isPrepaidInvoiceType: function() {
                 return this.get('invoice_type') === 'Prepaid';
             },
 
-            getSeatPrice: function () {
+            getSeatPrice: function() {
                 var seats = this.get('seats');
                 return seats[0] ? seats[0].price : '';
             },
 
-            updateTotalValue: function (seat_price) {
-                this.set('total_value', this.get('quantity') * seat_price);
+            updateTotalValue: function(seatPrice) {
+                this.set('total_value', this.get('quantity') * seatPrice);
             },
 
-            getCertificateType: function (seat_data) {
-                var seat_type = _.findWhere(seat_data, {'name': 'certificate_type'});
-                return seat_type ? seat_type.value : '';
+            getCertificateType: function(seatData) {
+                var seatType = _.findWhere(seatData, {name: 'certificate_type'});
+                return seatType ? seatType.value : '';
             },
 
-            getCourseID: function (seat_data) {
-                var course_id = _.findWhere(seat_data, {'name': 'course_key'});
-                return course_id ? course_id.value : '';
+            getCourseID: function(seatData) {
+                var courseId = _.findWhere(seatData, {name: 'course_key'});
+                return courseId ? courseId.value : '';
             },
 
-            updateSeatData: function () {
-                var seat_data,
+            updateSeatData: function() {
+                var seatData,
                     seats = this.get('seats'),
                     catalogId,
                     catalogType;
@@ -249,31 +259,33 @@ define([
 
                 if (this.get('catalog_type') === this.catalogTypes.single_course) {
                     if (seats !== null && seats[0]) {
-                        seat_data = seats[0].attribute_values;
+                        seatData = seats[0].attribute_values;
 
-                        this.set('seat_type', this.getCertificateType(seat_data));
-                        this.set('course_id', this.getCourseID(seat_data));
+                        this.set('seat_type', this.getCertificateType(seatData));
+                        this.set('course_id', this.getCourseID(seatData));
                         this.updateTotalValue(this.getSeatPrice());
                     }
                 }
             },
 
-            updatePaymentInformation: function () {
-                var payment_information = this.get('payment_information'),
-                    invoice = payment_information.Invoice,
-                    tax_deducted = invoice.tax_deducted_source ? 'Yes' : 'No';
+            updatePaymentInformation: function() {
+                var paymentInformation = this.get('payment_information'),
+                    invoice = paymentInformation.Invoice,
+                    taxDeducted = invoice.tax_deducted_source ? 'Yes' : 'No';
                 this.set({
-                    'invoice_type': invoice.type,
-                    'invoice_discount_type': invoice.discount_type,
-                    'invoice_discount_value': invoice.discount_value,
-                    'invoice_number': invoice.number,
-                    'invoice_payment_date': invoice.payment_date,
-                    'tax_deducted_source': invoice.tax_deducted_source,
-                    'tax_deduction': tax_deducted
+                    invoice_type: invoice.type,
+                    invoice_discount_type: invoice.discount_type,
+                    invoice_discount_value: invoice.discount_value,
+                    invoice_number: invoice.number,
+                    invoice_payment_date: invoice.payment_date,
+                    tax_deducted_source: invoice.tax_deducted_source,
+                    tax_deduction: taxDeducted
                 });
             },
 
-            save: function (attributes, options) {
+            save: function(attributes, options) {
+                /* eslint no-param-reassign: 2 */
+
                 // Remove all saved models from store, which prevents Duplicate id errors
                 Backbone.Relational.store.reset();
 
@@ -308,6 +320,7 @@ define([
                 }
 
                 return this._super(attributes, options);
+                /* eslint no-param-reassign: 0 */
             }
         });
     }

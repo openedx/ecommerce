@@ -1,8 +1,8 @@
 define([
-        'collections/paginated_collection',
-        'models/coupon_model'
-    ],
-    function (PaginatedCollection,
+    'collections/paginated_collection',
+    'models/coupon_model'
+],
+    function(PaginatedCollection,
               CouponModel) {
         'use strict';
 

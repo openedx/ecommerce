@@ -1,19 +1,18 @@
 define([
-        'jquery',
-        'backbone',
-        'underscore',
-        'underscore.string',
-        'moment',
-        'text!templates/coupon_list.html',
-        'dataTablesBootstrap'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'underscore',
+    'underscore.string',
+    'moment',
+    'text!templates/coupon_list.html',
+    'dataTablesBootstrap'
+],
+    function($,
               Backbone,
               _,
               _s,
               moment,
               CouponListViewTemplate) {
-
         'use strict';
 
         return Backbone.View.extend({
@@ -29,11 +28,11 @@ define([
                 '<a href="" class="btn btn-secondary btn-small voucher-report-button"' +
                 ' data-coupon-id="<%= id %>"><%=gettext(\'Download Coupon Report\')%></a>'),
 
-            initialize: function () {
+            initialize: function() {
                 this.listenTo(this.collection, 'update', this.refreshTableData);
             },
 
-            getRowData: function (coupon) {
+            getRowData: function(coupon) {
                 return {
                     categoryName: coupon.get('category').name,
                     client: coupon.get('client'),
@@ -44,7 +43,7 @@ define([
                 };
             },
 
-            renderCouponTable: function () {
+            renderCouponTable: function() {
                 var filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
@@ -74,7 +73,7 @@ define([
                             {
                                 title: gettext('Name'),
                                 data: 'title',
-                                fnCreatedCell: _.bind(function (nTd, sData, oData) {
+                                fnCreatedCell: _.bind(function(nTd, sData, oData) {
                                     $(nTd).html(this.linkTpl(oData));
                                 }, this)
                             },
@@ -97,7 +96,7 @@ define([
                             {
                                 title: gettext('Coupon Report'),
                                 data: 'id',
-                                fnCreatedCell: _.bind(function (nTd, sData, oData) {
+                                fnCreatedCell: _.bind(function(nTd, sData, oData) {
                                     $(nTd).html(this.downloadTpl(oData));
                                 }, this),
                                 orderable: false
@@ -112,11 +111,10 @@ define([
                         .attr('placeholder', filterPlaceholder)
                         .addClass('field-input input-text')
                         .removeClass('form-control input-sm');
-
                 }
             },
 
-            render: function () {
+            render: function() {
                 this.$el.html(this.template);
                 this.renderCouponTable();
                 this.refreshTableData();
@@ -126,7 +124,7 @@ define([
             /**
              * Refresh the data table with the collection's current information.
              */
-            refreshTableData: function () {
+            refreshTableData: function() {
                 var data = this.collection.map(this.getRowData, this),
                     $table = this.$el.find('#couponTable').DataTable();
 
@@ -137,9 +135,9 @@ define([
             /**
              * Download voucher report for a Coupon product
              */
-            downloadCouponReport: function (event) {
-                var coupon_id = $(event.currentTarget).data('coupon-id'),
-                    url = '/api/v2/coupons/coupon_reports/' + coupon_id;
+            downloadCouponReport: function(event) {
+                var couponId = $(event.currentTarget).data('coupon-id'),
+                    url = '/api/v2/coupons/coupon_reports/' + couponId;
 
                 event.preventDefault();
                 window.open(url, '_blank');

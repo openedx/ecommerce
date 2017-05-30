@@ -1,9 +1,9 @@
 define([
-        'backbone',
-        'jquery',
-        'pages/page',
-        'utils/utils'
-    ],
+    'backbone',
+    'jquery',
+    'pages/page',
+    'utils/utils'
+],
     function(Backbone,
              $,
              Page,
@@ -37,4 +37,4 @@ define([
                 expect(Utils.toogleMobileMenuClickEvent).toHaveBeenCalled();
             });
         });
-});
+    });

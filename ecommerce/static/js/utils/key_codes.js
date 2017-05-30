@@ -1,10 +1,10 @@
 define([],
-    function () {
+    function() {
         'use strict';
 
         return {
-            'Tab': 9,
-            'Escape': 27
+            Tab: 9,
+            Escape: 27
         };
     }
 );

@@ -1,18 +1,20 @@
 define([
-        'utils/credit_card'
-    ],
-    function (CreditCardUtils) {
+    'underscore',
+    'utils/credit_card'
+],
+    function(_,
+             CreditCardUtils) {
         'use strict';
 
-        describe('CreditCardUtils', function () {
+        describe('CreditCardUtils', function() {
             var validCardList = [
-                {'number': '378282246310005', 'name': 'amex', 'type': '003'},
-                {'number': '30569309025904', 'name': 'diners', 'type': '005'},
-                {'number': '6011111111111117', 'name': 'discover', 'type': '004'},
-                {'number': '3530111333300000', 'name': 'jcb', 'type': '007'},
-                {'number': '5105105105105100', 'name': 'mastercard', 'type': '002'},
-                {'number': '4111111111111111', 'name': 'visa', 'type': '001'},
-                {'number': '6759649826438453', 'name': 'maestro', 'type': '042'}
+                {number: '378282246310005', name: 'amex', type: '003'},
+                {number: '30569309025904', name: 'diners', type: '005'},
+                {number: '6011111111111117', name: 'discover', type: '004'},
+                {number: '3530111333300000', name: 'jcb', type: '007'},
+                {number: '5105105105105100', name: 'mastercard', type: '002'},
+                {number: '4111111111111111', name: 'visa', type: '001'},
+                {number: '6759649826438453', name: 'maestro', type: '042'}
             ];
 
             describe('isValidCreditCard', function() {

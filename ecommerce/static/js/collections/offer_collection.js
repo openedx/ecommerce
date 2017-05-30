@@ -1,9 +1,9 @@
 define([
-        'backbone',
-        'collections/paginated_collection',
-        'models/offer_model'
-    ],
-    function (Backbone,
+    'backbone',
+    'collections/paginated_collection',
+    'models/offer_model'
+],
+    function(Backbone,
               PaginatedCollection,
               OfferModel) {
         'use strict';

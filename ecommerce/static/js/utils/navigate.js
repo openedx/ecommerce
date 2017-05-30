@@ -1,7 +1,7 @@
 define([
-        'backbone'
-    ],
-    function (Backbone) {
+    'backbone'
+],
+    function(Backbone) {
         'use strict';
 
         /**
@@ -14,7 +14,6 @@ define([
          * @returns {boolean} - Indicates if event handling succeeded (always true).
          */
         return function(event) {
-
             var url = $(this).attr('href').replace(Backbone.history.root, '');
 
             // Handle the cases where the user wants to open the link in a new tab/window.
@@ -33,6 +32,8 @@ define([
             } else {
                 Backbone.history.navigate(url, {trigger: true});
             }
+
+            return undefined;
         };
     }
 );

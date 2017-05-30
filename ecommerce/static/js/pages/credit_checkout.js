@@ -1,12 +1,12 @@
 define([
-        'jquery',
-        'backbone',
-        'views/payment_button_view',
-        'utils/utils',
-        'views/provider_selection_view',
-        'pages/page'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'views/payment_button_view',
+    'utils/utils',
+    'views/provider_selection_view',
+    'pages/page'
+],
+    function($,
               Backbone,
               PaymentButtonView,
               Utils,
@@ -16,11 +16,11 @@ define([
 
         return Page.extend({
 
-            initialize: function () {
+            initialize: function() {
                 var providerSelectionView = new ProviderSelectionView({el: '.provider-details'}),
                     paymentButtonView = new PaymentButtonView({el: '#payment-buttons'});
 
-                this.listenTo(providerSelectionView, 'productSelected', function (data) {
+                this.listenTo(providerSelectionView, 'productSelected', function(data) {
                     paymentButtonView.setSku(data.sku);
                     // Update the display of the checkout total.
                     if (data.discount === 'None') {

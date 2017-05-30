@@ -1,32 +1,32 @@
 define([
-        'jquery',
-        'models/course_model',
-        'views/course_form_view'
-    ],
-    function ($,
+    'jquery',
+    'models/course_model',
+    'views/course_form_view'
+],
+    function($,
               Course,
               CourseFormView) {
         'use strict';
 
         var model, view;
 
-        beforeEach(function () {
+        beforeEach(function() {
             model = new Course();
             view = new CourseFormView({model: model});
         });
 
-        describe('course form view', function () {
+        describe('course form view', function() {
             window.bulkEnrollmentCodesEnabled = false;
 
-            describe('cleanHonorCode', function () {
-                it('should always return a boolean', function () {
+            describe('cleanHonorCode', function() {
+                it('should always return a boolean', function() {
                     expect(view.cleanBooleanValue('false')).toEqual(false);
                     expect(view.cleanBooleanValue('true')).toEqual(true);
                 });
             });
 
-            describe('getActiveCourseTypes', function () {
-                it('should return expected course types', function () {
+            describe('getActiveCourseTypes', function() {
+                it('should return expected course types', function() {
                     view.model.set('type', 'audit');
                     expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'credit']);
 

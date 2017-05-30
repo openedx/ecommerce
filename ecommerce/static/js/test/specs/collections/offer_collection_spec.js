@@ -1,9 +1,10 @@
 define([
-        'collections/offer_collection',
-        'backbone.super'
-    ],
+    'collections/offer_collection',
+    'backbone.super'
+],
     function(OfferCollection) {
         'use strict';
+
         var collection,
             response = {
                 count: 4,
@@ -38,13 +39,13 @@ define([
             });
 
             it('should fetch the next page.', function() {
-                var test_url = 'example.com';
-                response.next = test_url;
+                var testUrl = 'example.com';
+                response.next = testUrl;
                 spyOn(collection, 'fetch');
 
                 collection.parse(response);
                 expect(collection.fetch).toHaveBeenCalled();
-                expect(collection.url).toBe(test_url);
+                expect(collection.url).toBe(testUrl);
             });
 
             it('should fetch the next page of results', function() {

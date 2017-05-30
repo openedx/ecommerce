@@ -1,12 +1,14 @@
 define(['backbone',
-        'backbone.super',
-        'utils/utils'],
-    function (Backbone,
-              BackboneSuper,
-              Utils) {
+    'backbone.super',
+    'underscore',
+    'utils/utils'],
+    function(Backbone,
+             BackboneSuper,
+             _,
+             Utils) {
         'use strict';
 
-        /***
+        /** *
          * Base Page class.
          */
         var Page = Backbone.View.extend({
@@ -23,26 +25,26 @@ define(['backbone',
              *
              * Inheriting classes MUST override this method.
              */
-            initialize: function () {
+            initialize: function() {
 
             },
 
             /**
              * Removes the nested view before removing this view.
              */
-            remove: function () {
+            remove: function() {
                 if (this.view) {
                     this.view.remove();
                     this.view = null;
                 }
 
-                return this._super();
+                return this._super(); // eslint-disable-line no-underscore-dangle
             },
 
             /**
              * Updates the browser window's title.
              */
-            renderTitle: function () {
+            renderTitle: function() {
                 var title = _.result(this, 'title');
 
                 if (title) {
@@ -53,7 +55,7 @@ define(['backbone',
             /**
              * Renders the nested view.
              */
-            renderNestedView: function () {
+            renderNestedView: function() {
                 this.view.render();
                 this.$el.html(this.view.el);
             },
@@ -62,14 +64,14 @@ define(['backbone',
              * Renders this Page, specifically the title and nested view.
              * @returns {Page} current instance
              */
-            render: function () {
+            render: function() {
                 Utils.toogleMobileMenuClickEvent();
                 this.renderTitle();
                 this.renderNestedView();
                 return this;
             },
 
-            refresh: function () {
+            refresh: function() {
                 this.view.remove();
                 this.render();
             }

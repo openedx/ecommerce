@@ -1,10 +1,10 @@
 define([
-        'routers/offer_router',
-        'views/offer_view',
-        'pages/page',
-        'collections/offer_collection'
-    ],
-    function (OfferRouter,
+    'routers/offer_router',
+    'views/offer_view',
+    'pages/page',
+    'collections/offer_collection'
+],
+    function(OfferRouter,
               OfferView,
               Page,
               OfferCollection) {

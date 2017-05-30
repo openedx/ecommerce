@@ -1,7 +1,7 @@
 define([
-        'backbone'
-    ],
-    function (Backbone) {
+    'backbone'
+],
+    function(Backbone) {
         'use strict';
 
         return Backbone.View.extend({
@@ -10,19 +10,19 @@ define([
                 'change input[name=provider]': 'onProviderSelection'
             },
 
-            render: function () {
+            render: function() {
                 this.$el.find('input[name=provider]:first').click();
                 return this;
             },
 
-            onProviderSelection: function () {
+            onProviderSelection: function() {
                 var $selectedProvider = this.$el.find('input[name=provider]:checked').closest('.provider');
 
                 this.trigger('productSelected', {
                     sku: $selectedProvider.data('sku'),
                     price: $selectedProvider.data('price'),
                     discount: $selectedProvider.data('discount'),
-                    new_price: $selectedProvider.data('new-price'),
+                    new_price: $selectedProvider.data('new-price')
                 });
 
                 // toggle 'selected' class for background color

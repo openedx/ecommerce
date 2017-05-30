@@ -1,19 +1,18 @@
 define([
-        'jquery',
-        'backbone',
-        'underscore',
-        'underscore.string',
-        'moment',
-        'text!templates/course_list.html',
-        'dataTablesBootstrap'
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'underscore',
+    'underscore.string',
+    'moment',
+    'text!templates/course_list.html',
+    'dataTablesBootstrap'
+],
+    function($,
               Backbone,
               _,
               _s,
               moment,
               courseListViewTemplate) {
-
         'use strict';
 
         return Backbone.View.extend({
@@ -21,11 +20,11 @@ define([
 
             template: _.template(courseListViewTemplate),
 
-            initialize: function () {
+            initialize: function() {
                 this.listenTo(this.collection, 'update', this.refreshTableData);
             },
 
-            getRowData: function (course) {
+            getRowData: function(course) {
                 return {
                     id: course.get('id'),
                     type: course.get('type'),
@@ -34,7 +33,7 @@ define([
                 };
             },
 
-            renderCourseTable: function () {
+            renderCourseTable: function() {
                 var filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
@@ -64,7 +63,7 @@ define([
                             {
                                 title: gettext('Course'),
                                 data: 'name',
-                                fnCreatedCell: function (nTd, sData, oData) {
+                                fnCreatedCell: function(nTd, sData, oData) {
                                     $(nTd).html(_s.sprintf('<a href="/courses/%s/" class="course-name">%s</a>' +
                                         '<div class="course-id">%s</div>', oData.id, oData.name, oData.id));
                                 }
@@ -72,7 +71,7 @@ define([
                             {
                                 title: gettext('Course Type'),
                                 data: 'type',
-                                fnCreatedCell: function (nTd, sData, oData) {
+                                fnCreatedCell: function(nTd, sData, oData) {
                                     $(nTd).html(_s.capitalize(oData.type));
                                 }
                             },
@@ -95,11 +94,10 @@ define([
                         .attr('placeholder', filterPlaceholder)
                         .addClass('field-input input-text')
                         .removeClass('form-control input-sm');
-
                 }
             },
 
-            render: function () {
+            render: function() {
                 this.$el.html(this.template);
                 this.renderCourseTable();
                 this.refreshTableData();
@@ -110,7 +108,7 @@ define([
             /**
              * Refresh the data table with the collection's current information.
              */
-            refreshTableData: function () {
+            refreshTableData: function() {
                 var data = this.collection.map(this.getRowData, this),
                     $table = this.$el.find('#courseTable').DataTable();
 

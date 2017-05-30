@@ -1,8 +1,8 @@
 define([
-        'collections/paginated_collection',
-        'models/course_model'
-    ],
-    function (PaginatedCollection,
+    'collections/paginated_collection',
+    'models/course_model'
+],
+    function(PaginatedCollection,
               Course) {
         'use strict';
 

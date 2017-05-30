@@ -1,11 +1,12 @@
 define([
-        'backbone.relational'
-    ],
-    function () {
+    'backbone',
+    'backbone.relational'
+],
+    function(Backbone) {
         'use strict';
 
         return Backbone.RelationalModel.extend({
-            urlRoot: '/api/v2/enterprise/customers',
+            urlRoot: '/api/v2/enterprise/customers'
         });
     }
 );

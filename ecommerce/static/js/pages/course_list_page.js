@@ -1,9 +1,9 @@
 define([
-        'collections/course_collection',
-        'views/course_list_view',
-        'pages/page'
-    ],
-    function (CourseCollection,
+    'collections/course_collection',
+    'views/course_list_view',
+    'pages/page'
+],
+    function(CourseCollection,
               CourseListView,
               Page) {
         'use strict';
@@ -11,7 +11,7 @@ define([
         return Page.extend({
             title: gettext('Courses'),
 
-            initialize: function () {
+            initialize: function() {
                 this.collection = new CourseCollection();
                 this.view = new CourseListView({collection: this.collection});
                 this.render();

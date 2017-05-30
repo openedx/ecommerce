@@ -1,16 +1,16 @@
 define([
-        'jquery',
-        'backbone',
-        'ecommerce',
-        'underscore',
-        'underscore.string',
-        'moment',
-        'text!templates/_alert_div.html',
-        'text!templates/coupon_detail.html',
-        'utils/alert_utils',
-        'views/dynamic_catalog_view',
-    ],
-    function ($,
+    'jquery',
+    'backbone',
+    'ecommerce',
+    'underscore',
+    'underscore.string',
+    'moment',
+    'text!templates/_alert_div.html',
+    'text!templates/coupon_detail.html',
+    'utils/alert_utils',
+    'views/dynamic_catalog_view'
+],
+    function($,
               Backbone,
               ecommerce,
               _,
@@ -39,8 +39,8 @@ define([
                 return moment.utc(dateTime).format('MM/DD/YYYY h:mm A');
             },
 
-            formatLastEditedData: function(last_edited) {
-                return _s.sprintf('%s - %s', last_edited[0], this.formatDateTime(last_edited[1]));
+            formatLastEditedData: function(lastEdited) {
+                return _s.sprintf('%s - %s', lastEdited[0], this.formatDateTime(lastEdited[1]));
             },
 
             discountValue: function() {
@@ -50,7 +50,7 @@ define([
 
             taxDeductedSource: function(value) {
                 if (value) {
-                    return _s.sprintf('%u%%', parseInt(value));
+                    return _s.sprintf('%u%%', parseInt(value, 10));
                 } else {
                     return null;
                 }
@@ -58,40 +58,40 @@ define([
 
             invoiceDiscountValue: function(type, value) {
                 var stringFormat = (type === 'Percentage') ? '%u%%' : '$%u';
-                return _s.sprintf(stringFormat, parseInt(value));
+                return _s.sprintf(stringFormat, parseInt(value, 10));
             },
 
             formatInvoiceData: function() {
-                var invoice_payment_date = this.model.get('invoice_payment_date'),
-                    invoice_discount_type = this.model.get('invoice_discount_type'),
-                    invoice_discount_value = this.model.get('invoice_discount_value'),
-                    tax_deducted_source = this.model.get('tax_deducted_source');
+                var invoicePaymentDate = this.model.get('invoice_payment_date'),
+                    invoiceDiscountType = this.model.get('invoice_discount_type'),
+                    invoiceDiscountValue = this.model.get('invoice_discount_value'),
+                    taxDeductedSource = this.model.get('tax_deducted_source');
 
-                if (invoice_discount_value === null) {
-                    invoice_discount_type = null;
-                } else  {
-                    invoice_discount_value = this.invoiceDiscountValue(invoice_discount_type, invoice_discount_value);
+                if (invoiceDiscountValue === null) {
+                    invoiceDiscountType = null;
+                } else {
+                    invoiceDiscountValue = this.invoiceDiscountValue(invoiceDiscountType, invoiceDiscountValue);
                 }
-                tax_deducted_source = this.taxDeductedSource(tax_deducted_source);
+                taxDeductedSource = this.taxDeductedSource(taxDeductedSource);
 
-                if (invoice_payment_date) {
-                    invoice_payment_date = this.formatDateTime(invoice_payment_date);
+                if (invoicePaymentDate) {
+                    invoicePaymentDate = this.formatDateTime(invoicePaymentDate);
                 }
                 return {
-                    'invoice_type': this.model.get('invoice_type'),
-                    'invoice_number': this.model.get('invoice_number'),
-                    'invoice_payment_date': invoice_payment_date,
-                    'invoice_discount_type': invoice_discount_type,
-                    'invoice_discount_value': invoice_discount_value,
-                    'invoiced_amount': this.model.get('invoiced_amount'),
-                    'tax_deducted_source_value': tax_deducted_source,
+                    invoice_type: this.model.get('invoice_type'),
+                    invoice_number: this.model.get('invoice_number'),
+                    invoice_payment_date: invoicePaymentDate,
+                    invoice_discount_type: invoiceDiscountType,
+                    invoice_discount_value: invoiceDiscountValue,
+                    invoiced_amount: this.model.get('invoiced_amount'),
+                    tax_deducted_source_value: taxDeductedSource
                 };
             },
 
             formatSeatTypes: function() {
                 var courseSeatTypes = this.model.get('course_seat_types');
                 if (courseSeatTypes && courseSeatTypes[0] !== '[]') {
-                    if(courseSeatTypes.length === 1){
+                    if (courseSeatTypes.length === 1) {
                         return courseSeatTypes[0];
                     } else {
                         return courseSeatTypes.join(', ');
@@ -113,14 +113,14 @@ define([
                 return '';
             },
 
-            render: function () {
+            render: function() {
                 var html,
                     category = this.model.get('category').name,
                     catalogId = '',
                     courseCatalogName = '',
-                    invoice_data = this.formatInvoiceData(),
+                    invoiceData = this.formatInvoiceData(),
                     emailDomains = this.model.get('email_domains'),
-                    template_data,
+                    templateData,
                     price = null;
 
                 if (this.model.get('price') !== '0.00') {
@@ -132,7 +132,7 @@ define([
                     courseCatalogName = ecommerce.coupons.catalogs.get(catalogId).get('name');
                 }
 
-                template_data = {
+                templateData = {
                     category: category,
                     coupon: this.model.toJSON(),
                     courseCatalogName: courseCatalogName,
@@ -146,8 +146,8 @@ define([
                     emailDomains: emailDomains
                 };
 
-                $.extend(template_data, invoice_data);
-                html = this.template(template_data);
+                $.extend(templateData, invoiceData);
+                html = this.template(templateData);
 
                 this.$el.html(html);
                 this.renderCourseData();
@@ -155,8 +155,8 @@ define([
 
                 if (this.model.get('catalog_type') === this.model.catalogTypes.multiple_courses) {
                     this.dynamic_catalog_view = new DynamicCatalogView({
-                        'query': this.model.get('catalog_query'),
-                        'seat_types': this.model.get('course_seat_types')
+                        query: this.model.get('catalog_query'),
+                        seat_types: this.model.get('course_seat_types')
                     });
 
                     this.dynamic_catalog_view.$el = this.$('.catalog_buttons');
@@ -170,7 +170,7 @@ define([
                 return this;
             },
 
-            renderCourseData: function () {
+            renderCourseData: function() {
                 if (this.model.get('catalog_type') === 'Single course') {
                     this.$('.course-info').append(
                         _s.sprintf(
@@ -182,21 +182,21 @@ define([
                 return this;
             },
 
-            downloadCouponReport: function (event) {
+            downloadCouponReport: function(event) {
                 var url = _s.sprintf('/api/v2/coupons/coupon_reports/%d', this.model.id),
-                    _this = this;
+                    self = this;
 
                 $.ajax({
                     url: url,
                     type: 'GET',
-                    success: function(){
+                    success: function() {
                         event.preventDefault();
                         window.open(url, '_blank');
-                        return _this;
+                        return self;
                     },
                     error: function(data) {
-                        AlertUtils.clearAlerts(_this);
-                        AlertUtils.renderAlert('danger', '', data.responseText, _this);
+                        AlertUtils.clearAlerts(self);
+                        AlertUtils.renderAlert('danger', '', data.responseText, self);
                     }
                 });
             }
