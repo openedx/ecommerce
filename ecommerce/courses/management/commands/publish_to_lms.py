@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 import os
-from optparse import make_option
 
 from django.core.management import BaseCommand, CommandError
 
@@ -16,15 +15,13 @@ class Command(BaseCommand):
     """Publish the courses to LMS."""
 
     help = 'Publish the courses to LMS'
-    option_list = BaseCommand.option_list + (
-        make_option(
-            '--course_ids_file',
-            action='store',
-            dest='course_ids_file',
-            default=None,
-            help='Path to file to read courses from.'
-        ),
-    )
+
+    def add_arguments(self, parser):
+        parser.add_argument('--course_ids_file',
+                            action='store',
+                            dest='course_ids_file',
+                            default=None,
+                            help='Path to file to read courses from.')
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)

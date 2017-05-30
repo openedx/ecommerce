@@ -610,13 +610,12 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_no_product(self):
         """ Verify that an exception is raised if there is no product. """
-        code = FuzzyText().fuzz()
-        voucher = VoucherFactory(code=code)
+        voucher = VoucherFactory()
         offer = ConditionalOfferFactory()
         voucher.offers.add(offer)
 
         with self.assertRaises(exceptions.ProductNotFoundError):
-            get_voucher_and_products_from_code(code=code)
+            get_voucher_and_products_from_code(code=voucher.code)
 
     def test_get_non_existing_voucher(self):
         """ Verify that get_voucher_and_products_from_code() raises exception for a non-existing voucher. """
