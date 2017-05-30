@@ -114,3 +114,15 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form.is_valid()
         offer = form.save()
         self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])
+
+    def test_create_when_conditional_offer_with_uuid_exists(self):
+        """
+        Verify a program offer can be created if a conditional offer with different type and same uuid already exists.
+        """
+        data = self.generate_data()
+        factories.ProgramOfferFactory(
+            condition__program_uuid=data['program_uuid'],
+            offer_type=ConditionalOffer.VOUCHER,
+        )
+        form = ProgramOfferForm(request=self.request, data=data)
+        self.assertTrue(form.is_valid())

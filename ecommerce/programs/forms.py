@@ -57,7 +57,12 @@ class ProgramOfferForm(forms.ModelForm):
         program_uuid = cleaned_data.get('program_uuid')
 
         if not self.instance.pk and program_uuid:
-            if ProgramCourseRunSeatsCondition.objects.filter(program_uuid=program_uuid).exists():
+            program_offer_exists = ConditionalOffer.objects.filter(
+                offer_type=ConditionalOffer.SITE,
+                condition__program_uuid=program_uuid
+            ).exists()
+
+            if program_offer_exists:
                 self.add_error('program_uuid', _('An offer already exists for this program.'))
 
         if cleaned_data['benefit_type'] == Benefit.PERCENTAGE and cleaned_data.get('benefit_value') > 100:
