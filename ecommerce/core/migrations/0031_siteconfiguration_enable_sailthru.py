@@ -3,12 +3,18 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+from oscar.core.loading import get_model
 
 
 def migrate_sailthru_toggle(apps, schema_editor):
     SiteConfiguration = apps.get_model('core', 'SiteConfiguration')
+    Partner = get_model('partner', 'Partner')
+
     for site_configuration in SiteConfiguration.objects.all():
-        site_configuration.enable_sailthru = site_configuration.partner.enable_sailthru
+        # Reload the Partner object using the forked model instead of Oscar's default
+        partner = Partner.objects.get(pk=site_configuration.partner.pk)
+
+        site_configuration.enable_sailthru = partner.enable_sailthru
         site_configuration.save()
 
 
