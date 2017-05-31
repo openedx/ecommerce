@@ -31,16 +31,15 @@ class Command(BaseCommand):
 
     PAYPAL_CONFIG_KEY = "paypal"
 
-    @staticmethod
-    def _get_argument(args, variable_name, action_name):
-        """
-        DRY helper.  Tries to pop the topmost value from `args` and raises a CommandError
-        with a formatted message in case of failure.  This function mutates `args` in place.
-        """
-        try:
-            return args.pop(0)
-        except IndexError:
-            raise CommandError("Action `{}` requires a {} to be specified.".format(action_name, variable_name))
+    def add_arguments(self, parser):
+        parser.add_argument('--partner',
+                            help='Short code for the specified partner.')
+        parser.add_argument('--action',
+                            help=self.help)
+        parser.add_argument('--profile_id',
+                            help='Paypal account web profile id.')
+        parser.add_argument('--json',
+                            help='JSON string for Paypal web profile.')
 
     def print_json(self, data):
         self.stdout.write(json.dumps(data, indent=1, ensure_ascii=True))
@@ -49,13 +48,12 @@ class Command(BaseCommand):
         """
         Main dispatch.
         """
-        args = list(args)
 
-        if len(args) < 2:
-            raise CommandError("Required arguments `partner` and `action` are missing")
+        partner = options.get('partner')
+        action = options.get('action')
 
-        partner = args.pop(0)
-        action = args.pop(0)
+        if not partner or not action:
+            raise CommandError('Required arguments `partner` and `action` are missing')
 
         try:
             paypal_configuration = settings.PAYMENT_PROCESSOR_CONFIG[partner.lower()][self.PAYPAL_CONFIG_KEY.lower()]
@@ -77,7 +75,7 @@ class Command(BaseCommand):
             raise CommandError("no action specified.")
         except AttributeError:
             raise CommandError("unrecognized action: {}".format(action))
-        return handler(args)
+        return handler(options)
 
     def _do_create(self, profile_data):
         """
@@ -136,26 +134,34 @@ class Command(BaseCommand):
             pass
         self.print_json(result)
 
-    def handle_create(self, args):
+    def handle_create(self, options):
         """Wrapper for paypalrestsdk Create operation."""
-        profile_data = json.loads(self._get_argument(args, 'json string', 'create'))
+        if not options.get('json'):
+            raise CommandError("Action `create` requires a JSON string to be specified.")
+        profile_data = json.loads(options.get('json'))
         profile = self._do_create(profile_data)
         self.print_json(profile.to_dict())
 
-    def handle_show(self, args):
+    def handle_show(self, options):
         """Wrapper for paypalrestsdk Find operation."""
-        profile_id = self._get_argument(args, 'profile_id', 'show')
+        if not options.get('profile_id'):
+            raise CommandError("Action `show` requires a profile_id to be specified.")
+        profile_id = options.get('profile_id')
         profile = WebProfile.find(profile_id)
         self.print_json(profile.to_dict())
 
-    def handle_update(self, args):
+    def handle_update(self, options):
         """Wrapper for paypalrestsdk Update operation.  This completely replaces the value of the existing profile."""
-        profile_id = self._get_argument(args, 'profile_id', 'update')
-        profile_data = json.loads(self._get_argument(args, 'json string', 'update'))
+        if not options.get('profile_id'):
+            raise CommandError("Action `update` requires a profile_id to be specified.")
+        if not options.get('json'):
+            raise CommandError("Action `update` requires a JSON string to be specified.")
+        profile_id = options.get('profile_id')
+        profile_data = json.loads(options.get('json'))
         profile = self._do_update(profile_id, profile_data)
         self.print_json(profile.to_dict())
 
-    def handle_delete(self, args):
+    def handle_delete(self, options):
         """
         Delete a web profile from the configured PayPal account.
 
@@ -164,7 +170,9 @@ class Command(BaseCommand):
         with an error, since leaving things in that state would cause the application
         to send invalid profile ids to PayPal, causing errors.
         """
-        profile_id = self._get_argument(args, 'profile_id', 'delete')
+        if not options.get('profile_id'):
+            raise CommandError("Action `delete` requires a profile_id to be specified.")
+        profile_id = options.get('profile_id')
         if PaypalWebProfile.objects.filter(id=profile_id).exists():
             raise CommandError(
                 "Web profile {} is currently enabled.  You must disable it before you can delete it.".format(profile_id)
@@ -176,23 +184,27 @@ class Command(BaseCommand):
         log.info("Deleted profile: %s", profile.id)
         self.print_json(profile.to_dict())
 
-    def handle_enable(self, args):
+    def handle_enable(self, options):
         """
         Given the id of an existing web profile, save a reference to it in the database.
 
         When PayPal checkouts are set up, we can look this profile up by name and, if
         found, specify its id in our API calls to customize the payment page accordingly.
         """
-        profile_id = self._get_argument(args, 'profile_id', 'enable')
+        if not options.get('profile_id'):
+            raise CommandError("Action `enable` requires a profile_id to be specified.")
+        profile_id = options.get('profile_id')
         profile = WebProfile.find(profile_id)
         self._do_enable(profile.id, profile.name)
 
-    def handle_disable(self, args):
+    def handle_disable(self, options):
         """
         Given the id of an existing web profile, find and delete any references to it
         in the database.  This reverses the effect of `handle_enable` above.
         """
-        profile_id = self._get_argument(args, 'profile_id', 'disable')
+        if not options.get('profile_id'):
+            raise CommandError("Action `disable` requires a profile_id to be specified.")
+        profile_id = options.get('profile_id')
         try:
             PaypalWebProfile.objects.get(id=profile_id).delete()
             log.info("Disabled profile %s.", profile_id)

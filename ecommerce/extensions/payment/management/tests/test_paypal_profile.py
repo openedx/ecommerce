@@ -5,9 +5,7 @@ import ddt
 import mock
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import override_settings
 
-from ecommerce.extensions.payment.management.commands.paypal_profile import Command as PaypalProfileCommand
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.tests.testcases import TestCase
 
@@ -45,8 +43,14 @@ class TestPaypalProfileCommand(TestCase):
         except PaypalWebProfile.DoesNotExist:
             self.assertFalse(is_enabled)
 
-    def call_command_action(self, action, *args, **options):
-        call_command('paypal_profile', self.PAYMENT_PROCESSOR_CONFIG_KEY, action, *args, stdout=self.stdout, **options)
+    def call_command_action(self, action, test_id=None, test_json=None, **options):
+        call_command('paypal_profile',
+                     partner=self.PAYMENT_PROCESSOR_CONFIG_KEY,
+                     action=action,
+                     profile_id=test_id,
+                     json=test_json,
+                     stdout=self.stdout,
+                     **options)
 
     def test_list(self, mock_profile):
         mock_profile.all.return_value = [self.mock_profile_instance]
@@ -56,7 +60,7 @@ class TestPaypalProfileCommand(TestCase):
 
     def test_create(self, mock_profile):
         mock_profile.return_value = self.mock_profile_instance
-        self.call_command_action("create", self.TEST_JSON)
+        self.call_command_action("create", test_json=self.TEST_JSON)
         self.assertTrue(mock_profile.called)
         self.assertEqual(mock_profile.call_args[0][0], json.loads(self.TEST_JSON))
         self.assertTrue(self.mock_profile_instance.create.called)
@@ -64,14 +68,14 @@ class TestPaypalProfileCommand(TestCase):
 
     def test_show(self, mock_profile):
         mock_profile.find.return_value = self.mock_profile_instance
-        self.call_command_action("show", self.TEST_ID)
+        self.call_command_action("show", test_id=self.TEST_ID)
         self.assertTrue(mock_profile.find.called)
         self.assertEqual(mock_profile.find.call_args[0][0], self.TEST_ID)
         self.check_stdout(self.TEST_JSON)
 
     def test_update(self, mock_profile):
         mock_profile.find.return_value = self.mock_profile_instance
-        self.call_command_action("update", self.TEST_ID, self.TEST_JSON)
+        self.call_command_action("update", test_id=self.TEST_ID, test_json=self.TEST_JSON)
         self.assertTrue(self.mock_profile_instance.update.called)
         self.assertEqual(self.mock_profile_instance.update.call_args[0][0], json.loads(self.TEST_JSON))
         self.check_stdout(self.TEST_JSON)
@@ -82,7 +86,7 @@ class TestPaypalProfileCommand(TestCase):
         if is_enabled:
             PaypalWebProfile.objects.create(id=self.TEST_ID, name=self.TEST_NAME)
         try:
-            self.call_command_action("delete", self.TEST_ID)
+            self.call_command_action("delete", test_id=self.TEST_ID)
             self.assertTrue(self.mock_profile_instance.delete.called)
             self.check_stdout(self.TEST_JSON)
             self.assertFalse(is_enabled)
@@ -91,60 +95,65 @@ class TestPaypalProfileCommand(TestCase):
 
     def test_enable(self, mock_profile):
         mock_profile.find.return_value = self.mock_profile_instance
-        self.call_command_action("enable", self.TEST_ID)
+        self.call_command_action("enable", test_id=self.TEST_ID)
         self.check_enabled()
         # test idempotency
-        self.call_command_action("enable", self.TEST_ID)
+        self.call_command_action("enable", test_id=self.TEST_ID)
         self.check_enabled()
 
     def test_disable(self, mock_profile):  # pylint: disable=unused-argument
         PaypalWebProfile.objects.create(id=self.TEST_ID, name=self.TEST_NAME)
-        self.call_command_action("disable", self.TEST_ID)
+        self.call_command_action("disable", test_id=self.TEST_ID)
         self.check_enabled(False)
         # test idempotency
-        self.call_command_action("disable", self.TEST_ID)
+        self.call_command_action("disable", test_id=self.TEST_ID)
         self.check_enabled(False)
 
-    @override_settings(PAYMENT_PROCESSOR_CONFIG={
-        'edx': {'paypal': {}, 'cybersource': {}},
-        'no_paypal': {'cybersource': {}}
-    })
     def test_missing_required_parameters(self, mock_profile):  # pylint: disable=unused-argument
         """
         Tests that command raises Command Error if required parameters are missing
         """
         # pylint: disable=protected-access
-        args = ['foo']
-        self.assertEqual('foo', PaypalProfileCommand._get_argument(args, 'dummy', 'dummy'))
-        self.assertEqual(args, [])
-        with self.assertRaises(CommandError) as exception:
+
+        with self.assertRaises(CommandError) as context:
             call_command('paypal_profile', stdout=self.stdout)  # no config and action
-            self.assertEqual(exception.message, "Required arguments 'action' and 'config' are missing")
+        self.assertEqual('Required arguments `partner` and `action` are missing', str(context.exception))
 
-        with self.assertRaises(CommandError) as exception:
-            call_command('paypal_profile', 'edX', stdout=self.stdout)  # no action
-            self.assertEqual(exception.message, "Required arguments 'action' and 'config' are missing")
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', stdout=self.stdout)  # no action
+        self.assertEqual('Required arguments `partner` and `action` are missing', str(context.exception))
 
-        with self.assertRaises(CommandError) as exception:
-            call_command('paypal_profile', 'asd', 'list', stdout=self.stdout)  # unknown profile
-            self.assertEqual(exception.message, "Payment Processor configuration asd not found")
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='no_paypal', action='list', stdout=self.stdout)  # unknown profile
+        self.assertEqual(
+            'Payment Processor configuration for partner `no_paypal` does not contain PayPal settings',
+            str(context.exception))
 
-        with self.assertRaises(CommandError) as exception:
-            call_command('paypal_profile', 'no_paypal', 'list', stdout=self.stdout)  # unknown profile
-            self.assertEqual(
-                exception.message, "Payment Processor configuration no_paypal does not contain PayPal settings"
-            )
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='create', stdout=self.stdout)  # no json
+        self.assertEqual('Action `create` requires a JSON string to be specified.', str(context.exception))
 
-    def test_get_argument(self, mock_profile):  # pylint: disable=unused-argument
-        """
-        Tests that `get_argument` works as expected:
-        1. If argument list is not empty - pops first argument and returns it
-        2. If argument list is empty - raises CommandException with helpful error message
-        """
-        # pylint: disable=protected-access
-        args = ['foo']
-        self.assertEqual('foo', PaypalProfileCommand._get_argument(args, 'dummy', 'dummy'))
-        self.assertEqual(args, [])
-        with self.assertRaises(CommandError) as exception:
-            PaypalProfileCommand._get_argument(args, 'test-action', 'test-argument')
-            self.assertEqual(exception.message, 'Action `test-action` requires a test-argument to be specified.')
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='show', stdout=self.stdout)  # no profile id
+        self.assertEqual('Action `show` requires a profile_id to be specified.', str(context.exception))
+
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='update', stdout=self.stdout)  # no profile id
+        self.assertEqual('Action `update` requires a profile_id to be specified.', str(context.exception))
+
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='update', profile_id=self.TEST_ID,
+                         stdout=self.stdout)  # no json
+        self.assertEqual('Action `update` requires a JSON string to be specified.', str(context.exception))
+
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='delete', stdout=self.stdout)  # no profile id
+        self.assertEqual('Action `delete` requires a profile_id to be specified.', str(context.exception))
+
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='enable', stdout=self.stdout)  # no profile id
+        self.assertEqual('Action `enable` requires a profile_id to be specified.', str(context.exception))
+
+        with self.assertRaises(CommandError) as context:
+            call_command('paypal_profile', partner='edX', action='disable', stdout=self.stdout)  # no profile id
+        self.assertEqual('Action `disable` requires a profile_id to be specified.', str(context.exception))
