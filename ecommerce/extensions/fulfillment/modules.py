@@ -16,7 +16,6 @@ from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungr
 from rest_framework import status
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
@@ -107,8 +106,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     Allows the enrollment of a student via purchase of a 'seat'.
     """
 
-    def _post_to_enrollment_api(self, data, user):
-        enrollment_api_url = get_lms_enrollment_api_url()
+    def _post_to_enrollment_api(self, site, data, user):
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
         headers = {
             'Content-Type': 'application/json',
@@ -123,7 +121,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         if ip:
             headers['X-Forwarded-For'] = ip
 
-        return requests.post(enrollment_api_url, data=json.dumps(data), headers=headers, timeout=timeout)
+        data = json.dumps(data)
+        return requests.post(site.siteconfiguration.enrollment_api_url, data=data, headers=headers, timeout=timeout)
 
     def supports_line(self, line):
         return line.product.is_seat_product
@@ -230,7 +229,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
-                response = self._post_to_enrollment_api(data, user=order.user)
+                response = self._post_to_enrollment_api(order.site, data, user=order.user)
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
@@ -285,7 +284,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            response = self._post_to_enrollment_api(data, user=line.order.user)
+            response = self._post_to_enrollment_api(line.order.site, data, user=line.order.user)
 
             if response.status_code == status.HTTP_200_OK:
                 audit_log(

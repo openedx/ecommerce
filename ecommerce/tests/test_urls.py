@@ -1,6 +1,5 @@
 from django.core.urlresolvers import reverse
 
-from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.tests.testcases import TestCase
 
 
@@ -16,4 +15,4 @@ class TestUrls(TestCase):
         response = self.client.get(reverse('dashboard:index'))
         # Test client can't fetch external URLs, so fetch_redirect_response is set to
         # False to avoid loading the final page
-        self.assertRedirects(response, get_lms_dashboard_url(), fetch_redirect_response=False)
+        self.assertRedirects(response,self.site_configuration.student_dashboard_url, fetch_redirect_response=False)

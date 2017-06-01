@@ -20,7 +20,6 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher
@@ -376,7 +375,7 @@ class BasketSummaryView(BasketView):
         context.update({
             'formset_lines_data': zip(formset, lines_data),
             'free_basket': context['order_total'].incl_tax == 0,
-            'homepage_url': get_lms_url(''),
+            'homepage_url': self.request.site.siteconfiguration.build_lms_url(),
             'min_seat_quantity': 1,
             'payment_processors': payment_processors,
             'total_benefit': total_benefit

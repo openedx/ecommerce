@@ -11,7 +11,6 @@ from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
 
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.payment.models import PaypalProcessorConfiguration, PaypalWebProfile
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.utils import middle_truncate
@@ -53,13 +52,11 @@ class Paypal(BasePaymentProcessor):
             'client_secret': self.configuration['client_secret']
         })
 
-    @property
-    def cancel_url(self):
-        return get_ecommerce_url(self.configuration['cancel_checkout_path'])
+    def cancel_url(self, site):
+        return site.siteconfiguration.build_ecommerce_url(self.configuration['cancel_checkout_path'])
 
-    @property
-    def error_url(self):
-        return get_ecommerce_url(self.configuration['error_path'])
+    def error_url(self, site):
+        return site.siteconfiguration.build_ecommerce_url(self.configuration['error_path'])
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
@@ -79,12 +76,12 @@ class Paypal(BasePaymentProcessor):
             GatewayError: Indicates a general error or unexpected behavior on the part of PayPal which prevented
                 a payment from being created.
         """
-        return_url = urljoin(get_ecommerce_url(), reverse('paypal:execute'))
+        return_url = basket.site.siteconfiguration.build_ecommerce_url(reverse('paypal:execute'))
         data = {
             'intent': 'sale',
             'redirect_urls': {
                 'return_url': return_url,
-                'cancel_url': self.cancel_url,
+                'cancel_url': self.cancel_url(basket.site),
             },
             'payer': {
                 'payment_method': 'paypal',

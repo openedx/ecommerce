@@ -1,7 +1,6 @@
 import json
 
 import ddt
-import httpretty
 import mock
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
@@ -10,13 +9,12 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.extensions.api.serializers import OrderSerializer
-from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.factories import SiteFactory
-from ecommerce.tests.mixins import ThrottlingMixin
+from ecommerce.tests.mixins import ThrottlingMixin, AccessTokenMixin
 from ecommerce.tests.testcases import TestCase
 
 Order = get_model('order', 'Order')
@@ -43,15 +41,6 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         content = json.loads(response.content)
         self.assertEqual(content['count'], 0)
         self.assertEqual(content['results'], [])
-
-    @httpretty.activate
-    def test_oauth2_authentication(self):
-        """Verify clients can authenticate with OAuth 2.0."""
-        auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
-
-        self.mock_user_info_response(username=self.user.username)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
-        self.assert_empty_result_response(response)
 
     def test_no_orders(self):
         """ If the user has no orders, the view should return an empty list. """

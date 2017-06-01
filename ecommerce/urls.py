@@ -11,12 +11,11 @@ from django.views.generic import TemplateView
 from django.views.i18n import javascript_catalog
 
 from ecommerce.core import views as core_views
-from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.core.views import LogoutView
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
 
-def handler403(_):
+def handler403(request):
     """Redirect unauthorized users to the LMS student dashboard.
 
     Removing URLs isn't the most elegant way to hide Oscar's front-end from
@@ -31,7 +30,7 @@ def handler403(_):
     Oscar's front-end are redirected to the LMS student dashboard, as one would
     usually be after signing into the LMS.
     """
-    return redirect(get_lms_dashboard_url())
+    return redirect(request.site.siteconfiguration.student_dashboard_url)
 
 
 admin.autodiscover()

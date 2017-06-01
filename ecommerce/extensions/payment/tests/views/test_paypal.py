@@ -145,7 +145,9 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                                side_effect=PaymentError) as fake_handle_payment:
             logger_name = 'ecommerce.extensions.payment.views.paypal'
             with LogCapture(logger_name) as l:
-                creation_response, __ = self._assert_execution_redirect(url_redirect=self.processor.error_url)
+                creation_response, __ = self._assert_execution_redirect(
+                    url_redirect=self.processor.error_url(self.site)
+                )
                 self.assertTrue(fake_handle_payment.called)
 
                 # Verify that the payment creation response was recorded despite the error
@@ -240,7 +242,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self.mock_payment_creation_response(self.basket)
             self.processor.get_transaction_parameters(self.basket, request=self.request)
 
-            dummy_basket = factories.create_basket()
+            dummy_basket = factories.BasketFactory(site=self.site)
             self.mock_payment_creation_response(dummy_basket)
             self.processor.get_transaction_parameters(dummy_basket, request=self.request)
 
@@ -297,7 +299,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         self.assertRedirects(
             response,
-            self.processor.error_url,
+            self.processor.error_url(self.site),
             fetch_redirect_response=False
         )
 

@@ -14,7 +14,6 @@ from suds.sudsobject import asdict
 from suds.wsse import Security, UsernameToken
 
 from ecommerce.core.constants import ISO_8601_FORMAT
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
@@ -66,9 +65,8 @@ class Cybersource(BaseClientSidePaymentProcessor):
         self.sop_secret_key = configuration.get('sop_secret_key')
         self.sop_payment_page_url = configuration.get('sop_payment_page_url')
 
-    @property
-    def cancel_page_url(self):
-        return get_ecommerce_url(self.configuration['cancel_checkout_path'])
+    def get_cancel_page_url(self, site):
+        return site.siteconfiguration.build_ecommerce_url(self.configuration['cancel_checkout_path'])
 
     @property
     def client_side_payment_url(self):
@@ -152,7 +150,7 @@ class Cybersource(BaseClientSidePaymentProcessor):
                     reverse('cybersource:redirect')
                 )
             ),
-            'override_custom_cancel_page': self.cancel_page_url,
+            'override_custom_cancel_page': self.get_cancel_page_url(site),
         }
         # Level 2/3 details
         if self.send_level_2_3_details:

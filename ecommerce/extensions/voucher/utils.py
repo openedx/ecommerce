@@ -16,7 +16,6 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
@@ -163,6 +162,7 @@ def _get_voucher_info_for_coupon_report(voucher):
     offer = voucher.offers.first()
     status = _get_voucher_status(voucher, offer)
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
+    # FIXME
     url = get_ecommerce_url(path)
 
     # Set the max_uses_count for single-use vouchers to 1,

@@ -19,7 +19,6 @@ from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
@@ -303,6 +302,10 @@ class SiteConfiguration(models.Model):
         return urljoin(settings.ENTERPRISE_SERVICE_URL, path)
 
     @property
+    def is_segment_configured(self):
+        return bool(self.segment_key)
+
+    @property
     def commerce_api_url(self):
         """ Returns the URL for the root of the Commerce API (hosted by LMS). """
         return self.build_lms_url('/api/commerce/v1/')
@@ -361,6 +364,9 @@ class SiteConfiguration(models.Model):
 
         return access_token
 
+    def _build_api_client(self, api_url):
+        return EdxRestApiClient(api_url, jwt=self.access_token)
+
     @cached_property
     def course_catalog_api_client(self):
         """
@@ -385,7 +391,7 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Enterprise service.
 
         """
-        return EdxRestApiClient(self.enterprise_api_url, jwt=self.access_token)
+        return self._build_api_client(self.enterprise_api_url)
 
     @cached_property
     def user_api_client(self):
@@ -395,7 +401,34 @@ class SiteConfiguration(models.Model):
         Returns:
             EdxRestApiClient: The client to access the LMS user API service.
         """
-        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token)
+        return self._build_api_client(self.build_lms_url('/api/user/v1/'))
+
+    @cached_property
+    def credit_api_client(self):
+        """ Returns Credit API client. """
+        return self._build_api_client(self.build_lms_url('/api/credit/v1/'))
+
+    # FIXME: Test!
+    def is_user_eligible_for_credit(self, username, course_key):
+        """
+        Determines if the user with the given username is eligibile for credit for the course with the given course key.
+
+        Args:
+            username (str): Username of the user whose eligibility is checked.
+            course_key (str): Identifier of the course for which eligibility is checked.
+
+        Returns:
+            bool
+        """
+        query_strings = {
+            'username': username,
+            'course_key': course_key
+        }
+        try:
+            return bool(self.credit_api_client.eligibility().get(**query_strings))
+        except:  # pylint: disable=bare-except
+            log.exception('Failed to retrieve eligibility details for [%s] in course [%s]', username, course_key)
+            raise
 
 
 class User(AbstractUser):
@@ -406,8 +439,8 @@ class User(AbstractUser):
     @property
     def access_token(self):
         try:
-            return self.social_auth.first().extra_data[u'access_token']  # pylint: disable=no-member
-        except Exception:  # pylint: disable=broad-except
+            return self.social_auth.first().extra_data['access_token']  # pylint: disable=no-member
+        except:  # pylint: disable=bare-except
             return None
 
     tracking_context = JSONField(blank=True, null=True)
@@ -446,41 +479,6 @@ class User(AbstractUser):
                 self.username
             )
             raise
-
-    def is_eligible_for_credit(self, course_key):
-        """
-        Check if a user is eligible for a credit course.
-        Calls the LMS eligibility API endpoint and sends the username and course key
-        query parameters and returns eligibility details for the user and course combination.
-
-        Args:
-            course_key (string): The course key for which the eligibility is checked for.
-
-        Returns:
-            A list that contains eligibility information, or empty if user is not eligible.
-
-        Raises:
-            ConnectionError, SlumberBaseException and Timeout for failures in establishing a
-            connection with the LMS eligibility API endpoint.
-        """
-        query_strings = {
-            'username': self.username,
-            'course_key': course_key
-        }
-        try:
-            api = EdxRestApiClient(
-                get_lms_url('api/credit/v1/'),
-                oauth_access_token=self.access_token
-            )
-            response = api.eligibility().get(**query_strings)
-        except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
-            log.exception(
-                'Failed to retrieve eligibility details for [%s] in course [%s]',
-                self.username,
-                course_key
-            )
-            raise
-        return response
 
     def is_verified(self, site):
         """

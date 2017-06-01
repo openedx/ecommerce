@@ -15,7 +15,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.models import Site
 from ecommerce.courses.models import Course
 from ecommerce.invoice.models import Invoice
 
@@ -507,7 +507,7 @@ class VoucherSerializer(serializers.ModelSerializer):
         return BenefitSerializer(benefit).data
 
     def get_redeem_url(self, obj):
-        url = get_ecommerce_url('/coupons/offer/')
+        url = self.context['request'].site.siteconfiguration.build_ecommerce_url('/coupons/offer/')
         return '{url}?code={code}'.format(url=url, code=obj.code)
 
     class Meta(object):

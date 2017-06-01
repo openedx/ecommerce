@@ -14,7 +14,6 @@ from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
@@ -361,7 +360,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertEqual(row['Code'], voucher.code)
         self.assertEqual(
             row['URL'],
-            get_ecommerce_url() + self.REDEMPTION_URL.format(voucher.code)
+            self.site_configuration.enrollment_api_url.strip('/') + self.REDEMPTION_URL.format(voucher.code)
         )
 
     def test_generate_coupon_report(self):

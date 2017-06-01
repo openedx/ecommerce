@@ -212,7 +212,7 @@ class CourseCatalogMockMixin(object):
 class CouponMixin(object):
     """ Mixin for preparing data for coupons and creating coupons. """
 
-    REDEMPTION_URL = "/coupons/offer/?code={}"
+    REDEMPTION_URL = '/coupons/offer/?code={}'
 
     def setUp(self):
         super(CouponMixin, self).setUp()

@@ -5,7 +5,6 @@ import logging
 
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.referrals.models import Referral
 
@@ -31,7 +30,9 @@ class OrderNumberGenerator(object):
         """
         site = basket.site
         if not site:
-            site = get_current_request().site
+            # FIXME Raise an error!
+            raise
+            # site = get_current_request().site
             logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
 
         partner = site.siteconfiguration.partner

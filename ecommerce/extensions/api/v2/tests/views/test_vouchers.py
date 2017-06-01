@@ -148,6 +148,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
     @mock_course_catalog_api_client
     def test_omitting_already_bought_credit_seat(self):
         """ Verify a seat that the user bought is omitted from offer page results. """
+        self.mock_access_token_response()
         products, request, voucher = self.prepare_get_offers_response(quantity=2, seat_type='credit')
         self.mock_eligibility_api(request, self.user, 'a/b/c', eligible=True)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
@@ -164,6 +165,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
     @ddt.unpack
     def test_omitting_uneligible_credit_seat(self, offer_num, eligible):
         """ Verify a seat that the user is not eligible for is omitted from offer page results. """
+        self.mock_access_token_response()
         products, request, voucher = self.prepare_get_offers_response(quantity=1, seat_type='credit')
         self.mock_eligibility_api(request, self.user, products[0].attr.course_key, eligible=eligible)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
@@ -173,6 +175,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
     @mock_course_catalog_api_client
     def test_multiple_providers(self):
         """ Verify offer contains information about credit providers. """
+        self.mock_access_token_response()
         course = CourseFactory()
         seat1 = course.create_or_update_seat(
             'credit', False, 100, partner=self.partner, credit_provider='test_provider_1'

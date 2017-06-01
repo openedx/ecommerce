@@ -13,7 +13,6 @@ from pytz import UTC
 from slumber.exceptions import HttpClientError
 from testfixtures import LogCapture
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Product
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -57,7 +56,7 @@ class UpdateSeatExpireDateTests(CourseCatalogTestMixin, TestCase):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Course API calls.')
 
         body = body or {}
-        url = get_lms_url('/api/courses/v1/courses/?page_size=1')
+        url = self.site_configuration.build_lms_url('/api/courses/v1/courses/?page_size=1')
         httpretty.register_uri(
             httpretty.GET,
             url,

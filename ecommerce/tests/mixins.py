@@ -18,9 +18,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
-from threadlocals.threadlocals import set_thread_variable
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory
@@ -260,7 +258,6 @@ class SiteMixin(object):
         self.request = RequestFactory().get('')
         self.request.session = None
         self.request.site = self.site
-        set_thread_variable('request', self.request)
 
     def mock_access_token_response(self, status=200, **token_data):
         """ Mock the response from the OAuth provider's access token endpoint. """
@@ -331,7 +328,7 @@ class LmsApiMockMixin(object):
         }
         course_info_json = json.dumps(course_info)
         course_id = course.id if course else 'course-v1:test+test+test'
-        course_url = get_lms_url('api/courses/v1/courses/{}/'.format(course_id))
+        course_url = self.site.siteconfiguration.build_lms_url('api/courses/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(httpretty.GET, course_url, body=course_info_json, content_type=CONTENT_TYPE)
 
     def mock_account_api(self, request, username, data):
@@ -351,11 +348,17 @@ class LmsApiMockMixin(object):
 
     def mock_eligibility_api(self, request, user, course_key, eligible=True):
         """ Mock eligibility API endpoint. Returns eligibility data. """
-        eligibility_data = [{
-            'username': user.username,
-            'course_key': course_key,
-            'deadline': str(datetime.datetime.now() + datetime.timedelta(days=1))
-        }] if eligible else []
+        eligibility_data = []
+
+        if eligible:
+            eligibility_data = [
+                {
+                    'username': user.username,
+                    'course_key': course_key,
+                    'deadline': str(datetime.datetime.now() + datetime.timedelta(days=1))
+                }
+            ]
+
         url = '{host}/eligibility/?username={username}&course_key={course_key}'.format(
             host=request.site.siteconfiguration.build_lms_url('/api/credit/v1'),
             username=user.username,
@@ -388,3 +391,18 @@ class LmsApiMockMixin(object):
             username=username
         )
         httpretty.register_uri(httpretty.POST, url, body=response, content_type=CONTENT_TYPE)
+
+
+class AccessTokenMixin(object):
+    DEFAULT_TOKEN = 'abc123'
+    JSON = 'application/json'
+
+    def mock_user_info_response(self, status=200, username='fake-user'):
+        data = {
+            'preferred_username': username,
+            'email': '{}@example.com'.format(username),
+            'family_name': 'Doe',
+            'given_name': 'Jane',
+        }
+        url = '{}/user_info/'.format(self.site.siteconfiguration.oauth2_provider_url)
+        httpretty.register_uri(httpretty.GET, url, body=json.dumps(data), content_type=self.JSON, status=status)

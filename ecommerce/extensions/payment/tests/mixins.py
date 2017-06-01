@@ -264,7 +264,9 @@ class CybersourceMixin(PaymentEventsMixin):
             'override_custom_receipt_page': basket.site.siteconfiguration.build_ecommerce_url(
                 reverse('cybersource:redirect')
             ),
-            'override_custom_cancel_page': processor.cancel_page_url,
+            'override_custom_cancel_page': basket.site.siteconfiguration.build_ecommerce_url(
+                settings.PAYMENT_PROCESSOR_CANCEL_PATH
+            ),
         }
 
         if include_level_2_3_details:

@@ -5,8 +5,6 @@ import logging
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
-from oscar.test.utils import RequestFactory
-from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.utils import generate_sku
@@ -126,20 +124,3 @@ class Command(BaseCommand):
         stock_record.save()
 
         Line.objects.filter(stockrecord=stock_record).update(partner_sku=stock_record.partner_sku)
-
-    def _install_current_request(self, site):
-        """Install a thread-local fake request, setting its site. This is
-        necessary since publishing to the LMS requires inspecting the
-        'current request' and using its attached site to construct LMS
-        urls. See ecommerce.core.url_utils for the implementation
-        details.
-
-        Arguments:
-            site (Site): The site to set.
-
-        Returns:
-            None
-        """
-        request = RequestFactory()
-        request.site = site
-        set_thread_variable('request', request)

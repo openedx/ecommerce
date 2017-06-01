@@ -6,12 +6,10 @@ import logging
 import requests
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
-from ecommerce.core.url_utils import get_lms_commerce_api_url, get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 
 logger = logging.getLogger(__name__)
@@ -50,21 +48,15 @@ class LMSPublisher(object):
             'expires': self.get_seat_expiration(seat),
         }
 
-    def _publish_creditcourse(self, course_id, access_token):
+    def _publish_creditcourse(self, course):
         """Creates or updates a CreditCourse object on the LMS."""
-
-        api = EdxRestApiClient(
-            get_lms_url('api/credit/v1/'),
-            oauth_access_token=access_token,
-            timeout=self.timeout
-        )
-
+        course_id = course.id
         data = {
             'course_key': course_id,
             'enabled': True
         }
 
-        api.courses(course_id).put(data)
+        course.site.siteconfiguration.credit_api_client.courses(course_id).put(data)
 
     def publish(self, course, access_token=None):
         """ Publish course commerce data to LMS.
@@ -83,37 +75,29 @@ class LMSPublisher(object):
         """
 
         course_id = course.id
-        error_message = _(u'Failed to publish commerce data for {course_id} to LMS.').format(
-            course_id=course_id
-        )
-
-        commerce_api_url = get_lms_commerce_api_url()
-        if not commerce_api_url:
-            logger.error('Commerce API URL is not set. Commerce data will not be published!')
-            return error_message
+        error_message = _('Failed to publish commerce data for {course_id} to LMS.').format(course_id=course_id)
 
         name = course.name
         verification_deadline = self.get_course_verification_deadline(course)
         modes = [self.serialize_seat_for_commerce_api(seat) for seat in course.seat_products]
 
-        has_credit = 'credit' in [mode['name'] for mode in modes]
-        if has_credit:
+        if 'credit' in [mode['name'] for mode in modes]:
             try:
-                self._publish_creditcourse(course_id, access_token)
-                logger.info(u'Successfully published CreditCourse for [%s] to LMS.', course_id)
+                self._publish_creditcourse(course)
+                logger.info('Successfully published CreditCourse for [%s] to LMS.', course_id)
             except SlumberHttpBaseException as e:
                 # Note that %r is used to log the repr() of the response content, which may sometimes
                 # contain non-ASCII Unicode. We don't know (or want to guess) the encoding, so using %r will log the
                 # raw bytes of the message, freeing us from the possibility of encoding errors.
                 logger.exception(
-                    u'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was %r.',
+                    'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was %r.',
                     course_id,
                     e.response.status_code,
                     e.content
                 )
                 return error_message
-            except Exception:  # pylint: disable=broad-except
-                logger.exception(u'Failed to publish CreditCourse for [%s] to LMS.', course_id)
+            except:  # pylint: disable=bare-except
+                logger.exception('Failed to publish CreditCourse for [%s] to LMS.', course_id)
                 return error_message
 
         data = {
@@ -123,7 +107,7 @@ class LMSPublisher(object):
             'modes': modes,
         }
 
-        url = '{}/courses/{}/'.format(commerce_api_url.rstrip('/'), course_id)
+        url = '{}/courses/{}/'.format(course.site.siteconfiguration.commerce_api_url.rstrip('/'), course_id)
 
         headers = {
             'Content-Type': 'application/json',
@@ -132,18 +116,17 @@ class LMSPublisher(object):
 
         try:
             response = requests.put(url, data=json.dumps(data), headers=headers, timeout=self.timeout)
-            status_code = response.status_code
-            if status_code in (200, 201):
-                logger.info(u'Successfully published commerce data for [%s].', course_id)
+            if response.ok:
+                logger.info('Successfully published commerce data for [%s].', course_id)
                 return
             else:
-                logger.error(u'Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
-                             course_id, status_code, response.content)
+                logger.error('Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
+                             course_id, response.status_code, response.content)
 
                 return self._parse_error(response, error_message)
 
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(u'Failed to publish commerce data for [%s] to LMS.', course_id)
+        except:  # pylint: disable=bare-except
+            logger.exception('Failed to publish commerce data for [%s] to LMS.', course_id)
 
         return error_message
 

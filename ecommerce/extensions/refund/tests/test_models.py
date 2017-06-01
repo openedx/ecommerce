@@ -13,7 +13,6 @@ from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
@@ -160,7 +159,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         httpretty.register_uri(
             httpretty.POST,
-            get_lms_enrollment_api_url(),
+            self.site_configuration.enrollment_api_url,
             status=200,
             body='{}',
             content_type='application/json'

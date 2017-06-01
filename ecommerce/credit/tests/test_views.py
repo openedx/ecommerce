@@ -15,7 +15,6 @@ from oscar.core.loading import get_model
 from oscar.test.factories import RangeFactory
 from waffle.models import Switch
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
@@ -40,9 +39,9 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self.provider = 'ASU'
         self.price = 100
         self.credit_hours = 2
-        self.eligibility_url = get_lms_url('/api/credit/v1/eligibility/')
-        self.provider_url = get_lms_url('/api/credit/v1/providers/')
-        self.course = CourseFactory(thumbnail_url='http://www.edx.org/course.jpg')
+        self.eligibility_url = self.site_configuration.build_lms_url('/api/credit/v1/eligibility/')
+        self.provider_url = self.site_configuration.build_lms_url('/api/credit/v1/providers/')
+        self.course = CourseFactory()
 
         self.provider_data = [
             {
@@ -152,6 +151,7 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
     @httpretty.activate
     def test_get_without_deadline(self):
         """ Verify an error is shown if the user is not eligible for credit. """
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=[])
         self._assert_error_without_deadline()
 
@@ -160,6 +160,7 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         """ Verify an error is shown if the Credit API returns an empty list of
         providers.
         """
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=self.eligibilities)
 
         # Create the credit seat
@@ -174,6 +175,7 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         """ Verify an error is shown if an exception is raised when requesting
         eligibility information from the Credit API.
         """
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=[], status=500)
         self._assert_error_without_deadline()
 
@@ -182,11 +184,10 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         """ Verify an error is shown if an exception is raised when requesting
         provider(s) details from the Credit API.
         """
-
-        # Create the credit seat
         self.course.create_or_update_seat(
             'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
         )
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=[], status=500)
         self._assert_error_without_providers()
@@ -196,11 +197,11 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         """ Verify the page loads with the proper context, if all Credit API
         calls return successfully.
         """
-        # Create the credit seat
         self.course.create_or_update_seat(
             'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
         )
 
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
 
@@ -219,6 +220,7 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         # Create the audit seat
         self.course.create_or_update_seat('', False, 0, self.partner)
 
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
 
@@ -231,6 +233,7 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         self.course.create_or_update_seat(
             'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours, expires=expires
         )
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=self.eligibilities)
 
         response = self.client.get(self.path)
@@ -256,6 +259,8 @@ class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
         )
         new_range = RangeFactory(products=[seat, ])
         prepare_voucher(code=code, _range=new_range, benefit_value=100, benefit_type=benefit_type)
+
+        self.mock_access_token_response()
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
 
