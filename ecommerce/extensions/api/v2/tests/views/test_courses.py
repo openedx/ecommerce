@@ -14,7 +14,6 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.api.serializers import SiteSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -49,7 +48,6 @@ class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCas
         data = {
             'id': course.id,
             'name': course.name,
-            'site': SiteSerializer(course.site).data,
             'verification_deadline': course.verification_deadline,
             'type': course.type,
             'url': self.get_full_url(reverse('api:v2:course-detail', kwargs={'pk': course.id})),
