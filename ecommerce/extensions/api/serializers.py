@@ -15,7 +15,6 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.models import Site
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.invoice.models import Invoice
@@ -280,14 +279,8 @@ class RefundSerializer(serializers.ModelSerializer):
         model = Refund
 
 
-class SiteSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = Site
-
-
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
-    site = SiteSerializer(read_only=True)
     products = ProductSerializer(many=True)
     products_url = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
@@ -315,7 +308,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta(object):
         model = Course
         fields = (
-            'id', 'url', 'name', 'verification_deadline', 'type', 'site',
+            'id', 'url', 'name', 'verification_deadline', 'type',
             'products_url', 'last_edited', 'products', 'has_active_bulk_enrollment_code')
         read_only_fields = ('type', 'products', 'site')
         extra_kwargs = {
