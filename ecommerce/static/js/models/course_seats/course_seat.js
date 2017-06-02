@@ -30,7 +30,7 @@ define([
                 },
                 expires: function (value) {
                     var verificationDeadline,
-                        course = this.get('course');
+                        course = this.course || this.get('course');
 
                     // No validation is needed when the Seat is not linked to the course
                     if (!course || !course.get('id')) {

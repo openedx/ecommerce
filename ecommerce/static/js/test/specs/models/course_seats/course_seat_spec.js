@@ -39,6 +39,18 @@ define([
         });
 
         describe('Course seat model', function () {
+            describe('update model data', function() {
+                it('should be able to update seat data twice', function() {
+                    var model = CourseSeat.findOrCreate(data, {parse: true}),
+                        title1 = 'Changed title',
+                        title2 = 'Changed title 2';
+                    model.set({title: title1});
+                    expect(model.get('title')).toEqual(title1);
+                    model.set({title: title2});
+                    expect(model.get('title')).toEqual(title2);
+                });
+            });
+
             describe('getSeatType', function () {
                 it('should return a seat type corresponding to the certificate type', function () {
                     var mappings = {
