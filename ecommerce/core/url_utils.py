@@ -30,43 +30,8 @@ def get_ecommerce_url(path=''):
     Raises:
         MissingRequestError: If the current ecommerce site is not in threadlocal storage
     """
+    warnings.warn('Usage of get_ecommerce_url and django-threadlocals is deprecated. '
+                  'Use SiteConfiguration.build_ecommerce_url instead.', DeprecationWarning)
+
     site_configuration = _get_site_configuration()
     return site_configuration.build_ecommerce_url(path)
-
-
-def get_lms_commerce_api_url():
-    site_configuration = _get_site_configuration()
-    return site_configuration.commerce_api_url
-
-
-def get_lms_dashboard_url():
-    site_configuration = _get_site_configuration()
-    return site_configuration.student_dashboard_url
-
-
-def get_lms_enrollment_api_url():
-    # TODO Update consumers of this method to use `get_lms_enrollment_base_api_url` (which should be renamed
-    # get_lms_enrollment_api_url).
-    return get_lms_url('/api/enrollment/v1/enrollment')
-
-
-def get_lms_enrollment_base_api_url():
-    """ Returns the Base lms enrollment api url."""
-    site_configuration = _get_site_configuration()
-    return site_configuration.enrollment_api_url
-
-
-def get_lms_url(path=''):
-    """
-    Returns path joined with the appropriate LMS URL root for the current site
-
-    Raises:
-        MissingRequestError: If the current ecommerce site is not in threadlocal storage
-    """
-    site_configuration = _get_site_configuration()
-    return site_configuration.build_lms_url(path)
-
-
-def get_oauth2_provider_url():
-    site_configuration = _get_site_configuration()
-    return site_configuration.oauth2_provider_url
