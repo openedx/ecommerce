@@ -163,6 +163,7 @@ def _get_voucher_info_for_coupon_report(voucher):
     offer = voucher.offers.first()
     status = _get_voucher_status(voucher, offer)
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
+    # FIXME
     url = get_ecommerce_url(path)
 
     # Set the max_uses_count for single-use vouchers to 1,

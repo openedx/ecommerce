@@ -13,7 +13,6 @@ from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
@@ -77,11 +76,11 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
     pipeline = settings.OSCAR_REFUND_STATUS_PIPELINE
 
     def _get_instance(self, **kwargs):
-        return RefundFactory(**kwargs)
+        return self.create_refund(**kwargs)
 
     def test_num_items(self):
         """ The method should return the total number of items being refunded. """
-        refund = RefundFactory()
+        refund = self._get_instance()
         self.assertEqual(refund.num_items, 1)
 
         RefundLineFactory(quantity=3, refund=refund)
@@ -141,7 +140,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         order = self.create_order(user=UserFactory())
         line = order.lines.first()
-        RefundLineFactory(order_line=line, status=refund_status)
+        RefundFactory(order=order, status=refund_status)
 
         with LogCapture(LOGGER_NAME) as l:
             refund = Refund.create_with_lines(order, [line])
@@ -160,7 +159,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         httpretty.register_uri(
             httpretty.POST,
-            get_lms_enrollment_api_url(),
+            self.site_configuration.enrollment_api_url,
             status=200,
             body='{}',
             content_type='application/json'
@@ -435,6 +434,7 @@ class RefundLineTests(StatusTestsMixin, TestCase):
     pipeline = settings.OSCAR_REFUND_LINE_STATUS_PIPELINE
 
     def _get_instance(self, **kwargs):
+        kwargs['refund__order'] = create_order(site=self.site)
         return RefundLineFactory(**kwargs)
 
     def test_deny(self):

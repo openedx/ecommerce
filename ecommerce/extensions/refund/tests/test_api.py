@@ -5,7 +5,7 @@ from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course
-from ecommerce.extensions.refund.tests.factories import RefundLineFactory
+from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -73,7 +73,7 @@ class ApiTests(RefundTestMixin, TestCase):
     def test_create_refunds_with_existing_refund(self):
         """ The method should NOT create refunds for lines that have already been refunded. """
         order = self.create_order()
-        RefundLineFactory(order_line=order.lines.first())
+        RefundLineFactory(refund=RefundFactory(order=order), order_line=order.lines.first())
 
         actual = create_refunds([order], self.course.id)
         self.assertEqual(actual, [])

@@ -5,8 +5,6 @@ import logging
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
-from oscar.test.utils import RequestFactory
-from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.utils import generate_sku
@@ -16,15 +14,17 @@ Line = get_model('order', 'Line')
 Partner = get_model('partner', 'Partner')
 StockRecord = get_model('partner', 'StockRecord')
 
-
 HONOR_TO_AUDIT = 'honor_to_audit'
 AUDIT_TO_HONOR = 'audit_to_honor'
 
 
 class Command(BaseCommand):
-
     help = 'Convert a list of courses from honor to audit, or vice versa. For use with courses '
     'which already have enrollments.'
+
+    access_token = None
+    options = None
+    partner = None
 
     def add_arguments(self, parser):
         parser.add_argument('course_ids', nargs='+', type=str)
@@ -54,17 +54,15 @@ class Command(BaseCommand):
                                  'honor.')
 
     def handle(self, *args, **options):
-        self.options = options  # pylint: disable=attribute-defined-outside-init
+        self.options = options
         course_ids = map(unicode, self.options.get('course_ids', []))
 
-        self.access_token = options.get('access_token')  # pylint: disable=attribute-defined-outside-init
+        self.access_token = options.get('access_token')
         if not self.access_token:
             logger.error('Cannot convert and publish a course without an access token.')
             return
 
-        self.partner = Partner.objects.get(code__iexact=options['partner'])  # pylint: disable=attribute-defined-outside-init
-        site = self.partner.siteconfiguration.site
-        self._install_current_request(site)
+        self.partner = Partner.objects.get(code__iexact=options['partner'])
 
         if options.get('direction') == HONOR_TO_AUDIT:
             conversion = self._convert_honor_to_audit
@@ -126,20 +124,3 @@ class Command(BaseCommand):
         stock_record.save()
 
         Line.objects.filter(stockrecord=stock_record).update(partner_sku=stock_record.partner_sku)
-
-    def _install_current_request(self, site):
-        """Install a thread-local fake request, setting its site. This is
-        necessary since publishing to the LMS requires inspecting the
-        'current request' and using its attached site to construct LMS
-        urls. See ecommerce.core.url_utils for the implementation
-        details.
-
-        Arguments:
-            site (Site): The site to set.
-
-        Returns:
-            None
-        """
-        request = RequestFactory()
-        request.site = site
-        set_thread_variable('request', request)

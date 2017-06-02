@@ -11,7 +11,6 @@ from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_commerce_api_url, get_lms_url
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -29,7 +28,8 @@ StockRecord = get_model('partner', 'StockRecord')
 class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
-        self.course = CourseFactory(verification_deadline=datetime.datetime.now() + datetime.timedelta(days=7))
+        verification_deadline = datetime.datetime.now() + datetime.timedelta(days=7)
+        self.course = CourseFactory(verification_deadline=verification_deadline, site=self.site)
         self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.course.create_or_update_seat('verified', True, 50, self.partner)
         self.publisher = LMSPublisher()
@@ -41,14 +41,14 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Commerce API calls.')
 
         body = body or {}
-        url = '{}/courses/{}/'.format(get_lms_commerce_api_url().rstrip('/'), self.course.id)
+        url = '{}/courses/{}/'.format(self.site_configuration.commerce_api_url.rstrip('/'), self.course.id)
         httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
                                content_type=JSON)
 
     def mock_creditcourse_endpoint(self, course_id, status, body=None):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Credit API calls.')
 
-        url = get_lms_url('/api/credit/v1/courses/{}/'.format(course_id))
+        url = self.site_configuration.build_lms_url('/api/credit/v1/courses/{}/'.format(course_id))
         httpretty.register_uri(
             httpretty.PUT,
             url,
@@ -56,17 +56,6 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             body=json.dumps(body),
             content_type=JSON
         )
-
-    @mock.patch('ecommerce.courses.publishers.get_lms_commerce_api_url', mock.Mock(return_value=None))
-    def test_commerce_api_url_not_set(self):
-        """ If the commerce API url cannot be retrieved, the method should log an ERROR message and return """
-        with LogCapture(LOGGER_NAME) as l:
-            response = self.publisher.publish(self.course)
-            l.check(
-                (LOGGER_NAME, 'ERROR', 'Commerce API URL is not set. Commerce data will not be published!')
-            )
-            self.assertIsNotNone(response)
-            self.assertEqual(response, self.error_message)
 
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
@@ -214,6 +203,7 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         """
         # Setup the course and mock the API endpoints
         self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='acme', credit_hours=1)
+        self.mock_access_token_response()
         self.mock_creditcourse_endpoint(self.course.id, api_status)
         self._mock_commerce_api(201)
 
@@ -236,6 +226,8 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def test_credit_publication_api_failure(self):
         """ Verify the endpoint fails appropriately when Credit API calls return an error. """
         course_id = self.course.id
+        self.mock_access_token_response()
+
         with LogCapture(LOGGER_NAME) as l:
             status = 400
             actual = self.attempt_credit_publication(status)

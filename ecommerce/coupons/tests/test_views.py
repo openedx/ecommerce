@@ -12,7 +12,6 @@ from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -616,7 +615,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
         response = self.client.get(reverse(self.path, args=[order.number]))
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], get_lms_url('dashboard'))
+        self.assertEqual(response['location'], self.site_configuration.build_lms_url('dashboard'))
 
     def test_successful_response(self):
         """ Verify a successful response is returned. """

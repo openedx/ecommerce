@@ -35,10 +35,8 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
         self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
 
         self.processor = self.processor_class(self.site)  # pylint: disable=not-callable
-        self.basket = factories.create_basket(empty=True)
+        self.basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         self.basket.add_product(self.product)
-        self.basket.owner = factories.UserFactory()
-        self.basket.save()
 
     def test_configuration(self):
         """ Verifies configuration is read from settings. """

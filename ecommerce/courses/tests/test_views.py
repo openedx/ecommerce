@@ -8,7 +8,6 @@ from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.courses.views'
@@ -76,7 +75,7 @@ class CourseAppViewTests(TestCase):
         ]
         providers.sort(key=lambda provider: provider['display_name'])
         provider_json = json.dumps(providers)
-        url = get_lms_url('/api/credit/v1/providers/')
+        url = self.site_configuration.build_lms_url('/api/credit/v1/providers/')
         httpretty.register_uri(httpretty.GET, url, body=provider_json, content_type='application/json')
 
         return providers, provider_json
@@ -87,7 +86,7 @@ class CourseAppViewTests(TestCase):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             return 500, headers, 'Failure!'
 
-        url = get_lms_url('/api/credit/v1/providers/')
+        url = self.site_configuration.build_lms_url('/api/credit/v1/providers/')
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type='application/json')
 
     def test_login_required(self):
@@ -107,6 +106,7 @@ class CourseAppViewTests(TestCase):
     @httpretty.activate
     def test_staff_user_required(self):
         """ Verify the view is only accessible to staff users. """
+        self.mock_access_token_response()
         self.mock_credit_api_providers()
 
         user = self.create_user(is_staff=False)
@@ -122,8 +122,7 @@ class CourseAppViewTests(TestCase):
     def test_credit_providers_in_context(self):
         """ Verify the context data includes a list of credit providers. """
         self._create_and_login_staff_user()
-
-        # Mock Credit API
+        self.mock_access_token_response()
         __, provider_json = self.mock_credit_api_providers()
 
         response = self.client.get(self.path)
@@ -135,6 +134,7 @@ class CourseAppViewTests(TestCase):
     def test_bulk_enrollment_code_flag_is_context(self, enabled):
         """Verify the context data includes a bulk enrollment code flag."""
         self._create_and_login_staff_user()
+        self.mock_access_token_response()
         self.mock_credit_api_providers()
 
         toggle_switch(ENROLLMENT_CODE_SWITCH, enabled)
@@ -149,8 +149,8 @@ class CourseAppViewTests(TestCase):
     @httpretty.activate
     def test_credit_api_failure(self):
         """ Verify the view logs an error if it fails to retrieve credit providers. """
-        # Setup staff user with an OAuth 2 access token
         self._create_and_login_staff_user()
+        self.mock_access_token_response()
         self.mock_credit_api_error()
 
         with LogCapture(LOGGER_NAME) as l:
@@ -160,11 +160,13 @@ class CourseAppViewTests(TestCase):
             expected = 'Failed to retrieve credit providers!'
             l.check((LOGGER_NAME, 'ERROR', expected))
 
+    # FIXME Is this still needed?
     @httpretty.activate
     def test_missing_access_token(self):
         """ Verify the view logs a warning if the user has no access token. """
         user = self.create_user(is_staff=True)
         self.client.login(username=user.username, password=self.password)
+        self.mock_access_token_response()
         self.mock_credit_api_providers()
 
         with LogCapture(LOGGER_NAME) as l:

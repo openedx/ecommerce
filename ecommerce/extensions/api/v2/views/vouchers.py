@@ -161,7 +161,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             )
             if course_seat_types == 'credit':
                 # Omit credit seats for which the user is not eligible or which the user already bought.
-                if request.user.is_eligible_for_credit(product.course_id):
+                if request.site.siteconfiguration.is_user_eligible_for_credit(request.user.username, product.course_id):
                     if Order.objects.filter(user=request.user, lines__product=product).exists():
                         continue
                 else:

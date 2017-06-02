@@ -27,7 +27,6 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import get_basket_switch_data
@@ -372,7 +371,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         logger_name = 'ecommerce.extensions.basket.views'
         self.mock_api_error(
             error=error,
-            url=get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
+            url=self.site_configuration.build_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
         )
 
         with LogCapture(logger_name) as l:

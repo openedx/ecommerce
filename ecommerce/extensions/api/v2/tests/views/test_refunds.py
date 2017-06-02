@@ -1,20 +1,18 @@
 import json
 
 import ddt
-import httpretty
 import mock
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
-from oscar.test import factories
 from rest_framework import status
 
 from ecommerce.extensions.api.serializers import RefundSerializer
-from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
+from ecommerce.extensions.test import factories
+from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin, AccessTokenMixin
 from ecommerce.tests.testcases import TestCase
 
 Refund = get_model('refund', 'Refund')
@@ -95,18 +93,6 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
         self.assert_ok_response(response)
 
-    @httpretty.activate
-    def test_oauth2_authentication(self):
-        """Verify clients can authenticate with OAuth 2.0."""
-        self.client.logout()
-
-        data = self._get_data(self.user.username, self.course_id)
-        auth_header = 'Bearer ' + self.DEFAULT_TOKEN
-        self.mock_user_info_response(username=self.user.username)
-
-        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
-        self.assert_ok_response(response)
-
     def test_session_authentication(self):
         """ Client can authenticate with a Django session. """
         self.client.logout()
@@ -167,7 +153,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
     def test_non_course_order(self):
         """ Refunds should NOT be created for orders with no line items related to courses. """
         Refund.objects.all().delete()
-        factories.create_order(user=self.user)
+        factories.create_order(user=self.user, site=self.site)
         self.assertEqual(Refund.objects.count(), 0)
 
         data = self._get_data(self.user.username, self.course_id)
@@ -184,7 +170,8 @@ class RefundProcessViewTests(ThrottlingMixin, TestCase):
 
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.refund = RefundFactory(user=self.user)
+        order = factories.create_order(user=self.user, site=self.site)
+        self.refund = RefundFactory(user=self.user, order=order)
 
     def put(self, action):
         data = '{{"action": "{}"}}'.format(action)

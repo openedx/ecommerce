@@ -5,7 +5,6 @@ import logging
 
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
-from threadlocals.threadlocals import get_current_request
 
 from ecommerce.referrals.models import Referral
 
@@ -31,8 +30,7 @@ class OrderNumberGenerator(object):
         """
         site = basket.site
         if not site:
-            site = get_current_request().site
-            logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
+            raise AttributeError('Basket [{}] is not associated with a Site.'.format(basket.id))
 
         partner = site.siteconfiguration.partner
         return self.order_number_from_basket_id(partner, basket.id)
@@ -73,25 +71,23 @@ class OrderCreator(OscarOrderCreator):
 
         This override ensures the order's site is set to that of the basket. If the basket has no site, the default
         site is used. The site value can be overridden by setting the `site` kwarg.
+
+        Raises:
+            AttributeError: Raised if basket has no associated Site.
         """
 
-        # If a site was not passed in with extra_order_fields,
-        # use the basket's site if it has one, else get the site
-        # from the current request.
-        site = basket.site
-        if not site:
-            site = get_current_request().site
-
-        order_data = {'basket': basket,
-                      'number': order_number,
-                      'site': site,
-                      'currency': total.currency,
-                      'total_incl_tax': total.incl_tax,
-                      'total_excl_tax': total.excl_tax,
-                      'shipping_incl_tax': shipping_charge.incl_tax,
-                      'shipping_excl_tax': shipping_charge.excl_tax,
-                      'shipping_method': shipping_method.name,
-                      'shipping_code': shipping_method.code}
+        order_data = {
+            'basket': basket,
+            'number': order_number,
+            'site': basket.site,
+            'currency': total.currency,
+            'total_incl_tax': total.incl_tax,
+            'total_excl_tax': total.excl_tax,
+            'shipping_incl_tax': shipping_charge.incl_tax,
+            'shipping_excl_tax': shipping_charge.excl_tax,
+            'shipping_method': shipping_method.name,
+            'shipping_code': shipping_method.code,
+        }
         if shipping_address:
             order_data['shipping_address'] = shipping_address
         if billing_address:
@@ -102,6 +98,10 @@ class OrderCreator(OscarOrderCreator):
             order_data['status'] = status
         if extra_order_fields:
             order_data.update(extra_order_fields)
+
+        if not order_data.get('site'):
+            raise AttributeError('Basket [{}] is not associated with a Site.'.format(basket.id))
+
         order = Order(**order_data)
         order.save()
 

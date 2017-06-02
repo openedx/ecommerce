@@ -14,6 +14,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.extensions.test import factories
 
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
@@ -39,7 +40,7 @@ class RefundTestMixin(CourseCatalogTestMixin):
 
     def create_order(self, user=None, credit=False, multiple_lines=False, free=False, status=ORDER.COMPLETE):
         user = user or self.user
-        basket = BasketFactory(owner=user)
+        basket = BasketFactory(owner=user, site=self.site)
 
         if credit:
             basket.add_product(self.credit_product)
@@ -72,7 +73,10 @@ class RefundTestMixin(CourseCatalogTestMixin):
             self.assertEqual(refund_line.line_credit_excl_tax, order_line.line_price_excl_tax)
             self.assertEqual(refund_line.quantity, order_line.quantity)
 
-    def create_refund(self, processor_name=DummyProcessor.NAME, **kwargs):
+    def create_refund(self, processor_name=DummyProcessor.NAME, site=None, **kwargs):
+        site = site or self.site
+        kwargs['user'] = kwargs.get('user') or factories.UserFactory()
+        kwargs['order'] = kwargs.get('order') or factories.create_order(user=kwargs['user'], site=site)
         refund = RefundFactory(**kwargs)
         order = refund.order
         source_type, __ = SourceType.objects.get_or_create(name=processor_name)

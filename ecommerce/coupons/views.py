@@ -15,7 +15,6 @@ from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
@@ -294,7 +293,7 @@ class EnrollmentCodeCsvView(View):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=file_name)
 
-        redeem_url = get_ecommerce_url(reverse('coupons:offer'))
+        redeem_url = request.build_absolute_uri(reverse('coupons:offer'))
         voucher_field_names = ('Code', 'Redemption URL')
         voucher_writer = csv.DictWriter(response, fieldnames=voucher_field_names)
 

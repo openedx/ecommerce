@@ -1,8 +1,8 @@
 import ddt
-from oscar.test import factories
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.test import factories
 from ecommerce.tests.testcases import TestCase
 
 
@@ -10,7 +10,7 @@ from ecommerce.tests.testcases import TestCase
 class OrderTests(TestCase):
     def setUp(self):
         super(OrderTests, self).setUp()
-        self.order = factories.create_order()
+        self.order = factories.create_order(site=self.site)
 
     @ddt.data(ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
     def test_is_fulfillable(self, status):

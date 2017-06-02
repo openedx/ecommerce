@@ -100,26 +100,6 @@ class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
         with self.assertRaises(ConnectionError):
             self.assertFalse(user.account_details(self.request))
 
-    def prepare_credit_eligibility_info(self, eligible=True):
-        """ Helper method for setting up LMS eligibility info. """
-        user = self.create_user()
-        course_key = 'a/b/c'
-        self.mock_eligibility_api(self.request, user, course_key, eligible=eligible)
-        return user, course_key
-
-    @httpretty.activate
-    def test_user_is_eligible(self):
-        """ Verify the method returns eligibility information. """
-        user, course_key = self.prepare_credit_eligibility_info()
-        self.assertEqual(user.is_eligible_for_credit(course_key)[0]['username'], user.username)
-        self.assertEqual(user.is_eligible_for_credit(course_key)[0]['course_key'], course_key)
-
-    @httpretty.activate
-    def test_user_is_not_eligible(self):
-        """ Verify method returns false (empty list) if user is not eligible. """
-        user, course_key = self.prepare_credit_eligibility_info(eligible=False)
-        self.assertFalse(user.is_eligible_for_credit(course_key))
-
     @httpretty.activate
     @ddt.data(
         (200, True),
@@ -194,7 +174,7 @@ class BusinessClientTests(TestCase):
 
 
 @ddt.ddt
-class SiteConfigurationTests(TestCase):
+class SiteConfigurationTests(LmsApiMockMixin, TestCase):
     @ddt.data(
         ('paypal', {'paypal'}),
         ('paypal ', {'paypal'}),
@@ -329,3 +309,18 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], ENTERPRISE_API_URL)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
+
+    def prepare_credit_eligibility_info(self, eligible=True):
+        """ Helper method for setting up LMS eligibility info. """
+        user = self.create_user()
+        course_key = 'a/b/c'
+        self.mock_eligibility_api(self.request, user, course_key, eligible=eligible)
+        return user, course_key
+
+    @ddt.data(True, False)
+    @httpretty.activate
+    def test_is_user_eligible_for_credit(self, expected):
+        """ The method should return a boolean indicating the user's eligibility. """
+        self.mock_access_token_response()
+        user, course_key = self.prepare_credit_eligibility_info(eligible=expected)
+        self.assertEqual(self.site.siteconfiguration.is_user_eligible_for_credit(user.username, course_key), expected)

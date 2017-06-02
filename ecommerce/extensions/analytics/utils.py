@@ -2,14 +2,7 @@ import json
 import logging
 from functools import wraps
 
-from threadlocals.threadlocals import get_current_request
-
 logger = logging.getLogger(__name__)
-
-
-def is_segment_configured():
-    """Returns a Boolean indicating if Segment has been configured for use."""
-    return bool(get_current_request().site.siteconfiguration.segment_key)
 
 
 def parse_tracking_context(user):

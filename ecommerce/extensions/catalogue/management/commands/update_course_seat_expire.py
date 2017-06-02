@@ -8,7 +8,6 @@ from django.core.management import BaseCommand, CommandError
 from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import HttpClientError
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 
 logger = logging.getLogger(__name__)
@@ -19,6 +18,7 @@ class Command(BaseCommand):
 
     help = 'Update seat expire with the course enrollment end date.'
 
+    # FIXME Accept site/partner parameter
     def add_arguments(self, par):
         par.add_argument('--commit',
                          action='store_true',

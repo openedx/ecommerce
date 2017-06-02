@@ -8,13 +8,11 @@ from django.core.cache import cache
 from django.core.management import call_command
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView, View
-from edx_rest_api_client.client import EdxRestApiClient
 from requests import Timeout
 from slumber.exceptions import SlumberBaseException
 from waffle import switch_is_active
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
@@ -52,14 +50,8 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
 
         if not credit_providers:
             try:
-                credit_api = EdxRestApiClient(
-                    get_lms_url('/api/credit/v1/'),
-                    oauth_access_token=self.request.user.access_token
-                )
-                credit_providers = credit_api.providers.get()
+                credit_providers = self.request.site.siteconfiguration.credit_api_client.providers.get()
                 credit_providers.sort(key=lambda provider: provider['display_name'])
-
-                # Update the cache
                 cache.set(key, credit_providers, settings.CREDIT_PROVIDER_CACHE_TIMEOUT)
             except (SlumberBaseException, Timeout):
                 logger.exception('Failed to retrieve credit providers!')

@@ -94,7 +94,7 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.save()
         self.assertEqual(self.range.catalog_query, large_query)
 
-    @mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=None))
+    # FIXME Why do we care about requests?
     def test_run_catalog_query_no_request(self):
         """
         run_course_query() should return status 400 response when no request is present.
@@ -124,11 +124,10 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         cached_response = cache.get(cache_key)
         self.assertIsNone(cached_response)
 
-        with mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=request)):
-            response = self.range.run_catalog_query(seat)
-            self.assertTrue(response['course_runs'][course.id])
-            cached_response = cache.get(cache_key)
-            self.assertEqual(response, cached_response)
+        response = self.range.run_catalog_query(seat)
+        self.assertTrue(response['course_runs'][course.id])
+        cached_response = cache.get(cache_key)
+        self.assertEqual(response, cached_response)
 
     @mock_course_catalog_api_client
     def test_query_range_contains_product(self):

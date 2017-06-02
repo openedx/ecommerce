@@ -26,7 +26,7 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
     Helper function for creating an order for testing
     """
     if not basket:
-        basket = Basket.objects.create()
+        basket = Basket.objects.create(site=kwargs.get('site'))
         basket.strategy = Default()
         product = create_product()
         create_stockrecord(
