@@ -30,10 +30,7 @@ class OrderNumberGenerator(object):
         """
         site = basket.site
         if not site:
-            # FIXME Raise an error!
-            raise
-            # site = get_current_request().site
-            logger.warning('Basket [%d] is not associated with a Site. Defaulting to Site [%d].', basket.id, site.id)
+            raise AttributeError('Basket [{}] is not associated with a Site.'.format(basket.id))
 
         partner = site.siteconfiguration.partner
         return self.order_number_from_basket_id(partner, basket.id)
@@ -74,14 +71,14 @@ class OrderCreator(OscarOrderCreator):
 
         This override ensures the order's site is set to that of the basket. If the basket has no site, the default
         site is used. The site value can be overridden by setting the `site` kwarg.
+
+        Raises:
+            AttributeError: Raised if basket has no associated Site.
         """
 
-        # If a site was not passed in with extra_order_fields,
-        # use the basket's site if it has one, else get the site
-        # from the current request.
         site = basket.site
         if not site:
-            site = get_current_request().site
+            raise AttributeError('Basket [{}] is not associated with a Site.'.format(basket.id))
 
         order_data = {'basket': basket,
                       'number': order_number,

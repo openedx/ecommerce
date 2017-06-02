@@ -14,15 +14,17 @@ Line = get_model('order', 'Line')
 Partner = get_model('partner', 'Partner')
 StockRecord = get_model('partner', 'StockRecord')
 
-
 HONOR_TO_AUDIT = 'honor_to_audit'
 AUDIT_TO_HONOR = 'audit_to_honor'
 
 
 class Command(BaseCommand):
-
     help = 'Convert a list of courses from honor to audit, or vice versa. For use with courses '
     'which already have enrollments.'
+
+    access_token = None
+    options = None
+    partner = None
 
     def add_arguments(self, parser):
         parser.add_argument('course_ids', nargs='+', type=str)
@@ -52,17 +54,15 @@ class Command(BaseCommand):
                                  'honor.')
 
     def handle(self, *args, **options):
-        self.options = options  # pylint: disable=attribute-defined-outside-init
+        self.options = options
         course_ids = map(unicode, self.options.get('course_ids', []))
 
-        self.access_token = options.get('access_token')  # pylint: disable=attribute-defined-outside-init
+        self.access_token = options.get('access_token')
         if not self.access_token:
             logger.error('Cannot convert and publish a course without an access token.')
             return
 
-        self.partner = Partner.objects.get(code__iexact=options['partner'])  # pylint: disable=attribute-defined-outside-init
-        site = self.partner.siteconfiguration.site
-        self._install_current_request(site)
+        self.partner = Partner.objects.get(code__iexact=options['partner'])
 
         if options.get('direction') == HONOR_TO_AUDIT:
             conversion = self._convert_honor_to_audit

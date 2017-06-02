@@ -3,7 +3,6 @@ import logging
 
 import ddt
 import mock
-from django.test.client import RequestFactory
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import create_basket as oscar_create_basket
 from oscar.test.factories import create_order
@@ -22,9 +21,9 @@ LOGGER_NAME = 'ecommerce.extensions.order.utils'
 Country = get_class('address.models', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderCreator = get_class('order.utils', 'OrderCreator')
+OrderLine = get_model('order', 'Line')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
-OrderLine = get_model('order', 'Line')
 RefundLine = get_model('refund', 'RefundLine')
 ShippingAddress = get_class('order.models', 'ShippingAddress')
 
@@ -42,18 +41,11 @@ class OrderNumberGeneratorTests(TestCase):
         self.assert_order_number_matches_basket(basket, self.partner)
 
     def test_order_number_for_basket_without_site(self):
-        """ Verify the order number is linked to the default site, if the basket has no associated site. """
-        site_configuration = SiteConfigurationFactory(site__domain='acme.fake', partner__name='ACME')
-        site = site_configuration.site
-        partner = site_configuration.partner
+        """ If the basket is not associated with a site, an error should be raised.  """
         basket = BasketFactory(site=None)
 
-        request = RequestFactory().get('')
-        request.session = None
-        request.site = site
-
-        with mock.patch('ecommerce.extensions.order.utils.get_current_request', mock.Mock(return_value=request)):
-            self.assert_order_number_matches_basket(basket, partner)
+        with self.assertRaises(AttributeError):
+            self.generator.order_number(basket)
 
     def test_order_number_from_basket_id(self):
         """ Verify the method returns an order number determined using the basket's ID, and the specified partner. """
@@ -107,17 +99,12 @@ class OrderCreatorTests(TestCase):
         """ Returns a new Referral associated with the specified basket. """
         return Referral.objects.create(basket=basket, affiliate_id=affiliate_id, site=basket.site)
 
-    def test_create_order_model_default_site(self):
-        """
-        Verify the create_order_model method associates the order with the default site
-        if the basket does not have a site set.
-        """
-        # Create a basket without a site
-        basket = self.create_basket(None)
+    def test_create_order_model_for_site_without_basket(self):
+        """ An error should be raised if the basket has not site. """
+        basket = BasketFactory(site=None)
 
-        # Ensure the order's site is set to the default site
-        order = self.create_order_model(basket)
-        self.assertEqual(order.site, self.site)
+        with self.assertRaises(AttributeError):
+            self.create_order_model(basket)
 
     def test_create_order_model_basket_site(self):
         """ Verify the create_order_model method associates the order with the basket's site. """
