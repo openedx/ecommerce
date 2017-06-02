@@ -172,7 +172,7 @@ class UserAlreadyPlacedOrderTests(TestCase):
     def setUp(self):
         super(UserAlreadyPlacedOrderTests, self).setUp()
         self.user = self.create_user()
-        self.order = create_order(user=self.user)
+        self.order = create_order(user=self.user, site=self.site)
         self.product = self.get_order_product()
 
     def get_order_product(self, order=None):
@@ -203,7 +203,7 @@ class UserAlreadyPlacedOrderTests(TestCase):
         Test the case that user have a refunded order for the product.
         """
         user = self.create_user()
-        refund = RefundFactory(user=user)
+        refund = RefundFactory(user=user, order=create_order(user=user, site=self.site))
         refund_line = RefundLine.objects.get(refund=refund)
         refund_line.status = 'Complete'
         refund_line.save()
@@ -217,7 +217,7 @@ class UserAlreadyPlacedOrderTests(TestCase):
         Tests the functionality of is_order_line_refunded method.
         """
         user = self.create_user()
-        refund = RefundFactory(user=user)
+        refund = RefundFactory(user=user, order=create_order(user=user, site=self.site))
         refund_line = RefundLine.objects.get(refund=refund)
         refund_line.status = refund_line_status
         refund_line.save()

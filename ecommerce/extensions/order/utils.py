@@ -76,20 +76,18 @@ class OrderCreator(OscarOrderCreator):
             AttributeError: Raised if basket has no associated Site.
         """
 
-        site = basket.site
-        if not site:
-            raise AttributeError('Basket [{}] is not associated with a Site.'.format(basket.id))
-
-        order_data = {'basket': basket,
-                      'number': order_number,
-                      'site': site,
-                      'currency': total.currency,
-                      'total_incl_tax': total.incl_tax,
-                      'total_excl_tax': total.excl_tax,
-                      'shipping_incl_tax': shipping_charge.incl_tax,
-                      'shipping_excl_tax': shipping_charge.excl_tax,
-                      'shipping_method': shipping_method.name,
-                      'shipping_code': shipping_method.code}
+        order_data = {
+            'basket': basket,
+            'number': order_number,
+            'site': basket.site,
+            'currency': total.currency,
+            'total_incl_tax': total.incl_tax,
+            'total_excl_tax': total.excl_tax,
+            'shipping_incl_tax': shipping_charge.incl_tax,
+            'shipping_excl_tax': shipping_charge.excl_tax,
+            'shipping_method': shipping_method.name,
+            'shipping_code': shipping_method.code,
+        }
         if shipping_address:
             order_data['shipping_address'] = shipping_address
         if billing_address:
@@ -100,6 +98,10 @@ class OrderCreator(OscarOrderCreator):
             order_data['status'] = status
         if extra_order_fields:
             order_data.update(extra_order_fields)
+
+        if not order_data.get('site'):
+            raise AttributeError('Basket [{}] is not associated with a Site.'.format(basket.id))
+
         order = Order(**order_data)
         order.save()
 

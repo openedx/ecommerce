@@ -57,7 +57,7 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.seat, 1)
         self.order = factories.create_order(number=1, basket=basket, user=self.user)
 
