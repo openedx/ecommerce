@@ -76,11 +76,11 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
     pipeline = settings.OSCAR_REFUND_STATUS_PIPELINE
 
     def _get_instance(self, **kwargs):
-        return RefundFactory(**kwargs)
+        return self.create_refund(**kwargs)
 
     def test_num_items(self):
         """ The method should return the total number of items being refunded. """
-        refund = RefundFactory()
+        refund = self._get_instance()
         self.assertEqual(refund.num_items, 1)
 
         RefundLineFactory(quantity=3, refund=refund)
@@ -140,7 +140,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         order = self.create_order(user=UserFactory())
         line = order.lines.first()
-        RefundLineFactory(order_line=line, status=refund_status)
+        RefundFactory(order=order, status=refund_status)
 
         with LogCapture(LOGGER_NAME) as l:
             refund = Refund.create_with_lines(order, [line])
@@ -434,6 +434,7 @@ class RefundLineTests(StatusTestsMixin, TestCase):
     pipeline = settings.OSCAR_REFUND_LINE_STATUS_PIPELINE
 
     def _get_instance(self, **kwargs):
+        kwargs['refund__order'] = create_order(site=self.site)
         return RefundLineFactory(**kwargs)
 
     def test_deny(self):

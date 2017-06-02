@@ -317,6 +317,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
 
         self.basket = factories.create_basket()
         self.basket.owner = self.user
+        self.basket.site = self.site
         self.basket.freeze()
 
         self.processor = Cybersource(self.site)
