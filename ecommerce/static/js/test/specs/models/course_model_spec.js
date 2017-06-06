@@ -289,7 +289,11 @@ define([
 
                 it('should POST to the publication endpoint', function() {
                     var args,
-                        cookie = 'save-test';
+                        cookie = 'save-test',
+                        modelVerifiedSeat = model.getOrCreateSeats('verified')[0];
+
+                    // The next line prevents flakiness.
+                    spyOn(modelVerifiedSeat.validation, 'expires').and.returnValue(undefined);
 
                     spyOn($, 'ajax');
                     Cookies.set('ecommerce_csrftoken', cookie);
@@ -384,6 +388,7 @@ define([
             describe('verification deadline validation', function() {
                 it('succeeds if the verification deadline is after the course seats\' expiration dates', function() {
                     var seat = model.getOrCreateSeats('verified')[0];
+                    model.set('products', seat);
                     model.set('verification_deadline', '2016-01-01T00:00:00Z');
                     seat.set('expires', '2015-01-01T00:00:00Z');
 
@@ -481,6 +486,7 @@ define([
 
             describe('product title validation', function() {
                 it('succeeds if the product title does not contain HTML', function() {
+                    model.unset('products');
                     model.set('name', 'edX Demonstration Course');
                     expect(model.isValid(true)).toBeTruthy();
                 });
