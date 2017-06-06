@@ -1,4 +1,7 @@
+import waffle
 from oscar.apps.order.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+
+from ecommerce.extensions.order.constants import ORDER_LIST_VIEW_SWITCH
 
 admin.site.unregister((Order, Line, LinePrice, PaymentEvent, OrderDiscount,))
 
@@ -22,6 +25,14 @@ class OrderAdminExtended(OrderAdmin):
         queryset = super(OrderAdminExtended, self).get_queryset(request)
         queryset = queryset.select_related('site', 'user', 'basket', )
         return queryset
+
+    def changelist_view(self, request, extra_context=None):
+        if not waffle.switch_is_active(ORDER_LIST_VIEW_SWITCH):
+            self.change_list_template = 'admin/disable_change_list.html'
+        else:
+            self.change_list_template = None
+
+        return super(OrderAdminExtended, self).changelist_view(request, extra_context)
 
 
 @admin.register(Line)

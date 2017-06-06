@@ -10,6 +10,9 @@ COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
 # Seat constants
 SEAT_PRODUCT_CLASS_NAME = 'Seat'
 
+# switch is used to disable/enable USER table list/change view in django admin
+USER_LIST_VIEW_SWITCH = 'enable_user_list_view'
+
 # Coupon constant
 COUPON_PRODUCT_CLASS_NAME = 'Coupon'
 
