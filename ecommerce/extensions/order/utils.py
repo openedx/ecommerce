@@ -102,8 +102,11 @@ class OrderCreator(OscarOrderCreator):
             order_data['status'] = status
         if extra_order_fields:
             order_data.update(extra_order_fields)
-        order = Order(**order_data)
-        order.save()
+        try:
+            order = Order(**order_data)
+            order.save()
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to save Order [%s]', order_number)
 
         try:
             referral = Referral.objects.get(basket=basket)
