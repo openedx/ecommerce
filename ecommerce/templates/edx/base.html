@@ -26,6 +26,10 @@
         {% block stylesheets %}
         {% endblock %}
     {% endcompress %}
+
+    {% if optimizely_snippet_src %}
+      <script src="{{ optimizely_snippet_src }}"></script>
+    {% endif %}
 </head>
 <body>
 {% block skip_link %}
