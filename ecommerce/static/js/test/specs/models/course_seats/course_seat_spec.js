@@ -10,7 +10,7 @@ define([
 
         var model,
             data = {
-                id: 9,
+                id: 100,
                 url: 'http://ecommerce.local:8002/api/v2/products/9/',
                 structure: 'child',
                 product_class: 'Seat',
