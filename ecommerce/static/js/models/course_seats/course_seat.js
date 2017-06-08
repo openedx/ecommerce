@@ -53,24 +53,26 @@ define([
                         return gettext('The upgrade deadline must occur BEFORE the verification deadline.');
                     }
                     return undefined;
+                },
+                title: {
+                    required: false,
+                    pattern: 'productName'
                 }
             },
 
             // TODO Determine how to use the extended seatType attribute of child classes with Backbone.Relational
             // http://backbonerelational.org/#RelationalModel-subModelTypes
             getSeatType: function() {
-                switch (this.get('certificate_type')) {
-                case 'verified':
-                    {
-                        return 'verified';
-                    }
+                var certificateType = this.get('certificate_type');
+
+                switch (certificateType) {
                 case 'credit':
-                    return 'credit';
+                case 'honor':
+                case 'verified':
+                    return certificateType;
                 case 'professional':
                 case 'no-id-professional':
                     return 'professional';
-                case 'honor':
-                    return 'honor';
                 default:
                     return 'audit';
                 }

@@ -289,11 +289,7 @@ define([
 
                 it('should POST to the publication endpoint', function() {
                     var args,
-                        cookie = 'save-test',
-                        modelVerifiedSeat = model.getOrCreateSeats('verified')[0];
-
-                    // The next line prevents flakiness.
-                    spyOn(modelVerifiedSeat.validation, 'expires').and.returnValue(undefined);
+                        cookie = 'save-test';
 
                     spyOn($, 'ajax');
                     Cookies.set('ecommerce_csrftoken', cookie);
@@ -484,16 +480,31 @@ define([
                 });
             });
 
-            describe('product title validation', function() {
-                it('succeeds if the product title does not contain HTML', function() {
-                    model.unset('products');
-                    model.set('name', 'edX Demonstration Course');
+            describe('course and course seat name/title validation', function() {
+                var validName = 'Random name',
+                    invalidName = 'A &amp; test with <a>html</a>';
+
+                it('should succeed if the course name does not contain HTML', function() {
+                    model.set('name', validName);
                     expect(model.isValid(true)).toBeTruthy();
                 });
 
-                it('fails if the product title contains HTML', function() {
-                    model.set('name', 'edx Demo Course &amp; test with <a>html</a>');
+                it('should fail if the course name contains HTML', function() {
+                    model.set('name', invalidName);
                     expect(model.validate().name).toEqual('The product name cannot contain HTML.');
+                    expect(model.isValid(true)).toBeFalsy();
+                });
+
+                it('should succeed if the seat title does not contain HTML', function() {
+                    model.set('products', [honorSeat]);
+                    model.seats()[0].set('title', validName);
+                    expect(model.isValid(true)).toBeTruthy();
+                });
+
+                it('should fail if the seat title contains HTML', function() {
+                    model.set('products', [honorSeat]);
+                    model.seats()[0].set('title', invalidName);
+                    expect(model.seats()[0].validate().title).toEqual('The product name cannot contain HTML.');
                     expect(model.isValid(true)).toBeFalsy();
                 });
             });
