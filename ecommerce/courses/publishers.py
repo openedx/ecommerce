@@ -108,7 +108,7 @@ class LMSPublisher(object):
                 e.content
             )
             return self._parse_error(e.content, error_message)
-        except:  # pylint: disable=bare-except
+        except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to publish commerce data for [%s] to LMS.', course_id)
             return error_message
 
@@ -135,7 +135,7 @@ class LMSPublisher(object):
                 message = data.values()[0]
             if isinstance(message, list):
                 message = message[0]
-        except:  # pylint: disable=bare-except
+        except Exception:  # pylint: disable=broad-except
             pass
 
         if message:
