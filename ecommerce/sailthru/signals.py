@@ -55,6 +55,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
 
         # get product
         product = line.product
+        sku = line.partner_sku
 
         # ignore everything except course seats.  no support for coupons as of yet
         if product.is_seat_product:
@@ -65,7 +66,8 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
             update_course_enrollment.delay(order.user.email, _build_course_url(course_id),
                                            False, mode_for_seat(product),
                                            unit_cost=price, course_id=course_id, currency=order.currency,
-                                           site_code=site_configuration.partner.short_code, message_id=message_id)
+                                           site_code=site_configuration.partner.short_code, message_id=message_id,
+                                           sku=sku)
 
 
 @receiver(basket_addition)

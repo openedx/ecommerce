@@ -97,7 +97,8 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
             currency=order.currency,
             message_id=CAMPAIGN_COOKIE,
             site_code=self.partner.short_code,
-            unit_cost=order.total_excl_tax
+            unit_cost=order.total_excl_tax,
+            sku=order.lines.first().partner_sku
         )
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
@@ -116,7 +117,8 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
             currency=order.currency,
             message_id=None,
             site_code=self.partner.short_code,
-            unit_cost=order.total_excl_tax
+            unit_cost=order.total_excl_tax,
+            sku=order.lines.first().partner_sku
         )
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
@@ -177,7 +179,8 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
             currency=order.currency,
             message_id=CAMPAIGN_COOKIE,
             site_code=self.partner.short_code,
-            unit_cost=order.total_excl_tax
+            unit_cost=order.total_excl_tax,
+            sku=order.lines.first().partner_sku
         )
 
     def test_basket_attribute_update_with_existing_attribute(self):
@@ -217,7 +220,8 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
             currency=order.currency,
             message_id=CAMPAIGN_COOKIE,
             site_code=self.partner.short_code,
-            unit_cost=order.total_excl_tax
+            unit_cost=order.total_excl_tax,
+            sku=order.lines.first().partner_sku
         )
 
     def _create_order(self, price, mode='verified'):
