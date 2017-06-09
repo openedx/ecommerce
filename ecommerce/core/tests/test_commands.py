@@ -21,6 +21,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.partner = 'fake'
         self.lms_url_root = 'http://fake.server'
         self.payment_processors = 'cybersource,paypal'
+        self.client_side_payment_processor = 'cybersource'
         self.client_id = 'ecommerce-key'
         self.client_secret = 'ecommerce-secret'
         self.segment_key = 'test-segment-key'
@@ -34,6 +35,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.partner, partner)
         self.assertEqual(site_configuration.lms_url_root, self.lms_url_root)
         self.assertEqual(site_configuration.payment_processors, self.payment_processors)
+        self.assertEqual(site_configuration.client_side_payment_processor, self.client_side_payment_processor)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'], self.client_id)
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
         self.assertEqual(site_configuration.segment_key, self.segment_key)
@@ -42,7 +44,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, payment_processors=None, segment_key=None,
                       enable_enrollment_codes=False, payment_support_email=None, payment_support_url=None,
-                      send_refund_notifications=False):
+                      send_refund_notifications=False, client_side_payment_processor=None):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -67,6 +69,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             command_args.append('--payment-processors={payment_processors}'.format(
                 payment_processors=payment_processors
             ))
+        if client_side_payment_processor:
+            command_args.append('--client-side-payment-processor={}'.format(client_side_payment_processor))
         if segment_key:
             command_args.append('--segment-key={segment_key}'.format(segment_key=segment_key))
         if enable_enrollment_codes:
@@ -95,6 +99,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             site_domain=site_domain,
             partner_code=self.partner,
             lms_url_root=self.lms_url_root,
+            client_side_payment_processor=self.client_side_payment_processor,
             payment_processors=self.payment_processors,
             client_id=self.client_id,
             client_secret=self.client_secret,
@@ -123,6 +128,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             partner_code=self.partner,
             lms_url_root=self.lms_url_root,
             payment_processors=self.payment_processors,
+            client_side_payment_processor=self.client_side_payment_processor,
             client_id=self.client_id,
             client_secret=self.client_secret,
             segment_key=self.segment_key,
