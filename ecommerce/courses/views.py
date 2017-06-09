@@ -138,7 +138,7 @@ class ConvertCourseView(View):
         commit = request.GET.get('commit', False)
         commit = commit in ('1', 'true')
         direction = request.GET.get('direction', 'honor_to_audit')
-        partner = request.GET.get('partner')
+        partner = request.site.siteconfiguration.partner.code
 
         # Capture all output and logging
         out = StringIO()

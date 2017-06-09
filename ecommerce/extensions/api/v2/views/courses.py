@@ -84,8 +84,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
               'because the switch [publish_course_modes_to_lms] is disabled.'
 
         if waffle.switch_is_active('publish_course_modes_to_lms'):
-            access_token = getattr(request.user, 'access_token', None)
-            published = course.publish_to_lms(access_token=access_token)
+            published = course.publish_to_lms()
             if published:
                 msg = 'Course [{course_id}] was successfully published to LMS.'
             else:

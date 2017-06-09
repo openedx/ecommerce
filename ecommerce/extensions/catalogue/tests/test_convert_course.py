@@ -10,14 +10,11 @@ from ecommerce.extensions.catalogue.models import Product
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
-ACCESS_TOKEN = 'secret'
-
 StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
 class ConvertCourseTest(CourseCatalogTestMixin, TestCase):
-
     @ddt.data(
         ('honor', 'honor_to_audit', ''),
         ('', 'audit_to_honor', 'honor')
@@ -36,10 +33,7 @@ class ConvertCourseTest(CourseCatalogTestMixin, TestCase):
         # Mock the LMS call
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             mock_publish.return_value = True
-            call_command(
-                'convert_course', course.id, access_token=ACCESS_TOKEN, commit=True,
-                direction=direction, partner=self.partner.code
-            )
+            call_command('convert_course', course.id, commit=True, direction=direction, partner=self.partner.code)
 
         # Calling refresh_from_db doesn't seem to update the product's attributes
         seat_to_convert = Product.objects.get(pk=seat_to_convert.pk)
@@ -70,10 +64,7 @@ class ConvertCourseTest(CourseCatalogTestMixin, TestCase):
         course = CourseFactory()
         seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0, self.partner)
 
-        call_command(
-            'convert_course', course.id, access_token=ACCESS_TOKEN, commit=False,
-            direction=direction, partner=self.partner.code
-        )
+        call_command('convert_course', course.id, commit=False, direction=direction, partner=self.partner.code)
 
         seat_to_convert = Product.objects.get(pk=seat_to_convert.pk)
 
@@ -90,9 +81,6 @@ class ConvertCourseTest(CourseCatalogTestMixin, TestCase):
         """Verify that the command fails when the course does not have the correct seat type."""
         course = CourseFactory()
 
-        call_command(
-            'convert_course', course.id, access_token=ACCESS_TOKEN, commit=True,
-            direction=direction, partner=self.partner
-        )
+        call_command('convert_course', course.id, commit=True, direction=direction, partner=self.partner)
 
         self.assertEqual(len(course.seat_products), 0)

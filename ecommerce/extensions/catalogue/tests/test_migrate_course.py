@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 from decimal import Decimal
-from urlparse import urljoin, urlparse
+from urlparse import urlparse
 
 import httpretty
 import mock
@@ -52,21 +52,16 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
     }
 
     @property
-    def lms_url(self):
-        return self.site.siteconfiguration.lms_url_root
-
-    @property
     def commerce_api_url(self):
-        lms_commerce_api_url = urljoin(self.lms_url, '/api/commerce/v1')
-        return '{}/courses/{}/'.format(lms_commerce_api_url, self.course_id)
+        return self.site_configuration.build_lms_url('/api/commerce/v1/courses/{}/'.format(self.course_id))
 
     @property
     def course_structure_url(self):
-        return urljoin(self.lms_url, 'api/course_structure/v0/courses/{}/'.format(self.course_id))
+        return self.site_configuration.build_lms_url('/api/course_structure/v0/courses/{}/'.format(self.course_id))
 
     @property
     def enrollment_api_url(self):
-        return urljoin(self.lms_url, 'api/enrollment/v1/course/{}'.format(self.course_id))
+        return self.site_configuration.build_lms_url('/api/enrollment/v1/course/{}'.format(self.course_id))
 
     def _mock_lms_apis(self):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock LMS API calls.')
@@ -133,30 +128,27 @@ class CourseMigrationTestMixin(CourseCatalogTestMixin):
             self.assert_seat_valid(seat, mode)
             self.assert_stock_record_valid(stock_record, seat, self.prices[mode])
 
-    def assert_lms_api_headers(self, request, bearer=False):
-        self.assertEqual(request.headers['Accept'], JSON)
-
-        if bearer:
-            self.assertEqual(request.headers['Authorization'], 'Bearer ' + ACCESS_TOKEN)
-        else:
-            self.assertEqual(request.headers['Content-Type'], JSON)
-            self.assertEqual(request.headers['X-Edx-Api-Key'], EDX_API_KEY)
-
 
 @override_settings(EDX_API_KEY=EDX_API_KEY)
 class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
     def setUp(self):
         super(MigratedCourseTests, self).setUp()
         toggle_switch('publish_course_modes_to_lms', True)
+        httpretty.enable()
+        self.mock_access_token_response()
+
+    def tearDown(self):
+        super(MigratedCourseTests, self).tearDown()
+        httpretty.disable()
+        httpretty.reset()
 
     def _migrate_course_from_lms(self):
         """ Create a new MigratedCourse and simulate the loading of data from LMS. """
         self._mock_lms_apis()
         migrated_course = MigratedCourse(self.course_id, self.site.domain)
-        migrated_course.load_from_lms(ACCESS_TOKEN)
+        migrated_course.load_from_lms()
         return migrated_course
 
-    @httpretty.activate
     def test_load_from_lms(self):
         """ Verify the method creates new objects based on data loaded from the LMS. """
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
@@ -166,10 +158,6 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
             # Verify that the migrated course was not published back to the LMS
             self.assertFalse(mock_publish.called)
-
-        # Ensure LMS was called with the correct headers
-        for request in httpretty.httpretty.latest_requests:
-            self.assert_lms_api_headers(request)
 
         # Verify created objects match mocked data
         parent_seat = course.parent_seat_product
@@ -182,7 +170,6 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
 
             self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[mode]))
 
-    @httpretty.activate
     def test_course_name_missing(self):
         """Verify the Course Structure API is queried if the Commerce API doesn't return a course name."""
         # Mock the Commerce API so that it does not return a name
@@ -198,7 +185,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         # Try migrating the course, which should fail.
         try:
             migrated_course = MigratedCourse(self.course_id, self.site.domain)
-            migrated_course.load_from_lms(ACCESS_TOKEN)
+            migrated_course.load_from_lms()
         except Exception as ex:  # pylint: disable=broad-except
             self.assertEqual(ex.message, 'Aborting migration. No name is available for {}.'.format(self.course_id))
 
@@ -206,11 +193,9 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         last_request = httpretty.last_request()
         self.assertEqual(last_request.path, urlparse(self.course_structure_url).path)
 
-    @httpretty.activate
     def test_fall_back_to_course_structure(self):
         """
-        Verify that migration falls back to the Course Structure API when data
-        is unavailable from the Commerce API.
+        Verify that migration falls back to the Course Structure API when data is unavailable from the Commerce API.
         """
         self._mock_lms_apis()
 
@@ -224,16 +209,8 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         )
 
         migrated_course = MigratedCourse(self.course_id, self.site.domain)
-        migrated_course.load_from_lms(ACCESS_TOKEN)
+        migrated_course.load_from_lms()
         course = migrated_course.course
-
-        # Ensure that the LMS was called with the correct headers.
-        course_structure_path = urlparse(self.course_structure_url).path
-        for request in httpretty.httpretty.latest_requests:
-            if request.path == course_structure_path:
-                self.assert_lms_api_headers(request, bearer=True)
-            else:
-                self.assert_lms_api_headers(request)
 
         # Verify that created objects match mocked data.
         parent_seat = course.parent_seat_product
@@ -245,7 +222,6 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             mode = mode_for_seat(seat)
             self.assert_stock_record_valid(seat.stockrecords.first(), seat, Decimal(self.prices[mode]))
 
-    @httpretty.activate
     def test_whitespace_stripped(self):
         """Verify that whitespace in course names is stripped during migration."""
         self._mock_lms_apis()
@@ -258,7 +234,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
         httpretty.register_uri(httpretty.GET, self.commerce_api_url, body=json.dumps(body), content_type=JSON)
 
         migrated_course = MigratedCourse(self.course_id, self.site.domain)
-        migrated_course.load_from_lms(ACCESS_TOKEN)
+        migrated_course.load_from_lms()
         course = migrated_course.course
 
         # Verify that whitespace has been stripped from the course name.
@@ -285,15 +261,11 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             mock_publish.return_value = True
             call_command(
-                'migrate_course', self.course_id, access_token=ACCESS_TOKEN, site_domain=self.site.domain
+                'migrate_course', self.course_id, site_domain=self.site.domain
             )
 
             # Verify that the migrated course was not published back to the LMS
             self.assertFalse(mock_publish.called)
-
-        # Ensure LMS was called with the correct headers
-        for request in httpretty.httpretty.latest_requests:
-            self.assert_lms_api_headers(request)
 
         self.assertEqual(Product.objects.count(), initial_product_count, 'No new Products should have been saved.')
         self.assertEqual(StockRecord.objects.count(), initial_stock_record_count,
@@ -302,13 +274,13 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
     @httpretty.activate
     def test_handle_with_commit(self):
         """ Verify the management command retrieves data, and saves it to the database. """
+        self.mock_access_token_response()
         self._mock_lms_apis()
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
             call_command(
                 'migrate_course',
                 self.course_id,
-                access_token=ACCESS_TOKEN,
                 commit=True,
                 # `site_domain` is the option destination variable
                 site_domain=self.site.domain
@@ -329,7 +301,6 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
                 call_command(
                     'migrate_course',
                     self.course_id,
-                    access_token=ACCESS_TOKEN,
                     commit=True
                 )
 
@@ -346,7 +317,6 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
             call_command(
                 'migrate_course',
                 self.course_id,
-                access_token=ACCESS_TOKEN,
                 commit=False,
                 site=self.site.domain
             )
@@ -364,7 +334,6 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
             call_command(
                 'migrate_course',
                 self.course_id,
-                access_token=ACCESS_TOKEN,
                 commit=True,
                 site=self.site.domain
             )

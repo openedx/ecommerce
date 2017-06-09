@@ -34,11 +34,6 @@ def get_ecommerce_url(path=''):
     return site_configuration.build_ecommerce_url(path)
 
 
-def get_lms_commerce_api_url():
-    site_configuration = _get_site_configuration()
-    return site_configuration.commerce_api_url
-
-
 def get_lms_dashboard_url():
     site_configuration = _get_site_configuration()
     return site_configuration.student_dashboard_url

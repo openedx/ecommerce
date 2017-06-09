@@ -48,7 +48,7 @@ class CourseMigrationViewTests(ManagementCommandViewMixin, TestCase):
     path = reverse('courses:migrate')
 
 
-class ConvertCourseView(ManagementCommandViewMixin, TestCase):
+class ConvertCourseViewTests(ManagementCommandViewMixin, TestCase):
     path = reverse('courses:convert_course')
 
 
