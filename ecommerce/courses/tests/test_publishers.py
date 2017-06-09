@@ -1,23 +1,24 @@
+from __future__ import unicode_literals
+
 import datetime
 import json
 
 import ddt
 import httpretty
 import mock
-from django.test import override_settings
+from django.utils import timezone
 from oscar.core.loading import get_model
 from requests import Timeout
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_commerce_api_url, get_lms_url
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
-EDX_API_KEY = 'edx'
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.courses.publishers'
 
@@ -25,25 +26,30 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
-@override_settings(EDX_API_KEY=EDX_API_KEY)
 class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
-        self.course = CourseFactory(verification_deadline=datetime.datetime.now() + datetime.timedelta(days=7))
+
+        httpretty.enable()
+        self.mock_access_token_response()
+
+        self.course = CourseFactory(verification_deadline=timezone.now() + datetime.timedelta(days=7), site=self.site)
         self.course.create_or_update_seat('honor', False, 0, self.partner)
         self.course.create_or_update_seat('verified', True, 50, self.partner)
         self.publisher = LMSPublisher()
-        self.error_message = u'Failed to publish commerce data for {course_id} to LMS.'.format(
-            course_id=self.course.id
-        )
+        self.error_message = 'Failed to publish commerce data for {course_id} to LMS.'.format(course_id=self.course.id)
 
-    def _mock_commerce_api(self, status, body=None):
+    def tearDown(self):
+        super(LMSPublisherTests, self).tearDown()
+        httpretty.disable()
+        httpretty.reset()
+
+    def _mock_commerce_api(self, status=200, body=None):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Commerce API calls.')
 
         body = body or {}
-        url = '{}/courses/{}/'.format(get_lms_commerce_api_url().rstrip('/'), self.course.id)
-        httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body),
-                               content_type=JSON)
+        url = self.site_configuration.build_lms_url('/api/commerce/v1/courses/{}/'.format(self.course.id))
+        httpretty.register_uri(httpretty.PUT, url, status=status, body=json.dumps(body), content_type=JSON)
 
     def mock_creditcourse_endpoint(self, course_id, status, body=None):
         self.assertTrue(httpretty.is_enabled(), 'httpretty must be enabled to mock Credit API calls.')
@@ -57,62 +63,42 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             content_type=JSON
         )
 
-    @mock.patch('ecommerce.courses.publishers.get_lms_commerce_api_url', mock.Mock(return_value=None))
-    def test_commerce_api_url_not_set(self):
-        """ If the commerce API url cannot be retrieved, the method should log an ERROR message and return """
-        with LogCapture(LOGGER_NAME) as l:
-            response = self.publisher.publish(self.course)
-            l.check(
-                (LOGGER_NAME, 'ERROR', 'Commerce API URL is not set. Commerce data will not be published!')
-            )
-            self.assertIsNotNone(response)
-            self.assertEqual(response, self.error_message)
-
     def test_api_exception(self):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
         error = 'time out error'
         with mock.patch('requests.put', side_effect=Timeout(error)):
             with LogCapture(LOGGER_NAME) as l:
-                response = self.publisher.publish(self.course)
+                actual = self.publisher.publish(self.course)
                 l.check(
                     (
                         LOGGER_NAME, 'ERROR',
-                        u'Failed to publish commerce data for [{course_id}] to LMS.'.format(
-                            course_id=self.course.id
-                        )
+                        'Failed to publish commerce data for [{course_id}] to LMS.'.format(course_id=self.course.id)
                     )
                 )
-                self.assertIsNotNone(response)
-                self.assertEqual(self.error_message, response)
+                self.assertEqual(actual, self.error_message)
 
-    @httpretty.activate
-    @ddt.unpack
-    @ddt.data(
-        (400, {'non_field_errors': ['deadline issue']}, 'deadline issue'),
-        (404, 'page not found', 'page not found'),
-        (401, {'detail': 'Authentication'}, 'Authentication'),
-        (401, {}, ''),
-    )
-    def test_api_bad_status(self, status, error_msg, expected_msg):
+    def test_api_error(self):
         """ If the Commerce API returns a non-successful status, an ERROR message should be logged. """
-        self._mock_commerce_api(status, error_msg)
+        status = 400
+        expected_msg = 'deadline issue'
+        api_body = {'non_field_errors': [expected_msg]}
+
+        self._mock_commerce_api(status, api_body)
         with LogCapture(LOGGER_NAME) as l:
-            response = self.publisher.publish(self.course)
+            actual = self.publisher.publish(self.course)
             l.check(
                 (
                     LOGGER_NAME, 'ERROR',
-                    u'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
-                        self.course.id, status, json.dumps(error_msg))
+                    'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
+                        self.course.id, status, json.dumps(api_body))
                 )
             )
 
-            self.assert_response_message(response, expected_msg)
+            self.assertEqual(actual, self.error_message + ' ' + expected_msg)
 
-    @httpretty.activate
-    @ddt.data(200, 201)
-    def test_api_success(self, status):
+    def test_api_success(self):
         """ If the Commerce API returns a successful status, an INFO message should be logged. """
-        self._mock_commerce_api(status)
+        self._mock_commerce_api()
 
         with LogCapture(LOGGER_NAME) as l:
             response = self.publisher.publish(self.course)
@@ -121,13 +107,6 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
             l.check((LOGGER_NAME, 'INFO', 'Successfully published commerce data for [{}].'.format(self.course.id)))
 
         last_request = httpretty.last_request()
-
-        # Verify the headers passed to the API were correct.
-        expected = {
-            'Content-Type': JSON,
-            'X-Edx-Api-Key': EDX_API_KEY
-        }
-        self.assertDictContainsSubset(expected, last_request.headers)
 
         # Verify the data passed to the API was correct.
         actual = json.loads(last_request.body)
@@ -218,21 +197,19 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
         self._mock_commerce_api(201)
 
         # Attempt to publish the course
-        return self.publisher.publish(self.course, access_token='access_token')
+        return self.publisher.publish(self.course)
 
     def assert_creditcourse_endpoint_called(self):
         """ Verify the Credit API's CreditCourse endpoint was called. """
-        last_request = httpretty.httpretty.latest_requests[0]
-        self.assertEqual(last_request.path, '/api/credit/v1/courses/{}/'.format(self.course.id))
+        paths = [request.path for request in httpretty.httpretty.latest_requests]
+        self.assertIn('/api/credit/v1/courses/{}/'.format(self.course.id), paths)
 
-    @httpretty.activate
     def test_credit_publication_success(self):
         """ Verify the endpoint returns successfully when credit publication succeeds. """
         error_message = self.attempt_credit_publication(201)
         self.assertIsNone(error_message)
         self.assert_creditcourse_endpoint_called()
 
-    @httpretty.activate
     def test_credit_publication_api_failure(self):
         """ Verify the endpoint fails appropriately when Credit API calls return an error. """
         course_id = self.course.id
@@ -242,24 +219,16 @@ class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
 
             # Ensure the HTTP status and response are logged
             expected_log = 'Failed to publish CreditCourse for [{course_id}] to LMS. ' \
-                           'Status was [{status}]. Body was \'null\'.'.format(course_id=course_id, status=status)
+                           'Status was [{status}]. Body was [null].'.format(course_id=course_id, status=status)
             l.check((LOGGER_NAME, 'ERROR', expected_log))
 
         expected = 'Failed to publish commerce data for {} to LMS.'.format(course_id)
         self.assertEqual(actual, expected)
         self.assert_creditcourse_endpoint_called()
 
-    @httpretty.activate
     @mock.patch('requests.get', mock.Mock(side_effect=Exception))
     def test_credit_publication_uncaught_exception(self):
         """ Verify the endpoint fails appropriately when the Credit API fails unexpectedly. """
         actual = self.attempt_credit_publication(500)
         expected = 'Failed to publish commerce data for {} to LMS.'.format(self.course.id)
         self.assertEqual(actual, expected)
-
-    def assert_response_message(self, api_response, expected_error_msg):
-        self.assertIsNotNone(api_response)
-        if expected_error_msg:
-            self.assertEqual(api_response, " ".join([self.error_message, expected_error_msg]))
-        else:
-            self.assertEqual(api_response, self.error_message, expected_error_msg)

@@ -303,11 +303,6 @@ class SiteConfiguration(models.Model):
         return urljoin(settings.ENTERPRISE_SERVICE_URL, path)
 
     @property
-    def commerce_api_url(self):
-        """ Returns the URL for the root of the Commerce API (hosted by LMS). """
-        return self.build_lms_url('/api/commerce/v1/')
-
-    @property
     def student_dashboard_url(self):
         """ Returns a URL to the student dashboard (hosted by LMS). """
         return self.build_lms_url('/dashboard')
@@ -396,6 +391,14 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the LMS user API service.
         """
         return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token)
+
+    @cached_property
+    def commerce_api_client(self):
+        return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), jwt=self.access_token)
+
+    @cached_property
+    def credit_api_client(self):
+        return EdxRestApiClient(self.build_lms_url('/api/credit/v1/'), jwt=self.access_token)
 
 
 class User(AbstractUser):

@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.db import transaction
+from edx_rest_api_client.client import EdxRestApiClient
 
 from ecommerce.courses.models import Course
 
@@ -21,13 +22,13 @@ class MigratedCourse(object):
         self.course, _created = Course.objects.get_or_create(id=course_id, site=site)
         self.site_configuration = site.siteconfiguration
 
-    def load_from_lms(self, access_token):
+    def load_from_lms(self):
         """
         Loads course products from the LMS.
 
         Loaded data is NOT persisted until the save() method is called.
         """
-        name, verification_deadline, modes = self._retrieve_data_from_lms(access_token)
+        name, verification_deadline, modes = self._retrieve_data_from_lms()
 
         self.course.name = name
         self.course.verification_deadline = verification_deadline
@@ -41,24 +42,16 @@ class MigratedCourse(object):
         host = self.site_configuration.lms_url_root.strip('/')
         return '{host}/{path}'.format(host=host, path=path)
 
-    def _query_commerce_api(self, headers):
+    def _query_commerce_api(self):
         """Get course name and verification deadline from the Commerce API."""
-        url = '{}/courses/{}/'.format(self._build_lms_url('api/commerce/v1'), self.course.id)
-        timeout = settings.COMMERCE_API_TIMEOUT
+        commerce_api_client = self.course.site.siteconfiguration.commerce_api_client
 
-        response = requests.get(url, headers=headers, timeout=timeout)
-        if response.status_code != 200:
-            raise Exception('Unable to retrieve course name and verification deadline: [{status}] - {body}'.format(
-                status=response.status_code,
-                body=response.content
-            ))
-
-        data = response.json()
+        data = commerce_api_client.courses(self.course.id).get()
         logger.debug(data)
-
         course_name = data.get('name')
+
         if course_name is None:
-            message = u'Unable to retrieve course name for {}.'.format(self.course.id)
+            message = 'Unable to retrieve course name for {}.'.format(self.course.id)
             logger.error(message)
             raise Exception(message)
 
@@ -67,28 +60,19 @@ class MigratedCourse(object):
 
         return course_name.strip(), course_verification_deadline
 
-    def _query_course_structure_api(self, access_token):
+    def _query_course_structure_api(self):
         """Get course name from the Course Structure API."""
-        headers = {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + access_token
-        }
-
-        url = self._build_lms_url('api/course_structure/v0/courses/{}/'.format(self.course.id))
-        response = requests.get(url, headers=headers)
-
-        if response.status_code != 200:
-            raise Exception('Unable to retrieve course name: [{status}] - {body}'.format(
-                status=response.status_code,
-                body=response.content
-            ))
-
-        data = response.json()
+        site_configuration = self.course.site.siteconfiguration
+        api_client = EdxRestApiClient(
+            site_configuration.build_lms_url('/api/course_structure/v0/'),
+            jwt=site_configuration.access_token
+        )
+        data = api_client.courses(self.course.id).get()
         logger.debug(data)
 
         course_name = data.get('name')
         if course_name is None:
-            message = u'Aborting migration. No name is available for {}.'.format(self.course.id)
+            message = 'Aborting migration. No name is available for {}.'.format(self.course.id)
             logger.error(message)
             raise Exception(message)
 
@@ -113,7 +97,7 @@ class MigratedCourse(object):
         logger.debug(data)
         return data['course_modes']
 
-    def _retrieve_data_from_lms(self, access_token):
+    def _retrieve_data_from_lms(self):
         """
         Retrieves the course name and modes from the LMS.
         """
@@ -124,13 +108,13 @@ class MigratedCourse(object):
         }
 
         try:
-            course_name, course_verification_deadline = self._query_commerce_api(headers)
+            course_name, course_verification_deadline = self._query_commerce_api()
         except Exception as e:  # pylint: disable=broad-except
             logger.warning(
-                u"Calling Commerce API failed with: [%s]. Falling back to Course Structure API.",
+                'Calling Commerce API failed with: [%s]. Falling back to Course Structure API.',
                 e.message
             )
-            course_name, course_verification_deadline = self._query_course_structure_api(access_token)
+            course_name, course_verification_deadline = self._query_course_structure_api()
 
         modes = self._query_enrollment_api(headers)
 
@@ -156,11 +140,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('course_ids', nargs='+', type=str)
 
-        parser.add_argument('--access_token',
-                            action='store',
-                            dest='access_token',
-                            default=None,
-                            help='OAuth2 access token used to authenticate against some LMS APIs.')
         parser.add_argument('--commit',
                             action='store_true',
                             dest='commit',
@@ -175,11 +154,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         course_ids = options.get('course_ids', [])
-        access_token = options.get('access_token')
         site_domain = options.get('site_domain')
-        if not access_token:
-            logger.error('Courses cannot be migrated if no access token is supplied.')
-            return
 
         if not site_domain:
             logger.error('Courses cannot be migrated without providing a site domain.')
@@ -190,7 +165,7 @@ class Command(BaseCommand):
             try:
                 with transaction.atomic():
                     migrated_course = MigratedCourse(course_id, site_domain)
-                    migrated_course.load_from_lms(access_token)
+                    migrated_course.load_from_lms()
 
                     course = migrated_course.course
                     msg = 'Retrieved info for {0} ({1}):\n'.format(course.id, course.name)
@@ -213,7 +188,7 @@ class Command(BaseCommand):
                     if options.get('commit', False):
                         logger.info('Course [%s] was saved to the database.', course.id)
                         if waffle.switch_is_active('publish_course_modes_to_lms'):
-                            course.publish_to_lms(access_token=access_token)
+                            course.publish_to_lms()
                         else:
                             logger.info('Data was not published to LMS because the switch '
                                         '[publish_course_modes_to_lms] is disabled.')

@@ -65,9 +65,9 @@ class Course(models.Model):
         super(Course, self).save(force_insert, force_update, using, update_fields)
         self._create_parent_seat()
 
-    def publish_to_lms(self, access_token=None):
+    def publish_to_lms(self):
         """ Publish Course and Products to LMS. """
-        return LMSPublisher().publish(self, access_token=access_token)
+        return LMSPublisher().publish(self)
 
     @classmethod
     def is_mode_verified(cls, mode):
@@ -161,7 +161,7 @@ class Course(models.Model):
             expires(datetime): Date when the seat type expires.
             credit_hours(int): Number of credit hours provided.
             remove_stale_modes(bool): Remove stale modes.
-            create_enrollment_code(bool): Whether an enrollment code is created in additon to the seat.
+            create_enrollment_code(bool): Whether an enrollment code is created in addition to the seat.
 
         Returns:
             Product:  The seat that has been created or updated.

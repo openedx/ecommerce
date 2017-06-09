@@ -29,11 +29,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('course_ids', nargs='+', type=str)
 
-        parser.add_argument('--access_token',
-                            action='store',
-                            dest='access_token',
-                            default=None,
-                            help='OAuth2 access token used to authenticate against the LMS APIs.')
         parser.add_argument('--commit',
                             action='store_true',
                             dest='commit',
@@ -57,11 +52,6 @@ class Command(BaseCommand):
         self.options = options  # pylint: disable=attribute-defined-outside-init
         course_ids = map(unicode, self.options.get('course_ids', []))
 
-        self.access_token = options.get('access_token')  # pylint: disable=attribute-defined-outside-init
-        if not self.access_token:
-            logger.error('Cannot convert and publish a course without an access token.')
-            return
-
         self.partner = Partner.objects.get(code__iexact=options['partner'])  # pylint: disable=attribute-defined-outside-init
         site = self.partner.siteconfiguration.site
         self._install_current_request(site)
@@ -77,7 +67,7 @@ class Command(BaseCommand):
                     course = Course.objects.get(id=course_id)
                     conversion(course)
                     if self.options.get('commit', False):
-                        course.publish_to_lms(access_token=self.access_token)
+                        course.publish_to_lms()
                         logger.info('Course [%s] was saved to the database.', course.id)
                     else:
                         logger.info('Course [%s] was NOT saved to the database.', course.id)

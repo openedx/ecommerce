@@ -332,8 +332,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
     def __init__(self, *args, **kwargs):
         super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
-
-        self.access_token = kwargs['context'].pop('access_token')
         self.partner = kwargs['context'].pop('partner', None)
 
     def validate_products(self, products):
@@ -429,7 +427,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 if course.get_enrollment_code():
                     course.toggle_enrollment_code_status(is_active=create_enrollment_code)
 
-                resp_message = course.publish_to_lms(access_token=self.access_token)
+                resp_message = course.publish_to_lms()
                 published = (resp_message is None)
 
                 if published:
