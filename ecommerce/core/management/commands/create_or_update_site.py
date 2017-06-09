@@ -59,6 +59,12 @@ class Command(BaseCommand):
                             type=str,
                             default='',
                             help='Comma-delimited list of payment processors (e.g. cybersource,paypal)')
+        parser.add_argument('--client-side-payment-processor',
+                            action='store',
+                            dest='client_side_payment_processor',
+                            type=str,
+                            default='',
+                            help='Payment processor used for client-side payments')
         parser.add_argument('--client-id',
                             action='store',
                             dest='client_id',
@@ -145,6 +151,7 @@ class Command(BaseCommand):
             'partner': partner,
             'lms_url_root': lms_url_root,
             'payment_processors': options['payment_processors'],
+            'client_side_payment_processor': options['client_side_payment_processor'],
             'segment_key': segment_key,
             'from_email': from_email,
             'enable_enrollment_codes': enable_enrollment_codes,
