@@ -192,10 +192,12 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
 
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
     @ddt.data(None, Paypal.DEFAULT_PROFILE_NAME, 'some-other-name')
-    def test_web_profiles(self, enabled_profile_name, mock_payment):
+    def test_dummy_web_profiles(self, enabled_profile_name, mock_payment):
         """
         Verify that the payment creation payload references a web profile when one is enabled with the expected name.
+        This should occur when the create_and_set_webprofile waffle is disabled.
         """
+        toggle_switch('create_and_set_webprofile', False)
         mock_payment_instance = mock.Mock()
         # NOTE: This is necessary to avoid the issue in https://code.djangoproject.com/ticket/25493.
         mock_payment_instance.id = FuzzyInteger(low=1).fuzz()
@@ -212,6 +214,120 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
             self.assertEqual(payment_creation_payload['experience_profile_id'], 'test-profile-id')
         else:
             self.assertNotIn('experience_profile_id', payment_creation_payload)
+
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.logger')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.WebProfile')
+    def test_web_profile_with_valid_locale(self, mock_web_profile, mock_payment, mock_logger):
+        """
+        Verify that the payment creation payload references a web profile when a valid locale is chosen
+        This should occur when the create_and_set_webprofile waffle is enabled.
+        """
+        toggle_switch('create_and_set_webprofile', True)
+        mock_payment_instance = mock.Mock()
+        # NOTE: This is necessary to avoid the issue in https://code.djangoproject.com/ticket/25493.
+        mock_payment_instance.id = FuzzyInteger(low=1).fuzz()
+        mock_payment_instance.to_dict.return_value = {}
+        mock_payment_instance.links = [mock.Mock(rel='approval_url', href='dummy')]
+        mock_payment.return_value = mock_payment_instance
+
+        Paypal.resolve_paypal_locale = mock.Mock(return_value='valid_locale')
+        mock_web_profile_instance = mock.Mock()
+        mock_web_profile_instance.id = 'test-profile-id'
+        mock_web_profile_instance.presentation.locale_code = 'valid_locale'
+        mock_web_profile.create = mock.Mock(return_value=True)
+        mock_web_profile.return_value = mock_web_profile_instance
+
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        payment_creation_payload = mock_payment.call_args[0][0]
+        self.assertEqual(payment_creation_payload['experience_profile_id'], 'test-profile-id')
+
+        msg = 'Web Profile[%s] for locale %s created successfully' % (
+            mock_web_profile_instance.id,
+            mock_web_profile_instance.presentation.locale_code
+        )
+        mock_logger.info.assert_any_call(msg)
+
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.logger')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.WebProfile')
+    def test_web_profile_with_invalid_locale(self, mock_web_profile, mock_payment, mock_logger):
+        """
+        Verify that the payment creation payload does not reference a web profile when an invalid locale is chosen.
+        This should occur when the create_and_set_webprofile waffle is enabled.
+        """
+        toggle_switch('create_and_set_webprofile', True)
+        mock_payment_instance = mock.Mock()
+        # NOTE: This is necessary to avoid the issue in https://code.djangoproject.com/ticket/25493.
+        mock_payment_instance.id = FuzzyInteger(low=1).fuzz()
+        mock_payment_instance.to_dict.return_value = {}
+        mock_payment_instance.links = [mock.Mock(rel='approval_url', href='dummy')]
+        mock_payment.return_value = mock_payment_instance
+
+        Paypal.resolve_paypal_locale = mock.Mock(return_value='invalid_locale')
+        mock_web_profile_instance = mock.Mock()
+        mock_web_profile_instance.create = mock.Mock(return_value=False)
+        mock_web_profile_instance.error = 'invalid_config'
+        mock_web_profile.return_value = mock_web_profile_instance
+
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        payment_creation_payload = mock_payment.call_args[0][0]
+        self.assertNotIn('experience_profile_id', payment_creation_payload)
+
+        msg = 'Web profile creation encountered error [%s]. Will continue without one' % (
+            mock_web_profile_instance.error
+        )
+        mock_logger.warning.assert_any_call(msg)
+
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.logger')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
+    def test_web_profile_with_default_locale(self, mock_payment, mock_logger):
+        """
+        Verify that the payment creation payload does not reference a web profile when the default locale is chosen.
+        This should occur when the create_and_set_webprofile waffle is enabled.
+        """
+        toggle_switch('create_and_set_webprofile', True)
+        mock_payment_instance = mock.Mock()
+        # NOTE: This is necessary to avoid the issue in https://code.djangoproject.com/ticket/25493.
+        mock_payment_instance.id = FuzzyInteger(low=1).fuzz()
+        mock_payment_instance.to_dict.return_value = {}
+        mock_payment_instance.links = [mock.Mock(rel='approval_url', href='dummy')]
+        mock_payment.return_value = mock_payment_instance
+
+        Paypal.resolve_paypal_locale = mock.Mock(return_value=Paypal.DEFAULT_PROFILE_NAME)
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        payment_creation_payload = mock_payment.call_args[0][0]
+        self.assertNotIn('experience_profile_id', payment_creation_payload)
+
+        msg = 'Using default locale. Will not create and set web profile'
+        mock_logger.info.assert_any_call(msg)
+
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.logger')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
+    @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.WebProfile.__init__')
+    def test_web_profile_with_exception(self, mock_web_profile_init, mock_payment, mock_logger):
+        """
+        Verify that the payment creation payload does not reference a web profile if its creation results in exception.
+        This should occur when the create_and_set_webprofile waffle is enabled.
+        """
+        toggle_switch('create_and_set_webprofile', True)
+        mock_payment_instance = mock.Mock()
+        # NOTE: This is necessary to avoid the issue in https://code.djangoproject.com/ticket/25493.
+        mock_payment_instance.id = FuzzyInteger(low=1).fuzz()
+        mock_payment_instance.to_dict.return_value = {}
+        mock_payment_instance.links = [mock.Mock(rel='approval_url', href='dummy')]
+        mock_payment.return_value = mock_payment_instance
+
+        Paypal.resolve_paypal_locale = mock.Mock(return_value="valid_locale")
+        mock_web_profile_init.side_effect = Exception('MissingConfig Exception')
+
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        payment_creation_payload = mock_payment.call_args[0][0]
+        self.assertNotIn('experience_profile_id', payment_creation_payload)
+        self.assertRaises(Exception('MissingConfig Exception'))
+
+        msg = 'Creating PayPal WebProfile resulted in exception. Will continue without one.'
+        mock_logger.warning.assert_any_call(msg)
 
     @responses.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
