@@ -583,6 +583,8 @@ ENTERPRISE_API_CACHE_TIMEOUT = 3600  # Value is in seconds
 
 # Name for waffle switch to use for enabling enterprise features on runtime.
 ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH = 'enable_enterprise_on_runtime'
+
+ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
 # END ENTERPRISE APP CONFIGURATION
 
 # DJANGO DEBUG TOOLBAR CONFIGURATION

@@ -3,6 +3,7 @@ Helper methods for enterprise app.
 """
 import hashlib
 import hmac
+import logging
 from collections import OrderedDict
 from urllib import urlencode
 
@@ -19,7 +20,9 @@ from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 StockRecord = get_model('partner', 'StockRecord')
+Voucher = get_model('voucher', 'Voucher')
 CONSENT_FAILED_PARAM = 'consent_failed'
+log = logging.getLogger(__name__)
 
 
 def is_enterprise_feature_enabled():
@@ -364,3 +367,55 @@ def get_enterprise_customer_data_sharing_consent_token(access_token, course_id, 
         digestmod=hashlib.sha256,
     )
     return consent_token_hmac.hexdigest()
+
+
+def get_enterprise_customer_uuid(coupon_code):
+    """
+    Get Enterprise Customer UUID associated with given coupon.
+
+    Arguments:
+        coupon_code (str): Code for the enterprise coupon.
+
+    Returns:
+        (UUID): UUID for the enterprise customer associated with the given coupon.
+    """
+    try:
+        voucher = Voucher.objects.get(code=coupon_code)
+    except Voucher.DoesNotExist:
+        return None
+
+    try:
+        offer = voucher.offers.get(benefit__range__enterprise_customer__isnull=False)
+    except ConditionalOffer.DoesNotExist:
+        # There's no Enterprise Customer associated with this voucher.
+        return None
+
+    return offer.benefit.range.enterprise_customer
+
+
+def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid):
+    """
+    Set cookie for the enterprise customer with enterprise customer UUID.
+
+   The cookie is set to the base domain so that it is accessible to all services on the same domain.
+
+    Arguments:
+        site (Site): Django site object.
+        response (HttpResponse): Django HTTP response object.
+        enterprise_customer_uuid (UUID): Enterprise customer UUID
+
+    Returns:
+         response (HttpResponse): Django HTTP response object.
+    """
+    if site.siteconfiguration.base_cookie_domain:
+        response.set_cookie(
+            settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, enterprise_customer_uuid,
+            domain=site.siteconfiguration.base_cookie_domain,
+        )
+    else:
+        log.warning(
+            'Skipping cookie for enterprise customer "%s" as base_cookie_domain '
+            'is not set in site configuration for site "%s".', enterprise_customer_uuid, site.domain
+        )
+
+    return response

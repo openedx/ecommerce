@@ -166,6 +166,14 @@ class SiteConfiguration(models.Model):
         default=False
     )
 
+    base_cookie_domain = models.CharField(
+        verbose_name=_('Base Cookie Domain'),
+        help_text=_('Base cookie domain used to share cookies across services.'),
+        max_length=255,
+        blank=True,
+        default='',
+    )
+
     @property
     def payment_processors_set(self):
         """

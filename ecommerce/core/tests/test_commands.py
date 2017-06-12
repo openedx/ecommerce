@@ -28,6 +28,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.from_email = 'site_from_email@example.com'
         self.payment_support_email = 'support@example.com'
         self.payment_support_url = 'http://fake.server/support'
+        self.base_cookie_domain = '.fake.server'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -45,7 +46,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
                       site_id=None, site_name=None, partner_name=None, payment_processors=None, segment_key=None,
                       enable_enrollment_codes=False, payment_support_email=None, payment_support_url=None,
                       send_refund_notifications=False, client_side_payment_processor=None,
-                      disable_otto_receipt_page=False):
+                      disable_otto_receipt_page=False, base_cookie_domain=None):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -86,6 +87,10 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             command_args.append('--payment-support-url={payment_support_url}'.format(
                 payment_support_url=payment_support_url
             ))
+        if base_cookie_domain:
+            command_args.append('--base-cookie-domain={base_cookie_domain}'.format(
+                base_cookie_domain=base_cookie_domain
+            ))
 
         if send_refund_notifications:
             command_args.append('--send-refund-notifications')
@@ -118,6 +123,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertFalse(site.siteconfiguration.enable_enrollment_codes)
         self.assertFalse(site.siteconfiguration.send_refund_notifications)
         self.assertTrue(site.siteconfiguration.enable_otto_receipt_page)
+        self.assertEqual(site.siteconfiguration.base_cookie_domain, '')
 
     def test_update_site(self):
         """ Verify the command updates Site and creates Partner, and SiteConfiguration """
@@ -142,7 +148,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             payment_support_email=self.payment_support_email,
             payment_support_url=self.payment_support_url,
             send_refund_notifications=True,
-            disable_otto_receipt_page=True
+            disable_otto_receipt_page=True,
+            base_cookie_domain=self.base_cookie_domain
         )
 
         site = Site.objects.get(id=site.id)
@@ -158,6 +165,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_support_url, self.payment_support_url)
         self.assertTrue(site_configuration.send_refund_notifications)
         self.assertFalse(site.siteconfiguration.enable_otto_receipt_page)
+        self.assertEqual(site.siteconfiguration.base_cookie_domain, self.base_cookie_domain)
 
     @data(
         ['--site-id=1'],

@@ -58,14 +58,15 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
 
 
 def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_datetime=None, benefit_value=100,
-                    benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE, max_usage=None, email_domains=None):
+                    benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE, max_usage=None, email_domains=None,
+                    enterprise_customer=None):
     """ Helper function to create a voucher and add an offer to it that contains a product. """
 
     # NOTE (CCB): We use empty categories here to avoid unique-constraint issues that occur when we use
     # ProductCategoryFactory in conjunction with pre-created Category objects.
     if _range is None:
         product = ProductFactory(categories=[])
-        _range = RangeFactory(products=[product, ])
+        _range = RangeFactory(products=[product], enterprise_customer=enterprise_customer)
     elif _range.num_products() > 0:
         product = _range.all_products()[0]
     else:

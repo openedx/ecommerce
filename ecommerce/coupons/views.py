@@ -18,6 +18,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
+from ecommerce.enterprise.decorators import set_enterprise_cookie
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.utils import (
     enterprise_customer_user_needs_consent,
@@ -138,6 +139,7 @@ class CouponOfferView(TemplateView):
 
 
 class CouponRedeemView(EdxOrderPlacementMixin, View):
+    @method_decorator(set_enterprise_cookie)
     @method_decorator(login_required)
     def get(self, request):
         """
