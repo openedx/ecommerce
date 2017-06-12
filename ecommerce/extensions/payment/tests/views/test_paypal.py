@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import ddt
 import mock
+import responses
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from oscar.apps.order.exceptions import UnableToPlaceOrder
@@ -11,7 +12,6 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
 
-from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
@@ -50,7 +50,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         # construction of absolute URLs
         self.request = RequestFactory().post('/')
 
-    @httpretty.activate
+    @responses.activate
     def _assert_execution_redirect(self, payer_info=None, url_redirect=None):
         """Verify redirection to Otto receipt page after attempted payment execution."""
         self.mock_oauth2_response()
@@ -100,7 +100,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 (logger_name, 'ERROR', error_message)
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_execution_redirect_to_lms(self):
         """
         Verify redirection to LMS receipt page after attempted payment execution if Otto receipt page waffle
@@ -226,7 +226,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self._assert_order_placement_failure(error_message)
             self.assertTrue(fake_handle_order_placement.called)
 
-    @httpretty.activate
+    @responses.activate
     def test_payment_error_with_duplicate_payment_id(self):
         """
         Verify that we fail gracefully when PayPal sends us the wrong payment ID,
@@ -261,7 +261,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 ),
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_payment_error_with_no_basket(self):
         """
         Verify that we fail gracefully when any Exception occurred in _get_basket() method,

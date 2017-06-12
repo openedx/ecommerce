@@ -1,13 +1,14 @@
 from __future__ import unicode_literals
 
 import datetime
-import json
+import logging
 import os
+from decimal import Decimal
 from urlparse import urljoin
 
 import ddt
-import httpretty
 import mock
+import responses
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from factory.django import mute_signals
@@ -16,7 +17,6 @@ from oscar.apps.payment.exceptions import PaymentError, TransactionDeclined, Use
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories, newfactories
 from oscar.test.contextmanagers import mock_signal_receiver
-from suds.sudsobject import Factory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
@@ -32,6 +32,7 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 SourceType = get_model('payment', 'SourceType')
 
+logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
@@ -210,30 +211,54 @@ class CybersourceMixin(PaymentEventsMixin):
             path = os.path.join(os.path.dirname(__file__), filename)
             body = open(path, 'r').read()
             url = urljoin(settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource']['soap_api_url'], filename)
-            httpretty.register_uri(httpretty.GET, url, body=body)
+            responses.add(responses.GET, url, body=body)
 
-    def get_soap_mock(self, amount=100, currency=CURRENCY, transaction_id=None, basket_id=None, decision='ACCEPT'):
-        class CybersourceSoapMock(mock.MagicMock):
-            def runTransaction(self, **kwargs):  # pylint: disable=unused-argument
-                cc_reply_items = {
-                    'reasonCode': 100,
-                    'amount': unicode(amount),
-                    'requestDateTime': '2015-01-01T:00:00:00Z',
-                    'reconciliationID': 'efg456'
-                }
-                items = {
-                    'requestID': transaction_id,
-                    'decision': decision,
-                    'merchantReferenceCode': unicode(basket_id),
-                    'reasonCode': 100,
-                    'requestToken': 'abc123',
-                    'purchaseTotals': Factory.object('PurchaseTotals', {'currency': currency}),
-                    'ccCreditReply': Factory.object('CCCreditReply', cc_reply_items)
-                }
+    # pylint:disable=bad-continuation
+    def mock_refund_response(self, amount=Decimal(100), currency=CURRENCY, transaction_id=None, basket_id=None,
+                             decision='ACCEPT'):
+        url = 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor'
+        body = """<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+        <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+            <wsu:Timestamp
+                    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                    wsu:Id="Timestamp-1924306294">
+                <wsu:Created>2017-06-12T23:40:14.087Z</wsu:Created>
+            </wsu:Timestamp>
+        </wsse:Security>
+    </soap:Header>
+    <soap:Body>
+        <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.115">
+            <c:merchantReferenceCode>{merchant_reference_code}</c:merchantReferenceCode>
+            <c:requestID>{request_id}</c:requestID>
+            <c:decision>{decision}</c:decision>
+            <c:reasonCode>100</c:reasonCode>
+            <c:requestToken>
+                Ahj/7wSTDZe9UHPSiXlfKhbFg1ctWLRiycM0uKt0DswBS4q3QiEdIHTiDf3DJpJlukB2NEECcmGy8oWwa2X5HSAA4Tz2
+            </c:requestToken>
+            <c:purchaseTotals>
+                <c:currency>{currency}</c:currency>
+            </c:purchaseTotals>
+            <c:ccCreditReply>
+                <c:reasonCode>100</c:reasonCode>
+                <c:requestDateTime>2017-06-12T23:40:14Z</c:requestDateTime>
+                <c:amount>{amount}</c:amount>
+                <c:reconciliationID>10595141283</c:reconciliationID>
+            </c:ccCreditReply>
+        </c:replyMessage>
+    </soap:Body>
+</soap:Envelope>""".format(
+            merchant_reference_code=basket_id,
+            request_id=transaction_id,
+            decision=decision,
+            currency=currency,
+            amount=str(amount)
+        )
 
-                return Factory.object('reply', items)
+        responses.add(responses.POST, url, body=body, content_type='text/xml')
 
-        return CybersourceSoapMock
+        return body
 
     def get_expected_transaction_parameters(self, basket, transaction_uuid, include_level_2_3_details=True,
                                             processor=None, use_sop_profile=False, **kwargs):
@@ -486,14 +511,14 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         order should NOT be created.
         """
         notification = self.generate_notification(self.basket)
-        notification[u'signature'] = u'Tampered'
+        notification['signature'] = 'Tampered'
         self.client.post(self.path, notification)
 
         # The basket should not have an associated order
         self.assertFalse(Order.objects.filter(basket=self.basket).exists())
 
         # The response should be saved.
-        self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification,
+        self.assert_processor_response_recorded(self.processor_name, notification['transaction_id'], notification,
                                                 basket=self.basket)
 
 
@@ -525,36 +550,11 @@ class PaypalMixin(object):
     }
     SALE_ID = '789XYZ'
 
-    def mock_api_response(self, path, body, post=True):
-        assert httpretty.is_enabled()
-
+    def mock_api_response(self, path, body, method=responses.POST, status=200, rsps=responses):
         url = self._create_api_url(path)
-        httpretty.register_uri(
-            httpretty.POST if post else httpretty.GET,
-            url,
-            body=json.dumps(body),
-            status=200
-        )
+        rsps.add(method, url, status=status, json=body)
 
-    def mock_api_responses(self, path, response_array, post=True):
-        assert httpretty.is_enabled()
-
-        url = self._create_api_url(path)
-
-        httpretty_response_array = []
-        for response in response_array:
-            httpretty_response_array.append(
-                httpretty.Response(body=json.dumps(response['body']), status=response['status'])
-            )
-
-        httpretty.register_uri(
-            httpretty.POST if post else httpretty.GET,
-            url,
-            responses=httpretty_response_array,
-            status=200
-        )
-
-    def mock_oauth2_response(self):
+    def mock_oauth2_response(self, rsps=responses):
         oauth2_response = {
             'scope': 'https://api.paypal.com/v1/payments/.*',
             'access_token': 'fake-access-token',
@@ -563,11 +563,9 @@ class PaypalMixin(object):
             'expires_in': 28800
         }
 
-        self.mock_api_response('/v1/oauth2/token', oauth2_response)
+        self.mock_api_response('/v1/oauth2/token', oauth2_response, rsps=rsps)
 
-    def get_payment_creation_response_mock(self, basket,
-                                           state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL):
-
+    def get_payment_creation_response_mock(self, basket, state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL):
         total = unicode(basket.total_incl_tax)
         payment_creation_response = {
             'create_time': '2015-05-04T18:18:27Z',
@@ -630,11 +628,8 @@ class PaypalMixin(object):
         payment_creation_response = self.get_payment_creation_response_mock(basket, state, approval_url)
 
         if find:
-            self.mock_api_response(
-                '/v1/payments/payment/{}'.format(self.PAYMENT_ID),
-                payment_creation_response,
-                post=False
-            )
+            path = '/v1/payments/payment/{}'.format(self.PAYMENT_ID)
+            self.mock_api_response(path, payment_creation_response, method=responses.GET)
         else:
             self.mock_api_response('/v1/payments/payment', payment_creation_response)
 
