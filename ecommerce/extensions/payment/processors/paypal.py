@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import uuid
 from decimal import Decimal
 from urlparse import urljoin
 
@@ -28,6 +29,7 @@ class Paypal(BasePaymentProcessor):
 
     NAME = 'paypal'
     DEFAULT_PROFILE_NAME = 'default'
+    DEFAULT_LOCALE_CODE = 'default'
 
     def __init__(self, site):
         """
@@ -60,6 +62,40 @@ class Paypal(BasePaymentProcessor):
     @property
     def error_url(self):
         return get_ecommerce_url(self.configuration['error_path'])
+
+    def resolve_paypal_locale(self):
+        """ TODO (LEARNER 1278): Generate appropriate Paypal locale code based on region """
+        return self.DEFAULT_LOCALE_CODE
+
+    def create_temporary_web_profile(self, locale_code):
+        """
+        Generates a temporary Paypal WebProfile that carries the locale setting for a Paypal Payment
+        and returns the id of the WebProfile
+        """
+        try:
+            web_profile = paypalrestsdk.WebProfile({
+                "name": str(uuid.uuid1()),  # Generate a unique identifier
+                "presentation": {
+                    "locale_code": locale_code
+                },
+                "temporary": True  # Persists for 3 hours
+            }, api=self.paypal_api)
+
+            if web_profile.create():
+                msg = "Web Profile[%s] for locale %s created successfully" % (
+                    web_profile.id,
+                    web_profile.presentation.locale_code
+                )
+                logger.info(msg)
+                return web_profile.id
+            else:
+                msg = "Web profile creation encountered error [%s]. Will continue without one" % (
+                    web_profile.error
+                )
+                logger.warning(msg)
+
+        except Exception:  # pylint: disable=broad-except
+            logger.warning("Creating PayPal WebProfile resulted in exception. Will continue without one.")
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
@@ -112,11 +148,23 @@ class Paypal(BasePaymentProcessor):
             }],
         }
 
-        try:
-            web_profile = PaypalWebProfile.objects.get(name=self.DEFAULT_PROFILE_NAME)
-            data['experience_profile_id'] = web_profile.id
-        except PaypalWebProfile.DoesNotExist:
-            pass
+        if waffle.switch_is_active('create_and_set_webprofile'):
+            # TODO (LEARNER 1278) - set locale code based on user language
+            locale_code = self.resolve_paypal_locale()
+            if locale_code != self.DEFAULT_LOCALE_CODE:
+                # Create a temporary web profile with the correct locale code
+                web_profile_id = self.create_temporary_web_profile(locale_code)
+                if web_profile_id is not None:
+                    data['experience_profile_id'] = web_profile_id
+            else:
+                # Proceed without web profile (Paypal defaults to english)
+                logger.info("Using default locale. Will not create and set web profile")
+        else:
+            try:
+                web_profile = PaypalWebProfile.objects.get(name=self.DEFAULT_PROFILE_NAME)
+                data['experience_profile_id'] = web_profile.id
+            except PaypalWebProfile.DoesNotExist:
+                pass
 
         available_attempts = 1
         if waffle.switch_is_active('PAYPAL_RETRY_ATTEMPTS'):
