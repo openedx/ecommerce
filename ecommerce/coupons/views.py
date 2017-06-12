@@ -148,6 +148,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         code = request.GET.get('code')
         sku = request.GET.get('sku')
         failure_url = request.GET.get('failure_url')
+        site_configuration = request.site.siteconfiguration
 
         if not code:
             return render(request, template_name, {'error': _('Code not provided.')})
@@ -169,10 +170,16 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
-        if not voucher.offers.first().is_email_valid(request.user.email):
+        offer = voucher.offers.first()
+        if not offer.is_email_valid(request.user.email):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
-        require_account_activation = request.site.siteconfiguration.require_account_activation
+        # Require account activation before a coupon can be redeemed if the site is configured
+        # to require account activation or if the coupon offer is restricted for use to learners
+        # with a specific email domain. The learner needs to activate their account before we
+        # allow them to redeem email domain-restricted coupons, otherwise anyone could create
+        # an account using an email address with a privileged domain and use the coupon.
+        require_account_activation = site_configuration.require_account_activation or offer.email_domains
         if require_account_activation and not request.user.account_details(request).get('is_active'):
             return render(
                 request,
@@ -239,7 +246,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if basket.total_excl_tax == 0:
             try:
                 order = self.place_free_order(basket)
-                return HttpResponseRedirect(get_receipt_page_url(self.request.site.siteconfiguration, order.number))
+                return HttpResponseRedirect(get_receipt_page_url(site_configuration, order.number))
             except:  # pylint: disable=bare-except
                 logger.exception('Failed to create a free order for basket [%d]', basket.id)
                 return HttpResponseRedirect(reverse('checkout:error'))

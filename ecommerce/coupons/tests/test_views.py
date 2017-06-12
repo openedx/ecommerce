@@ -594,6 +594,22 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         expected_url = self.get_full_url(path=reverse('basket:summary'))
         self.assert_redemption_page_redirects(expected_url)
 
+    @httpretty.activate
+    def test_active_user_email_domain_restricted_coupon_redemption(self):
+        """
+        Verify that a user must activate their account before being allowed
+        to redeem an email domain-restricted coupon.
+        """
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        self.mock_access_token_response()
+        email_domain = self.user.email.split('@')[1]
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5, email_domains=email_domain)
+
+        response = self.client.get(self.redeem_url_with_params())
+        self.assertIn('edx/email_confirmation_required.html', [t.name for t in response.templates])
+        self.assertEqual(response.context['course_name'], self.course.name)
+        self.assertEqual(response.context['user_email'], self.user.email)
+
 
 class EnrollmentCodeCsvViewTests(TestCase):
     """ Tests for the EnrollmentCodeCsvView view. """
