@@ -253,6 +253,7 @@ class SiteMixin(object):
             segment_key='fake_segment_key',
             site__domain=domain,
             site__id=settings.SITE_ID,
+            base_cookie_domain=domain,
         )
         self.partner = self.site_configuration.partner
         self.site = self.site_configuration.site

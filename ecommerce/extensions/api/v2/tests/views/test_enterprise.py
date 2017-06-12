@@ -6,9 +6,10 @@ import mock
 from django.core.urlresolvers import reverse
 
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.tests.testcases import TestCase
 
 
-class TestEnterpriseCustomerView(EnterpriseServiceMockMixin):
+class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
 
     dummy_enterprise_customer_data = {
         'results': [

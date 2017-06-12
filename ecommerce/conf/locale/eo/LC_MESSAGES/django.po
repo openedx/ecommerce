@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-30 11:38+0000\n"
+"POT-Creation-Date: 2017-06-16 05:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -210,6 +210,16 @@ msgid "Determines if purchases should be reported to Sailthru."
 msgstr ""
 "Détérmïnés ïf pürçhäsés shöüld ßé répörtéd tö Säïlthrü. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/core/models.py
+msgid "Base Cookie Domain"
+msgstr "Bäsé Çöökïé Dömäïn Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/core/models.py
+msgid "Base cookie domain used to share cookies across services."
+msgstr ""
+"Bäsé çöökïé dömäïn üséd tö shäré çöökïés äçröss sérvïçés. Ⱡ'σяєм ιρѕυм ∂σłσя"
+" ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/core/models.py
 msgid "Full Name"
@@ -1386,6 +1396,12 @@ msgstr "Vöüçhérs Ⱡ'σяєм ιρѕυм ∂#"
 #: ecommerce/settings/_oscar.py
 msgid "Reports"
 msgstr "Répörts Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/templates/admin/disable_change_list.html
+msgid "List view is temporarily disabled due to large number of records."
+msgstr ""
+"Lïst vïéw ïs témpörärïlý dïsäßléd düé tö lärgé nümßér öf réçörds. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/templates/base.html
 msgid "Build"

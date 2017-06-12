@@ -117,6 +117,13 @@ class Command(BaseCommand):
                             dest='disable_otto_receipt_page',
                             default=False,
                             help='Disable the receipt page hosted on this service (and use LMS)')
+        parser.add_argument('--base-cookie-domain',
+                            action='store',
+                            dest='base_cookie_domain',
+                            type=str,
+                            required=False,
+                            default='',
+                            help='Base Cookie Domain to share cookies across IDAs.')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -133,6 +140,7 @@ class Command(BaseCommand):
         enable_otto_receipt_page = not options.get('disable_otto_receipt_page')
         payment_support_email = options.get('payment_support_email', '')
         payment_support_url = options.get('payment_support_url', '')
+        base_cookie_domain = options.get('base_cookie_domain', '')
 
         try:
             site = Site.objects.get(id=site_id)
@@ -169,7 +177,8 @@ class Command(BaseCommand):
                 'SOCIAL_AUTH_EDX_OIDC_SECRET': client_secret,
                 'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': client_secret,
                 'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [lms_url_root]
-            }
+            },
+            'base_cookie_domain': base_cookie_domain
         }
         if payment_support_email:
             site_configuration_defaults['payment_support_email'] = payment_support_email

@@ -9,13 +9,14 @@ from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
+from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
 @httpretty.activate
-class EnterpriseAPITests(EnterpriseServiceMockMixin):
+class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
         super(EnterpriseAPITests, self).setUp()
         self.learner = self.create_user(is_staff=True)

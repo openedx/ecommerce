@@ -5,10 +5,8 @@ from uuid import uuid4
 import httpretty
 from django.conf import settings
 
-from ecommerce.tests.testcases import TestCase
 
-
-class EnterpriseServiceMockMixin(TestCase):
+class EnterpriseServiceMockMixin(object):
     """
     Mocks for the Open edX service 'Enterprise Service' responses.
     """
@@ -21,9 +19,6 @@ class EnterpriseServiceMockMixin(TestCase):
     ENTERPRISE_COURSE_ENROLLMENT_URL = '{}enterprise-course-enrollment/'.format(
         settings.ENTERPRISE_API_URL,
     )
-
-    def setUp(self):
-        super(EnterpriseServiceMockMixin, self).setUp()
 
     def mock_enterprise_customer_list_api_get(self):
         """

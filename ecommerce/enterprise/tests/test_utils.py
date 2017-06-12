@@ -1,19 +1,32 @@
 from __future__ import unicode_literals
 
+import uuid
+
 import ddt
 import httpretty
+from django.conf import settings
+from django.http.response import HttpResponse
+from oscar.test.factories import VoucherFactory
 
 from ecommerce.core.tests.decorators import mock_enterprise_api_client
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
-from ecommerce.enterprise.utils import (enterprise_customer_user_needs_consent, get_enterprise_customer,
-                                        get_enterprise_customers, get_or_create_enterprise_customer_user)
+from ecommerce.enterprise.utils import (
+    enterprise_customer_user_needs_consent,
+    get_enterprise_customer,
+    get_enterprise_customer_uuid,
+    get_enterprise_customers,
+    get_or_create_enterprise_customer_user,
+    set_enterprise_customer_cookie
+)
+from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.tests.testcases import TestCase
 
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 
 @ddt.ddt
 @httpretty.activate
-class EnterpriseUtilsTests(EnterpriseServiceMockMixin):
+class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
         super(EnterpriseUtilsTests, self).setUp()
         self.learner = self.create_user(is_staff=True)
@@ -87,8 +100,8 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin):
         """
         self.mock_access_token_response()
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
-        uuid = TEST_ENTERPRISE_CUSTOMER_UUID
-        self.mock_specific_enterprise_customer_api(uuid, consent_enabled=ec_consent_enabled)
+        enterprise_customer_uuid = TEST_ENTERPRISE_CUSTOMER_UUID
+        self.mock_specific_enterprise_customer_api(enterprise_customer_uuid, consent_enabled=ec_consent_enabled)
 
         consent_needed = enterprise_customer_user_needs_consent(
             self.site,
@@ -116,9 +129,9 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin):
             expected_consent_requirement
     ):
         self.mock_access_token_response()
-        uuid = TEST_ENTERPRISE_CUSTOMER_UUID
+        enterprise_customer_uuid = TEST_ENTERPRISE_CUSTOMER_UUID
         self.mock_enterprise_learner_api(
-            enterprise_customer_uuid=uuid,
+            enterprise_customer_uuid=enterprise_customer_uuid,
             consent_provided=account_consent_provided,
             consent_enabled=consent_enabled,
         )
@@ -134,3 +147,57 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin):
             'admin'
         )
         self.assertEqual(consent_needed, expected_consent_requirement)
+
+    def test_get_enterprise_customer_uuid(self):
+        """
+        Verify that enterprise customer UUID is returned for a voucher with an associated enterprise customer.
+        """
+        enterprise_customer_uuid = uuid.uuid4()
+        voucher, __ = prepare_voucher(enterprise_customer=enterprise_customer_uuid)
+
+        self.assertEqual(
+            enterprise_customer_uuid,
+            get_enterprise_customer_uuid(voucher.code),
+        )
+
+    def test_get_enterprise_customer_uuid_non_existing_voucher(self):
+        """
+        Verify that None is returned when voucher with given code does not exist.
+        """
+        voucher = VoucherFactory()
+        self.assertIsNone(get_enterprise_customer_uuid(voucher.code))
+
+    def test_get_enterprise_customer_uuid_non_existing_conditional_offer(self):
+        """
+        Verify that None is returned if voucher exists but conditional offer
+        does not exist.
+        """
+        voucher = VoucherFactory()
+        self.assertIsNone(get_enterprise_customer_uuid(voucher.code))
+
+    def test_set_enterprise_customer_cookie(self):
+        """
+        Verify that enterprise cookies are set properly.
+        """
+        enterprise_customer_uuid = uuid.uuid4()
+        response = HttpResponse()
+
+        result = set_enterprise_customer_cookie(self.site, response, enterprise_customer_uuid)
+
+        cookie = result.cookies[settings.ENTERPRISE_CUSTOMER_COOKIE_NAME]
+        self.assertEqual(str(enterprise_customer_uuid), cookie.value)
+
+    def test_set_enterprise_customer_cookie_empty_cookie_domain(self):
+        """
+        Verify that enterprise cookie is not set if base_cookie_domain is empty
+        in site configuration.
+        """
+        self.site.siteconfiguration.base_cookie_domain = ''
+        self.site.siteconfiguration.save()
+
+        enterprise_customer_uuid = uuid.uuid4()
+        response = HttpResponse()
+
+        result = set_enterprise_customer_cookie(self.site, response, enterprise_customer_uuid)
+
+        self.assertNotIn(settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, result.cookies)
