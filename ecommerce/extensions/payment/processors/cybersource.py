@@ -9,9 +9,9 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
-from suds.client import Client
-from suds.sudsobject import asdict
-from suds.wsse import Security, UsernameToken
+from zeep import Client
+from zeep.helpers import serialize_object
+from zeep.wsse import UsernameToken
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
@@ -23,7 +23,6 @@ from ecommerce.extensions.payment.exceptions import (
 )
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse
-from ecommerce.extensions.payment.transport import RequestsTransport
 from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
@@ -291,27 +290,27 @@ class Cybersource(BaseClientSidePaymentProcessor):
 
     def issue_credit(self, order, reference_number, amount, currency):
         try:
-            security = Security()
-            token = UsernameToken(self.merchant_id, self.transaction_key)
-            security.tokens.append(token)
+            client = Client(self.soap_api_url, wsse=UsernameToken(self.merchant_id, self.transaction_key))
 
-            client = Client(self.soap_api_url, transport=RequestsTransport())
-            client.set_options(wsse=security)
+            credit_service = {
+                'captureRequestID': reference_number,
+                'run': 'true',
+            }
+            purchase_totals = {
+                'currency': currency,
+                'grandTotalAmount': unicode(amount),
+            }
 
-            credit_service = client.factory.create('ns0:CCCreditService')
-            credit_service._run = 'true'  # pylint: disable=protected-access
-            credit_service.captureRequestID = reference_number
+            response = client.service.runTransaction(
+                merchantID=self.merchant_id,
+                merchantReferenceCode=order.number,
+                orderRequestToken=reference_number,
+                ccCreditService=credit_service,
+                purchaseTotals=purchase_totals
+            )
 
-            purchase_totals = client.factory.create('ns0:PurchaseTotals')
-            purchase_totals.currency = currency
-            purchase_totals.grandTotalAmount = unicode(amount)
-
-            response = client.service.runTransaction(merchantID=self.merchant_id, merchantReferenceCode=order.number,
-                                                     orderRequestToken=reference_number,
-                                                     ccCreditService=credit_service,
-                                                     purchaseTotals=purchase_totals)
             request_id = response.requestID
-            ppr = self.record_processor_response(suds_response_to_dict(response), transaction_id=request_id,
+            ppr = self.record_processor_response(serialize_object(response), transaction_id=request_id,
                                                  basket=order.basket)
         except:
             msg = 'An error occurred while attempting to issue a credit (via CyberSource) for order [{}].'.format(
@@ -326,25 +325,3 @@ class Cybersource(BaseClientSidePaymentProcessor):
                 'Failed to issue CyberSource credit for order [{order_number}]. '
                 'Complete response has been recorded in entry [{response_id}]'.format(
                     order_number=order.number, response_id=ppr.id))
-
-
-def suds_response_to_dict(d):  # pragma: no cover
-    """
-    Convert Suds object into serializable format.
-
-    Source: http://stackoverflow.com/a/15678861/592820
-    """
-    out = {}
-    for k, v in asdict(d).iteritems():
-        if hasattr(v, '__keylist__'):
-            out[k] = suds_response_to_dict(v)
-        elif isinstance(v, list):
-            out[k] = []
-            for item in v:
-                if hasattr(item, '__keylist__'):
-                    out[k].append(suds_response_to_dict(item))
-                else:
-                    out[k].append(item)
-        else:
-            out[k] = v
-    return out

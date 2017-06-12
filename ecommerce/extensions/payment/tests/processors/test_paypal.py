@@ -9,6 +9,7 @@ from urlparse import urljoin
 import ddt
 import mock
 import paypalrestsdk
+import responses
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory
@@ -19,7 +20,6 @@ from paypalrestsdk.resource import Resource  # pylint:disable=ungrouped-imports
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.patched_httpretty import httpretty
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.extensions.payment.processors.paypal import Paypal
@@ -85,36 +85,48 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         """DRY helper for getting receipt page URL."""
         return get_receipt_page_url(site_configuration=self.site.siteconfiguration)
 
-    def _assert_transaction_parameters_retry(self, response_success, failure_log_message):
+    def _assert_transaction_parameters_retry(self, api_responses, response_success, failure_log_message):
         self.processor.retry_attempts = 2
         logger_name = 'ecommerce.extensions.payment.processors.paypal'
+        toggle_switch('PAYPAL_RETRY_ATTEMPTS', True)
+        url = self._create_api_url('/v1/payments/payment')
 
-        with LogCapture(logger_name) as paypal_logger:
-            self._assert_transaction_parameters()
-            self.assert_processor_response_recorded(
-                self.processor.NAME,
-                self.PAYMENT_ID,
-                response_success,
-                basket=self.basket
-            )
+        with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
+            self.mock_oauth2_response(rsps=rsps)
 
-            last_request_body = json.loads(httpretty.last_request().body)
-            expected = urljoin(self.site.siteconfiguration.build_ecommerce_url(), reverse('paypal:execute'))
-            self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
-            paypal_logger.check(
-                (
-                    logger_name,
-                    'WARNING',
-                    failure_log_message,
-                ),
-                (
-                    logger_name,
-                    'INFO',
-                    'Successfully created PayPal payment [{}] for basket [{}].'.format(self.PAYMENT_ID, self.basket.id)
+            for response in api_responses:
+                rsps.add(responses.POST, url, status=response['status'], json=response['body'])
+
+            with LogCapture(logger_name) as paypal_logger:
+                self._assert_transaction_parameters()
+                self.assert_processor_response_recorded(
+                    self.processor.NAME,
+                    self.PAYMENT_ID,
+                    response_success,
+                    basket=self.basket
                 )
-            )
 
-    @httpretty.activate
+                last_request_body = json.loads(rsps.calls[-1].request.body)
+                expected = urljoin(self.site.siteconfiguration.build_ecommerce_url(), reverse('paypal:execute'))
+                self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
+
+                success_log_message = 'Successfully created PayPal payment [{}] for basket [{}].'.format(
+                    self.PAYMENT_ID, self.basket.id
+                )
+                paypal_logger.check(
+                    (
+                        logger_name,
+                        'WARNING',
+                        failure_log_message,
+                    ),
+                    (
+                        logger_name,
+                        'INFO',
+                        success_log_message
+                    )
+                )
+
+    @responses.activate
     def test_get_transaction_parameters(self):
         """Verify the processor returns the appropriate parameters required to complete a transaction."""
         self.mock_oauth2_response()
@@ -123,47 +135,40 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self._assert_transaction_parameters()
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
-        last_request_body = json.loads(httpretty.last_request().body)
+        last_request_body = json.loads(responses.calls[-1].request.body)
         expected = urljoin(self.site.siteconfiguration.build_ecommerce_url(), reverse('paypal:execute'))
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
 
-    @httpretty.activate
+    @responses.activate
     def test_get_transaction_parameters_with_retry(self):
         """Verify the processor returns the appropriate parameters required to complete a transaction after a retry"""
-        toggle_switch('PAYPAL_RETRY_ATTEMPTS', True)
-        self.mock_oauth2_response()
         response_error = self.get_payment_creation_error_response_mock()
         response_success = self.get_payment_creation_response_mock(self.basket)
-        self.mock_api_responses(
-            '/v1/payments/payment',
-            [
-                {'body': response_error, 'status': 200},
-                {'body': response_success, 'status': 200}
-            ]
-        )
+        api_responses = [
+            {'body': response_error, 'status': 200},
+            {'body': response_success, 'status': 200}
+        ]
         self._assert_transaction_parameters_retry(
+            api_responses,
             response_success,
             'Creating PayPal payment for basket [{}] was unsuccessful. Will retry.'.format(self.basket.id)
         )
 
-    @httpretty.activate
+    @responses.activate
     def test_get_transaction_parameters_server_error_with_retry(self):
         """
         Verify the processor returns the appropriate parameters required
         to complete a transaction after a retry with server error
         """
-        toggle_switch('PAYPAL_RETRY_ATTEMPTS', True)
-        self.mock_oauth2_response()
         response_error = self.get_payment_creation_error_response_mock()
         response_success = self.get_payment_creation_response_mock(self.basket)
-        self.mock_api_responses(
-            '/v1/payments/payment',
-            [
-                {'body': response_error, 'status': 500},
-                {'body': response_success, 'status': 200}
-            ]
-        )
+
+        api_responses = [
+            {'body': response_error, 'status': 500},
+            {'body': response_success, 'status': 200}
+        ]
         self._assert_transaction_parameters_retry(
+            api_responses,
             response_success,
             'Creating PayPal payment for basket [{}] resulted in an exception. Will retry.'.format(self.basket.id)
         )
@@ -208,7 +213,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         else:
             self.assertNotIn('experience_profile_id', payment_creation_payload)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_creation_state(self):
         """Verify that failure to create a payment results in a GatewayError."""
@@ -229,15 +234,12 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                 basket=self.basket
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_payment_creation_exception_state(self):
         """Verify that an exception is thrown while create a payment results in paypal exception."""
         self.mock_oauth2_response()
         response_error = self.get_payment_creation_error_response_mock()
-        self.mock_api_responses(
-            '/v1/payments/payment',
-            [{'body': response_error, 'status': 500}]
-        )
+        self.mock_api_response('/v1/payments/payment', response_error, status=500)
         logger_name = 'ecommerce.extensions.payment.processors.paypal'
 
         with LogCapture(logger_name) as paypal_logger:
@@ -247,16 +249,17 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                 self.basket,
                 request=self.request
             )
+            msg = 'After {} retries, creating PayPal payment for basket [{}] still experienced exception.'.format(
+                self.processor.retry_attempts + 1, self.basket.id)
             paypal_logger.check(
                 (
                     logger_name,
                     'ERROR',
-                    'After {} retries, creating PayPal payment for basket [{}] still experienced exception.'
-                    .format(self.processor.retry_attempts + 1, self.basket.id)
+                    msg
                 )
             )
 
-    @httpretty.activate
+    @responses.activate
     def test_approval_url_missing(self):
         """Verify that a missing approval URL results in a GatewayError."""
         self.mock_oauth2_response()
@@ -265,11 +268,11 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assertRaises(GatewayError, self.processor.get_transaction_parameters, self.basket, request=self.request)
         self.assert_processor_response_recorded(self.processor.NAME, self.PAYMENT_ID, response, basket=self.basket)
 
-    @httpretty.activate
+    @responses.activate
     def test_handle_processor_response(self):
         """Verify that the processor creates the appropriate PaymentEvent and Source objects."""
         for payer_info in (PaypalMixin.PAYER_INFO, {"shipping_address": None}):
-            httpretty.reset()
+            responses.reset()
             log.info("Testing payer_info with email set to: %s", payer_info.get("email"))
             self.mock_oauth2_response()
             self.mock_payment_creation_response(self.basket, find=True)
@@ -284,7 +287,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                 'PayPal ({})'.format(payer_info['email']) if 'email' in payer_info else 'PayPal Account')
             self.assertIsNone(handled_response.card_type)
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_execution_state(self):
         """Verify that failure to execute a payment results in a GatewayError."""
@@ -320,7 +323,7 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
                     ),
                 )
 
-    @httpretty.activate
+    @responses.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_execution_with_retry_attempt(self):
         """Verify that, when the switch is active, failure to execute a payment

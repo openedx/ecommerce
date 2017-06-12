@@ -6,8 +6,9 @@ import copy
 from uuid import UUID
 
 import ddt
-import httpretty
 import mock
+import requests
+import responses
 from django.conf import settings
 from django.test import override_settings
 from freezegun import freeze_time
@@ -19,7 +20,8 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidCybersourceDecision, InvalidSignatureError, PartialAuthorizationError, PCIViolation,
     ProcessorMisconfiguredError
 )
-from ecommerce.extensions.payment.processors.cybersource import Cybersource, suds_response_to_dict
+from ecommerce.extensions.payment.models import PaymentProcessorResponse
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
@@ -35,6 +37,23 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         super(CybersourceTests, self).setUp()
         self.toggle_ecommerce_receipt_page(True)
         self.basket.site = self.site
+
+    def assert_processor_response_recorded(self, processor_name, transaction_id, response, basket=None):
+        """ Ensures a PaymentProcessorResponse exists for the corresponding processor and response. """
+        ppr = PaymentProcessorResponse.objects.filter(
+            processor_name=processor_name,
+            transaction_id=transaction_id
+        ).latest('created')
+
+        # The response we have for CyberSource is XML. Rather than parse it, we simply check for a single key/value.
+        # If that key/value is present it is reasonably safe to assume the others are present.
+        expected = {
+            'requestID': transaction_id,
+        }
+        self.assertDictContainsSubset(expected, ppr.response)
+        self.assertEqual(ppr.basket, basket)
+
+        return ppr.id
 
     @freeze_time('2016-01-01')
     def assert_correct_transaction_parameters(self, include_level_2_3_details=True, **kwargs):
@@ -189,7 +208,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
                           basket=self.basket)
 
-    @httpretty.activate
+    @responses.activate
     def test_issue_credit(self):
         """
         Tests issue_credit operation
@@ -207,18 +226,15 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertEqual(source.amount_refunded, 0)
         self.assertFalse(order.payment_events.exists())
 
-        cs_soap_mock = self.get_soap_mock(amount=amount, currency=currency, transaction_id=transaction_id,
-                                          basket_id=basket.id)
-        with mock.patch('suds.client.ServiceSelector', cs_soap_mock):
-            actual = self.processor.issue_credit(order, source.reference, amount, currency)
-            self.assertEqual(actual, transaction_id)
+        response = self.mock_refund_response(amount=amount, currency=currency, transaction_id=transaction_id,
+                                             basket_id=basket.id)
+        actual = self.processor.issue_credit(order, source.reference, amount, currency)
+        self.assertEqual(actual, transaction_id)
 
         # Verify PaymentProcessorResponse created
-        self.assert_processor_response_recorded(self.processor.NAME, transaction_id,
-                                                suds_response_to_dict(cs_soap_mock().runTransaction()),
-                                                basket)
+        self.assert_processor_response_recorded(self.processor.NAME, transaction_id, response, basket)
 
-    @httpretty.activate
+    @responses.activate
     def test_issue_credit_error(self):
         """
         Tests that issue_credit errors in case of communication error or declined transaction
@@ -234,19 +250,16 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.mock_cybersource_wsdl()
 
         # Test for communication failure.
-        with mock.patch('suds.client.ServiceSelector', mock.Mock(side_effect=Exception)):
+        with mock.patch.object(requests.Session, 'get', mock.Mock(side_effect=requests.Timeout)):
             self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
             self.assertEqual(source.amount_refunded, 0)
 
         # Test for declined transaction
-        cs_soap_mock = self.get_soap_mock(amount=amount, currency=currency, transaction_id=transaction_id,
-                                          basket_id=basket.id, decision='DECLINE')
-        with mock.patch('suds.client.ServiceSelector', cs_soap_mock):
-            self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
-            self.assert_processor_response_recorded(self.processor.NAME, transaction_id,
-                                                    suds_response_to_dict(cs_soap_mock().runTransaction()),
-                                                    basket)
-            self.assertEqual(source.amount_refunded, 0)
+        response = self.mock_refund_response(amount=amount, currency=currency, transaction_id=transaction_id,
+                                             basket_id=basket.id, decision='DECLINE')
+        self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
+        self.assert_processor_response_recorded(self.processor.NAME, transaction_id, response, basket)
+        self.assertEqual(source.amount_refunded, 0)
 
     def test_client_side_payment_url(self):
         """ Verify the property returns the Silent Order POST URL. """
