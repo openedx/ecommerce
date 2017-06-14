@@ -112,6 +112,11 @@ class Command(BaseCommand):
                             dest='send_refund_notifications',
                             default=False,
                             help='Enable refund notification emails')
+        parser.add_argument('--disable-otto-receipt-page',
+                            action='store_true',
+                            dest='disable_otto_receipt_page',
+                            default=False,
+                            help='Disable the receipt page hosted on this service (and use LMS)')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -125,6 +130,7 @@ class Command(BaseCommand):
         segment_key = options.get('segment_key')
         from_email = options.get('from_email')
         enable_enrollment_codes = True if options.get('enable_enrollment_codes') else False
+        enable_otto_receipt_page = not options.get('disable_otto_receipt_page')
         payment_support_email = options.get('payment_support_email', '')
         payment_support_url = options.get('payment_support_url', '')
 
@@ -155,6 +161,7 @@ class Command(BaseCommand):
             'segment_key': segment_key,
             'from_email': from_email,
             'enable_enrollment_codes': enable_enrollment_codes,
+            'enable_otto_receipt_page': enable_otto_receipt_page,
             'send_refund_notifications': options['send_refund_notifications'],
             'oauth_settings': {
                 'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),

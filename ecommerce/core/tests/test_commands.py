@@ -44,7 +44,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, payment_processors=None, segment_key=None,
                       enable_enrollment_codes=False, payment_support_email=None, payment_support_url=None,
-                      send_refund_notifications=False, client_side_payment_processor=None):
+                      send_refund_notifications=False, client_side_payment_processor=None,
+                      disable_otto_receipt_page=False):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -89,6 +90,9 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         if send_refund_notifications:
             command_args.append('--send-refund-notifications')
 
+        if disable_otto_receipt_page:
+            command_args.append('--disable-otto-receipt-page')
+
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -113,6 +117,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self._check_site_configuration(site, partner)
         self.assertFalse(site.siteconfiguration.enable_enrollment_codes)
         self.assertFalse(site.siteconfiguration.send_refund_notifications)
+        self.assertTrue(site.siteconfiguration.enable_otto_receipt_page)
 
     def test_update_site(self):
         """ Verify the command updates Site and creates Partner, and SiteConfiguration """
@@ -136,7 +141,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             enable_enrollment_codes=True,
             payment_support_email=self.payment_support_email,
             payment_support_url=self.payment_support_url,
-            send_refund_notifications=True
+            send_refund_notifications=True,
+            disable_otto_receipt_page=True
         )
 
         site = Site.objects.get(id=site.id)
@@ -151,6 +157,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_support_email, self.payment_support_email)
         self.assertEqual(site_configuration.payment_support_url, self.payment_support_url)
         self.assertTrue(site_configuration.send_refund_notifications)
+        self.assertFalse(site.siteconfiguration.enable_otto_receipt_page)
 
     @data(
         ['--site-id=1'],
