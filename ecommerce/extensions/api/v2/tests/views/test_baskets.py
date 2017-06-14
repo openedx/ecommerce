@@ -418,7 +418,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.data, expected)
 
     def test_basket_calculate_fixed_coupon(self):
-        """ Verufy successful basket calculation for a fixed price voucher """
+        """ Verify successful basket calculation for a fixed price voucher """
         discount = 5
         voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount)
 
@@ -442,3 +442,40 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         with self.assertRaises(Exception):
             self.client.get(self.url + '&code={code}'.format(code=voucher.code))
             self.assertTrue(mocked_logger.called)
+
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.get_entitlement_voucher')
+    def test_basket_calculate_entitlement_voucher(self, mock_get_entitlement_voucher):
+        """ Verify successful basket calculation considering Enterprise entitlement vouchers """
+
+        discount = 5
+        voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount)
+        mock_get_entitlement_voucher.return_value = voucher
+
+        # If the list of sku's contains more than one product no entitlement voucher is applied
+        response = self.client.get(self.url)
+
+        expected = {
+            'total_incl_tax_excl_discounts': self.product_total,
+            'total_incl_tax': self.product_total,
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+        # If it's only one product, the entitlement voucher is applied
+        product = self.products[0]
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku]}, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        product_total = product.stockrecords.first().price_excl_tax
+
+        response = self.client.get(url)
+
+        expected = {
+            'total_incl_tax_excl_discounts': product_total,
+            'total_incl_tax': product_total - discount,
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
