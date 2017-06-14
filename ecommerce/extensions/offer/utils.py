@@ -1,6 +1,7 @@
 """Offer Utility Methods. """
 from decimal import Decimal
 
+from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
@@ -71,3 +72,36 @@ def format_benefit_value(benefit):
         converted_benefit = add_currency(Decimal(benefit.value))
         benefit_value = _('${benefit_value}'.format(benefit_value=converted_benefit))
     return benefit_value
+
+
+def render_email_confirmation_if_required(request, offer, product):
+    """
+    Render the email confirmation template if email confirmation is
+    required to redeem the offer.
+
+    We require email confirmation via account activation before an offer
+    can be redeemed if the site is configured to require account activation
+    or if the offer is restricted for use to learners with a specific
+    email domain. The learner needs to activate their account before we allow
+    them to redeem email domain-restricted offers, otherwise anyone could create
+    an account using an email address with a privileged domain and use the coupon
+    code associated with the offer.
+
+    Arguments:
+        request (HttpRequest): The current HttpRequest.
+        offer (ConditionalOffer): The offer to be redeemed.
+        product (Product): The
+
+    Returns:
+        HttpResponse or None: An HttpResponse which renders the email confirmation template if required.
+    """
+    require_account_activation = request.site.siteconfiguration.require_account_activation or offer.email_domains
+    if require_account_activation and not request.user.account_details(request).get('is_active'):
+        return render(
+            request,
+            'edx/email_confirmation_required.html',
+            {
+                'course_name': product.course and product.course.name,
+                'user_email': request.user and request.user.email,
+            }
+        )

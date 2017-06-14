@@ -658,7 +658,8 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         )
 
 
-class VoucherAddViewTests(TestCase):
+@httpretty.activate
+class VoucherAddViewTests(LmsApiMockMixin, TestCase):
     """ Tests for VoucherAddView. """
 
     def setUp(self):
@@ -668,7 +669,6 @@ class VoucherAddViewTests(TestCase):
         self.basket = factories.BasketFactory(owner=self.user, site=self.site)
 
         # Fallback storage is needed in tests with messages
-        self.request = RequestFactory().post('/')
         self.request.user = self.user
         self.request.basket = self.basket
 
@@ -702,25 +702,36 @@ class VoucherAddViewTests(TestCase):
 
     def test_voucher_expired_error_msg(self):
         """ Verify correct error message is returned when voucher has expired. """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         end_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
         start_datetime = datetime.datetime.now() - datetime.timedelta(days=2)
-        factories.VoucherFactory(code=COUPON_CODE, end_datetime=end_datetime, start_datetime=start_datetime)
+        __, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
+        self.basket.add_product(product)
         self.assert_form_valid_message("Coupon code '{code}' has expired.".format(code=COUPON_CODE))
 
     def test_voucher_added_to_basket_msg(self):
         """ Verify correct message is returned when voucher is added to basket. """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         __, product = prepare_voucher(code=COUPON_CODE)
         self.basket.add_product(product)
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
     def test_voucher_has_no_discount_error_msg(self):
         """ Verify correct error message is returned when voucher has no discount. """
-        factories.VoucherFactory(code=COUPON_CODE)
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        __, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
+        self.basket.add_product(product)
         self.assert_form_valid_message("Your basket does not qualify for a coupon code discount.")
 
     def test_voucher_used_error_msg(self):
         """ Verify correct error message is returned when voucher has been used (Single use). """
-        voucher, __ = prepare_voucher(code=COUPON_CODE)
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        voucher, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         self.assert_form_valid_message("Coupon code '{code}' has already been redeemed.".format(code=COUPON_CODE))
@@ -733,10 +744,13 @@ class VoucherAddViewTests(TestCase):
 
     def test_inactive_voucher(self):
         """ Verify the view alerts the user if the voucher is inactive. """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         code = FuzzyText().fuzz()
         start_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
         end_datetime = start_datetime + datetime.timedelta(days=2)
-        voucher = factories.VoucherFactory(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
+        voucher, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
+        self.basket.add_product(product)
         self.form.cleaned_data = {'code': voucher.code}
         self.assert_form_valid_message("Coupon code '{code}' is not active.".format(code=voucher.code))
 
@@ -746,6 +760,8 @@ class VoucherAddViewTests(TestCase):
         Test that when a coupon code is entered on the checkout page, and that coupon code is
         linked to an EnterpriseCustomer, the user is kicked over to the RedeemCoupon flow.
         """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         get_ec.return_value = {'value': 'othervalue'}
         __, product = prepare_voucher(code=COUPON_CODE)
         self.basket.add_product(product)
@@ -782,6 +798,8 @@ class VoucherAddViewTests(TestCase):
 
     def test_coupon_applied_on_site_offer(self):
         """Coupon offer supersedes site offer."""
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         product_price = 100
         site_offer_discount = 20
         voucher_discount = 10
@@ -808,6 +826,36 @@ class VoucherAddViewTests(TestCase):
         # Site offer discount is still present after removing voucher.
         self.client.post(reverse('basket:vouchers-remove', kwargs={'pk': voucher.id}))
         self.assert_basket_discounts([site_offer])
+
+    def assert_account_activation_rendered(self):
+        with self.assertTemplateUsed('edx/email_confirmation_required.html'):
+            self.view.form_valid(self.form)
+
+    def test_activation_required_for_inactive_user(self):
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        __, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
+        self.assert_account_activation_rendered()
+
+    def test_activation_required_for_inactive_user_email_domain_offer(self):
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        self.site.siteconfiguration.require_account_activation = False
+        self.site.siteconfiguration.save()
+        email_domain = self.user.email.split('@')[1]
+        __, product = prepare_voucher(code=COUPON_CODE, email_domains=email_domain)
+        self.basket.add_product(product)
+        self.assert_account_activation_rendered()
+
+    def test_activation_not_required_for_inactive_user(self):
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        self.site.siteconfiguration.require_account_activation = False
+        self.site.siteconfiguration.save()
+        __, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
+        self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
 
 class VoucherRemoveViewTests(TestCase):
