@@ -113,7 +113,7 @@ compile_translations:
 fake_translations: extract_translations dummy_translations compile_translations
 
 pull_translations:
-	cd ecommerce && tx pull -af
+	cd ecommerce && tx pull -af --mode reviewed
 
 push_translations:
 	cd ecommerce && tx push -s
