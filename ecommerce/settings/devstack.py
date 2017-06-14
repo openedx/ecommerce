@@ -44,8 +44,8 @@ PAYMENT_PROCESSOR_CONFIG = {
         },
         'paypal': {
             'mode': 'sandbox',
-            'client_id': 'ATWMN3ZlgZl750ITtIEDZAqeyHIlRfrfaFBAnWpTHB8UDQE8Lrr6dgU6sE1Wz5cjmCxp4x8iRpIx-GXn',
-            'client_secret': 'EDE1bAVYDYEDlNW_iMNeMXP9T2LLPghMrsIqjMKi0Q3lmfgZUdgypkJhGnWesQD5E2AA_0mFgz6kckoc',
+            'client_id': 'AVcS4ZWEk7IPqaJibex3bCR0_lykVQ2BHdGz6JWVik0PKWGTOQzWMBOHRppPwFXMCPUqRsoBUDSE-ro5',
+            'client_secret': 'EHNgP4mXL5mI54DQI1-EgXo6y0BDUzj5x1_8gQD0dNWSWS6pcLqlmGq8f5En6oos0z2L37a_EJ27mJ_a',
             'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
