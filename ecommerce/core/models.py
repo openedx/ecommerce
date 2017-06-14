@@ -121,7 +121,7 @@ class SiteConfiguration(models.Model):
         verbose_name=_('Enable Otto receipt page'),
         help_text=_('Enable the usage of Otto receipt page.'),
         blank=True,
-        default=False
+        default=True
     )
     send_refund_notifications = models.BooleanField(
         verbose_name=_('Send refund email notification'),
