@@ -103,10 +103,10 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     @responses.activate
     def test_execution_redirect_to_lms(self):
         """
-        Verify redirection to LMS receipt page after attempted payment execution if Otto receipt page waffle
-        switch is disabled.
+        Verify redirection to LMS receipt page after attempted payment execution if the Otto receipt page is disabled.
         """
-        self.site.siteconfiguration.enable_otto_receipt_page = False
+        self.site_configuration.enable_otto_receipt_page = False
+        self.site_configuration.save()
         self.mock_oauth2_response()
 
         # Create a payment record the view can use to retrieve a basket
