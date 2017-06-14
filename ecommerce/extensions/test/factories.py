@@ -58,7 +58,7 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
 
 
 def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_datetime=None, benefit_value=100,
-                    benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE, max_usage=None):
+                    benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE, max_usage=None, email_domains=None):
     """ Helper function to create a voucher and add an offer to it that contains a product. """
 
     # NOTE (CCB): We use empty categories here to avoid unique-constraint issues that occur when we use
@@ -90,13 +90,15 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
             offer_type=ConditionalOffer.VOUCHER,
             benefit=benefit,
             condition=condition,
-            max_global_applications=max_usage
+            max_global_applications=max_usage,
+            email_domains=email_domains
         )
     else:
         offer = ConditionalOfferFactory(
             offer_type=ConditionalOffer.VOUCHER,
             benefit=benefit,
-            condition=condition
+            condition=condition,
+            email_domains=email_domains
         )
     voucher.offers.add(offer)
     return voucher, product

@@ -30,6 +30,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.offer.utils import render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
@@ -174,21 +175,9 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not offer.is_email_valid(request.user.email):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
-        # Require account activation before a coupon can be redeemed if the site is configured
-        # to require account activation or if the coupon offer is restricted for use to learners
-        # with a specific email domain. The learner needs to activate their account before we
-        # allow them to redeem email domain-restricted coupons, otherwise anyone could create
-        # an account using an email address with a privileged domain and use the coupon.
-        require_account_activation = site_configuration.require_account_activation or offer.email_domains
-        if require_account_activation and not request.user.account_details(request).get('is_active'):
-            return render(
-                request,
-                'edx/email_confirmation_required.html',
-                {
-                    'course_name': product.course and product.course.name,
-                    'user_email': request.user and request.user.email,
-                }
-            )
+        email_confirmation_response = render_email_confirmation_if_required(request, offer, product)
+        if email_confirmation_response:
+            return email_confirmation_response
 
         try:
             enterprise_customer = get_enterprise_customer_from_voucher(request.site, voucher)

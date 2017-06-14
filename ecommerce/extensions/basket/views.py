@@ -26,7 +26,7 @@ from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.basket.utils import get_basket_switch_data, prepare_basket
-from ecommerce.extensions.offer.utils import format_benefit_value
+from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
@@ -456,6 +456,18 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
                     _("Coupon code '{code}' does not exist.").format(code=code)
                 )
             else:
+                basket_lines = self.request.basket.all_lines()
+
+                # TODO: for multiline baskets, select the StockRecord for the product associated
+                # specifically with the code that was submitted.
+                stock_record = basket_lines[0].stockrecord
+
+                offer = voucher.offers.first()
+                product = stock_record.product
+                email_confirmation_response = render_email_confirmation_if_required(self.request, offer, product)
+                if email_confirmation_response:
+                    return email_confirmation_response
+
                 if get_enterprise_customer_from_voucher(
                         get_current_site(self.request),
                         voucher,
@@ -465,15 +477,10 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
                     # the standard redemption flow, we kick the user out to the `redeem` flow.
                     # This flow will handle any additional information that needs to be gathered
                     # due to the fact that the voucher is attached to an Enterprise Customer.
-                    basket_lines = self.request.basket.all_lines()
-
-                    # TODO: for multiline baskets, select the SKU for the product associated
-                    # specifically with the code that was submitted.
-                    sku = basket_lines[0].stockrecord.partner_sku
                     params = urlencode(
                         {
                             'code': code,
-                            'sku': sku,
+                            'sku': stock_record.partner_sku,
                             'failure_url': self.request.build_absolute_uri(
                                 '{path}?{params}'.format(
                                     path=reverse('basket:summary'),
