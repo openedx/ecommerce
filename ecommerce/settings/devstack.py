@@ -54,6 +54,16 @@ PAYMENT_PROCESSOR_CONFIG = {
 }
 # END PAYMENT PROCESSING
 
+EDX_DRF_EXTENSIONS = {
+    'JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING': {
+        'administrator': 'is_staff',
+        'email': 'email',
+        'locale': 'locale',
+        'full_name': 'full_name',
+        'tracking_context': 'tracking_context',
+    },
+}
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):

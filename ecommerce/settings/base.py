@@ -561,6 +561,7 @@ EDX_DRF_EXTENSIONS = {
     'JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING': {
         'administrator': 'is_staff',
         'email': 'email',
+        'locale': 'locale',
         'full_name': 'full_name',
         'tracking_context': 'tracking_context',
     },
