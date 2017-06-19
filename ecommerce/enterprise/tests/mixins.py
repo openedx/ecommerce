@@ -248,6 +248,26 @@ class EnterpriseServiceMockMixin(TestCase):
             content_type='application/json'
         )
 
+    def mock_enterprise_learner_api_for_no_learner(self):
+        """
+        Helper function to register enterprise learner API endpoint for a
+        learner which is not associated with any enterprise.
+        """
+        enterprise_learner_api_response = {
+            'count': 0,
+            'results': [],
+            'next': None,
+            'previous': None
+        }
+        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=self.ENTERPRISE_LEARNER_URL,
+            body=enterprise_learner_api_response_json,
+            content_type='application/json'
+        )
+
     def mock_enterprise_learner_api_for_learner_with_invalid_response(self):
         """
         Helper function to register enterprise learner API endpoint for a

@@ -322,3 +322,8 @@ class Condition(AbstractCondition):
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
+from ecommerce.extensions.offer.benefits import (  # noqa isort:skip pylint: disable=wrong-import-position,unused-import,ungrouped-imports
+    EnterpriseCustomerUserAbsoluteDiscountBenefit,
+    EnterpriseCustomerUserPercentageBenefit,
+)
+from ecommerce.extensions.offer.conditions import DataSharingConsentCondition  # noqa isort:skip pylint: disable=wrong-import-position,unused-import

@@ -20,6 +20,7 @@ from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
@@ -388,3 +389,18 @@ class LmsApiMockMixin(object):
             username=username
         )
         httpretty.register_uri(httpretty.POST, url, body=response, content_type=CONTENT_TYPE)
+
+
+class EnterpriseMixin(object):
+    """
+    Provides utility methods for running Enterprise tests
+    """
+    def setUp(self):
+        super(EnterpriseMixin, self).setUp()
+        self._enable_enterprise()
+
+    def _enable_enterprise(self, is_active=True):
+        """
+        Enable Enterprise functionality via waffle switch.
+        """
+        toggle_switch(name=settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH, active=is_active)

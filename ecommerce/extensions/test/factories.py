@@ -7,6 +7,9 @@ from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOffer
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.extensions.offer.models import (
+    EnterpriseCustomerUserAbsoluteDiscountBenefit, EnterpriseCustomerUserPercentageBenefit
+)
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -144,3 +147,23 @@ class ProgramOfferFactory(ConditionalOfferFactory):
     max_basket_applications = 1
     offer_type = ConditionalOffer.SITE
     status = ConditionalOffer.OPEN
+
+
+class EnterpriseCustomerUserPercentageBenefitFactory(factory.DjangoModelFactory):
+    enterprise_customer_uuid = factory.LazyFunction(uuid.uuid4)
+    type = Benefit.PERCENTAGE
+    value = 10
+    range = factory.SubFactory(RangeFactory)
+
+    class Meta(object):
+        model = EnterpriseCustomerUserPercentageBenefit
+
+
+class EnterpriseCustomerUserAbsoluteDiscountBenefitFactory(factory.DjangoModelFactory):
+    enterprise_customer_uuid = factory.LazyFunction(uuid.uuid4)
+    type = Benefit.FIXED
+    value = 10
+    range = factory.SubFactory(RangeFactory)
+
+    class Meta(object):
+        model = EnterpriseCustomerUserAbsoluteDiscountBenefit
