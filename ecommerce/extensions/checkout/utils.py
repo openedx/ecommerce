@@ -43,15 +43,11 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
     Returns:
         str: Receipt page URL.
     """
-    if site_configuration.enable_otto_receipt_page:
-        if override_url:
-            return override_url
-        else:
-            base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
-            params = urllib.urlencode({'order_number': order_number}) if order_number else ''
+    if override_url:
+        return override_url
     else:
-        base_url = site_configuration.build_lms_url('/commerce/checkout/receipt/')
-        params = urllib.urlencode({'orderNum': order_number}) if order_number else ''
+        base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
+        params = urllib.urlencode({'order_number': order_number}) if order_number else ''
 
     return '{base_url}{params}'.format(
         base_url=base_url,

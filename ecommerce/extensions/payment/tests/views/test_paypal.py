@@ -105,8 +105,6 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """
         Verify redirection to LMS receipt page after attempted payment execution if the Otto receipt page is disabled.
         """
-        self.site_configuration.enable_otto_receipt_page = False
-        self.site_configuration.save()
         self.mock_oauth2_response()
 
         # Create a payment record the view can use to retrieve a basket

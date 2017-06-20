@@ -427,7 +427,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     @httpretty.activate
     def test_basket_redirect_enrollment_code(self):
         """ Verify the view redirects to the receipt page when an enrollment code is provided. """
-        self.toggle_ecommerce_receipt_page(True)
         code = self.create_coupon_and_get_code(benefit_value=100, code='')
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
@@ -517,7 +516,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     @httpretty.activate
     def test_enterprise_customer_successful_redemption(self):
         """ Verify the view redirects to LMS when valid consent is provided. """
-        self.toggle_ecommerce_receipt_page(True)
         code = self.prepare_enterprise_data()
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         self.mock_enterprise_learner_post_api()
@@ -539,7 +537,6 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
     @httpretty.activate
     def test_multiple_vouchers(self):
         """ Verify a redirect to LMS happens when a basket with already existing vouchers is used. """
-        self.toggle_ecommerce_receipt_page(True)
         code = self.create_coupon_and_get_code(benefit_value=100, code='')
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=code))
