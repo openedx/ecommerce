@@ -27,7 +27,6 @@ class FreeCheckoutViewTests(TestCase):
         super(FreeCheckoutViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.toggle_ecommerce_receipt_page(True)
 
     def prepare_basket(self, price):
         """ Helper function that creates a basket and adds a product with set price to it. """
@@ -62,20 +61,6 @@ class FreeCheckoutViewTests(TestCase):
             order_number=order.number,
             site_configuration=order.site.siteconfiguration
         )
-        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
-
-    @httpretty.activate
-    def test_redirect_to_lms_receipt(self):
-        """ Verify that disabling the otto_receipt_page switch redirects to the LMS receipt page. """
-        self.toggle_ecommerce_receipt_page(False)
-        self.prepare_basket(0)
-        self.assertEqual(Order.objects.count(), 0)
-        receipt_page = self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt/')
-
-        response = self.client.get(self.path)
-        self.assertEqual(Order.objects.count(), 1)
-
-        expected_url = '{}?orderNum={}'.format(receipt_page, Order.objects.first().number)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
 

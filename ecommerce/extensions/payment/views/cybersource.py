@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
@@ -268,34 +268,6 @@ class CybersourceNotificationMixin(EdxOrderPlacementMixin):
         except:  # pylint: disable=bare-except
             logger.exception(self.order_placement_failure_msg, basket.id)
             raise
-
-
-class CybersourceNotifyView(CybersourceNotificationMixin, View):
-    """ Validates a response from CyberSource and processes the associated basket/order appropriately. """
-
-    def post(self, request):
-        """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
-
-        # If the Otto receipt page is enabled, CyberSource Interstitial View
-        # should handle the CyberSource response
-        if request.site.siteconfiguration.enable_otto_receipt_page:
-            return HttpResponse()
-
-        try:
-            notification = request.POST.dict()
-            basket = self.validate_notification(notification)
-        except (InvalidBasketError, InvalidSignatureError):
-            return HttpResponse(status=400)
-        except (UserCancelled, TransactionDeclined, PaymentError):
-            return HttpResponse()
-        except:  # pylint: disable=bare-except
-            return HttpResponse(status=500)
-
-        try:
-            self.create_order(request, basket, notification)
-            return HttpResponse()
-        except:  # pylint: disable=bare-except
-            return HttpResponse(status=500)
 
 
 class CybersourceInterstitialView(CybersourceNotificationMixin, View):

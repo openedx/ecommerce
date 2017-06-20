@@ -14,7 +14,7 @@ from oscar.test import factories
 
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
-from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView, CybersourceNotifyView
+from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -30,28 +30,6 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 @ddt.ddt
-class CybersourceNotifyViewTests(CybersourceNotificationTestsMixin, TestCase):
-    """ Test processing of CyberSource notifications. """
-    path = reverse('cybersource:notify')
-    view = CybersourceNotifyView
-
-    def setUp(self):
-        super(CybersourceNotifyViewTests, self).setUp()
-        self.site.siteconfiguration.enable_otto_receipt_page = False
-        self.site.siteconfiguration.save()
-
-    def test_otto_receipt_page_enabled(self):
-        """
-        Verify that the Notify view returns HTTP response with 200 status
-        when the Otto hosted receipt page is enabled.
-        """
-        self.site.siteconfiguration.enable_otto_receipt_page = True
-        self.site.siteconfiguration.save()
-        response = self.client.post(self.path)
-        self.assertEqual(response.status_code, 200)
-
-
-@ddt.ddt
 class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
     path = reverse('cybersource:submit')
 
@@ -59,8 +37,6 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         super(CybersourceSubmitViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.site.siteconfiguration.enable_otto_receipt_page = True
-        self.site.siteconfiguration.save()
 
     def _generate_data(self, basket_id):
         return {

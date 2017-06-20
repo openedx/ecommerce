@@ -35,7 +35,6 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
     def setUp(self):
         super(CybersourceTests, self).setUp()
-        self.toggle_ecommerce_receipt_page(True)
         self.basket.site = self.site
 
     def assert_processor_response_recorded(self, processor_name, transaction_id, response, basket=None):

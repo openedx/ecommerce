@@ -173,23 +173,6 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
             'Creating PayPal payment for basket [{}] resulted in an exception. Will retry.'.format(self.basket.id)
         )
 
-    def test_switch_enabled_otto_url(self):
-        """
-        Ensures that when the otto_receipt_page waffle switch is enabled, the processor uses the new receipt page.
-        """
-        self.site.siteconfiguration.enable_otto_receipt_page = True
-        self.assertEqual(
-            self._get_receipt_url(),
-            self.site.siteconfiguration.build_ecommerce_url(settings.RECEIPT_PAGE_PATH)
-        )
-
-    def test_switch_disabled_lms_url(self):
-        """
-        Ensures that when the otto_receipt_page waffle switch is disabled, the processor uses the LMS receipt page.
-        """
-        self.site.siteconfiguration.enable_otto_receipt_page = False
-        assert self._get_receipt_url() == self.site.siteconfiguration.build_lms_url('/commerce/checkout/receipt/')
-
     @mock.patch('ecommerce.extensions.payment.processors.paypal.paypalrestsdk.Payment')
     @ddt.data(None, Paypal.DEFAULT_PROFILE_NAME, 'some-other-name')
     def test_dummy_web_profiles(self, enabled_profile_name, mock_payment):

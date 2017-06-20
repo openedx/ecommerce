@@ -333,8 +333,6 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
     def setUp(self):
         super(CybersourceNotificationTestsMixin, self).setUp()
 
-        self.toggle_ecommerce_receipt_page(True)
-
         self.user = factories.UserFactory()
         self.billing_address = self.make_billing_address()
 

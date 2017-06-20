@@ -122,7 +122,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self._check_site_configuration(site, partner)
         self.assertFalse(site.siteconfiguration.enable_enrollment_codes)
         self.assertFalse(site.siteconfiguration.send_refund_notifications)
-        self.assertTrue(site.siteconfiguration.enable_otto_receipt_page)
         self.assertEqual(site.siteconfiguration.base_cookie_domain, '')
 
     def test_update_site(self):
@@ -164,7 +163,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.payment_support_email, self.payment_support_email)
         self.assertEqual(site_configuration.payment_support_url, self.payment_support_url)
         self.assertTrue(site_configuration.send_refund_notifications)
-        self.assertFalse(site.siteconfiguration.enable_otto_receipt_page)
         self.assertEqual(site.siteconfiguration.base_cookie_domain, self.base_cookie_domain)
 
     @data(

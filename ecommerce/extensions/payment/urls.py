@@ -3,7 +3,6 @@ from django.conf.urls import include, url
 from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal
 
 CYBERSOURCE_URLS = [
-    url(r'^notify/$', cybersource.CybersourceNotifyView.as_view(), name='notify'),
     url(r'^redirect/$', cybersource.CybersourceInterstitialView.as_view(), name='redirect'),
     url(r'^submit/$', cybersource.CybersourceSubmitView.as_view(), name='submit'),
 ]
