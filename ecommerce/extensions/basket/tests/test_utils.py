@@ -5,13 +5,13 @@ import ddt
 import mock
 import pytz
 from django.db import transaction
-from django.test import RequestFactory, TransactionTestCase
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.constants import REPEAT_PURCHASE_SWITCH_NAME
 from ecommerce.extensions.basket.utils import attribute_cookie_data, prepare_basket
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -19,9 +19,7 @@ from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.referrals.models import Referral
-from ecommerce.tests.factories import SiteConfigurationFactory
-from ecommerce.tests.mixins import UserMixin
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Benefit = get_model('offer', 'Benefit')
 Basket = get_model('basket', 'Basket')
@@ -34,12 +32,9 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
 
     def setUp(self):
         super(BasketUtilsTests, self).setUp()
-        self.request = RequestFactory()
-        self.request.COOKIES = {}
         self.request.user = self.create_user()
-        site_configuration = SiteConfigurationFactory(partner__name='Tester')
-        site_configuration.utm_cookie_name = 'test.edx.utm'
-        self.request.site = site_configuration.site
+        self.site_configuration.utm_cookie_name = 'test.edx.utm'
+        toggle_switch(REPEAT_PURCHASE_SWITCH_NAME, True)
 
     def test_prepare_basket_with_voucher(self):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """
@@ -176,7 +171,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             'created_at': utm_created_at,
         }
 
-        self.request.COOKIES['test.edx.utm'] = json.dumps(utm_cookie)
+        self.request.COOKIES[self.site_configuration.utm_cookie_name] = json.dumps(utm_cookie)
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
         attribute_cookie_data(basket, self.request)
 
@@ -206,7 +201,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             'utm_content': utm_content,
             'created_at': utm_created_at,
         }
-        self.request.COOKIES['test.edx.utm'] = json.dumps(new_utm_cookie)
+        self.request.COOKIES[self.site_configuration.utm_cookie_name] = json.dumps(new_utm_cookie)
         attribute_cookie_data(basket, self.request)
 
         # test new utm data saved
@@ -219,7 +214,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(referral.utm_created_at, expected_created_at)
 
         # expire cookie
-        del self.request.COOKIES['test.edx.utm']
+        del self.request.COOKIES[self.site_configuration.utm_cookie_name]
         attribute_cookie_data(basket, self.request)
 
         # test referral record is deleted when no cookie set
@@ -246,7 +241,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
 
         affiliate_id = 'affiliate'
 
-        self.request.COOKIES['test.edx.utm'] = json.dumps(utm_cookie)
+        self.request.COOKIES[self.site_configuration.utm_cookie_name] = json.dumps(utm_cookie)
         self.request.COOKIES['affiliate_id'] = affiliate_id
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
         attribute_cookie_data(basket, self.request)
@@ -263,7 +258,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(referral.affiliate_id, affiliate_id)
 
         # expire 1 cookie
-        del self.request.COOKIES['test.edx.utm']
+        del self.request.COOKIES[self.site_configuration.utm_cookie_name]
         attribute_cookie_data(basket, self.request)
 
         # test affiliate id still saved in referral but utm data removed
@@ -293,6 +288,10 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             with self.assertRaises(AlreadyPlacedOrderException):
                 prepare_basket(self.request, [product])
 
+        # If the switch is disabled, no validation should be performed.
+        toggle_switch(REPEAT_PURCHASE_SWITCH_NAME, False)
+        prepare_basket(self.request, [product])
+
     def test_prepare_basket_for_purchased_enrollment_code(self):
         """
         Test prepare_basket returns basket with product even if its already been purchased by user
@@ -306,15 +305,12 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             self.assertIsNotNone(basket)
 
 
-class BasketUtilsTransactionTests(UserMixin, TransactionTestCase):
+class BasketUtilsTransactionTests(TransactionTestCase):
     def setUp(self):
         super(BasketUtilsTransactionTests, self).setUp()
-        self.request = RequestFactory()
-        self.request.COOKIES = {}
         self.request.user = self.create_user()
-        site_configuration = SiteConfigurationFactory(partner__name='Tester')
-        site_configuration.utm_cookie_name = 'test.edx.utm'
-        self.request.site = site_configuration.site
+        self.site_configuration.utm_cookie_name = 'test.edx.utm'
+        toggle_switch(REPEAT_PURCHASE_SWITCH_NAME, True)
 
     def _setup_request_cookie(self):
         utm_campaign = 'test-campaign'
@@ -329,7 +325,7 @@ class BasketUtilsTransactionTests(UserMixin, TransactionTestCase):
 
         affiliate_id = 'affiliate'
 
-        self.request.COOKIES['test.edx.utm'] = json.dumps(utm_cookie)
+        self.request.COOKIES[self.site_configuration.utm_cookie_name] = json.dumps(utm_cookie)
         self.request.COOKIES['affiliate_id'] = affiliate_id
 
     def test_attribution_atomic_transaction(self):
