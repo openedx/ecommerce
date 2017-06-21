@@ -329,6 +329,10 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         msg = 'Creating PayPal WebProfile resulted in exception. Will continue without one.'
         mock_logger.warning.assert_any_call(msg)
 
+    @ddt.data(["en", "US"], ["es", "AR"], ["es-419"], ["invalid", "US"])
+    def test_resolve_paypal_locale(self, user_locale, expected_paypal_locale):
+        self.assertEqual(self.processor.resolve_paypal_locale(user_locale), expected_paypal_locale)
+
     @responses.activate
     @mock.patch.object(Paypal, '_get_error', mock.Mock(return_value=ERROR))
     def test_unexpected_payment_creation_state(self):

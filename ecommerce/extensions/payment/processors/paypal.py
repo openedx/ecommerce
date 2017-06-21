@@ -13,6 +13,7 @@ from django.utils.functional import cached_property
 from oscar.apps.payment.exceptions import GatewayError
 
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.extensions.payment.constants import PAYPAL_LOCALES
 from ecommerce.extensions.payment.models import PaypalProcessorConfiguration, PaypalWebProfile
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.utils import middle_truncate
@@ -29,7 +30,7 @@ class Paypal(BasePaymentProcessor):
 
     NAME = 'paypal'
     DEFAULT_PROFILE_NAME = 'default'
-    DEFAULT_LOCALE_CODE = 'default'
+    DEFAULT_PAYPAL_LOCALE_CODE = 'US'
 
     def __init__(self, site):
         """
@@ -63,9 +64,9 @@ class Paypal(BasePaymentProcessor):
     def error_url(self):
         return get_ecommerce_url(self.configuration['error_path'])
 
-    def resolve_paypal_locale(self):
-        """ TODO (LEARNER 1278): Generate appropriate Paypal locale code based on region """
-        return self.DEFAULT_LOCALE_CODE
+    def resolve_paypal_locale(self, language_code):
+        paypal_locale_code = PAYPAL_LOCALES.get(language_code, self.DEFAULT_PAYPAL_LOCALE_CODE)
+        return paypal_locale_code
 
     def create_temporary_web_profile(self, locale_code):
         """
@@ -149,9 +150,8 @@ class Paypal(BasePaymentProcessor):
         }
 
         if waffle.switch_is_active('create_and_set_webprofile'):
-            # TODO (LEARNER 1278) - set locale code based on user language
-            locale_code = self.resolve_paypal_locale()
-            if locale_code != self.DEFAULT_LOCALE_CODE:
+            locale_code = self.resolve_paypal_locale(request.user.locale)
+            if locale_code != self.DEFAULT_PAYPAL_LOCALE_CODE:
                 # Create a temporary web profile with the correct locale code
                 web_profile_id = self.create_temporary_web_profile(locale_code)
                 if web_profile_id is not None:
