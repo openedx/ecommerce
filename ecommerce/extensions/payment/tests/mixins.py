@@ -340,6 +340,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
 
         self.basket = factories.create_basket()
         self.basket.owner = self.user
+        self.basket.site = self.site
         self.basket.freeze()
 
         self.processor = Cybersource(self.site)
@@ -465,7 +466,17 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         )
         self.client.post(self.path, notification)
 
-        self.assert_processor_response_recorded(self.processor_name, notification[u'transaction_id'], notification)
+        self.assert_processor_response_recorded(self.processor_name, notification['transaction_id'], notification)
+
+    @ddt.data(Basket.MERGED, Basket.SAVED, Basket.OPEN, Basket.SUBMITTED)
+    def test_invalid_basket_status(self, status):
+        """ An error should be raised if the basket is in a non-frozen state. """
+        self.basket.status = status
+        self.basket.save()
+        notification = self.generate_notification(self.basket, billing_address=self.billing_address)
+        msg = 'CyberSource payment received for basket [{id}] which is in a non-frozen state, [{status}]'.format(
+            id=self.basket.id, status=status)
+        self._assert_processing_failure(notification, msg, 'ERROR')
 
     @ddt.data(('line2', 'foo'), ('state', 'bar'))
     @ddt.unpack

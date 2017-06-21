@@ -90,7 +90,7 @@ class CybersourceSubmitView(FormView):
         # Ensure we aren't attempting to purchase a basket that has already been purchased, frozen,
         # or merged with another basket.
         if basket.status != Basket.OPEN:
-            logger.debug('Basket %d must be in the "Open" state. It is currently in the "%s" state.',
+            logger.error('Basket %d must be in the "Open" state. It is currently in the "%s" state.',
                          basket.id, basket.status)
             error_msg = _('Your basket may have been modified or already purchased. Refresh the page to try again.')
             return self._basket_error_response(error_msg)
@@ -196,6 +196,12 @@ class CybersourceNotificationMixin(EdxOrderPlacementMixin):
             if not basket:
                 logger.error('Received payment for non-existent basket [%s].', basket_id)
                 raise InvalidBasketError
+
+            if basket.status != Basket.FROZEN:
+                logger.error(
+                    'CyberSource payment received for basket [%d] which is in a non-frozen state, [%s]',
+                    basket.id, basket.status
+                )
         finally:
             # Store the response in the database regardless of its authenticity.
             ppr = self.payment_processor.record_processor_response(
