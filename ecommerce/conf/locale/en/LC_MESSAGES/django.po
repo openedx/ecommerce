@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-27 17:27-0400\n"
+"POT-Creation-Date: 2017-06-28 11:24-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -191,72 +191,77 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: ecommerce/coupons/views.py:66 ecommerce/coupons/views.py:115
+#: ecommerce/coupons/views.py:67 ecommerce/coupons/views.py:116
 msgid "Coupon does not exist."
 msgstr ""
 
-#: ecommerce/coupons/views.py:71
+#: ecommerce/coupons/views.py:72
 msgid "This coupon code is not yet valid."
 msgstr ""
 
-#: ecommerce/coupons/views.py:73
+#: ecommerce/coupons/views.py:74
 msgid "This coupon code has expired."
 msgstr ""
 
-#: ecommerce/coupons/views.py:85
+#: ecommerce/coupons/views.py:86
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr ""
 
-#: ecommerce/coupons/views.py:90
+#: ecommerce/coupons/views.py:91
 msgid "This coupon code is no longer available."
 msgstr ""
 
-#: ecommerce/coupons/views.py:110
+#: ecommerce/coupons/views.py:111
 msgid "This coupon code is invalid."
 msgstr ""
 
-#: ecommerce/coupons/views.py:117
+#: ecommerce/coupons/views.py:118
 msgid "The voucher is not applicable to your current basket."
 msgstr ""
 
-#: ecommerce/coupons/views.py:127
+#: ecommerce/coupons/views.py:128
 msgid "Welcome to edX"
 msgstr ""
 
-#: ecommerce/coupons/views.py:128
+#: ecommerce/coupons/views.py:129
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
 msgstr ""
 
-#: ecommerce/coupons/views.py:157
+#: ecommerce/coupons/views.py:158
 msgid "Code not provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:159
+#: ecommerce/coupons/views.py:160
 msgid "SKU not provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:170
+#: ecommerce/coupons/views.py:171
 msgid "The product does not exist."
 msgstr ""
 
-#: ecommerce/coupons/views.py:178
+#: ecommerce/coupons/views.py:179
 msgid "You are not eligible to use this coupon."
 msgstr ""
 
-#: ecommerce/coupons/views.py:193
+#: ecommerce/coupons/views.py:194
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr ""
 
-#: ecommerce/coupons/views.py:215
+#: ecommerce/coupons/views.py:216
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:234 ecommerce/extensions/basket/views.py:118
+#: ecommerce/coupons/views.py:235 ecommerce/extensions/basket/views.py:118
 #, python-brace-format
 msgid "You have already purchased {course} seat."
+msgstr ""
+
+#: ecommerce/coupons/views.py:247
+#, python-brace-format
+msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr ""
 
 #: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:12
