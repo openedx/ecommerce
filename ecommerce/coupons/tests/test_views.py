@@ -450,19 +450,19 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
             )
             self.assertTrue(mock_logger.called)
 
-    def prepare_enterprise_data(self):
+    def prepare_enterprise_data(self, benefit_value=100, consent_enabled=True, consent_provided=False):
         """Creates an enterprise coupon and mocks enterprise endpoints."""
         code = self.create_coupon_and_get_code(
-            benefit_value=100,
+            benefit_value=benefit_value,
             code='',
             enterprise_customer=ENTERPRISE_CUSTOMER
         )
         self.request.user = self.user
-        self.mock_enterprise_learner_api(consent_provided=False)
+        self.mock_enterprise_learner_api(consent_enabled=consent_enabled, consent_provided=consent_provided)
         self.mock_enterprise_course_enrollment_api(results_present=False)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
-        self.mock_specific_enterprise_customer_api(ENTERPRISE_CUSTOMER)
+        self.mock_specific_enterprise_customer_api(uuid=ENTERPRISE_CUSTOMER, consent_enabled=consent_enabled)
         return code
 
     @httpretty.activate
@@ -533,6 +533,24 @@ class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin
         last_request = httpretty.last_request()
         self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
         self.assertEqual(last_request.method, 'POST')
+
+    @httpretty.activate
+    def test_enterprise_customer_successful_redemption_message(self):
+        """ Verify the info message appears on successful redemption. """
+        expected_message = '<i class="fa fa-info-circle"></i> A discount has been applied, courtesy of TestShib.'
+
+        # Setting benefit value to a low amount to ensure the basket is not free,
+        # and calls to the checkout page do not redirect away from the checkout page.
+        code = self.prepare_enterprise_data(benefit_value=5, consent_enabled=False)
+
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+        self.mock_enterprise_learner_post_api()
+
+        response = self.client.get(self.redeem_url_with_params(code=code), follow=True)
+        messages = []
+        messages += response.context['messages']
+        self.assertEqual(messages[0].tags, 'safe info')
+        self.assertEqual(messages[0].message, expected_message)
 
     @httpretty.activate
     def test_multiple_vouchers(self):

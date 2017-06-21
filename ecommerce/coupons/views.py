@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import csv
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -241,6 +242,14 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             except:  # pylint: disable=bare-except
                 logger.exception('Failed to create a free order for basket [%d]', basket.id)
                 return HttpResponseRedirect(reverse('checkout:error'))
+
+        if enterprise_customer:
+            message = _('A discount has been applied, courtesy of {enterprise_customer_name}.').format(
+                enterprise_customer_name=enterprise_customer.get('name')
+            )
+            message = '<i class="fa fa-info-circle"></i> {}'.format(message)
+            messages.info(self.request, message, extra_tags='safe')
+
         return HttpResponseRedirect(reverse('basket:summary'))
 
 
