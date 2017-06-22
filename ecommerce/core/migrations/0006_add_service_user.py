@@ -22,7 +22,9 @@ class Migration(migrations.Migration):
         User.objects.get(username=settings.ECOMMERCE_SERVICE_WORKER_USERNAME).delete()
 
     dependencies = [
+        ('core', '0036_user_locale'),
         ('core', '0005_auto_20150924_0123'),
+
     ]
 
     operations = [

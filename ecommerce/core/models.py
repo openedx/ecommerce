@@ -413,6 +413,7 @@ class User(AbstractUser):
     """Custom user model for use with OIDC."""
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
+    locale = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
 
     @property
     def access_token(self):
@@ -548,11 +549,6 @@ class User(AbstractUser):
                 self.username
             )
             raise
-
-
-class UserPreference(models.Model):
-    user = models.ForeignKey(User)
-    locale = models.CharField(_('Locale'), max_length=255, blank=True, null=True)
 
 
 class Client(User):
