@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-30 11:38+0000\n"
-"PO-Revision-Date: 2017-05-30 09:21+0000\n"
+"POT-Creation-Date: 2017-06-16 05:55+0000\n"
+"PO-Revision-Date: 2017-06-20 10:56+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Hebrew (http://www.transifex.com/open-edx/edx-platform/language/he/)\n"
 "MIME-Version: 1.0\n"
@@ -23,15 +23,15 @@ msgstr ""
 "Language: he\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ecommerce/core/admin.py:19
+#: ecommerce/core/admin.py:21
 msgid "Personal info"
 msgstr "מידע אישי"
 
-#: ecommerce/core/admin.py:20
+#: ecommerce/core/admin.py:22
 msgid "Permissions"
 msgstr "הרשאות"
 
-#: ecommerce/core/admin.py:22
+#: ecommerce/core/admin.py:24
 msgid "Important dates"
 msgstr "תאריכים חשובים"
 
@@ -189,78 +189,86 @@ msgstr "אפשר דיווח Sailthru"
 msgid "Determines if purchases should be reported to Sailthru."
 msgstr ""
 
-#: ecommerce/core/models.py:404
+#: ecommerce/core/models.py:170
+msgid "Base Cookie Domain"
+msgstr ""
+
+#: ecommerce/core/models.py:171
+msgid "Base cookie domain used to share cookies across services."
+msgstr ""
+
+#: ecommerce/core/models.py:415
 msgid "Full Name"
 msgstr "שם מלא"
 
-#: ecommerce/core/models.py:549 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:560 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr "שם"
 
-#: ecommerce/coupons/views.py:64 ecommerce/coupons/views.py:113
+#: ecommerce/coupons/views.py:65 ecommerce/coupons/views.py:114
 msgid "Coupon does not exist."
 msgstr ""
 
-#: ecommerce/coupons/views.py:69
+#: ecommerce/coupons/views.py:70
 msgid "This coupon code is not yet valid."
 msgstr "קוד קופון זה אינו חוקי עדיין."
 
-#: ecommerce/coupons/views.py:71
+#: ecommerce/coupons/views.py:72
 msgid "This coupon code has expired."
 msgstr "תוקף קוד קופון זה פג."
 
-#: ecommerce/coupons/views.py:83
+#: ecommerce/coupons/views.py:84
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr "המוצר [{product}] אינו זמין לרכישה."
 
-#: ecommerce/coupons/views.py:88
+#: ecommerce/coupons/views.py:89
 msgid "This coupon code is no longer available."
 msgstr "קודו קופון זה אינו זמין יותר."
 
-#: ecommerce/coupons/views.py:108
+#: ecommerce/coupons/views.py:109
 msgid "This coupon code is invalid."
 msgstr "קוד קופון זה אינו חוקי."
 
-#: ecommerce/coupons/views.py:115
+#: ecommerce/coupons/views.py:116
 msgid "The voucher is not applicable to your current basket."
 msgstr "השובר אינו רלוונטי לסל הנוכחי שלך."
 
-#: ecommerce/coupons/views.py:125
+#: ecommerce/coupons/views.py:126
 msgid "Welcome to edX"
 msgstr ""
 
-#: ecommerce/coupons/views.py:126
+#: ecommerce/coupons/views.py:127
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
 msgstr ""
 
-#: ecommerce/coupons/views.py:153
+#: ecommerce/coupons/views.py:156
 msgid "Code not provided."
 msgstr "הקוד לא סופק."
 
-#: ecommerce/coupons/views.py:155
+#: ecommerce/coupons/views.py:158
 msgid "SKU not provided."
 msgstr "ה-SKU לא סופק."
 
-#: ecommerce/coupons/views.py:166
+#: ecommerce/coupons/views.py:169
 msgid "The product does not exist."
 msgstr "המוצר אינו קיים."
 
-#: ecommerce/coupons/views.py:173
+#: ecommerce/coupons/views.py:177
 msgid "You are not eligible to use this coupon."
 msgstr "אינך זכאי להשתמש בשובר זה."
 
-#: ecommerce/coupons/views.py:195
+#: ecommerce/coupons/views.py:204
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr ""
 
-#: ecommerce/coupons/views.py:217
+#: ecommerce/coupons/views.py:226
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:236 ecommerce/extensions/basket/views.py:117
+#: ecommerce/coupons/views.py:245 ecommerce/extensions/basket/views.py:117
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
@@ -275,7 +283,7 @@ msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "התאריך/השעה האחרונים שניתן לשלוח אימות עבור מוצר זה."
 
-#: ecommerce/courses/publishers.py:86
+#: ecommerce/courses/publishers.py:61
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr "פרסום נתוני מסחר עבור {course_id} אל LMS נכשל."
@@ -321,31 +329,31 @@ msgid ""
 "selected offers this course credit. Try the transaction again."
 msgstr "אירעה שגיאה. לא יכולנו לאשר שהמוסד שבחרת מציע את נקודות הזכות עבור קורס זה. נסה שוב את העסקה."
 
-#: ecommerce/enterprise/utils.py:105
+#: ecommerce/enterprise/utils.py:108
 #, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:113
+#: ecommerce/enterprise/utils.py:116
 #, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
-msgstr ""
-
-#: ecommerce/enterprise/utils.py:121
-#, python-brace-format
-msgid ""
-"If you have concerns about sharing your data, please contact your "
-"administrator at {enterprise}."
 msgstr ""
 
 #: ecommerce/enterprise/utils.py:124
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
+"administrator at {enterprise}."
+msgstr ""
+
+#: ecommerce/enterprise/utils.py:127
+#, python-brace-format
+msgid ""
+"If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:130
+#: ecommerce/enterprise/utils.py:133
 #, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr ""
@@ -368,20 +376,20 @@ msgstr "לא מצאנו את אחד מהמוצרים שאתה מחפש."
 msgid "One of the products you're trying to order is unavailable."
 msgstr "אחד מהמוצרים שאתה מנסה להזמין אינו זמין."
 
-#: ecommerce/extensions/api/serializers.py:352
+#: ecommerce/extensions/api/serializers.py:344
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "נדרש סיווג מוצר לא חוקי [{product_class}]."
 
-#: ecommerce/extensions/api/serializers.py:358
+#: ecommerce/extensions/api/serializers.py:350
 msgid "Products must indicate whether ID verification is required."
 msgstr "המוצרים חייבים לציין אם נדרש אימות המזהה."
 
-#: ecommerce/extensions/api/serializers.py:362
+#: ecommerce/extensions/api/serializers.py:354
 msgid "Products must have a price."
 msgstr "חייב להיות מחיר למוצרים."
 
-#: ecommerce/extensions/api/serializers.py:391
+#: ecommerce/extensions/api/serializers.py:383
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -389,19 +397,19 @@ msgid ""
 " been saved."
 msgstr "הקורס [{course_id}] לא פורסם ל-LMS משום שהמתג [publish_course_modes_to_lms] מושבת. על מנת להימנע מ-SKUs רפאים, לא נשמרו הנתונים."
 
-#: ecommerce/extensions/api/serializers.py:604
+#: ecommerce/extensions/api/serializers.py:596
 msgid "Enrollment code"
 msgstr "קוד הרשמה"
 
-#: ecommerce/extensions/api/serializers.py:605
+#: ecommerce/extensions/api/serializers.py:597
 msgid "Discount code"
 msgstr "קוד הנחה"
 
-#: ecommerce/extensions/api/serializers.py:619
+#: ecommerce/extensions/api/serializers.py:611
 msgid "ACTIVE"
 msgstr "פעיל"
 
-#: ecommerce/extensions/api/serializers.py:619
+#: ecommerce/extensions/api/serializers.py:611
 msgid "INACTIVE"
 msgstr "לא פעיל"
 
@@ -599,12 +607,12 @@ msgstr ""
 msgid "Program UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/utils.py:61
+#: ecommerce/extensions/offer/utils.py:69
 #, python-brace-format
 msgid "{benefit_value}%"
 msgstr "{benefit_value}%"
 
-#: ecommerce/extensions/offer/utils.py:64
+#: ecommerce/extensions/offer/utils.py:72
 #, python-brace-format
 msgid "${benefit_value}"
 msgstr "${benefit_value}"
@@ -1235,6 +1243,10 @@ msgstr "תלושים"
 #: ecommerce/settings/_oscar.py:251
 msgid "Reports"
 msgstr "דוחות"
+
+#: ecommerce/templates/admin/disable_change_list.html:5
+msgid "List view is temporarily disabled due to large number of records."
+msgstr ""
 
 #: ecommerce/templates/base.html:10
 msgid "Build"
