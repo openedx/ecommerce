@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-30 17:21+0000\n"
+"POT-Creation-Date: 2017-07-05 12:09-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1915,6 +1915,11 @@ msgstr "Süßtötäl Ⱡ'σяєм ιρѕυм ∂#"
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr "%(voucher_discount_amount)s öff Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/templates/edx/checkout/receipt.html
+#, python-format
+msgid "Courtesy of %(enterprise_name)s."
+msgstr "Çöürtésý öf %(enterprise_name)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 msgid "Total"
