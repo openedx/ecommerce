@@ -101,25 +101,22 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         and basket submission in a transaction. Should be used only in
         the context of an exception handler.
         """
-        try:
-            return Order.objects.get(number=order_number)
-        except Order.DoesNotExist:
-            with transaction.atomic():
-                order = self.place_order(
-                    order_number=order_number,
-                    user=user,
-                    basket=basket,
-                    shipping_address=shipping_address,
-                    shipping_method=shipping_method,
-                    shipping_charge=shipping_charge,
-                    order_total=order_total,
-                    billing_address=billing_address,
-                    **kwargs
-                )
+        with transaction.atomic():
+            order = self.place_order(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=shipping_address,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                order_total=order_total,
+                billing_address=billing_address,
+                **kwargs
+            )
 
-                basket.submit()
+            basket.submit()
 
-            return self.handle_successful_order(order, request)
+        return self.handle_successful_order(order, request)
 
     def handle_successful_order(self, order, request=None):  # pylint: disable=arguments-differ
         """Send a signal so that receivers can perform relevant tasks (e.g., fulfill the order)."""

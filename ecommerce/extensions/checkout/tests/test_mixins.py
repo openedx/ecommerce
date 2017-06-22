@@ -5,7 +5,7 @@ Tests for the ecommerce.extensions.checkout.mixins module.
 from django.core import mail
 from django.test import RequestFactory
 from mock import Mock, patch
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory, ProductFactory, UserFactory
 from testfixtures import LogCapture
@@ -24,6 +24,8 @@ from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Basket = get_model('basket', 'Basket')
+NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
 
@@ -84,6 +86,32 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         # Validate the PaymentEvent was created
         paid_type = PaymentEventType.objects.get(code='paid')
         self.assert_valid_payment_event_fields(mixin._payment_events[-1], total, paid_type, processor_name, reference)
+
+    def test_order_number_collision(self, _mock_track):
+        """
+        Verify that an attempt to create an order with the same number as an existing
+        order causes an exception to be raised.
+        """
+        order_placement_mixin = EdxOrderPlacementMixin()
+
+        basket = self.order.basket
+
+        shipping_method = NoShippingRequired()
+        shipping_charge = shipping_method.calculate(basket)
+
+        order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+        with self.assertRaises(ValueError):
+            order_placement_mixin.handle_order_placement(
+                self.order.number,
+                self.user,
+                basket,
+                None,
+                shipping_method,
+                shipping_charge,
+                None,
+                order_total,
+            )
 
     def test_handle_successful_order(self, mock_track):
         """
