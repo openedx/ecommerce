@@ -8,7 +8,7 @@ import mock
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from freezegun import freeze_time
-from oscar.apps.payment.exceptions import PaymentError, TransactionDeclined, UserCancelled
+from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
@@ -188,9 +188,12 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
     path = reverse('cybersource:redirect')
     view = CybersourceInterstitialView
 
-    @ddt.data(InvalidSignatureError, InvalidBasketError, KeyError)
+    @ddt.data(InvalidSignatureError, InvalidBasketError, TransactionDeclined, Exception)
     def test_invalid_payment_error(self, error_class):
-        """ Verify the view redirects to Payment error page when a Payment error occurred. """
+        """
+        Verify that the view redirects to the payment error page when an error
+        occurs while processing a payment notification.
+        """
         notification = self.generate_notification(
             self.basket,
             billing_address=self.billing_address,
@@ -208,22 +211,6 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             },
             response.context
         )
-
-    @ddt.data(UserCancelled, TransactionDeclined, PaymentError)
-    def test_payment_cancelled_error(self, error_class):
-        """ Verify the view redirects to the Basket page when the Payment has been canceled. """
-        notification = self.generate_notification(
-            self.basket,
-            billing_address=self.billing_address,
-        )
-        with mock.patch.object(self.view, 'validate_notification', side_effect=error_class):
-            response = self.client.post(self.path, notification)
-            self.assertRedirects(
-                response,
-                self.get_full_url(path=reverse('basket:summary')),
-                status_code=302,
-                fetch_redirect_response=False
-            )
 
     def test_successful_order(self):
         """ Verify the view redirects to the Receipt page when the Order has been successfully placed. """

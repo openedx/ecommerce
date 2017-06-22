@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import logging
 
 import six
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -307,17 +306,6 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
         try:
             notification = request.POST.dict()
             basket = self.validate_notification(notification)
-        except (InvalidBasketError, InvalidSignatureError):
-            return redirect(reverse('payment_error'))
-        except (UserCancelled, TransactionDeclined, PaymentError):
-            order_number = request.POST.get('req_reference_number')
-            basket_id = OrderNumberGenerator().basket_id(order_number)
-            basket = self._get_basket(basket_id)
-            if basket:
-                basket.thaw()
-
-            messages.error(request, _('Your payment has been canceled.'))
-            return redirect(reverse('basket:summary'))
         except:  # pylint: disable=bare-except
             return redirect(reverse('payment_error'))
 
