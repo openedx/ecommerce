@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-30 11:38+0000\n"
+"POT-Creation-Date: 2017-06-16 05:55+0000\n"
 "PO-Revision-Date: 2017-06-16 09:24+0000\n"
 "Last-Translator: Innocent Masue <translations_7@camara.ie>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
@@ -26,19 +26,19 @@ msgstr ""
 "Language: sw_KE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ecommerce/static/js/models/coupon_model.js:25
+#: ecommerce/static/js/models/coupon_model.js:33
 msgid "This field is required."
 msgstr "Hii sehemu inatakiwa kujazwa. "
 
-#: ecommerce/static/js/models/coupon_model.js:26
+#: ecommerce/static/js/models/coupon_model.js:34
 msgid "This value must be a number."
 msgstr "Hii sehemu inatakiwa kujazwa namba."
 
-#: ecommerce/static/js/models/coupon_model.js:27
+#: ecommerce/static/js/models/coupon_model.js:35
 msgid "This value must be a date."
 msgstr "Hii sehemu inatakiwa kujazwa tarehe."
 
-#: ecommerce/static/js/models/coupon_model.js:28
+#: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
 msgstr "Angalau aina moja ya kikalio lazima ichaguliwe."
 
@@ -50,24 +50,24 @@ msgstr "Hii sehemu inatakiwa ibaki wazi au ijazwe maneno 1-16 yenye mchanganyiko
 msgid "A valid course ID is required"
 msgstr "Kitambulisho cha kozi sahihi kinahitajika. "
 
-#: ecommerce/static/js/models/coupon_model.js:103
+#: ecommerce/static/js/models/coupon_model.js:106
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "Miliki ya barua pepe {%s} siyo sahihi."
 
-#: ecommerce/static/js/models/coupon_model.js:120
+#: ecommerce/static/js/models/coupon_model.js:124
 msgid "Must occur after start date"
 msgstr "Lazima itokee baada ya tarehe ya kuanza"
 
-#: ecommerce/static/js/models/coupon_model.js:148
+#: ecommerce/static/js/models/coupon_model.js:154
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "                                                                                                                                                      Kiwango cha juu kwa watumiaji wenye kuponi kiwe zaidi ya 2."
 
-#: ecommerce/static/js/models/coupon_model.js:158
+#: ecommerce/static/js/models/coupon_model.js:166
 msgid "A valid Program UUID is required."
 msgstr "Programu Halali za UUID zinahitajika."
 
-#: ecommerce/static/js/models/coupon_model.js:182
+#: ecommerce/static/js/models/coupon_model.js:190
 msgid "Must occur before end date"
 msgstr "Lazima itokee kabla ya tarehe ya kumalizia"
 
@@ -83,91 +83,91 @@ msgstr "Lazima uchague kama nafasi ya heshima inapaswa kubuniwa."
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr "Siku ya mwisho ya uhakikishaji lazima iwe BAADA ya siku ya mwisho ya uboreshaji."
 
-#: ecommerce/static/js/models/course_model.js:86
+#: ecommerce/static/js/models/course_model.js:88
 msgid "Product validation failed."
 msgstr "Uhalalishaji wa bidhaa ulishindikana."
 
-#: ecommerce/static/js/models/course_model.js:92
-#: ecommerce/static/js/views/dynamic_catalog_view.js:66
+#: ecommerce/static/js/models/course_model.js:96
+#: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
 msgstr "Kitambulisho cha Kozi"
 
-#: ecommerce/static/js/models/course_model.js:93
+#: ecommerce/static/js/models/course_model.js:97
 msgid "Course Name"
 msgstr "Jina la Kozi"
 
-#: ecommerce/static/js/models/course_model.js:94
-#: ecommerce/static/js/views/course_list_view.js:73
+#: ecommerce/static/js/models/course_model.js:98
+#: ecommerce/static/js/views/course_list_view.js:72
 msgid "Course Type"
 msgstr "Aina ya Kozi"
 
-#: ecommerce/static/js/models/course_model.js:95
+#: ecommerce/static/js/models/course_model.js:99
 msgid "Verification Deadline"
 msgstr "Mwisho wa uhakiki"
 
-#: ecommerce/static/js/models/course_model.js:96
+#: ecommerce/static/js/models/course_model.js:100
 msgid "Include Honor Seat"
 msgstr "Ongezea nafasi ya heshima"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:26
+#: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
 msgstr "Nafasi zote za fani lazima ziwe na bei."
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:43
+#: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
 msgstr "Nafasi za uhakiki lazima ziwe na muda wa mwisho wa 'kuboreshwa'."
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:51
+#: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr "Siku ya mwisho ya uboreshaji lazima iwe KABLA ya siku ya mwisho ya uhakiki."
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:79
-#: ecommerce/static/js/views/course_form_view.js:62
+#: ecommerce/static/js/models/course_seats/course_seat.js:84
+#: ecommerce/static/js/views/course_form_view.js:63
 msgid "Verified"
 msgstr "Hakikishwa"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:81
-#: ecommerce/static/js/views/course_form_view.js:73
+#: ecommerce/static/js/models/course_seats/course_seat.js:86
+#: ecommerce/static/js/views/course_form_view.js:74
 msgid "Credit"
 msgstr "Sifa"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:84
+#: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
 msgstr "Mweledi/Mtaalamu"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:86
+#: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
 msgstr "Heshima"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:88
+#: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
 msgstr "Ukaguzi wa mahesabu"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:96
+#: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
 msgstr "Cheti kilichohakikiwa"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:100
+#: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
 msgstr "Hati ya Taaluma"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:103
+#: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
 msgstr "Cheti cha Heshima"
 
-#: ecommerce/static/js/models/course_seats/course_seat.js:106
+#: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
 msgstr "Hakuna Cheti"
 
-#: ecommerce/static/js/models/course_seats/credit_seat.js:24
+#: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
 msgstr "Nafasi zote za kutunukiwa lazima ziwe anayetoa sifa."
 
-#: ecommerce/static/js/models/course_seats/credit_seat.js:28
+#: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
 msgstr "Tafadhali chagua njia halali za malipo. "
 
-#: ecommerce/static/js/models/course_seats/credit_seat.js:35
+#: ecommerce/static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Nafasi zote za kutunukiwa lazima ziteuliwe na idadi ya muda wa kutunukiwa."
 
@@ -179,35 +179,35 @@ msgstr "Tatizo limetokea wakati wa kuondoka. Tafadhali wasiliana na 'kitengo cha
 msgid "This field is required"
 msgstr "'Sehemu' hii inahitaji kujazwa"
 
-#: ecommerce/static/js/pages/basket_page.js:124
+#: ecommerce/static/js/pages/basket_page.js:131
 msgid "Invalid card number"
 msgstr "Namba batili ya kadi"
 
-#: ecommerce/static/js/pages/basket_page.js:126
+#: ecommerce/static/js/pages/basket_page.js:133
 msgid "Unsupported card type"
 msgstr "Aina ya kadi haikubaliki"
 
-#: ecommerce/static/js/pages/basket_page.js:128
+#: ecommerce/static/js/pages/basket_page.js:135
 msgid "Invalid security number"
 msgstr "Namba batili ya usalama"
 
-#: ecommerce/static/js/pages/basket_page.js:133
+#: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid month"
 msgstr "Mwezi batili"
 
-#: ecommerce/static/js/pages/basket_page.js:135
+#: ecommerce/static/js/pages/basket_page.js:142
 msgid "Invalid year"
 msgstr "Mwaka batili"
 
-#: ecommerce/static/js/pages/basket_page.js:137
+#: ecommerce/static/js/pages/basket_page.js:144
 msgid "Card expired"
 msgstr "Kadi imeisha muda wake"
 
-#: ecommerce/static/js/pages/basket_page.js:327
+#: ecommerce/static/js/pages/basket_page.js:363
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:328
+#: ecommerce/static/js/pages/basket_page.js:364
 msgid "State/Province (required)"
 msgstr "Jimbo/Nchi (zinahitajika)"
 
@@ -219,7 +219,7 @@ msgstr "Buni Kuponi Mpya"
 msgid "View Coupon"
 msgstr "Tizama Kuponi"
 
-#: ecommerce/static/js/pages/coupon_edit_page.js:14
+#: ecommerce/static/js/pages/coupon_edit_page.js:13
 msgid "Edit Coupon"
 msgstr "Hariri Kuponi"
 
@@ -235,7 +235,7 @@ msgstr "Buni Kozi Mpya"
 msgid "View Course"
 msgstr "Tazama Kozi"
 
-#: ecommerce/static/js/pages/course_edit_page.js:14
+#: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
 msgstr "Hariri Kozi"
 
@@ -247,120 +247,120 @@ msgstr "Kozi"
 msgid "Redeem"
 msgstr "Komboa"
 
-#: ecommerce/static/js/utils/utils.js:183
+#: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
 msgstr "Alama ya mkato hairuhusiwi."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
-#: ecommerce/static/js/views/coupon_form_view.js:60
+#: ecommerce/static/js/views/coupon_form_view.js:61
 msgid "Can be used once by one customer"
 msgstr "Inaweza kutumika mara moja kwa mteja mmoja"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:109
-#: ecommerce/static/js/views/coupon_form_view.js:68
+#: ecommerce/static/js/views/coupon_form_view.js:69
 msgid "Can be used multiple times by multiple customers"
 msgstr "Inaweza kutumiwa mara nyingi na wateja wengi"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:111
-#: ecommerce/static/js/views/coupon_form_view.js:64
+#: ecommerce/static/js/views/coupon_form_view.js:65
 msgid "Can be used once by multiple customers"
 msgstr "Inaweza kutumika mara moja kwa wateja wengi"
 
-#: ecommerce/static/js/views/coupon_form_view.js:49
+#: ecommerce/static/js/views/coupon_form_view.js:50
 msgid "Enrollment Code"
 msgstr "Msimbo wa kujiandikisha"
 
-#: ecommerce/static/js/views/coupon_form_view.js:53
+#: ecommerce/static/js/views/coupon_form_view.js:54
 msgid "Discount Code"
 msgstr "Msimbo uliopunguzwa"
 
-#: ecommerce/static/js/views/coupon_form_view.js:771
+#: ecommerce/static/js/views/coupon_form_view.js:769
 msgid "Save Changes"
 msgstr "Hifadhi Mabadiliko"
 
-#: ecommerce/static/js/views/coupon_form_view.js:786
+#: ecommerce/static/js/views/coupon_form_view.js:784
 msgid "Create Coupon"
 msgstr "Buni Kuponi"
 
-#: ecommerce/static/js/views/coupon_list_view.js:48
-#: ecommerce/static/js/views/course_list_view.js:38
+#: ecommerce/static/js/views/coupon_list_view.js:47
+#: ecommerce/static/js/views/course_list_view.js:37
 msgid "Search..."
 msgstr "Tafuta..."
 
-#: ecommerce/static/js/views/coupon_list_view.js:58
-#: ecommerce/static/js/views/course_list_view.js:48
+#: ecommerce/static/js/views/coupon_list_view.js:57
+#: ecommerce/static/js/views/course_list_view.js:47
 msgid "Next"
 msgstr "Ifuatayo"
 
-#: ecommerce/static/js/views/coupon_list_view.js:59
-#: ecommerce/static/js/views/course_list_view.js:49
+#: ecommerce/static/js/views/coupon_list_view.js:58
+#: ecommerce/static/js/views/course_list_view.js:48
 msgid "Previous"
 msgstr "Iliyopita"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: ecommerce/static/js/views/coupon_list_view.js:63
+#: ecommerce/static/js/views/coupon_list_view.js:62
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
 msgstr "Onesha _MWANZO_ mpaka _MWISHO_ wa _JUMLA_ kuponi"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:66
+#: ecommerce/static/js/views/coupon_list_view.js:65
 msgid "(filtered from _MAX_ total coupons)"
 msgstr "(imechujwa kutoka _MAX_ jumla ya kuponi)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:69
+#: ecommerce/static/js/views/coupon_list_view.js:68
 msgid "Display _MENU_ coupons"
 msgstr "Onesha _MENYU_ kuponi"
 
-#: ecommerce/static/js/views/coupon_list_view.js:75
+#: ecommerce/static/js/views/coupon_list_view.js:74
 msgid "Name"
 msgstr "Jina"
 
-#: ecommerce/static/js/views/coupon_list_view.js:82
+#: ecommerce/static/js/views/coupon_list_view.js:81
 msgid "Created"
 msgstr "Imebuniwa"
 
-#: ecommerce/static/js/views/coupon_list_view.js:86
+#: ecommerce/static/js/views/coupon_list_view.js:85
 msgid "Custom Code"
 msgstr "'Alama' za kawaida"
 
-#: ecommerce/static/js/views/coupon_list_view.js:90
+#: ecommerce/static/js/views/coupon_list_view.js:89
 msgid "Client"
 msgstr "Mteja"
 
-#: ecommerce/static/js/views/coupon_list_view.js:94
+#: ecommerce/static/js/views/coupon_list_view.js:93
 msgid "Category"
 msgstr "Kundi"
 
-#: ecommerce/static/js/views/coupon_list_view.js:98
+#: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Coupon Report"
 msgstr "Taarifa ya 'Kuponi'"
 
-#: ecommerce/static/js/views/course_form_view.js:57
+#: ecommerce/static/js/views/course_form_view.js:58
 msgid "Free (Audit)"
 msgstr "Bure (Ukaguzi)"
 
-#: ecommerce/static/js/views/course_form_view.js:58
+#: ecommerce/static/js/views/course_form_view.js:59
 msgid "Free audit track. No certificate."
 msgstr "Ukaguzi wa bure wa hesabu. Bila 'cheti'."
 
-#: ecommerce/static/js/views/course_form_view.js:63
+#: ecommerce/static/js/views/course_form_view.js:64
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr "Cheti kilicholipiwa pamoja na uhakiki wa awali na 'Cheti' Kilichohakikiwa"
 
-#: ecommerce/static/js/views/course_form_view.js:67
+#: ecommerce/static/js/views/course_form_view.js:68
 msgid "Professional Education"
 msgstr "Elimu ya Kitaalamu"
 
-#: ecommerce/static/js/views/course_form_view.js:68
+#: ecommerce/static/js/views/course_form_view.js:69
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr "Lipa cheti kinachofuatia pamoja na uhakiki wa awali na 'Cheti cha Elimu ya Kitaalamu'"
 
-#: ecommerce/static/js/views/course_form_view.js:74
+#: ecommerce/static/js/views/course_form_view.js:75
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
@@ -368,54 +368,54 @@ msgstr "Lipa cheti kinachofuatia pamoja na uhakiki wa awali na cheti kilichohaki
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: ecommerce/static/js/views/course_list_view.js:53
+#: ecommerce/static/js/views/course_list_view.js:52
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
 msgstr "Onesha _MWANZO_ mpaka _MWISHO_ wa _JUMLA_ ya kozi"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/course_list_view.js:56
+#: ecommerce/static/js/views/course_list_view.js:55
 msgid "(filtered from _MAX_ total courses)"
 msgstr "(kuchujwa kutoka kwenye _UPEO_ jumla ya kozi)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/course_list_view.js:59
+#: ecommerce/static/js/views/course_list_view.js:58
 msgid "Display _MENU_ courses"
 msgstr "Onesha _MENU_ kozi"
 
-#: ecommerce/static/js/views/course_list_view.js:65
+#: ecommerce/static/js/views/course_list_view.js:64
 msgid "Course"
 msgstr "Kozi"
 
-#: ecommerce/static/js/views/course_list_view.js:80
+#: ecommerce/static/js/views/course_list_view.js:79
 msgid "Last Edited"
 msgstr "Mara ya Mwisho Kufanyiwa Uhariri"
 
-#: ecommerce/static/js/views/dynamic_catalog_view.js:70
+#: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
 msgstr "Jina la 'Idhini'"
 
-#: ecommerce/static/js/views/dynamic_catalog_view.js:74
+#: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
 msgstr "Aina ya Idhini"
 
-#: ecommerce/static/js/views/form_view.js:67
+#: ecommerce/static/js/views/form_view.js:69
 msgid "A course with the specified ID already exists."
 msgstr "Kozi yenye Kitambulisho maalum tayri ipo."
 
-#: ecommerce/static/js/views/form_view.js:77
-#: ecommerce/static/js/views/form_view.js:171
+#: ecommerce/static/js/views/form_view.js:79
+#: ecommerce/static/js/views/form_view.js:172
 msgid "Error!"
 msgstr "Hitilafu!"
 
-#: ecommerce/static/js/views/form_view.js:122
+#: ecommerce/static/js/views/form_view.js:125
 msgid "Saving..."
 msgstr "Inahifadhi..."
 
-#: ecommerce/static/js/views/form_view.js:131
+#: ecommerce/static/js/views/form_view.js:134
 msgid "Please complete all required fields."
 msgstr "Tafadhali kamilisha sehemu zote zinazohitajika."
 
-#: ecommerce/static/js/views/form_view.js:158
+#: ecommerce/static/js/views/form_view.js:159
 msgid "An error occurred while saving the data."
 msgstr "Hitilafu imetokea wakati wa kuhifadhi data."
 
