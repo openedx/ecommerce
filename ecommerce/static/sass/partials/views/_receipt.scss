@@ -145,9 +145,11 @@
     #dashboard-link {
         margin: 20px;
         text-align: center;
+        padding-bottom: 3em;
 
         .dashboard-link {
             font-size: 18px;
+            padding: 10px 15px;
         }
     }
 
@@ -341,6 +343,11 @@
                 margin-right: 10%;
 
                 color: black;
+            }
+
+            .enterprise-customer {
+                font-weight: 300;
+                padding-top: 12px;
             }
         }
     }
