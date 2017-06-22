@@ -4,20 +4,6 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
-from ecommerce.extensions.basket.constants import REPEAT_PURCHASE_SWITCH_NAME
-
-
-def create_switch(apps, schema_editor):
-    """Create and activate the sailthru_enable switch if it does not already exist."""
-    Switch = apps.get_model('waffle', 'Switch')
-    Switch.objects.get_or_create(name=REPEAT_PURCHASE_SWITCH_NAME, defaults={'active': True})
-
-
-def delete_switch(apps, schema_editor):
-    """Delete the sailthru_enable switch."""
-    Switch = apps.get_model('waffle', 'Switch')
-    Switch.objects.filter(name=REPEAT_PURCHASE_SWITCH_NAME).delete()
-
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -26,5 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_switch, reverse_code=delete_switch),
+        # NOTE (CCB): This migration is no longer needed. Eventually, it should be squashed out.
+        migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop),
     ]

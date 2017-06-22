@@ -6,14 +6,14 @@ import mock
 import pytz
 from django.db import transaction
 from oscar.core.loading import get_model
-from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
+from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory, create_order
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.constants import REPEAT_PURCHASE_SWITCH_NAME
 from ecommerce.extensions.basket.utils import attribute_cookie_data, prepare_basket
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.partner.models import StockRecord
@@ -34,7 +34,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         super(BasketUtilsTests, self).setUp()
         self.request.user = self.create_user()
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
-        toggle_switch(REPEAT_PURCHASE_SWITCH_NAME, True)
+        toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
 
     def test_prepare_basket_with_voucher(self):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """
@@ -103,7 +103,7 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         """ Verify a basket is returned and only contains a single product. """
         product1 = ProductFactory(stockrecords__partner__short_code='test1')
         product2 = ProductFactory(stockrecords__partner__short_code='test2')
-        basket = prepare_basket(self.request, [product1])
+        prepare_basket(self.request, [product1])
         basket = prepare_basket(self.request, [product2])
         self.assertIsNotNone(basket)
         self.assertEqual(basket.status, Basket.OPEN)
@@ -283,13 +283,14 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         """
         Test prepare_basket raises AlreadyPlacedOrderException if the product is already purchased by user
         """
-        product = ProductFactory()
-        with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
-            with self.assertRaises(AlreadyPlacedOrderException):
-                prepare_basket(self.request, [product])
+        order = create_order(user=self.request.user)
+        product = order.lines.first().product
 
-        # If the switch is disabled, no validation should be performed.
-        toggle_switch(REPEAT_PURCHASE_SWITCH_NAME, False)
+        with self.assertRaises(AlreadyPlacedOrderException):
+            prepare_basket(self.request, [product])
+
+        # If the switch is enabled, no validation should be performed.
+        toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, True)
         prepare_basket(self.request, [product])
 
     def test_prepare_basket_for_purchased_enrollment_code(self):
@@ -310,7 +311,7 @@ class BasketUtilsTransactionTests(TransactionTestCase):
         super(BasketUtilsTransactionTests, self).setUp()
         self.request.user = self.create_user()
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
-        toggle_switch(REPEAT_PURCHASE_SWITCH_NAME, True)
+        toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
 
     def _setup_request_cookie(self):
         utm_campaign = 'test-campaign'
