@@ -3,10 +3,13 @@ from __future__ import unicode_literals
 
 import logging
 
+import waffle
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
 from threadlocals.threadlocals import get_current_request
 
+from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
+from ecommerce.extensions.refund.status import REFUND_LINE
 from ecommerce.referrals.models import Referral
 
 logger = logging.getLogger(__name__)
@@ -121,22 +124,35 @@ class UserAlreadyPlacedOrder(object):
     """
     Provides utils methods to check if user has already placed an order
     """
+
     @staticmethod
     def user_already_placed_order(user, product):
         """
-        checks if the user already have a non refunded order for the product.
+        Checks if the user has already purchased the product.
+
+        A product is considered purchased if an OrderLine exists for the product,
+        and it has not been refunded.
+
         Args:
             user: (User)
             product: (Product)
 
         Returns:
-                Returns True if user have a non refunded order else False
+            bool: True if user has purchased the product.
+
+        Notes:
+            If the switch with the name `ecommerce.extensions.order.constants.DISABLE_REPEAT_ORDER_SWITCH_NAME`
+            is active this check will be disabled, and this method will already return `False`.
         """
+        if waffle.switch_is_active(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME):
+            return False
+
         orders_lines = OrderLine.objects.filter(product=product, order__user=user)
         if orders_lines:
             for order_line in orders_lines:
                 if not UserAlreadyPlacedOrder.is_order_line_refunded(order_line):
                     return True
+
         return False
 
     @staticmethod
@@ -146,4 +162,4 @@ class UserAlreadyPlacedOrder(object):
         Returns:
             boolean: True if order line is refunded else false
         """
-        return RefundLine.objects.filter(order_line=order_line, status='Complete').exists()
+        return RefundLine.objects.filter(order_line=order_line, status=REFUND_LINE.COMPLETE).exists()
