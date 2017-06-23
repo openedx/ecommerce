@@ -2,6 +2,8 @@ import json
 import logging
 from functools import wraps
 
+from ecommerce.courses.utils import mode_for_seat
+
 logger = logging.getLogger(__name__)
 
 
@@ -144,3 +146,26 @@ def track_segment_event(site, user, event, properties):
         }
     }
     return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
+
+
+def translate_basket_line_for_segment(line):
+    """ Translates a BasketLine to Segment's expected format for cart events.
+
+    Args:
+        line (BasketLine)
+
+    Returns:
+        dict
+    """
+    return {
+        # For backwards-compatibility with older events the `sku` field is (ab)used to
+        # store the product's `certificate_type`, while the `id` field holds the product's
+        # SKU. Marketing is aware that this approach will not scale once we start selling
+        # products other than courses, and will need to change in the future.
+        'product_id': line.stockrecord.partner_sku,
+        'sku': mode_for_seat(line.product),
+        'name': line.product.course.id,
+        'price': str(line.line_price_excl_tax),
+        'quantity': line.quantity,
+        'category': line.product.get_product_class().name,
+    }

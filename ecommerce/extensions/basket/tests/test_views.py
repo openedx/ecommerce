@@ -30,6 +30,7 @@ from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.utils import get_basket_switch_data
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -41,7 +42,6 @@ from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.factories import ProductFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -461,7 +461,16 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
         benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
 
-        response = self.client.get(self.path)
+        with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
+            response = self.client.get(self.path)
+
+            # Verify an event is sent to Segment
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            mock_track.assert_called_once_with(self.site, self.user, 'Cart Viewed', properties)
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['formset_lines_data']), 1)
         line_data = response.context['formset_lines_data'][0][1]
@@ -471,7 +480,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
 
-    def assert_emtpy_basket(self):
+    def assert_empty_basket(self):
         """ Assert that the basket is empty on visiting the basket summary page. """
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -480,7 +489,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_no_basket_response(self):
         """ Verify there are no form, line and benefit data in the context for a non-existing basket. """
-        self.assert_emtpy_basket()
+        self.assert_empty_basket()
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """
