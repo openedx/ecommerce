@@ -6,6 +6,8 @@ from logging.handlers import SysLogHandler
 from os.path import basename, normpath
 from sys import path
 
+from django.utils.translation import ugettext_lazy as _
+
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.settings._oscar import *
@@ -66,7 +68,8 @@ DATABASES = {
 TIME_ZONE = 'America/New_York'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
-LANGUAGE_CODE = 'en-us'
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#site-id
 # This needs to be set to None in order to support multitenancy
@@ -77,6 +80,12 @@ DEFAULT_SITE_ID = 1
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#use-i18n
 USE_I18N = True
+
+LANGUAGES = (
+    ('en', _('English')),
+    ('es', _('Spanish')),
+    ('es-419', _('Spanish (Latin American)')),
+)
 
 LOCALE_PATHS = (
     join(DJANGO_ROOT, 'conf', 'locale'),

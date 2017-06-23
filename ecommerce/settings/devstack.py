@@ -54,6 +54,9 @@ PAYMENT_PROCESSOR_CONFIG = {
 }
 # END PAYMENT PROCESSING
 
+# Language cookie
+LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
