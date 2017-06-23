@@ -12,6 +12,7 @@ from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
@@ -182,7 +183,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         response = self.client.get(reverse('payment_error'))
         self.assertDictContainsSubset(
             {
-                'basket_url': reverse('basket:summary'),
+                'dashboard_url': get_lms_url(),
                 'payment_support_email': self.site.siteconfiguration.payment_support_email
             },
             response.context

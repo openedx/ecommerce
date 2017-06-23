@@ -27,9 +27,9 @@
     </p>
 
     <p>
-      {% with "<a class='nav-link' href='"|add:basket_url|add:"'>"|safe as start_link %}
+      {% with "<a class='nav-link' href='"|add:dashboard_url|add:"'>"|safe as start_link %}
         {% blocktrans trimmed with end_link="</a>"|safe %}
-          To try again, visit the {{ start_link }}checkout page{{ end_link }}.
+          To try again, return to your {{ start_link }}dashboard{{ end_link }}.
         {% endblocktrans %}
       {% endwith %}
     </p>
