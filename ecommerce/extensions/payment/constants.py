@@ -29,3 +29,12 @@ CYBERSOURCE_CARD_TYPE_MAP = {
 }
 
 CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'
+
+# Paypal only supports 4 languages, which are prioritized by country.
+# https://developer.paypal.com/docs/classic/api/locale_codes/
+PAYPAL_LOCALES = {
+    'zh': 'CN',
+    'fr': 'FR',
+    'en': 'US',
+    'es': 'MX',
+}
