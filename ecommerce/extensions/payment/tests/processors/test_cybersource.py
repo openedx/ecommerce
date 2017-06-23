@@ -17,8 +17,8 @@ from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.payment.exceptions import (
-    InvalidCybersourceDecision, InvalidSignatureError, PartialAuthorizationError, PCIViolation,
-    ProcessorMisconfiguredError
+    DuplicateReferenceNumber, InvalidCybersourceDecision, InvalidSignatureError,
+    PartialAuthorizationError, PCIViolation, ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
@@ -197,6 +197,17 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         response = self.generate_notification(self.basket, decision=decision)
         self.assertRaises(exception, self.processor.handle_processor_response, response, basket=self.basket)
+
+    def test_handle_processor_response_duplicate_reference_number(self):
+        """
+        Verify that DuplicateReferenceNumber is raised when an ERROR decision with
+        reason code 104 is received.
+        """
+        response = self.generate_notification(self.basket, decision='ERROR', reason_code='104')
+        self.assertRaises(
+            DuplicateReferenceNumber,
+            self.processor.handle_processor_response, response, basket=self.basket
+        )
 
     def test_handle_processor_response_invalid_auth_amount(self):
         """

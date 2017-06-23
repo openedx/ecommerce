@@ -18,8 +18,8 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
-    InvalidCybersourceDecision, InvalidSignatureError, PartialAuthorizationError, PCIViolation,
-    ProcessorMisconfiguredError
+    DuplicateReferenceNumber, InvalidCybersourceDecision, InvalidSignatureError,
+    PartialAuthorizationError, PCIViolation, ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse
@@ -222,13 +222,16 @@ class Cybersource(BaseClientSidePaymentProcessor):
         # and logging the exception.
         decision = response['decision'].lower()
         if decision != 'accept':
-            exception = {
+            reason_code = int(response['reason_code'])
+
+            if decision == 'error' and reason_code == 104:
+                raise DuplicateReferenceNumber
+
+            raise {
                 'cancel': UserCancelled,
                 'decline': TransactionDeclined,
                 'error': GatewayError
             }.get(decision, InvalidCybersourceDecision)
-
-            raise exception
 
         # Raise an exception if the authorized amount differs from the requested amount.
         # Note (CCB): We should never reach this point in production since partial authorization is disabled

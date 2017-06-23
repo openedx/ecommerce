@@ -19,7 +19,7 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
+from ecommerce.extensions.payment.exceptions import DuplicateReferenceNumber, InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import clean_field_value
@@ -185,7 +185,7 @@ class CybersourceNotificationMixin(EdxOrderPlacementMixin):
             basket_id = OrderNumberGenerator().basket_id(order_number)
 
             logger.info(
-                'Received CyberSource merchant notification for transaction [%s], associated with basket [%d].',
+                'Received CyberSource payment notification for transaction [%s], associated with basket [%d].',
                 transaction_id,
                 basket_id
             )
@@ -193,12 +193,15 @@ class CybersourceNotificationMixin(EdxOrderPlacementMixin):
             basket = self._get_basket(basket_id)
 
             if not basket:
-                logger.error('Received payment for non-existent basket [%s].', basket_id)
+                logger.error('Received CyberSource payment notification for non-existent basket [%s].', basket_id)
                 raise InvalidBasketError
 
             if basket.status != Basket.FROZEN:
-                logger.error(
-                    'CyberSource payment received for basket [%d] which is in a non-frozen state, [%s]',
+                # We don't know how serious this situation is at this point, hence
+                # the INFO level logging. This notification is most likely CyberSource
+                # telling us that they've declined an attempt to pay for an existing order.
+                logger.info(
+                    'Received CyberSource payment notification for basket [%d] which is in a non-frozen state, [%s]',
                     basket.id, basket.status
                 )
         finally:
@@ -224,6 +227,14 @@ class CybersourceNotificationMixin(EdxOrderPlacementMixin):
                     basket.id,
                     exception.__class__.__name__,
                     ppr.id
+                )
+                raise
+            except DuplicateReferenceNumber:
+                logger.info(
+                    'Received CyberSource payment notification for basket [%d] which is associated '
+                    'with existing order [%s]. No payment was collected, and no new order will be created.',
+                    basket.id,
+                    order_number
                 )
                 raise
             except PaymentError:
@@ -272,21 +283,30 @@ class CybersourceNotificationMixin(EdxOrderPlacementMixin):
 
 class CybersourceInterstitialView(CybersourceNotificationMixin, View):
     """ Interstitial view for Cybersource Payments. """
-
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
         try:
             notification = request.POST.dict()
             basket = self.validate_notification(notification)
+        except DuplicateReferenceNumber:
+            # CyberSource has told us that they've declined an attempt to pay
+            # for an existing order. If this happens, we can redirect the browser
+            # to the receipt page for the existing order.
+            return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
             return redirect(reverse('payment_error'))
 
         try:
             self.create_order(request, basket, notification)
-            receipt_page_url = get_receipt_page_url(
-                order_number=notification.get('req_reference_number'),
-                site_configuration=self.request.site.siteconfiguration
-            )
-            return redirect(receipt_page_url)
+
+            return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
             return redirect(reverse('payment_error'))
+
+    def redirect_to_receipt_page(self, notification):
+        receipt_page_url = get_receipt_page_url(
+            self.request.site.siteconfiguration,
+            order_number=notification.get('req_reference_number')
+        )
+
+        return redirect(receipt_page_url)

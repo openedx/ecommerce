@@ -20,6 +20,7 @@ from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
@@ -132,7 +133,7 @@ class CybersourceMixin(PaymentEventsMixin):
                 (
                     logger_name,
                     'INFO',
-                    'Received CyberSource merchant notification for transaction [{transaction_id}], '
+                    'Received CyberSource payment notification for transaction [{transaction_id}], '
                     'associated with basket [{basket_id}].'.format(
                         transaction_id=notification['transaction_id'],
                         basket_id=self.basket.id
@@ -166,13 +167,18 @@ class CybersourceMixin(PaymentEventsMixin):
         return newfactories.BillingAddressFactory(**kwargs)
 
     def generate_notification(self, basket, decision='ACCEPT', billing_address=None, auth_amount=None, **kwargs):
-        """ Generates a dict containing the API reply fields expected to be received from CyberSource. """
-
+        """
+        Generates a dict containing the API reply fields expected to be received
+        from CyberSource.
+        """
+        reason_code = kwargs.get('reason_code', '100')
         req_reference_number = kwargs.get('req_reference_number', basket.order_number)
         total = unicode(basket.total_incl_tax)
         auth_amount = auth_amount or total
+
         notification = {
             'decision': decision,
+            'reason_code': reason_code,
             'req_reference_number': req_reference_number,
             'transaction_id': '123456',
             'auth_amount': auth_amount,
@@ -472,9 +478,15 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         self.basket.status = status
         self.basket.save()
         notification = self.generate_notification(self.basket, billing_address=self.billing_address)
-        msg = 'CyberSource payment received for basket [{id}] which is in a non-frozen state, [{status}]'.format(
-            id=self.basket.id, status=status)
-        self._assert_processing_failure(notification, msg, 'ERROR')
+        msg = (
+            'Received CyberSource payment notification for basket [{id}] '
+            'which is in a non-frozen state, [{status}]'
+        ).format(
+            id=self.basket.id,
+            status=status
+        )
+
+        self._assert_processing_failure(notification, msg, 'INFO')
 
     @ddt.data(('line2', 'foo'), ('state', 'bar'))
     @ddt.unpack
@@ -529,6 +541,39 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         # The response should be saved.
         self.assert_processor_response_recorded(self.processor_name, notification['transaction_id'], notification,
                                                 basket=self.basket)
+
+    def test_duplicate_reference_code(self):
+        """
+        Verify that if CyberSource declines to charge for an existing order, we
+        redirect to the receipt page for the existing order.
+        """
+        notification = self.generate_notification(self.basket, billing_address=self.billing_address)
+
+        self.client.post(self.path, notification)
+
+        # Validate that a new order exists in the correct state
+        order = Order.objects.get(basket=self.basket)
+        self.assertIsNotNone(order, 'No order was created for the basket after payment.')
+
+        # Mutate the notification and re-use it to simulate a duplicate reference
+        # number error from CyberSource.
+        notification.update({
+            'decision': 'ERROR',
+            'reason_code': '104',
+        })
+
+        # Re-sign the response. This is necessary because we've tampered with fields
+        # that have already been signed.
+        notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
+
+        response = self.client.post(self.path, notification)
+
+        expected_redirect = get_receipt_page_url(
+            self.site.siteconfiguration,
+            order_number=notification.get('req_reference_number')
+        )
+
+        self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
 
 
 class PaypalMixin(object):
