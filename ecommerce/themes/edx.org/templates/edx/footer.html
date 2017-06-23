@@ -1,0 +1,72 @@
+{% load i18n %}
+{% load staticfiles %}
+
+<footer class="footer-main container">
+  <div class="grid-manual grid-container">
+    <div class="row">
+      <div class="col-lg-2 col-md-2 col-sm-12 footer-logo"><img src="{% static 'edx.org/images/default-logo.png' %}" alt="{% trans 'Home Page' %}" /></div>
+      <div class="col-lg-10 col-md-10 col-sm-12">
+        <div class="row">
+          <div class="col-lg-7 col-md-7 col-sm-6 col-xs-12">
+            <div class="row site-details">
+              <div class="col-12">
+                <a class='btn-link' target="_blank" href="{{ lms_base_url }}/about">{% trans 'About' %}</a>
+                <a class='btn-link' target="_blank" href="{{ lms_base_url }}/contact">{% trans 'Contact' %}</a>
+              </div>
+
+              <div class="col-12 legal-notices">
+                <a class='btn-link' target="_blank" href="{{ lms_base_url }}/tos">{% trans 'Terms of Service' %}</a>
+                <a class='btn-link' target="_blank" href="{{ lms_base_url }}/privacy">{% trans 'Privacy Policy' %}</a>
+                <a class='btn-link' target="_blank" href="{{ lms_base_url }}/honor">{% trans 'Honor Code' %}</a>
+              </div>
+
+              <div class="col-12">
+                <p class="copyright">{% trans '© edX Inc.  All rights reserved except where noted.  EdX, Open edX and the edX and Open EdX logos are registered trademarks or trademarks of edX Inc.' %}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 col-md-5 col-sm-6 col-xs-12">
+            <div class="row external-links">
+              <div class="col-12 social-media-links">
+                <a target="_blank" href="http://www.facebook.com/EdxOnline" title="Facebook">
+                  <span class="fa fa-facebook-square" aria-hidden="true"></span>
+                  <span class="sr">{% trans 'Like edX on Facebook' %}</span>
+                </a>
+                <a target="_blank" href="https://twitter.com/edXOnline" title="Twitter">
+                  <span class="fa fa-twitter" aria-hidden="true"></span>
+                  <span class="sr">{% trans 'Follow edX on Twitter' %}</span>
+                </a>
+                <a target="_blank" href="https://www.youtube.com/user/edxonline?sub_confirmation=1" title="Youtube">
+                  <span class="fa fa-youtube" aria-hidden="true"></span>
+                  <span class="sr">{% trans 'Subscribe to the edX YouTube channel' %}</span>
+                </a>
+                <a target="_blank" href="http://www.linkedin.com/company/edx" title="LinkedIn">
+                  <span class="fa fa-linkedin-square" aria-hidden="true"></span>
+                  <span class="sr">{% trans 'Follow edX on LinkedIn' %}</span>
+                </a>
+                <a target="_blank" href="https://plus.google.com/+edXOnline" title="Google+">
+                  <span class="fa fa-google-plus-square" aria-hidden="true"></span>
+                  <span class="sr">{% trans 'Follow edX on Google+' %}</span>
+                </a>
+                <a target="_blank" href="http://www.reddit.com/r/edx" title="Reddit">
+                  <span class="fa fa-reddit" aria-hidden="true"></span>
+                  <span class="sr">{% trans 'Subscribe to the edX subreddit' %}</span>
+                </a>
+              </div>
+
+              <div class="col-12 mobile-app-links">
+                <a target="_blank" href="https://itunes.apple.com/us/app/edx/id945480667?mt=8">
+                  <img alt="{% trans 'Download the edX mobile app from the Apple App Store' %}" src="https://d37djvu3ytnwxt.cloudfront.net/static/images/app/app_store_badge_135x40.d0558d910630.svg">
+                </a>
+                <a target="_blank" href="https://play.google.com/store/apps/details?id=org.edx.mobile">
+                  <img alt="{% trans 'Download the edX mobile app from Google Play' %}" src="https://d37djvu3ytnwxt.cloudfront.net/static/images/app/google_play_badge_45.144f2dd05129.png">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</footer>
