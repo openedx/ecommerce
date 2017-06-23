@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-16 05:55+0000\n"
+"POT-Creation-Date: 2017-06-23 11:20-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -137,16 +137,6 @@ msgstr "Àffïlïäté Çöökïé Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕ
 msgid "Name of cookie storing affiliate data."
 msgstr ""
 "Nämé öf çöökïé störïng äffïlïäté dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя#"
-
-#: ecommerce/core/models.py
-msgid "Enable Otto receipt page"
-msgstr "Énäßlé Öttö réçéïpt pägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
-
-#: ecommerce/core/models.py
-msgid "Enable the usage of Otto receipt page."
-msgstr ""
-"Énäßlé thé üsägé öf Öttö réçéïpt pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
 
 #: ecommerce/core/models.py
@@ -894,10 +884,6 @@ msgid ""
 msgstr ""
 "Ýöür ßäskét mäý hävé ßéén mödïfïéd ör älréädý pürçhäséd. Réfrésh thé pägé tö"
 " trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
-
-#: ecommerce/extensions/payment/views/cybersource.py
-msgid "Your payment has been canceled."
-msgstr "Ýöür päýmént häs ßéén çänçéléd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: ecommerce/extensions/refund/models.py
 msgid "Order"
@@ -2464,35 +2450,28 @@ msgstr "Päýmént Fäïléd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
 msgid ""
-"\n"
-"        A system error occurred while processing your payment. <strong>You have not been charged.</strong>\n"
-"      "
+"An error occurred while processing your payment. <strong>You have not been "
+"charged.</strong>"
 msgstr ""
-"\n"
-"        À sýstém érrör öççürréd whïlé pröçéssïng ýöür päýmént. <strong>Ýöü hävé nöt ßéén çhärgéd.</strong>\n"
-"       Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+"Àn érrör öççürréd whïlé pröçéssïng ýöür päýmént. <strong>Ýöü hävé nöt ßéén "
+"çhärgéd.</strong> Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
 #, python-format
 msgid ""
-"\n"
-"          Please wait a few minutes and then try again. For help, contact %(start_link)s%(payment_support_email)s%(end_link)s.\n"
-"        "
+"Please wait a few minutes and then try again. For help, contact "
+"%(start_link)s%(payment_support_email)s%(end_link)s."
 msgstr ""
-"\n"
-"          Pléäsé wäït ä féw mïnütés änd thén trý ägäïn. För hélp, çöntäçt %(start_link)s%(payment_support_email)s%(end_link)s.\n"
-"         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+"Pléäsé wäït ä féw mïnütés änd thén trý ägäïn. För hélp, çöntäçt "
+"%(start_link)s%(payment_support_email)s%(end_link)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυ#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
 #, python-format
-msgid ""
-"\n"
-"          To try again, visit the %(start_link)sbasket page%(end_link)s.\n"
-"        "
+msgid "To try again, visit the %(start_link)scheckout page%(end_link)s."
 msgstr ""
-"\n"
-"          Tö trý ägäïn, vïsït thé %(start_link)sßäskét pägé%(end_link)s.\n"
-"         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+"Tö trý ägäïn, vïsït thé %(start_link)sçhéçköüt pägé%(end_link)s. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #. Translators: SDN is an acronym for Specially Designated Nationals
 #: ecommerce/templates/oscar/checkout/sdn_failure.html
