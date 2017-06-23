@@ -3,12 +3,17 @@ import json
 import mock
 from analytics import Client
 from django.contrib.auth.models import AnonymousUser
+from oscar.test import factories
 
-from ecommerce.extensions.analytics.utils import parse_tracking_context, prepare_analytics_data, track_segment_event
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.analytics.utils import (
+    parse_tracking_context, prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
+)
+from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
 
-class UtilsTest(TestCase):
+class UtilsTest(CourseCatalogTestMixin, TestCase):
     """ Tests for the analytics utils. """
 
     def test_prepare_analytics_data(self):
@@ -80,3 +85,22 @@ class UtilsTest(TestCase):
         with mock.patch.object(Client, 'track') as mock_track:
             track_segment_event(self.site, user, event, properties)
             mock_track.assert_called_once_with(user_tracking_id, event, properties, context=context)
+
+    def test_translate_basket_line_for_segment(self):
+        """ The method should return a dict formatted for Segment. """
+        course = CourseFactory()
+        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        basket = factories.create_basket(empty=True)
+        basket.add_product(seat)
+        line = basket.lines.first()
+
+        expected = {
+            'product_id': seat.stockrecords.first().partner_sku,
+            'sku': 'verified',
+            'name': course.id,
+            'price': '100.00',
+            'quantity': 1,
+            'category': 'Seat',
+        }
+
+        self.assertEqual(translate_basket_line_for_segment(line), expected)

@@ -7,7 +7,6 @@ from urllib import urlencode
 
 import dateutil.parser
 import waffle
-from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
@@ -24,7 +23,9 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher
-from ecommerce.extensions.analytics.utils import prepare_analytics_data
+from ecommerce.extensions.analytics.utils import (
+    prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
+)
 from ecommerce.extensions.basket.utils import get_basket_switch_data, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -328,6 +329,20 @@ class BasketSummaryView(BasketView):
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
 
+    def get(self, request, *args, **kwargs):
+        basket = request.basket
+
+        try:
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
+
+        return super(BasketSummaryView, self).get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
@@ -468,10 +483,7 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
                 if email_confirmation_response:
                     return email_confirmation_response
 
-                if get_enterprise_customer_from_voucher(
-                        get_current_site(self.request),
-                        voucher,
-                ) is not None:
+                if get_enterprise_customer_from_voucher(self.request.site, voucher) is not None:
                     # The below lines only apply if the voucher that was entered is attached
                     # to an EnterpriseCustomer. If that's the case, then rather than following
                     # the standard redemption flow, we kick the user out to the `redeem` flow.
