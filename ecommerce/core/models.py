@@ -117,13 +117,6 @@ class SiteConfiguration(models.Model):
         blank=True,
         default="",
     )
-    # TODO Remove this field after all usages have been removed/released to production.
-    enable_otto_receipt_page = models.BooleanField(
-        verbose_name=_('Enable Otto receipt page'),
-        help_text=_('Enable the usage of Otto receipt page.'),
-        blank=True,
-        default=True
-    )
     send_refund_notifications = models.BooleanField(
         verbose_name=_('Send refund email notification'),
         blank=True,
