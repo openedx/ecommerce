@@ -2,14 +2,7 @@ import json
 import logging
 from functools import wraps
 
-from threadlocals.threadlocals import get_current_request
-
 logger = logging.getLogger(__name__)
-
-
-def is_segment_configured():
-    """Returns a Boolean indicating if Segment has been configured for use."""
-    return bool(get_current_request().site.siteconfiguration.segment_key)
 
 
 def parse_tracking_context(user):
@@ -47,6 +40,7 @@ def silence_exceptions(msg):
     Arguments:
         msg (str): A message to be logged when an exception is raised.
     """
+
     def decorator(func):  # pylint: disable=missing-docstring
         @wraps(func)
         def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
@@ -54,7 +48,9 @@ def silence_exceptions(msg):
                 return func(*args, **kwargs)
             except:  # pylint: disable=bare-except
                 logger.exception(msg)
+
         return wrapper
+
     return decorator
 
 
@@ -118,3 +114,33 @@ def prepare_analytics_data(user, segment_key):
         }
     data.update(user_data)
     return json.dumps(data)
+
+
+def track_segment_event(site, user, event, properties):
+    """ Fire a tracking event via Segment.
+
+    Args:
+        site (Site): Site whose Segment client should be used.
+        user (User): User to which the event should be associated.
+        event (str): Event name.
+        properties (dict): Event properties.
+
+    Returns:
+        (success, msg): Tuple indicating the success of enqueuing the event on the message queue.
+            This can be safely ignored unless needed for debugging purposes.
+    """
+    site_configuration = site.siteconfiguration
+    if not site_configuration.segment_key:
+        msg = 'Event [{event}] was NOT fired because no Segment key is set for site configuration [{site_id}]'
+        msg = msg.format(event=event, site_id=site_configuration.pk)
+        logger.debug(msg)
+        return False, msg
+
+    user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(user)
+    context = {
+        'ip': lms_ip,
+        'Google Analytics': {
+            'clientId': lms_client_id
+        }
+    }
+    return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
