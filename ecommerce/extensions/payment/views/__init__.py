@@ -1,5 +1,6 @@
-from django.core.urlresolvers import reverse
 from django.views.generic import TemplateView
+
+from ecommerce.core.url_utils import get_lms_url
 
 
 class PaymentFailedView(TemplateView):
@@ -8,7 +9,7 @@ class PaymentFailedView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PaymentFailedView, self).get_context_data(**kwargs)
         context.update({
-            'basket_url': reverse('basket:summary'),
+            'dashboard_url': get_lms_url(),
             'payment_support_email': self.request.site.siteconfiguration.payment_support_email
         })
         return context
