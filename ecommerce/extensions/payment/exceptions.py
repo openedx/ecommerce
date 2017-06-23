@@ -28,6 +28,16 @@ class InvalidCybersourceDecision(GatewayError):
     pass
 
 
+class DuplicateReferenceNumber(PaymentError):
+    """
+    CyberSource returned an error response with reason code 104, indicating that
+    a duplicate reference number (i.e., order number) was received in a 15 minute period.
+
+    See https://support.cybersource.com/cybskb/index?page=content&id=C156&pmv=print.
+    """
+    pass
+
+
 class PartialAuthorizationError(PaymentError):
     """The amount authorized by the payment processor differs from the requested amount."""
     pass
