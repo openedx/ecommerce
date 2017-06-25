@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-16 05:55+0000\n"
-"PO-Revision-Date: 2017-06-20 10:56+0000\n"
+"POT-Creation-Date: 2017-06-23 11:20-0400\n"
+"PO-Revision-Date: 2017-06-23 23:07+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
@@ -131,147 +131,139 @@ msgid "Name of cookie storing affiliate data."
 msgstr "Nombre de la cookie que almacena datos de afiliado"
 
 #: ecommerce/core/models.py:121
-msgid "Enable Otto receipt page"
-msgstr "Habilitar página de recibo en Otto"
-
-#: ecommerce/core/models.py:122
-msgid "Enable the usage of Otto receipt page."
-msgstr "Habilitar utilización de la página de recibo en Otto."
-
-#: ecommerce/core/models.py:127
 msgid "Send refund email notification"
 msgstr "Enviar notificación de reembolso por email"
 
-#: ecommerce/core/models.py:132
+#: ecommerce/core/models.py:126
 msgid "Enable SDN check"
 msgstr "Habilitación SDN"
 
-#: ecommerce/core/models.py:133
+#: ecommerce/core/models.py:127
 msgid "Enable SDN check at checkout."
 msgstr "Habilitar verificación SDN en el momento del pago."
 
-#: ecommerce/core/models.py:137
+#: ecommerce/core/models.py:131
 msgid "US Treasury SDN API URL"
 msgstr "URL de la API SDN del departamento del tesoro de Estados Unidos"
 
-#: ecommerce/core/models.py:142
+#: ecommerce/core/models.py:136
 msgid "US Treasury SDN API key"
 msgstr "Llave de la API SDN del departamento del tesoro de Estados Unidos"
 
-#: ecommerce/core/models.py:147
+#: ecommerce/core/models.py:141
 msgid "SDN lists"
 msgstr "Listas SDN"
 
-#: ecommerce/core/models.py:148
+#: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr "Lista separada por comas de las listas OFAC que se usarán para la verificación."
 
-#: ecommerce/core/models.py:153
+#: ecommerce/core/models.py:147
 msgid "Require Account Activation"
 msgstr ""
 
-#: ecommerce/core/models.py:154
+#: ecommerce/core/models.py:148
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr ""
 
-#: ecommerce/core/models.py:158
+#: ecommerce/core/models.py:152
 msgid "Optimizely snippet source URL"
 msgstr ""
 
-#: ecommerce/core/models.py:159
+#: ecommerce/core/models.py:153
 msgid "This script will be loaded on every page."
 msgstr ""
 
-#: ecommerce/core/models.py:164 ecommerce/extensions/partner/models.py:14
+#: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:14
 msgid "Enable Sailthru Reporting"
 msgstr "Habilitar reportes de Sailthru"
 
-#: ecommerce/core/models.py:165
+#: ecommerce/core/models.py:159
 msgid "Determines if purchases should be reported to Sailthru."
 msgstr ""
 
-#: ecommerce/core/models.py:170
+#: ecommerce/core/models.py:164
 msgid "Base Cookie Domain"
 msgstr ""
 
-#: ecommerce/core/models.py:171
+#: ecommerce/core/models.py:165
 msgid "Base cookie domain used to share cookies across services."
 msgstr ""
 
-#: ecommerce/core/models.py:415
+#: ecommerce/core/models.py:409
 msgid "Full Name"
 msgstr "Nombre Completo"
 
-#: ecommerce/core/models.py:560 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:554 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr "Nombre"
 
-#: ecommerce/coupons/views.py:65 ecommerce/coupons/views.py:114
+#: ecommerce/coupons/views.py:66 ecommerce/coupons/views.py:115
 msgid "Coupon does not exist."
 msgstr ""
 
-#: ecommerce/coupons/views.py:70
+#: ecommerce/coupons/views.py:71
 msgid "This coupon code is not yet valid."
 msgstr "Este código de cupón aún no es válido."
 
-#: ecommerce/coupons/views.py:72
+#: ecommerce/coupons/views.py:73
 msgid "This coupon code has expired."
 msgstr "Este código de cupón ha expirado."
 
-#: ecommerce/coupons/views.py:84
+#: ecommerce/coupons/views.py:85
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr "El producto [{product}] no está disponible para compra."
 
-#: ecommerce/coupons/views.py:89
+#: ecommerce/coupons/views.py:90
 msgid "This coupon code is no longer available."
 msgstr "Este código de cupón ya no está disponible."
 
-#: ecommerce/coupons/views.py:109
+#: ecommerce/coupons/views.py:110
 msgid "This coupon code is invalid."
 msgstr "Este código de cupón no es válido."
 
-#: ecommerce/coupons/views.py:116
+#: ecommerce/coupons/views.py:117
 msgid "The voucher is not applicable to your current basket."
 msgstr "El voucher no es aplicable a su orden actual."
 
-#: ecommerce/coupons/views.py:126
+#: ecommerce/coupons/views.py:127
 msgid "Welcome to edX"
 msgstr ""
 
-#: ecommerce/coupons/views.py:127
+#: ecommerce/coupons/views.py:128
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
 msgstr ""
 
-#: ecommerce/coupons/views.py:156
+#: ecommerce/coupons/views.py:157
 msgid "Code not provided."
 msgstr "No se suministró un código."
 
-#: ecommerce/coupons/views.py:158
+#: ecommerce/coupons/views.py:159
 msgid "SKU not provided."
 msgstr "No se suministró una SKU."
 
-#: ecommerce/coupons/views.py:169
+#: ecommerce/coupons/views.py:170
 msgid "The product does not exist."
 msgstr "El producto no existe."
 
-#: ecommerce/coupons/views.py:177
+#: ecommerce/coupons/views.py:178
 msgid "You are not eligible to use this coupon."
 msgstr "Usted no es elegible para usar este cupón."
 
-#: ecommerce/coupons/views.py:204
+#: ecommerce/coupons/views.py:193
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr "No se ha encontrado ninguna cliente empresarial que coincida para este cupón."
 
-#: ecommerce/coupons/views.py:226
+#: ecommerce/coupons/views.py:215
 msgid "Invalid data sharing consent token provided."
 msgstr "El token de consentimiento para compartir datos suministrado es inválido."
 
-#: ecommerce/coupons/views.py:245 ecommerce/extensions/basket/views.py:117
+#: ecommerce/coupons/views.py:234 ecommerce/extensions/basket/views.py:117
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
@@ -416,12 +408,12 @@ msgstr "ACTIVO"
 msgid "INACTIVE"
 msgstr "INACTIVO"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:353
+#: ecommerce/extensions/api/v2/views/baskets.py:356
 #: ecommerce/extensions/basket/views.py:135
 msgid "No SKUs provided."
 msgstr ""
 
-#: ecommerce/extensions/api/v2/views/baskets.py:363
+#: ecommerce/extensions/api/v2/views/baskets.py:366
 #: ecommerce/extensions/basket/views.py:139
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
@@ -446,11 +438,11 @@ msgstr "Tipo de atributo"
 msgid "Text Attribute"
 msgstr "Texto del atributo"
 
-#: ecommerce/extensions/basket/utils.py:82
+#: ecommerce/extensions/basket/utils.py:83
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr "Haga clic para comprar un registro a curso"
 
-#: ecommerce/extensions/basket/utils.py:85
+#: ecommerce/extensions/basket/utils.py:86
 msgid "Click here to purchase multiple seats in this course"
 msgstr "Haga clic para comprar multiples asientos para este curso"
 
@@ -610,12 +602,12 @@ msgstr "UUID de un EnterpriseCustomer en el servicio de Clientes empresariales"
 msgid "Program UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/utils.py:69
+#: ecommerce/extensions/offer/utils.py:70
 #, python-brace-format
 msgid "{benefit_value}%"
 msgstr "{benefit_value}%"
 
-#: ecommerce/extensions/offer/utils.py:72
+#: ecommerce/extensions/offer/utils.py:73
 #, python-brace-format
 msgid "${benefit_value}"
 msgstr "${benefit_value}"
@@ -745,20 +737,16 @@ msgstr "Número de veces que debe volver a intentar una acción fallida del clie
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:79
+#: ecommerce/extensions/payment/views/cybersource.py:78
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr "Se ha producido un problema al recuperar su cesta. Actualice la página para intentarlo de nuevo."
 
-#: ecommerce/extensions/payment/views/cybersource.py:95
+#: ecommerce/extensions/payment/views/cybersource.py:94
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
 msgstr "Su cesta puede haber sido modificada o ya ha sido comprada. Actualice la página para intentarlo de nuevo."
-
-#: ecommerce/extensions/payment/views/cybersource.py:313
-msgid "Your payment has been canceled."
-msgstr "Su pago ha sido cancelado."
 
 #: ecommerce/extensions/refund/models.py:68
 msgid "Order"
@@ -2104,26 +2092,21 @@ msgstr "El pago falló"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:17
 msgid ""
-"\n"
-"        A system error occurred while processing your payment. <strong>You have not been charged.</strong>\n"
-"      "
-msgstr "\nSe ha producido un error de sistema al procesar su pago. <strong>No se ha realizado ningún cobro.</strong>\n\n      "
+"An error occurred while processing your payment. <strong>You have not been "
+"charged.</strong>"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:23
 #, python-format
 msgid ""
-"\n"
-"          Please wait a few minutes and then try again. For help, contact %(start_link)s%(payment_support_email)s%(end_link)s.\n"
-"        "
-msgstr "\nEspere unos minutos y vuelva a intentarlo. Para obtener ayuda, comuníquese con %(start_link)s%(payment_support_email)s%(end_link)s.\n        "
+"Please wait a few minutes and then try again. For help, contact "
+"%(start_link)s%(payment_support_email)s%(end_link)s."
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:31
 #, python-format
-msgid ""
-"\n"
-"          To try again, visit the %(start_link)sbasket page%(end_link)s.\n"
-"        "
-msgstr "\nPara intentar nuevamente, regrese a la página del %(start_link)scarrito de compras%(end_link)s.\n        "
+msgid "To try again, visit the %(start_link)scheckout page%(end_link)s."
+msgstr ""
 
 #. Translators: SDN is an acronym for Specially Designated Nationals
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:7
