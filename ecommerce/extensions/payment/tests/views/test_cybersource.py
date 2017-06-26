@@ -165,7 +165,37 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
     path = reverse('cybersource:redirect')
     view = CybersourceInterstitialView
 
-    @ddt.data(InvalidSignatureError, InvalidBasketError, TransactionDeclined, Exception)
+    def test_payment_declined(self):
+        """
+        Verify that the user is redirected to the basket summary page when their
+        payment is declined.
+        """
+        # Basket merging clears lines on the old basket. We need to take a snapshot
+        # of lines currently on this basket before it gets merged with a new basket.
+        old_lines = list(self.basket.lines.all())
+
+        notification = self.generate_notification(
+            self.basket,
+            billing_address=self.billing_address,
+        )
+
+        with mock.patch.object(self.view, 'validate_notification', side_effect=TransactionDeclined):
+            response = self.client.post(self.path, notification)
+
+            self.assertRedirects(
+                response,
+                self.get_full_url(path=reverse('basket:summary')),
+                status_code=302,
+                fetch_redirect_response=False
+            )
+
+            new_basket = Basket.objects.get(status='Open')
+            merged_basket_count = Basket.objects.filter(status='Merged').count()
+
+            self.assertEqual(list(new_basket.lines.all()), old_lines)
+            self.assertEqual(merged_basket_count, 1)
+
+    @ddt.data(InvalidSignatureError, InvalidBasketError, Exception)
     def test_invalid_payment_error(self, error_class):
         """
         Verify that the view redirects to the payment error page when an error
