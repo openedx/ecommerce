@@ -365,7 +365,7 @@ class ConditionalOfferTests(TestCase):
     def create_basket(self, email):
         """Helper method for creating a basket with specific owner."""
         user = self.create_user(email=email)
-        basket = factories.BasketFactory(owner=user)
+        basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(self.product, 1)
         return basket
 

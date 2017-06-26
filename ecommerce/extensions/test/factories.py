@@ -10,6 +10,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
+from ecommerce.tests.factories import SiteConfigurationFactory
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -27,6 +28,11 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
     """
     if not basket:
         basket = Basket.objects.create()
+        siteconfiguration = SiteConfigurationFactory()
+        site = siteconfiguration.site
+        site.siteconfiguration = siteconfiguration
+        basket.site = site
+        basket.save()
         basket.strategy = Default()
         product = create_product()
         create_stockrecord(

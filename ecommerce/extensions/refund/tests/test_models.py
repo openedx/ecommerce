@@ -371,6 +371,8 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
 
         basket = create_basket(empty=True)
         basket.site = self.site
+        basket.owner = user
+        basket.save()
         basket.add_product(product)
 
         order = create_order(basket=basket, user=user)

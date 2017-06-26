@@ -1,0 +1,83 @@
+# Ansible managed
+
+AFFILIATE_COOKIE_KEY: dev_affiliate_id
+BROKER_URL: amqp://celery:celery@172.17.0.2:5672
+CACHES:
+    default:
+        BACKEND: django.core.cache.backends.memcached.MemcachedCache
+        KEY_PREFIX: ecommerce
+        LOCATION:
+        - edx.devstack.memcached:11211
+COMMERCE_API_URL: http://127.0.0.1:18000/api/commerce/v1/
+COMPREHENSIVE_THEME_DIRS: null
+COURSE_CATALOG_API_URL: http://edx.devstack.discovery:18381/api/v1/
+DATABASES:
+    default:
+        ATOMIC_REQUESTS: true
+        CONN_MAX_AGE: 60
+        ENGINE: django.db.backends.mysql
+        HOST: edx.devstack.mysql
+        NAME: ecommerce
+        OPTIONS:
+            connect_timeout: 10
+        PASSWORD: password
+        PORT: '3306'
+        USER: ecomm001
+DEFAULT_SITE_THEME: null
+ECOMMERCE_URL_ROOT: http://localhost:18130
+EDX_API_KEY: PUT_YOUR_API_KEY_HERE
+EDX_DRF_EXTENSIONS:
+    OAUTH2_USER_INFO_URL: http://127.0.0.1:18000/oauth2/user_info
+ENABLE_COMPREHENSIVE_THEMING: false
+ENROLLMENT_API_URL: http://127.0.0.1:18000/api/enrollment/v1/enrollment
+ENTERPRISE_SERVICE_URL: http://127.0.0.1:18000/enterprise/
+EXTRA_APPS: []
+JWT_AUTH:
+    JWT_ISSUERS:
+    -   AUDIENCE: SET-ME-PLEASE
+        ISSUER: http://127.0.0.1:18000/oauth2
+        SECRET_KEY: SET-ME-PLEASE
+LANGUAGE_CODE: en-us
+LMS_DASHBOARD_URL: http://127.0.0.1:18000/dashboard
+LMS_HEARTBEAT_URL: http://127.0.0.1:18000/heartbeat
+LMS_URL_ROOT: http://127.0.0.1:18000
+MEDIA_STORAGE_BACKEND:
+    DEFAULT_FILE_STORAGE: django.core.files.storage.FileSystemStorage
+    MEDIA_ROOT: /edx/var/ecommerce/media
+    MEDIA_URL: /media/
+OSCAR_FROM_EMAIL: oscar@example.com
+PAYMENT_PROCESSOR_CONFIG:
+    edx:
+        cybersource:
+            access_key: SET-ME-PLEASE
+            cancel_page_url: http://127.0.0.1:18000/commerce/checkout/cancel/
+            merchant_id: SET-ME-PLEASE
+            payment_page_url: https://set-me-please
+            profile_id: SET-ME-PLEASE
+            receipt_page_url: http://127.0.0.1:18000/commerce/checkout/receipt/
+            secret_key: SET-ME-PLEASE
+            soap_api_url: https://set-me-please
+            transaction_key: SET-ME-PLEASE
+        paypal:
+            cancel_url: http://127.0.0.1:18000/commerce/checkout/cancel/
+            client_id: SET-ME-PLEASE
+            client_secret: SET-ME-PLEASE
+            error_url: http://127.0.0.1:18000/commerce/checkout/error/
+            mode: SET-ME-PLEASE
+            receipt_url: http://127.0.0.1:18000/commerce/checkout/receipt/
+PLATFORM_NAME: Your Platform Name Here
+SECRET_KEY: Your secret key here
+SEGMENT_KEY: null
+SESSION_EXPIRE_AT_BROWSER_CLOSE: false
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY: ecommerce-secret
+SOCIAL_AUTH_EDX_OIDC_ISSUER: http://127.0.0.1:18000/oauth2
+SOCIAL_AUTH_EDX_OIDC_KEY: ecommerce-key
+SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL: http://127.0.0.1:18000/oauth2/logout
+SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT: http://127.0.0.1:18000/oauth2
+SOCIAL_AUTH_EDX_OIDC_SECRET: ecommerce-secret
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT: http://127.0.0.1:18000/oauth2
+SOCIAL_AUTH_REDIRECT_IS_HTTPS: false
+STATICFILES_STORAGE: django.contrib.staticfiles.storage.StaticFilesStorage
+STATIC_ROOT: /edx/var/ecommerce/staticfiles
+THEME_SCSS: sass/themes/default.scss
+TIME_ZONE: UTC

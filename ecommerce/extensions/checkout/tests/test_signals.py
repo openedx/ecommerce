@@ -38,7 +38,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
         """
         course = CourseFactory()
         seat = course.create_or_update_seat(seat_type, False, 50, self.partner, credit_provider_id, None, 2)
-        basket = BasketFactory(site=self.site)
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat, 1)
         order = factories.create_order(basket=basket, user=self.user)
         return order

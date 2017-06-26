@@ -9,6 +9,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -35,6 +36,11 @@ class CheckoutViewTests(TestCase):
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.basket = Basket.objects.create(owner=self.user)
+        siteconfiguration = SiteConfigurationFactory()
+        site = siteconfiguration.site
+        site.siteconfiguration = siteconfiguration
+        self.basket.site = site
+        self.basket.save()
         self.data = {
             'basket_id': self.basket.id,
             'payment_processor': DummyProcessorWithUrl.NAME

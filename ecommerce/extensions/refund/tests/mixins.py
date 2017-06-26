@@ -39,7 +39,7 @@ class RefundTestMixin(CourseCatalogTestMixin):
 
     def create_order(self, user=None, credit=False, multiple_lines=False, free=False, status=ORDER.COMPLETE):
         user = user or self.user
-        basket = BasketFactory(owner=user)
+        basket = BasketFactory(owner=user, site=self.site)
 
         if credit:
             basket.add_product(self.credit_product)
