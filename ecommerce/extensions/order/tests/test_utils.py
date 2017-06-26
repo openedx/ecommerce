@@ -5,14 +5,13 @@ import ddt
 import mock
 from django.test.client import RequestFactory
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import create_basket as oscar_create_basket
-from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
@@ -98,7 +97,7 @@ class OrderCreatorTests(TestCase):
 
     def create_basket(self, site):
         """ Returns a new Basket with the specified Site. """
-        basket = oscar_create_basket()
+        basket = create_basket()
         basket.site = site
         basket.save()
         return basket
@@ -185,7 +184,7 @@ class UserAlreadyPlacedOrderTests(TestCase):
     def setUp(self):
         super(UserAlreadyPlacedOrderTests, self).setUp()
         self.user = self.create_user()
-        self.order = create_order(user=self.user)
+        self.order = create_order(site=self.site, user=self.user)
         self.product = self.get_order_product()
 
     def get_order_product(self, order=None):

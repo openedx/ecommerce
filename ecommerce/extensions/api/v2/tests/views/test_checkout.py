@@ -34,7 +34,7 @@ class CheckoutViewTests(TestCase):
         super(CheckoutViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.basket = Basket.objects.create(owner=self.user)
+        self.basket = Basket.objects.create(site=self.site, owner=self.user)
         self.data = {
             'basket_id': self.basket.id,
             'payment_processor': DummyProcessorWithUrl.NAME

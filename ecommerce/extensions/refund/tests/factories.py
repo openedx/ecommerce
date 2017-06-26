@@ -3,10 +3,11 @@ from decimal import Decimal
 import factory
 from django.conf import settings
 from oscar.core.loading import get_model
-from oscar.test import factories
 from oscar.test.newfactories import UserFactory
 
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
+from ecommerce.extensions.test.factories import create_order
+from ecommerce.tests.factories import SiteConfigurationFactory
 
 Category = get_model("catalogue", "Category")
 Partner = get_model('partner', 'Partner')
@@ -22,7 +23,8 @@ class RefundFactory(factory.DjangoModelFactory):
 
     @factory.lazy_attribute
     def order(self):
-        return factories.create_order(user=self.user)
+        site = SiteConfigurationFactory().site
+        return create_order(site=site, user=self.user)
 
     @factory.post_generation
     def create_lines(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
@@ -46,7 +48,7 @@ class RefundLineFactory(factory.DjangoModelFactory):
 
     @factory.lazy_attribute
     def order_line(self):
-        order = factories.create_order()
+        order = create_order()
         return order.lines.first()
 
     class Meta(object):

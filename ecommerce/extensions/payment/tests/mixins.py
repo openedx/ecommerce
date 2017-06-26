@@ -25,6 +25,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.test.factories import create_basket
 
 CURRENCY = 'USD'
 Basket = get_model('basket', 'Basket')
@@ -398,9 +399,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         self.user = factories.UserFactory()
         self.billing_address = self.make_billing_address()
 
-        self.basket = factories.create_basket()
-        self.basket.owner = self.user
-        self.basket.site = self.site
+        self.basket = create_basket(owner=self.user, site=self.site)
         self.basket.freeze()
 
         self.processor = Cybersource(self.site)

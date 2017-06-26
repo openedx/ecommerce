@@ -59,7 +59,11 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         """
         order = self.create_order(free=True)
         create_refunds([order], self.course.id)
-        self.assertFalse(mock_track.called)
+
+        # Ensure that only 'Product Added' event is emitted (in order creation) and not 'Order Completion' event.
+        self.assertEqual(mock_track.call_count, 1)
+        event_name = mock_track.call_args[0][1]
+        self.assertEqual(event_name, 'Product Added')
 
     def test_successful_refund_tracking_without_context(self, mock_track):
         """Verify that a successfully placed refund is tracked, even if no tracking context is available."""

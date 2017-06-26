@@ -7,7 +7,6 @@ from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, override_settings
 from oscar.core.loading import get_model
-from oscar.test import factories
 
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
@@ -15,7 +14,7 @@ from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.test.factories import create_order
-from ecommerce.tests.factories import SiteFactory
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -64,7 +63,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         The view should return a list of the user's orders, sorted reverse chronologically, filtered by current site.
         """
         order = create_order(site=self.site, user=self.user)
-        create_order(site=SiteFactory(), user=self.user)
+        site = SiteConfigurationFactory().site
+        create_order(site=site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
@@ -86,11 +86,11 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
         other_user = self.create_user()
-        factories.create_order(user=other_user)
+        create_order(site=self.site, user=other_user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assert_empty_result_response(response)
 
-        order = factories.create_order(user=self.user)
+        order = create_order(site=self.site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         content = json.loads(response.content)
         self.assertEqual(content['count'], 1)
@@ -104,7 +104,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def test_staff_superuser(self, is_staff, is_superuser):
         """ The view should return all orders for when authenticating as a staff member or superuser. """
         admin_user = self.create_user(is_staff=is_staff, is_superuser=is_superuser)
-        order = factories.create_order(user=self.user)
+        order = create_order(site=self.site, user=self.user)
 
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
         content = json.loads(response.content)
@@ -114,7 +114,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
     def test_user_information(self):
         """ Make sure that the correct user information is returned. """
         admin_user = self.create_user(is_staff=True, is_superuser=True)
-        order = factories.create_order(user=admin_user)
+        order = create_order(site=self.site, user=admin_user)
 
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
         content = json.loads(response.content)
@@ -127,9 +127,9 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """ Verify the staff user can filter data by username."""
 
         # create two orders for different users
-        order = factories.create_order(user=self.user)
+        order = create_order(site=self.site, user=self.user)
         other_user = self.create_user()
-        other_order = factories.create_order(user=other_user)
+        other_order = create_order(site=self.site, user=other_user)
 
         requester = self.create_user(is_staff=True)
         self.client.login(email=requester.email, password=self.password)
@@ -167,13 +167,12 @@ class OrderFulfillViewTests(TestCase):
         # Use the ecommerce worker service user in order to cover
         # request throttling code in extensions/api/throttles.py
         self.user = self.create_user(is_staff=True, username='test-service-user')
-
         self.change_order_permission = Permission.objects.get(codename='change_order')
         self.user.user_permissions.add(self.change_order_permission)
 
         self.client.login(username=self.user.username, password=self.password)
 
-        self.order = factories.create_order(user=self.user)
+        self.order = create_order(site=self.site, user=self.user)
         self.url = reverse('api:v2:order-fulfill', kwargs={'number': self.order.number})
 
     def _put_to_view(self):
@@ -224,7 +223,7 @@ class OrderFulfillViewTests(TestCase):
         able to modify orders on behalf of other users.
         """
         customer = self.create_user(username='customer')
-        customer_order = factories.create_order(user=customer)
+        customer_order = create_order(site=self.site, user=customer)
         self.url = reverse('api:v2:order-fulfill', kwargs={'number': customer_order.number})
 
         self._assert_fulfillment_success()

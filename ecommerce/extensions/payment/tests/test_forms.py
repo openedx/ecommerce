@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 import ddt
 import pycountry
-from oscar.test import factories
 
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 
@@ -13,9 +13,7 @@ class PaymentFormTests(TestCase):
     def setUp(self):
         super(PaymentFormTests, self).setUp()
         self.user = self.create_user()
-        self.basket = factories.create_basket()
-        self.basket.owner = self.user
-        self.basket.save()
+        self.basket = create_basket(owner=self.user)
 
     def _generate_data(self, **kwargs):
         data = {

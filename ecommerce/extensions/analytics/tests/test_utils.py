@@ -1,5 +1,4 @@
 import json
-
 import mock
 from analytics import Client
 from django.contrib.auth.models import AnonymousUser
@@ -9,11 +8,13 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
     parse_tracking_context, prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
 )
+from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 
-class UtilsTest(CourseCatalogTestMixin, TestCase):
+class UtilsTest(CourseCatalogTestMixin, BasketMixin, TestCase):
     """ Tests for the analytics utils. """
 
     def test_prepare_analytics_data(self):
@@ -88,7 +89,7 @@ class UtilsTest(CourseCatalogTestMixin, TestCase):
 
     def test_translate_basket_line_for_segment(self):
         """ The method should return a dict formatted for Segment. """
-        basket = factories.create_basket(empty=True)
+        basket = create_basket(empty=True)
         basket.site = self.site
         basket.owner = factories.UserFactory()
         basket.save()
@@ -116,5 +117,11 @@ class UtilsTest(CourseCatalogTestMixin, TestCase):
         basket.add_product(seat)
         line = basket.lines.first()
 
+        expected['name'] = seat.title
+        self.assertEqual(translate_basket_line_for_segment(line), expected)
+
+        seat.course = None
+        seat.save()
+        course.delete()
         expected['name'] = seat.title
         self.assertEqual(translate_basket_line_for_segment(line), expected)

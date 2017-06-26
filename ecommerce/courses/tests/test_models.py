@@ -4,7 +4,6 @@ from django.conf import settings
 from django.utils.timezone import now, timedelta
 from freezegun import freeze_time
 from oscar.core.loading import get_model
-from oscar.test.factories import create_order
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
@@ -13,6 +12,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
