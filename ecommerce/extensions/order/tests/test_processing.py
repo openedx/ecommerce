@@ -4,6 +4,7 @@ from oscar.test import factories
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.order.processing import EventHandler
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.testcases import TestCase
 
 ShippingEventType = get_model('order', 'ShippingEventType')
@@ -14,7 +15,7 @@ class EventHandlerTests(TestCase):
     def setUp(self):
         super(EventHandlerTests, self).setUp()
         self.shipping_event_type, __ = ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
-        self.order = factories.create_order()
+        self.order = create_order()
 
     def test_create_shipping_event_all_lines_complete(self):
         """
@@ -52,13 +53,13 @@ class EventHandlerTests(TestCase):
     def test_create_shipping_event_mixed_line_status(self):
         """ The created ShippingEvent should only contain the fulfilled line items. """
         # Create a basket with multiple items
-        basket = factories.create_basket()
+        basket = create_basket()
         product = factories.create_product()
         factories.create_stockrecord(product, num_in_stock=2)
         basket.add_product(product)
 
         # Create an order from the basket and verify a line item exists for each item in the basket
-        order = factories.create_order(basket=basket)
+        order = create_order(basket=basket)
         self.assertEqual(order.lines.count(), 2)
         statuses = (LINE.COMPLETE, LINE.FULFILLMENT_CONFIGURATION_ERROR,)
 

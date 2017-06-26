@@ -1,6 +1,5 @@
-from oscar.test import factories
-
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
+from ecommerce.extensions.test.factories import create_order
 
 
 class FulfillmentTestMixin(object):
@@ -12,7 +11,7 @@ class FulfillmentTestMixin(object):
     def generate_open_order(self):
         """ Returns an open order, ready to be fulfilled. """
         user = self.create_user()
-        return factories.create_order(user=user, status=ORDER.OPEN)
+        return create_order(user=user, status=ORDER.OPEN)
 
     def assert_order_fulfilled(self, order):
         """

@@ -2,9 +2,9 @@ from django.conf import settings
 from django.core import mail
 from django.test import RequestFactory
 from oscar.core.loading import get_model
-from oscar.test import factories
 
 from ecommerce.extensions.customer.utils import Dispatcher
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -22,7 +22,7 @@ class CustomerUtilsTests(TestCase):
         self.request.user = self.user
         self.site_configuration = SiteConfigurationFactory(partner__name='Tester', from_email='from@example.com')
         self.request.site = self.site_configuration.site
-        self.order = factories.create_order()
+        self.order = create_order()
         self.order.user = self.user
 
     def test_dispatch_direct_messages(self):

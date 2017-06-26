@@ -8,7 +8,7 @@ import pytz
 import requests
 from django.db import transaction
 from oscar.core.loading import get_model
-from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory, create_order
+from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
@@ -19,7 +19,7 @@ from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWIT
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.partner.models import StockRecord
-from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
 

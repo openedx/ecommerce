@@ -3,7 +3,6 @@ import json
 import httpretty
 import mock
 from django.core import mail
-from oscar.test import factories
 from oscar.test.newfactories import BasketFactory
 from testfixtures import LogCapture
 
@@ -13,6 +12,7 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
@@ -38,9 +38,9 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
         """
         course = CourseFactory()
         seat = course.create_or_update_seat(seat_type, False, 50, self.partner, credit_provider_id, None, 2)
-        basket = BasketFactory(site=self.site)
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat, 1)
-        order = factories.create_order(basket=basket, user=self.user)
+        order = create_order(basket=basket, user=self.user)
         return order
 
     @httpretty.activate
@@ -138,7 +138,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
 
             # We should be able to fire events even if the product is not releated to a course.
             mock_track.reset_mock()
-            order = factories.create_order()
+            order = create_order()
             track_completed_order(None, order)
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)

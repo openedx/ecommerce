@@ -16,7 +16,6 @@ from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import newfactories as factories
-from oscar.test.factories import create_order
 from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -38,7 +37,7 @@ from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
-from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.tests.factories import ProductFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -307,7 +306,7 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixi
         """
         Test prepare_basket removes already purchased product and checkout for the rest of products
         """
-        order = create_order(user=self.user)
+        order = create_order(site=self.site, user=self.user)
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
         products.append(OrderLine.objects.get(order=order).product)
         qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)

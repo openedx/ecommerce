@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-16 17:22-0400\n"
+"POT-Creation-Date: 2017-07-18 11:14-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -195,11 +195,16 @@ msgstr ""
 msgid "Discovery API URL"
 msgstr ""
 
-#: ecommerce/core/models.py:425
+#. Translators: Do not translate "Apple Pay"
+#: ecommerce/core/models.py:181
+msgid "Enable Apple Pay"
+msgstr ""
+
+#: ecommerce/core/models.py:430
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:570 ecommerce/extensions/basket/models.py:75
+#: ecommerce/core/models.py:575 ecommerce/extensions/basket/models.py:86
 msgid "Name"
 msgstr ""
 
@@ -426,22 +431,22 @@ msgstr ""
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
 
-#: ecommerce/extensions/basket/models.py:64
+#: ecommerce/extensions/basket/models.py:75
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr ""
 
-#: ecommerce/extensions/basket/models.py:87
+#: ecommerce/extensions/basket/models.py:98
 #: ecommerce/extensions/payment/models.py:18
 #: ecommerce/templates/oscar/basket/basket.html:8
 msgid "Basket"
 msgstr ""
 
-#: ecommerce/extensions/basket/models.py:89
+#: ecommerce/extensions/basket/models.py:100
 msgid "Attribute Type"
 msgstr ""
 
-#: ecommerce/extensions/basket/models.py:91
+#: ecommerce/extensions/basket/models.py:102
 msgid "Text Attribute"
 msgstr ""
 

@@ -25,6 +25,7 @@ from ecommerce.extensions.fulfillment.modules import (CouponFulfillmentModule, E
                                                       EnrollmentFulfillmentModule)
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -60,9 +61,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin,
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user)
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=1, basket=basket, user=self.user)
+        self.order = create_order(number=1, basket=basket, user=self.user)
 
     # pylint: disable=attribute-defined-outside-init
     def create_seat_and_order(self, certificate_type='test-certificate-type', provider=None):
@@ -80,7 +81,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin,
 
         basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
-        self.order = factories.create_order(number=2, basket=basket, user=self.user)
+        self.order = create_order(number=2, basket=basket, user=self.user)
 
     def prepare_basket_with_voucher(self, program_uuid=None):
         catalog = Catalog.objects.create(partner=self.partner)
@@ -443,9 +444,9 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         super(CouponFulfillmentModuleTest, self).setUp()
         coupon = self.create_coupon()
         user = UserFactory()
-        basket = BasketFactory()
+        basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(coupon, 1)
-        self.order = factories.create_order(number=1, basket=basket, user=user)
+        self.order = create_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
         """Test that a line containing Coupon returns True."""
@@ -482,9 +483,9 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = UserFactory()
-        basket = BasketFactory()
+        basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, self.QUANTITY)
-        self.order = factories.create_order(number=1, basket=basket, user=user)
+        self.order = create_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
         """Test that support_line returns True for Enrollment code lines."""
@@ -492,7 +493,7 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
         supports_line = EnrollmentCodeFulfillmentModule().supports_line(line)
         self.assertTrue(supports_line)
 
-        order = factories.create_order()
+        order = create_order()
         unsupported_line = order.lines.first()
         supports_line = EnrollmentCodeFulfillmentModule().supports_line(unsupported_line)
         self.assertFalse(supports_line)

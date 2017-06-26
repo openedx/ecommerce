@@ -16,6 +16,7 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -38,9 +39,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     def setUp(self):
         super(PaypalPaymentExecutionViewTests, self).setUp()
 
-        self.basket = factories.create_basket()
-        self.basket.owner = factories.UserFactory()
-        self.basket.site = self.site
+        self.basket = create_basket(owner=factories.UserFactory(), site=self.site)
         self.basket.freeze()
 
         self.processor = Paypal(self.site)
@@ -238,7 +237,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self.mock_payment_creation_response(self.basket)
             self.processor.get_transaction_parameters(self.basket, request=self.request)
 
-            dummy_basket = factories.create_basket()
+            dummy_basket = create_basket()
             self.mock_payment_creation_response(dummy_basket)
             self.processor.get_transaction_parameters(dummy_basket, request=self.request)
 

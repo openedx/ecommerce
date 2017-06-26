@@ -3,6 +3,7 @@ from oscar.test import factories
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.testcases import TestCase
 
 
@@ -10,7 +11,7 @@ from ecommerce.tests.testcases import TestCase
 class OrderTests(TestCase):
     def setUp(self):
         super(OrderTests, self).setUp()
-        self.order = factories.create_order()
+        self.order = create_order()
 
     @ddt.data(ORDER.OPEN, ORDER.FULFILLMENT_ERROR)
     def test_is_fulfillable(self, status):
@@ -33,8 +34,8 @@ class OrderTests(TestCase):
         self.assertFalse(self.order.contains_coupon)
 
         product = factories.create_product(product_class=COUPON_PRODUCT_CLASS_NAME)
-        basket = factories.create_basket(empty=True)
+        basket = create_basket(empty=True)
         factories.create_stockrecord(product, num_in_stock=1)
         basket.add_product(product)
-        order = factories.create_order(basket=basket)
+        order = create_order(basket=basket)
         self.assertTrue(order.contains_coupon)

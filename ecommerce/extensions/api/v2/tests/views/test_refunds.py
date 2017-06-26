@@ -5,7 +5,6 @@ import httpretty
 import mock
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
-from oscar.test import factories
 from rest_framework import status
 
 from ecommerce.extensions.api.serializers import RefundSerializer
@@ -14,6 +13,7 @@ from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -167,7 +167,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
     def test_non_course_order(self):
         """ Refunds should NOT be created for orders with no line items related to courses. """
         Refund.objects.all().delete()
-        factories.create_order(user=self.user)
+        create_order(site=self.site, user=self.user)
         self.assertEqual(Refund.objects.count(), 0)
 
         data = self._get_data(self.user.username, self.course_id)

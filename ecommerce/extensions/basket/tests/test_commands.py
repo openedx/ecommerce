@@ -7,6 +7,7 @@ from django.core.management import CommandError, call_command
 from oscar.core.loading import get_model
 from oscar.test import factories
 
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
@@ -20,11 +21,11 @@ class DeleteOrderedBasketsCommandTests(TestCase):
         super(DeleteOrderedBasketsCommandTests, self).setUp()
 
         # Create baskets with and without orders
-        self.orders = [factories.create_order() for __ in range(0, 2)]
+        self.orders = [create_order() for __ in range(0, 2)]
         self.unordered_baskets = [factories.BasketFactory() for __ in range(0, 3)]
 
         # Create invoiced baskets.
-        self.invoiced_orders = [factories.create_order() for __ in range(0, 2)]
+        self.invoiced_orders = [create_order() for __ in range(0, 2)]
         self.invoiced_baskets = [order.basket for order in self.invoiced_orders]
         for order in self.invoiced_orders:
             Invoice.objects.create(basket=order.basket, order=order)

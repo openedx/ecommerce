@@ -16,6 +16,7 @@ from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.testcases import LiveServerTestCase, TestCase
 
 Order = get_model('order', 'Order')
@@ -63,7 +64,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
         self.password = 'test'
         self.user = factories.UserFactory(password=self.password, is_superuser=True, is_staff=True)
 
-        self.order = factories.create_order(user=self.user)
+        self.order = create_order(user=self.user, site=self.site)
         self.order.status = ORDER.FULFILLMENT_ERROR
         self.order.save()
         self.order.lines.all().update(status=LINE.FULFILLMENT_CONFIGURATION_ERROR)

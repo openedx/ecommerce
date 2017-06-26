@@ -6,8 +6,7 @@ from django.core import mail
 from django.test import RequestFactory
 from mock import Mock, patch
 from oscar.core.loading import get_class, get_model
-from oscar.test import factories
-from oscar.test.newfactories import BasketFactory, ProductFactory, UserFactory
+from oscar.test.newfactories import ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 
@@ -19,6 +18,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
@@ -49,7 +49,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         objects.
         """
         user = self.user
-        basket = factories.create_basket()
+        basket = create_basket()
         basket.owner = user
         basket.site = self.site
         basket.save()
@@ -160,8 +160,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         order = self.create_order(free=True, status=ORDER.OPEN)
         EdxOrderPlacementMixin().handle_successful_order(order)
 
-        # Verify that no event was emitted.
-        self.assertFalse(mock_track.called)
+        # Ensure that only 'Product Added' event is emitted (in order creation) and not 'Order Completion' event.
+        self.assertEqual(mock_track.call_count, 1)
+        event_name = mock_track.call_args[0][1]
+        self.assertEqual(event_name, 'Product Added')
 
     def test_handle_successful_order_no_context(self, mock_track):
         """
@@ -229,7 +231,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
     def test_place_free_order(self, __):
         """ Verify an order is placed and the basket is submitted. """
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = create_basket(empty=True)
         basket.add_product(ProductFactory(stockrecords__price_excl_tax=0))
         order = EdxOrderPlacementMixin().place_free_order(basket)
 
@@ -238,7 +240,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
     def test_non_free_basket_order(self, __):
         """ Verify an error is raised for non-free basket. """
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = create_basket(empty=True)
         basket.add_product(ProductFactory(stockrecords__price_excl_tax=10))
 
         with self.assertRaises(BasketNotFreeError):
@@ -255,7 +257,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         site_from_email = 'from@example.com'
         site_configuration = SiteConfigurationFactory(partner__name='Tester', from_email=site_from_email)
         request.site = site_configuration.site
-        order = factories.create_order()
+        order = create_order()
         order.user = user
         mixin = EdxOrderPlacementMixin()
         mixin.request = request
@@ -286,10 +288,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         """
         Verify the "Payment Info Entered" Segment event is fired after payment info is validated
         """
-        basket = factories.create_basket()
-        basket.owner = self.user
-        basket.site = self.site
-        basket.save()
+        basket = create_basket(owner=self.user, site=self.site)
 
         mixin = EdxOrderPlacementMixin()
         mixin.payment_processor = DummyProcessor(self.site)
@@ -304,4 +303,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         }
 
         mixin.handle_payment({}, basket)
-        mock_track.assert_called_once_with(user_tracking_id, 'Payment Info Entered', properties, context=context)
+        # ensure that the only two Segment events fired are 'Product Added' and 'Payment Info Entered'
+        self.assertEqual(mock_track.call_count, 2)
+        mock_track.assert_called_with(user_tracking_id, 'Payment Info Entered', properties, context=context)

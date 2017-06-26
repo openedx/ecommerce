@@ -24,6 +24,7 @@ from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 
@@ -104,11 +105,8 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         course = CourseFactory(id='a/b/c/d', name='Course with "quotes"')
         product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
 
-        basket = factories.create_basket(empty=True)
+        basket = create_basket(owner=factories.UserFactory(), site=self.site, empty=True)
         basket.add_product(product)
-        basket.owner = factories.UserFactory()
-        basket.site = self.site
-        basket.save()
 
         response = self.processor.get_transaction_parameters(basket)
         self.assertEqual(response['item_0_name'], 'Seat in Course with quotes with test-certificate-type certificate')
@@ -284,10 +282,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     @responses.activate
     def test_request_apple_pay_authorization(self):
         """ The method should authorize and settle an Apple Pay payment with CyberSource. """
-        basket = factories.create_basket()
-        basket.owner = self.create_user()
-        basket.site = self.site
-        basket.save()
+        basket = create_basket(owner=self.create_user(), site=self.site)
 
         billing_address = factories.BillingAddressFactory()
         payment_token = {
@@ -324,10 +319,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.mock_cybersource_wsdl()
         self.mock_authorization_response(accepted=False)
 
-        basket = factories.create_basket()
-        basket.owner = self.create_user()
-        basket.site = self.site
-        basket.save()
+        basket = create_basket(site=self.site, owner=self.create_user())
 
         billing_address = factories.BillingAddressFactory()
         payment_token = {
@@ -354,10 +346,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
     def test_request_apple_pay_authorization_error(self):
         """ The method should raise GatewayError if an error occurs while authorizing payment. """
-        basket = factories.create_basket()
-        basket.owner = self.create_user()
-        basket.site = self.site
-        basket.save()
+        basket = create_basket(site=self.site, owner=self.create_user())
 
         with mock.patch('zeep.Client.__init__', side_effect=Exception):
             with self.assertRaises(GatewayError):

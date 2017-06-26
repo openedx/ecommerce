@@ -32,6 +32,7 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     lms_url_root = factory.LazyAttribute(lambda obj: "http://lms.testserver.fake")
     site = factory.SubFactory(SiteFactory)
     partner = factory.SubFactory(PartnerFactory)
+    segment_key = 'fake_key'
     send_refund_notifications = False
     enable_sdn_check = False
     enable_embargo_check = False

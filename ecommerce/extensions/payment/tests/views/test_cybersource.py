@@ -20,6 +20,7 @@ from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidS
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -66,10 +67,8 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
 
     def _create_valid_basket(self):
         """ Creates a Basket ready for checkout. """
-        basket = factories.create_basket()
-        basket.owner = self.user
+        basket = create_basket(owner=self.user, site=self.site)
         basket.strategy = Selector().strategy()
-        basket.site = self.site
         basket.thaw()
         return basket
 
@@ -355,11 +354,8 @@ class CybersourceApplePayAuthorizationViewTests(LoginMixin, CybersourceMixin, Te
     def test_post(self):
         """ The view should authorize and settle payment at CyberSource, and create an order. """
         data = self.generate_post_data()
-        basket = factories.create_basket()
-        basket.owner = self.user
+        basket = create_basket(owner=self.user, site=self.site)
         basket.strategy = Selector().strategy()
-        basket.site = self.site
-        basket.save()
 
         self.mock_cybersource_wsdl()
         self.mock_authorization_response(accepted=True)

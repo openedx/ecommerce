@@ -21,7 +21,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin):
         super(OrderDetailViewTestMixin, self).setUp()
 
         user = self.create_user()
-        self.order = factories.create_order(user=user)
+        self.order = factories.create_order(site=self.site, user=user)
 
         # Add a product attribute to one of the order items
         ProductAttributeValueFactory(product=self.order.lines.first().product)

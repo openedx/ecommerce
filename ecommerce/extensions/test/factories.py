@@ -10,6 +10,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
+from ecommerce.tests.factories import SiteConfigurationFactory
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -20,18 +21,27 @@ Voucher = get_model('voucher', 'Voucher')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
+def create_basket(owner=None, site=None, empty=False):  # pylint:disable=function-redefined
+    if site is None:
+        site = SiteConfigurationFactory().site
+    if owner is None:
+        owner = UserFactory()
+    basket = Basket.objects.create(site=site, owner=owner)
+    basket.strategy = Default()
+    if not empty:
+        product = create_product()
+        create_stockrecord(product, num_in_stock=2, price_excl_tax=D('10.00'))
+        basket.add_product(product)
+    return basket
+
+
 def create_order(number=None, basket=None, user=None, shipping_address=None,  # pylint:disable=function-redefined
-                 shipping_method=None, billing_address=None, total=None, **kwargs):
+                 shipping_method=None, billing_address=None, total=None, site=None, **kwargs):
     """
     Helper function for creating an order for testing
     """
     if not basket:
-        basket = Basket.objects.create()
-        basket.strategy = Default()
-        product = create_product()
-        create_stockrecord(
-            product, num_in_stock=10, price_excl_tax=D('10.00'))
-        basket.add_product(product)
+        basket = create_basket(owner=user, site=site)
     if not basket.id:
         basket.save()
     if shipping_method is None:

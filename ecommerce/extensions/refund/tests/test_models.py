@@ -8,7 +8,6 @@ import mock
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import create_basket
 from oscar.test.newfactories import UserFactory
 from testfixtures import LogCapture
 
@@ -22,7 +21,7 @@ from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.extensions.test.factories import create_order
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.testcases import TestCase
 
 PaymentEventType = get_model('order', 'PaymentEventType')
@@ -369,8 +368,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         price = Decimal(100.00)
         product = course.create_or_update_seat('verified', True, price, self.partner)
 
-        basket = create_basket(empty=True)
-        basket.site = self.site
+        basket = create_basket(site=self.site, owner=user, empty=True)
         basket.add_product(product)
 
         order = create_order(basket=basket, user=user)
