@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 
 import six
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -10,6 +11,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView, View
@@ -293,6 +295,33 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
             # for an existing order. If this happens, we can redirect the browser
             # to the receipt page for the existing order.
             return self.redirect_to_receipt_page(notification)
+        except TransactionDeclined:
+            # Declined transactions are the most common cause of errors during payment
+            # processing and tend to be easy to correct (e.g., an incorrect CVV may have
+            # been provided). The recovery path is not as clear for other exceptions,
+            # so we let those drop through to the payment error page.
+            order_number = request.POST.get('req_reference_number')
+            old_basket_id = OrderNumberGenerator().basket_id(order_number)
+            old_basket = Basket.objects.get(id=old_basket_id)
+
+            new_basket = Basket.objects.create(owner=old_basket.owner, site=request.site)
+
+            # We intentionally avoid thawing the old basket here to prevent order
+            # numbers from being reused. For more, refer to commit a1efc68.
+            new_basket.merge(old_basket, add_quantities=False)
+
+            message = _(
+                'An error occurred while processing your payment. You have not been charged. '
+                'Please double-check the information you provided and try again. '
+                'For help, {link_start}contact support{link_end}.'
+            ).format(
+                link_start='<a href="{}">'.format(request.site.siteconfiguration.payment_support_url),
+                link_end='</a>',
+            )
+
+            messages.error(request, mark_safe(message))
+
+            return redirect(reverse('basket:summary'))
         except:  # pylint: disable=bare-except
             return redirect(reverse('payment_error'))
 
