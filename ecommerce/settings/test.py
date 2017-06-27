@@ -39,15 +39,19 @@ if os.getenv('DISABLE_MIGRATIONS'):
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.environ.get('DB_NAME', ':memory:'),
-        'USER': os.environ.get('DB_USER', ''),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', ''),
-        'PORT': os.environ.get('DB_PORT', ''),
-        'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 0)),
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.mysql'),
+        'NAME': os.environ.get('DB_NAME', 'ecommerce'),
+        'USER': os.environ.get('DB_USER', 'ecomm001'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+        'CONN_MAX_AGE': int(os.environ.get('CONN_MAX_AGE', 60)),
         'ATOMIC_REQUESTS': True,
-    },
+        'TEST': {
+            'CHARSET': 'utf8',
+            'COLLATION': 'utf8_general_ci'
+        }
+    }
 }
 
 
