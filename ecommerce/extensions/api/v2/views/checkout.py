@@ -25,6 +25,11 @@ class CheckoutView(APIView):
         basket_id = request.data['basket_id']
         payment_processor_name = request.data['payment_processor']
 
+        logger.info(
+            'Checkout view called for basket [%s].',
+            basket_id
+        )
+
         # Get the basket, and make sure it belongs to the current user.
         try:
             basket = request.user.baskets.get(id=basket_id)
