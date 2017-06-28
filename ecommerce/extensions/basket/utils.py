@@ -4,6 +4,7 @@ import logging
 
 import pytz
 from django.conf import settings
+from django.contrib import messages
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
@@ -11,6 +12,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
+from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.utils', 'Applicator')
@@ -44,6 +46,18 @@ def prepare_basket(request, products, voucher=None):
     basket.save()
     basket_addition = get_class('basket.signals', 'basket_addition')
     already_purchased_products = []
+
+    if request.site.siteconfiguration.enable_embargo_check:
+        if not embargo_check(request.user, request.site, products):
+            messages.error(
+                request,
+                _('Due to export controls, we cannot allow you to access this course at this time.')
+            )
+            logger.warning(
+                'User [%s] blocked by embargo check, not adding products to basket',
+                request.user.username
+            )
+            return basket
 
     for product in products:
         if product.is_enrollment_code_product or \

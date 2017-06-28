@@ -8,6 +8,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.extensions.analytics.utils import parse_tracking_context
 from ecommerce.extensions.payment.models import SDNCheckFailure
 
 logger = logging.getLogger(__name__)
@@ -64,6 +66,41 @@ def clean_field_value(value):
         A cleaned string.
     """
     return re.sub(r'[\^:"\']', '', value)
+
+
+def embargo_check(user, site, products):
+    """ Checks if the user has access to purchase products by calling the LMS embargo API.
+
+    Args:
+        request (object): The current request
+        products (list): A list of products to check access against
+
+    Returns:
+        Bool
+    """
+    courses = []
+    _, _, ip = parse_tracking_context(user)
+
+    for product in products:
+        # We only are checking Seats
+        if product.get_product_class().name == SEAT_PRODUCT_CLASS_NAME:
+            courses.append(product.course.id)
+
+    if courses:
+        params = {
+            'user': user,
+            'ip_address': ip,
+            'course_ids': courses
+        }
+
+        try:
+            response = site.siteconfiguration.embargo_api_client.course_access.get(**params)
+            return response.get('access', True)
+        except:  # pylint: disable=bare-except
+            # We are going to allow purchase if the API is un-reachable.
+            pass
+
+    return True
 
 
 class SDNClient(object):
