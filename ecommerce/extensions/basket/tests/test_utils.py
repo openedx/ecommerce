@@ -2,8 +2,10 @@ import datetime
 import json
 
 import ddt
+import httpretty
 import mock
 import pytz
+import requests
 from django.db import transaction
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory, create_order
@@ -26,6 +28,10 @@ Basket = get_model('basket', 'Basket')
 Product = get_model('catalogue', 'Product')
 
 
+def timeoutException():
+    raise requests.Timeout('Connection timed out')
+
+
 @ddt.ddt
 class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
     """ Tests for basket utility functions. """
@@ -35,6 +41,15 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
         self.request.user = self.create_user()
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
         toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
+
+    def mock_embargo_api(self, body=None, status=200):
+        httpretty.register_uri(
+            httpretty.GET,
+            self.site_configuration.build_lms_url('/api/embargo/v1/course_access/'),
+            status=status,
+            body=body,
+            content_type='application/json'
+        )
 
     def test_prepare_basket_with_voucher(self):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """
@@ -117,6 +132,41 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             product = ProductFactory()
             basket = prepare_basket(self.request, [product])
             mock_attr_method.assert_called_with(basket, self.request)
+
+    @httpretty.activate
+    def test_prepare_basket_embargo_check_fail(self):
+        """ Verify an empty basket is returned after embargo check fails. """
+        self.site_configuration.enable_embargo_check = True
+        self.mock_access_token_response()
+        self.mock_embargo_api(body=json.dumps({'access': False}))
+        course = CourseFactory()
+        product = course.create_or_update_seat('verified', False, 10, self.partner)
+        basket = prepare_basket(self.request, [product])
+        self.assertEqual(basket.lines.count(), 0)
+
+    @httpretty.activate
+    def test_prepare_basket_embargo_with_enrollment_code(self):
+        """ Verify a basket is returned after adding enrollment code. """
+        self.site_configuration.enable_embargo_check = True
+        self.mock_access_token_response()
+        self.mock_embargo_api(body=json.dumps({'access': True}))
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        course = CourseFactory()
+        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        product = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        basket = prepare_basket(self.request, [product])
+        self.assertEqual(basket.lines.count(), 1)
+
+    @httpretty.activate
+    def test_prepare_basket_embargo_check_exception(self):
+        """ Verify embargo check passes when API call throws an exception. """
+        self.site_configuration.enable_embargo_check = True
+        self.mock_access_token_response()
+        self.mock_embargo_api(body=timeoutException)
+        course = CourseFactory()
+        product = course.create_or_update_seat('verified', False, 10, self.partner)
+        basket = prepare_basket(self.request, [product])
+        self.assertEqual(basket.lines.count(), 1)
 
     def test_attribute_cookie_data_affiliate_cookie_lifecycle(self):
         """ Verify a basket is returned and referral captured if there is cookie info """

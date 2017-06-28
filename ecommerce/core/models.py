@@ -168,6 +168,12 @@ class SiteConfiguration(models.Model):
         default='',
     )
 
+    enable_embargo_check = models.BooleanField(
+        verbose_name=_('Enable embargo check'),
+        help_text=_('Enable embargo check at checkout.'),
+        default=False
+    )
+
     @property
     def payment_processors_set(self):
         """
@@ -369,6 +375,11 @@ class SiteConfiguration(models.Model):
 
         # TODO Use URL from SiteConfiguration model.
         return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
+
+    @cached_property
+    def embargo_api_client(self):
+        """ Returns the URL for the embargo API """
+        return EdxRestApiClient(self.build_lms_url('/api/embargo/v1'), jwt=self.access_token)
 
     @cached_property
     def enterprise_api_client(self):

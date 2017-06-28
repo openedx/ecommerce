@@ -152,3 +152,37 @@ class SDNCheckTests(TestCase):
             self.assertEqual(sdn_object.products.count(), basket.lines.count())
             self.assertIn(product1, sdn_object.products.all())
             self.assertIn(product2, sdn_object.products.all())
+
+
+class EmbargoCheckTests(TestCase):
+    """ Tests for the Embargo check function. """
+
+    @httpretty.activate
+    def setUp(self):
+        super(EmbargoCheckTests, self).setUp()
+        self.mock_access_token_response()
+        self.params = {
+            'user': 'foo',
+            'ip_address': '0.0.0.0',
+            'course_ids': ['foo-course']
+        }
+
+    def mock_embargo_response(self, response, status_code=200):
+        """ Mock the embargo check API endpoint response. """
+
+        httpretty.register_uri(
+            httpretty.GET,
+            self.site_configuration.build_lms_url('/api/embargo/v1/course_access/'),
+            status=status_code,
+            body=response,
+            content_type='application/json'
+        )
+
+    @httpretty.activate
+    def test_embargo_check_match(self):
+        """ Verify the embargo check returns False. """
+        embargo_response = {'access': False}
+        self.mock_access_token_response()
+        self.mock_embargo_response(json.dumps(embargo_response))
+        response = self.site.siteconfiguration.embargo_api_client.course_access.get(**self.params)
+        self.assertEqual(response, embargo_response)
