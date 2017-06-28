@@ -1,15 +1,16 @@
-/* global Cybersource */
 /**
  * CyberSource payment processor specific actions.
  */
-require([
+define([
     'jquery',
+    'js-cookie',
+    'underscore.string',
     'pages/basket_page'
-], function($, BasketPage) {
+], function($, Cookies, _s, BasketPage) {
     'use strict';
 
-    var CyberSourceClient = {
-        init: function() {
+    return {
+        init: function(config) {
             var $paymentForm = $('#paymentForm'),
                 $pciFields = $('.pci-field', $paymentForm),
                 cardMap = {
@@ -19,10 +20,10 @@ require([
                     discover: '004'
                 };
 
-            this.signingUrl = Cybersource.signingUrl;   // jshint ignore:line
+            this.signingUrl = config.signingUrl;
 
             // The payment form should post to CyberSource
-            $paymentForm.attr('action', Cybersource.postUrl);   // jshint ignore:line
+            $paymentForm.attr('action', config.postUrl);
 
             // Add name attributes to the PCI fields
             $pciFields.each(function() {
@@ -40,6 +41,9 @@ require([
             $paymentForm.on('cardType:detected', function(event, data) {
                 $('input[name=card_type]', $paymentForm).val(cardMap[data.type]);
             });
+
+            this.applePayConfig = config.applePay;
+            this.initializeApplePay();
         },
 
         /**
@@ -123,10 +127,134 @@ require([
                     }
                 }
             });
+        },
+
+        displayErrorMessage: function(message) {
+            $('#messages').html(_s.sprintf('<div class="alert alert-error">%s<i class="icon-warning-sign"></i></div>',
+                message));
+        },
+
+        initializeApplePay: function() {
+            var promise,
+                self = this;
+
+            if (window.ApplePaySession && self.applePayConfig.enabled) {
+                promise = ApplePaySession.canMakePaymentsWithActiveCard(self.applePayConfig.merchantIdentifier);
+                promise.then(
+                    function(canMakePayments) {
+                        var applePayBtn = document.getElementById('applePayBtn');
+
+                        if (canMakePayments) {
+                            console.log('Learner is eligible for Apple Pay');
+
+                            // Display the button
+                            applePayBtn.style.display = 'inline-flex';
+                            applePayBtn.addEventListener('click', self.onApplePayButtonClicked.bind(self));
+                        } else {
+                            console.log('Apple Pay not setup.');
+                        }
+                    }
+                );
+
+                return promise;
+            }
+
+            // Return an empty promise for callers expecting a promise.
+            // eslint-disable-next-line no-undef
+            return Promise.resolve();
+        },
+
+        onApplePayButtonClicked: function(event) {
+            // Setup the session and its event handlers
+            this.applePaySession = new ApplePaySession(2, {
+                countryCode: this.applePayConfig.countryCode,
+                currencyCode: this.applePayConfig.basketCurrency,
+                supportedNetworks: ['amex', 'discover', 'visa', 'masterCard'],
+                merchantCapabilities: ['supports3DS', 'supportsCredit', 'supportsDebit'],
+                total: {
+                    label: this.applePayConfig.merchantName,
+                    type: 'final',
+                    amount: this.applePayConfig.basketTotal
+                },
+                requiredBillingContactFields: ['postalAddress']
+            });
+
+            this.applePaySession.onvalidatemerchant = this.onApplePayValidateMerchant.bind(this);
+            this.applePaySession.onpaymentauthorized = this.onApplePayPaymentAuthorized.bind(this);
+
+            // Let's start the show!
+            this.applePaySession.begin();
+
+            event.preventDefault();
+            event.stopPropagation();
+        },
+
+        onApplePayValidateMerchant: function(event) {
+            var self = this;
+            console.log('Validating merchant...');
+
+            $.ajax({
+                method: 'POST',
+                url: this.applePayConfig.startSessionUrl,
+                headers: {
+                    'X-CSRFToken': Cookies.get('ecommerce_csrftoken')
+                },
+                data: JSON.stringify({url: event.validationURL}),
+                contentType: 'application/json',
+                success: function(data) {
+                    console.log('Merchant validation succeeded.');
+                    console.log(data);
+                    self.applePaySession.completeMerchantValidation(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    // Translators: Do not translate "Apple Pay".
+                    var msg = gettext('Apple Pay is not available at this time. Please try another payment method.');
+
+                    console.log('Merchant validation failed!');
+                    console.log(textStatus);
+                    console.log(errorThrown);
+
+                    self.applePaySession.abort();
+                    self.displayErrorMessage(msg);
+                }
+            });
+        },
+
+        onApplePayPaymentAuthorized: function(event) {
+            var self = this;
+            console.log('Submitting Apple Pay payment to CyberSource...');
+
+            $.ajax({
+                method: 'POST',
+                url: this.applePayConfig.authorizeUrl,
+                headers: {
+                    'X-CSRFToken': Cookies.get('ecommerce_csrftoken')
+                },
+                data: JSON.stringify(event.payment),
+                contentType: 'application/json',
+                success: function(data) {
+                    console.log('Successfully submitted Apple Pay payment to CyberSource.');
+                    console.log(data);
+                    self.applePaySession.completePayment(ApplePaySession.STATUS_SUCCESS);
+                    self.redirectToReceipt(data.number);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var msg = gettext('An error occurred while processing your payment. You have NOT been charged. ' +
+                        'Please try again, or select another payment method.');
+
+                    console.log('Failed to submit Apple Pay payment to CyberSource!');
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                    self.applePaySession.completePayment(ApplePaySession.STATUS_FAILURE);
+                    self.displayErrorMessage(msg);
+                }
+            });
+        },
+
+        /* istanbul ignore next */
+        redirectToReceipt: function(orderNumber) {
+            /* istanbul ignore next */
+            window.location.href = this.applePayConfig.receiptUrl + '?order_number=' + orderNumber;
         }
     };
-
-    $(document).ready(function() {
-        CyberSourceClient.init();
-    });
 });

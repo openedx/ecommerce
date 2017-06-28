@@ -9,6 +9,9 @@
 <html lang={{ LANGUAGE_CODE }}>
 <head>
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}"/>
+    <link rel="apple-touch-icon" href="{% static 'images/touch-icon.png' %}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'images/touch-icon-2x.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/touch-icon-3x.png' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
@@ -61,7 +64,7 @@
     <script src="{% static 'bower_components/requirejs/require.js' %}"></script>
     <script src="{% static 'js/config.js' %}"></script>
 
-    {# Note: django-compressor does not recognize the data-main attribute. Load the main script separately. #}
+     Note: django-compressor does not recognize the data-main attribute. Load the main script separately.
     <script src="{% static 'js/common.js' %}"></script>
 {% endcompress %}
 

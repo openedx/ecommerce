@@ -396,7 +396,9 @@ define([
                 }
             });
 
-            $paymentButtons.find('.payment-button').click(function(e) {
+            // NOTE: We only include buttons that have a data-processor-name attribute because we don't want to
+            // go through the standard checkout process for some payment methods (e.g. Apple Pay).
+            $paymentButtons.find('.payment-button[data-processor-name]').click(function(e) {
                 var $btn = $(e.target),
                     deferred = new $.Deferred(),
                     promise = deferred.promise(),

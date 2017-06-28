@@ -277,7 +277,7 @@ define([
 
 
                 beforeEach(function() {
-                    loadFixtures('client-side-checkout-validation.html');
+                    loadFixtures('client-side-checkout-basket.html');
 
                     $('#card-expiry-month').append(
                         _.reduce(_.toArray(ccExpiryMonths), function(memo, value) {

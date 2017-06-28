@@ -280,3 +280,85 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     def test_get_template_name(self):
         """ Verify the method returns the path to the client-side template. """
         self.assertEqual(self.processor.get_template_name(), 'payment/cybersource.html')
+
+    @responses.activate
+    def test_request_apple_pay_authorization(self):
+        """ The method should authorize and settle an Apple Pay payment with CyberSource. """
+        basket = factories.create_basket()
+        basket.owner = self.create_user()
+        basket.site = self.site
+        basket.save()
+
+        billing_address = factories.BillingAddressFactory()
+        payment_token = {
+            'paymentData': {
+                'version': 'EC_v1',
+                'data': 'fake-data',
+                'signature': 'fake-signature',
+                'header': {
+                    'ephemeralPublicKey': 'fake-key',
+                    'publicKeyHash': 'fake-hash',
+                    'transactionId': 'abc123'
+                }
+            },
+            'paymentMethod': {
+                'displayName': 'AmEx 1086',
+                'network': 'AmEx',
+                'type': 'credit'
+            },
+            'transactionIdentifier': 'DEADBEEF'
+        }
+
+        self.mock_cybersource_wsdl()
+        self.mock_authorization_response(accepted=True)
+
+        actual = self.processor.request_apple_pay_authorization(basket, billing_address, payment_token)
+        self.assertEqual(actual.total, basket.total_incl_tax)
+        self.assertEqual(actual.currency, basket.currency)
+        self.assertEqual(actual.card_number, 'Apple Pay')
+        self.assertEqual(actual.card_type, 'american_express')
+
+    @responses.activate
+    def test_request_apple_pay_authorization_rejected(self):
+        """ The method should raise GatewayError if CyberSource rejects the payment. """
+        self.mock_cybersource_wsdl()
+        self.mock_authorization_response(accepted=False)
+
+        basket = factories.create_basket()
+        basket.owner = self.create_user()
+        basket.site = self.site
+        basket.save()
+
+        billing_address = factories.BillingAddressFactory()
+        payment_token = {
+            'paymentData': {
+                'version': 'EC_v1',
+                'data': 'fake-data',
+                'signature': 'fake-signature',
+                'header': {
+                    'ephemeralPublicKey': 'fake-key',
+                    'publicKeyHash': 'fake-hash',
+                    'transactionId': 'abc123'
+                }
+            },
+            'paymentMethod': {
+                'displayName': 'AmEx 1086',
+                'network': 'AmEx',
+                'type': 'credit'
+            },
+            'transactionIdentifier': 'DEADBEEF'
+        }
+
+        with self.assertRaises(GatewayError):
+            self.processor.request_apple_pay_authorization(basket, billing_address, payment_token)
+
+    def test_request_apple_pay_authorization_error(self):
+        """ The method should raise GatewayError if an error occurs while authorizing payment. """
+        basket = factories.create_basket()
+        basket.owner = self.create_user()
+        basket.site = self.site
+        basket.save()
+
+        with mock.patch('zeep.Client.__init__', side_effect=Exception):
+            with self.assertRaises(GatewayError):
+                self.processor.request_apple_pay_authorization(basket, None, None)

@@ -176,6 +176,11 @@ class SiteConfiguration(models.Model):
         verbose_name=_('Discovery API URL'),
         blank=True,
     )
+    enable_apple_pay = models.BooleanField(
+        # Translators: Do not translate "Apple Pay"
+        verbose_name=_('Enable Apple Pay'),
+        default=False
+    )
 
     @property
     def payment_processors_set(self):

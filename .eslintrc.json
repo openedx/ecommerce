@@ -12,6 +12,7 @@
     "globals": {
         "gettext": true,
         "loadFixtures": true,
-        "spyOnEvent": true
+        "spyOnEvent": true,
+        "ApplePaySession": true
     }
 }

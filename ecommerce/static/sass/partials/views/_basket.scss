@@ -16,8 +16,8 @@
             right: 10px;
 
             -webkit-transform: translateY(-50%);
-                -ms-transform: translateY(-50%);
-                    transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
         }
     }
 
@@ -61,24 +61,24 @@
                     @include text-align(right);
                 }
 
-               .checkout-quantity {
-                   .input-group {
-                       display: inline;
-                   }
+                .checkout-quantity {
+                    .input-group {
+                        display: inline;
+                    }
 
-                   .quantity {
-                       display: inline-block;
-                       width: 35%;
-                       padding: 3px;
-                   }
+                    .quantity {
+                        display: inline-block;
+                        width: 35%;
+                        padding: 3px;
+                    }
 
-                   button.update-button {
-                       display: inline-block;
-                       vertical-align:top;
-                       margin-left: 5px;
-                       width: 40%;
-                   }
-               }
+                    button.update-button {
+                        display: inline-block;
+                        vertical-align: top;
+                        margin-left: 5px;
+                        width: 40%;
+                    }
+                }
 
                 .product-image img {
                     margin: 0 auto;
@@ -236,6 +236,70 @@
                     background: #25B85A;
                 }
             }
+
+            @supports (-webkit-appearance: -apple-pay-button) {
+                .apple-pay-set-up-button {
+                    display: inline-block;
+                    -webkit-appearance: -apple-pay-button;
+                    -apple-pay-button-type: set-up !important;
+                }
+
+                .apple-pay-button-with-text {
+                    display: inline-block;
+                    -webkit-appearance: -apple-pay-button;
+                    -apple-pay-button-type: buy;
+                    cursor: pointer;
+                }
+
+                .apple-pay-button-with-text > * {
+                    display: none;
+                }
+
+                .apple-pay-button-black-with-text {
+                    -apple-pay-button-style: black;
+                }
+
+                .apple-pay-button-with-text {
+                    --apple-pay-scale: 1; /* (height / 32) */
+                    display: inline-flex;
+                    justify-content: center;
+                    font-size: 12px;
+                    border-radius: 5px;
+                    padding: 0px;
+                    box-sizing: border-box;
+                    min-width: 200px;
+                    min-height: 32px;
+                    max-height: 64px;
+                }
+
+                .apple-pay-button-black-with-text {
+                    background-color: black;
+                    color: white;
+                }
+
+                .apple-pay-button-with-text.apple-pay-button-black-with-text > .logo, {
+                    background-image: -webkit-named-image(apple-pay-logo-white);
+                    background-color: black;
+                }
+
+                .apple-pay-button-with-text > .text {
+                    font-family: -apple-system;
+                    font-size: calc(1em * var(--apple-pay-scale));
+                    font-weight: 300;
+                    align-self: center;
+                    margin-right: calc(2px * var(--apple-pay-scale));
+                }
+
+                .apple-pay-button-with-text > .logo {
+                    width: calc(35px * var(--scale));
+                    height: 100%;
+                    background-size: 100% 60%;
+                    background-repeat: no-repeat;
+                    background-position: 0 50%;
+                    margin-left: calc(2px * var(--apple-pay-scale));
+                    border: none;
+                }
+            }
         }
 
         .verification-note {
@@ -325,6 +389,7 @@
             background-color: #fff;
             width: 120px;
             height: 50px;
+            vertical-align: top;
             &.payment-processor-paypal {
                 background-image: url('/static/images/paypal_logo.png');
 
@@ -457,7 +522,7 @@
 
             .quantity-update {
                 width: 80px;
-                float:left;
+                float: left;
             }
 
             fieldset > legend {

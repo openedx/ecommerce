@@ -1,8 +1,7 @@
 .. _Changing Payment Processors:
 
-#############################
 Changing Payment Processors
-#############################
+###########################
 
 
 Payment processors sometimes experience temporary outages. When these outages

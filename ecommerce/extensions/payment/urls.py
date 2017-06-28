@@ -2,7 +2,12 @@ from django.conf.urls import include, url
 
 from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal
 
+CYBERSOURCE_APPLE_PAY_URLS = [
+    url(r'^authorize/$', cybersource.CybersourceApplePayAuthorizationView.as_view(), name='authorize'),
+    url(r'^start-session/$', cybersource.ApplePayStartSessionView.as_view(), name='start_session'),
+]
 CYBERSOURCE_URLS = [
+    url(r'^apple-pay/', include(CYBERSOURCE_APPLE_PAY_URLS, namespace='apple_pay')),
     url(r'^redirect/$', cybersource.CybersourceInterstitialView.as_view(), name='redirect'),
     url(r'^submit/$', cybersource.CybersourceSubmitView.as_view(), name='submit'),
 ]

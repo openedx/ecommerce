@@ -331,6 +331,62 @@ class CybersourceMixin(PaymentEventsMixin):
 
         return expected
 
+    def mock_authorization_response(self, accepted=True):
+        decision = 'ACCEPT' if accepted else 'REJECTED'
+        reason_code = 100 if accepted else 102
+        url = 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor'
+        body = """<?xml version="1.0" encoding="utf-8"?>
+        <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Header>
+                <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                    <wsu:Timestamp
+                            xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                            wsu:Id="Timestamp-2033980704">
+                        <wsu:Created>2017-07-09T20:42:17.984Z</wsu:Created>
+                    </wsu:Timestamp>
+                </wsse:Security>
+            </soap:Header>
+            <soap:Body>
+                <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.115">
+                    <c:merchantReferenceCode>EDX-100045</c:merchantReferenceCode>
+                    <c:requestID>4996329373316728804010</c:requestID>
+                    <c:decision>{decision}</c:decision>
+                    <c:reasonCode>{reason_code}</c:reasonCode>
+                    <c:requestToken>
+                        Ahj//wSTDtn/tVgRrNKqKhbFg0cuWjFgyYNkuHIlfeUBS4ciV95dIHTVjgtDJpJlukB2NEAYMZMO2f+1WBGs0qoAqQu/
+                    </c:requestToken>
+                    <c:purchaseTotals>
+                        <c:currency>USD</c:currency>
+                    </c:purchaseTotals>
+                    <c:ccAuthReply>
+                        <c:reasonCode>{reason_code}</c:reasonCode>
+                        <c:amount>99.00</c:amount>
+                        <c:authorizationCode>831000</c:authorizationCode>
+                        <c:avsCode>Y</c:avsCode>
+                        <c:avsCodeRaw>Y</c:avsCodeRaw>
+                        <c:authorizedDateTime>2017-07-09T20:42:17Z</c:authorizedDateTime>
+                        <c:processorResponse>000</c:processorResponse>
+                        <c:paymentNetworkTransactionID>558196000003814</c:paymentNetworkTransactionID>
+                        <c:cardCategory>A</c:cardCategory>
+                    </c:ccAuthReply>
+                    <c:ccCaptureReply>
+                        <c:reasonCode>{reason_code}</c:reasonCode>
+                        <c:requestDateTime>2017-07-09T20:42:17Z</c:requestDateTime>
+                        <c:amount>99.00</c:amount>
+                        <c:reconciliationID>10499410206</c:reconciliationID>
+                    </c:ccCaptureReply>
+                </c:replyMessage>
+            </soap:Body>
+        </soap:Envelope>
+        """.format(
+            decision=decision,
+            reason_code=reason_code,
+        )
+
+        responses.add(responses.POST, url, body=body, content_type='text/xml')
+
+        return body
+
 
 @ddt.ddt
 class CybersourceNotificationTestsMixin(CybersourceMixin):

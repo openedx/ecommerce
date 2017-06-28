@@ -52,11 +52,13 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         linked to the order when it is saved later on.
         """
         handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
+        self.record_payment(basket, handled_processor_response)
+
+    def record_payment(self, basket, handled_processor_response):
         track_segment_event(basket.site, basket.owner, 'Payment Info Entered', {'checkout_id': basket.order_number})
         source_type, __ = SourceType.objects.get_or_create(name=self.payment_processor.NAME)
         total = handled_processor_response.total
         reference = handled_processor_response.transaction_id
-
         source = Source(
             source_type=source_type,
             currency=handled_processor_response.currency,
@@ -66,14 +68,11 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             label=handled_processor_response.card_number,
             card_type=handled_processor_response.card_type
         )
-
         event_type, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
         payment_event = PaymentEvent(event_type=event_type, amount=total, reference=reference,
                                      processor_name=self.payment_processor.NAME)
-
         self.add_payment_source(source)
         self.add_payment_event(payment_event)
-
         audit_log(
             'payment_received',
             amount=payment_event.amount,

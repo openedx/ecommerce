@@ -18,6 +18,7 @@ require.config({
         models: 'js/models',
         moment: 'bower_components/moment/moment',
         pages: 'js/pages',
+        payment_processors: 'js/payment_processors',
         pikaday: 'bower_components/pikaday/pikaday',
         punycode: 'bower_components/punycode/punycode',
         requirejs: 'bower_components/requirejs/require',

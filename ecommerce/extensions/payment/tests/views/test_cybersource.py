@@ -5,6 +5,7 @@ import json
 
 import ddt
 import mock
+import responses
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from freezegun import freeze_time
@@ -13,7 +14,10 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
+from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.tests.testcases import TestCase
@@ -26,8 +30,16 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 Selector = get_class('partner.strategy', 'Selector')
+Source = get_model('payment', 'Source')
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
+
+
+class LoginMixin(object):
+    def setUp(self):
+        super(LoginMixin, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
 
 
 @ddt.ddt
@@ -241,3 +253,153 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         with mock.patch.object(self.view, 'create_order', side_effect=Exception):
             response = self.client.post(self.path, notification)
             self.assertRedirects(response, self.get_full_url(path=reverse('payment_error')), status_code=302)
+
+
+class ApplePayMerchantDomainAssociationViewTests(LoginMixin, TestCase):
+    url = reverse('apple_pay_domain_association')
+
+    def assert_response_matches(self, response, expected_status_code, expected_content):
+        self.assertEqual(response.status_code, expected_status_code)
+        self.assertEqual(response.content, expected_content)
+        self.assertEqual(response['Content-Type'], 'text/plain')
+
+    def test_get(self):
+        """ The view should return the the merchant domain association verification data. """
+        response = self.client.get(self.url)
+        self.assert_response_matches(response, 200, settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource'][
+            'apple_pay_merchant_id_domain_association'])
+
+    def test_get_with_configuration_error(self):
+        """ The view should return HTTP 501 if Apple Pay is not properly configured. """
+        settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource'][
+            'apple_pay_merchant_id_domain_association'] = ''
+        response = self.client.get(self.url)
+        content = 'Apple Pay is not configured for [{}].'.format(self.site.domain)
+        self.assert_response_matches(response, 501, content)
+
+
+@ddt.ddt
+class ApplePayStartSessionViewTests(LoginMixin, TestCase):
+    url = reverse('cybersource:apple_pay:start_session')
+
+    @ddt.data(
+        (200, {'foo': 'bar'}),
+        (500, {'error': 'Failure!'})
+    )
+    @ddt.unpack
+    @responses.activate
+    def test_post(self, status, body):
+        """ The view should POST to the given URL and return the response. """
+        url = 'https://apple-pay-gateway.apple.com/paymentservices/startSession'
+        body = json.dumps(body)
+        responses.add(responses.POST, url, body=body, status=status, content_type=JSON)
+
+        response = self.client.post(self.url, json.dumps({'url': url}), JSON)
+        self.assertEqual(response.status_code, status)
+        self.assertEqual(response.content, body)
+
+    def test_post_without_url(self):
+        """ The view should return HTTP 400 if no url parameter is posted. """
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {'error': 'url is required'})
+
+
+@ddt.ddt
+class CybersourceApplePayAuthorizationViewTests(LoginMixin, CybersourceMixin, TestCase):
+    url = reverse('cybersource:apple_pay:authorize')
+
+    def generate_post_data(self):
+        address = factories.BillingAddressFactory()
+
+        return {
+            'billingContact': {
+                'addressLines': [
+                    address.line1,
+                    address.line1
+                ],
+                'administrativeArea': address.state,
+                'country': address.country.printable_name,
+                'countryCode': address.country.iso_3166_1_a2,
+                'familyName': self.user.last_name,
+                'givenName': self.user.first_name,
+                'locality': address.line4,
+                'postalCode': address.postcode,
+            },
+            'shippingContact': {
+                'emailAddress': self.user.email,
+                'familyName': self.user.last_name,
+                'givenName': self.user.first_name,
+            },
+            'token': {
+                'paymentData': {
+                    'version': 'EC_v1',
+                    'data': 'fake-data',
+                    'signature': 'fake-signature',
+                    'header': {
+                        'ephemeralPublicKey': 'fake-key',
+                        'publicKeyHash': 'fake-hash',
+                        'transactionId': 'abc123'
+                    }
+                },
+                'paymentMethod': {
+                    'displayName': 'AmEx 1086',
+                    'network': 'AmEx',
+                    'type': 'credit'
+                },
+                'transactionIdentifier': 'DEADBEEF'
+            }
+        }
+
+    @responses.activate
+    def test_post(self):
+        """ The view should authorize and settle payment at CyberSource, and create an order. """
+        data = self.generate_post_data()
+        basket = factories.create_basket()
+        basket.owner = self.user
+        basket.strategy = Selector().strategy()
+        basket.site = self.site
+        basket.save()
+
+        self.mock_cybersource_wsdl()
+        self.mock_authorization_response(accepted=True)
+        response = self.client.post(self.url, json.dumps(data), JSON)
+
+        self.assertEqual(response.status_code, 201)
+        PaymentProcessorResponse.objects.get(basket=basket)
+
+        order = Order.objects.all().first()
+        total = order.total_incl_tax
+        self.assertEqual(response.data, OrderSerializer(order, context={'request': self.request}).data)
+        order.payment_events.get(event_type__code='paid', amount=total)
+        Source.objects.get(
+            source_type__name=Cybersource.NAME, currency=order.currency, amount_allocated=total, amount_debited=total,
+            label='Apple Pay')
+        PaymentEvent.objects.get(event_type__name=PaymentEventTypeName.PAID, amount=total,
+                                 processor_name=Cybersource.NAME)
+
+    @responses.activate
+    def test_post_with_rejected_payment(self):
+        """ The view should return an error if CyberSource rejects payment. """
+        data = self.generate_post_data()
+        self.mock_cybersource_wsdl()
+        self.mock_authorization_response(accepted=False)
+        response = self.client.post(self.url, json.dumps(data), JSON)
+        self.assertEqual(response.status_code, 502)
+        self.assertEqual(response.data, {'error': 'payment_failed'})
+
+    def test_post_with_invalid_billing_address(self):
+        """ The view should return an error if the billing address is invalid. """
+        data = self.generate_post_data()
+        data['billingContact'] = {}
+        response = self.client.post(self.url, json.dumps(data), JSON)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {'error': 'billing_address_invalid'})
+
+    def test_post_without_payment_token(self):
+        """ The view should return an error if no payment token is provided. """
+        data = self.generate_post_data()
+        data['token'] = {}
+        response = self.client.post(self.url, json.dumps(data), JSON)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {'error': 'token_missing'})
