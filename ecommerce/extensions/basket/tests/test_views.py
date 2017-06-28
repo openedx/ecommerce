@@ -102,7 +102,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, expected_content)
 
-    @mock.patch('ecommerce.extensions.basket.views.get_entitlement_voucher')
+    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
     def test_with_entitlement_voucher(self, mock_get_entitlement_voucher):
         """
         The view ought to redirect to the coupon redemption flow, which is consent-aware.
@@ -125,7 +125,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         )
         self.assertRedirects(response, expected_url)
 
-    @mock.patch('ecommerce.extensions.basket.views.get_entitlement_voucher')
+    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
     def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
         """
         Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
@@ -210,7 +210,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
 
 
 @ddt.ddt
-class BasketMultipleItemsViewTests(CourseCatalogTestMixin, TestCase):
+class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
     """ BasketMultipleItemsView view tests. """
     path = reverse('basket:add-multi')
 
@@ -218,6 +218,13 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, TestCase):
         super(BasketMultipleItemsViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
+
+        self.course = CourseFactory()
+        self.course.create_or_update_seat('verified', True, 50, self.partner)
+        product = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.stock_record = StockRecordFactory(product=product, partner=self.partner)
+        self.catalog = Catalog.objects.create(partner=self.partner)
+        self.catalog.stock_records.add(self.stock_record)
 
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
@@ -309,6 +316,43 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, TestCase):
         basket = response.wsgi_request.basket
         self.assertEqual(response.status_code, 303)
         self.assertEqual(basket.lines.count(), len(products) - 1)
+
+    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
+    def test_with_entitlement_voucher(self, mock_get_entitlement_voucher):
+        """
+        The view ought to redirect to the coupon redemption flow, which is consent-aware.
+        """
+        voucher = mock_get_entitlement_voucher.return_value
+        voucher.code = 'FAKECODE'
+        sku = self.stock_record.partner_sku
+        url = '{path}?{skus}'.format(path=self.path, skus=urllib.urlencode({'sku': [sku]}, doseq=True))
+        response = self.client.get(url)
+
+        expected_failure_url = (
+            'http%3A%2F%2Ftestserver.fake%2Fbasket%2Fadd%2F%3Fconsent_failed%3DTrue%26sku%3D{sku}'.format(
+                sku=sku
+            )
+        )
+
+        expected_url = reverse('coupons:redeem') + '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
+            sku=sku,
+            failure_url=expected_failure_url,
+        )
+        self.assertRedirects(response, expected_url)
+
+    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
+    def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
+        """
+        Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
+        """
+        voucher = mock_get_entitlement_voucher.return_value
+        voucher.code = 'FAKECODE'
+        sku = self.stock_record.partner_sku
+        url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
+        self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
+        response = self.client.get(url)
+        expected_url = self.get_full_url(reverse('basket:summary'))
+        self.assertRedirects(response, expected_url, status_code=303)
 
 
 @httpretty.activate
