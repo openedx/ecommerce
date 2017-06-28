@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-23 11:20-0400\n"
+"POT-Creation-Date: 2017-06-27 17:27-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -884,6 +884,22 @@ msgid ""
 msgstr ""
 "Ýöür ßäskét mäý hävé ßéén mödïfïéd ör älréädý pürçhäséd. Réfrésh thé pägé tö"
 " trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: ecommerce/extensions/payment/views/cybersource.py
+#, python-brace-format
+msgid ""
+"An error occurred while processing your payment. You have not been charged. "
+"Please double-check the information you provided and try again. For help, "
+"{link_start}contact support{link_end}."
+msgstr ""
+"Àn érrör öççürréd whïlé pröçéssïng ýöür päýmént. Ýöü hävé nöt ßéén çhärgéd. "
+"Pléäsé döüßlé-çhéçk thé ïnförmätïön ýöü prövïdéd änd trý ägäïn. För hélp, "
+"{link_start}çöntäçt süppört{link_end}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт "
+"∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση "
+"υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє "
+"∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
+" ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυ#"
 
 #: ecommerce/extensions/refund/models.py
 msgid "Order"
@@ -2128,14 +2144,14 @@ msgstr "Ýöür ßäskét ïs émptý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт
 #, python-format
 msgid ""
 "\n"
-"                                If you have attempted to do a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
+"                                If you attempted to make a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
 "                                again, or %(support_link_start)scontact %(platform_name)s Support%(link_end)s.\n"
 "                            "
 msgstr ""
 "\n"
-"                                Ìf ýöü hävé ättémptéd tö dö ä pürçhäsé, ýöü hävé nöt ßéén çhärgéd. Rétürn tö ýöür %(dashboard_link_start)sdäshßöärd%(link_end)s tö trý\n"
+"                                Ìf ýöü ättémptéd tö mäké ä pürçhäsé, ýöü hävé nöt ßéén çhärgéd. Rétürn tö ýöür %(dashboard_link_start)sdäshßöärd%(link_end)s tö trý\n"
 "                                ägäïn, ör %(support_link_start)sçöntäçt %(platform_name)s Süppört%(link_end)s.\n"
-"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłł#"
+"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σł#"
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html
 msgid "Applying..."
@@ -2468,9 +2484,9 @@ msgstr ""
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
 #, python-format
-msgid "To try again, visit the %(start_link)scheckout page%(end_link)s."
+msgid "To try again, return to your %(start_link)sdashboard%(end_link)s."
 msgstr ""
-"Tö trý ägäïn, vïsït thé %(start_link)sçhéçköüt pägé%(end_link)s. Ⱡ'σяєм "
+"Tö trý ägäïn, rétürn tö ýöür %(start_link)sdäshßöärd%(end_link)s. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #. Translators: SDN is an acronym for Specially Designated Nationals

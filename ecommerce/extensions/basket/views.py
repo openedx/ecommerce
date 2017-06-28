@@ -144,7 +144,7 @@ class BasketMultipleItemsView(View):
             prepare_basket(request, products, voucher)
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-        messages.add_message(request, messages.INFO, 'Already purchased products will not be added to basket.')
+
         return HttpResponseRedirect(reverse('basket:summary'), status=303)
 
 
