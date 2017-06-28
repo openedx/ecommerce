@@ -8,9 +8,13 @@ enterprise entitlements are provided by the Enterprise Service on the basis
 of the learner's enterprise eligibility criterion.
 """
 import logging
+from collections import OrderedDict
+from urllib import urlencode
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -19,7 +23,7 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise import api as enterprise_api
-from ecommerce.enterprise.utils import is_enterprise_feature_enabled
+from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, is_enterprise_feature_enabled
 from ecommerce.extensions.api.serializers import retrieve_all_vouchers
 
 logger = logging.getLogger(__name__)
@@ -203,4 +207,67 @@ def get_available_voucher_for_product(request, product, vouchers):
                 return voucher
 
     # Explicitly return None in case product has no valid voucher
+    return None
+
+
+def get_enterprise_code_redemption_redirect(request, products, skus, failure_view):
+    """
+    Returns redirect to CouponRedeemView if an Enterprise entitlement needs to be applied to a basket.
+
+    This function is used by the basket views to construct a redirect to the CouponRedeemView
+    when an Enterprise entitlement needs to be applied to a basket.
+
+    Arguments:
+        request (HttpRequest): The HttpRequest from the basket view.
+        products (List): List of Products in the basket.
+        skus (List): List of Product skus in the basket.
+        failure_view (String): The name of the view to redirect to after the data sharing consent view.
+
+    Returns:
+        HttpResponseRedirect: A redirect to the CouponRedeemView if an Enterprise entitlement voucher
+                              needs to be applied to the basket, otherwise None.
+    """
+    consent_failed = request.GET.get(CONSENT_FAILED_PARAM, False)
+    if not consent_failed and len(products) == 1 and len(skus) == 1:
+        # Find and apply the enterprise entitlement on the learner basket. First, check two things:
+        # 1. The `consent_failed` URL parameter is falsey, or missing, meaning that we haven't already
+        # attempted to apply an Enterprise voucher at least once, but the user rejected consent. Failing
+        # to make that check would result in the user being repeatedly prompted to grant consent for the
+        # same coupon they already declined consent on.
+        # 2. We are working with a single item basket. Enterprise entitlements do not yet support
+        # multiple item baskets.
+        voucher = get_entitlement_voucher(request, products[0])
+        if voucher is not None:
+            sku = skus[0]
+            params = urlencode(
+                OrderedDict([
+                    ('code', voucher.code),
+                    ('sku', sku),
+                    # The basket views do not handle getting data sharing consent. However, the coupon redemption
+                    # view does. By adding the `failure_url` parameter, we're informing that view that, in the
+                    # event required consent for a coupon can't be collected, the user ought to be directed
+                    # back to this single-item basket view, with the `consent_failed` parameter applied so that
+                    # we know not to try to apply the enterprise coupon again.
+                    (
+                        'failure_url', request.build_absolute_uri(
+                            '{path}?{params}'.format(
+                                path=reverse(failure_view),
+                                params=urlencode(
+                                    OrderedDict([
+                                        (CONSENT_FAILED_PARAM, True),
+                                        ('sku', sku),
+                                    ])
+                                )
+                            )
+                        ),
+                    ),
+                ])
+            )
+            return HttpResponseRedirect(
+                '{path}?{params}'.format(
+                    path=reverse('coupons:redeem'),
+                    params=params
+                )
+            )
+
     return None

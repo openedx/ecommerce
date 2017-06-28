@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-from collections import OrderedDict
 from datetime import datetime
 from urllib import urlencode
 
@@ -21,7 +20,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
-from ecommerce.enterprise.entitlements import get_entitlement_voucher
+from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
@@ -52,7 +51,6 @@ class BasketSingleItemView(View):
 
         sku = request.GET.get('sku', None)
         code = request.GET.get('code', None)
-        consent_failed = request.GET.get(CONSENT_FAILED_PARAM, False)
 
         if not sku:
             return HttpResponseBadRequest(_('No SKU provided.'))
@@ -64,45 +62,18 @@ class BasketSingleItemView(View):
         except StockRecord.DoesNotExist:
             return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
 
-        if not consent_failed and voucher is None:
-            # Find and apply the enterprise entitlement on the learner basket. First, check two things:
-            # 1. We don't already have an existing voucher parsed from a URL parameter
-            # 2. The `consent_failed` URL parameter is falsey, or missing, meaning that we haven't already
-            # attempted to apply an Enterprise voucher at least once, but the user rejected consent. Failing
-            # to make that check would result in the user being repeatedly prompted to grant consent for the
-            # same coupon they already declined consent on.
-            voucher = get_entitlement_voucher(request, product)
-            if voucher is not None:
-                params = urlencode(
-                    OrderedDict([
-                        ('code', voucher.code),
-                        ('sku', sku),
-                        # This view does not handle getting data sharing consent. However, the coupon redemption
-                        # view does. By adding the `failure_url` parameter, we're informing that view that, in the
-                        # event required consent for a coupon can't be collected, the user ought to be directed
-                        # back to this single-item basket view, with the `consent_failed` parameter applied so that
-                        # we know not to try to apply the enterprise coupon again.
-                        (
-                            'failure_url', request.build_absolute_uri(
-                                '{path}?{params}'.format(
-                                    path=reverse('basket:single-item'),
-                                    params=urlencode(
-                                        OrderedDict([
-                                            (CONSENT_FAILED_PARAM, True),
-                                            ('sku', sku),
-                                        ])
-                                    )
-                                )
-                            ),
-                        ),
-                    ])
-                )
-                return HttpResponseRedirect(
-                    '{path}?{params}'.format(
-                        path=reverse('coupons:redeem'),
-                        params=params
-                    )
-                )
+        if voucher is None:
+            # If there is an Enterprise entitlement available for this basket,
+            # we redirect to the CouponRedeemView to apply the discount to the
+            # basket and handle the data sharing consent requirement.
+            code_redemption_redirect = get_enterprise_code_redemption_redirect(
+                request,
+                [product],
+                [sku],
+                'basket:single-item'
+            )
+            if code_redemption_redirect:
+                return code_redemption_redirect
 
         # If the product isn't available then there's no reason to continue with the basket addition
         purchase_info = request.strategy.fetch_for_product(product)
@@ -140,6 +111,20 @@ class BasketMultipleItemsView(View):
             return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
 
         voucher = Voucher.objects.get(code=code) if code else None
+
+        if voucher is None:
+            # If there is an Enterprise entitlement available for this basket,
+            # we redirect to the CouponRedeemView to apply the discount to the
+            # basket and handle the data sharing consent requirement.
+            code_redemption_redirect = get_enterprise_code_redemption_redirect(
+                request,
+                products,
+                skus,
+                'basket:add-multi'
+            )
+            if code_redemption_redirect:
+                return code_redemption_redirect
+
         try:
             prepare_basket(request, products, voucher)
         except AlreadyPlacedOrderException:
