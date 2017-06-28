@@ -47,6 +47,10 @@
         {
             name: 'js/pages/program_offer_form_page',
             exclude: ['js/common']
+        },
+        {
+            name: 'js/views/cybersource_client_side_checkout',
+            exclude: ['js/common']
         }
     ]
 })

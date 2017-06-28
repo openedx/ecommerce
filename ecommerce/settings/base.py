@@ -3,7 +3,7 @@ import datetime
 import os
 import platform
 from logging.handlers import SysLogHandler
-from os.path import basename, normpath
+from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from django.utils.translation import ugettext_lazy as _

@@ -13,6 +13,7 @@ from django.views.i18n import JavaScriptCatalog
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.core.views import LogoutView
+from ecommerce.extensions.payment.views.cybersource import ApplePayMerchantDomainAssociationView
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
 
@@ -40,7 +41,12 @@ admin.autodiscover()
 # NOTE 2: These same patterns are used for rest_framework's browseable API authentication links.
 AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + auth_urlpatterns
 
-urlpatterns = AUTH_URLS + [
+WELL_KNOWN_URLS = [
+    url(r'^.well-known/apple-developer-merchantid-domain-association$',
+        ApplePayMerchantDomainAssociationView.as_view(), name='apple_pay_domain_association'),
+]
+
+urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),

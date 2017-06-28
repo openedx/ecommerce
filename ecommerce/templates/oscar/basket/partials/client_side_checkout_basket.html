@@ -108,7 +108,7 @@
                     <div id="payment-method" class="col-md-4 col-sm-7 col-xs-6">
                         <a href="#payment-information" id="payment-method-image" title="{% trans "Pay with a Credit Card" %}" role="button"><img src="/static/images/credit_card_options.png" alt=""></a>
                     </div>
-                    <div id="payment-processor" class="payment-buttons col-md-3 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
+                    <div id="payment-processor" class="payment-buttons col-md-8 col-sm-5 col-xs-6" data-basket-id="{{ basket.id }}">
                         {# Translators: Do NOT translate the name PayPal. #}
                         <button data-track-type="click"
                                 data-track-event="edx.bi.ecommerce.basket.payment_selected"
@@ -118,6 +118,15 @@
                                 value="paypal"
                                 title="{% trans "Pay with PayPal" %}"
                                 type="button">
+                        </button>
+                        <button id="applePayBtn" lang="{{ LANGUAGE_CODE|default:"en-us" }}" style="display:none"
+                                data-track-type="click"
+                                data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                                data-track-category="checkout"
+                                class="payment-button apple-pay-button-with-text apple-pay-button-black-with-text apple-pay-button-with-text"
+                                title="{% trans "Pay with Apple Pay" %}" type="button">
+                          <span class="text"></span>
+                          <span class="logo"></span>
                         </button>
                     </div>
                 </div>

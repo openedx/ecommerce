@@ -20,13 +20,13 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
 	files: [
-      {pattern: 'ecommerce/static/vendor/**/*.js', included: false},
       {pattern: 'ecommerce/static/bower_components/**/*.js', included: false},
       {pattern: 'ecommerce/static/js/**/*.js', included: false},
       {pattern: 'ecommerce/static/templates/**/*.html', included: false},
       {pattern: 'ecommerce/static/js/test/fixtures/**/*.html', included: false, served: true, watched: true},
       'ecommerce/static/js/config.js',
-      'ecommerce/static/js/test/spec-runner.js'
+      'ecommerce/static/js/test/spec-runner.js',
+      'node_modules/apple-pay-js-stubs/src/apple-pay-js-stubs.js'
     ],
 
     // list of files to exclude

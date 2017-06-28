@@ -21,7 +21,7 @@ class Order(AbstractOrder):
 
 
 class PaymentEvent(AbstractPaymentEvent):
-    processor_name = models.CharField(_("Payment Processor"), max_length=32, blank=True, null=True)
+    processor_name = models.CharField(_('Payment Processor'), max_length=32, blank=True, null=True)
 
 
 class Line(AbstractLine):

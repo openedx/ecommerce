@@ -1,4 +1,15 @@
-<div class="payment-form">
+<div id="messages"></div>
+
+<div id="paymentForm" class="payment-form">
+  <button id="applePayBtn" lang="en" style="display:none"
+          data-track-type="click"
+          data-track-event="edx.bi.ecommerce.basket.payment_selected"
+          data-track-category="checkout"
+          class="payment-button apple-pay-button-with-text apple-pay-button-black-with-text apple-pay-button-with-text"
+          title="Pay with Apple Pay" type="button">
+    <span class="text"></span>
+    <span class="logo"></span>
+  </button>
   <fieldset>
     <input type="hidden" name="sdn-check" value="enabled">
     <div class="form-item">

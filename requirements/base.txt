@@ -30,7 +30,7 @@ premailer==2.9.2
 pycountry==17.1.8
 python-dateutil==2.4.2
 pytz==2016.10
-requests==2.17.3
+requests==2.18.1
 sailthru-client==2.2.3
 six==1.10.0
 zeep==2.1.1

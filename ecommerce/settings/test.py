@@ -88,6 +88,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'sop_access_key': 'sop-fake-access-key',
             'sop_secret_key': 'sop-fake-secret-key',
             'sop_payment_page_url': 'https://sop-replace-me/',
+            'apple_pay_merchant_identifier': 'merchant.com.example',
+            'apple_pay_merchant_id_domain_association': 'fake-merchant-id-domain-association',
+            'apple_pay_merchant_id_certificate_path': '',
+            'apple_pay_country_code': 'US',
         },
         'paypal': {
             'mode': 'sandbox',
