@@ -59,6 +59,12 @@ class CybersourceSubmitView(FormView):
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
+        logger.info(
+            'CyberSource submit view called for basket [%d]. It is in the [%s] state.',
+            request.basket.id,
+            request.basket.status
+        )
+
         return super(CybersourceSubmitView, self).dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -73,6 +79,11 @@ class CybersourceSubmitView(FormView):
         return JsonResponse(data, status=400)
 
     def form_invalid(self, form):
+        logger.info(
+            'Invalid payment form submitted for basket [%d].',
+            self.request.basket.id
+        )
+
         errors = {field: error[0] for field, error in form.errors.iteritems()}
         logger.debug(errors)
 
@@ -87,6 +98,11 @@ class CybersourceSubmitView(FormView):
         basket = data['basket']
         request = self.request
         user = request.user
+
+        logger.info(
+            'Valid payment form submitted for basket [%d].',
+            basket.id
+        )
 
         # Ensure we aren't attempting to purchase a basket that has already been purchased, frozen,
         # or merged with another basket.
@@ -114,6 +130,12 @@ class CybersourceSubmitView(FormView):
             basket,
             use_client_side_checkout=True,
             extra_parameters=extra_parameters
+        )
+
+        logger.info(
+            'Parameters signed for CyberSource transaction [%s], associated with basket [%d].',
+            parameters.get('transaction_id'),
+            basket.id
         )
 
         # This parameter is only used by the Web/Mobile flow. It is not needed for for Silent Order POST.
