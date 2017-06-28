@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
+from oscar.core.loading import get_class
 from zeep import Client
 from zeep.helpers import serialize_object
 from zeep.wsse import UsernameToken
@@ -26,6 +27,8 @@ from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcess
 from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
+
+OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
 class Cybersource(BaseClientSidePaymentProcessor):
@@ -273,6 +276,23 @@ class Cybersource(BaseClientSidePaymentProcessor):
         Returns:
             unicode: the signature for the given parameters
         """
+        order_number = None
+        basket_id = None
+
+        if 'reference_number' in parameters:
+            order_number = parameters['reference_number']
+        elif 'req_reference_number' in parameters:
+            order_number = parameters['req_reference_number']
+
+        if order_number:
+            basket_id = str(OrderNumberGenerator().basket_id(order_number))
+
+        logger.info(
+            'Signing CyberSource payment data for basket [%s], to become order [%s].',
+            basket_id,
+            order_number
+        )
+
         keys = parameters['signed_field_names'].split(',')
         secret_key = self.sop_secret_key if use_sop_profile else self.secret_key
 
