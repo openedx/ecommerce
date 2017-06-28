@@ -10,7 +10,7 @@ django-rest-swagger[reST]==0.3.10
 django-simple-history==1.8.2
 django-solo==1.1.2
 django-threadlocals==0.8
-django-waffle==0.11.1
+django-waffle==0.12.0
 djangorestframework==3.3.3
 djangorestframework-jwt==1.8.0
 drf-extensions==0.3.1
