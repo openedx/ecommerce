@@ -22,7 +22,7 @@ def country_choices():
     )
     # Inserting a placeholder here so that the first option
     # when rendering the dropdown isn't a valid country.
-    countries.insert(0, ('', _('<Choose country>')))
+    countries.insert(0, ('', '<{}>'.format(_('Choose country'))))
     return countries
 
 
@@ -87,7 +87,7 @@ class PaymentForm(forms.Form):
                 # Translators: This is a string added next to the name of the required
                 # fields on the payment form. For example, the first name field is
                 # required, so this would read "First name (required)".
-                self.fields[bound_field.name].label = _('{label} (required)'.format(label=bound_field.label))
+                self.fields[bound_field.name].label = _('{label} (required)').format(label=bound_field.label)
                 bound_field.field.widget.attrs['required'] = 'required'
 
     basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput(), required=False)
