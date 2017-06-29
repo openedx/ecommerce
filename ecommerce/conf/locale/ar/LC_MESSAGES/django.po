@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-23 11:20-0400\n"
-"PO-Revision-Date: 2017-06-23 23:07+0000\n"
+"POT-Creation-Date: 2017-06-27 17:27-0400\n"
+"PO-Revision-Date: 2017-06-28 21:28+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -266,7 +266,7 @@ msgstr ""
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:234 ecommerce/extensions/basket/views.py:117
+#: ecommerce/coupons/views.py:234 ecommerce/extensions/basket/views.py:118
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
@@ -412,12 +412,12 @@ msgid "INACTIVE"
 msgstr "غير نشط"
 
 #: ecommerce/extensions/api/v2/views/baskets.py:356
-#: ecommerce/extensions/basket/views.py:135
+#: ecommerce/extensions/basket/views.py:136
 msgid "No SKUs provided."
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:366
-#: ecommerce/extensions/basket/views.py:139
+#: ecommerce/extensions/basket/views.py:140
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
@@ -449,80 +449,80 @@ msgstr "انقر هنا لشراء التسجيل لنفسك"
 msgid "Click here to purchase multiple seats in this course"
 msgstr "انقر هنا لشراء عدّة مقاعد في هذه الدورة التدريبية"
 
-#: ecommerce/extensions/basket/views.py:57
+#: ecommerce/extensions/basket/views.py:58
 msgid "No SKU provided."
 msgstr "لا تتوفر وحدة إدارة المخزون."
 
-#: ecommerce/extensions/basket/views.py:64
+#: ecommerce/extensions/basket/views.py:65
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr "وحدة إدارة المخزون [{sku}] غير موجودة."
 
-#: ecommerce/extensions/basket/views.py:109
+#: ecommerce/extensions/basket/views.py:110
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr "المنتج [{product}] غير متوفر لشرائه."
 
-#: ecommerce/extensions/basket/views.py:145
+#: ecommerce/extensions/basket/views.py:146
 msgid "You have already purchased these products"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:247
+#: ecommerce/extensions/basket/views.py:248
 msgid ""
 "You will be automatically enrolled in the verified track of the course upon "
 "completing your order."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:251
+#: ecommerce/extensions/basket/views.py:252
 msgid "You will receive your credit upon completing your order."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:254
+#: ecommerce/extensions/basket/views.py:255
 msgid ""
 "You will be automatically enrolled in the course upon completing your order."
 msgstr "سيتم تسجيلك تلقائياً في الدورة عند استكمال طلبك."
 
-#: ecommerce/extensions/basket/views.py:260
+#: ecommerce/extensions/basket/views.py:261
 #, python-brace-format
 msgid ""
 "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr "سوف تتلقى رسالة الكترونية على {user_email} التي تشمل رمو(ز) التجسيل الخاصة بك."
 
-#: ecommerce/extensions/basket/views.py:341
+#: ecommerce/extensions/basket/views.py:356
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:393
+#: ecommerce/extensions/basket/views.py:408
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr "انتهت صلاحية القسيمة رمز '{code}'."
 
-#: ecommerce/extensions/basket/views.py:400
+#: ecommerce/extensions/basket/views.py:415
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:407
+#: ecommerce/extensions/basket/views.py:422
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr "تم استرداد القسيمة رمز '{code}' بالفعل."
 
-#: ecommerce/extensions/basket/views.py:433
+#: ecommerce/extensions/basket/views.py:448
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr "سلتك غير مؤهلة لخصم من رموز القسائم."
 
-#: ecommerce/extensions/basket/views.py:438
+#: ecommerce/extensions/basket/views.py:453
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr "تمت إضافة القسيمة رمز '{code}' إلى السلة."
 
-#: ecommerce/extensions/basket/views.py:448
+#: ecommerce/extensions/basket/views.py:463
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "لقد أضفت بالفعل رمز القسيمة '{code}' إلى سلتك."
 
-#: ecommerce/extensions/basket/views.py:456
+#: ecommerce/extensions/basket/views.py:471
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "القسيمة رمز '{code}' غير موجودة."
@@ -740,16 +740,24 @@ msgstr "عدد مرات إعادة محاولة إجراءات دفع Paypal  غ
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:78
+#: ecommerce/extensions/payment/views/cybersource.py:80
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr "عذراً، حدثت مشكلة في عملية استعادة سلتك. الرجاء تحديث الصفحة لإعادة المحاولة. "
 
-#: ecommerce/extensions/payment/views/cybersource.py:94
+#: ecommerce/extensions/payment/views/cybersource.py:96
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
 msgstr "قد يكون قد تم تعديل سلتك أو انتهت عملية الشراء بالفعل. الرجاء تحديث الصفحة لإعادة المحاولة. "
+
+#: ecommerce/extensions/payment/views/cybersource.py:314
+#, python-brace-format
+msgid ""
+"An error occurred while processing your payment. You have not been charged. "
+"Please double-check the information you provided and try again. For help, "
+"{link_start}contact support{link_end}."
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:68
 msgid "Order"
@@ -1834,7 +1842,7 @@ msgstr "سلتك فارغة"
 #, python-format
 msgid ""
 "\n"
-"                                If you have attempted to do a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
+"                                If you attempted to make a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
 "                                again, or %(support_link_start)scontact %(platform_name)s Support%(link_end)s.\n"
 "                            "
 msgstr ""
@@ -2108,7 +2116,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:31
 #, python-format
-msgid "To try again, visit the %(start_link)scheckout page%(end_link)s."
+msgid "To try again, return to your %(start_link)sdashboard%(end_link)s."
 msgstr ""
 
 #. Translators: SDN is an acronym for Specially Designated Nationals

@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-06-16 05:55+0000\n"
-"PO-Revision-Date: 2017-06-23 15:21+0000\n"
+"PO-Revision-Date: 2017-06-29 15:58+0000\n"
 "Last-Translator: Katerina Ligkovanli <kaligova@gmail.com>\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"
 "MIME-Version: 1.0\n"
@@ -25,11 +25,11 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:33
 msgid "This field is required."
-msgstr ""
+msgstr "Το πεδίο αυτό είναι υποχρεωτικό."
 
 #: ecommerce/static/js/models/coupon_model.js:34
 msgid "This value must be a number."
-msgstr ""
+msgstr "Η τιμή αυτή πρέπει να είναι αριθμός."
 
 #: ecommerce/static/js/models/coupon_model.js:35
 msgid "This value must be a date."
