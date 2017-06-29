@@ -383,7 +383,7 @@ class BasketCalculateView(generics.GenericAPIView):
                     basket.vouchers.add(voucher)
 
                 # Calculate any discounts on the basket.
-                Applicator().apply(basket, request)
+                Applicator().apply(basket, user=request.user, request=request)
 
                 discounts = []
 

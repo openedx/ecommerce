@@ -38,6 +38,7 @@ Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Refund = get_model('refund', 'Refund')
 User = get_user_model()
+Voucher = get_model('voucher', 'Voucher')
 
 LOGGER_NAME = 'ecommerce.extensions.api.v2.views.baskets'
 
@@ -448,7 +449,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         """ Verify successful basket calculation considering Enterprise entitlement vouchers """
 
         discount = 5
-        voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount)
+        # Using ONCE_PER_CUSTOMER usage here because it fully excercises the Oscar Applicator code.
+        voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount,
+                                     usage=Voucher.ONCE_PER_CUSTOMER)
         mock_get_entitlement_voucher.return_value = voucher
 
         # If the list of sku's contains more than one product no entitlement voucher is applied
