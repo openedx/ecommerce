@@ -24,6 +24,16 @@ define([
             });
 
             describe('onReady', function() {
+                it('should disable the back button by manipulating the fragment', function() {
+                    ReceiptPage.onReady();
+
+                    expect(location.hash).toContain('#');
+
+                    history.back();
+
+                    expect(location.hash).toContain('#');
+                });
+
                 it('should trigger track purchase', function() {
                     spyOn(window.analytics, 'track');
 

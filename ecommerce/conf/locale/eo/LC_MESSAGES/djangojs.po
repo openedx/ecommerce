@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-30 01:19+0000\n"
+"POT-Creation-Date: 2017-06-30 17:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -261,6 +261,14 @@ msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 #: ecommerce/static/js/pages/offer_page.js
 msgid "Redeem"
 msgstr "Rédéém Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/static/js/pages/receipt_page.js
+msgid ""
+"Caution! Using the back button on this page may cause you to be charged "
+"again."
+msgstr ""
+"Çäütïön! Ûsïng thé ßäçk ßüttön ön thïs pägé mäý çäüsé ýöü tö ßé çhärgéd "
+"ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
 #: ecommerce/static/js/utils/utils.js
 msgid "Trailing comma not allowed."
