@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-06-16 05:55+0000\n"
-"PO-Revision-Date: 2017-06-05 14:59+0000\n"
+"PO-Revision-Date: 2017-06-26 09:57+0000\n"
 "Last-Translator: Abel Camacho <abelcama@gmail.com>\n"
 "Language-Team: Basque (Spain) (http://www.transifex.com/open-edx/edx-platform/language/eu_ES/)\n"
 "MIME-Version: 1.0\n"
@@ -170,7 +170,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:96
 msgid "This field is required"
-msgstr ""
+msgstr "Eremu hau beharrezkoa da"
 
 #: ecommerce/static/js/pages/basket_page.js:131
 msgid "Invalid card number"
