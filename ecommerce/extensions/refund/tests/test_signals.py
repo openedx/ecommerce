@@ -33,7 +33,7 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         }
         self.assertEqual(kwargs['context'], expected_context)
 
-        self.assertEqual(event_payload['orderId'], refund.order.number)
+        self.assertEqual(event_payload['order_id'], refund.order.number)
 
         expected_products = [
             {
