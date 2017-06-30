@@ -88,12 +88,14 @@ class UtilsTest(CourseCatalogTestMixin, TestCase):
 
     def test_translate_basket_line_for_segment(self):
         """ The method should return a dict formatted for Segment. """
+        basket = factories.create_basket(empty=True)
+        basket.site = self.site
+        basket.owner = factories.UserFactory()
+        basket.save()
         course = CourseFactory()
         seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        basket = factories.create_basket(empty=True)
         basket.add_product(seat)
         line = basket.lines.first()
-
         expected = {
             'product_id': seat.stockrecords.first().partner_sku,
             'sku': 'verified',
@@ -102,5 +104,17 @@ class UtilsTest(CourseCatalogTestMixin, TestCase):
             'quantity': 1,
             'category': 'Seat',
         }
+        self.assertEqual(translate_basket_line_for_segment(line), expected)
 
+        # Products not associated with a Course should still be reported with the product's title instead of
+        # the course ID.
+        seat.course = None
+        seat.save()
+
+        # Refresh the basket
+        basket.flush()
+        basket.add_product(seat)
+        line = basket.lines.first()
+
+        expected['name'] = seat.title
         self.assertEqual(translate_basket_line_for_segment(line), expected)

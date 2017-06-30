@@ -35,7 +35,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                 # products other than courses, and will need to change in the future.
                 'id': line.partner_sku,
                 'sku': mode_for_seat(line.product),
-                'name': line.product.course.id,
+                'name': line.product.course.id if line.product.course else line.product.title,
                 'price': str(line.line_price_excl_tax),
                 'quantity': line.quantity,
                 'category': line.product.get_product_class().name,
