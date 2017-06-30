@@ -24,6 +24,8 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
         return
 
     properties = {
+        # FIXME This should be order_id. GA is currently working as expected, so I am not changing this.
+        # Fix this as part of LEARNER-1609.
         'orderId': order.number,
         'total': str(order.total_excl_tax),
         'currency': order.currency,

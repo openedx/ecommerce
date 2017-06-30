@@ -14,7 +14,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
         return
 
     properties = {
-        'orderId': refund.order.number,
+        'order_id': refund.order.number,
         'products': [
             {
                 'id': line.order_line.partner_sku,
