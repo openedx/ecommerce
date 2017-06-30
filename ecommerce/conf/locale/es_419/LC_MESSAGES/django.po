@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Anthony Mangano <amangano@edx.org>, 2017
+# Christopher Lee <clee@edx.org>, 2017
 # e2f_lat_r3 <e2f_lat_r3@outlook.com>, 2017
 # e2f_lat_t3 <e2f_lat_t3@outlook.com>, 2017
 # Elias Estay <eestay@u.uchile.cl>, 2015
@@ -18,9 +19,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-27 17:27-0400\n"
-"PO-Revision-Date: 2017-06-29 17:14+0000\n"
-"Last-Translator: e2f_lat_r3 <e2f_lat_r3@outlook.com>\n"
+"POT-Creation-Date: 2017-06-30 01:19+0000\n"
+"PO-Revision-Date: 2017-06-30 15:18+0000\n"
+"Last-Translator: Christopher Lee <clee@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,7 +31,7 @@ msgstr ""
 
 #: ecommerce/core/admin.py:21
 msgid "Personal info"
-msgstr "Información personal"
+msgstr ""
 
 #: ecommerce/core/admin.py:22
 msgid "Permissions"
@@ -194,81 +195,94 @@ msgstr "Dominio de cookie de base"
 msgid "Base cookie domain used to share cookies across services."
 msgstr "Dominio de cookie de base utilizado para compartir cookies en todos los servicios."
 
-#: ecommerce/core/models.py:409
+#: ecommerce/core/models.py:172
+msgid "Enable embargo check"
+msgstr ""
+
+#: ecommerce/core/models.py:173
+msgid "Enable embargo check at checkout."
+msgstr ""
+
+#: ecommerce/core/models.py:420
 msgid "Full Name"
 msgstr "Nombre Completo"
 
-#: ecommerce/core/models.py:554 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:565 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr "Nombre"
 
-#: ecommerce/coupons/views.py:66 ecommerce/coupons/views.py:115
+#: ecommerce/coupons/views.py:67 ecommerce/coupons/views.py:116
 msgid "Coupon does not exist."
 msgstr "El cupón no existe."
 
-#: ecommerce/coupons/views.py:71
+#: ecommerce/coupons/views.py:72
 msgid "This coupon code is not yet valid."
 msgstr "Este código de cupón aún no es válido."
 
-#: ecommerce/coupons/views.py:73
+#: ecommerce/coupons/views.py:74
 msgid "This coupon code has expired."
 msgstr "Este código de cupón ha expirado."
 
-#: ecommerce/coupons/views.py:85
+#: ecommerce/coupons/views.py:86
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr "El producto [{product}] no está disponible para compra."
 
-#: ecommerce/coupons/views.py:90
+#: ecommerce/coupons/views.py:91
 msgid "This coupon code is no longer available."
 msgstr "Este código de cupón ya no está disponible."
 
-#: ecommerce/coupons/views.py:110
+#: ecommerce/coupons/views.py:111
 msgid "This coupon code is invalid."
 msgstr "Este código de cupón no es válido."
 
-#: ecommerce/coupons/views.py:117
+#: ecommerce/coupons/views.py:118
 msgid "The voucher is not applicable to your current basket."
 msgstr "El voucher no es aplicable a su orden actual."
 
-#: ecommerce/coupons/views.py:127
+#: ecommerce/coupons/views.py:128
 msgid "Welcome to edX"
 msgstr "Bienvenido a edX"
 
-#: ecommerce/coupons/views.py:128
+#: ecommerce/coupons/views.py:129
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
 msgstr "Elige entre los cursos seleccionados por tu organización para comenzar a aprender."
 
-#: ecommerce/coupons/views.py:157
+#: ecommerce/coupons/views.py:158
 msgid "Code not provided."
 msgstr "No se suministró un código."
 
-#: ecommerce/coupons/views.py:159
+#: ecommerce/coupons/views.py:160
 msgid "SKU not provided."
 msgstr "No se suministró una SKU."
 
-#: ecommerce/coupons/views.py:170
+#: ecommerce/coupons/views.py:171
 msgid "The product does not exist."
 msgstr "El producto no existe."
 
-#: ecommerce/coupons/views.py:178
+#: ecommerce/coupons/views.py:179
 msgid "You are not eligible to use this coupon."
 msgstr "Usted no es elegible para usar este cupón."
 
-#: ecommerce/coupons/views.py:193
+#: ecommerce/coupons/views.py:194
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr "No se ha encontrado ninguna cliente empresarial que coincida para este cupón."
 
-#: ecommerce/coupons/views.py:215
+#: ecommerce/coupons/views.py:216
 msgid "Invalid data sharing consent token provided."
 msgstr "El token de consentimiento para compartir datos suministrado es inválido."
 
-#: ecommerce/coupons/views.py:234 ecommerce/extensions/basket/views.py:118
+#: ecommerce/coupons/views.py:235 ecommerce/extensions/basket/views.py:89
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr "Ya has comprado un asiento para {course}."
+
+#: ecommerce/coupons/views.py:247
+#, python-brace-format
+msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
+msgstr ""
 
 #: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:12
 #: ecommerce/extensions/payment/models.py:58
@@ -411,12 +425,12 @@ msgid "INACTIVE"
 msgstr "INACTIVO"
 
 #: ecommerce/extensions/api/v2/views/baskets.py:356
-#: ecommerce/extensions/basket/views.py:136
+#: ecommerce/extensions/basket/views.py:107
 msgid "No SKUs provided."
 msgstr "No se suministraron SKU."
 
 #: ecommerce/extensions/api/v2/views/baskets.py:366
-#: ecommerce/extensions/basket/views.py:140
+#: ecommerce/extensions/basket/views.py:111
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "No hay producto(s) con SKU [{skus}]."
@@ -440,88 +454,94 @@ msgstr "Tipo de atributo"
 msgid "Text Attribute"
 msgstr "Texto del atributo"
 
-#: ecommerce/extensions/basket/utils.py:83
+#: ecommerce/extensions/basket/utils.py:54
+msgid ""
+"Due to export controls, we cannot allow you to access this course at this "
+"time."
+msgstr ""
+
+#: ecommerce/extensions/basket/utils.py:97
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr "Haga clic para comprar un registro a curso"
 
-#: ecommerce/extensions/basket/utils.py:86
+#: ecommerce/extensions/basket/utils.py:100
 msgid "Click here to purchase multiple seats in this course"
 msgstr "Haga clic para comprar multiples asientos para este curso"
 
-#: ecommerce/extensions/basket/views.py:58
+#: ecommerce/extensions/basket/views.py:56
 msgid "No SKU provided."
 msgstr "No se suministró un SKU"
 
-#: ecommerce/extensions/basket/views.py:65
+#: ecommerce/extensions/basket/views.py:63
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr "El SKU [{sku}] no existe."
 
-#: ecommerce/extensions/basket/views.py:110
+#: ecommerce/extensions/basket/views.py:81
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr "El producto [{product}] no está disponible para la venta."
 
-#: ecommerce/extensions/basket/views.py:146
+#: ecommerce/extensions/basket/views.py:131
 msgid "You have already purchased these products"
 msgstr "Ya has comprado estos productos"
 
-#: ecommerce/extensions/basket/views.py:248
+#: ecommerce/extensions/basket/views.py:233
 msgid ""
 "You will be automatically enrolled in the verified track of the course upon "
 "completing your order."
 msgstr "Usted será inscrito automáticamente en la ruta verificada del curso al completar su pedido."
 
-#: ecommerce/extensions/basket/views.py:252
+#: ecommerce/extensions/basket/views.py:237
 msgid "You will receive your credit upon completing your order."
 msgstr "Recibirá su crédito al completar su pedido."
 
-#: ecommerce/extensions/basket/views.py:255
+#: ecommerce/extensions/basket/views.py:240
 msgid ""
 "You will be automatically enrolled in the course upon completing your order."
 msgstr "Usted será inscrito automáticamente in el curso al completar su pedido."
 
-#: ecommerce/extensions/basket/views.py:261
+#: ecommerce/extensions/basket/views.py:246
 #, python-brace-format
 msgid ""
 "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr "Recibirá un correo electrónico en {user_email} con su código(s) de inscripción."
 
-#: ecommerce/extensions/basket/views.py:356
+#: ecommerce/extensions/basket/views.py:341
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr "No se pudo aplicar el código '{code}'; se requiere el consentimiento para compartir datos."
 
-#: ecommerce/extensions/basket/views.py:408
+#: ecommerce/extensions/basket/views.py:393
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr "El código de cupón '{code}' ha expirado."
 
-#: ecommerce/extensions/basket/views.py:415
+#: ecommerce/extensions/basket/views.py:400
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr "El código de cupón '{code}' no está activo."
 
-#: ecommerce/extensions/basket/views.py:422
+#: ecommerce/extensions/basket/views.py:407
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr "El código de cupón '{code}' ya ha sido redimido."
 
-#: ecommerce/extensions/basket/views.py:448
+#: ecommerce/extensions/basket/views.py:433
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr "Su canasta no califica para un descuento de código de cupón."
 
-#: ecommerce/extensions/basket/views.py:453
+#: ecommerce/extensions/basket/views.py:438
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr "Código de cupón '{code}' añadido a la canasta."
 
-#: ecommerce/extensions/basket/views.py:463
+#: ecommerce/extensions/basket/views.py:448
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "Usted ya añadió un cupón '{code}' a su canasta."
 
-#: ecommerce/extensions/basket/views.py:471
+#: ecommerce/extensions/basket/views.py:456
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "El código de cupón '{code}' no existe"
@@ -654,8 +674,8 @@ msgid "We don't support the payment option you selected."
 msgstr "La opción de pago que seleccionó no está soportada."
 
 #: ecommerce/extensions/payment/forms.py:25
-msgid "<Choose country>"
-msgstr "<Choose country>"
+msgid "Choose country"
+msgstr "Seleccione un país"
 
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
@@ -735,22 +755,22 @@ msgstr "Número de veces que debe volver a intentar una acción fallida del clie
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py:42
+#: ecommerce/extensions/payment/utils.py:44
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:80
+#: ecommerce/extensions/payment/views/cybersource.py:91
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr "Se ha producido un problema al recuperar su cesta. Actualice la página para intentarlo de nuevo."
 
-#: ecommerce/extensions/payment/views/cybersource.py:96
+#: ecommerce/extensions/payment/views/cybersource.py:112
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
 msgstr "Su cesta puede haber sido modificada o ya ha sido comprada. Actualice la página para intentarlo de nuevo."
 
-#: ecommerce/extensions/payment/views/cybersource.py:314
+#: ecommerce/extensions/payment/views/cybersource.py:336
 #, python-brace-format
 msgid ""
 "An error occurred while processing your payment. You have not been charged. "
@@ -1244,6 +1264,18 @@ msgstr "Cupones"
 #: ecommerce/settings/_oscar.py:251
 msgid "Reports"
 msgstr "Reportes"
+
+#: ecommerce/settings/base.py:85
+msgid "English"
+msgstr ""
+
+#: ecommerce/settings/base.py:86
+msgid "Spanish"
+msgstr ""
+
+#: ecommerce/settings/base.py:87
+msgid "Spanish (Latin American)"
+msgstr ""
 
 #: ecommerce/templates/admin/disable_change_list.html:5
 msgid "List view is temporarily disabled due to large number of records."
