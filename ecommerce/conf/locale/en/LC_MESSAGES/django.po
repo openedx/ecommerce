@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-28 11:24-0400\n"
+"POT-Creation-Date: 2017-06-30 01:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -183,11 +183,19 @@ msgstr ""
 msgid "Base cookie domain used to share cookies across services."
 msgstr ""
 
-#: ecommerce/core/models.py:409
+#: ecommerce/core/models.py:172
+msgid "Enable embargo check"
+msgstr ""
+
+#: ecommerce/core/models.py:173
+msgid "Enable embargo check at checkout."
+msgstr ""
+
+#: ecommerce/core/models.py:420
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:554 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:565 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr ""
 
@@ -254,7 +262,7 @@ msgstr ""
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:235 ecommerce/extensions/basket/views.py:118
+#: ecommerce/coupons/views.py:235 ecommerce/extensions/basket/views.py:89
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
@@ -404,12 +412,12 @@ msgid "INACTIVE"
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:356
-#: ecommerce/extensions/basket/views.py:136
+#: ecommerce/extensions/basket/views.py:107
 msgid "No SKUs provided."
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:366
-#: ecommerce/extensions/basket/views.py:140
+#: ecommerce/extensions/basket/views.py:111
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
@@ -433,87 +441,93 @@ msgstr ""
 msgid "Text Attribute"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:83
+#: ecommerce/extensions/basket/utils.py:54
+msgid ""
+"Due to export controls, we cannot allow you to access this course at this "
+"time."
+msgstr ""
+
+#: ecommerce/extensions/basket/utils.py:97
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:86
+#: ecommerce/extensions/basket/utils.py:100
 msgid "Click here to purchase multiple seats in this course"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:58
+#: ecommerce/extensions/basket/views.py:56
 msgid "No SKU provided."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:65
+#: ecommerce/extensions/basket/views.py:63
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:110
+#: ecommerce/extensions/basket/views.py:81
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:146
+#: ecommerce/extensions/basket/views.py:131
 msgid "You have already purchased these products"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:248
+#: ecommerce/extensions/basket/views.py:233
 msgid ""
 "You will be automatically enrolled in the verified track of the course upon "
 "completing your order."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:252
+#: ecommerce/extensions/basket/views.py:237
 msgid "You will receive your credit upon completing your order."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:255
+#: ecommerce/extensions/basket/views.py:240
 msgid ""
 "You will be automatically enrolled in the course upon completing your order."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:261
+#: ecommerce/extensions/basket/views.py:246
 #, python-brace-format
 msgid "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:356
+#: ecommerce/extensions/basket/views.py:341
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:408
+#: ecommerce/extensions/basket/views.py:393
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:415
+#: ecommerce/extensions/basket/views.py:400
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:422
+#: ecommerce/extensions/basket/views.py:407
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:448
+#: ecommerce/extensions/basket/views.py:433
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:453
+#: ecommerce/extensions/basket/views.py:438
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:463
+#: ecommerce/extensions/basket/views.py:448
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:471
+#: ecommerce/extensions/basket/views.py:456
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
@@ -646,7 +660,7 @@ msgid "We don't support the payment option you selected."
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:25
-msgid "<Choose country>"
+msgid "Choose country"
 msgstr ""
 
 #. Translators: This is a string added next to the name of the required
@@ -727,22 +741,22 @@ msgstr ""
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py:42
+#: ecommerce/extensions/payment/utils.py:44
 msgid "..."
 msgstr ""
 
-#: ecommerce/extensions/payment/views/cybersource.py:80
+#: ecommerce/extensions/payment/views/cybersource.py:91
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr ""
 
-#: ecommerce/extensions/payment/views/cybersource.py:96
+#: ecommerce/extensions/payment/views/cybersource.py:112
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to "
 "try again."
 msgstr ""
 
-#: ecommerce/extensions/payment/views/cybersource.py:314
+#: ecommerce/extensions/payment/views/cybersource.py:336
 #, python-brace-format
 msgid ""
 "An error occurred while processing your payment. You have not been charged. "
@@ -1235,6 +1249,18 @@ msgstr ""
 
 #: ecommerce/settings/_oscar.py:251
 msgid "Reports"
+msgstr ""
+
+#: ecommerce/settings/base.py:85
+msgid "English"
+msgstr ""
+
+#: ecommerce/settings/base.py:86
+msgid "Spanish"
+msgstr ""
+
+#: ecommerce/settings/base.py:87
+msgid "Spanish (Latin American)"
 msgstr ""
 
 #: ecommerce/templates/admin/disable_change_list.html:5
