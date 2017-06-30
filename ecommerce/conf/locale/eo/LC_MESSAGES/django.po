@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-28 11:24-0400\n"
+"POT-Creation-Date: 2017-06-30 01:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -210,6 +210,15 @@ msgid "Base cookie domain used to share cookies across services."
 msgstr ""
 "Bäsé çöökïé dömäïn üséd tö shäré çöökïés äçröss sérvïçés. Ⱡ'σяєм ιρѕυм ∂σłσя"
 " ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/core/models.py
+msgid "Enable embargo check"
+msgstr "Énäßlé émßärgö çhéçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/core/models.py
+msgid "Enable embargo check at checkout."
+msgstr ""
+"Énäßlé émßärgö çhéçk ät çhéçköüt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/core/models.py
 msgid "Full Name"
@@ -531,6 +540,14 @@ msgid "Text Attribute"
 msgstr "Téxt Àttrïßüté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/extensions/basket/utils.py
+msgid ""
+"Due to export controls, we cannot allow you to access this course at this "
+"time."
+msgstr ""
+"Düé tö éxpört çöntröls, wé çännöt ällöw ýöü tö äççéss thïs çöürsé ät thïs "
+"tïmé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: ecommerce/extensions/basket/utils.py
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr ""
 "Çlïçk héré tö jüst pürçhäsé än énröllmént för ýöürsélf Ⱡ'σяєм ιρѕυм ∂σłσя "
@@ -787,8 +804,8 @@ msgstr ""
 "αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/payment/forms.py
-msgid "<Choose country>"
-msgstr "<Choose country> Ⱡ'σяєм#"
+msgid "Choose country"
+msgstr "Çhöösé çöüntrý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
@@ -1405,6 +1422,18 @@ msgstr "Vöüçhérs Ⱡ'σяєм ιρѕυм ∂#"
 #: ecommerce/settings/_oscar.py
 msgid "Reports"
 msgstr "Répörts Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/settings/base.py
+msgid "English"
+msgstr "Énglïsh Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/settings/base.py
+msgid "Spanish"
+msgstr "Spänïsh Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/settings/base.py
+msgid "Spanish (Latin American)"
+msgstr "Spänïsh (Lätïn Àmérïçän) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: ecommerce/templates/admin/disable_change_list.html
 msgid "List view is temporarily disabled due to large number of records."
