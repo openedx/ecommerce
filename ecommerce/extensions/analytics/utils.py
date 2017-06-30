@@ -157,6 +157,7 @@ def translate_basket_line_for_segment(line):
     Returns:
         dict
     """
+    course = line.product.course
     return {
         # For backwards-compatibility with older events the `sku` field is (ab)used to
         # store the product's `certificate_type`, while the `id` field holds the product's
@@ -164,7 +165,7 @@ def translate_basket_line_for_segment(line):
         # products other than courses, and will need to change in the future.
         'product_id': line.stockrecord.partner_sku,
         'sku': mode_for_seat(line.product),
-        'name': line.product.course.id,
+        'name': course.id if course else line.product.title,
         'price': str(line.line_price_excl_tax),
         'quantity': line.quantity,
         'category': line.product.get_product_class().name,

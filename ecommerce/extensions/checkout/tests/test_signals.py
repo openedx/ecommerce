@@ -1,6 +1,7 @@
 import json
 
 import httpretty
+import mock
 from django.core import mail
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory
@@ -8,8 +9,9 @@ from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
-from ecommerce.extensions.checkout.signals import send_course_purchase_email
+from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.tests.testcases import TestCase
 
@@ -17,7 +19,6 @@ LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 
 
 class SignalTests(CourseCatalogTestMixin, TestCase):
-
     def setUp(self):
         super(SignalTests, self).setUp()
         self.user = self.create_user()
@@ -108,3 +109,36 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                     )
                 )
             )
+
+    def _generate_event_properties(self, order):
+        return {
+            'orderId': order.number,
+            'total': str(order.total_excl_tax),
+            'currency': order.currency,
+            'products': [
+                {
+                    'id': line.partner_sku,
+                    'sku': mode_for_seat(line.product),
+                    'name': line.product.course.id if line.product.course else line.product.title,
+                    'price': str(line.line_price_excl_tax),
+                    'quantity': line.quantity,
+                    'category': line.product.get_product_class().name,
+                } for line in order.lines.all()
+            ],
+        }
+
+    def test_track_completed_order(self):
+        """ An event should be sent to Segment. """
+
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+            order = self.prepare_order('verified')
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+            # We should be able to fire events even if the product is not releated to a course.
+            mock_track.reset_mock()
+            order = factories.create_order()
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
