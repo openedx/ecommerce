@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-28 11:24-0400\n"
-"PO-Revision-Date: 2017-05-30 22:58+0000\n"
+"POT-Creation-Date: 2017-06-30 17:21+0000\n"
+"PO-Revision-Date: 2017-06-30 21:22+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/open-edx/edx-platform/language/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -240,6 +240,12 @@ msgstr ""
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
+msgstr ""
+
+#: ecommerce/static/js/pages/receipt_page.js:25
+msgid ""
+"Caution! Using the back button on this page may cause you to be charged "
+"again."
 msgstr ""
 
 #: ecommerce/static/js/utils/utils.js:184
