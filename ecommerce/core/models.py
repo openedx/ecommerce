@@ -377,7 +377,7 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Course Catalog service.
         """
         # TODO Once the change is verified remove the switch and COURSE_CATALOG_API_URL from settings.
-        if waffle.switch_is_active("multi-site-course-catalog-url") and self.course_catalog_api_url:
+        if waffle.switch_is_active('multi-site-course-catalog-url') and self.course_catalog_api_url:
             return EdxRestApiClient(self.course_catalog_api_url, jwt=self.access_token)
         return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 

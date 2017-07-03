@@ -326,10 +326,10 @@ class SiteConfigurationTests(TestCase):
         (True, None, COURSE_CATALOG_API_URL)
     )
     @ddt.unpack
-    def test_course_catalog_api_client(self, switch_enabled, api_url_model_value, expected_api_url):
+    def test_course_catalog_api_client(self, switch_enabled, site_course_catalog_api_url, expected_api_url):
         """ Verify the property returns a Course Catalog API client. """
-        toggle_switch("multi-site-course-catalog-url", switch_enabled)
-        self.site.siteconfiguration.course_catalog_api_url = api_url_model_value
+        toggle_switch('multi-site-course-catalog-url', switch_enabled)
+        self.site.siteconfiguration.course_catalog_api_url = site_course_catalog_api_url
         token = self.mock_access_token_response()
         client = self.site.siteconfiguration.course_catalog_api_client
         client_store = client._store  # pylint: disable=protected-access
