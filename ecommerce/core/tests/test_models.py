@@ -19,6 +19,7 @@ from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
+COURSE_CATALOG_API_URL2 = 'https://catalog.example2.com/api/v1/'
 ENTERPRISE_API_URL = 'https://enterprise.example.com/api/v1/'
 
 
@@ -302,19 +303,6 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(self.site.siteconfiguration.access_token, token)
 
     @httpretty.activate
-    @override_settings(COURSE_CATALOG_API_URL=COURSE_CATALOG_API_URL)
-    def test_course_catalog_api_client(self):
-        """ Verify the property returns a Course Catalog API client. """
-        token = self.mock_access_token_response()
-        client = self.site.siteconfiguration.course_catalog_api_client
-        client_store = client._store  # pylint: disable=protected-access
-        client_auth = client_store['session'].auth
-
-        self.assertEqual(client_store['base_url'], COURSE_CATALOG_API_URL)
-        self.assertIsInstance(client_auth, SuppliedJwtAuth)
-        self.assertEqual(client_auth.token, token)
-
-    @httpretty.activate
     @override_settings(ENTERPRISE_API_URL=ENTERPRISE_API_URL)
     def test_enterprise_api_client(self):
         """
@@ -327,5 +315,26 @@ class SiteConfigurationTests(TestCase):
         client_auth = client_store['session'].auth
 
         self.assertEqual(client_store['base_url'], ENTERPRISE_API_URL)
+        self.assertIsInstance(client_auth, SuppliedJwtAuth)
+        self.assertEqual(client_auth.token, token)
+
+    @httpretty.activate
+    @override_settings(COURSE_CATALOG_API_URL=COURSE_CATALOG_API_URL)
+    @ddt.data(
+        (True, COURSE_CATALOG_API_URL2, COURSE_CATALOG_API_URL2),
+        (False, COURSE_CATALOG_API_URL2, COURSE_CATALOG_API_URL),
+        (True, None, COURSE_CATALOG_API_URL)
+    )
+    @ddt.unpack
+    def test_course_catalog_api_client(self, switch_enabled, api_url_model_value, expected_api_url):
+        """ Verify the property returns a Course Catalog API client. """
+        toggle_switch("multi-site-course-catalog-url", switch_enabled)
+        self.site.siteconfiguration.course_catalog_api_url = api_url_model_value
+        token = self.mock_access_token_response()
+        client = self.site.siteconfiguration.course_catalog_api_client
+        client_store = client._store  # pylint: disable=protected-access
+        client_auth = client_store['session'].auth
+
+        self.assertEqual(client_store['base_url'], expected_api_url)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
