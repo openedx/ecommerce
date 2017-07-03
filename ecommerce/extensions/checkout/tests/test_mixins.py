@@ -12,6 +12,7 @@ from testfixtures import LogCapture
 from waffle.models import Sample
 
 from ecommerce.core.models import SegmentClient
+from ecommerce.extensions.analytics.utils import parse_tracking_context
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -47,9 +48,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         Ensure that we emit a log entry upon receipt of a payment notification, and create Source and PaymentEvent
         objects.
         """
-        user = factories.UserFactory()
+        user = self.user
         basket = factories.create_basket()
         basket.owner = user
+        basket.site = self.site
         basket.save()
 
         mixin = EdxOrderPlacementMixin()
@@ -279,3 +281,27 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             mock_get.return_value = mock_event_type
             mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
             self.assertEqual(len(mail.outbox), 0)
+
+    def test_valid_payment_segment_logging(self, mock_track):
+        """
+        Verify the "Payment Info Entered" Segment event is fired after payment info is validated
+        """
+        basket = factories.create_basket()
+        basket.owner = self.user
+        basket.site = self.site
+        basket.save()
+
+        mixin = EdxOrderPlacementMixin()
+        mixin.payment_processor = DummyProcessor(self.site)
+        properties = {'checkout_id': basket.order_number}
+
+        user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(self.user)
+        context = {
+            'ip': lms_ip,
+            'Google Analytics': {
+                'clientId': lms_client_id
+            }
+        }
+
+        mixin.handle_payment({}, basket)
+        mock_track.assert_called_once_with(user_tracking_id, 'Payment Info Entered', properties, context=context)
