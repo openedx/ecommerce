@@ -148,6 +148,12 @@ OIDC client's settings, as follows.
      - OIDC ID token decryption key, used to validate the ID
        token
      - The same value as ``SOCIAL_AUTH_EDX_OIDC_SECRET``.
+   * - ``SOCIAL_AUTH_EDX_OIDC_ISSUER``
+     - OIDC ID token issuer
+     - For example, ``http://127.0.0.1:8000/oauth2``.
+   * - ``SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL``
+     - User logout URL
+     - For example, ``http://127.0.0.1:8000/logout``.
 
 To configure your default site, partner, and site configuration, use the
 appropriate settings module for your environment
