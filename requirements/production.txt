@@ -9,7 +9,7 @@ gevent==1.0.2
 
 gunicorn==19.6.0
 MySQL-python==1.2.5
-newrelic==2.74.0.54
+newrelic==2.86.3.70
 python-memcached==1.58
 PyYAML==3.12
 nodeenv==1.1.1
