@@ -17,18 +17,19 @@ class ProgramsApiClient(object):
         self.cache_ttl = settings.PROGRAM_CACHE_TIMEOUT
         self.client = client
 
-    def get_program(self, uuid):
+    def get_program(self, uuid, site_domain):
         """
         Retrieve the details for a single program.
 
         Args:
             uuid (str|uuid): Program UUID.
+            site_domain (str): Current site domain.
 
         Returns:
             dict
         """
         program_uuid = str(uuid)
-        cache_key = 'program-{uuid}'.format(uuid=program_uuid)
+        cache_key = '{site_domain}-program-{uuid}'.format(site_domain=site_domain, uuid=program_uuid)
 
         program = cache.get(cache_key)
 

@@ -1,6 +1,7 @@
 import uuid
 
 import httpretty
+from requests import ConnectionError
 
 from ecommerce.programs.api import ProgramsApiClient
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -25,8 +26,12 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
         self.mock_access_token_response()
         program_uuid = uuid.uuid4()
         data = self.mock_program_detail_endpoint(program_uuid)
-        self.assertEqual(self.client.get_program(program_uuid), data)
+        self.assertEqual(self.client.get_program(program_uuid, self.site.domain), data)
 
         # Subsequent calls should pull from the cache
         httpretty.disable()
-        self.assertEqual(self.client.get_program(program_uuid), data)
+        self.assertEqual(self.client.get_program(program_uuid, self.site.domain), data)
+
+        # Calls from different domains should not pull from cache
+        with self.assertRaises(ConnectionError):
+            self.client.get_program(program_uuid, 'different-domain')
