@@ -230,7 +230,7 @@ class CourseTests(CourseCatalogTestMixin, TestCase):
         professional_product_no_verification = course.create_or_update_seat('professional', False, 0, self.partner)
         self.assertEqual(course.products.count(), 2)
 
-        basket = BasketFactory(owner=user)
+        basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(professional_product_no_verification)
         create_order(basket=basket, user=user)
         course.create_or_update_seat('professional', True, 0, self.partner)

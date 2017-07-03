@@ -10,7 +10,7 @@ from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.extensions.analytics.utils import audit_log
+from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
@@ -52,6 +52,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         linked to the order when it is saved later on.
         """
         handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
+        track_segment_event(basket.site, basket.owner, 'Payment Info Entered', {'checkout_id': basket.order_number})
         source_type, __ = SourceType.objects.get_or_create(name=self.payment_processor.NAME)
         total = handled_processor_response.total
         reference = handled_processor_response.transaction_id

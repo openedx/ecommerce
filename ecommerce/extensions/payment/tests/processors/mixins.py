@@ -36,6 +36,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, Pay
 
         self.processor = self.processor_class(self.site)  # pylint: disable=not-callable
         self.basket = factories.create_basket(empty=True)
+        self.basket.site = self.site
         self.basket.add_product(self.product)
         self.basket.owner = factories.UserFactory()
         self.basket.save()
