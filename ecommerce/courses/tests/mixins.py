@@ -12,7 +12,7 @@ class CourseCatalogServiceMockMixin(object):
     Mocks for the Open edX service 'Course Catalog Service' responses.
     """
     COURSE_DISCOVERY_CATALOGS_URL = '{}catalogs/'.format(
-        settings.COURSE_CATALOG_API_URL,
+        settings.DISCOVERY_API_URL,
     )
 
     def setUp(self):

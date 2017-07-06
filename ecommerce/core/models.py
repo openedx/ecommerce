@@ -172,9 +172,9 @@ class SiteConfiguration(models.Model):
         help_text=_('Enable embargo check at checkout.'),
         default=False
     )
-    course_catalog_api_url = models.URLField(
-        verbose_name=_('Course catalog API URL'),
-        help_text=_('URL for course catalog API.'),
+    discovery_api_url = models.URLField(
+        verbose_name=_('Discovery API URL'),
+        help_text=_('URL for discovery API.'),
         blank=True,
     )
 
@@ -369,17 +369,17 @@ class SiteConfiguration(models.Model):
         return access_token
 
     @cached_property
-    def course_catalog_api_client(self):
+    def discovery_api_client(self):
         """
-        Returns an API client to access the Course Catalog service.
+        Returns an API client to access the Discovery service.
 
         Returns:
-            EdxRestApiClient: The client to access the Course Catalog service.
+            EdxRestApiClient: The client to access the Discovery service.
         """
-        # TODO Once the change is verified remove the switch and COURSE_CATALOG_API_URL from settings.
-        if waffle.switch_is_active('multi-site-course-catalog-url') and self.course_catalog_api_url:
-            return EdxRestApiClient(self.course_catalog_api_url, jwt=self.access_token)
-        return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
+        # TODO Once the change is verified remove the switch and DISCOVERY_API_URL from settings.
+        if waffle.switch_is_active('use_multi_tenant_discovery_api_urls') and self.discovery_api_url:
+            return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
+        return EdxRestApiClient(settings.DISCOVERY_API_URL, jwt=self.access_token)
 
     @cached_property
     def embargo_api_client(self):

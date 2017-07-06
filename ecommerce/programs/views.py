@@ -30,8 +30,8 @@ class ProgramOfferViewMixin(StaffOnlyMixin):
             'uuid': program_uuid,
         }
         try:
-            programs_api_client = ProgramsApiClient(site.siteconfiguration.course_catalog_api_client)
-            details = programs_api_client.get_program(program_uuid, site.domain)
+            programs_api_client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
+            details = programs_api_client.get_program(program_uuid)
         except:  # pylint: disable=bare-except
             logger.exception('Failed to retrieve program [%s] from the Programs API!', program_uuid)
 

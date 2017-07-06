@@ -52,7 +52,7 @@ class ProgramTestMixin(CourseCatalogTestMixin):
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{base}/programs/{uuid}/'.format(base=settings.COURSE_CATALOG_API_URL.strip('/'), uuid=program_uuid),
+            uri='{base}/programs/{uuid}/'.format(base=settings.DISCOVERY_API_URL.strip('/'), uuid=program_uuid),
             body=json.dumps(data),
             content_type='application/json'
         )

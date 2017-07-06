@@ -13,23 +13,23 @@ class ProgramsApiClient(object):
     reduce load on the API and increase performance of consuming services.
     """
 
-    def __init__(self, client):
+    def __init__(self, client, site_domain):
         self.cache_ttl = settings.PROGRAM_CACHE_TIMEOUT
         self.client = client
+        self.site_domain = site_domain
 
-    def get_program(self, uuid, site_domain):
+    def get_program(self, uuid):
         """
         Retrieve the details for a single program.
 
         Args:
             uuid (str|uuid): Program UUID.
-            site_domain (str): Current site domain.
 
         Returns:
             dict
         """
         program_uuid = str(uuid)
-        cache_key = '{site_domain}-program-{uuid}'.format(site_domain=site_domain, uuid=program_uuid)
+        cache_key = '{site_domain}-program-{uuid}'.format(site_domain=self.site_domain, uuid=program_uuid)
 
         program = cache.get(cache_key)
 

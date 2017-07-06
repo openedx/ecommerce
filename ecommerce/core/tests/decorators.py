@@ -7,9 +7,9 @@ from django.conf import settings
 from edx_rest_api_client.client import EdxRestApiClient
 
 
-def mock_course_catalog_api_client(test):
+def mock_discovery_api_client(test):
     """
-    Custom decorator for mocking the course_catalog_api_client property of siteconfiguration
+    Custom decorator for mocking the discovery_api_client property of siteconfiguration
     to return a new instance of EdxRestApiClient with a dummy jwt value.
     """
     def decorate_class(klass):
@@ -29,9 +29,9 @@ def mock_course_catalog_api_client(test):
         @functools.wraps(test)
         def wrapper(*args, **kw):
             with mock.patch(
-                'ecommerce.core.models.SiteConfiguration.course_catalog_api_client',
+                'ecommerce.core.models.SiteConfiguration.discovery_api_client',
                 mock.PropertyMock(return_value=EdxRestApiClient(
-                    settings.COURSE_CATALOG_API_URL,
+                    settings.DISCOVERY_API_URL,
                     jwt='auth-token'
                 ))
             ):

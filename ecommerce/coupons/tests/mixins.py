@@ -41,7 +41,7 @@ class CourseCatalogMockMixin(object):
 
         course_run_info_json = json.dumps(course_run_info)
         course_run_url = '{}course_runs/{}/?partner={}'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             course_run.id,
             self.site.siteconfiguration.partner.short_code
         )
@@ -66,7 +66,7 @@ class CourseCatalogMockMixin(object):
 
         course_run_info_json = json.dumps(course_catalog)
         course_run_url = '{}catalogs/{}/'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             catalog_id,
         )
 
@@ -114,7 +114,7 @@ class CourseCatalogMockMixin(object):
             }
         course_run_info_json = json.dumps(course_run_info)
         course_run_url_with_query = '{}course_runs/?q={}'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             query if query else 'id:course*'
         )
         httpretty.register_uri(
@@ -125,7 +125,7 @@ class CourseCatalogMockMixin(object):
         )
 
         course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             query if query else 'id:course*',
             partner_code if partner_code else 'edx'
         )
@@ -137,7 +137,7 @@ class CourseCatalogMockMixin(object):
         )
 
         course_run_url_with_key = '{}course_runs/{}/'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             course_run.id if course_run else 'course-v1:test+test+test'
         )
         httpretty.register_uri(
@@ -156,7 +156,7 @@ class CourseCatalogMockMixin(object):
 
         course_run_info_json = json.dumps(course_contains_info)
         course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             ",".join(course_run_id for course_run_id in course_run_ids),
             query if query else 'id:course*'
         )
@@ -175,7 +175,7 @@ class CourseCatalogMockMixin(object):
             raise error
 
         catalog_contains_course_run_url = '{}catalogs/{}/contains/?course_run_id={}'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             catalog_id,
             ','.join(course_run_id for course_run_id in course_run_ids),
         )
@@ -196,7 +196,7 @@ class CourseCatalogMockMixin(object):
             raise error
 
         course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
-            settings.COURSE_CATALOG_API_URL,
+            settings.DISCOVERY_API_URL,
             query,
             partner_code,
         )

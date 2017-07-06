@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
+from ecommerce.core.tests.decorators import mock_discovery_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
@@ -42,7 +42,7 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
         if enrollment_code:  # We should only have enrollment codes for allowed types
             self.assertEqual(mode_for_seat(enrollment_code), mode)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_course_info_from_catalog(self):
         """ Check to see if course info gets cached """
         course = CourseFactory()
@@ -109,7 +109,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_course_catalogs_for_single_catalog_with_id(self):
         """
         Verify that method "get_course_catalogs" returns proper response for a
@@ -132,7 +132,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         # Verify the API was actually hit (not the cache)
         self._assert_num_requests(1)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     @ddt.data(
         ['Catalog 1'],
         ['Catalog 1', 'Catalog 2'],
@@ -155,7 +155,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         get_course_catalogs(self.request.site)
         self._assert_num_requests(1)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_course_catalogs_for_paginated_api_response(self):
         """
         Verify that method "get_course_catalogs" returns all catalogs for
@@ -169,7 +169,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         # Verify the API was hit for each catalog page
         self._assert_num_requests(len(catalog_name_list))
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_course_catalogs_for_failure(self):
         """
         Verify that method "get_course_catalogs" raises exception in case

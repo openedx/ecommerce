@@ -14,7 +14,7 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
 
         httpretty.enable()
         self.mock_access_token_response()
-        self.client = ProgramsApiClient(self.site.siteconfiguration.course_catalog_api_client)
+        self.client = ProgramsApiClient(self.site.siteconfiguration.discovery_api_client, self.site.domain)
 
     def tearDown(self):
         super(ProgramsApiClientTests, self).tearDown()
@@ -26,12 +26,13 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
         self.mock_access_token_response()
         program_uuid = uuid.uuid4()
         data = self.mock_program_detail_endpoint(program_uuid)
-        self.assertEqual(self.client.get_program(program_uuid, self.site.domain), data)
+        self.assertEqual(self.client.get_program(program_uuid), data)
 
         # Subsequent calls should pull from the cache
         httpretty.disable()
-        self.assertEqual(self.client.get_program(program_uuid, self.site.domain), data)
+        self.assertEqual(self.client.get_program(program_uuid), data)
 
         # Calls from different domains should not pull from cache
+        self.client.site_domain = 'different-domain'
         with self.assertRaises(ConnectionError):
-            self.client.get_program(program_uuid, 'different-domain')
+            self.client.get_program(program_uuid)

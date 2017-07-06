@@ -80,8 +80,8 @@ class ProgramOfferForm(forms.ModelForm):
         program_uuid = self.cleaned_data['program_uuid']
         site = self.request.site
 
-        client = ProgramsApiClient(site.siteconfiguration.course_catalog_api_client)
-        program = client.get_program(program_uuid, site.domain)
+        client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
+        program = client.get_program(program_uuid)
         offer_name = _('Discount for the {program_title} {program_type} Program'.format(
             program_title=program['title'],
             program_type=program['type']

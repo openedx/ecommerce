@@ -8,7 +8,7 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client, mock_enterprise_api_client
+from ecommerce.core.tests.decorators import mock_discovery_api_client, mock_enterprise_api_client
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
@@ -21,7 +21,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.tests.testcases import TestCase
 
-COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
+DISCOVERY_API_URL = 'https://catalog.example.com/api/v1/'
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
@@ -132,7 +132,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.assertIsNone(entitlement_voucher)
 
     @mock_enterprise_api_client
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_entitlement_voucher_with_enterprise_feature_enabled(self):
         """
         Verify that method "get_entitlement_voucher" returns a voucher if
@@ -153,7 +153,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.assertEqual(expected_voucher, entitlement_voucher)
 
     @mock_enterprise_api_client
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_entitlement_voucher_with_invalid_entitlement_id(self):
         """
         Verify that method "get_entitlement_voucher" logs exception if there
@@ -184,7 +184,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
             self.assertIsNone(entitlement_voucher)
 
     @mock_enterprise_api_client
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_course_vouchers_for_learner_with_multiple_codes(self):
         """
         Verify that method "get_course_vouchers_for_learner" returns all valid
@@ -238,7 +238,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         )
 
     @mock_enterprise_api_client
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_learner_entitlements_with_exception(self):
         """
         Verify that method "get_course_entitlements_for_learner" logs exception if
@@ -257,7 +257,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         )
 
     @mock_enterprise_api_client
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_learner_entitlements_invalid_response(self):
         """
         Verify that method "get_course_entitlements_for_learner" logs exception if
@@ -326,7 +326,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         )
 
     @mock_enterprise_api_client
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_get_course_entitlements_for_learner_with_unavailable_course(self):
         """
         Verify that method "get_course_entitlements_for_learner" returns empty
@@ -351,7 +351,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self._assert_num_requests(2)
         self.assertIsNone(entitlements)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_is_course_in_enterprise_catalog_for_available_course(self):
         """
         Verify that method "is_course_in_enterprise_catalog" returns True if
@@ -369,7 +369,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self._assert_num_requests(1)
         self.assertTrue(is_course_available)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     def test_is_course_in_enterprise_catalog_for_unavailable_course(self):
         """
         Verify that method "is_course_in_enterprise_catalog" returns False if
@@ -388,7 +388,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self._assert_num_requests(1)
         self.assertFalse(is_course_available)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_is_course_in_enterprise_catalog_for_error_in_get_course_catalogs(self, error):
         """
@@ -403,7 +403,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         log_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
         self._assert_is_course_in_enterprise_catalog_for_failure(expected_number_of_requests, log_message)
 
-    @mock_course_catalog_api_client
+    @mock_discovery_api_client
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_is_course_in_enterprise_catalog_for_error_in_get_catalog_course_runs(self, error):
         """
