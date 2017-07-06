@@ -15,7 +15,6 @@
     "geckodriver": "1.6.1",
     "gulp": "3.9.1",
     "gulp-eslint": "3.0.1",
-    "gulp-jscs": "4.0.0",
     "jasmine-core": "2.6.1",
     "jasmine-jquery": "2.1.1",
     "karma": "1.5.0",

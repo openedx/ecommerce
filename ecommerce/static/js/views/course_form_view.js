@@ -1,6 +1,3 @@
-/* global gettext */
-// jscs:disable requireCapitalizedConstructors
-
 define([
     'jquery',
     'backbone',

@@ -1,5 +1,3 @@
-// jscs:disable requireCapitalizedConstructors
-
 define([
     'backbone',
     'backbone.relational',
