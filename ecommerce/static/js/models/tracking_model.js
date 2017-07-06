@@ -12,7 +12,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
         isTracking: function() {
             var self = this,
                 trackId = self.get('segmentApplicationId');
-            return !_(trackId).isUndefined() && !_(trackId).isNull();
+            return !_(trackId).isUndefined() && !_(trackId).isNull() && !_(trackId).isEmpty();
         }
     });
 });
