@@ -1,5 +1,4 @@
 /* eslint no-underscore-dangle: ["error", { "allow": ["_initAttributes", "_super"] }] */
-// jscs:disable requireCapitalizedConstructors
 
 define([
     'jquery',

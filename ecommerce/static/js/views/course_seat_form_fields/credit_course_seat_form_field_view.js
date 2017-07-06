@@ -1,5 +1,3 @@
-// jscs:disable requireCapitalizedConstructors
-
 define([
     'underscore',
     'views/course_seat_form_fields/course_seat_form_field_view',

@@ -1,5 +1,4 @@
 var gulp = require('gulp'),
-    jscs = require('gulp-jscs'),
     eslint = require('gulp-eslint'),
     KarmaServer = require('karma').Server,
     path = require('path');
@@ -44,21 +43,11 @@ var gulp = require('gulp'),
     });
 
 /**
- * Runs the JavaScript Code Style (JSCS) linter.
- *
- * http://jscs.info/
- */
-    gulp.task('jscs', function() {
-        return gulp.src(paths.lint)
-        .pipe(jscs());
-    });
-
-/**
  * Monitors the source and test files, running tests
  * and linters when changes detected.
  */
     gulp.task('watch', function() {
-        gulp.watch(paths.spec, ['test', 'lint', 'jscs']);
+        gulp.watch(paths.spec, ['test', 'lint']);
     });
 
     gulp.task('default', ['test']);
