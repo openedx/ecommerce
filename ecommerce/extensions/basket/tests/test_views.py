@@ -26,7 +26,6 @@ from waffle.testutils import override_flag
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_discovery_api_client
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -492,7 +491,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         (Benefit.FIXED, 50)
     )
     @ddt.unpack
-    @mock_discovery_api_client
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_response_success(self, benefit_type, benefit_value):
         """ Verify a successful response is returned. """
@@ -505,6 +503,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
         benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
 
+        self.mock_access_token_response()
         with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
             response = self.client.get(self.path)
 
@@ -551,7 +550,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.assertEqual(lines[0][1]['benefit_value'], '50%')
         self.assertEqual(lines[1][1]['benefit_value'], None)
 
-    @mock_discovery_api_client
     def test_cached_course(self):
         """ Verify that the course info is cached. """
         seat = self.create_seat(self.course, 50)
@@ -564,6 +562,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         cached_course_before = cache.get(cache_key)
         self.assertIsNone(cached_course_before)
 
+        self.mock_access_token_response()
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         cached_course_after = cache.get(cache_key)
@@ -578,12 +577,12 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         'course': 'edX+DemoX',
         'short_description': None,
     })
-    @mock_discovery_api_client
     def test_empty_catalog_api_response(self, course_info):
         """ Check to see if we can handle empty response from the catalog api """
         seat = self.create_seat(self.course)
         self.create_basket_and_add_product(seat)
         self.mock_dynamic_catalog_single_course_runs_api(self.course, course_info)
+        self.mock_access_token_response()
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         line_data = response.context['formset_lines_data'][0][1]
@@ -673,7 +672,6 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         ('2017-02-01T00:00:00', datetime.datetime(2017, 2, 1)),
     )
     @ddt.unpack
-    @mock_discovery_api_client
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_context_data_contains_course_dates(self, date_string, expected_result):
         seat = self.create_seat(self.course)
@@ -682,6 +680,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
             'start': date_string,
             'end': date_string
         })
+        self.mock_access_token_response()
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         for _, line_data in response.context['formset_lines_data']:

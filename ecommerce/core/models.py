@@ -174,7 +174,6 @@ class SiteConfiguration(models.Model):
     )
     discovery_api_url = models.URLField(
         verbose_name=_('Discovery API URL'),
-        help_text=_('URL for discovery API.'),
         blank=True,
     )
 
@@ -379,7 +378,7 @@ class SiteConfiguration(models.Model):
         # TODO Once the change is verified remove the switch and DISCOVERY_API_URL from settings.
         if waffle.switch_is_active('use_multi_tenant_discovery_api_urls') and self.discovery_api_url:
             return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
-        return EdxRestApiClient(settings.DISCOVERY_API_URL, jwt=self.access_token)
+        return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 
     @cached_property
     def embargo_api_client(self):

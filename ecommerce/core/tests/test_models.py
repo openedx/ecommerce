@@ -18,7 +18,6 @@ from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-DISCOVERY_API_URL = 'https://catalog.example.com/api/v1/'
 ENTERPRISE_API_URL = 'https://enterprise.example.com/api/v1/'
 
 
@@ -321,26 +320,25 @@ class SiteConfigurationTests(TestCase):
     def test_discovery_api_client(self):
         """ Verify the property returns a Discovery API client. """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
-        self.site.siteconfiguration.discovery_api_url = DISCOVERY_API_URL
         token = self.mock_access_token_response()
-        client = self.site.siteconfiguration.discovery_api_client
+        client = self.site_configuration.discovery_api_client
         client_store = client._store  # pylint: disable=protected-access
         client_auth = client_store['session'].auth
 
-        self.assertEqual(client_store['base_url'], DISCOVERY_API_URL)
+        self.assertEqual(client_store['base_url'], self.site_configuration.discovery_api_url)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
 
     @httpretty.activate
-    @override_settings(DISCOVERY_API_URL=DISCOVERY_API_URL)
+    @override_settings(COURSE_CATALOG_API_URL='https://fake.domain.com/api/v1/')
     def test_discovery_api_client_without_multitenancy(self):
         """ Verify the property returns a Discovery API client with settings url. """
         toggle_switch('use_multi_tenant_discovery_api_urls', False)
         token = self.mock_access_token_response()
-        client = self.site.siteconfiguration.discovery_api_client
+        client = self.site_configuration.discovery_api_client
         client_store = client._store  # pylint: disable=protected-access
         client_auth = client_store['session'].auth
 
-        self.assertEqual(client_store['base_url'], DISCOVERY_API_URL)
+        self.assertEqual(client_store['base_url'], 'https://fake.domain.com/api/v1/')
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)

@@ -12,7 +12,6 @@ from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.tests.decorators import mock_discovery_api_client
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
@@ -102,7 +101,6 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         with self.assertRaises(Exception):
             self.range.run_catalog_query(self.product)
 
-    @mock_discovery_api_client
     def test_run_catalog_query(self):
         """
         run_course_query() should return True for included course run ID's.
@@ -124,13 +122,13 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         cached_response = cache.get(cache_key)
         self.assertIsNone(cached_response)
 
+        self.mock_access_token_response()
         with mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=request)):
             response = self.range.run_catalog_query(seat)
             self.assertTrue(response['course_runs'][course.id])
             cached_response = cache.get(cache_key)
             self.assertEqual(response, cached_response)
 
-    @mock_discovery_api_client
     def test_query_range_contains_product(self):
         """
         contains_product() should return the correct boolean if a product is in it's range.
@@ -143,10 +141,10 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
 
         self.range.catalog_query = 'key:*'
         self.range.course_seat_types = 'verified'
+        self.mock_access_token_response()
         response = self.range.contains_product(seat)
         self.assertTrue(response)
 
-    @mock_discovery_api_client
     def test_course_catalog_query_range_contains_product(self):
         """
         Verify that the method "contains_product" returns True (boolean) if a
@@ -168,13 +166,13 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.course_catalog = course_catalog_id
         self.range.save()
 
+        self.mock_access_token_response()
         response = self.range.contains_product(seat)
         self.assertTrue(response)
         # Verify that there only one call for the course discovery API for
         # checking if course exists in course runs against the course catalog.
-        self._assert_num_requests(1)
+        self._assert_num_requests(2)
 
-    @mock_discovery_api_client
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_catalog_query_range_contains_product_for_failure(self, error):
         """
@@ -190,6 +188,7 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.save()
 
         self.mock_catalog_api_failure(error, course_catalog_id)
+        self.mock_access_token_response()
         with self.assertRaises(Exception) as error:
             self.range.contains_product(seat)
 
@@ -197,9 +196,8 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.assertEqual(error.exception.message, expected_exception_message)
         # Verify that there only one call for the course discovery API for
         # checking if course exists in course runs against the course catalog.
-        self._assert_num_requests(1)
+        self._assert_num_requests(2)
 
-    @mock_discovery_api_client
     @ddt.data(
         'verified',
         'verified,professional',
@@ -219,13 +217,13 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.save()
 
         self.mock_course_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        self.mock_access_token_response()
         is_product_in_range = self.range.contains_product(seat)
         self.assertTrue(is_product_in_range)
         # Verify that there only one call for the course discovery API for
         # checking if course exists in course runs against the course catalog.
-        self._assert_num_requests(1)
+        self._assert_num_requests(2)
 
-    @mock_discovery_api_client
     @ddt.data(
         ('verified', 'professional'),
         ('professional', 'verified'),
@@ -252,7 +250,6 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         # doesn't have the provide course seat types.
         self._assert_num_requests(0)
 
-    @mock_discovery_api_client
     def test_query_range_all_products(self):
         """
         all_products() should return seats from the query.

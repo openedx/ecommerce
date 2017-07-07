@@ -8,7 +8,6 @@ from django.conf import settings
 from django.http.response import HttpResponse
 from oscar.test.factories import VoucherFactory
 
-from ecommerce.core.tests.decorators import mock_enterprise_api_client
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     enterprise_customer_user_needs_consent,
@@ -54,7 +53,6 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
 
         self.assertEqual(TEST_ENTERPRISE_CUSTOMER_UUID, response.get('id'))
 
-    @mock_enterprise_api_client
     @ddt.data(
         (
             ['mock_enterprise_learner_api'],
@@ -80,6 +78,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         for mock in mock_helpers:
             getattr(self, mock)()
 
+        self.mock_access_token_response()
         response = get_or_create_enterprise_customer_user(
             self.site,
             TEST_ENTERPRISE_CUSTOMER_UUID,
