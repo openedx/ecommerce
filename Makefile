@@ -95,7 +95,8 @@ fast_diff_coverage:
 	diff-cover coverage.xml --compare-branch=$(DIFF_COVER_BASE_BRANCH)
 
 e2e:
-	nosetests --with-ignore-docstrings -v e2e --with-xunit --xunit-file=e2e/xunit.xml
+	./install-geckodriver.sh
+	PATH=$(PATH):. nosetests --with-ignore-docstrings -v e2e --with-xunit --xunit-file=e2e/xunit.xml
 
 extract_translations:
 	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"

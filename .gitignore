@@ -69,6 +69,7 @@ edx_ecommerce.log
 venv
 e2e.*.log
 e2e.*.png
+geckodriver
 
 # Override config files
 override.cfg
