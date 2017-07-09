@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-30 17:21+0000\n"
-"PO-Revision-Date: 2017-06-30 15:17+0000\n"
-"Last-Translator: Christopher Lee <clee@edx.org>\n"
+"POT-Creation-Date: 2017-07-05 12:09-0400\n"
+"PO-Revision-Date: 2017-07-05 22:09+0000\n"
+"Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Spanish (Mexico) (http://www.transifex.com/open-edx/edx-platform/language/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -799,7 +799,7 @@ msgid "Line Credit (excl. tax)"
 msgstr ""
 
 #: ecommerce/extensions/refund/models.py:300
-#: ecommerce/templates/edx/checkout/receipt.html:72
+#: ecommerce/templates/edx/checkout/receipt.html:73
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:29
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:42
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:49
@@ -821,7 +821,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
-#: ecommerce/templates/edx/checkout/receipt.html:102
+#: ecommerce/templates/edx/checkout/receipt.html:103
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
@@ -1582,16 +1582,16 @@ msgstr ""
 msgid "Sign Out"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:10
+#: ecommerce/templates/edx/checkout/receipt.html:11
 #, python-format
 msgid "Receipt for %(order_number)s"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:29
+#: ecommerce/templates/edx/checkout/receipt.html:30
 msgid "Thank you for your order!"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:38
+#: ecommerce/templates/edx/checkout/receipt.html:39
 #, python-format
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page. You "
@@ -1599,62 +1599,67 @@ msgid ""
 "%(link_start)s%(email)s%(link_end)s."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:56
+#: ecommerce/templates/edx/checkout/receipt.html:57
 msgid "Order Number:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:59
+#: ecommerce/templates/edx/checkout/receipt.html:60
 msgid "Payment Method:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:62
+#: ecommerce/templates/edx/checkout/receipt.html:63
 msgid "Order Date:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:68
+#: ecommerce/templates/edx/checkout/receipt.html:69
 msgid "Order Information"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:73
+#: ecommerce/templates/edx/checkout/receipt.html:74
 msgid "Description"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:74
+#: ecommerce/templates/edx/checkout/receipt.html:75
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:38
 msgid "Item Price"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:78
+#: ecommerce/templates/edx/checkout/receipt.html:79
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
 msgid "Quantity:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:80
+#: ecommerce/templates/edx/checkout/receipt.html:81
 msgid "Description:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:87
+#: ecommerce/templates/edx/checkout/receipt.html:88
 msgid "Item Price:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:93
+#: ecommerce/templates/edx/checkout/receipt.html:94
 msgid "Subtotal"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:108
+#: ecommerce/templates/edx/checkout/receipt.html:109
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:126
+#: ecommerce/templates/edx/checkout/receipt.html:123
+#, python-format
+msgid "Courtesy of %(enterprise_name)s."
+msgstr ""
+
+#: ecommerce/templates/edx/checkout/receipt.html:135
 msgid "Total"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:137
+#: ecommerce/templates/edx/checkout/receipt.html:146
 msgid "Get Your Course Credit"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:139
+#: ecommerce/templates/edx/checkout/receipt.html:148
 #, python-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the"
@@ -1663,7 +1668,7 @@ msgid ""
 "the course name."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:155
+#: ecommerce/templates/edx/checkout/receipt.html:164
 msgid "Go to Dashboard"
 msgstr ""
 
