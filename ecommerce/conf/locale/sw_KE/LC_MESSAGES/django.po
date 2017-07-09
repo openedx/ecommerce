@@ -14,9 +14,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-30 17:21+0000\n"
-"PO-Revision-Date: 2017-06-30 15:17+0000\n"
-"Last-Translator: Christopher Lee <clee@edx.org>\n"
+"POT-Creation-Date: 2017-07-05 12:09-0400\n"
+"PO-Revision-Date: 2017-07-06 12:45+0000\n"
+"Last-Translator: YAHAYA MWAVURIZI <translations_1@camara.ie>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -134,19 +134,19 @@ msgstr "Tuma taarifa ya barua pepe ya marejesho"
 
 #: ecommerce/core/models.py:126
 msgid "Enable SDN check"
-msgstr ""
+msgstr "Wezesha uingiaji wa SDN"
 
 #: ecommerce/core/models.py:127
 msgid "Enable SDN check at checkout."
-msgstr ""
+msgstr "Wezesha uingiaji na utokaji wa SDN."
 
 #: ecommerce/core/models.py:131
 msgid "US Treasury SDN API URL"
-msgstr ""
+msgstr "URL ya API SDN ya Hazina ya Marekani"
 
 #: ecommerce/core/models.py:136
 msgid "US Treasury SDN API key"
-msgstr ""
+msgstr "Namba ya API SDN ya Hazina ya Marekani"
 
 #: ecommerce/core/models.py:141
 msgid "SDN lists"
@@ -154,7 +154,7 @@ msgstr "orodha za SDN"
 
 #: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
-msgstr ""
+msgstr "Orodha ya kukaguliwa ya Hazina ya OFAC."
 
 #: ecommerce/core/models.py:147
 msgid "Require Account Activation"
@@ -176,11 +176,11 @@ msgstr "Maandishi haya yatatokea kwenye kila ukurasa."
 
 #: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:14
 msgid "Enable Sailthru Reporting"
-msgstr ""
+msgstr "Wezesha Utoaji taarifa wa Sailthru"
 
 #: ecommerce/core/models.py:159
 msgid "Determines if purchases should be reported to Sailthru."
-msgstr ""
+msgstr "Huamua ikiwa manunuzi yataelezwa kwenye Sailthru."
 
 #: ecommerce/core/models.py:164
 msgid "Base Cookie Domain"
@@ -192,7 +192,7 @@ msgstr ""
 
 #: ecommerce/core/models.py:172
 msgid "Enable embargo check"
-msgstr ""
+msgstr "Wezesha uratibu wa vikwazo"
 
 #: ecommerce/core/models.py:173
 msgid "Enable embargo check at checkout."
@@ -804,7 +804,7 @@ msgid "Line Credit (excl. tax)"
 msgstr "Mstari wa Mkopo (bila kodi)"
 
 #: ecommerce/extensions/refund/models.py:300
-#: ecommerce/templates/edx/checkout/receipt.html:72
+#: ecommerce/templates/edx/checkout/receipt.html:73
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:29
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:42
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:49
@@ -826,7 +826,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
-#: ecommerce/templates/edx/checkout/receipt.html:102
+#: ecommerce/templates/edx/checkout/receipt.html:103
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
@@ -1135,19 +1135,19 @@ msgstr "Mwisho"
 
 #: ecommerce/programs/views.py:48
 msgid "Program offer updated!"
-msgstr ""
+msgstr "Pendekezo la Programu limesasishwa"
 
 #: ecommerce/programs/views.py:71
 msgid "Program offer created!"
-msgstr ""
+msgstr "Pendekezo la Programu limetayarishwa"
 
 #: ecommerce/referrals/models.py:26
 msgid "Affiliate ID"
-msgstr ""
+msgstr "Kitambulisho Kinachohusiana"
 
 #: ecommerce/referrals/models.py:27
 msgid "UTM Source"
-msgstr ""
+msgstr "Chanzo cha UTM"
 
 #: ecommerce/referrals/models.py:28
 msgid "UTM Medium"
@@ -1159,15 +1159,15 @@ msgstr ""
 
 #: ecommerce/referrals/models.py:30
 msgid "UTM Term"
-msgstr ""
+msgstr "Muhula wa UTM"
 
 #: ecommerce/referrals/models.py:31
 msgid "UTM Content"
-msgstr ""
+msgstr " maudhui ya UTM "
 
 #: ecommerce/referrals/models.py:32
 msgid "UTM Created At"
-msgstr ""
+msgstr "UTM Iliyoundwa Katika"
 
 #: ecommerce/settings/_oscar.py:170
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
@@ -1262,19 +1262,19 @@ msgstr "Ripoti"
 
 #: ecommerce/settings/base.py:85
 msgid "English"
-msgstr ""
+msgstr "Kiingereza"
 
 #: ecommerce/settings/base.py:86
 msgid "Spanish"
-msgstr ""
+msgstr "Kihispania"
 
 #: ecommerce/settings/base.py:87
 msgid "Spanish (Latin American)"
-msgstr ""
+msgstr "Kihispania (Amerika ya Kati na Kusini)"
 
 #: ecommerce/templates/admin/disable_change_list.html:5
 msgid "List view is temporarily disabled due to large number of records."
-msgstr ""
+msgstr "Mwonekano wa orodha umesitishwa kwa muda kutokana na idadi kubwa ya kumbukumbu."
 
 #: ecommerce/templates/base.html:10
 msgid "Build"
@@ -1282,7 +1282,7 @@ msgstr "Jenga"
 
 #: ecommerce/templates/base.html:71
 msgid "Version:"
-msgstr ""
+msgstr "Toleo:"
 
 #: ecommerce/templates/coupons/_offer_error.html:4
 #: ecommerce/templates/coupons/offer.html:5
@@ -1298,11 +1298,11 @@ msgstr "Namba za Kuponi"
 msgid ""
 "Earn a verified certificate in one of our popular courses to advance your "
 "career, showcase your accomplishments or enhance your college application."
-msgstr ""
+msgstr "Pata cheti kilithibitishwa katika moja ya kozi zetu mashuhuri uweze kujenga umahiri wa kazi yako, onesha mafanikio yako au imarisha maombi yako ya nafasi ya masomo ya chuo."
 
 #: ecommerce/templates/coupons/offer.html:22
 msgid "Why buy a verified certificate?"
-msgstr ""
+msgstr "Kwanini ununue cheti kilichothibitishwa?"
 
 #: ecommerce/templates/coupons/offer.html:27
 msgid ""
@@ -1317,19 +1317,19 @@ msgstr ""
 msgid ""
 "A verified certificate demonstrates to future employers that you've mastered"
 " the course material."
-msgstr ""
+msgstr "Cheti kilichothibitishwa kinabeba taarifa kwa waajiri kwamba wewe mwanafunzi una umahiri wa kutosha wa mafunzo ya kozi"
 
 #: ecommerce/templates/coupons/offer.html:32
 msgid ""
 "The certificate is officially signed and stamped by the institution that "
 "offers the course."
-msgstr ""
+msgstr "Cheti kimesainiwa rasmi na kuwekewa muhuri na taasisi inayotoa mafunzo ya kozi."
 
 #: ecommerce/templates/coupons/offer.html:34
 msgid ""
 "You're twelve times more likely to complete the course if you're working "
 "toward a verified certificate."
-msgstr ""
+msgstr "Una nafasi mara kumi na mbili zaidi ya kuweza kukamilisha kozi kama unahangaikia kupata cheti kilichothibitishwa."
 
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
@@ -1587,16 +1587,16 @@ msgstr ""
 msgid "Sign Out"
 msgstr "Toka Mtandaoni"
 
-#: ecommerce/templates/edx/checkout/receipt.html:10
+#: ecommerce/templates/edx/checkout/receipt.html:11
 #, python-format
 msgid "Receipt for %(order_number)s"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:29
+#: ecommerce/templates/edx/checkout/receipt.html:30
 msgid "Thank you for your order!"
 msgstr "Asante kwa agizo lako!"
 
-#: ecommerce/templates/edx/checkout/receipt.html:38
+#: ecommerce/templates/edx/checkout/receipt.html:39
 #, python-format
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page. You "
@@ -1604,62 +1604,67 @@ msgid ""
 "%(link_start)s%(email)s%(link_end)s."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:56
+#: ecommerce/templates/edx/checkout/receipt.html:57
 msgid "Order Number:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:59
+#: ecommerce/templates/edx/checkout/receipt.html:60
 msgid "Payment Method:"
 msgstr "Njia ya Malipo:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:62
+#: ecommerce/templates/edx/checkout/receipt.html:63
 msgid "Order Date:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:68
+#: ecommerce/templates/edx/checkout/receipt.html:69
 msgid "Order Information"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:73
+#: ecommerce/templates/edx/checkout/receipt.html:74
 msgid "Description"
 msgstr "Maelezo"
 
-#: ecommerce/templates/edx/checkout/receipt.html:74
+#: ecommerce/templates/edx/checkout/receipt.html:75
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:38
 msgid "Item Price"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:78
+#: ecommerce/templates/edx/checkout/receipt.html:79
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
 msgid "Quantity:"
 msgstr "Kiasi:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:80
+#: ecommerce/templates/edx/checkout/receipt.html:81
 msgid "Description:"
 msgstr "Maelezo:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:87
+#: ecommerce/templates/edx/checkout/receipt.html:88
 msgid "Item Price:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:93
+#: ecommerce/templates/edx/checkout/receipt.html:94
 msgid "Subtotal"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:108
+#: ecommerce/templates/edx/checkout/receipt.html:109
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:126
+#: ecommerce/templates/edx/checkout/receipt.html:123
+#, python-format
+msgid "Courtesy of %(enterprise_name)s."
+msgstr ""
+
+#: ecommerce/templates/edx/checkout/receipt.html:135
 msgid "Total"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:137
+#: ecommerce/templates/edx/checkout/receipt.html:146
 msgid "Get Your Course Credit"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:139
+#: ecommerce/templates/edx/checkout/receipt.html:148
 #, python-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the"
@@ -1668,7 +1673,7 @@ msgid ""
 "the course name."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:155
+#: ecommerce/templates/edx/checkout/receipt.html:164
 msgid "Go to Dashboard"
 msgstr "Nenda kwenye 'Dashibodi'"
 
