@@ -95,7 +95,7 @@ class DiscoveryMockMixin(object):
     def mock_dynamic_catalog_course_runs_api(
             self, course_run=None, partner_code=None, query=None, course_run_info=None,
             discovery_api_url=DEFAULT_DISCOVERY_API_URL
-        ):
+    ):
         """
         Helper function to register a discovery API endpoint for getting
         course runs information.

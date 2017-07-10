@@ -2,7 +2,6 @@ import json
 from decimal import Decimal
 
 import httpretty
-from django.conf import settings
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat

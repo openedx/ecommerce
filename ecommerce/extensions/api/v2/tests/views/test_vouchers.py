@@ -339,7 +339,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
     def test_voucher_offers_listing_catalog_query(self):
         """ Verify the endpoint returns offers data for single product range. """
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_discovery_single_course_runs_api(query='*:*', course_run=course)
+        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range)

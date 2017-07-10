@@ -110,7 +110,6 @@ class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
-
     def test_get_course_catalogs_for_single_catalog_with_id(self):
         """
         Verify that method "get_course_catalogs" returns proper response for a
