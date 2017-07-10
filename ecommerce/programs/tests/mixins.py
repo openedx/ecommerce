@@ -10,6 +10,8 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 
 
 class ProgramTestMixin(CourseCatalogTestMixin):
+    DEFAULT_DISCOVERY_API_URL = 'http://testserver.fake/api/v1'
+
     def mock_program_detail_endpoint(self, program_uuid):
         """ Mocks the program detail endpoint on the Catalog API.
         Args:
@@ -52,7 +54,7 @@ class ProgramTestMixin(CourseCatalogTestMixin):
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{base}/programs/{uuid}/'.format(base=settings.DISCOVERY_API_URL.strip('/'), uuid=program_uuid),
+            uri='{base}/programs/{uuid}/'.format(base=self.DEFAULT_DISCOVERY_API_URL, uuid=program_uuid),
             body=json.dumps(data),
             content_type='application/json'
         )

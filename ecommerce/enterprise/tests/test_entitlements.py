@@ -8,9 +8,9 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
+from ecommerce.courses.tests.mixins import DiscoveryServiceMockMixin
 from ecommerce.enterprise.entitlements import (
     get_course_entitlements_for_learner, get_course_vouchers_for_learner, get_entitlement_voucher,
     is_course_in_enterprise_catalog
@@ -26,8 +26,8 @@ StockRecord = get_model('partner', 'StockRecord')
 
 @ddt.ddt
 @httpretty.activate
-class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMixin,
-                        CourseCatalogMockMixin, CouponMixin, TestCase):
+class EntitlementsTests(EnterpriseServiceMockMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
+                        DiscoveryMockMixin, CouponMixin, TestCase):
     def setUp(self):
         super(EntitlementsTests, self).setUp()
         self.learner = self.create_user(is_staff=True)
@@ -134,13 +134,14 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         Verify that method "get_entitlement_voucher" returns a voucher if
         the enterprise feature is enabled.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         coupon = self.create_coupon(catalog=self.catalog)
         expected_voucher = coupon.attr.coupon_vouchers.vouchers.first()
 
         enterprise_catalog_id = 1
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_discovery_api_for_catalog_contains(
             catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
         )
 
@@ -155,12 +156,13 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         is no coupon against the provided entitlement id in the enterprise
         learner API response.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         non_existing_coupon_id = 99
         self.mock_enterprise_learner_api(
             catalog_id=non_existing_coupon_id, entitlement_id=non_existing_coupon_id
         )
         self.mock_enterprise_learner_entitlements_api(entitlement_id=non_existing_coupon_id)
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_discovery_api_for_catalog_contains(
             catalog_id=non_existing_coupon_id, course_run_ids=[self.course.id]
         )
 
@@ -184,6 +186,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         Verify that method "get_course_vouchers_for_learner" returns all valid
         coupon codes for the provided enterprise course.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         catalog_id = 1
         coupon_quantity = 2
         coupon = self._create_course_catalog_coupon(catalog_id, coupon_quantity)
@@ -191,7 +194,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
 
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_discovery_api_for_catalog_contains(
             catalog_id=catalog_id, course_run_ids=[self.course.id]
         )
         self.mock_access_token_response()
@@ -235,10 +238,11 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         Verify that method "get_course_entitlements_for_learner" logs exception if
         there is an error while accessing the learner entitlements.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         learner_id = 1
         self.mock_enterprise_learner_api(learner_id=learner_id)
         self.mock_learner_entitlements_api_failure(learner_id=learner_id)
-        self.mock_course_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
+        self.mock_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
 
         self.mock_access_token_response()
         self._assert_get_course_entitlements_for_learner_response(
@@ -253,10 +257,11 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         Verify that method "get_course_entitlements_for_learner" logs exception if
         there is an error while accessing the learner entitlements.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         learner_id = 1
         self.mock_enterprise_learner_api(learner_id=learner_id)
         self.mock_learner_entitlements_api_failure(learner_id=learner_id, status=200)
-        self.mock_course_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
+        self.mock_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
 
         self.mock_access_token_response()
         self._assert_get_course_entitlements_for_learner_response(
@@ -319,10 +324,11 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         response for entitlements if the provided course id is not available
         in the related enterprise course catalog.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         enterprise_catalog_id = 1
         self.mock_enterprise_learner_api(entitlement_id=enterprise_catalog_id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=enterprise_catalog_id)
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_discovery_api_for_catalog_contains(
             catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
         )
 
@@ -343,8 +349,9 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         Verify that method "is_course_in_enterprise_catalog" returns True if
         the provided course is available in the enterprise course catalog.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         enterprise_catalog_id = 1
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_discovery_api_for_catalog_contains(
             catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
         )
 
@@ -362,7 +369,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         the provided course is not available in the enterprise course catalog.
         """
         enterprise_catalog_id = 1
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_discovery_api_for_catalog_contains(
             catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
         )
 
@@ -382,7 +389,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         to fetch catalog against the provided enterprise course catalog id.
         """
         enterprise_catalog_id = 1
-        self.mock_catalog_api_failure(error, enterprise_catalog_id)
+        self.mock_discovery_api_failure(error, enterprise_catalog_id)
 
         expected_number_of_requests = 1
         log_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
@@ -396,6 +403,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         unable to validate the given course against the course runs for the
         provided enterprise catalog.
         """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         enterprise_catalog_id = 1
         self.mock_get_catalog_contains_api_for_failure(
             course_run_ids=[self.course.id], catalog_id=enterprise_catalog_id, error=error

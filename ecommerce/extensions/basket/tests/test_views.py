@@ -27,7 +27,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.utils import get_basket_switch_data
@@ -62,7 +62,7 @@ COUPON_CODE = 'COUPONTEST'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -129,6 +129,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         """
         Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
         """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         voucher = mock_get_entitlement_voucher.return_value
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
@@ -155,6 +156,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         """
         Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
         """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
@@ -209,7 +211,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
 
 
 @ddt.ddt
-class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
+class BasketMultipleItemsViewTests(CourseCatalogTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
     """ BasketMultipleItemsView view tests. """
     path = reverse('basket:add-multi')
 
@@ -344,6 +346,7 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixi
         """
         Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
         """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         voucher = mock_get_entitlement_voucher.return_value
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
@@ -356,7 +359,7 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixi
 
 @httpretty.activate
 @ddt.ddt
-class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
+class BasketSummaryViewTests(CourseCatalogTestMixin, DiscoveryMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -443,6 +446,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_enrollment_code_seat_type(self):
         """Verify the correct seat type attribute is retrieved."""
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         self.create_basket_and_add_product(enrollment_code)
         self.mock_dynamic_catalog_course_runs_api(course_run=course)
@@ -455,6 +459,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_no_switch_link(self):
         """Verify response does not contain variables for the switch link if seat does not have an EC."""
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         no_ec_course = CourseFactory()
         seat_without_ec = no_ec_course.create_or_update_seat('verified', False, 10, self.partner)
         self.create_basket_and_add_product(seat_without_ec)
@@ -494,12 +499,13 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_response_success(self, benefit_type, benefit_value):
         """ Verify a successful response is returned. """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         seat = self.create_seat(self.course, 500)
         basket = self.create_basket_and_add_product(seat)
         self.create_and_apply_benefit_to_basket(basket, seat, benefit_type, benefit_value)
 
         self.assertEqual(basket.lines.count(), 1)
-        self.mock_dynamic_catalog_single_course_runs_api(self.course)
+        self.mock_dynamic_discovery_single_course_runs_api(self.course)
 
         benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
 
@@ -536,6 +542,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         self.mock_dynamic_catalog_course_runs_api(course_run=self.course)
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
@@ -552,10 +559,11 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_cached_course(self):
         """ Verify that the course info is cached. """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         seat = self.create_seat(self.course, 50)
         basket = self.create_basket_and_add_product(seat)
         self.assertEqual(basket.lines.count(), 1)
-        self.mock_dynamic_catalog_single_course_runs_api(self.course)
+        self.mock_dynamic_discovery_single_course_runs_api(self.course)
 
         cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.site.siteconfiguration.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
@@ -579,9 +587,10 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
     })
     def test_empty_catalog_api_response(self, course_info):
         """ Check to see if we can handle empty response from the catalog api """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         seat = self.create_seat(self.course)
         self.create_basket_and_add_product(seat)
-        self.mock_dynamic_catalog_single_course_runs_api(self.course, course_info)
+        self.mock_dynamic_discovery_single_course_runs_api(self.course, course_info)
         self.mock_access_token_response()
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -674,9 +683,10 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
     @ddt.unpack
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     def test_context_data_contains_course_dates(self, date_string, expected_result):
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         seat = self.create_seat(self.course)
         self.create_basket_and_add_product(seat)
-        self.mock_dynamic_catalog_single_course_runs_api(self.course, {
+        self.mock_dynamic_discovery_single_course_runs_api(self.course, {
             'start': date_string,
             'end': date_string
         })

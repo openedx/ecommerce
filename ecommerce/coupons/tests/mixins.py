@@ -2,7 +2,6 @@ import datetime
 import json
 
 import httpretty
-from django.conf import settings
 from django.core.cache import cache
 from django.test import RequestFactory
 from oscar.core.utils import slugify
@@ -17,15 +16,18 @@ from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, Voucher
 
 
-class CourseCatalogMockMixin(object):
+class DiscoveryMockMixin(object):
     """ Mocks for the Course Catalog responses. """
+    DEFAULT_DISCOVERY_API_URL = 'http://testserver.fake/api/v1/'
 
     def setUp(self):
-        super(CourseCatalogMockMixin, self).setUp()
+        super(DiscoveryMockMixin, self).setUp()
         cache.clear()
 
-    def mock_dynamic_catalog_single_course_runs_api(self, course_run, course_run_info=None):
-        """ Helper function to register a dynamic course catalog API endpoint for the course run information. """
+    def mock_dynamic_discovery_single_course_runs_api(
+            self, course_run, course_run_info=None, discovery_api_url=DEFAULT_DISCOVERY_API_URL
+    ):
+        """ Helper function to register a dynamic discovery API endpoint for the course run information. """
         if not course_run_info:
             course_run_info = {
                 "course": "edX+DemoX",
@@ -41,7 +43,7 @@ class CourseCatalogMockMixin(object):
 
         course_run_info_json = json.dumps(course_run_info)
         course_run_url = '{}course_runs/{}/?partner={}'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             course_run.id,
             self.site.siteconfiguration.partner.short_code
         )
@@ -52,9 +54,12 @@ class CourseCatalogMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_fetch_course_catalog(self, catalog_id=1, expected_query="*:*", expected_status='200'):
+    def mock_fetch_course_catalog(
+            self, catalog_id=1, expected_query="*:*", expected_status='200',
+            discovery_api_url=DEFAULT_DISCOVERY_API_URL
+    ):
         """
-        Helper function to register a catalog API endpoint for fetching catalog by catalog id.
+        Helper function to register a discovery API endpoint for fetching catalog by catalog id.
         """
         course_catalog = {
             "id": 1,
@@ -66,7 +71,7 @@ class CourseCatalogMockMixin(object):
 
         course_run_info_json = json.dumps(course_catalog)
         course_run_url = '{}catalogs/{}/'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             catalog_id,
         )
 
@@ -77,20 +82,22 @@ class CourseCatalogMockMixin(object):
             status=expected_status,
         )
 
-    def mock_course_catalog_api_for_catalog_voucher(
+    def mock_discovery_api_for_catalog_voucher(
             self, catalog_id=1, query="*:*", expected_status='200', course_run=None,
     ):
         """
-        Helper function to register course catalog API endpoint for fetching course run information and
+        Helper function to register discovery API endpoint for fetching course run information and
         catalog by catalog id.
         """
         self.mock_fetch_course_catalog(catalog_id=catalog_id, expected_query=query, expected_status=expected_status)
         self.mock_dynamic_catalog_course_runs_api(query=query, course_run=course_run)
 
-    def mock_dynamic_catalog_course_runs_api(self, course_run=None, partner_code=None, query=None,
-                                             course_run_info=None):
+    def mock_dynamic_catalog_course_runs_api(
+            self, course_run=None, partner_code=None, query=None, course_run_info=None,
+            discovery_api_url=DEFAULT_DISCOVERY_API_URL
+        ):
         """
-        Helper function to register a course catalog API endpoint for getting
+        Helper function to register a discovery API endpoint for getting
         course runs information.
         """
         if not course_run_info:
@@ -114,7 +121,7 @@ class CourseCatalogMockMixin(object):
             }
         course_run_info_json = json.dumps(course_run_info)
         course_run_url_with_query = '{}course_runs/?q={}'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             query if query else 'id:course*'
         )
         httpretty.register_uri(
@@ -125,7 +132,7 @@ class CourseCatalogMockMixin(object):
         )
 
         course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             query if query else 'id:course*',
             partner_code if partner_code else 'edx'
         )
@@ -137,7 +144,7 @@ class CourseCatalogMockMixin(object):
         )
 
         course_run_url_with_key = '{}course_runs/{}/'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             course_run.id if course_run else 'course-v1:test+test+test'
         )
         httpretty.register_uri(
@@ -146,8 +153,8 @@ class CourseCatalogMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_dynamic_catalog_contains_api(self, course_run_ids, query):
-        """ Helper function to register a dynamic course catalog API endpoint for the contains information. """
+    def mock_dynamic_catalog_contains_api(self, course_run_ids, query, discovery_api_url=DEFAULT_DISCOVERY_API_URL):
+        """ Helper function to register a dynamic discovery API endpoint for the contains information. """
         course_contains_info = {
             'course_runs': {}
         }
@@ -156,7 +163,7 @@ class CourseCatalogMockMixin(object):
 
         course_run_info_json = json.dumps(course_contains_info)
         course_run_url = '{}course_runs/contains/?course_run_ids={}&query={}'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             ",".join(course_run_id for course_run_id in course_run_ids),
             query if query else 'id:course*'
         )
@@ -166,16 +173,18 @@ class CourseCatalogMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_get_catalog_contains_api_for_failure(self, course_run_ids, catalog_id, error):
+    def mock_get_catalog_contains_api_for_failure(
+            self, course_run_ids, catalog_id, error, discovery_api_url=DEFAULT_DISCOVERY_API_URL
+    ):
         """
-        Helper function to register a course catalog API endpoint with failure
+        Helper function to register a discovery API endpoint with failure
         for getting course runs information.
         """
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
 
         catalog_contains_course_run_url = '{}catalogs/{}/contains/?course_run_id={}'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             catalog_id,
             ','.join(course_run_id for course_run_id in course_run_ids),
         )
@@ -187,16 +196,18 @@ class CourseCatalogMockMixin(object):
             ]
         )
 
-    def mock_get_catalog_course_runs_for_failure(self, partner_code, query, error):
+    def mock_get_catalog_course_runs_for_failure(
+            self, partner_code, query, error, discovery_api_url=DEFAULT_DISCOVERY_API_URL
+    ):
         """
-        Helper function to register a course catalog API endpoint with failure
+        Helper function to register a discovery API endpoint with failure
         for getting course runs information.
         """
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
 
         course_run_url_with_query_and_partner_code = '{}course_runs/?q={}&partner={}'.format(
-            settings.DISCOVERY_API_URL,
+            discovery_api_url,
             query,
             partner_code,
         )
