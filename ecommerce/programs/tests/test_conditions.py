@@ -35,7 +35,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         """ The method should return True if the basket contains one course run seat corresponding to each
         course in the program. """
         offer = factories.ProgramOfferFactory(condition=self.condition)
-        basket = factories.BasketFactory(site=self.site)
+        basket = factories.BasketFactory(owner=factories.UserFactory(), site=self.site)
         program = self.mock_program_detail_endpoint(self.condition.program_uuid)
 
         # Extract one audit and one verified seat for each course

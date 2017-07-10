@@ -60,7 +60,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin,
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user)
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
         self.order = factories.create_order(number=1, basket=basket, user=self.user)
 
@@ -443,7 +443,7 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         super(CouponFulfillmentModuleTest, self).setUp()
         coupon = self.create_coupon()
         user = UserFactory()
-        basket = BasketFactory()
+        basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(coupon, 1)
         self.order = factories.create_order(number=1, basket=basket, user=user)
 
@@ -482,7 +482,7 @@ class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = UserFactory()
-        basket = BasketFactory()
+        basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, self.QUANTITY)
         self.order = factories.create_order(number=1, basket=basket, user=user)
 

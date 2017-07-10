@@ -185,7 +185,7 @@ class UserAlreadyPlacedOrderTests(TestCase):
     def setUp(self):
         super(UserAlreadyPlacedOrderTests, self).setUp()
         self.user = self.create_user()
-        self.order = create_order(user=self.user)
+        self.order = create_order(site=self.site, user=self.user)
         self.product = self.get_order_product()
 
     def get_order_product(self, order=None):

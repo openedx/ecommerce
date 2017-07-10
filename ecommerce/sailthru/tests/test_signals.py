@@ -70,7 +70,7 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     def test_unsupported_product_class(self, mock_log_error, mock_update_course_enrollment):
         """ Verify Sailthru is not contacted for non-seat products. """
         coupon = self.create_coupon()
-        basket = BasketFactory()
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(coupon, 1)
         process_basket_addition(None, request=self.request, user=self.user, product=coupon, basket=basket)
         self.assertFalse(mock_update_course_enrollment.called)
@@ -227,7 +227,7 @@ class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
     def _create_order(self, price, mode='verified'):
         seat = self.course.create_or_update_seat(mode, False, price, self.partner, None)
 
-        basket = BasketFactory()
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat, 1)
         order = create_order(number=1, basket=basket, user=self.user, site=self.site)
         order.total_excl_tax = price

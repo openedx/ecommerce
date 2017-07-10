@@ -1,20 +1,24 @@
 import itertools
-
-from django.contrib.sites.models import Site
+import mock
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
+from ecommerce.extensions.basket.models import Basket
+from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class BasketTests(TestCase):
+class BasketTests(BasketMixin, TestCase):
     def setUp(self):
         super(BasketTests, self).setUp()
-        self.site1 = Site.objects.create(domain='site1.fake')
-        self.site2 = Site.objects.create(domain='site2.fake')
+        self.site1 = SiteConfigurationFactory(site__domain='site1.fake').site
+        self.site2 = SiteConfigurationFactory(site__domain='site2.fake').site
 
     def assert_basket_state(self, basket, status, user, site):
         """ Verify the given basket's properties. """
@@ -22,24 +26,15 @@ class BasketTests(TestCase):
         self.assertEqual(basket.owner, user)
         self.assertEqual(basket.site, site)
 
-    def _create_basket(self, user, site, status=Basket.OPEN):
-        """ Create a new Basket for the user. """
-        basket = factories.create_basket()
-        basket.owner = user
-        basket.site = site
-        basket.status = status
-        basket.save()
-        return basket
-
     def test_order_number(self):
         """ The method should return the order number for the Order corresponding to the Basket. """
-        basket = factories.create_basket()
+        basket = self.create_basket()
         expected = OrderNumberGenerator().order_number(basket)
         self.assertEqual(basket.order_number, expected)
 
     def test_unicode(self):
         """ Verify the __unicode__ method returns the correct value. """
-        basket = factories.create_basket()
+        basket = self.create_basket()
         expected = u"{id} - {status} basket (owner: {owner}, lines: {num_lines})".format(
             id=basket.id,
             status=basket.status,
@@ -75,12 +70,15 @@ class BasketTests(TestCase):
         # Create baskets in a state that qualifies them for merging
         editable_baskets = []
         for status in Basket.editable_statuses:
-            editable_baskets.append(self._create_basket(user, self.site1, status))
+            editable_baskets.append(self.create_basket(user, self.site1, status))
 
         # Create baskets that should NOT be merged
         non_editable_baskets = []
         for status in (Basket.MERGED, Basket.FROZEN, Basket.SUBMITTED):
-            non_editable_baskets.append(self._create_basket(user, self.site1, status))
+            basket = self.create_basket(user, self.site1)
+            basket.status = status
+            basket.save()
+            non_editable_baskets.append(basket)
 
         # Create a basket for the other site/tenant
         Basket.get_basket(user, self.site2)
@@ -113,3 +111,14 @@ class BasketTests(TestCase):
         basket = Basket.create_basket(self.site1, user)
         self.assertEqual(basket.site, self.site1)
         self.assertEqual(basket.owner, user)
+
+    def test_add_product(self):
+        """ Verify the method fires Product Added analytic event when a product is added to the basket """
+        course = CourseFactory()
+        basket = self.create_basket(empty=True)
+        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
+            basket.add_product(seat)
+            properties = translate_basket_line_for_segment(basket.lines.first())
+            properties['cart_id'] = basket.id
+            mock_track.assert_called_once_with(basket.site, basket.owner, 'Product Added', properties)
