@@ -16,7 +16,7 @@
             <p>{% trans "Your purchase contains the following" %}:</p>
             {% for form, line_data in formset_lines_data %}
                 {{ form.id }}
-                <div class="product col-sm-12">
+                <div class="product row">
                     <div class="product-image col-sm-5 col-xs-5">
                         <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}" alt=""/>
                     </div>
