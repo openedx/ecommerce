@@ -1,6 +1,7 @@
 """Tests of the Fulfillment API's fulfillment modules."""
 import datetime
 import json
+import uuid
 
 import ddt
 import httpretty
@@ -26,6 +27,7 @@ from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -43,7 +45,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
 
     course_id = 'edX/DemoX/Demo_Course'
@@ -76,9 +78,36 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         self.provider = provider
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory()
+        basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
         self.order = factories.create_order(number=2, basket=basket, user=self.user)
+
+    def prepare_basket_with_voucher(self, program_uuid=None):
+        catalog = Catalog.objects.create(partner=self.partner)
+
+        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
+        coupon = factories.create_product(
+            product_class=coupon_product_class,
+            title='Test product'
+        )
+
+        stock_record = StockRecord.objects.filter(product=self.seat).first()
+        catalog.stock_records.add(stock_record)
+
+        vouchers = create_vouchers(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.00,
+            catalog=catalog,
+            coupon=coupon,
+            end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
+            enterprise_customer=None,
+            name="Test Voucher",
+            quantity=10,
+            start_datetime=datetime.datetime.now(),
+            voucher_type=Voucher.SINGLE_USE,
+            program_uuid=program_uuid,
+        )
+        Applicator().apply_offers(self.order.basket, vouchers[0].offers.all())
 
     def test_enrollment_module_support(self):
         """Test that we get the correct values back for supported product lines."""
@@ -387,34 +416,24 @@ class EnrollmentFulfillmentModuleTests(CourseCatalogTestMixin, FulfillmentTestMi
         """
         Test that using a voucher applies offer discount to reduce order price
         """
-        catalog = Catalog.objects.create(partner=self.partner)
+        self.prepare_basket_with_voucher()
+        self.assertEqual(self.order.basket.total_excl_tax, 0.00)
 
-        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
-        coupon = factories.create_product(
-            product_class=coupon_product_class,
-            title='Test product'
-        )
-
-        stock_record = StockRecord.objects.filter(product=self.seat).first()
-        catalog.stock_records.add(stock_record)
-
-        vouchers = create_vouchers(
-            benefit_type=Benefit.PERCENTAGE,
-            benefit_value=100.00,
-            catalog=catalog,
-            coupon=coupon,
-            end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
-            enterprise_customer=None,
-            name="Test Voucher",
-            quantity=10,
-            start_datetime=datetime.datetime.now(),
-            voucher_type=Voucher.SINGLE_USE
-        )
-        voucher = vouchers[0]
-
-        seat_basket = self.order.basket
-        Applicator().apply_offers(seat_basket, voucher.offers.all())
-        self.assertEqual(seat_basket.total_excl_tax, 0.00)
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
+    def test_voucher_usage_with_program(self, parse_tracking_context):
+        """
+        Test that using a voucher with a program basket results in a fulfilled order.
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        program_uuid = uuid.uuid4()
+        self.mock_program_detail_endpoint(program_uuid)
+        self.prepare_basket_with_voucher(program_uuid=program_uuid)
+        __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+        # No exceptions should be raised and the order should be fulfilled
+        self.assertEqual(lines[0].status, 'Complete')
 
 
 class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):

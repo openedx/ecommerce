@@ -125,6 +125,40 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
         return requests.post(enrollment_api_url, data=json.dumps(data), headers=headers, timeout=timeout)
 
+    def _add_enterprise_data_to_enrollment_api_post(self, data, order):
+        """ Augment enrollment api POST data with enterprise specific data.
+
+        Checks the order to see if there was a discount applied and if that discount
+        was associated with an EnterpriseCustomer. If so, enterprise specific data
+        is added to the POST data and an EnterpriseCustomerUser model is created if
+        one does not already exist.
+
+        Arguments:
+            data (dict): The POST data for the enrollment API.
+            order (Order): The order.
+        """
+        # Collect the EnterpriseCustomer UUID from the coupon, if any.
+        enterprise_customer_uuid = None
+        for discount in order.discounts.all():
+            try:
+                enterprise_customer_uuid = discount.voucher.benefit.range.enterprise_customer
+            except AttributeError:
+                # The voucher did not have an enterprise customer associated with it.
+                pass
+
+            if enterprise_customer_uuid is not None:
+                data['enterprise_course_consent'] = True
+                break
+
+        # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
+        # on the Enterprise service if one doesn't already exist.
+        if enterprise_customer_uuid is not None:
+            get_or_create_enterprise_customer_user(
+                order.site,
+                enterprise_customer_uuid,
+                order.user.username
+            )
+
     def supports_line(self, line):
         return line.product.is_seat_product
 
@@ -210,23 +244,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     }
                 )
             try:
-                # Collect the EnterpriseCustomer UUID from the coupon, if any.
-                enterprise_customer_uuid = None
-                for discount in order.discounts.all():
-                    if discount.voucher:
-                        enterprise_customer_uuid = discount.voucher.benefit.range.enterprise_customer
-                        if enterprise_customer_uuid is not None:
-                            data['enterprise_course_consent'] = True
-                            break
-
-                # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
-                # on the Enterprise service if one doesn't already exist.
-                if enterprise_customer_uuid is not None:
-                    get_or_create_enterprise_customer_user(
-                        order.site,
-                        enterprise_customer_uuid,
-                        order.user.username
-                    )
+                self._add_enterprise_data_to_enrollment_api_post(data, order)
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
