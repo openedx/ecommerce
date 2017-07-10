@@ -3,6 +3,7 @@ import uuid
 import httpretty
 from requests import ConnectionError
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.programs.api import ProgramsApiClient
 from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -12,6 +13,7 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramsApiClientTests, self).setUp()
 
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         httpretty.enable()
         self.mock_access_token_response()
         self.client = ProgramsApiClient(self.site.siteconfiguration.discovery_api_client, self.site.domain)

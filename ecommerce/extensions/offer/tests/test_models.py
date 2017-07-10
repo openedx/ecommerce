@@ -212,6 +212,7 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         product seat is in it's range for a course catalog.
         """
         # Create a course with verified seat type
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
 
         course_catalog = 1

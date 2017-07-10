@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.test import factories
 from ecommerce.programs.benefits import PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
@@ -127,6 +128,7 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
 
     def test_post(self):
         """ The program offer should be updated. """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         data = {
             'program_uuid': self.program_offer.condition.program_uuid,
             'benefit_type': BENEFIT_PROXY_CLASS_MAP[self.program_offer.benefit.proxy_class],
@@ -142,6 +144,7 @@ class ProgramOfferCreateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
 
     def test_post(self):
         """ A new program offer should be created. """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         expected_uuid = uuid.uuid4()
         self.mock_program_detail_endpoint(expected_uuid)
         expected_benefit_value = 10

@@ -18,6 +18,7 @@ from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
@@ -375,7 +376,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     def test_basket_calculate_program_offer(self):
         """ Verify successful basket calculation with a program offer """
-
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         offer = ProgramOfferFactory(benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100))
         program_uuid = offer.condition.program_uuid
         self.mock_program_detail_endpoint(program_uuid)

@@ -28,6 +28,7 @@ class ProgramsApiClient(object):
         Returns:
             dict
         """
+        print self.client.__dict__
         program_uuid = str(uuid)
         cache_key = '{site_domain}-program-{uuid}'.format(site_domain=self.site_domain, uuid=program_uuid)
 

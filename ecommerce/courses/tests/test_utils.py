@@ -115,6 +115,7 @@ class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
         Verify that method "get_course_catalogs" returns proper response for a
         single catalog by its id.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         self.mock_discovery_api_for_catalog_by_resource_id()
 
         catalog_id = 1
@@ -143,6 +144,7 @@ class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
         single page Course Discovery API response and uses cache to return data
         in case of same API request.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         self.mock_discovery_api(catalog_name_list)
 
         self._assert_get_course_catalogs(catalog_name_list)
@@ -160,6 +162,7 @@ class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
         Verify that method "get_course_catalogs" returns all catalogs for
         paginated Course Discovery API response for multiple catalogs.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         catalog_name_list = ['Catalog 1', 'Catalog 2', 'Catalog 3']
         self.mock_discovery_api_for_paginated_catalogs(catalog_name_list)
 
