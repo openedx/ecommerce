@@ -540,7 +540,9 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_catalog_detail_endpoint(catalog_id=catalog_id, expected_query=catalog_query, expected_status=status.HTTP_200_OK)
+        self.mock_catalog_detail_endpoint(
+            catalog_id=catalog_id, expected_query=catalog_query, expected_status=status.HTTP_200_OK
+        )
         self.mock_course_runs_endpoint(query=catalog_query, course_run=course)
 
         benefit = voucher.offers.first().benefit
@@ -586,7 +588,9 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_catalog_detail_endpoint(catalog_id=catalog_id, expected_query=catalog_query, expected_status=status.HTTP_404_NOT_FOUND)
+        self.mock_catalog_detail_endpoint(
+            catalog_id=catalog_id, expected_query=catalog_query, expected_status=status.HTTP_404_NOT_FOUND
+        )
         self.mock_course_runs_endpoint(query=catalog_query, course_run=course)
 
         request = self.prepare_offers_listing_request(voucher.code)
