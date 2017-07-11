@@ -425,6 +425,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin,
         """
         Test that using a voucher with a program basket results in a fulfilled order.
         """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         self.create_seat_and_order(certificate_type='credit', provider='MIT')

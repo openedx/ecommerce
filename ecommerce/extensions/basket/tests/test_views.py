@@ -463,7 +463,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, DiscoveryMockMixin, LmsApiM
         no_ec_course = CourseFactory()
         seat_without_ec = no_ec_course.create_or_update_seat('verified', False, 10, self.partner)
         self.create_basket_and_add_product(seat_without_ec)
-        self.mock_dynamic_catalog_course_runs_api(course_run=no_ec_course)
+        self.mock_course_runs_endpoint(course_run=no_ec_course)
 
         response = self.client.get(self.path)
         self.assertFalse(response.context['switch_link_text'])
