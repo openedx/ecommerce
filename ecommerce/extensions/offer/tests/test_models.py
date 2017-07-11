@@ -15,7 +15,6 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
-from ecommerce.courses.tests.mixins import DiscoveryServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -26,7 +25,7 @@ Range = get_model('offer', 'Range')
 
 @ddt.ddt
 @httpretty.activate
-class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin, DiscoveryMockMixin, TestCase):
+class RangeTests(CouponMixin, CourseCatalogTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
         super(RangeTests, self).setUp()
 
@@ -108,7 +107,7 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_contains_api(query='key:*', course_run_ids=[course.id])
+        self.mock_course_runs_contains_endpoint(query='key:*', course_run_ids=[course.id])
         request = RequestFactory()
         request.site = self.site
         self.range.catalog_query = 'key:*'
@@ -137,7 +136,7 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_contains_api(query='key:*', course_run_ids=[course.id])
+        self.mock_course_runs_contains_endpoint(query='key:*', course_run_ids=[course.id])
 
         false_response = self.range.contains_product(seat)
         self.assertFalse(false_response)
@@ -156,13 +155,13 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         catalog_query = 'key:*'
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[course.id])
+        self.mock_course_runs_contains_endpoint(query=catalog_query, course_run_ids=[course.id])
 
         false_response = self.range.contains_product(seat)
         self.assertFalse(false_response)
 
         course_catalog_id = 1
-        self.mock_discovery_api_for_catalog_contains(
+        self.mock_catalog_contains_endpoint(
             catalog_id=course_catalog_id, course_run_ids=[course.id]
         )
         self.range.catalog_query = None
@@ -221,7 +220,7 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         self.range.course_catalog = course_catalog
         self.range.save()
 
-        self.mock_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        self.mock_catalog_contains_endpoint(catalog_id=course_catalog, course_run_ids=[course.id])
         self.mock_access_token_response()
         is_product_in_range = self.range.contains_product(seat)
         self.assertTrue(is_product_in_range)
@@ -248,7 +247,7 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         self.range.course_catalog = course_catalog
         self.range.save()
 
-        self.mock_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        self.mock_catalog_contains_endpoint(catalog_id=course_catalog, course_run_ids=[course.id])
         is_product_in_range = self.range.contains_product(invalid_course_seat)
         self.assertFalse(is_product_in_range)
         # Verify that there was no call for the course discovery API as Range
@@ -264,7 +263,7 @@ class RangeTests(CouponMixin, DiscoveryServiceMockMixin, CourseCatalogTestMixin,
         self.assertEqual(len(self.range.all_products()), 1)
         self.assertFalse(seat in self.range.all_products())
 
-        self.mock_dynamic_catalog_course_runs_api(query='key:*', course_run=course)
+        self.mock_course_runs_endpoint(query='key:*', course_run=course)
         self.range.catalog_query = 'key:*'
         self.range.course_seat_types = 'verified'
         self.assertEqual(len(self.range.all_products()), 0)

@@ -139,7 +139,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, CourseCatalogTestMixin, LmsApiM
             course_seat_types='verified'
     ):
         toggle_switch("use_multi_tenant_discovery_api_urls", True)
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_course_runs_endpoint()
         return self.create_coupon(
             title=coupon_title,
             quantity=quantity,
@@ -459,7 +459,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, CourseCatalogTestMixin, LmsApiM
         """ Verify empty report fields for query coupons. """
         toggle_switch("use_multi_tenant_discovery_api_urls", True)
         catalog_query = 'course:*'
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_course_runs_endpoint()
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         query_coupon.history.all().update(history_user=self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
@@ -564,8 +564,8 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, CourseCatalogTestMixin, LmsApiM
         """Test that used query coupon voucher reports which course was it used for."""
         toggle_switch("use_multi_tenant_discovery_api_urls", True)
         catalog_query = '*:*'
-        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=self.course)
-        self.mock_dynamic_catalog_contains_api(course_run_ids=[self.verified_seat.course_id], query=catalog_query)
+        self.mock_course_runs_endpoint(query=catalog_query, course_run=self.course)
+        self.mock_course_runs_contains_endpoint(course_run_ids=[self.verified_seat.course_id], query=catalog_query)
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         query_coupon.history.all().update(history_user=self.user)
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()

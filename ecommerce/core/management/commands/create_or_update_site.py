@@ -130,7 +130,7 @@ class Command(BaseCommand):
                             type=str,
                             required=False,
                             default='',
-                            help='URL for Discovery service API calls (e.g. http://localhost:8008/api/v1/).')
+                            help='URL for Discovery service API calls.')
 
     def handle(self, *args, **options):
         site_id = options.get('site_id')
@@ -185,7 +185,7 @@ class Command(BaseCommand):
                 'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [lms_url_root]
             },
             'base_cookie_domain': base_cookie_domain,
-            'discovery_api_url': discovery_api_url
+            'discovery_api_url': discovery_api_url,
         }
         if payment_support_email:
             site_configuration_defaults['payment_support_email'] = payment_support_email

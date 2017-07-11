@@ -9,7 +9,6 @@ from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.tests.mixins import DiscoveryServiceMockMixin
 from ecommerce.courses.utils import (
     get_certificate_type_display_value, get_course_catalogs, get_course_info_from_catalog, mode_for_seat
 )
@@ -45,7 +44,7 @@ class UtilsTests(CourseCatalogTestMixin, DiscoveryMockMixin, TestCase):
         """ Check to see if course info gets cached """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course = CourseFactory()
-        self.mock_dynamic_discovery_single_course_runs_api(course)
+        self.mock_course_run_detail_endpoint(course)
 
         cache_key = 'courses_api_detail_{}{}'.format(course.id, self.site.siteconfiguration.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
@@ -78,7 +77,7 @@ class UtilsTests(CourseCatalogTestMixin, DiscoveryMockMixin, TestCase):
 
 @ddt.ddt
 @httpretty.activate
-class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
+class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
 
     def tearDown(self):
         # Reset HTTPretty state (clean up registered urls and request history)
@@ -116,7 +115,7 @@ class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
         single catalog by its id.
         """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
-        self.mock_discovery_api_for_catalog_by_resource_id()
+        self.mock_catalog_detail_endpoint()
 
         catalog_id = 1
         cache_key = '{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
@@ -126,7 +125,7 @@ class GetCourseCatalogUtilTests(DiscoveryServiceMockMixin, TestCase):
 
         self.mock_access_token_response()
         response = get_course_catalogs(self.request.site, catalog_id)
-        self.assertEqual(response['name'], 'Catalog {}'.format(catalog_id))
+        self.assertEqual(response['name'], 'All Courses')
 
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)

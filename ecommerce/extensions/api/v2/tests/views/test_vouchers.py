@@ -113,7 +113,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, CourseCatalogTestMixin, LmsApiMock
                 new_range.add_product(seat)
                 products.append(seat)
 
-        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run_info=course_run_info)
+        self.mock_course_runs_endpoint(query='*:*', course_run_info=course_run_info)
         voucher, __ = prepare_voucher(_range=new_range)
 
         factory = APIRequestFactory()
@@ -246,7 +246,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         """ Verify the endpoint returns offers data when a single product is in voucher range. """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_discovery_single_course_runs_api(course)
+        self.mock_course_run_detail_endpoint(course)
         new_range = RangeFactory(products=[seat, ])
         new_range.catalog = Catalog.objects.create(partner=self.partner)
         new_range.catalog.stock_records.add(StockRecord.objects.get(product=seat))
@@ -296,7 +296,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         """ Verify the endpoint returns offers data for single product range. """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_discovery_single_course_runs_api(course)
+        self.mock_course_run_detail_endpoint(course)
 
         new_range = RangeFactory(products=[seat, ])
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
@@ -325,7 +325,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
+        self.mock_course_runs_endpoint(query='*:*', course_run=course)
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range)
@@ -340,7 +340,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         """ Verify the endpoint returns offers data for single product range. """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
+        self.mock_course_runs_endpoint(query='*:*', course_run=course)
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range)
@@ -359,7 +359,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
-        self.mock_dynamic_discovery_single_course_runs_api(course)
+        self.mock_course_run_detail_endpoint(course)
         self.mock_access_token_response()
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
@@ -387,7 +387,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         """ Verify that the course offers data is returned for a multiple courses voucher. """
         toggle_switch('use_multi_tenant_discovery_api_urls', True)
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_course_runs_api(query='*:*', course_run=course)
+        self.mock_course_runs_endpoint(query='*:*', course_run=course)
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
@@ -428,8 +428,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=course)
-        self.mock_fetch_course_catalog(catalog_id=catalog_id, expected_query=catalog_query)
+        self.mock_course_runs_endpoint(query=catalog_query, course_run=course)
+        self.mock_catalog_detail_endpoint(catalog_id=catalog_id, expected_query=catalog_query)
 
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
@@ -540,9 +540,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_discovery_api_for_catalog_voucher(
-            catalog_id=catalog_id, query=catalog_query, course_run=course
-        )
+        self.mock_catalog_detail_endpoint(catalog_id=catalog_id, expected_query=catalog_query, expected_status=status.HTTP_200_OK)
+        self.mock_course_runs_endpoint(query=catalog_query, course_run=course)
 
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
@@ -587,9 +586,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, CourseCata
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_discovery_api_for_catalog_voucher(
-            catalog_id=catalog_id, query=catalog_query, expected_status=status.HTTP_404_NOT_FOUND, course_run=course
-        )
+        self.mock_catalog_detail_endpoint(catalog_id=catalog_id, expected_query=catalog_query, expected_status=status.HTTP_404_NOT_FOUND)
+        self.mock_course_runs_endpoint(query=catalog_query, course_run=course)
 
         request = self.prepare_offers_listing_request(voucher.code)
         response = self.endpointView(request)

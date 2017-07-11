@@ -11,7 +11,6 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
-from ecommerce.courses.tests.mixins import DiscoveryServiceMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
 from ecommerce.tests.mixins import ApiMockMixin
@@ -23,7 +22,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 @httpretty.activate
 @ddt.ddt
-class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, DiscoveryServiceMockMixin, ApiMockMixin, TestCase):
+class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCase):
     """Test the Catalog and related products APIs."""
 
     catalog_list_path = reverse('api:v2:catalog-list')
@@ -102,7 +101,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, DiscoveryServiceMockM
     def test_preview_success(self):
         """ Verify the endpoint returns a list of catalogs from the Catalog API. """
         toggle_switch("use_multi_tenant_discovery_api_urls", True)
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_course_runs_endpoint()
 
         url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
         self.mock_access_token_response()
