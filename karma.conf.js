@@ -2,7 +2,12 @@
 // Generated on Tue Jul 21 2015 10:10:16 GMT-0400 (EDT)
 
 module.exports = function(config) {
-  config.set({
+    const coveragePath = 'ecommerce/static/js/!(test)/**/*.js';
+    var preprocessors = {};
+
+    preprocessors[coveragePath] = ['coverage'];
+
+    config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -29,9 +34,7 @@ module.exports = function(config) {
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {
-        'ecommerce/static/js/!(test)/**/*.js': ['coverage']
-    },
+    preprocessors: preprocessors,
 
     // enabled plugins
     plugins:[
@@ -39,6 +42,7 @@ module.exports = function(config) {
        'karma-jasmine',
        'karma-requirejs',
        'karma-firefox-launcher',
+       'karma-coverage-allsources',
        'karma-coverage',
        'karma-spec-reporter',
        'karma-sinon'
@@ -46,6 +50,7 @@ module.exports = function(config) {
 
     // Karma coverage config
     coverageReporter: {
+        include: coveragePath,
         reporters: [
             {type: 'text'},
             { type: 'lcov', subdir: 'report-lcov' }
@@ -55,7 +60,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['spec', 'coverage'],
+    reporters: ['spec', 'coverage-allsources', 'coverage'],
 
     // web server port
     port: 9876,
