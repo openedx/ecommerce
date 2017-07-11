@@ -1,9 +1,15 @@
 import itertools
+import mock
 
+from analytics import Client
 from django.contrib.sites.models import Site
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
+from ecommerce.extensions.test.factories import create_basket
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -113,3 +119,44 @@ class BasketTests(TestCase):
         basket = Basket.create_basket(self.site1, user)
         self.assertEqual(basket.site, self.site1)
         self.assertEqual(basket.owner, user)
+
+    def test_flush_with_product(self):
+        """
+        Verify the method fires 'Product Removed' Segment event with the correct information when basket is not empty
+        """
+        self.site1.siteconfiguration = SiteConfigurationFactory()
+        self.site1.siteconfiguration.segment_key = 'fake_key'
+        basket = create_basket(empty=True)
+        basket.owner = factories.UserFactory()
+        basket.site = self.site1
+        basket.save()
+
+        course = CourseFactory()
+        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        basket.add_product(seat)
+
+        properties = translate_basket_line_for_segment(basket.lines.first())
+        user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(basket.owner)
+        context = {
+            'ip': lms_ip,
+            'Google Analytics': {
+                'clientId': lms_client_id
+            }
+        }
+
+        with mock.patch.object(Client, 'track') as mock_track:
+            basket.flush()
+            mock_track.assert_called_once_with(user_tracking_id, 'Product Removed', properties, context=context)
+
+    def test_flush_without_product(self):
+        """ Verify the method does not fireSegment event when basket is empty """
+        self.site1.siteconfiguration = SiteConfigurationFactory()
+        self.site1.siteconfiguration.segment_key = 'fake_key'
+
+        basket = create_basket(empty=True)
+        basket.owner = factories.UserFactory()
+        basket.site = self.site1
+
+        with mock.patch.object(Client, 'track') as mock_track:
+            basket.flush()
+            self.assertEqual(mock_track.call_count, 0)

@@ -3,6 +3,9 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
 
+from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
+
+
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
 
@@ -45,6 +48,13 @@ class Basket(AbstractBasket):
 
         return basket
 
+    def flush(self):
+        """Remove all products in basket and fire Segment 'Product Removed' Analytic event for each"""
+        for line in self.all_lines():
+            properties = translate_basket_line_for_segment(line)
+            track_segment_event(self.site, self.owner, 'Product Removed', properties)
+        super(Basket, self).flush()  # pylint: disable=bad-super-call
+
     def clear_vouchers(self):
         """Remove all vouchers applied to the basket."""
         for v in self.vouchers.all():
@@ -85,4 +95,4 @@ class BasketAttribute(models.Model):
 
 
 # noinspection PyUnresolvedReferences
-from oscar.apps.basket.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+from oscar.apps.basket.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
