@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 define([
     'backbone',
     'backbone.relational'

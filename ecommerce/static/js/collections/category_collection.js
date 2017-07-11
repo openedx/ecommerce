@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 define([
     'collections/paginated_collection',
     'models/category'
