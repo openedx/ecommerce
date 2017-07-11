@@ -3,6 +3,7 @@ from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TestCase as DjangoTestCase
 from django.test import TransactionTestCase as DjangoTransactionTestCase
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 
 
@@ -22,7 +23,11 @@ class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoTestC
 
     This class guarantees that tests have a Site and Partner available.
     """
-    pass
+    # TODO: This is a temporary setUp which should be removed together with the switch and COURSE_CATALOG_API_URL
+    # once the site-specific URL feature gets approved. This work is part of LEARNER-1135.
+    def setUp(self):
+        super(TestCase, self).setUp()
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
 
 
 class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoLiveServerTestCase):

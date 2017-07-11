@@ -24,7 +24,7 @@ def mode_for_seat(product):
 
 def get_course_info_from_catalog(site, course_key):
     """ Get course information from catalog service and cache """
-    api = site.siteconfiguration.course_catalog_api_client
+    api = site.siteconfiguration.discovery_api_client
     partner_short_code = site.siteconfiguration.partner.short_code
     cache_key = 'courses_api_detail_{}{}'.format(course_key, partner_short_code)
     cache_key = hashlib.md5(cache_key).hexdigest()
@@ -61,7 +61,7 @@ def get_course_catalogs(site, resource_id=None):
     if cached:
         return cached
 
-    api = site.siteconfiguration.course_catalog_api_client
+    api = site.siteconfiguration.discovery_api_client
     endpoint = getattr(api, resource)
     response = endpoint(resource_id).get()
 

@@ -429,7 +429,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin,
         parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
         program_uuid = uuid.uuid4()
-        self.mock_program_detail_endpoint(program_uuid)
+        self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
         self.prepare_basket_with_voucher(program_uuid=program_uuid)
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         # No exceptions should be raised and the order should be fulfilled

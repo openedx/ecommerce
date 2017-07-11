@@ -2,7 +2,6 @@ import json
 from decimal import Decimal
 
 import httpretty
-from django.conf import settings
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
@@ -10,7 +9,7 @@ from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 
 
 class ProgramTestMixin(CourseCatalogTestMixin):
-    def mock_program_detail_endpoint(self, program_uuid):
+    def mock_program_detail_endpoint(self, program_uuid, discovery_api_url):
         """ Mocks the program detail endpoint on the Catalog API.
         Args:
             program_uuid (uuid): UUID of the mocked program.
@@ -52,7 +51,7 @@ class ProgramTestMixin(CourseCatalogTestMixin):
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{base}/programs/{uuid}/'.format(base=settings.COURSE_CATALOG_API_URL.strip('/'), uuid=program_uuid),
+            uri='{base}/programs/{uuid}/'.format(base=discovery_api_url.strip('/'), uuid=program_uuid),
             body=json.dumps(data),
             content_type='application/json'
         )

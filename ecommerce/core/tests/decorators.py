@@ -29,9 +29,9 @@ def mock_course_catalog_api_client(test):
         @functools.wraps(test)
         def wrapper(*args, **kw):
             with mock.patch(
-                'ecommerce.core.models.SiteConfiguration.course_catalog_api_client',
+                'ecommerce.core.models.SiteConfiguration.discovery_api_client',
                 mock.PropertyMock(return_value=EdxRestApiClient(
-                    settings.COURSE_CATALOG_API_URL,
+                    'http://testserver.fake/api/v1/',
                     jwt='auth-token'
                 ))
             ):

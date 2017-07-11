@@ -108,7 +108,9 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         run_course_query() should return True for included course run ID's.
         """
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_contains_api(query='key:*', course_run_ids=[course.id])
+        self.mock_dynamic_catalog_contains_api(
+            query='key:*', course_run_ids=[course.id], discovery_api_url=self.site_configuration.discovery_api_url
+        )
         request = RequestFactory()
         request.site = self.site
         self.range.catalog_query = 'key:*'
@@ -136,7 +138,9 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         contains_product() should return the correct boolean if a product is in it's range.
         """
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_contains_api(query='key:*', course_run_ids=[course.id])
+        self.mock_dynamic_catalog_contains_api(
+            query='key:*', course_run_ids=[course.id], discovery_api_url=self.site_configuration.discovery_api_url
+        )
 
         false_response = self.range.contains_product(seat)
         self.assertFalse(false_response)
@@ -154,14 +158,18 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         """
         catalog_query = 'key:*'
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_contains_api(query=catalog_query, course_run_ids=[course.id])
+        self.mock_dynamic_catalog_contains_api(
+            query=catalog_query, course_run_ids=[course.id],
+            discovery_api_url=self.site_configuration.discovery_api_url
+        )
 
         false_response = self.range.contains_product(seat)
         self.assertFalse(false_response)
 
         course_catalog_id = 1
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=course_catalog_id, course_run_ids=[course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog_id,
+            course_run_ids=[course.id]
         )
         self.range.catalog_query = None
         self.range.course_seat_types = 'verified'
@@ -189,7 +197,7 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.course_catalog = course_catalog_id
         self.range.save()
 
-        self.mock_catalog_api_failure(error, course_catalog_id)
+        self.mock_catalog_api_failure(error, self.site_configuration.discovery_api_url, course_catalog_id)
         with self.assertRaises(Exception) as error:
             self.range.contains_product(seat)
 
@@ -218,7 +226,10 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.course_catalog = course_catalog
         self.range.save()
 
-        self.mock_course_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        self.mock_course_discovery_api_for_catalog_contains(
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog,
+            course_run_ids=[course.id]
+        )
         is_product_in_range = self.range.contains_product(seat)
         self.assertTrue(is_product_in_range)
         # Verify that there only one call for the course discovery API for
@@ -245,7 +256,10 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.range.course_catalog = course_catalog
         self.range.save()
 
-        self.mock_course_discovery_api_for_catalog_contains(catalog_id=course_catalog, course_run_ids=[course.id])
+        self.mock_course_discovery_api_for_catalog_contains(
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog,
+            course_run_ids=[course.id]
+        )
         is_product_in_range = self.range.contains_product(invalid_course_seat)
         self.assertFalse(is_product_in_range)
         # Verify that there was no call for the course discovery API as Range
@@ -261,7 +275,9 @@ class RangeTests(CouponMixin, CourseCatalogServiceMockMixin, CourseCatalogTestMi
         self.assertEqual(len(self.range.all_products()), 1)
         self.assertFalse(seat in self.range.all_products())
 
-        self.mock_dynamic_catalog_course_runs_api(query='key:*', course_run=course)
+        self.mock_dynamic_catalog_course_runs_api(
+            self.site_configuration.discovery_api_url, query='key:*', course_run=course
+        )
         self.range.catalog_query = 'key:*'
         self.range.course_seat_types = 'verified'
         self.assertEqual(len(self.range.all_products()), 0)

@@ -46,7 +46,9 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
     def test_get_course_info_from_catalog(self):
         """ Check to see if course info gets cached """
         course = CourseFactory()
-        self.mock_dynamic_catalog_single_course_runs_api(course)
+        self.mock_dynamic_catalog_single_course_runs_api(
+            course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
 
         cache_key = 'courses_api_detail_{}{}'.format(course.id, self.site.siteconfiguration.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
@@ -115,7 +117,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         Verify that method "get_course_catalogs" returns proper response for a
         single catalog by its id.
         """
-        self.mock_course_discovery_api_for_catalog_by_resource_id()
+        self.mock_course_discovery_api_for_catalog_by_resource_id(self.site_configuration.discovery_api_url)
 
         catalog_id = 1
         cache_key = '{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
@@ -143,7 +145,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         single page Course Discovery API response and uses cache to return data
         in case of same API request.
         """
-        self.mock_catalog_api(catalog_name_list)
+        self.mock_catalog_api(catalog_name_list, self.site_configuration.discovery_api_url)
 
         self._assert_get_course_catalogs(catalog_name_list)
 
@@ -162,7 +164,9 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         paginated Course Discovery API response for multiple catalogs.
         """
         catalog_name_list = ['Catalog 1', 'Catalog 2', 'Catalog 3']
-        self.mock_course_discovery_api_for_paginated_catalogs(catalog_name_list)
+        self.mock_course_discovery_api_for_paginated_catalogs(
+            catalog_name_list, self.site_configuration.discovery_api_url
+        )
 
         self._assert_get_course_catalogs(catalog_name_list)
 
@@ -176,7 +180,7 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         the Course Discovery API fails to return data.
         """
         exception = ConnectionError
-        self.mock_catalog_api_failure(exception)
+        self.mock_catalog_api_failure(exception, self.site_configuration.discovery_api_url)
 
         with self.assertRaises(exception):
             get_course_catalogs(self.request.site)

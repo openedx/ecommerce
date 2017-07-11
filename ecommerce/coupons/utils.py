@@ -68,7 +68,7 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
 
     response = cache.get(cache_key)
     if not response:
-        api = site.siteconfiguration.course_catalog_api_client
+        api = site.siteconfiguration.discovery_api_client
         endpoint = getattr(api, api_resource_name)
 
         if limit:
@@ -152,7 +152,7 @@ def fetch_course_catalog(site, catalog_id):
 
     response = cache.get(cache_key)
     if not response:
-        api = site.siteconfiguration.course_catalog_api_client
+        api = site.siteconfiguration.discovery_api_client
         endpoint = getattr(api, api_resource)
 
         try:

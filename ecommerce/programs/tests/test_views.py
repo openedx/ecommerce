@@ -72,7 +72,7 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         program_offers = factories.ProgramOfferFactory.create_batch(4)
 
         for offer in program_offers:
-            self.mock_program_detail_endpoint(offer.condition.program_uuid)
+            self.mock_program_detail_endpoint(offer.condition.program_uuid, self.site_configuration.discovery_api_url)
 
         response = self.assert_get_response_status(200)
         self.assertEqual(list(response.context['object_list']), program_offers)
@@ -94,7 +94,7 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         ]
 
         for offer in program_offers:
-            self.mock_program_detail_endpoint(offer.condition.program_uuid)
+            self.mock_program_detail_endpoint(offer.condition.program_uuid, self.site_configuration.discovery_api_url)
 
         response = self.client.get(self.path)
         self.assertEqual(list(response.context['object_list']), [site_conditional_offer])
@@ -108,7 +108,9 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
 
         # NOTE: We activate httpretty here so that we don't have to decorate every test method.
         httpretty.enable()
-        self.mock_program_detail_endpoint(self.program_offer.condition.program_uuid)
+        self.mock_program_detail_endpoint(
+            self.program_offer.condition.program_uuid, self.site_configuration.discovery_api_url
+        )
 
     def tearDown(self):
         super(ProgramOfferUpdateViewTests, self).tearDown()
@@ -143,7 +145,7 @@ class ProgramOfferCreateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
     def test_post(self):
         """ A new program offer should be created. """
         expected_uuid = uuid.uuid4()
-        self.mock_program_detail_endpoint(expected_uuid)
+        self.mock_program_detail_endpoint(expected_uuid, self.site_configuration.discovery_api_url)
         expected_benefit_value = 10
         data = {
             'program_uuid': expected_uuid,
