@@ -375,10 +375,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     def test_basket_calculate_program_offer(self):
         """ Verify successful basket calculation with a program offer """
-
         offer = ProgramOfferFactory(benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100))
         program_uuid = offer.condition.program_uuid
-        self.mock_program_detail_endpoint(program_uuid)
+        self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
 
         response = self.client.get(self.url)
         expected = {

@@ -22,7 +22,7 @@ class ProgramOfferTests(ProgramTestMixin, TestCase):
         basket = factories.BasketFactory(site=self.site, owner=self.create_user())
 
         program_uuid = offer.condition.program_uuid
-        program = self.mock_program_detail_endpoint(program_uuid)
+        program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
 
         # Add one course run seat from each course to the basket.
         for course in program['courses']:

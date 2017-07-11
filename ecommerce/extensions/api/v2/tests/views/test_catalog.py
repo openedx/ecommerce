@@ -102,7 +102,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
     @mock_course_catalog_api_client
     def test_preview_success(self):
         """ Verify the endpoint returns a list of catalogs from the Catalog API. """
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url)
 
         url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
         response = self.client.get(url)
@@ -140,7 +140,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         with catalogs in alphabetical order.
         """
         catalogs = ('Clean Catalog', 'ABC Catalog', 'New Catalog', 'Edx Catalog',)
-        self.mock_catalog_api(catalogs)
+        self.mock_catalog_api(catalogs, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
         self.assertEqual(response.status_code, 200)
@@ -156,7 +156,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         empty results list in case the Course Discovery API fails to return
         data.
         """
-        self.mock_catalog_api_failure(ConnectionError)
+        self.mock_catalog_api_failure(ConnectionError, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
 

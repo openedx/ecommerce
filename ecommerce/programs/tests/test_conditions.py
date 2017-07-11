@@ -23,7 +23,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     def test_get_program(self):
         """ The method should return data from the Catalog Service API. Data should be cached for subsequent calls. """
-        data = self.mock_program_detail_endpoint(self.condition.program_uuid)
+        data = self.mock_program_detail_endpoint(self.condition.program_uuid, self.site_configuration.discovery_api_url)
         self.assertEqual(self.condition.get_program(self.site.siteconfiguration), data)
 
         # The program data should be cached
@@ -36,7 +36,9 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         course in the program. """
         offer = factories.ProgramOfferFactory(condition=self.condition)
         basket = factories.BasketFactory(site=self.site)
-        program = self.mock_program_detail_endpoint(self.condition.program_uuid)
+        program = self.mock_program_detail_endpoint(
+            self.condition.program_uuid, self.site_configuration.discovery_api_url
+        )
 
         # Extract one audit and one verified seat for each course
         audit_seats = []

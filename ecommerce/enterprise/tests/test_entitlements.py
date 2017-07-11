@@ -145,7 +145,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=enterprise_catalog_id,
+            course_run_ids=[self.course.id]
         )
 
         entitlement_voucher = get_entitlement_voucher(self.request, self.course.products.first())
@@ -166,7 +167,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         )
         self.mock_enterprise_learner_entitlements_api(entitlement_id=non_existing_coupon_id)
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=non_existing_coupon_id, course_run_ids=[self.course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=non_existing_coupon_id,
+            course_run_ids=[self.course.id]
         )
 
         logger_name = 'ecommerce.enterprise.entitlements'
@@ -198,7 +200,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.mock_enterprise_learner_api(entitlement_id=coupon.id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=coupon.id)
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=catalog_id, course_run_ids=[self.course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=catalog_id,
+            course_run_ids=[self.course.id]
         )
         course_vouchers = get_course_vouchers_for_learner(self.request.site, self.request.user, self.course.id)
 
@@ -247,7 +250,9 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         learner_id = 1
         self.mock_enterprise_learner_api(learner_id=learner_id)
         self.mock_learner_entitlements_api_failure(learner_id=learner_id)
-        self.mock_course_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
+        self.mock_course_discovery_api_for_catalog_contains(
+            discovery_api_url=self.site_configuration.discovery_api_url, course_run_ids=[self.course.id]
+        )
 
         self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
@@ -266,7 +271,9 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         learner_id = 1
         self.mock_enterprise_learner_api(learner_id=learner_id)
         self.mock_learner_entitlements_api_failure(learner_id=learner_id, status=200)
-        self.mock_course_discovery_api_for_catalog_contains(course_run_ids=[self.course.id])
+        self.mock_course_discovery_api_for_catalog_contains(
+            discovery_api_url=self.site_configuration.discovery_api_url, course_run_ids=[self.course.id]
+        )
 
         self._assert_get_course_entitlements_for_learner_response(
             expected_entitlements=None,
@@ -337,7 +344,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         self.mock_enterprise_learner_api(entitlement_id=enterprise_catalog_id)
         self.mock_enterprise_learner_entitlements_api(entitlement_id=enterprise_catalog_id)
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=enterprise_catalog_id,
+            course_run_ids=[self.course.id]
         )
 
         non_enterprise_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
@@ -359,7 +367,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         """
         enterprise_catalog_id = 1
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=enterprise_catalog_id,
+            course_run_ids=[self.course.id]
         )
 
         is_course_available = is_course_in_enterprise_catalog(self.request.site, self.course.id, enterprise_catalog_id)
@@ -377,7 +386,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         """
         enterprise_catalog_id = 1
         self.mock_course_discovery_api_for_catalog_contains(
-            catalog_id=enterprise_catalog_id, course_run_ids=[self.course.id]
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=enterprise_catalog_id,
+            course_run_ids=[self.course.id]
         )
 
         test_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
@@ -397,7 +407,7 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         to fetch catalog against the provided enterprise course catalog id.
         """
         enterprise_catalog_id = 1
-        self.mock_catalog_api_failure(error, enterprise_catalog_id)
+        self.mock_catalog_api_failure(error, self.site_configuration.discovery_api_url, enterprise_catalog_id)
 
         expected_number_of_requests = 1
         log_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
@@ -414,7 +424,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, CourseCatalogServiceMockMixi
         """
         enterprise_catalog_id = 1
         self.mock_get_catalog_contains_api_for_failure(
-            course_run_ids=[self.course.id], catalog_id=enterprise_catalog_id, error=error
+            course_run_ids=[self.course.id], catalog_id=enterprise_catalog_id, error=error,
+            discovery_api_url=self.site_configuration.discovery_api_url
         )
 
         expected_number_of_requests = 1

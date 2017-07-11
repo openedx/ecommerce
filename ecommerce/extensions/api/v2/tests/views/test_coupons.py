@@ -780,7 +780,9 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         })
         self.data.pop('stock_record_ids')
         course, __ = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
-        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=course)
+        self.mock_dynamic_catalog_course_runs_api(
+            self.site_configuration.discovery_api_url, query=catalog_query, course_run=course
+        )
 
         response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         coupon_id = json.loads(response.content)['coupon_id']

@@ -139,7 +139,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             catalog_query='*:*',
             course_seat_types='verified'
     ):
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url)
         return self.create_coupon(
             title=coupon_title,
             quantity=quantity,
@@ -458,7 +458,7 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
     def test_generate_coupon_report_for_query_coupons(self):
         """ Verify empty report fields for query coupons. """
         catalog_query = 'course:*'
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url)
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         query_coupon.history.all().update(history_user=self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
@@ -562,8 +562,13 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
     def test_generate_coupon_report_for_used_query_coupon(self):
         """Test that used query coupon voucher reports which course was it used for."""
         catalog_query = '*:*'
-        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=self.course)
-        self.mock_dynamic_catalog_contains_api(course_run_ids=[self.verified_seat.course_id], query=catalog_query)
+        self.mock_dynamic_catalog_course_runs_api(
+            self.site_configuration.discovery_api_url, query=catalog_query, course_run=self.course
+        )
+        self.mock_dynamic_catalog_contains_api(
+            course_run_ids=[self.verified_seat.course_id], query=catalog_query,
+            discovery_api_url=self.site_configuration.discovery_api_url
+        )
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         query_coupon.history.all().update(history_user=self.user)
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()

@@ -74,7 +74,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
     def test_save_create(self):
         """ A new ConditionalOffer, Benefit, and Condition should be created. """
         data = self.generate_data()
-        self.mock_program_detail_endpoint(data['program_uuid'])
+        self.mock_program_detail_endpoint(data['program_uuid'], self.site_configuration.discovery_api_url)
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
@@ -85,7 +85,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         """ Previously-created ConditionalOffer, Benefit, and Condition instances should be updated. """
         offer = factories.ProgramOfferFactory()
         data = self.generate_data(program_uuid=offer.condition.program_uuid, benefit_type=Benefit.FIXED)
-        self.mock_program_detail_endpoint(data['program_uuid'])
+        self.mock_program_detail_endpoint(data['program_uuid'], self.site_configuration.discovery_api_url)
         form = ProgramOfferForm(request=self.request, data=data, instance=offer)
         form.is_valid()
         form.save()
@@ -98,7 +98,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         """ No data should be persisted to the database if the commit kwarg is set to False. """
         data = self.generate_data()
         form = ProgramOfferForm(request=self.request, data=data)
-        self.mock_program_detail_endpoint(data['program_uuid'])
+        self.mock_program_detail_endpoint(data['program_uuid'], self.site_configuration.discovery_api_url)
         form.is_valid()
         instance = form.save(commit=False)
         self.assertIsNone(instance.pk)
@@ -109,7 +109,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
     def test_save_offer_name(self):
         """ If a request object is sent, the offer name should include program title and type. """
         data = self.generate_data()
-        self.mock_program_detail_endpoint(data['program_uuid'])
+        self.mock_program_detail_endpoint(data['program_uuid'], self.site_configuration.discovery_api_url)
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
