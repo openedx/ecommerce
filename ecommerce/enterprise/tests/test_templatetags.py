@@ -4,7 +4,6 @@ from django.conf import settings
 from django.template import Context, Template
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_enterprise_api_client
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -21,7 +20,6 @@ class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestC
         # Enable enterprise functionality
         toggle_switch(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH, True)
 
-    @mock_enterprise_api_client
     def test_enterprise_customer_for_voucher(self):
         """
         Verify that enterprise_customer_for_voucher assignment tag returns correct

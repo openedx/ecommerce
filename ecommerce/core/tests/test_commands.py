@@ -29,6 +29,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.payment_support_email = 'support@example.com'
         self.payment_support_url = 'http://fake.server/support'
         self.base_cookie_domain = '.fake.server'
+        self.discovery_api_url = 'https://fake.discovery.server/api/v1/'
 
     def _check_site_configuration(self, site, partner):
         site_configuration = site.siteconfiguration
@@ -41,12 +42,13 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'], self.client_secret)
         self.assertEqual(site_configuration.segment_key, self.segment_key)
         self.assertEqual(site_configuration.from_email, self.from_email)
+        self.assertEqual(site_configuration.discovery_api_url, self.discovery_api_url)
 
     def _call_command(self, site_domain, partner_code, lms_url_root, client_id, client_secret, from_email,
                       site_id=None, site_name=None, partner_name=None, payment_processors=None, segment_key=None,
                       enable_enrollment_codes=False, payment_support_email=None, payment_support_url=None,
                       send_refund_notifications=False, client_side_payment_processor=None,
-                      disable_otto_receipt_page=False, base_cookie_domain=None):
+                      disable_otto_receipt_page=False, base_cookie_domain=None, discovery_api_url=None):
         """
         Internal helper method for interacting with the create_or_update_site management command
         """
@@ -98,6 +100,11 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         if disable_otto_receipt_page:
             command_args.append('--disable-otto-receipt-page')
 
+        if discovery_api_url:
+            command_args.append('--discovery_api_url={discovery_api_url}'.format(
+                discovery_api_url=discovery_api_url
+            ))
+
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -113,7 +120,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             client_id=self.client_id,
             client_secret=self.client_secret,
             segment_key=self.segment_key,
-            from_email=self.from_email
+            from_email=self.from_email,
+            discovery_api_url=self.discovery_api_url,
         )
 
         site = Site.objects.get(domain=site_domain)
@@ -148,7 +156,8 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             payment_support_url=self.payment_support_url,
             send_refund_notifications=True,
             disable_otto_receipt_page=True,
-            base_cookie_domain=self.base_cookie_domain
+            base_cookie_domain=self.base_cookie_domain,
+            discovery_api_url=self.discovery_api_url,
         )
 
         site = Site.objects.get(id=site.id)

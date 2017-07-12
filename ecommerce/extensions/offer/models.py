@@ -236,7 +236,7 @@ class Range(AbstractRange):
         response = cache.get(cache_key)
         if not response:  # pragma: no cover
             try:
-                response = request.site.siteconfiguration.course_catalog_api_client.course_runs.contains.get(
+                response = request.site.siteconfiguration.discovery_api_client.course_runs.contains.get(
                     query=self.catalog_query,
                     course_run_ids=product.course_id,
                     partner=partner_code
@@ -263,10 +263,10 @@ class Range(AbstractRange):
         )
         response = cache.get(cache_key)
         if not response:
-            course_catalog_api_client = request.site.siteconfiguration.course_catalog_api_client
+            discovery_api_client = request.site.siteconfiguration.discovery_api_client
             try:
                 # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
-                response = course_catalog_api_client.catalogs(self.course_catalog).contains.get(
+                response = discovery_api_client.catalogs(self.course_catalog).contains.get(
                     course_run_id=product.course_id
                 )
                 cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)

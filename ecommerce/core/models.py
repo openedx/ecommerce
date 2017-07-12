@@ -3,6 +3,7 @@ import hashlib
 import logging
 from urlparse import urljoin
 
+import waffle
 from analytics import Client as SegmentClient
 from dateutil.parser import parse
 from django.conf import settings
@@ -159,7 +160,6 @@ class SiteConfiguration(models.Model):
         help_text=_('Determines if purchases should be reported to Sailthru.'),
         default=False
     )
-
     base_cookie_domain = models.CharField(
         verbose_name=_('Base Cookie Domain'),
         help_text=_('Base cookie domain used to share cookies across services.'),
@@ -167,11 +167,14 @@ class SiteConfiguration(models.Model):
         blank=True,
         default='',
     )
-
     enable_embargo_check = models.BooleanField(
         verbose_name=_('Enable embargo check'),
         help_text=_('Enable embargo check at checkout.'),
         default=False
+    )
+    discovery_api_url = models.URLField(
+        verbose_name=_('Discovery API URL'),
+        blank=True,
     )
 
     @property
@@ -365,15 +368,16 @@ class SiteConfiguration(models.Model):
         return access_token
 
     @cached_property
-    def course_catalog_api_client(self):
+    def discovery_api_client(self):
         """
-        Returns an API client to access the Course Catalog service.
+        Returns an API client to access the Discovery service.
 
         Returns:
-            EdxRestApiClient: The client to access the Course Catalog service.
+            EdxRestApiClient: The client to access the Discovery service.
         """
-
-        # TODO Use URL from SiteConfiguration model.
+        # TODO Once the change is verified remove the switch and DISCOVERY_API_URL from settings.
+        if waffle.switch_is_active('use_multi_tenant_discovery_api_urls') and self.discovery_api_url:
+            return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
         return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
 
     @cached_property

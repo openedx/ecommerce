@@ -3,6 +3,7 @@ from decimal import Decimal
 import httpretty
 from oscar.core.loading import get_class
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test import factories
@@ -18,6 +19,7 @@ class ProgramOfferTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     def test_offer(self):
         # Our offer is for 100%, so all lines should end up with a price of 0.
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         offer = factories.ProgramOfferFactory(benefit=factories.PercentageDiscountBenefitWithoutRangeFactory(value=100))
         basket = factories.BasketFactory(site=self.site, owner=self.create_user())
 

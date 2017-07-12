@@ -13,9 +13,9 @@ from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -46,8 +46,7 @@ VOUCHER_CODE_LENGTH = 1
 
 @ddt.ddt
 @httpretty.activate
-@mock_course_catalog_api_client
-class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class UtilTests(CouponMixin, DiscoveryMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
@@ -139,7 +138,8 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
             catalog_query='*:*',
             course_seat_types='verified'
     ):
-        self.mock_dynamic_catalog_course_runs_api()
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
+        self.mock_course_runs_endpoint()
         return self.create_coupon(
             title=coupon_title,
             quantity=quantity,
@@ -457,8 +457,9 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_generate_coupon_report_for_query_coupons(self):
         """ Verify empty report fields for query coupons. """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         catalog_query = 'course:*'
-        self.mock_dynamic_catalog_course_runs_api()
+        self.mock_course_runs_endpoint()
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         query_coupon.history.all().update(history_user=self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
@@ -561,9 +562,10 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
 
     def test_generate_coupon_report_for_used_query_coupon(self):
         """Test that used query coupon voucher reports which course was it used for."""
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         catalog_query = '*:*'
-        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=self.course)
-        self.mock_dynamic_catalog_contains_api(course_run_ids=[self.verified_seat.course_id], query=catalog_query)
+        self.mock_course_runs_endpoint(query=catalog_query, course_run=self.course)
+        self.mock_course_runs_contains_endpoint(course_run_ids=[self.verified_seat.course_id], query=catalog_query)
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         query_coupon.history.all().update(history_user=self.user)
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()

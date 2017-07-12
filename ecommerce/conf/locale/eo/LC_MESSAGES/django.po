@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-05 12:09-0400\n"
+"POT-Creation-Date: 2017-07-07 14:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -219,6 +219,10 @@ msgstr "Énäßlé émßärgö çhéçk Ⱡ'σяєм ιρѕυм ∂σłσя ѕι
 msgid "Enable embargo check at checkout."
 msgstr ""
 "Énäßlé émßärgö çhéçk ät çhéçköüt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/core/models.py
+msgid "Discovery API URL"
+msgstr "Dïsçövérý ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
 #: ecommerce/core/models.py
 msgid "Full Name"

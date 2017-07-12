@@ -18,8 +18,8 @@ from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
 
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.core.tests import toggle_switch
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -305,7 +305,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, ThrottlingMixin,
+class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, DiscoveryMockMixin, ThrottlingMixin,
                                   TestCase):
     """Test the coupon order creation functionality."""
 
@@ -768,9 +768,9 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assert_post_response_status(self.data)
 
     @httpretty.activate
-    @mock_course_catalog_api_client
     def test_dynamic_catalog_coupon(self):
         """ Verify dynamic range values are returned. """
+        toggle_switch("use_multi_tenant_discovery_api_urls", True)
         catalog_query = 'key:*'
         course_seat_types = ['verified']
         self.data.update({
@@ -780,7 +780,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         })
         self.data.pop('stock_record_ids')
         course, __ = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
-        self.mock_dynamic_catalog_course_runs_api(query=catalog_query, course_run=course)
+        self.mock_course_runs_endpoint(query=catalog_query, course_run=course)
 
         response = self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         coupon_id = json.loads(response.content)['coupon_id']

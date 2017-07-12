@@ -35,6 +35,7 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     send_refund_notifications = False
     enable_sdn_check = False
     enable_embargo_check = False
+    discovery_api_url = factory.LazyAttribute(lambda obj: 'http://{domain}/api/v1/'.format(domain=obj.site.domain))
 
 
 class StockRecordFactory(OscarStockRecordFactory):

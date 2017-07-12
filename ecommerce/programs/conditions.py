@@ -33,7 +33,7 @@ class ProgramCourseRunSeatsCondition(Condition):
             dict
         """
         program_uuid = str(self.program_uuid)
-        client = ProgramsApiClient(site_configuration.course_catalog_api_client)
+        client = ProgramsApiClient(site_configuration.discovery_api_client, site_configuration.site.domain)
         return client.get_program(program_uuid)
 
     def get_applicable_skus(self, site_configuration):

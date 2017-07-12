@@ -1,6 +1,7 @@
 import httpretty
 from oscar.core.loading import get_model
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.extensions.test import factories
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -23,6 +24,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     def test_get_program(self):
         """ The method should return data from the Catalog Service API. Data should be cached for subsequent calls. """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         data = self.mock_program_detail_endpoint(self.condition.program_uuid)
         self.assertEqual(self.condition.get_program(self.site.siteconfiguration), data)
 
@@ -34,6 +36,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def test_is_satisfied(self):
         """ The method should return True if the basket contains one course run seat corresponding to each
         course in the program. """
+        toggle_switch('use_multi_tenant_discovery_api_urls', True)
         offer = factories.ProgramOfferFactory(condition=self.condition)
         basket = factories.BasketFactory(site=self.site)
         program = self.mock_program_detail_endpoint(self.condition.program_uuid)
