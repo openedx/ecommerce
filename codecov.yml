@@ -6,4 +6,4 @@ coverage:
         target: 95
     project:
       default:
-        target: 95
+        target: 94
