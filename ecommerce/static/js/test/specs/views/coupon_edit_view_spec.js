@@ -95,15 +95,15 @@ define([
                 it('should hide code field when quantity is greater than one', function() {
                     view.model.set('quantity', 2);
                     view.render();
-                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=quantity]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=quantity]')).not.toHaveHiddenClass();
                 });
 
                 it('should hide quantity field when code is set', function() {
                     view.model.set('code', 'RANDOMCODE');
                     view.render();
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=quantity]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=quantity]')).toHaveHiddenClass();
                 });
             });
 
@@ -123,7 +123,7 @@ define([
                     var creditSeatType = ['credit'];
                     model.set('course_seat_types', creditSeatType);
                     view.render();
-                    expect(view.$('.non-credit-seats')).not.toBeVisible();
+                    expect(view.$('.non-credit-seats')).toHaveHiddenClass();
                 });
             });
 

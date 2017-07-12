@@ -112,12 +112,12 @@ define([
                 });
 
                 it('should show the price field', function() {
-                    expect(SpecUtils.formGroup(view, '[name=price]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=price]')).not.toHaveHiddenClass();
                 });
 
                 it('should hide discount and code fields', function() {
-                    expect(SpecUtils.formGroup(view, '[name=benefit_value]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=benefit_value]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toHaveHiddenClass();
                 });
             });
 
@@ -125,13 +125,13 @@ define([
                 it('should hide non-credit seats and uncheck them.', function() {
                     view.$('#credit').prop('checked', true).trigger('change');
                     expect(view.$('input[id=verified], input[id=professional]').is(':checked')).toBe(false);
-                    expect(view.$('.non-credit-seats')).not.toBeVisible();
+                    expect(view.$('.non-credit-seats')).toHaveHiddenClass();
                     expect(view.model.get('course_seat_types')[0]).toBe('credit');
                 });
 
                 it('should show non-credit seats.', function() {
                     view.$('#non-credit').prop('checked', true).trigger('change');
-                    expect(view.$('.non-credit-seats')).toBeVisible();
+                    expect(view.$('.non-credit-seats')).not.toHaveHiddenClass();
 
                     view.$('input[id=verified]').prop('checked', true).trigger('change');
                     expect(view.model.get('course_seat_types')[0]).toBe('verified');
@@ -151,13 +151,13 @@ define([
             describe('course catalogs', function() {
                 it('course catalog drop down should be hidden when catalog is not selected', function() {
                     view.$('#single-course').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toHaveHiddenClass();
 
                     view.$('#multiple-courses').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toHaveHiddenClass();
 
                     view.$('#catalog').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toHaveHiddenClass();
                 });
 
                 it('course catalog is setting properly', function() {
@@ -202,13 +202,13 @@ define([
             describe('enterprise customers', function() {
                 it('enterprise customer dropdown should be hidden when a catalog is selected', function() {
                     view.$('#single-course').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toHaveHiddenClass();
 
                     view.$('#catalog').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toHaveHiddenClass();
 
                     view.$('#multiple-courses').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toHaveHiddenClass();
                 });
 
                 it('enterprise customer is setting properly', function() {
@@ -246,7 +246,7 @@ define([
                 });
 
                 it('should show the discount field', function() {
-                    expect(SpecUtils.formGroup(view, '[name=benefit_value]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=benefit_value]')).not.toHaveHiddenClass();
                 });
 
                 it('should indicate the benefit type', function() {
@@ -282,18 +282,18 @@ define([
 
                 it('should show the code field for once-per-customer and singe-use vouchers', function() {
                     view.$('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
                     view.$('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
                 });
 
                 it('should show the max_uses field only for once-per-customer and multi-use vouchers', function() {
                     view.$('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).toHaveHiddenClass();
                     view.$('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).not.toHaveHiddenClass();
                     view.$('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=max_uses]')).not.toHaveHiddenClass();
                 });
 
                 it('should set different values for max_uses field for different voucher types', function() {
@@ -315,71 +315,71 @@ define([
 
                 it('should hide quantity field when code entered', function() {
                     view.$('[name=code]').val('E34T4GR342').trigger('input');
-                    expect(SpecUtils.formGroup(view, '[name=quantity]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=quantity]')).toHaveHiddenClass();
                     view.$('[name=code]').val('').trigger('input');
-                    expect(SpecUtils.formGroup(view, '[name=quantity]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=quantity]')).not.toHaveHiddenClass();
                 });
 
                 it('should hide code field when quantity not 1', function() {
                     view.$('[name=quantity]').val(21).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toHaveHiddenClass();
                     view.$('[name=quantity]').val(1).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
                 });
 
                 it('should hide code field for every voucher type if quantity is not 1.', function() {
                     view.$('[name=quantity]').val(2).trigger('change');
                     view.$('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toHaveHiddenClass();
 
                     view.$('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toHaveHiddenClass();
 
                     view.$('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).toHaveHiddenClass();
                 });
 
                 it('should show the code field for every voucher type if quantity is 1.', function() {
                     view.$('[name=quantity]').val(1).trigger('change');
                     view.$('[name=voucher_type]').val('Single use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
 
                     view.$('[name=voucher_type]').val('Once per customer').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
 
                     view.$('[name=voucher_type]').val('Multi-use').trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=code]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=code]')).not.toHaveHiddenClass();
                 });
 
                 it('should show prepaid invoice fields when changing to Prepaid invoice type.', function() {
                     view.$('#already-invoiced').prop('checked', true).trigger('change');
                     _.each(prepaidInvoiceFields, function(field) {
-                        expect(SpecUtils.formGroup(view, field)).toBeVisible();
+                        expect(SpecUtils.formGroup(view, field)).not.toHaveHiddenClass();
                     });
-                    expect(SpecUtils.formGroup(view, '[name=invoice_discount_value]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=invoice_discount_value]')).toHaveHiddenClass();
                 });
 
                 it('should show postpaid invoice fields when changing to Postpaid invoice type.', function() {
                     view.$('#invoice-after-redemption').prop('checked', true).trigger('change');
                     _.each(prepaidInvoiceFields, function(field) {
-                        expect(SpecUtils.formGroup(view, field)).not.toBeVisible();
+                        expect(SpecUtils.formGroup(view, field)).toHaveHiddenClass();
                     });
-                    expect(SpecUtils.formGroup(view, '[name=invoice_discount_value]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=invoice_discount_value]')).not.toHaveHiddenClass();
                 });
 
                 it('should hide all invoice fields when changing to Not applicable invoice type.', function() {
                     view.$('#not-applicable').prop('checked', true).trigger('change');
                     _.each(prepaidInvoiceFields, function(field) {
-                        expect(SpecUtils.formGroup(view, field)).not.toBeVisible();
+                        expect(SpecUtils.formGroup(view, field)).toHaveHiddenClass();
                     });
-                    expect(SpecUtils.formGroup(view, '[name=invoice_discount_value]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=invoice_discount_value]')).toHaveHiddenClass();
                 });
 
                 it('should show tax deduction source field when TSD is selected.', function() {
                     view.$('#tax-deducted').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=tax_deducted_source_value]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=tax_deducted_source_value]')).not.toHaveHiddenClass();
                     view.$('#non-tax-deducted').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=tax_deducted_source_value]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=tax_deducted_source_value]')).toHaveHiddenClass();
                 });
             });
 
@@ -458,41 +458,41 @@ define([
                 it('should verify only fields related to selected course catalog type are shown', function() {
                     view.model.set('catalog_type', model.catalogTypes.single_course);
                     view.toggleCatalogTypeField();
-                    expect(SpecUtils.formGroup(view, '[name=course_id]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).toHaveHiddenClass();
 
                     view.model.set('catalog_type', model.catalogTypes.multiple_courses);
                     view.toggleCatalogTypeField();
-                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).toHaveHiddenClass();
 
                     view.model.set('catalog_type', model.catalogTypes.catalog);
                     view.toggleCatalogTypeField();
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toHaveHiddenClass();
                     expect(view.$('.catalog_buttons').hasClass('hidden')).toBeTruthy();
-                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=catalog_query]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).toHaveHiddenClass();
 
                     view.model.set('catalog_type', model.catalogTypes.program);
                     view.toggleCatalogTypeField();
-                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_id]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).not.toBeVisible();
-                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).not.toBeVisible();
+                    expect(SpecUtils.formGroup(view, '[name=program_uuid]')).not.toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_id]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=seat_type]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_seat_types]')).toHaveHiddenClass();
+                    expect(SpecUtils.formGroup(view, '[name=course_catalog]')).toHaveHiddenClass();
                 });
             });
         });
