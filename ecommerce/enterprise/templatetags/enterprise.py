@@ -14,7 +14,7 @@ def enterprise_customer_for_voucher(context, voucher):
     Raises:
         EnterpriseDoesNotExist: Voucher is not associated with any enterprise customer.
     """
-    if context and 'request' in context:
+    if voucher and context and 'request' in context:
         request = context['request']
     else:
         return None
