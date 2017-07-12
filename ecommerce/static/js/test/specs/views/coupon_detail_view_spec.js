@@ -237,7 +237,7 @@ define([
             it('should display tax deducted source input field.', function() {
                 view.model.set('tax_deduction', 'Yes');
                 view.render();
-                expect(view.$('.tax-deducted-source-value').closest('.info-item')).toBeVisible();
+                expect(view.$('.tax-deducted-source-value').closest('.info-item')).not.toHaveHiddenClass();
                 view.model.set('tax_deduction', 'No');
                 view.render();
                 expect(SpecUtils.formGroup(view, '.tax-deducted-source-value')).not.toBeVisible();
