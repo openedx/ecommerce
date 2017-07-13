@@ -7,10 +7,8 @@ from requests.exceptions import ConnectionError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.courses.utils import (
     get_certificate_type_display_value, get_course_catalogs, get_course_info_from_catalog, mode_for_seat
 )
@@ -42,9 +40,9 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
         if enrollment_code:  # We should only have enrollment codes for allowed types
             self.assertEqual(mode_for_seat(enrollment_code), mode)
 
-    @mock_course_catalog_api_client
     def test_get_course_info_from_catalog(self):
         """ Check to see if course info gets cached """
+        self.mock_access_token_response()
         course = CourseFactory()
         self.mock_dynamic_catalog_single_course_runs_api(
             course, discovery_api_url=self.site_configuration.discovery_api_url
@@ -80,7 +78,7 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
 
 @ddt.ddt
 @httpretty.activate
-class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
+class GetCourseCatalogUtilTests(CourseCatalogMockMixin, TestCase):
 
     def tearDown(self):
         # Reset HTTPretty state (clean up registered urls and request history)
@@ -111,13 +109,13 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
-    @mock_course_catalog_api_client
     def test_get_course_catalogs_for_single_catalog_with_id(self):
         """
         Verify that method "get_course_catalogs" returns proper response for a
         single catalog by its id.
         """
-        self.mock_course_discovery_api_for_catalog_by_resource_id(self.site_configuration.discovery_api_url)
+        self.mock_access_token_response()
+        self.mock_fetch_course_catalog(self.site_configuration.discovery_api_url)
 
         catalog_id = 1
         cache_key = '{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
@@ -126,15 +124,14 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         self.assertIsNone(cached_course_catalog)
 
         response = get_course_catalogs(self.request.site, catalog_id)
-        self.assertEqual(response['name'], 'Catalog {}'.format(catalog_id))
+        self.assertEqual(response['name'], 'All Courses')
 
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
         # Verify the API was actually hit (not the cache)
-        self._assert_num_requests(1)
+        self._assert_num_requests(2)
 
-    @mock_course_catalog_api_client
     @ddt.data(
         ['Catalog 1'],
         ['Catalog 1', 'Catalog 2'],
@@ -145,24 +142,25 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         single page Course Discovery API response and uses cache to return data
         in case of same API request.
         """
+        self.mock_access_token_response()
         self.mock_catalog_api(catalog_name_list, self.site_configuration.discovery_api_url)
 
         self._assert_get_course_catalogs(catalog_name_list)
 
         # Verify the API was hit once
-        self._assert_num_requests(1)
+        self._assert_num_requests(2)
 
         # Now fetch the catalogs again and there should be no more actual call
         # to Course Discovery API as the data will be fetched from the cache
         get_course_catalogs(self.request.site)
-        self._assert_num_requests(1)
+        self._assert_num_requests(2)
 
-    @mock_course_catalog_api_client
     def test_get_course_catalogs_for_paginated_api_response(self):
         """
         Verify that method "get_course_catalogs" returns all catalogs for
         paginated Course Discovery API response for multiple catalogs.
         """
+        self.mock_access_token_response()
         catalog_name_list = ['Catalog 1', 'Catalog 2', 'Catalog 3']
         self.mock_course_discovery_api_for_paginated_catalogs(
             catalog_name_list, self.site_configuration.discovery_api_url
@@ -171,15 +169,15 @@ class GetCourseCatalogUtilTests(CourseCatalogServiceMockMixin, TestCase):
         self._assert_get_course_catalogs(catalog_name_list)
 
         # Verify the API was hit for each catalog page
-        self._assert_num_requests(len(catalog_name_list))
+        self._assert_num_requests(len(catalog_name_list) + 1)
 
-    @mock_course_catalog_api_client
     def test_get_course_catalogs_for_failure(self):
         """
         Verify that method "get_course_catalogs" raises exception in case
         the Course Discovery API fails to return data.
         """
         exception = ConnectionError
+        self.mock_access_token_response()
         self.mock_catalog_api_failure(exception, self.site_configuration.discovery_api_url)
 
         with self.assertRaises(exception):
