@@ -1,7 +1,6 @@
 # Packages required for testing
 -r base.txt
 
-bok-choy==0.7.0
 coverage==4.3.4
 ddt==1.1.1
 diff-cover==0.9.6
@@ -17,5 +16,5 @@ nose-ignore-docstring==0.2
 pep8==1.6.2
 pylint==1.6.4
 responses==0.5.1
-selenium==3.4.2
+selenium==3.4.3
 testfixtures==4.5.0

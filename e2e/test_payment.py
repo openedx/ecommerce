@@ -1,118 +1,133 @@
-from abc import ABCMeta
-from unittest import skip, skipUnless
+import datetime
 
-import ddt
-from bok_choy.web_app_test import WebAppTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import WebDriverWait
 
-from e2e.config import BULK_PURCHASE_SKU, MARKETING_URL_ROOT, PAYPAL_EMAIL, PAYPAL_PASSWORD, VERIFIED_COURSE_ID
+from e2e.api import DiscoveryApi, EcommerceApi
+from e2e.config import LMS_USERNAME, PAYPAL_EMAIL, PAYPAL_PASSWORD
 from e2e.constants import ADDRESS_FR, ADDRESS_US
-from e2e.mixins import EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, PaymentMixin, UnenrollmentMixin
-from e2e.pages.basket import BasketAddProductPage
-from e2e.pages.lms import LMSCourseModePage
-from e2e.pages.marketing import MarketingCourseAboutPage
+from e2e.helpers import EcommerceHelpers, LmsHelpers
 
 
-class BasePaymentTest(UnenrollmentMixin, EcommerceApiMixin, EnrollmentApiMixin, LogistrationMixin, PaymentMixin,
-                      WebAppTest):
-    __metaclass__ = ABCMeta
+class TestSeatPayment(object):
+    def get_verified_course_run(self):
+        """ Returns a course run data dict. """
+        return DiscoveryApi().get_course_run('verified')
 
-    def setUp(self):
-        super(BasePaymentTest, self).setUp()
-        self.course_id = VERIFIED_COURSE_ID
-        self.username, self.password, self.email = self.get_lms_user()
-        self.basket_add_product_page = BasketAddProductPage(self.browser)
+    def checkout_with_credit_card(self, selenium, address):
+        """ Submits the credit card form hosted by the E-Commerce Service. """
+        billing_information = {
+            'id_first_name': 'Ed',
+            'id_last_name': 'Xavier',
+            'id_address_line1': address['line1'],
+            'id_address_line2': address['line2'],
+            'id_city': address['city'],
+            'id_postal_code': address['postal_code'],
+            'card-number': '4111111111111111',
+            'card-cvn': '123'
+        }
 
+        country = address['country']
+        state = address['state'] or ''
 
-@ddt.ddt
-class VerifiedCertificatePaymentTests(BasePaymentTest):
-    def setUp(self):
-        super(VerifiedCertificatePaymentTests, self).setUp()
-        self.course_id = VERIFIED_COURSE_ID
-        self.username, self.password, self.email = self.get_lms_user()
-        self.basket_add_product_page = BasketAddProductPage(self.browser)
+        card_expiry_year = str(datetime.datetime.now().year + 3)
+        select_fields = [
+            ('id_country', country),
+            ('card-expiry-month', '12'),
+            ('card-expiry-year', card_expiry_year),
+        ]
 
-    def _start_checkout(self):
-        """ Begin the checkout process for a verified certificate. """
-        self.login_with_lms(self.email, self.password)
-
-        if MARKETING_URL_ROOT:
-            course_about_page = MarketingCourseAboutPage(self.browser, self.course_id)
-            course_about_page.visit()
-
-            # Click the first enroll button on the page to take the browser to the track selection page.
-            course_about_page.q(css='.js-enroll-btn').first.click()
-
-            # Wait for the track selection page to load.
-            wait = WebDriverWait(self.browser, 10)
-            track_selection_present = EC.presence_of_element_located((By.CLASS_NAME, 'form-register-choose'))
-            wait.until(track_selection_present)
+        if country in ('US', 'CA',):
+            select_fields.append(('id_state', state,))
         else:
-            course_modes_page = LMSCourseModePage(self.browser, self.course_id)
-            course_modes_page.visit()
+            billing_information['id_state'] = state
 
-        # Click the purchase button on the track selection page to take the browser to the payment selection page.
-        self.browser.find_element_by_css_selector('input[name=verified_mode]').click()
+        # Select the appropriate <option> elements
+        for selector, value in select_fields:
+            if value:
+                select = Select(selenium.find_element_by_id(selector))
+                select.select_by_value(value)
 
-    @ddt.data(ADDRESS_US, ADDRESS_FR)
-    def test_checkout_with_credit_card(self, address):
-        """ Test the client-side checkout page.
+        # Fill in the text fields
+        for field, value in billing_information.items():
+            selenium.find_element_by_id(field).send_keys(value)
 
-        We use a U.S. address and a French address since the checkout page requires a state for the U.S. and
-        Canada, but not for other countries.
-        """
-        self._start_checkout()
-        self.checkout_with_credit_card(address)
+        # Click the payment button
+        selenium.find_element_by_id('payment-button').click()
 
-        self.assert_receipt_page_loads()
-        self.assert_order_created_and_completed()
-        self.assert_user_enrolled(self.username, self.course_id, 'verified')
+    def checkout_with_paypal(self, selenium):
+        selenium.find_element_by_css_selector('button.payment-button[data-processor-name=paypal]').click()
 
-    @skip('See ECOM-7298.')
-    def test_paypal(self):
-        """ Test checkout with PayPal. """
-        self._start_checkout()
-        self.checkout_with_paypal()
+        # Wait for login form to load. PayPal's test environment is slow.
+        login_iframe = selenium.find_element_by_css_selector('#injectedUnifiedLogin > iframe')
+        selenium.switch_to.frame(login_iframe)
 
-        self.assert_receipt_page_loads()
-        self.assert_order_created_and_completed()
-        self.assert_user_enrolled(self.username, self.course_id, 'verified')
+        # Log into PayPal
+        email = selenium.find_element_by_id('email')
+        password = selenium.find_element_by_id('password')
+        email.send_keys(PAYPAL_EMAIL)
+        password.send_keys(PAYPAL_PASSWORD)
 
+        selenium.find_element_by_id('btnLogin').click()
+        selenium.switch_to.default_content()
 
-@ddt.ddt
-@skipUnless(BULK_PURCHASE_SKU, 'A bulk purchase SKU must be provided to run bulk purchase tests!')
-class BulkSeatPaymentTests(BasePaymentTest):
-    def _start_bulk_seat_checkout(self):
-        """ Begin the checkout process for a verified certificate. """
-        self.login_with_lms(self.email, self.password)
+        # Wait for the checkout form to load, and for the loading spinner to disappear.
+        wait = WebDriverWait(selenium, 10)
+        spinner_invisibility = EC.invisibility_of_element_located((By.ID, 'spinner'))
+        wait.until(spinner_invisibility)
+        selenium.find_element_by_id('confirmButtonTop').click()
 
-        self.basket_add_product_page.visit()
-        self.assertTrue(self.basket_add_product_page.is_browser_on_page())
-        self.basket_add_product_page.update_product_quantity(5)
+    def assert_browser_on_receipt_page(self, selenium):
+        selenium.find_element_by_id('receipt-container')
 
-        # Click the purchase button on the track selection page to take
-        # the browser to the payment selection page.
-        self.browser.find_element_by_css_selector('button[id=paypal]').click()
+    def add_item_to_basket(self, selenium, sku):
+        # Add the item to the basket and start the checkout process
+        selenium.get(EcommerceHelpers.build_url('/basket/add/?sku=' + sku))
+        assert selenium.find_element_by_css_selector('.basket-client-side').is_displayed()
 
-    def test_bulk_seat_purchase_with_credit_card(self):
-        """ Test bulk seat purchase checkout with CyberSource. """
-        self._start_bulk_seat_checkout()
-        self.browser.find_element_by_css_selector('button[id=cybersource]').click()
-        self.checkout_with_credit_card(ADDRESS_US)
+    def refund_orders_for_course_run(self, course_run_id):
+        api = EcommerceApi()
+        refund_ids = api.create_refunds_for_course_run(LMS_USERNAME, course_run_id)
+        assert len(refund_ids) > 0
 
-        self.assert_receipt_page_loads()
-        self.assert_user_not_enrolled(self.username, self.course_id)
+        for refund_id in refund_ids:
+            api.process_refund(refund_id, 'approve')
 
-    def test_bulk_seat_purchase_with_paypal(self):
-        """ Test bulk seat purchase checkout with PayPal. """
-        if not (PAYPAL_EMAIL and PAYPAL_PASSWORD):
-            self.fail('No PayPal credentials supplied!')
+    def get_verified_seat(self, course_run):
+        verified_seat = None
+        for seat in course_run['seats']:
+            if seat['type'] == 'verified':
+                verified_seat = seat
+                break
+        return verified_seat
 
-        self._start_bulk_seat_checkout()
-        self.browser.find_element_by_css_selector('button[id=paypal]').click()
-        self.checkout_with_paypal()
+    def test_verified_seat_payment_with_credit_card(self, selenium):
+        """ Validates users can add a verified seat to the cart and checkout with a credit card. """
+        LmsHelpers.login(selenium)
 
-        self.assert_receipt_page_loads()
-        self.assert_user_not_enrolled(self.username, self.course_id)
+        # Get the course run we want to purchase
+        course_run = self.get_verified_course_run()
+        verified_seat = self.get_verified_seat(course_run)
+
+        for address in (ADDRESS_US, ADDRESS_FR,):
+            self.add_item_to_basket(selenium, verified_seat['sku'])
+            self.checkout_with_credit_card(selenium, address)
+            self.assert_browser_on_receipt_page(selenium)
+            # TODO In the future we should verify enrollment via the Enrollment API
+            self.refund_orders_for_course_run(course_run['key'])
+
+    def test_verified_seat_payment_with_paypal(self, selenium):
+        """ Validates users can add a verified seat to the cart and checkout with PayPal. """
+        LmsHelpers.login(selenium)
+
+        # Get the course run we want to purchase
+        course_run = self.get_verified_course_run()
+        verified_seat = self.get_verified_seat(course_run)
+        self.add_item_to_basket(selenium, verified_seat['sku'])
+
+        self.checkout_with_paypal(selenium)
+        self.assert_browser_on_receipt_page(selenium)
+        # TODO In the future we should verify enrollment via the Enrollment API
+        self.refund_orders_for_course_run(course_run['key'])
