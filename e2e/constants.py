@@ -1,7 +1,3 @@
-from datetime import date
-
-CODE = 'ABCD'
-
 ADDRESS_US = {
     'country': 'US',
     'state': 'MA',
@@ -18,6 +14,3 @@ ADDRESS_FR = {
     'city': 'Paris',
     'postal_code': '75007',
 }
-
-DEFAULT_START_DATE = date(2015, 1, 1)
-DEFAULT_END_DATE = date(2050, 1, 1)

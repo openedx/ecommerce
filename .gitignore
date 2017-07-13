@@ -69,6 +69,8 @@ edx_ecommerce.log
 venv
 e2e.*.log
 e2e.*.png
+e2e/*.env
+.cache/
 
 # Override config files
 override.cfg

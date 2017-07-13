@@ -1,8 +1,8 @@
 # Packages required to run e2e tests
 bok-choy==0.7.0
-ddt==1.1.1
-django-nose==1.4.4
 edx-rest-api-client==1.7.1
-nose-ignore-docstring==0.2
+pytest==3.1.3
+pytest-random-order==0.5.4
+pytest-selenium==1.11.0
 python-dotenv==0.6.4
-selenium==3.4.2
+selenium==3.4.3
