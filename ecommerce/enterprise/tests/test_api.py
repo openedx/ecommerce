@@ -4,7 +4,6 @@ from django.core.cache import cache
 from oscar.core.loading import get_model
 
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.tests.decorators import mock_enterprise_api_client
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -60,17 +59,17 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)
 
-    @mock_enterprise_api_client
     def test_fetch_enterprise_learner_data(self):
         """
         Verify that method "fetch_enterprise_learner_data" returns a proper
         response for the enterprise learner.
         """
+        self.mock_access_token_response()
         self.mock_enterprise_learner_api()
         self._assert_fetch_enterprise_learner_data()
 
         # API should be hit only once in this test case
-        expected_number_of_requests = 1
+        expected_number_of_requests = 2
 
         # Verify the API was hit once
         self._assert_num_requests(expected_number_of_requests)
@@ -81,7 +80,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
         enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
         self._assert_num_requests(expected_number_of_requests)
 
-    @mock_enterprise_api_client
     def test_fetch_enterprise_learner_entitlements(self):
         """
         Verify that method "fetch_enterprise_learner_data" returns a proper
@@ -89,8 +87,9 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
         """
         # API should be hit only twice in this test case,
         # once by `fetch_enterprise_learner_data` and once by `fetch_enterprise_learner_entitlements`.
-        expected_number_of_requests = 2
+        expected_number_of_requests = 3
 
+        self.mock_access_token_response()
         self.mock_enterprise_learner_api()
         enterprise_learners = enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
 

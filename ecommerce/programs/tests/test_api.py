@@ -23,7 +23,6 @@ class ProgramsApiClientTests(ProgramTestMixin, TestCase):
 
     def test_get_program(self):
         """ The method should return data from the Programs API. Data should be cached for subsequent calls. """
-        self.mock_access_token_response()
         program_uuid = uuid.uuid4()
         data = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
         self.assertEqual(self.client.get_program(program_uuid), data)

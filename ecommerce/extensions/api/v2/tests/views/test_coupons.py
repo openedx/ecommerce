@@ -18,7 +18,6 @@ from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
 
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -770,7 +769,6 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.assert_post_response_status(self.data)
 
     @httpretty.activate
-    @mock_course_catalog_api_client
     def test_dynamic_catalog_coupon(self):
         """ Verify dynamic range values are returned. """
         catalog_query = 'key:*'
@@ -782,6 +780,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         })
         self.data.pop('stock_record_ids')
         course, __ = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
+        self.mock_access_token_response()
         self.mock_dynamic_catalog_course_runs_api(
             self.site_configuration.discovery_api_url, query=catalog_query, course_run=course
         )

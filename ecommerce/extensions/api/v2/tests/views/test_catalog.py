@@ -8,9 +8,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.tests.decorators import mock_course_catalog_api_client
 from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
-from ecommerce.courses.tests.mixins import CourseCatalogServiceMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
 from ecommerce.tests.factories import PartnerFactory
@@ -23,7 +21,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 @httpretty.activate
 @ddt.ddt
-class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServiceMockMixin, ApiMockMixin, TestCase):
+class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, TestCase):
     """Test the Catalog and related products APIs."""
 
     catalog_list_path = reverse('api:v2:catalog-list')
@@ -95,9 +93,9 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         expected_data = ProductSerializer(self.stock_record.product, context={'request': response.wsgi_request}).data
         self.assertListEqual(response_data['results'], [expected_data])
 
-    @mock_course_catalog_api_client
     def test_preview_success(self):
         """ Verify the endpoint returns a list of catalogs from the Catalog API. """
+        self.mock_access_token_response()
         self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url)
 
         url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
@@ -129,13 +127,13 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
             response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
-    @mock_course_catalog_api_client
     def test_course_catalogs_for_single_page_api_response(self):
         """
         Test course catalogs list view "course_catalogs" for valid response
         with catalogs in alphabetical order.
         """
         catalogs = ('Clean Catalog', 'ABC Catalog', 'New Catalog', 'Edx Catalog',)
+        self.mock_access_token_response()
         self.mock_catalog_api(catalogs, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
@@ -144,7 +142,6 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         actual = [catalog['name'] for catalog in response.data['results']]
         self.assertEqual(actual, sorted(catalogs))
 
-    @mock_course_catalog_api_client
     @mock.patch('ecommerce.extensions.api.v2.views.catalog.logger.exception')
     def test_get_course_catalogs_with_catalog_api_failure(self, mock_exception):
         """
@@ -152,6 +149,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, CourseCatalogServ
         empty results list in case the Course Discovery API fails to return
         data.
         """
+        self.mock_access_token_response()
         self.mock_catalog_api_failure(ConnectionError, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
