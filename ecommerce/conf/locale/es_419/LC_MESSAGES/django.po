@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-05 12:09-0400\n"
-"PO-Revision-Date: 2017-07-05 22:09+0000\n"
+"POT-Creation-Date: 2017-07-12 10:32+0000\n"
+"PO-Revision-Date: 2017-07-12 22:57+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgstr ""
 
 #: ecommerce/core/admin.py:21
 msgid "Personal info"
-msgstr ""
+msgstr "Información personal"
 
 #: ecommerce/core/admin.py:22
 msgid "Permissions"
@@ -41,149 +41,149 @@ msgstr "Permisos"
 msgid "Important dates"
 msgstr "Fechas importantes"
 
-#: ecommerce/core/models.py:40
+#: ecommerce/core/models.py:41
 msgid "LMS base url for custom site/microsite"
 msgstr "URL base del LMS para el site o microsite"
 
-#: ecommerce/core/models.py:41
+#: ecommerce/core/models.py:42
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr "URL raíz del LMS. (Ej: https://courses.stage.edx.org)"
 
-#: ecommerce/core/models.py:46
+#: ecommerce/core/models.py:47
 msgid "Path to custom site theme"
 msgstr "Ruta para personalizar el tema del sitio"
 
-#: ecommerce/core/models.py:53
+#: ecommerce/core/models.py:54
 msgid "Payment processors"
 msgstr "Procesadores de pagos"
 
-#: ecommerce/core/models.py:54
+#: ecommerce/core/models.py:55
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr "Lista separada con comas de nombres de procesadores: 'cybersource,paypal'"
 
-#: ecommerce/core/models.py:60
+#: ecommerce/core/models.py:61
 msgid "Client-side payment processor"
 msgstr "Procesador de pagos del lado del cliente"
 
-#: ecommerce/core/models.py:61
+#: ecommerce/core/models.py:62
 msgid "Processor that will be used for client-side payments"
 msgstr "Procesador que será utilizado para los pagos del lado del cliente"
 
-#: ecommerce/core/models.py:67
+#: ecommerce/core/models.py:68
 msgid "OAuth settings"
 msgstr "Configuración OAuth"
 
-#: ecommerce/core/models.py:68
+#: ecommerce/core/models.py:69
 msgid "JSON string containing OAuth backend settings."
 msgstr "Cadena JSON que contiene la configuración para el backend de OAuth"
 
-#: ecommerce/core/models.py:74
+#: ecommerce/core/models.py:75
 msgid "Segment key"
 msgstr "Clave de segmento"
 
-#: ecommerce/core/models.py:75
+#: ecommerce/core/models.py:76
 msgid "Segment write/API key."
 msgstr "Segment write/API key."
 
-#: ecommerce/core/models.py:81
+#: ecommerce/core/models.py:82
 msgid "From email"
 msgstr "De correo electrónico"
 
-#: ecommerce/core/models.py:82
+#: ecommerce/core/models.py:83
 msgid "Address from which emails are sent."
 msgstr "Dirección de la cual los correos electrónicos se envían."
 
-#: ecommerce/core/models.py:88
+#: ecommerce/core/models.py:89
 msgid "Enable enrollment codes"
 msgstr "Habilitar códigos de inscripción"
 
-#: ecommerce/core/models.py:89
+#: ecommerce/core/models.py:90
 msgid "Enable the creation of enrollment codes."
 msgstr "Habilitar la creación de códigos de inscripción."
 
-#: ecommerce/core/models.py:94
+#: ecommerce/core/models.py:95
 msgid "Payment support email"
 msgstr "Correo electrónico de soporte para pagos"
 
-#: ecommerce/core/models.py:95
+#: ecommerce/core/models.py:96
 msgid "Contact email for payment support issues."
 msgstr "Correo de contacto para asuntos relacionados con soporte a pagos."
 
-#: ecommerce/core/models.py:101
+#: ecommerce/core/models.py:102
 msgid "Payment support url"
 msgstr "URL de soporte a pagos"
 
-#: ecommerce/core/models.py:102
+#: ecommerce/core/models.py:103
 msgid "URL for payment support issues."
 msgstr "URL para asuntos de soporte a pagos"
 
-#: ecommerce/core/models.py:107
+#: ecommerce/core/models.py:108
 msgid "UTM Cookie Name"
 msgstr "Nombre de Cookie UTM"
 
-#: ecommerce/core/models.py:108
+#: ecommerce/core/models.py:109
 msgid "Name of cookie storing UTM data."
 msgstr "Nombre del cookie que contiene datos UTM"
 
-#: ecommerce/core/models.py:114
+#: ecommerce/core/models.py:115
 msgid "Affiliate Cookie Name"
 msgstr "Nombre de Cookie afiliado"
 
-#: ecommerce/core/models.py:115
+#: ecommerce/core/models.py:116
 msgid "Name of cookie storing affiliate data."
 msgstr "Nombre de la cookie que almacena datos de afiliado"
 
-#: ecommerce/core/models.py:121
+#: ecommerce/core/models.py:122
 msgid "Send refund email notification"
 msgstr "Enviar notificación de reembolso por email"
 
-#: ecommerce/core/models.py:126
+#: ecommerce/core/models.py:127
 msgid "Enable SDN check"
 msgstr "Habilitación SDN"
 
-#: ecommerce/core/models.py:127
+#: ecommerce/core/models.py:128
 msgid "Enable SDN check at checkout."
 msgstr "Habilitar verificación SDN en el momento del pago."
 
-#: ecommerce/core/models.py:131
+#: ecommerce/core/models.py:132
 msgid "US Treasury SDN API URL"
 msgstr "URL de la API SDN del departamento del tesoro de Estados Unidos"
 
-#: ecommerce/core/models.py:136
+#: ecommerce/core/models.py:137
 msgid "US Treasury SDN API key"
 msgstr "Llave de la API SDN del departamento del tesoro de Estados Unidos"
 
-#: ecommerce/core/models.py:141
+#: ecommerce/core/models.py:142
 msgid "SDN lists"
 msgstr "Listas SDN"
 
-#: ecommerce/core/models.py:142
+#: ecommerce/core/models.py:143
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr "Lista separada por comas de las listas OFAC que se usarán para la verificación."
 
-#: ecommerce/core/models.py:147
+#: ecommerce/core/models.py:148
 msgid "Require Account Activation"
 msgstr "Solicita la activación de la cuenta"
 
-#: ecommerce/core/models.py:148
+#: ecommerce/core/models.py:149
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr "Solicita a los usuarios que activen su cuenta antes de permitirles canjear un cupón."
 
-#: ecommerce/core/models.py:152
+#: ecommerce/core/models.py:153
 msgid "Optimizely snippet source URL"
 msgstr "Fragmento de código de URL de origen de Optimizely"
 
-#: ecommerce/core/models.py:153
+#: ecommerce/core/models.py:154
 msgid "This script will be loaded on every page."
 msgstr "Este script se cargará en cada página."
 
-#: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:14
+#: ecommerce/core/models.py:159 ecommerce/extensions/partner/models.py:14
 msgid "Enable Sailthru Reporting"
 msgstr "Habilitar reportes de Sailthru"
 
-#: ecommerce/core/models.py:159
+#: ecommerce/core/models.py:160
 msgid "Determines if purchases should be reported to Sailthru."
 msgstr "Determina si las compras deben ser reportadas a Sailthru."
 
@@ -195,19 +195,23 @@ msgstr "Dominio de cookie de base"
 msgid "Base cookie domain used to share cookies across services."
 msgstr "Dominio de cookie de base utilizado para compartir cookies en todos los servicios."
 
-#: ecommerce/core/models.py:172
+#: ecommerce/core/models.py:171
 msgid "Enable embargo check"
 msgstr ""
 
-#: ecommerce/core/models.py:173
+#: ecommerce/core/models.py:172
 msgid "Enable embargo check at checkout."
 msgstr ""
 
-#: ecommerce/core/models.py:420
+#: ecommerce/core/models.py:176
+msgid "Discovery API URL"
+msgstr ""
+
+#: ecommerce/core/models.py:425
 msgid "Full Name"
 msgstr "Nombre Completo"
 
-#: ecommerce/core/models.py:565 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:570 ecommerce/extensions/basket/models.py:65
 msgid "Name"
 msgstr "Nombre"
 
@@ -726,7 +730,7 @@ msgstr "Este campo es requerido."
 #: ecommerce/extensions/payment/forms.py:125
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
-msgstr ""
+msgstr "{state} no es un estado / provincia válido en {country}."
 
 #: ecommerce/extensions/payment/forms.py:137
 msgid ""
@@ -821,14 +825,14 @@ msgstr "Línea de crédito (excluidos impuestos)"
 msgid "Quantity"
 msgstr "Cantidad"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:175
+#: ecommerce/extensions/voucher/tests/test_utils.py:176
 #: ecommerce/extensions/voucher/utils.py:61
 #: ecommerce/extensions/voucher/utils.py:262
 msgid "Redeemed"
 msgstr "Redimido"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:321
-#: ecommerce/extensions/voucher/tests/test_utils.py:326
+#: ecommerce/extensions/voucher/tests/test_utils.py:322
+#: ecommerce/extensions/voucher/tests/test_utils.py:327
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
 #: ecommerce/templates/edx/checkout/receipt.html:103
@@ -838,22 +842,22 @@ msgstr "Redimido"
 msgid "Discount"
 msgstr "Descuento"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:321
-#: ecommerce/extensions/voucher/tests/test_utils.py:326
+#: ecommerce/extensions/voucher/tests/test_utils.py:322
+#: ecommerce/extensions/voucher/tests/test_utils.py:327
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
 msgid "Enrollment"
 msgstr "Inscripciones"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:322
-#: ecommerce/extensions/voucher/tests/test_utils.py:330
+#: ecommerce/extensions/voucher/tests/test_utils.py:323
+#: ecommerce/extensions/voucher/tests/test_utils.py:331
 #: ecommerce/extensions/voucher/utils.py:81
 #: ecommerce/extensions/voucher/utils.py:128
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:456
+#: ecommerce/extensions/voucher/tests/test_utils.py:457
 #: ecommerce/extensions/voucher/utils.py:63
 msgid "Inactive"
 msgstr "Inactivo"
@@ -1057,7 +1061,7 @@ msgstr "Se debe especificar una fecha de inicio al especificar una fecha de fina
 msgid "The start date must occur before the end date."
 msgstr "La fecha de inicio debe ser anterior a la fecha de finalización."
 
-#: ecommerce/programs/forms.py:84
+#: ecommerce/programs/forms.py:85
 #, python-brace-format
 msgid "Discount for the {program_title} {program_type} Program"
 msgstr "Descuento para el programa {program_type} {program_title}"
@@ -1138,11 +1142,11 @@ msgstr "Inicio"
 msgid "End"
 msgstr "Fin"
 
-#: ecommerce/programs/views.py:48
+#: ecommerce/programs/views.py:49
 msgid "Program offer updated!"
 msgstr "¡Se actualizó la oferta del programa!"
 
-#: ecommerce/programs/views.py:71
+#: ecommerce/programs/views.py:72
 msgid "Program offer created!"
 msgstr "¡Se creó la oferta del programa!"
 
