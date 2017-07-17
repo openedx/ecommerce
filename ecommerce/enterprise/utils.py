@@ -393,7 +393,7 @@ def get_enterprise_customer_uuid(coupon_code):
     return offer.benefit.range.enterprise_customer
 
 
-def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid):
+def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid, max_age=None):
     """
     Set cookie for the enterprise customer with enterprise customer UUID.
 
@@ -403,6 +403,7 @@ def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid):
         site (Site): Django site object.
         response (HttpResponse): Django HTTP response object.
         enterprise_customer_uuid (UUID): Enterprise customer UUID
+        max_age (int): Maximum age of the cookie (seconds), defaults to None (lasts only as long as browser session).
 
     Returns:
          response (HttpResponse): Django HTTP response object.
@@ -411,6 +412,7 @@ def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid):
         response.set_cookie(
             settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, enterprise_customer_uuid,
             domain=site.siteconfiguration.base_cookie_domain,
+            max_age=max_age,
         )
     else:
         log.warning(

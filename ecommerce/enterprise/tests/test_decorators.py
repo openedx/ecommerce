@@ -39,6 +39,7 @@ class EnterpriseDecoratorsTests(EnterpriseServiceMockMixin, TestCase):
 
         cookie = response.cookies[settings.ENTERPRISE_CUSTOMER_COOKIE_NAME]
         self.assertEqual(str(enterprise_customer_uuid), cookie.value)
+        self.assertEqual(60, cookie.get('max-age'))
 
     def test_set_enterprise_cookie_no_code(self):
         """
