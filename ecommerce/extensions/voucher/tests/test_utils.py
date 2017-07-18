@@ -483,6 +483,9 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertIn('Redeemed For Course ID', field_names)
         self.assertNotIn('Redeemed For Course ID', rows[0])
 
+        self.assertIn('Redeemed For Course IDs', field_names)
+        self.assertNotIn('Redeemed For Course IDs', rows[0])
+
     def test_get_voucher_discount_info(self):
         """ Verify that get_voucher_discount_info() returns correct info. """
         benefits = self.create_benefits()
@@ -580,6 +583,32 @@ class UtilTests(CouponMixin, CourseCatalogMockMixin, CourseCatalogTestMixin, Lms
         self.assertIn('Redeemed By Username', field_names)
         self.assertEqual(rows[-1]['Redeemed By Username'], self.user.username)
         self.assertEqual(rows[-1]['Redeemed For Course ID'], self.course.id)
+
+    def test_generate_coupon_report_for_query_coupon_with_multi_line_order(self):
+        """
+        Test that coupon report for a query coupon that was used on multi-line order
+        contains ids from all courses in that order.
+        """
+        course1 = CourseFactory()
+        course2 = CourseFactory()
+        order = OrderFactory(number='TESTORDER')
+        order.lines.add(
+            OrderLineFactory(product=course1.create_or_update_seat('verified', False, 101, self.partner))
+        )
+        order.lines.add(
+            OrderLineFactory(product=course2.create_or_update_seat('verified', False, 110, self.partner))
+        )
+        query_coupon = self.create_catalog_coupon(catalog_query='*:*')
+        query_coupon.history.all().update(history_user=self.user)
+        voucher = query_coupon.attr.coupon_vouchers.vouchers.first()
+        voucher.record_usage(order, self.user)
+        field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
+
+        expected_redemed_course_ids = '{}, {}'.format(course1, course2)
+        self.assertEqual(rows[-1]['Redeemed For Course IDs'], expected_redemed_course_ids)
+        self.assertEqual(rows[-1].get('Redeemed For Course ID'), None)
+        self.assertIn('Redeemed For Course ID', field_names)
+        self.assertIn('Redeemed For Course IDs', field_names)
 
     def test_update_voucher_offer(self):
         """Test updating a voucher."""

@@ -41,6 +41,14 @@ Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 
+def _add_redemption_course_ids(new_row_to_append, header_row, redemption_course_ids):
+    if any(row in ['Catalog Query', 'Program UUID'] for row in header_row):
+        if len(redemption_course_ids) > 1:
+            new_row_to_append['Redeemed For Course IDs'] = ', '.join(redemption_course_ids)
+        else:
+            new_row_to_append['Redeemed For Course ID'] = redemption_course_ids[0]
+
+
 def _get_voucher_status(voucher, offer):
     """Retrieve the status of a voucher.
 
@@ -225,6 +233,7 @@ def generate_coupon_report(coupon_vouchers):
         _('Order Number'),
         _('Redeemed By Username'),
         _('Redeemed For Course ID'),
+        _('Redeemed For Course IDs'),
         _('Created By'),
         _('Create Date'),
         _('Coupon Start Date'),
@@ -246,18 +255,20 @@ def generate_coupon_report(coupon_vouchers):
                 row[item] = ''
 
             rows.append(row)
+
             if voucher.num_orders > 0:
                 voucher_applications = VoucherApplication.objects.filter(
                     voucher=voucher).prefetch_related('user', 'order__lines')
+
                 for application in voucher_applications:
+                    redemption_course_ids = []
                     redemption_user_username = application.user.username
-                    redemption_course_id = application.order.lines.first().product.course_id
+
+                    for line in application.order.lines.all():
+                        redemption_course_ids.append(line.product.course_id)
 
                     new_row = row.copy()
-
-                    if 'Catalog Query' in rows[0]:
-                        new_row['Redeemed For Course ID'] = redemption_course_id
-
+                    _add_redemption_course_ids(new_row, rows[0], redemption_course_ids)
                     new_row.update({
                         'Status': _('Redeemed'),
                         'Order Number': application.order.number,
@@ -281,6 +292,7 @@ def generate_coupon_report(coupon_vouchers):
         field_names.remove('Catalog Query')
         field_names.remove('Course Seat Types')
         field_names.remove('Redeemed For Course ID')
+        field_names.remove('Redeemed For Course IDs')
         field_names.remove('Program UUID')
 
     return field_names, rows
