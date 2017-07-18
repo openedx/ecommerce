@@ -4,6 +4,9 @@ import operator
 from oscar.apps.offer import utils
 from oscar.core.loading import get_model
 
+from requests import Timeout
+from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+
 from ecommerce.programs.api import ProgramsApiClient
 
 Condition = get_model('offer', 'Condition')
@@ -55,7 +58,11 @@ class ProgramCourseRunSeatsCondition(Condition):
 
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
 
-        program = self.get_program(basket.site.siteconfiguration)
+        try:
+            program = self.get_program(basket.site.siteconfiguration)
+        except (HttpNotFoundError, SlumberBaseException, Timeout):
+            return False
+
         applicable_seat_types = program['applicable_seat_types']
 
         for course in program['courses']:

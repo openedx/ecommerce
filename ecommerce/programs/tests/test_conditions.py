@@ -1,18 +1,26 @@
+import ddt
 import httpretty
+import mock
 from oscar.core.loading import get_model
+
+from requests import Timeout
+from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.test import factories
 from ecommerce.programs.tests.mixins import ProgramTestMixin
+from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 
 
+@ddt.ddt
 class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramCourseRunSeatsConditionTests, self).setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
+        self.test_product = ProductFactory()
 
     def test_name(self):
         """ The name should contain the program's UUID. """
@@ -73,3 +81,14 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         # The condition should be satisfied if one valid course run from each course is in the basket.
         basket.add_product(verified_seats[len(verified_seats) - 1])
         self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @ddt.data(HttpNotFoundError, SlumberBaseException, Timeout)
+    def test_is_satisfied_with_exception(self, value):
+        """ The method should return False if there is an exception when trying to get program details. """
+        offer = factories.ProgramOfferFactory(condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        basket.add_product(self.test_product)
+
+        with mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition.get_program',
+                        side_effect=value):
+            self.assertFalse(self.condition.is_satisfied(offer, basket))
