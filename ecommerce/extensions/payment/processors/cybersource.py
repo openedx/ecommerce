@@ -409,6 +409,11 @@ class Cybersource(BaseClientSidePaymentProcessor):
             capture_service = {
                 'run': 'true',
             }
+            # Enable Export Compliance for SDN validation, amongst other checks.
+            # See https://www.cybersource.com/products/fraud_management/export_compliance/
+            export_service = {
+                'run': 'true',
+            }
             item = [{
                 'id': index,
                 'productCode': line.product.get_product_class().slug,
@@ -428,6 +433,7 @@ class Cybersource(BaseClientSidePaymentProcessor):
                 card=card,
                 ccAuthService=auth_service,
                 ccCaptureService=capture_service,
+                exportService=export_service,
                 paymentSolution='001',
                 item=item,
             )
