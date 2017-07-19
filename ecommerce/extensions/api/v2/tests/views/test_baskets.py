@@ -351,6 +351,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
+    @httpretty.activate
     def test_basket_calculate_site_offer(self):
         """ Verify successful basket calculation with a site offer """
 
@@ -358,8 +359,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         benefit = factories.BenefitFactory(type=Benefit.PERCENTAGE, range=self.range, value=discount_value)
         condition = factories.ConditionFactory(value=3, range=self.range, type=Condition.COVERAGE)
         factories.ConditionalOfferFactory(name='Test Offer', benefit=benefit, condition=condition,
-                                          offer_type=ConditionalOffer.SITE, start_datetime=datetime.datetime.now(),
-                                          end_datetime=datetime.datetime.now() + datetime.timedelta(days=1))
+                                          offer_type=ConditionalOffer.SITE,
+                                          start_datetime=datetime.datetime.now() - datetime.timedelta(days=1),
+                                          end_datetime=datetime.datetime.now() + datetime.timedelta(days=2))
 
         response = self.client.get(self.url)
 
@@ -378,6 +380,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         offer = ProgramOfferFactory(benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100))
         program_uuid = offer.condition.program_uuid
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        self.mock_enrollment_api(self.user.username)
 
         response = self.client.get(self.url)
         expected = {

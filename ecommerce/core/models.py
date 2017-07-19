@@ -181,6 +181,12 @@ class SiteConfiguration(models.Model):
         verbose_name=_('Enable Apple Pay'),
         default=False
     )
+    enable_partial_program = models.BooleanField(
+        verbose_name=_('Enable Partial Program Offer'),
+        help_text=_('Enable the application of program offers to remaining unenrolled or unverified courses'),
+        blank=True,
+        default=False
+    )
 
     @property
     def payment_processors_set(self):
@@ -422,6 +428,10 @@ class SiteConfiguration(models.Model):
     @cached_property
     def credit_api_client(self):
         return EdxRestApiClient(self.build_lms_url('/api/credit/v1/'), jwt=self.access_token)
+
+    @cached_property
+    def enrollment_api_client(self):
+        return EdxRestApiClient(self.build_lms_url('/api/enrollment/v1/'), jwt=self.access_token, append_slash=False)
 
 
 class User(AbstractUser):
