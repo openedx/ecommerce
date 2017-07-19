@@ -193,23 +193,34 @@ class BusinessIntelligenceMixin(object):
     """Provides assertions for test cases validating the emission of business intelligence events."""
 
     def assert_correct_event(
-            self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency, total
+            self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency,
+            total, coupon=None, discount='0.00'
     ):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
         self.assertEqual(event_user_id, expected_user_id)
         self.assertEqual(event_name, 'Order Completed')
         self.assertEqual(kwargs['context'], {'ip': expected_ip, 'Google Analytics': {'clientId': expected_client_id}})
-        self.assert_correct_event_payload(instance, event_payload, order_number, currency, total)
+        self.assert_correct_event_payload(
+            instance, event_payload, order_number, currency, total, coupon, discount
+        )
 
-    def assert_correct_event_payload(self, instance, event_payload, order_number, currency, total):
+    def assert_correct_event_payload(
+            self, instance, event_payload, order_number, currency, total,
+            coupon, discount
+    ):
         """
         Check that field values in the event payload correctly represent the
         completed order or refund.
         """
-        self.assertEqual(['currency', 'orderId', 'products', 'total'], sorted(event_payload.keys()))
+        self.assertEqual(
+            ['coupon', 'currency', 'discount', 'orderId', 'products', 'total'],
+            sorted(event_payload.keys())
+        )
         self.assertEqual(event_payload['orderId'], order_number)
         self.assertEqual(event_payload['currency'], currency)
+        self.assertEqual(event_payload['coupon'], coupon)
+        self.assertEqual(event_payload['discount'], discount)
 
         lines = instance.lines.all()
         self.assertEqual(len(lines), len(event_payload['products']))
