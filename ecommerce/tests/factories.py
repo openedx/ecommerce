@@ -37,6 +37,7 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
     send_refund_notifications = False
     enable_sdn_check = False
     enable_embargo_check = False
+    enable_partial_program = False
     discovery_api_url = 'http://{}.fake/'.format(Faker().domain_name())
 
 

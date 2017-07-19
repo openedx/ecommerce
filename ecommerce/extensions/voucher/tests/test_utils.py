@@ -28,6 +28,7 @@ from ecommerce.extensions.voucher.utils import (
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
+
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -439,7 +440,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         """ Verify the coupon report show correct status for inactive coupons. """
         self.data.update({
             'name': self.coupon.title,
-            'end_datetime': datetime.datetime.now() - datetime.timedelta(days=0.1)
+            'end_datetime': datetime.datetime.now() - datetime.timedelta(days=1)
         })
         vouchers = create_vouchers(**self.data)
         self.coupon_vouchers.first().vouchers.add(*vouchers)
