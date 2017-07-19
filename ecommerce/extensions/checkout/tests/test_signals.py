@@ -3,6 +3,8 @@ import json
 import httpretty
 import mock
 from django.core import mail
+from oscar.core.loading import get_class, get_model
+from oscar.test import factories
 from oscar.test.newfactories import BasketFactory
 from testfixtures import LogCapture
 
@@ -12,8 +14,14 @@ from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.test.factories import create_order
+from ecommerce.extensions.test.factories import create_order, prepare_voucher
+from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
+
+Applicator = get_class('offer.utils', 'Applicator')
+Benefit = get_model('offer', 'Benefit')
+Condition = get_model('offer', 'Condition')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 
@@ -111,10 +119,14 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
             )
 
     def _generate_event_properties(self, order):
+        voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
+        coupon = voucher.voucher_code if voucher else None
         return {
             'orderId': order.number,
             'total': str(order.total_excl_tax),
             'currency': order.currency,
+            'coupon': coupon,
+            'discount': str(order.total_discount_incl_tax),
             'products': [
                 {
                     'id': line.partner_sku,
@@ -139,6 +151,65 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
             # We should be able to fire events even if the product is not releated to a course.
             mock_track.reset_mock()
             order = create_order()
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+    def test_track_completed_percent_discounted_order(self):
+        """ An event including coupon information should be sent to Segment"""
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+            # Orders may be discounted by percent
+            percent_benefit = 66
+            product = ProductFactory(categories=[], stockrecords__price_currency='USD')
+            _range = factories.RangeFactory(products=[product], )
+            voucher, product = prepare_voucher(_range=_range, benefit_value=percent_benefit)
+
+            basket = BasketFactory(owner=self.user, site=self.site)
+            basket.add_product(product)
+            basket.vouchers.add(voucher)
+            Applicator().apply(basket, user=basket.owner, request=self.request)
+
+            order = factories.create_order(basket=basket, user=self.user)
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+    def test_track_completed_fixed_discounted_order(self):
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+            # Orders may be discounted by a fixed value
+            fixed_benefit = 5.00
+            product = ProductFactory(categories=[], stockrecords__price_currency='USD')
+            _range = factories.RangeFactory(products=[product], )
+            voucher, product = prepare_voucher(_range=_range, benefit_value=fixed_benefit, benefit_type=Benefit.FIXED)
+
+            basket = BasketFactory(owner=self.user, site=self.site)
+            basket.add_product(product)
+            basket.vouchers.add(voucher)
+            Applicator().apply(basket, user=basket.owner, request=self.request)
+
+            order = factories.create_order(basket=basket, user=self.user)
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+    def test_track_completed_discounted_order_with_offer(self):
+        """ An event including a discount but no coupon should be sent to Segment"""
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+            # Orders may be discounted by a fixed value
+            offer_discount = 5
+            product = ProductFactory(categories=[], stockrecords__price_currency='USD')
+            _range = factories.RangeFactory(products=[product], )
+            site_offer = factories.ConditionalOfferFactory(
+                offer_type=ConditionalOffer.SITE,
+                benefit=factories.BenefitFactory(range=_range, value=offer_discount),
+                condition=factories.ConditionFactory(type=Condition.COVERAGE, value=1, range=_range)
+            )
+
+            basket = BasketFactory(owner=self.user, site=self.site)
+            basket.add_product(product)
+            Applicator().apply_offers(basket, [site_offer])
+
+            order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)

@@ -23,10 +23,15 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     if order.total_excl_tax <= 0:
         return
 
+    voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
+    coupon = voucher.voucher_code if voucher else None
+
     properties = {
         'orderId': order.number,
         'total': str(order.total_excl_tax),
         'currency': order.currency,
+        'coupon': coupon,
+        'discount': str(order.total_discount_incl_tax),
         'products': [
             {
                 # For backwards-compatibility with older events the `sku` field is (ab)used to
