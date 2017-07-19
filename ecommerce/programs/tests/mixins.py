@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import httpretty
 
+from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -18,9 +19,9 @@ class ProgramTestMixin(DiscoveryTestMixin):
             dict: Mocked program data.
         """
         courses = []
-        for __ in range(1, 5):
+        for i in range(1, 5):
+            key = 'course-v1:test-org+course+' + str(i)
             course_runs = []
-
             for __ in range(1, 4):
                 course_run = CourseFactory()
                 course_run.create_or_update_seat('audit', False, Decimal(0), self.partner)
@@ -34,7 +35,7 @@ class ProgramTestMixin(DiscoveryTestMixin):
                     } for seat in course_run.seat_products]
                 })
 
-            courses.append({'course_runs': course_runs, })
+            courses.append({'key': key, 'course_runs': course_runs, })
 
         program_uuid = str(program_uuid)
         data = {
@@ -56,3 +57,17 @@ class ProgramTestMixin(DiscoveryTestMixin):
             content_type='application/json'
         )
         return data
+
+    def mock_enrollment_api(self, username, enrollments=[]):  # pylint: disable=dangerous-default-value
+        """ Mocks enrollment retrieval from LMS
+        Returns:
+            list: Mocked enrollment data
+        """
+        self.mock_access_token_response()
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}?user={}'.format(get_lms_enrollment_api_url(), username),
+            body=json.dumps(enrollments),
+            content_type='application/json'
+        )
+        return enrollments

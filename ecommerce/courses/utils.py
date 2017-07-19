@@ -1,10 +1,13 @@
 import hashlib
+import logging
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 
 from ecommerce.core.utils import traverse_pagination
+
+logger = logging.getLogger(__name__)
 
 
 def mode_for_seat(product):

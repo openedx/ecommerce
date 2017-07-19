@@ -378,6 +378,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         offer = ProgramOfferFactory(benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100))
         program_uuid = offer.condition.program_uuid
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        self.mock_enrollment_api(self.user.username)
 
         response = self.client.get(self.url)
         expected = {
