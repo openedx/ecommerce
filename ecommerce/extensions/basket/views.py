@@ -323,6 +323,12 @@ class BasketSummaryView(BasketView):
                 'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
             }
             track_segment_event(request.site, request.user, 'Cart Viewed', properties)
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
 

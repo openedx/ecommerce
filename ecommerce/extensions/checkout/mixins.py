@@ -54,7 +54,22 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
         self.record_payment(basket, handled_processor_response)
 
+    def emit_checkout_step_events(self, basket, handled_processor_response, payment_processor):
+        """ Emit events necessary to track the user in the checkout funnel. """
+
+        properties = {
+            'checkout_id': basket.order_number,
+            'step': 1,
+            'payment_method': '{} | {}'.format(handled_processor_response.card_type, payment_processor.NAME)
+        }
+        track_segment_event(basket.site, basket.owner, 'Checkout Step Completed', properties)
+
+        properties['step'] = 2
+        track_segment_event(basket.site, basket.owner, 'Checkout Step Viewed', properties)
+        track_segment_event(basket.site, basket.owner, 'Checkout Step Completed', properties)
+
     def record_payment(self, basket, handled_processor_response):
+        self.emit_checkout_step_events(basket, handled_processor_response, self.payment_processor)
         track_segment_event(basket.site, basket.owner, 'Payment Info Entered', {'checkout_id': basket.order_number})
         source_type, __ = SourceType.objects.get_or_create(name=self.payment_processor.NAME)
         total = handled_processor_response.total

@@ -1,17 +1,16 @@
 """
 Tests for the ecommerce.extensions.checkout.mixins module.
 """
-
+import mock
 from django.core import mail
 from django.test import RequestFactory
-from mock import Mock, patch
 from oscar.core.loading import get_class, get_model
 from oscar.test.newfactories import ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 
 from ecommerce.core.models import SegmentClient
-from ecommerce.extensions.analytics.utils import parse_tracking_context
+from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -31,7 +30,7 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
 
 
-@patch.object(SegmentClient, 'track')
+@mock.patch.object(SegmentClient, 'track')
 class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin, RefundTestMixin, TestCase):
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
@@ -200,7 +199,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         Ensure that exceptions raised while emitting tracking events are
         logged, but do not otherwise interrupt program flow.
         """
-        with patch('ecommerce.extensions.analytics.utils.logger.exception') as mock_log_exc:
+        with mock.patch('ecommerce.extensions.analytics.utils.logger.exception') as mock_log_exc:
             mock_track.side_effect = Exception("clunk")
             EdxOrderPlacementMixin().handle_successful_order(self.order)
         # ensure that analytics.track was called, but the exception was caught
@@ -224,7 +223,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             sample.percent = 100.0
             sample.save()
 
-        with patch('ecommerce.extensions.checkout.mixins.fulfill_order.delay') as mock_delay:
+        with mock.patch('ecommerce.extensions.checkout.mixins.fulfill_order.delay') as mock_delay:
             EdxOrderPlacementMixin().handle_successful_order(self.order)
             self.assertTrue(mock_delay.called)
             mock_delay.assert_called_once_with(self.order.number, site_code=self.partner.short_code)
@@ -272,8 +271,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         self.assertEqual(len(mail.outbox), 0)
 
         # Invalid messages container path (graceful exit)
-        with patch('ecommerce.extensions.checkout.mixins.CommunicationEventType.objects.get') as mock_get:
-            mock_event_type = Mock()
+        with mock.patch('ecommerce.extensions.checkout.mixins.CommunicationEventType.objects.get') as mock_get:
+            mock_event_type = mock.Mock()
             mock_event_type.get_messages.return_value = {}
             mock_get.return_value = mock_event_type
             mixin.send_confirmation_message(order, 'ORDER_PLACED', request.site)
@@ -292,7 +291,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
         mixin = EdxOrderPlacementMixin()
         mixin.payment_processor = DummyProcessor(self.site)
-        properties = {'checkout_id': basket.order_number}
 
         user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(self.user)
         context = {
@@ -303,6 +301,25 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         }
 
         mixin.handle_payment({}, basket)
-        # ensure that the only two Segment events fired are 'Product Added' and 'Payment Info Entered'
-        self.assertEqual(mock_track.call_count, 2)
-        mock_track.assert_called_with(user_tracking_id, 'Payment Info Entered', properties, context=context)
+
+        # Verify the correct events are fired to Segment
+        calls = []
+
+        properties = translate_basket_line_for_segment(basket.lines.first())
+        properties['cart_id'] = basket.id
+        calls.append(mock.call(user_tracking_id, 'Product Added', properties, context=context))
+
+        properties = {
+            'checkout_id': basket.order_number,
+            'step': 1,
+            'payment_method': 'Visa | ' + DummyProcessor.NAME,
+        }
+        calls.append(mock.call(user_tracking_id, 'Checkout Step Completed', properties, context=context))
+        properties['step'] = 2
+        calls.append(mock.call(user_tracking_id, 'Checkout Step Viewed', properties, context=context))
+        calls.append(mock.call(user_tracking_id, 'Checkout Step Completed', properties, context=context))
+
+        properties = {'checkout_id': basket.order_number}
+        calls.append(mock.call(user_tracking_id, 'Payment Info Entered', properties, context=context))
+
+        mock_track.assert_has_calls(calls)

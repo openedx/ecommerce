@@ -509,15 +509,24 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
             response = self.client.get(self.path)
 
-            # Verify an event is sent to Segment
+            # Verify events are sent to Segment
+            calls = []
             properties = {
                 'cart_id': basket.id,
                 'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
             }
-            mock_track.assert_called_once_with(self.site, self.user, 'Cart Viewed', properties)
+            calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            calls.append(mock.call(self.site, self.user, 'Checkout Step Viewed', properties))
+            mock_track.assert_has_calls(calls)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['formset_lines_data']), 1)
+
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['benefit_value'], format_benefit_value(benefit))
         self.assertEqual(line_data['seat_type'], seat.attr.certificate_type.capitalize())

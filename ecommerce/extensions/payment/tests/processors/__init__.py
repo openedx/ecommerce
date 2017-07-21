@@ -14,7 +14,7 @@ class DummyProcessor(BaseClientSidePaymentProcessor):
             total=basket.total_incl_tax,
             currency=basket.currency,
             card_number=basket.owner.username,
-            card_type=None
+            card_type='Visa'
         )
 
     def is_signature_valid(self, response):
