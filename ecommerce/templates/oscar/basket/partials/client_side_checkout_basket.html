@@ -112,6 +112,7 @@
                       <button data-track-type="click"
                               data-track-event="edx.bi.ecommerce.basket.payment_selected"
                               data-track-category="checkout"
+                              data-track-payment-method="PayPal"
                               data-processor-name="paypal"
                               class="btn payment-button payment-processor-paypal"
                               value="paypal"
@@ -122,6 +123,7 @@
                               data-track-type="click"
                               data-track-event="edx.bi.ecommerce.basket.payment_selected"
                               data-track-category="checkout"
+                              data-track-payment-method="Apple Pay"
                               class="payment-button apple-pay-button apple-pay-button-black"
                               title="{% trans "Pay with Apple Pay" %}" type="button">
                       </button>
@@ -211,6 +213,7 @@
                             data-track-type="click"
                             data-track-event="edx.bi.ecommerce.basket.payment_selected"
                             data-track-category="checkout"
+                            data-track-payment-method="Credit Card"
                             data-processor-name="{{ client_side_payment_processor.NAME }}"
                             data-track-checkout-type="client_side">
                       {% trans "Place Order" %}
