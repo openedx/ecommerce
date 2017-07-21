@@ -118,9 +118,8 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
                 )
             )
 
-    def _generate_event_properties(self, order):
-        voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
-        coupon = voucher.voucher_code if voucher else None
+    def _generate_event_properties(self, order, voucher=None):
+        coupon = voucher.code if voucher else None
         return {
             'orderId': order.number,
             'total': str(order.total_excl_tax),
@@ -155,7 +154,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
-    def test_track_completed_percent_discounted_order(self):
+    def test_track_completed_discounted_order_with_voucher(self):
         """ An event including coupon information should be sent to Segment"""
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
             # Orders may be discounted by percent
@@ -171,16 +170,22 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
-            properties = self._generate_event_properties(order)
+            properties = self._generate_event_properties(order, voucher)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
-    def test_track_completed_fixed_discounted_order(self):
+    def test_track_completed_discounted_order_with_voucher_with_offer(self):
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
             # Orders may be discounted by a fixed value
             fixed_benefit = 5.00
+            offer_discount = 6
             product = ProductFactory(categories=[], stockrecords__price_currency='USD')
             _range = factories.RangeFactory(products=[product], )
             voucher, product = prepare_voucher(_range=_range, benefit_value=fixed_benefit, benefit_type=Benefit.FIXED)
+            factories.ConditionalOfferFactory(
+                offer_type=ConditionalOffer.SITE,
+                benefit=factories.BenefitFactory(range=_range, value=offer_discount),
+                condition=factories.ConditionFactory(type=Condition.COVERAGE, value=1, range=_range)
+            )
 
             basket = BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
@@ -189,7 +194,7 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
-            properties = self._generate_event_properties(order)
+            properties = self._generate_event_properties(order, voucher)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
     def test_track_completed_discounted_order_with_offer(self):
