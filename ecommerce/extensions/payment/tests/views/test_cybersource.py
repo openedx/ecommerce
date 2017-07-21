@@ -392,6 +392,19 @@ class CybersourceApplePayAuthorizationViewTests(LoginMixin, CybersourceMixin, Te
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data, {'error': 'billing_address_invalid'})
 
+    def test_post_with_invalid_country(self):
+        """ The view should log a warning if the country code is invalid. """
+        data = self.generate_post_data()
+        country_code = 'FAKE'
+        data['billingContact']['countryCode'] = country_code
+
+        with mock.patch('ecommerce.extensions.payment.views.cybersource.logger.warning') as mock_logger:
+            response = self.client.post(self.url, json.dumps(data), JSON)
+            mock_logger.assert_called_once_with('Country matching code [%s] does not exist.', country_code)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {'error': 'billing_address_invalid'})
+
     def test_post_without_payment_token(self):
         """ The view should return an error if no payment token is provided. """
         data = self.generate_post_data()

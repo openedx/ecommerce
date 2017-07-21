@@ -422,6 +422,13 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, OrderCreat
         """
         address_lines = apple_pay_payment_contact['addressLines']
         address_line_2 = address_lines[1] if len(address_lines) > 1 else ''
+        country_code = apple_pay_payment_contact.get('countryCode')
+
+        try:
+            country = Country.objects.get(iso_3166_1_a2__iexact=country_code)
+        except Country.DoesNotExist:
+            logger.warning('Country matching code [%s] does not exist.', country_code)
+            raise
 
         return BillingAddress(
             first_name=apple_pay_payment_contact['givenName'],
@@ -437,7 +444,7 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, OrderCreat
             postcode=apple_pay_payment_contact.get('postalCode', ''),
             # State is optional
             state=apple_pay_payment_contact.get('administrativeArea', ''),
-            country=Country.objects.get(iso_3166_1_a2__iexact=apple_pay_payment_contact.get('countryCode')))
+            country=country)
 
     def post(self, request):
         basket = request.basket
