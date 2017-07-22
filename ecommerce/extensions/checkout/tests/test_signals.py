@@ -8,7 +8,9 @@ from oscar.test import factories
 from oscar.test.newfactories import BasketFactory
 from testfixtures import LogCapture
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
@@ -25,8 +27,10 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 
+Product = get_model('catalogue', 'Product')
 
-class SignalTests(CourseCatalogTestMixin, TestCase):
+
+class SignalTests(CourseCatalogTestMixin, CouponMixin, TestCase):
     def setUp(self):
         super(SignalTests, self).setUp()
         self.user = self.create_user()
@@ -218,3 +222,35 @@ class SignalTests(CourseCatalogTestMixin, TestCase):
             track_completed_order(None, order)
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+    def test_track_completed_coupon_order(self):
+        """ Make sure we do not send GA events for Coupon orders """
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+
+            coupon = self.create_coupon()
+            basket = BasketFactory(owner=self.user, site=self.site)
+            basket.add_product(coupon)
+
+            order = factories.create_order(basket=basket, user=self.user)
+            track_completed_order(None, order)
+            assert not mock_track.called
+
+    def test_track_completed_enrollment_order(self):
+        """ Make sure we do not send GA events for Enrollment Code orders """
+        with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
+
+            toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+            site_config = self.site.siteconfiguration
+            site_config.enable_enrollment_codes = True
+            site_config.save()
+
+            course = CourseFactory()
+            course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+            enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+
+            basket = BasketFactory(owner=self.user, site=self.site)
+            basket.add_product(enrollment_code)
+
+            order = factories.create_order(basket=basket, user=self.user)
+            track_completed_order(None, order)
+            assert not mock_track.called

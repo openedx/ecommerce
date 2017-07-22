@@ -23,6 +23,10 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     if order.total_excl_tax <= 0:
         return
 
+    for line in order.lines.all():
+        if line.product.is_coupon_product or line.product.is_enrollment_code_product:
+            return
+
     voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
     coupon = voucher.voucher_code if voucher else None
 
