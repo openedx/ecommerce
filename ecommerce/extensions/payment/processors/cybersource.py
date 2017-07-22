@@ -462,4 +462,5 @@ class Cybersource(BaseClientSidePaymentProcessor):
             msg = ('CyberSource rejected an Apple Pay authorization request for basket [{basket_id}]. '
                    'Complete response has been recorded in entry [{response_id}]')
             msg = msg.format(basket_id=basket.id, response_id=ppr.id)
+            logger.warning(msg)
         raise GatewayError(msg)
