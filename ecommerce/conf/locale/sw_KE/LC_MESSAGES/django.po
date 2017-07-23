@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-12 10:32+0000\n"
-"PO-Revision-Date: 2017-07-12 22:57+0000\n"
+"POT-Creation-Date: 2017-07-18 11:14-0400\n"
+"PO-Revision-Date: 2017-07-18 21:55+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
 "MIME-Version: 1.0\n"
@@ -202,11 +202,16 @@ msgstr ""
 msgid "Discovery API URL"
 msgstr ""
 
-#: ecommerce/core/models.py:425
+#. Translators: Do not translate "Apple Pay"
+#: ecommerce/core/models.py:181
+msgid "Enable Apple Pay"
+msgstr ""
+
+#: ecommerce/core/models.py:430
 msgid "Full Name"
 msgstr "Jina Kamili"
 
-#: ecommerce/core/models.py:570 ecommerce/extensions/basket/models.py:65
+#: ecommerce/core/models.py:575 ecommerce/extensions/basket/models.py:86
 msgid "Name"
 msgstr "Jina"
 
@@ -283,7 +288,7 @@ msgstr "Tayari umeshanunua {course} nafasi ya kozi."
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr "Ombi la punguzo limewasilishwa, kwa ajili ya {enterprise_customer_name}."
 
-#: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:12
+#: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:15
 #: ecommerce/extensions/payment/models.py:58
 msgid "Site"
 msgstr "Tovuti"
@@ -434,22 +439,22 @@ msgstr "Hakuna SKUs zilizotolewa."
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "Bidhaa zenye SKU(s) [{skus}] hazipo."
 
-#: ecommerce/extensions/basket/models.py:54
+#: ecommerce/extensions/basket/models.py:75
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr "{id} - {status} kapu (owner:{owner}, mistari:{num_lines})"
 
-#: ecommerce/extensions/basket/models.py:77
+#: ecommerce/extensions/basket/models.py:98
 #: ecommerce/extensions/payment/models.py:18
 #: ecommerce/templates/oscar/basket/basket.html:8
 msgid "Basket"
 msgstr "Kapu"
 
-#: ecommerce/extensions/basket/models.py:79
+#: ecommerce/extensions/basket/models.py:100
 msgid "Attribute Type"
 msgstr "Aina Ya Sifa"
 
-#: ecommerce/extensions/basket/models.py:81
+#: ecommerce/extensions/basket/models.py:102
 msgid "Text Attribute"
 msgstr "Sifa ya Maandishi"
 
@@ -648,7 +653,7 @@ msgstr "Bofya 'Save and continue Editing' kuongeza taarifa za mali."
 msgid "Partner"
 msgstr "Mbia"
 
-#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:213
+#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:214
 msgid "Partners"
 msgstr "Wabia"
 
@@ -656,15 +661,15 @@ msgstr "Wabia"
 msgid "American Express"
 msgstr "American Express"
 
-#: ecommerce/extensions/payment/constants.py:13
+#: ecommerce/extensions/payment/constants.py:14
 msgid "Discover"
 msgstr "Discover"
 
-#: ecommerce/extensions/payment/constants.py:17
+#: ecommerce/extensions/payment/constants.py:19
 msgid "MasterCard"
 msgstr "MasterCard"
 
-#: ecommerce/extensions/payment/constants.py:21
+#: ecommerce/extensions/payment/constants.py:24
 msgid "Visa"
 msgstr "Visa"
 
@@ -758,18 +763,18 @@ msgstr "Idadi juhudi za majaribio ya kusimamisha shughuli za mtumiaji Paypal  (m
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:91
+#: ecommerce/extensions/payment/views/cybersource.py:135
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr "Kulikuwa na tatizo katika kupata ujazo wako. Onesha upya ukurusa kujaribu tena."
 
-#: ecommerce/extensions/payment/views/cybersource.py:112
+#: ecommerce/extensions/payment/views/cybersource.py:156
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
 msgstr "Ujazo wako umerekebishwa au tayari umeshanunuliwa. Onesha upya ukurasa ujaribu tena."
 
-#: ecommerce/extensions/payment/views/cybersource.py:336
+#: ecommerce/extensions/payment/views/cybersource.py:347
 #, python-brace-format
 msgid ""
 "An error occurred while processing your payment. You have not been charged. "
@@ -820,14 +825,14 @@ msgstr "Mstari wa Mkopo (bila kodi)"
 msgid "Quantity"
 msgstr "Idadi"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:176
+#: ecommerce/extensions/voucher/tests/test_utils.py:175
 #: ecommerce/extensions/voucher/utils.py:61
 #: ecommerce/extensions/voucher/utils.py:262
 msgid "Redeemed"
 msgstr "Imerejeshwa"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:322
-#: ecommerce/extensions/voucher/tests/test_utils.py:327
+#: ecommerce/extensions/voucher/tests/test_utils.py:321
+#: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
 #: ecommerce/templates/edx/checkout/receipt.html:103
@@ -837,22 +842,22 @@ msgstr "Imerejeshwa"
 msgid "Discount"
 msgstr "\"Punguzo\""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:322
-#: ecommerce/extensions/voucher/tests/test_utils.py:327
+#: ecommerce/extensions/voucher/tests/test_utils.py:321
+#: ecommerce/extensions/voucher/tests/test_utils.py:326
 #: ecommerce/extensions/voucher/utils.py:80
 #: ecommerce/extensions/voucher/utils.py:124
 msgid "Enrollment"
 msgstr "Usajili"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:323
-#: ecommerce/extensions/voucher/tests/test_utils.py:331
+#: ecommerce/extensions/voucher/tests/test_utils.py:322
+#: ecommerce/extensions/voucher/tests/test_utils.py:330
 #: ecommerce/extensions/voucher/utils.py:81
 #: ecommerce/extensions/voucher/utils.py:128
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:457
+#: ecommerce/extensions/voucher/tests/test_utils.py:456
 #: ecommerce/extensions/voucher/utils.py:63
 msgid "Inactive"
 msgstr "Haiko katika matumizi"
@@ -980,7 +985,7 @@ msgstr "Taarifa ya Kuponi ya {coupon_name}"
 #: ecommerce/extensions/voucher/views.py:38
 msgid ""
 "Failed to find a matching stock record for coupon, report download canceled."
-msgstr ""
+msgstr "Haikuweza kupata rekodi ya bidhaa inayofanana na kuponi, upakuaji wa ripoti umebatilishwa."
 
 #: ecommerce/invoice/models.py:11
 msgid "Not Paid"
@@ -1064,21 +1069,21 @@ msgstr "Punguzo la bei kwa Programu ya {program_title} {program_type}"
 #: ecommerce/programs/templates/programs/programoffer_form.html:8
 #, python-format
 msgid "Edit Program Offer: %(program_title)s"
-msgstr ""
+msgstr "Hariri Ofa ya Programu:%(program_title)s"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:12
 #: ecommerce/programs/templates/programs/programoffer_form.html:45
 #: ecommerce/programs/templates/programs/programoffer_form.html:58
 #: ecommerce/programs/templates/programs/programoffer_list.html:20
 msgid "Create Program Offer"
-msgstr ""
+msgstr "Tengeneza Ofa ya Programu"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:28
 #: ecommerce/programs/templates/programs/programoffer_list.html:6
 #: ecommerce/programs/templates/programs/programoffer_list.html:17
 #: ecommerce/templates/edx/partials/_administration_menu.html:8
 msgid "Program Offers"
-msgstr ""
+msgstr "Ofa za Programu"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:32
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:11
@@ -1093,7 +1098,7 @@ msgstr "Unda"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:43
 msgid "Edit Program Offer"
-msgstr ""
+msgstr "Hariri Ofa ya Programu"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:56
 msgid "Save Changes"
@@ -1109,7 +1114,7 @@ msgstr "Batilisha"
 #: ecommerce/programs/templates/programs/programoffer_list.html:58
 #, python-format
 msgid "%(platform_name)s Program Offer Administration Tool"
-msgstr ""
+msgstr "%(platform_name)sZana ya Kusimamia Ofa za Programu"
 
 #: ecommerce/programs/templates/programs/programoffer_list.html:26
 msgid "Current program offers"
@@ -1167,13 +1172,13 @@ msgstr "Muhula wa UTM"
 
 #: ecommerce/referrals/models.py:31
 msgid "UTM Content"
-msgstr " maudhui ya UTM "
+msgstr " Maudhui ya UTM "
 
 #: ecommerce/referrals/models.py:32
 msgid "UTM Created At"
 msgstr "UTM Iliyoundwa Katika"
 
-#: ecommerce/settings/_oscar.py:170
+#: ecommerce/settings/_oscar.py:171
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
 #: ecommerce/templates/oscar/dashboard/index.html:22
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:13
@@ -1185,38 +1190,38 @@ msgstr "UTM Iliyoundwa Katika"
 msgid "Dashboard"
 msgstr "Dashibodi"
 
-#: ecommerce/settings/_oscar.py:175
+#: ecommerce/settings/_oscar.py:176
 msgid "Catalogue"
 msgstr "Katalogi"
 
-#: ecommerce/settings/_oscar.py:179
+#: ecommerce/settings/_oscar.py:180
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:11
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:20
 msgid "Products"
 msgstr "Bidhaa"
 
-#: ecommerce/settings/_oscar.py:183
+#: ecommerce/settings/_oscar.py:184
 msgid "Product Types"
 msgstr "Aina za bidhaa"
 
-#: ecommerce/settings/_oscar.py:187
+#: ecommerce/settings/_oscar.py:188
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:73
 msgid "Categories"
 msgstr "Makundi"
 
-#: ecommerce/settings/_oscar.py:191
+#: ecommerce/settings/_oscar.py:192
 msgid "Ranges"
 msgstr "Nafasi"
 
-#: ecommerce/settings/_oscar.py:195
+#: ecommerce/settings/_oscar.py:196
 msgid "Low stock alerts"
 msgstr "Tahadhari za upungufu wa mali"
 
-#: ecommerce/settings/_oscar.py:201
+#: ecommerce/settings/_oscar.py:202
 msgid "Fulfillment"
 msgstr "Tekelezo"
 
-#: ecommerce/settings/_oscar.py:205
+#: ecommerce/settings/_oscar.py:206
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:16
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1228,11 +1233,11 @@ msgstr "Tekelezo"
 msgid "Orders"
 msgstr "Maagizi /Amri"
 
-#: ecommerce/settings/_oscar.py:209
+#: ecommerce/settings/_oscar.py:210
 msgid "Statistics"
 msgstr "Takwimu"
 
-#: ecommerce/settings/_oscar.py:217
+#: ecommerce/settings/_oscar.py:218
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:32
@@ -1243,24 +1248,24 @@ msgstr "Takwimu"
 msgid "Refunds"
 msgstr "Marejesho ya fedha zilizolipwa"
 
-#: ecommerce/settings/_oscar.py:223 ecommerce/settings/_oscar.py:227
+#: ecommerce/settings/_oscar.py:224 ecommerce/settings/_oscar.py:228
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr "Wateja"
 
-#: ecommerce/settings/_oscar.py:231
+#: ecommerce/settings/_oscar.py:232
 msgid "Stock alert requests"
 msgstr "Tahadhari ya uhitaji wa mali"
 
-#: ecommerce/settings/_oscar.py:237 ecommerce/settings/_oscar.py:241
+#: ecommerce/settings/_oscar.py:238 ecommerce/settings/_oscar.py:242
 msgid "Offers"
 msgstr "Ahadi"
 
-#: ecommerce/settings/_oscar.py:245
+#: ecommerce/settings/_oscar.py:246
 msgid "Vouchers"
 msgstr "Vocha"
 
-#: ecommerce/settings/_oscar.py:251
+#: ecommerce/settings/_oscar.py:252
 msgid "Reports"
 msgstr "Ripoti"
 
@@ -1315,7 +1320,7 @@ msgid ""
 "university's logo, as well as signatures from faculty members involved with "
 "the course. There is also a URL that can be used to verify the authenticity "
 "of the certificate."
-msgstr ""
+msgstr "Cheti kilichothibitishwa( cha mtandaoni) kinachoeleza kwamba mtumiaji amemaliza kozi katika muda uliooneshwa. Cheti kina nembo ya edX, nembo ya chuo pamoja na sahihi za walimu waliofundisha kozi. Pia kuna URL ambayo inaweza kutumika kuhakiki uhalali wa cheti."
 
 #: ecommerce/templates/coupons/offer.html:30
 msgid ""
@@ -1537,12 +1542,12 @@ msgid ""
 "Thank you for purchasing access to %(course_name)s.\n"
 "                    Please click <a href=\"%(download_csv_link)s\">HERE</a> to download a CSV file with the enrollment codes for this course.\n"
 "                    Once you have the codes you can distribute them to your team. "
-msgstr ""
+msgstr "Ahsante kwa kununua nafasi ya kusoma %(course_name)s. \nTafdhali bofya  <a href=\"%(download_csv_link)s\">HAPA</a> kupakua faili la CSV kwa kutumia namba za usajili za kozi hii.\nUpatapo namba unaweza kuzigawa kwa wenzako. "
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:58
 #, python-format
 msgid "To view your payment information, please visit %(receipt_page_url)s."
-msgstr ""
+msgstr "Kuangalia taarifa zako za malipo, tafadhali tembelea %(receipt_page_url)s."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:59
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:8
@@ -1568,7 +1573,7 @@ msgid ""
 "You received this message because you purchased enrollment codes for "
 "%(course_name)s on %(lms_url)s. If you have any questions, please visit "
 "%(contact_url)s."
-msgstr ""
+msgstr "Ulipokea ujumbe huu kwasababu ulinunua namba za usajili wa %(course_name)s kwenye%(lms_url)s. Kama una maswali, tafadhali tembelea %(contact_url)s."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:2
 msgid "Order confirmation for: "
@@ -1580,12 +1585,12 @@ msgid ""
 "Thank you for purchasing access to %(course_name)s. Please go to "
 "%(download_csv_link)s to download a CSV file with the enrollment codes for "
 "this course. Once you have the codes you can distribute them to your team. "
-msgstr ""
+msgstr "Ahsante kwa kununua nafasi ya kusoma %(course_name)s. \nTafdhali nenda kwenye%(download_csv_link)s  kupakua faili la CSV kwa kutumia namba za usajili za kozi hii.\nUpatapo namba unaweza kuzigawa kwa wenzako. "
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt:2
 #, python-format
 msgid "%(partner_name)s: Order Confirmation: [%(order_number)s]"
-msgstr ""
+msgstr "%(partner_name)s: Uthibitisho wa Agizo: [%(order_number)s]"
 
 #: ecommerce/templates/edx/base_menu.html:7
 msgid "Sign Out"
@@ -1658,7 +1663,7 @@ msgstr ""
 #: ecommerce/templates/edx/checkout/receipt.html:123
 #, python-format
 msgid "Courtesy of %(enterprise_name)s."
-msgstr ""
+msgstr "Kwa fadhila ya%(enterprise_name)s"
 
 #: ecommerce/templates/edx/checkout/receipt.html:135
 msgid "Total"
@@ -1683,7 +1688,7 @@ msgstr "Nenda kwenye 'Dashibodi'"
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:6
 msgid "Order Not Found"
-msgstr ""
+msgstr "Agizo Halikupatikana"
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:18
 #, python-format
@@ -1694,7 +1699,7 @@ msgstr " %(error_summary)s "
 msgid ""
 "The specified order could not be located. Please ensure that the URL is "
 "correct, and try again."
-msgstr ""
+msgstr "Agizo lililoombwa halikupatikana. Tafadhali hakikisha URL ni sahihi, na jaribu tena."
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:31
 #, python-format
@@ -1758,11 +1763,11 @@ msgstr "\nHongera! Unastahili kununua mkopo kusomea kozi kwa kozi hii.\nLazima u
 
 #: ecommerce/templates/edx/credit/checkout.html:46
 msgid "Price:"
-msgstr ""
+msgstr "Bei:"
 
 #: ecommerce/templates/edx/credit/checkout.html:50
 msgid "Discount:"
-msgstr ""
+msgstr "Punguzo:"
 
 #: ecommerce/templates/edx/credit/checkout.html:55
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:122
@@ -1813,14 +1818,14 @@ msgstr "\nTafadhali soma %(link_start)s FAQs yetu kuona maswali kuhusu vyeti vye
 
 #: ecommerce/templates/edx/email_confirmation_required.html:16
 msgid "You are enrolling in: "
-msgstr ""
+msgstr "Unajisajili kwenye:"
 
 #: ecommerce/templates/edx/email_confirmation_required.html:23
 #, python-format
 msgid ""
 "An email has been sent to %(user_email)s with a link for you to activate "
 "your account."
-msgstr ""
+msgstr "Barua pepe imetumwa kwenye %(user_email)s pamoja na kiungo-wavuti chakukuwezesha kuamsha akaunti yako."
 
 #: ecommerce/templates/edx/email_confirmation_required.html:25
 msgid "Why activate?"
@@ -1859,28 +1864,28 @@ msgstr "Ingia mtandaoni"
 
 #: ecommerce/templates/edx/partials/_staff_navbar.html:9
 msgid "E-Commerce Course Administration"
-msgstr ""
+msgstr "Uongozaji wa kozi ya E-Commerce"
 
 #: ecommerce/templates/edx/partials/_staff_navbar.html:14
 msgid "E-Commerce Coupon Administration"
-msgstr ""
+msgstr "Uongozaji wa kuponi ya E-Commerce"
 
 #: ecommerce/templates/edx/partials/_staff_navbar.html:19
 msgid "E-Commerce Program Offers Administration"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/basket.html:38
+#: ecommerce/templates/oscar/basket/basket.html:37
 msgid "Your basket is empty"
-msgstr ""
+msgstr "Hazina yako ni tupu"
 
-#: ecommerce/templates/oscar/basket/basket.html:47
+#: ecommerce/templates/oscar/basket/basket.html:46
 #, python-format
 msgid ""
 "\n"
 "                                If you attempted to make a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
 "                                again, or %(support_link_start)scontact %(platform_name)s Support%(link_end)s.\n"
 "                            "
-msgstr ""
+msgstr "\nKama ulijaribu kufanya manunuzi, hujatozwa pesa. Rudi kwenye tovuti%(dashboard_link_start)sya dashibodi yako ya%(link_end)skujaribu tena, au %(support_link_start)s wasiliana na %(platform_name)skupata msaada wa%(link_end)s"
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:11
 msgid "Applying..."
@@ -1892,16 +1897,16 @@ msgstr "Omba"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:15
 msgid "in your cart"
-msgstr ""
+msgstr "kwenye hazina yako"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:16
 msgid "Your purchase contains the following"
-msgstr ""
+msgstr "Umenunua vifuatavyo"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:35
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
 msgid "Updating..."
-msgstr ""
+msgstr "Inasasisha..."
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:35
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
@@ -1915,7 +1920,7 @@ msgstr "muhtasari"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:51
 msgid "Discounts applied"
-msgstr ""
+msgstr "Punguzo zilizoombwa"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:62
 #, python-format
@@ -1923,7 +1928,7 @@ msgid ""
 "\n"
 "                                        Coupon %(voucher_code)s applied for %(total_benefit)s off\n"
 "                                    "
-msgstr ""
+msgstr "\nKuponi ya %(voucher_code)s lililoombwa kwenye punguzo la%(total_benefit)s"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:67
 msgid "Remove coupon"
@@ -1943,7 +1948,7 @@ msgstr "JUMLA"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:91
 msgid "order details"
-msgstr ""
+msgstr "maelezo ya agizo"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:106
 msgid "select payment method"
@@ -1957,66 +1962,70 @@ msgstr "Lipa kwa kutumia Kdi ya Malipo"
 msgid "Pay with PayPal"
 msgstr "Lipa kwa PayPal"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:129
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:127
+msgid "Pay with Apple Pay"
+msgstr "Lipa kwa  Apple Pay"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:138
 msgid "card holder information"
-msgstr ""
+msgstr "taarifa za mwenye kadi"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:140
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:149
 msgid "billing information"
-msgstr ""
+msgstr "taarifa za ankara"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:142
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:151
 msgid "Credit cards"
-msgstr ""
+msgstr "Kadi ya malipo"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:149
-msgid "Card Number (required)"
-msgstr ""
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:149
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:158
+msgid "Card Number (required)"
+msgstr "Namba ya Kadi (inahitajika)"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:158
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:167
 msgid "Secure"
 msgstr "Salama"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:152
-msgid "Credit card icon"
-msgstr ""
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:157
-msgid "Security Code (required)"
-msgstr ""
-
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:161
-msgid "Help with CVV"
-msgstr ""
+msgid "Credit card icon"
+msgstr "Ikoni ya kadi ya malipo"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:164
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:166
+msgid "Security Code (required)"
+msgstr "Namba ya usalama(inahitajika)"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:170
+msgid "Help with CVV"
+msgstr "Msaada kwa CVV"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:173
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
-msgstr ""
+msgstr "Tarakimu tatu za mwisho kwenye upande wa kuweka sahihi wa kadi yako. Ikiwa ni American Express, ni tarakimu nne upande wa mbele wa kadi."
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:171
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:180
 msgid "Expiration (required)"
-msgstr ""
+msgstr "Muda wa mwisho(unahitajika)"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:175
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:184
 msgid "Month"
 msgstr "Mwezi"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:185
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:194
 msgid "Year"
 msgstr "Mwaka"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:211
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:220
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
-msgstr ""
+msgstr "Weka Oda."
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:22
 msgid "Earn a valuable certificate to showcase the skills you learn in"
-msgstr ""
+msgstr "Pata cheti bora ili kuonesha ujuzi unaojifunza"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:68
 #, python-format
@@ -2024,7 +2033,7 @@ msgid ""
 "\n"
 "                                            %(benefit_value)s off\n"
 "                                        "
-msgstr ""
+msgstr "\npunguzo la%(benefit_value)s"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:95
 #, python-format
@@ -2032,11 +2041,11 @@ msgid ""
 "\n"
 "                                        Coupon code %(voucher_code)s applied\n"
 "                                    "
-msgstr ""
+msgstr "\nNamba ya kuponi ya %(voucher_code)s imeombwa"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:111
 msgid "Apply a coupon code"
-msgstr ""
+msgstr "Omba namba ya kuponi"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:159
 msgid "Checkout"
@@ -2052,13 +2061,13 @@ msgid ""
 "<strong>Note:</strong> To earn a verified certificate, you must verify your "
 "identity with a <strong>webcam</strong> and a <strong>government-issued "
 "photo ID</strong>. "
-msgstr ""
+msgstr "<strong>Zingatia:</strong> Kupata cheti kilichothibitishwa, lazima uhakiki utambulisho wako kwa kutumia <strong> kamera ya mtandaoni</strong> na <strong>kitambulisho cha serikali chenye picha</strong>"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:178
 msgid ""
 "<strong>Note:</strong> To complete your enrollment, select Checkout or "
 "Checkout with PayPal."
-msgstr ""
+msgstr "<strong>Zingatia:</strong> Kukamilisha usajili wako, chagua Angalia au Angalia kwa kutumia  PayPal."
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
@@ -2066,7 +2075,7 @@ msgstr "Je una maswali?"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
 msgid "Please read our FAQs to view common questions about our certificates."
-msgstr ""
+msgstr "Tafadhali soma kipengele chetu cha FAQs ili kuona maswali ya mara kwa mara yanayoulizwa kuhusu vyeti vyetu."
 
 #: ecommerce/templates/oscar/basket/partials/seat_type.html:5
 #, python-format
@@ -2074,18 +2083,18 @@ msgid ""
 "\n"
 "        %(seat_type)s Certificate\n"
 "    "
-msgstr ""
+msgstr "\nCheti cha %(seat_type)s"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:4
 msgid "Verify Your Identity"
-msgstr ""
+msgstr "Thibitisha Utambulisho Wako"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:6
 msgid ""
 "To receive a verified certificate, you have to verify your identity using "
 "your <strong>webcam</strong> and an <strong>official government-issued photo"
 " identification</strong> before the verification deadline."
-msgstr ""
+msgstr "Kupokea cheti kilichothibitishwa, unahitajika kuthibitisha utambulisho wako kwa kutumia <strong> kamera ya mtandaoni</strong> na <strong> kitambulisho cha serikali chenye utambulisho wa picha</strong> kabla ya uthibitisho wa tarehe ya mwisho."
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:21
 msgid "Verify Now"
@@ -2093,7 +2102,7 @@ msgstr "Thibitisha Sasa"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:30
 msgid "Go to my dashboard and verify later"
-msgstr ""
+msgstr "Nenda kwenye dashibodi yangu na thibitisha baadae"
 
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:6
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:15
@@ -2107,7 +2116,7 @@ msgid ""
 "            Your transaction has been cancelled. If you feel an error has occurred, contact %(start_link)s\n"
 "            %(payment_support_email)s%(end_link)s.\n"
 "            "
-msgstr ""
+msgstr "\nMuamala wako umebatilishwa. Kama unahisi hitilafu imetokea, wasiliana na %(start_link)s\n%(payment_support_email)s%(end_link)s"
 
 #: ecommerce/templates/oscar/checkout/error.html:6
 #: ecommerce/templates/oscar/checkout/error.html:17
@@ -2116,11 +2125,11 @@ msgstr "Angalia Hitilafu"
 
 #: ecommerce/templates/oscar/checkout/error.html:18
 msgid "An error has occurred with your payment."
-msgstr ""
+msgstr "Hitilafu imejitokeza katika ulipaji wako."
 
 #: ecommerce/templates/oscar/checkout/error.html:18
 msgid "You have not been charged."
-msgstr ""
+msgstr "Hujatozwa pesa."
 
 #: ecommerce/templates/oscar/checkout/error.html:20
 #, python-format
@@ -2129,30 +2138,30 @@ msgid ""
 "                    Please try to submit your payment again. If this problem persists, contact %(start_link)s\n"
 "                    %(payment_support_email)s%(end_link)s.\n"
 "                    "
-msgstr ""
+msgstr "\nTafadhali wasilisha malipo yako tena. Kama tatizo linaendelea kujitokeza, wasiliana na%(start_link)s\n%(payment_support_email)s%(end_link)s"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:6
 #: ecommerce/templates/oscar/checkout/payment_error.html:15
 msgid "Payment Failed"
-msgstr ""
+msgstr "Ulipaji Haukufaulu"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:17
 msgid ""
 "An error occurred while processing your payment. <strong>You have not been "
 "charged.</strong>"
-msgstr ""
+msgstr "Hitilafu imejitokeza wakati wa kuandaa malipo yako.<strong> Hujatozwa pesa.</strong>"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:23
 #, python-format
 msgid ""
 "Please wait a few minutes and then try again. For help, contact "
 "%(start_link)s%(payment_support_email)s%(end_link)s."
-msgstr ""
+msgstr "Tafadhali subiri kidogo na kisha jaribu tena. Kwa msaada, wasiliana na %(start_link)s%(payment_support_email)s%(end_link)s"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:31
 #, python-format
 msgid "To try again, return to your %(start_link)sdashboard%(end_link)s."
-msgstr ""
+msgstr "Kujaribu tena, rudi kwenye dashibodi yako ya%(start_link)s na %(end_link)s."
 
 #. Translators: SDN is an acronym for Specially Designated Nationals
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:7
@@ -2165,7 +2174,7 @@ msgid ""
 "one or more records on a U.S. Treasury Department sanctions list. This means"
 " we cannot complete your transaction or provide you with services and must "
 "suspend your learner account."
-msgstr ""
+msgstr "Kwa bahati mbaya, wasifu wa akaunti yako au taarifa za malipo zinaonekana kulingana na moja ya taarifa za orodha ya vikwazo vya Idara ya Fedha ya Marekani. Hii inamaanisha kwamba hatuwezi kukamilsha muamala wako au kukupa huduma na tunalazimika kufunga akaunti yako ya uanafunzi."
 
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:29
 #, python-format
@@ -2174,7 +2183,7 @@ msgid ""
 "%(ofac_email_link)s ofac.reconsideration@treasury.gov%(end_link)s for "
 "information about options for clearing a match. Your account will be "
 "suspended until this matter is resolved satisfactorily."
-msgstr ""
+msgstr "Kama una maswali kuhusu kufuta ulinganifu, tafadhali wasiliana na %(ofac_email_link)sofac.reconsideration@treasury.gov%(end_link)s kwa taarifa kuhusu vipengele kuhusu ufutaji ulinganifu. Mawasiliano yako yataahirishwa mpaka suala hili litatuliwe kikamilifu."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:6
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:6
@@ -2187,11 +2196,11 @@ msgstr "Matendo"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:12
 msgid "Edit category"
-msgstr ""
+msgstr "Hariri kifungu"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:17
 msgid "Add child category"
-msgstr ""
+msgstr "Ongeza kifungu kidogo"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:22
 msgid "Edit children"
@@ -2254,7 +2263,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:48
 msgid "Edit again"
-msgstr ""
+msgstr "Hariri tena"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:44
 #, python-format
@@ -2267,19 +2276,19 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:59
 msgid "Sections"
-msgstr ""
+msgstr "Vifungu"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:71
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:101
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:33
 msgid "Product details"
-msgstr ""
+msgstr "Maelezo ya bidhaa"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:76
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:144
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:255
 msgid "Attributes"
-msgstr ""
+msgstr "Sifa"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:79
 msgid "Images"
@@ -2288,7 +2297,7 @@ msgstr "Picha"
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:82
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:186
 msgid "Stock and pricing"
-msgstr ""
+msgstr "Bidhaa na bei"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:85
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:246
@@ -2301,15 +2310,15 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
 msgid "Product Type:"
-msgstr ""
+msgstr "Aina ya Bidhaa:"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:167
 msgid "Upload, change or remove images"
-msgstr ""
+msgstr "Pakia, badilisha au ondoa picha"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:192
 msgid "SKU"
-msgstr ""
+msgstr "SKU"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:194
 msgid "Num in stock"
@@ -2325,27 +2334,27 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:199
 msgid "Cost price"
-msgstr ""
+msgstr "Bei ya manunuzi"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Price (excl tax)"
-msgstr ""
+msgstr "Bei (bila kodi)"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:201
 msgid "Retail price"
-msgstr ""
+msgstr "Bei ya rejareja"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:202
 msgid "Delete?"
-msgstr ""
+msgstr "Futa?"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:247
 msgid "Adding..."
-msgstr ""
+msgstr "Inaongeza..."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:249
 msgid "Add variant"
-msgstr ""
+msgstr "Ongeza kipengele tofauti"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:254
 msgid "Title"
@@ -2353,11 +2362,11 @@ msgstr "Jina la mada"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:256
 msgid "Stock records"
-msgstr ""
+msgstr "Rekodi ya bidhaa"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:278
 msgid "This product does not have any variants."
-msgstr ""
+msgstr "Bidhaa hii haina vipengele tofauti "
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:280
 msgid "One can't add variants to this product at this point."
@@ -2369,7 +2378,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:298
 msgid "Recommended products"
-msgstr ""
+msgstr "Bidhaa pendekezwa"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:323
 msgid "or"
@@ -2383,11 +2392,11 @@ msgstr "Inahifadhi..."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:326
 msgid "Save and add another variant"
-msgstr ""
+msgstr "Hifadhi na ongeza kipengele tofauti"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:330
 msgid "Save and continue editing"
-msgstr ""
+msgstr "Hifadhi na endelea kuhariri"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:333
 msgid "Save"
@@ -2395,7 +2404,7 @@ msgstr "Hifadhi"
 
 #: ecommerce/templates/oscar/dashboard/index.html:27
 msgid "Store Statistics (Last 24 Hours)"
-msgstr ""
+msgstr "Takwimu za Bidhaa (Saa 24 zilizopita)"
 
 #: ecommerce/templates/oscar/dashboard/index.html:34
 msgid "New Customers"
@@ -2404,7 +2413,7 @@ msgstr "Wateja Wapya"
 #: ecommerce/templates/oscar/dashboard/index.html:35
 #: ecommerce/templates/oscar/dashboard/index.html:41
 msgid "Revenue"
-msgstr ""
+msgstr "Mapato"
 
 #: ecommerce/templates/oscar/dashboard/index.html:36
 msgid "Average order cost"
@@ -2416,7 +2425,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:67
 msgid "Products and vouchers"
-msgstr ""
+msgstr "Bidhaa na vocha"
 
 #: ecommerce/templates/oscar/dashboard/index.html:69
 msgid "Total products"
@@ -2451,7 +2460,7 @@ msgstr "Mada ya kozi"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:43
 msgid "Product Type"
-msgstr ""
+msgstr "Aina ya Bidhaa"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:46
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:140
@@ -2473,7 +2482,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:82
 msgid "Shipping details"
-msgstr ""
+msgstr "Maelezo ya utumaji bidhaa"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:86
 msgid "Partner reference number"

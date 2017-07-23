@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-05 12:09-0400\n"
-"PO-Revision-Date: 2017-06-30 21:22+0000\n"
+"POT-Creation-Date: 2017-07-18 11:14-0400\n"
+"PO-Revision-Date: 2017-07-17 23:00+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -74,41 +74,41 @@ msgstr ""
 msgid "Must occur before end date"
 msgstr "يجب حدوثه قبل تاريخ انتهاء المساق"
 
-#: ecommerce/static/js/models/course_model.js:56
+#: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
 msgstr "يجب أن تختار نوع المساق."
 
-#: ecommerce/static/js/models/course_model.js:62
+#: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
 msgstr "يجب أن تختار فيما إذا كان يتوجّب إنشاء مقعد شرف."
 
-#: ecommerce/static/js/models/course_model.js:79
+#: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
 msgstr "يجب أن يُحدّد الموعد النهائي للتحقّق من صحّة الشهادة بعد الموعد النهائي للترقية"
 
-#: ecommerce/static/js/models/course_model.js:88
+#: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
 msgstr "فشلت عملية مصادقة المنتج"
 
-#: ecommerce/static/js/models/course_model.js:96
+#: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
 msgstr "رقم تعريف المساق "
 
-#: ecommerce/static/js/models/course_model.js:97
+#: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
 msgstr "اسم المساق"
 
-#: ecommerce/static/js/models/course_model.js:98
+#: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:72
 msgid "Course Type"
 msgstr "نوع المساق"
 
-#: ecommerce/static/js/models/course_model.js:99
+#: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
 msgstr "الموعد النهائي للتحقّق"
 
-#: ecommerce/static/js/models/course_model.js:100
+#: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
 msgstr "شمل مقعد الشرف"
 
@@ -125,12 +125,12 @@ msgid "The upgrade deadline must occur BEFORE the verification deadline."
 msgstr "يجب أن يُحدّد الموعد النهائي الترقية قبل الموعد النهائي للتحقّق من صحّة الشهادة."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
-#: ecommerce/static/js/views/course_form_view.js:63
+#: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified"
 msgstr "موثَّقة"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
-#: ecommerce/static/js/views/course_form_view.js:74
+#: ecommerce/static/js/views/course_form_view.js:71
 msgid "Credit"
 msgstr "مادّة دراسيّة"
 
@@ -256,38 +256,50 @@ msgid ""
 "again."
 msgstr ""
 
+#. Translators: Do not translate "Apple Pay".
+#: ecommerce/static/js/payment_processors/cybersource.js:211
+msgid ""
+"Apple Pay is not available at this time. Please try another payment method."
+msgstr ""
+
+#: ecommerce/static/js/payment_processors/cybersource.js:242
+msgid ""
+"An error occurred while processing your payment. You have NOT been charged. "
+"Please try again, or select another payment method."
+msgstr ""
+
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
 msgstr " الزائدة الفاصلة غير مسموحة."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
-#: ecommerce/static/js/views/coupon_form_view.js:61
+#: ecommerce/static/js/views/coupon_form_view.js:60
 msgid "Can be used once by one customer"
 msgstr "يمكن لزبون واحد استخدامه لمرّة واحدة"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:109
-#: ecommerce/static/js/views/coupon_form_view.js:69
+#: ecommerce/static/js/views/coupon_form_view.js:68
 msgid "Can be used multiple times by multiple customers"
 msgstr "يمكن  لعدّة زبائن استخدامه لعدّة مرات"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:111
-#: ecommerce/static/js/views/coupon_form_view.js:65
+#: ecommerce/static/js/views/coupon_form_view.js:64
 msgid "Can be used once by multiple customers"
 msgstr "يمكن لعدّة زبائن استخدامه لمرّة واحدة"
 
-#: ecommerce/static/js/views/coupon_form_view.js:50
+#: ecommerce/static/js/views/coupon_form_view.js:49
 msgid "Enrollment Code"
 msgstr "رمز التسجيل"
 
-#: ecommerce/static/js/views/coupon_form_view.js:54
+#: ecommerce/static/js/views/coupon_form_view.js:53
 msgid "Discount Code"
 msgstr "رمز الخصم"
 
-#: ecommerce/static/js/views/coupon_form_view.js:769
+#: ecommerce/static/js/views/coupon_form_view.js:768
 msgid "Save Changes"
 msgstr "حفّظ التغييرات"
 
-#: ecommerce/static/js/views/coupon_form_view.js:784
+#: ecommerce/static/js/views/coupon_form_view.js:783
 msgid "Create Coupon"
 msgstr "إنشاء قسيمة"
 
@@ -346,30 +358,30 @@ msgstr "الفئة"
 msgid "Coupon Report"
 msgstr "تقرير القسيمة"
 
-#: ecommerce/static/js/views/course_form_view.js:58
+#: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
 msgstr "مجاني (مستمع)"
 
-#: ecommerce/static/js/views/course_form_view.js:59
+#: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
 msgstr "مساق استماع مجاني. لا تُمنح شهادة."
 
-#: ecommerce/static/js/views/course_form_view.js:64
+#: ecommerce/static/js/views/course_form_view.js:61
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
 msgstr "مسار نيل شهادة مدفوع ذا مصادقة مبدئيّة وشهادة موثّقة"
 
-#: ecommerce/static/js/views/course_form_view.js:68
+#: ecommerce/static/js/views/course_form_view.js:65
 msgid "Professional Education"
 msgstr "تعليم مهني"
 
-#: ecommerce/static/js/views/course_form_view.js:69
+#: ecommerce/static/js/views/course_form_view.js:66
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
 msgstr ""
 
-#: ecommerce/static/js/views/course_form_view.js:75
+#: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
