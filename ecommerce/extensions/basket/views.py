@@ -318,11 +318,27 @@ class BasketSummaryView(BasketView):
         basket = request.basket
 
         try:
+            products = [translate_basket_line_for_segment(line) for line in basket.all_lines()]
             properties = {
                 'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+                'products': products,
             }
             track_segment_event(request.site, request.user, 'Cart Viewed', properties)
+
+            voucher = basket.vouchers.filter(id__isnull=False).first()
+            coupon = voucher.code if voucher else None
+
+            properties = {
+                'order_id': basket.order_number,
+                'value': str(basket.total_incl_tax_excl_discounts),
+                'revenue': str(basket.total_incl_tax),
+                'coupon': coupon,
+                'tax': str(basket.total_tax),
+                'discount': str(basket.total_discount),
+                'currency': basket.currency,
+                'products': products,
+            }
+            track_segment_event(request.site, request.user, 'Checkout Started', properties)
 
             properties = {
                 'checkout_id': basket.order_number,
