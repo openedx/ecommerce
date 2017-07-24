@@ -1,14 +1,18 @@
 import datetime
+import logging
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-from e2e.api import DiscoveryApi, EcommerceApi
+from e2e.api import DiscoveryApi, EcommerceApi, EnrollmentApi
 from e2e.config import LMS_USERNAME, PAYPAL_EMAIL, PAYPAL_PASSWORD
 from e2e.constants import ADDRESS_FR, ADDRESS_US
 from e2e.helpers import EcommerceHelpers, LmsHelpers
+
+log = logging.getLogger(__name__)
 
 
 class TestSeatPayment(object):
@@ -82,6 +86,37 @@ class TestSeatPayment(object):
     def assert_browser_on_receipt_page(self, selenium):
         selenium.find_element_by_id('receipt-container')
 
+    def assert_user_enrolled_in_course_run(self, username, course_run_key, seat_type='verified', attempts=5):
+        """ Asserts the given user has an *active* enrollment for the given course run and seat type/mode.
+
+         Args:
+             username (str): Username of the user whose enrollments should be retrieved.
+             course_run_key (str): ID of the course run for which enrollments should be retrieved.
+             seat_type (str): Expected enrolled seat type/mode
+             attempts (int): Number of times to attempt to retrieve the enrollment data.
+
+         Raises:
+             AssertionError if no active enrollment is found that matches the criteria.
+        """
+        api = EnrollmentApi()
+
+        while attempts > 0:
+            attempts -= 1
+            log.info('Retrieving enrollment details for [%s] in [%s]...', username, course_run_key)
+            enrollment = api.get_enrollment(username, course_run_key)
+
+            try:
+                assert enrollment['is_active'] and enrollment['mode'] == seat_type
+                return
+            except AssertionError:
+                log.warning('No active enrollment was found for [%s] in the [%s] mode of [%s].',
+                            username, seat_type, course_run_key)
+                if attempts < 1:
+                    raise
+
+                log.info('Checking again in 0.5 seconds.')
+                time.sleep(0.5)
+
     def add_item_to_basket(self, selenium, sku):
         # Add the item to the basket and start the checkout process
         selenium.get(EcommerceHelpers.build_url('/basket/add/?sku=' + sku))
@@ -115,8 +150,10 @@ class TestSeatPayment(object):
             self.add_item_to_basket(selenium, verified_seat['sku'])
             self.checkout_with_credit_card(selenium, address)
             self.assert_browser_on_receipt_page(selenium)
-            # TODO In the future we should verify enrollment via the Enrollment API
-            self.refund_orders_for_course_run(course_run['key'])
+
+            course_run_key = course_run['key']
+            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+            self.refund_orders_for_course_run(course_run_key)
 
     def test_verified_seat_payment_with_paypal(self, selenium):
         """ Validates users can add a verified seat to the cart and checkout with PayPal. """
@@ -126,8 +163,9 @@ class TestSeatPayment(object):
         course_run = self.get_verified_course_run()
         verified_seat = self.get_verified_seat(course_run)
         self.add_item_to_basket(selenium, verified_seat['sku'])
-
         self.checkout_with_paypal(selenium)
         self.assert_browser_on_receipt_page(selenium)
-        # TODO In the future we should verify enrollment via the Enrollment API
-        self.refund_orders_for_course_run(course_run['key'])
+
+        course_run_key = course_run['key']
+        self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+        self.refund_orders_for_course_run(course_run_key)
