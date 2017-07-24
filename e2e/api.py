@@ -3,6 +3,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from e2e.config import (
     DISCOVERY_API_URL_ROOT,
     ECOMMERCE_API_URL,
+    ENROLLMENT_API_URL,
     OAUTH_ACCESS_TOKEN_URL,
     OAUTH_CLIENT_ID,
     OAUTH_CLIENT_SECRET
@@ -11,11 +12,12 @@ from e2e.config import (
 
 class BaseApi(object):
     api_url_root = None
+    append_slash = True
 
     def __init__(self):
         assert self.api_url_root
         access_token, __ = self.get_access_token()
-        self._client = EdxRestApiClient(self.api_url_root, jwt=access_token)
+        self._client = EdxRestApiClient(self.api_url_root, jwt=access_token, append_slash=self.append_slash)
 
     @staticmethod
     def get_access_token():
@@ -69,3 +71,17 @@ class EcommerceApi(BaseApi):
 
     def process_refund(self, refund_id, action):
         return self._client.refunds(refund_id).process.put({'action': action})
+
+
+class EnrollmentApi(BaseApi):
+    api_url_root = ENROLLMENT_API_URL
+    append_slash = False
+
+    def get_enrollment(self, username, course_run_id):
+        """ Get enrollment details for the given user and course run.
+
+        Args:
+            username (str)
+            course_run_id (str)
+        """
+        return self._client.enrollment('{},{}'.format(username, course_run_id)).get()
