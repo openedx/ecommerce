@@ -517,6 +517,26 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
             }
             calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
 
+            voucher = basket.vouchers.filter(id__isnull=False).first()
+            coupon = voucher.code if voucher else None
+
+            if benefit_type == Benefit.PERCENTAGE:
+                discount = (basket.total_incl_tax_excl_discounts * benefit_value / 100)
+            else:
+                discount = benefit_value
+            revenue = basket.total_incl_tax_excl_discounts - discount
+            properties = {
+                'order_id': basket.order_number,
+                'value': str(basket.total_incl_tax_excl_discounts),
+                'revenue': str(revenue),
+                'coupon': coupon,
+                'tax': str(basket.total_tax),
+                'discount': '%.2f' % (discount),
+                'currency': basket.currency,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            calls.append(mock.call(self.site, self.user, 'Checkout Started', properties))
+
             properties = {
                 'checkout_id': basket.order_number,
                 'step': 1
