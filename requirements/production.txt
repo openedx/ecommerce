@@ -1,15 +1,14 @@
 # Packages required in a production environment
 -r base.txt
 
-django-ses==0.8.1
+django-ses==0.8.2
 
 # Later versions of gevent wrap Python's __import__ in a way that breaks Oscar imports.
 # For more, see https://github.com/edx/ecommerce/pull/920.
 gevent==1.0.2
 
-gunicorn==19.6.0
+gunicorn==19.7.1
 MySQL-python==1.2.5
-newrelic==2.86.3.70
 python-memcached==1.58
 PyYAML==3.12
-nodeenv==1.1.1
+nodeenv==1.1.4
