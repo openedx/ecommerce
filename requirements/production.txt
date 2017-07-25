@@ -11,4 +11,4 @@ gunicorn==19.7.1
 MySQL-python==1.2.5
 python-memcached==1.58
 PyYAML==3.12
-nodeenv==1.1.4
+nodeenv==1.1.1
