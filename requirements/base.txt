@@ -1,4 +1,4 @@
-analytics-python==1.1.0
+analytics-python==1.2.3
 django==1.10.7
 django-compressor==2.1.1
 django-crispy-forms==1.6.1
