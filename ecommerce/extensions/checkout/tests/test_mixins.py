@@ -149,16 +149,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 )
             )
 
-    def test_handle_successful_free_order(self, mock_track):
-        """Verify that tracking events are not emitted for free orders."""
-        order = self.create_order(free=True, status=ORDER.OPEN)
-        EdxOrderPlacementMixin().handle_successful_order(order)
-
-        # Ensure that only 'Product Added' event is emitted (in order creation) and not 'Order Completion' event.
-        self.assertEqual(mock_track.call_count, 1)
-        event_name = mock_track.call_args[0][1]
-        self.assertEqual(event_name, 'Product Added')
-
     def test_handle_successful_order_no_context(self, mock_track):
         """
         Ensure that expected values are substituted when no tracking_context

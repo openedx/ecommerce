@@ -153,3 +153,14 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
             properties = translate_basket_line_for_segment(basket.lines.first())
             properties['cart_id'] = basket.id
             mock_track.assert_called_once_with(basket.site, basket.owner, 'Product Added', properties)
+
+    def test_product_events_with_free_items(self):
+        """ Product Added/Removed events should not be fired for free products. """
+        course = CourseFactory()
+        basket = create_basket(empty=True)
+        seat = course.create_or_update_seat('audit', False, 0, self.partner)
+
+        with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
+            basket.add_product(seat)
+            basket.flush()
+            self.assertEqual(mock_track.call_count, 0)
