@@ -10,6 +10,7 @@ from testfixtures import LogCapture
 from waffle.models import Sample
 
 from ecommerce.core.models import SegmentClient
+from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -38,6 +39,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
     def setUp(self):
         super(EdxOrderPlacementMixinTests, self).setUp()
+        toggle_switch('fire_non_order_events', True)
 
         self.user = UserFactory()
         self.order = self.create_order(status=ORDER.OPEN)

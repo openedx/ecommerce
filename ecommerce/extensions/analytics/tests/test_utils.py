@@ -4,6 +4,7 @@ from analytics import Client
 from django.contrib.auth.models import AnonymousUser
 from oscar.test import factories
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
     parse_tracking_context, prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
@@ -16,6 +17,10 @@ from ecommerce.tests.testcases import TestCase
 
 class UtilsTest(CourseCatalogTestMixin, BasketMixin, TestCase):
     """ Tests for the analytics utils. """
+
+    def setUp(self):
+        super(UtilsTest, self).setUp()
+        toggle_switch('fire_non_order_events', True)
 
     def test_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for a logged in user."""

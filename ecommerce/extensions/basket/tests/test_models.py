@@ -5,8 +5,10 @@ from analytics import Client
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
+from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.test.factories import create_basket
@@ -17,9 +19,10 @@ Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class BasketTests(BasketMixin, TestCase):
+class BasketTests(CatalogMixin, BasketMixin, TestCase):
     def setUp(self):
         super(BasketTests, self).setUp()
+        toggle_switch('fire_non_order_events', True)
         self.site1 = SiteConfigurationFactory().site
         self.site2 = SiteConfigurationFactory().site
 
