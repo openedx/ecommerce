@@ -19,12 +19,6 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
 class BasketTests(CatalogMixin, BasketMixin, TestCase):
-    def setUp(self):
-        super(BasketTests, self).setUp()
-
-        self.site_configuration._allowed_segment_events += ',Product Removed, Product Added'
-        self.site_configuration.save()
-
     def assert_basket_state(self, basket, status, user, site):
         """ Verify the given basket's properties. """
         self.assertEqual(basket.status, status)

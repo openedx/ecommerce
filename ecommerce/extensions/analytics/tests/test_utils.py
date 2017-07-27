@@ -18,11 +18,6 @@ from ecommerce.tests.testcases import TestCase
 class UtilsTest(CourseCatalogTestMixin, BasketMixin, TestCase):
     """ Tests for the analytics utils. """
 
-    def setUp(self):
-        super(UtilsTest, self).setUp()
-        self.site_configuration._allowed_segment_events += ',foo'
-        self.site_configuration.save()
-
     def test_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for a logged in user."""
         user = self.create_user(

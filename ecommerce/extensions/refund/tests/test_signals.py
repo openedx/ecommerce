@@ -13,9 +13,6 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
 
     def setUp(self):
         super(RefundTrackingTests, self).setUp()
-        self.site_configuration._allowed_segment_events += ' ,Product Added'
-        self.site_configuration.save()
-
         self.user = UserFactory()
         self.refund = create_refunds([self.create_order()], self.course.id)[0]
 
