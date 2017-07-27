@@ -13,7 +13,7 @@ from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, Vo
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.utils import attribute_cookie_data, prepare_basket
+from ecommerce.extensions.basket.utils import add_utm_params_to_url, attribute_cookie_data, prepare_basket
 from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -50,6 +50,10 @@ class BasketUtilsTests(CourseCatalogTestMixin, TestCase):
             body=body,
             content_type='application/json'
         )
+
+    def test_add_utm_params_to_url(self):
+        url = add_utm_params_to_url('/basket', [('utm_param', 'test'), ('other_param', 'test2')])
+        self.assertEqual(url, '/basket?utm_param=test')
 
     def test_prepare_basket_with_voucher(self):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """

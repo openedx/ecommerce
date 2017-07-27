@@ -25,7 +25,7 @@ from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_cust
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
 )
-from ecommerce.extensions.basket.utils import get_basket_switch_data, prepare_basket
+from ecommerce.extensions.basket.utils import add_utm_params_to_url, get_basket_switch_data, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -88,7 +88,10 @@ class BasketSingleItemView(View):
         except AlreadyPlacedOrderException:
             msg = _('You have already purchased {course} seat.').format(course=product.course.name)
             return render(request, 'edx/error.html', {'error': msg})
-        return HttpResponseRedirect(reverse('basket:summary'), status=303)
+        url = reverse('basket:summary')
+        url = add_utm_params_to_url(url, self.request.GET.items()) \
+            if waffle.flag_is_active(self.request, 'add-utm-params') else url
+        return HttpResponseRedirect(url, status=303)
 
 
 class BasketMultipleItemsView(View):
@@ -129,8 +132,10 @@ class BasketMultipleItemsView(View):
             prepare_basket(request, products, voucher)
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-
-        return HttpResponseRedirect(reverse('basket:summary'), status=303)
+        url = reverse('basket:summary')
+        url = add_utm_params_to_url(url, self.request.GET.items()) \
+            if waffle.flag_is_active(self.request, 'add-utm-params') else url
+        return HttpResponseRedirect(url, status=303)
 
 
 class BasketSummaryView(BasketView):

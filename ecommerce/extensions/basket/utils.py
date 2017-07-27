@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from urllib import unquote, urlencode
 
 import pytz
 from django.conf import settings
@@ -22,6 +23,18 @@ OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
 
 logger = logging.getLogger(__name__)
+
+
+def add_utm_params_to_url(url, params):
+    # utm_params is [(u'utm_content', u'course-v1:IDBx IDB20.1x 1T2017'),...
+    utm_params = [item for item in params if 'utm_' in item[0]]
+    # utm_params is utm_content=course-v1%3AIDBx+IDB20.1x+1T2017&...
+    utm_params = urlencode(utm_params, True)
+    # utm_params is utm_content=course-v1:IDBx+IDB20.1x+1T2017&...
+    # (course-keys do not have url encoding)
+    utm_params = unquote(utm_params)
+    url = url + '?' + utm_params if utm_params else url
+    return url
 
 
 def prepare_basket(request, products, voucher=None):
