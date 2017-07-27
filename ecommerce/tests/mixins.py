@@ -310,6 +310,7 @@ class ApiMockMixin(object):
     def mock_api_error(self, error, url):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
+
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type=CONTENT_TYPE)
 
 

@@ -2,7 +2,6 @@ from mock import patch
 from oscar.test.newfactories import UserFactory
 
 from ecommerce.core.models import SegmentClient
-from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -14,7 +13,8 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
 
     def setUp(self):
         super(RefundTrackingTests, self).setUp()
-        toggle_switch('fire_non_order_events', True)
+        self.site_configuration._allowed_segment_events += ' ,Product Added'
+        self.site_configuration.save()
 
         self.user = UserFactory()
         self.refund = create_refunds([self.create_order()], self.course.id)[0]

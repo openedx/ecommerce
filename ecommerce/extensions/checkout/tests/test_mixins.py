@@ -10,7 +10,6 @@ from testfixtures import LogCapture
 from waffle.models import Sample
 
 from ecommerce.core.models import SegmentClient
-from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -39,9 +38,11 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
     def setUp(self):
         super(EdxOrderPlacementMixinTests, self).setUp()
-        toggle_switch('fire_non_order_events', True)
-
         self.user = UserFactory()
+        self.site_configuration._allowed_segment_events += ' ,Product Removed, Product Added, Checkout Step Viewed, ' \
+                                                           'Checkout Step Completed, Payment Info Entered'
+        self.site_configuration.save()
+
         self.order = self.create_order(status=ORDER.OPEN)
 
     def test_handle_payment_logging(self, __):
@@ -49,11 +50,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         Ensure that we emit a log entry upon receipt of a payment notification, and create Source and PaymentEvent
         objects.
         """
-        user = self.user
-        basket = create_basket()
-        basket.owner = user
-        basket.site = self.site
-        basket.save()
+        basket = create_basket(owner=self.user, site=self.site)
 
         mixin = EdxOrderPlacementMixin()
         mixin.payment_processor = DummyProcessor(self.site)
@@ -74,7 +71,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                         basket.currency,
                         processor_name,
                         reference,
-                        user.id
+                        self.user.id
                     )
                 )
             )
@@ -83,7 +80,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
         # Validate a payment Source was created
         source_type = SourceType.objects.get(code=processor_name)
-        label = user.username
+        label = self.user.username
         self.assert_basket_matches_source(basket, mixin._payment_sources[-1], source_type, reference, label)
 
         # Validate the PaymentEvent was created
