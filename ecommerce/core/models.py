@@ -181,6 +181,18 @@ class SiteConfiguration(models.Model):
         verbose_name=_('Enable Apple Pay'),
         default=False
     )
+    _allowed_segment_events = models.TextField(
+        verbose_name='Allowed Segment events',
+        help_text='Comma-separated list of events the service is allowed to transmit to Segment. '
+                  'This is temporary. Do NOT rely on it long-term.',
+        default='Order Completed, Order Refunded'
+    )
+
+    @cached_property
+    def allowed_segment_events(self):
+        events = self._allowed_segment_events.split(',')
+        events = [event.strip() for event in events]
+        return events
 
     @property
     def payment_processors_set(self):

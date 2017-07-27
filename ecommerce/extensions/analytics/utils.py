@@ -2,8 +2,6 @@ import json
 import logging
 from functools import wraps
 
-import waffle
-
 from ecommerce.courses.utils import mode_for_seat
 
 logger = logging.getLogger(__name__)
@@ -134,10 +132,13 @@ def track_segment_event(site, user, event, properties):
             This can be safely ignored unless needed for debugging purposes.
     """
 
-    if not (event in ('Order Completed', 'Order Refunded',) or waffle.switch_is_active('fire_non_order_events')):
+    site_configuration = site.siteconfiguration
+    if event not in site_configuration.allowed_segment_events:
+        msg = 'Event [{event}] was NOT fired because it is not permitted for site configuration [{site_id}]'.format(
+            event=event, site_id=site_configuration.pk)
+        logger.debug(msg)
         return False, ''
 
-    site_configuration = site.siteconfiguration
     if not site_configuration.segment_key:
         msg = 'Event [{event}] was NOT fired because no Segment key is set for site configuration [{site_id}]'
         msg = msg.format(event=event, site_id=site_configuration.pk)
