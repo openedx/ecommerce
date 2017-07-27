@@ -188,12 +188,6 @@ class SiteConfiguration(models.Model):
         default='Order Completed, Order Refunded'
     )
 
-    @cached_property
-    def allowed_segment_events(self):
-        events = self._allowed_segment_events.split(',')
-        events = [event.strip() for event in events]
-        return events
-
     @property
     def payment_processors_set(self):
         """

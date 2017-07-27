@@ -39,10 +39,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     def setUp(self):
         super(EdxOrderPlacementMixinTests, self).setUp()
         self.user = UserFactory()
-        self.site_configuration._allowed_segment_events += ' ,Product Removed, Product Added, Checkout Step Viewed, ' \
-                                                           'Checkout Step Completed, Payment Info Entered'
-        self.site_configuration.save()
-
         self.order = self.create_order(status=ORDER.OPEN)
 
     def test_handle_payment_logging(self, __):

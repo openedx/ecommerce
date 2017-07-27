@@ -133,12 +133,6 @@ def track_segment_event(site, user, event, properties):
     """
 
     site_configuration = site.siteconfiguration
-    if event not in site_configuration.allowed_segment_events:
-        msg = 'Event [{event}] was NOT fired because it is not permitted for site configuration [{site_id}]'.format(
-            event=event, site_id=site_configuration.pk)
-        logger.debug(msg)
-        return False, ''
-
     if not site_configuration.segment_key:
         msg = 'Event [{event}] was NOT fired because no Segment key is set for site configuration [{site_id}]'
         msg = msg.format(event=event, site_id=site_configuration.pk)
