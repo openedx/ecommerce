@@ -282,7 +282,7 @@ class SiteConfiguration(models.Model):
 
     @cached_property
     def segment_client(self):
-        return SegmentClient(self.segment_key, debug=settings.DEBUG)
+        return SegmentClient(self.segment_key, debug=settings.DEBUG, send=settings.SEND_SEGMENT_EVENTS)
 
     def save(self, *args, **kwargs):
         # Clear Site cache upon SiteConfiguration changed

@@ -607,3 +607,6 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
 # END DJANGO DEBUG TOOLBAR CONFIGURATION
+
+# Determines if events are actually sent to Segment. This should only be set to False for testing purposes.
+SEND_SEGMENT_EVENTS = True
