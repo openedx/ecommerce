@@ -26,11 +26,11 @@ class ProgramCourseRunSeatsCondition(Condition):
         """
         Returns details for the program associated with this condition.
 
-        Data is retrieved from the Catalog Service, and cached for ``settings.PROGRAM_CACHE_TIMEOUT`` seconds.
+        Data is retrieved from the Discovery Service, and cached for ``settings.PROGRAM_CACHE_TIMEOUT`` seconds.
 
         Args:
             site_configuration (SiteConfiguration): Configuration containing the requisite parameters
-             to connect to the Catalog Service.
+             to connect to the Discovery Service.
 
         Returns:
             dict

@@ -15,7 +15,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
@@ -24,7 +24,7 @@ Selector = get_class('partner.strategy', 'Selector')
 User = get_user_model()
 
 
-class CourseViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
+class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
     list_path = reverse('api:v2:course-list')
 
     def setUp(self):

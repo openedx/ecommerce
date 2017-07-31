@@ -180,7 +180,7 @@ class Range(AbstractRange):
     )
     catalog_query = models.TextField(blank=True, null=True)
     course_catalog = models.PositiveIntegerField(
-        help_text=_('Course catalog id from the Catalog Service.'),
+        help_text=_('Course Catalog ID from the Discovery Service.'),
         null=True,
         blank=True
     )
@@ -243,7 +243,7 @@ class Range(AbstractRange):
                 )
                 cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             except:  # pylint: disable=bare-except
-                raise Exception('Could not contact Course Catalog Service.')
+                raise Exception('Could not contact Discovery Service.')
 
         return response
 
@@ -271,7 +271,7 @@ class Range(AbstractRange):
                 )
                 cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             except (ConnectionError, SlumberBaseException, Timeout):
-                raise Exception('Unable to connect to Course Catalog service for catalog contains endpoint.')
+                raise Exception('Unable to connect to Discovery Service for catalog contains endpoint.')
 
         return response
 
@@ -309,7 +309,7 @@ class Range(AbstractRange):
 
     def all_products(self):
         if (self.catalog_query or self.course_catalog) and self.course_seat_types:
-            # Backbone calls the Voucher Offers API endpoint which gets the products from the Course Catalog Service
+            # Backbone calls the Voucher Offers API endpoint which gets the products from the Discovery Service
             return []
         if self.catalog:
             catalog_products = [record.product for record in self.catalog.stock_records.all()]

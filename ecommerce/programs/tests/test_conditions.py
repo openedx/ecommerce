@@ -30,7 +30,10 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
 
     @httpretty.activate
     def test_get_program(self):
-        """ The method should return data from the Catalog Service API. Data should be cached for subsequent calls. """
+        """
+        The method should return data from the Discovery Service API.
+        Data should be cached for subsequent calls.
+        """
         data = self.mock_program_detail_endpoint(self.condition.program_uuid, self.site_configuration.discovery_api_url)
         self.assertEqual(self.condition.get_program(self.site.siteconfiguration), data)
 

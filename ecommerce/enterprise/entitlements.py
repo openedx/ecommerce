@@ -177,7 +177,7 @@ def is_course_in_enterprise_catalog(site, course_id, enterprise_catalog_id):
             )
             cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.exception('Unable to connect to Course Catalog service for catalog contains endpoint.')
+            logger.exception('Unable to connect to Discovery Service for catalog contains endpoint.')
             return False
 
     try:

@@ -17,7 +17,7 @@ from waffle.models import Switch
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.helpers import get_processor_class
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import JwtMixin
@@ -28,7 +28,7 @@ Benefit = get_model('offer', 'Benefit')
 
 
 @ddt.ddt
-class CheckoutPageTest(CourseCatalogTestMixin, TestCase, JwtMixin):
+class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
     """Test for Checkout page"""
 
     def setUp(self):

@@ -6,7 +6,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.factories import StockRecordFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
@@ -15,7 +15,7 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class StockRecordViewSetTests(ProductSerializerMixin, CourseCatalogTestMixin, ThrottlingMixin, TestCase):
+class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, ThrottlingMixin, TestCase):
     list_path = reverse('api:v2:stockrecords-list')
     detail_path = 'api:v2:stockrecords-detail'
 

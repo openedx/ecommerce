@@ -5,7 +5,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.coupons.tests.mixins import CouponMixin
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.tests.testcases import TestCase
 
@@ -14,7 +14,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 
 
 @ddt.ddt
-class ProductTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
     COUPON_PRODUCT_TITLE = 'Some test title.'
 
     def _create_coupon_product_with_note_attribute(self, note):

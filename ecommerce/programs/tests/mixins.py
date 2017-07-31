@@ -5,10 +5,10 @@ import httpretty
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 
 
-class ProgramTestMixin(CourseCatalogTestMixin):
+class ProgramTestMixin(DiscoveryTestMixin):
     def mock_program_detail_endpoint(self, program_uuid, discovery_api_url):
         """ Mocks the program detail endpoint on the Catalog API.
         Args:

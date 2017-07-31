@@ -3,11 +3,11 @@ import mock
 from django.core.management import call_command
 
 from ecommerce.courses.models import Course
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 
-class CreateDemoDataTests(CourseCatalogTestMixin, TestCase):
+class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
     def assert_seats_created(self, course_id, course_title, price):
         course = Course.objects.get(id=course_id, name=course_title)
         seats = course.seat_products

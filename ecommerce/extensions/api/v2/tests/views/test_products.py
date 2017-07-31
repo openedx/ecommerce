@@ -13,7 +13,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.factories import PartnerFactory, ProductFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -26,7 +26,7 @@ Voucher = get_model('voucher', 'Voucher')
 PRODUCT_LIST_PATH = reverse('api:v2:product-list')
 
 
-class ProductViewSetBase(ProductSerializerMixin, CourseCatalogTestMixin, TestCase):
+class ProductViewSetBase(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(ProductViewSetBase, self).setUp()
         self.user = self.create_user(is_staff=True)

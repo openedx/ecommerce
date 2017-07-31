@@ -52,7 +52,7 @@ def create_coupon_product(
         category (dict): Contains category ID and name.
         code (str): Voucher code.
         course_seat_types (str): Comma-separated list of course seat types.
-        course_catalog (int): Course catalog id from Catalog Service
+        course_catalog (int): Course catalog id from Discovery Service
         email_domains (str): Comma-separated list of email domains.
         end_datetime (Datetime): Voucher end Datetime.
         enterprise_customer (str): UUID of an EnterpriseCustomer to attach to this voucher

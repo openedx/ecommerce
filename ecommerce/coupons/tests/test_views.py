@@ -19,7 +19,7 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     get_enterprise_course_consent_url, get_enterprise_customer_data_sharing_consent_token
 )
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
@@ -73,7 +73,7 @@ class CouponAppViewTests(TestCase):
         self.assert_response_status(is_staff=True, status_code=200)
 
 
-class VoucherIsValidTests(CourseCatalogTestMixin, TestCase):
+class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
     def test_valid_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is valid. """
         voucher, product = prepare_voucher()
@@ -155,7 +155,7 @@ class VoucherIsValidTests(CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, EnterpriseServiceMockMixin,
+class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, EnterpriseServiceMockMixin,
                            LmsApiMockMixin, TestCase):
     path = reverse('coupons:offer')
     credit_seat = None
@@ -297,7 +297,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, CourseCatalogTestMixin, En
 
 
 @ddt.ddt
-class CouponRedeemViewTests(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, EnterpriseServiceMockMixin,
+class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, EnterpriseServiceMockMixin,
                             TestCase):
     redeem_url = reverse('coupons:redeem')
 

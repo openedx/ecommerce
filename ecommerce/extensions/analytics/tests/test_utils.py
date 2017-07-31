@@ -10,12 +10,12 @@ from ecommerce.extensions.analytics.utils import (
     parse_tracking_context, prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 
-class UtilsTest(CourseCatalogTestMixin, BasketMixin, TestCase):
+class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
     """ Tests for the analytics utils. """
 
     def test_prepare_analytics_data(self):

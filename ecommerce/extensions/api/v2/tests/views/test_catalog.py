@@ -8,7 +8,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
 from ecommerce.tests.factories import PartnerFactory
@@ -21,7 +21,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 @httpretty.activate
 @ddt.ddt
-class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, TestCase):
+class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCase):
     """Test the Catalog and related products APIs."""
 
     catalog_list_path = reverse('api:v2:catalog-list')
@@ -97,7 +97,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, Tes
         """ Verify the endpoint returns a list of catalogs from the Catalog API. """
         self.mock_access_token_response()
         seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=self.course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
 
         url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
         response = self.client.get(url)
@@ -138,7 +138,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, Tes
         """
         catalogs = ('Clean Catalog', 'ABC Catalog', 'New Catalog', 'Edx Catalog',)
         self.mock_access_token_response()
-        self.mock_catalog_api(catalogs, self.site_configuration.discovery_api_url)
+        self.mock_discovery_api(catalogs, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
         self.assertEqual(response.status_code, 200)
@@ -154,7 +154,7 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, Tes
         data.
         """
         self.mock_access_token_response()
-        self.mock_catalog_api_failure(ConnectionError, self.site_configuration.discovery_api_url)
+        self.mock_discovery_api_failure(ConnectionError, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
 

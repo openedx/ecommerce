@@ -8,7 +8,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
@@ -21,7 +21,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class RefundTestMixin(CourseCatalogTestMixin):
+class RefundTestMixin(DiscoveryTestMixin):
     def setUp(self):
         super(RefundTestMixin, self).setUp()
         self.course = CourseFactory(

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-18 11:14-0400\n"
+"POT-Creation-Date: 2017-07-31 15:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -743,9 +743,9 @@ msgstr ""
 "Fäïléd tö rétrïévé énröllmént dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
 #: ecommerce/extensions/offer/models.py
-msgid "Course catalog id from the Catalog Service."
+msgid "Course catalog id from the Discovery Service."
 msgstr ""
-"Çöürsé çätälög ïd fröm thé Çätälög Sérvïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"Çöürsé çätälög ïd fröm thé Dïsçövérý Sérvïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/offer/models.py
@@ -1099,6 +1099,10 @@ msgstr "Rédééméd Bý Ûsérnämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт
 #: ecommerce/extensions/voucher/utils.py
 msgid "Redeemed For Course ID"
 msgstr "Rédééméd För Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/extensions/voucher/utils.py
+msgid "Redeemed For Course IDs"
+msgstr "Rédééméd För Çöürsé ÌDs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/extensions/voucher/utils.py
 msgid "Created By"

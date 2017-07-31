@@ -78,7 +78,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         try:
             offers_data = self.get_offers(request, voucher)
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.error('Could not connect to course catalog service.')
+            logger.error('Could not connect to Discovery Service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:
             logger.error('Could not locate product for voucher with code %s.', code)
@@ -264,7 +264,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         Arguments:
             benefit (Benefit): Benefit associated with a voucher
             course (Course): Course associated with a voucher
-            course_info (dict): Course info fetched from an API (LMS or Course Catalog)
+            course_info (dict): Course info fetched from an API (LMS or Discovery)
             is_verified (bool): Indicated whether or not the voucher's range of products contains a verified course seat
             stock_record (StockRecord): Stock record associated with the course seat
             voucher (Voucher): Voucher for which the course offer data is being fetched

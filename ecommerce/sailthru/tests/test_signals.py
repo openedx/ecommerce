@@ -8,7 +8,7 @@ from oscar.test.newfactories import BasketFactory, UserFactory
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN, process_basket_addition, process_checkout_complete
 from ecommerce.tests.testcases import TestCase
@@ -20,7 +20,7 @@ TEST_EMAIL = 'test@edx.org'
 CAMPAIGN_COOKIE = 'cookie_bid'
 
 
-class SailthruSignalTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
     """ Tests for the Sailthru signals. """
 
     def setUp(self):

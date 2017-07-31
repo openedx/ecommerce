@@ -7,18 +7,18 @@ from requests.exceptions import ConnectionError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
-from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import (
     get_certificate_type_display_value, get_course_catalogs, get_course_info_from_catalog, mode_for_seat
 )
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 
 @httpretty.activate
 @ddt.ddt
-class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
+class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     @ddt.unpack
     @ddt.data(
         ('', False, 'audit'),
@@ -44,7 +44,7 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
         """ Check to see if course info gets cached """
         self.mock_access_token_response()
         course = CourseFactory()
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
@@ -78,7 +78,7 @@ class UtilsTests(CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
 
 @ddt.ddt
 @httpretty.activate
-class GetCourseCatalogUtilTests(CourseCatalogMockMixin, TestCase):
+class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
 
     def tearDown(self):
         # Reset HTTPretty state (clean up registered urls and request history)
@@ -115,7 +115,7 @@ class GetCourseCatalogUtilTests(CourseCatalogMockMixin, TestCase):
         single catalog by its id.
         """
         self.mock_access_token_response()
-        self.mock_fetch_course_catalog(self.site_configuration.discovery_api_url)
+        self.mock_catalog_detail_endpoint(self.site_configuration.discovery_api_url)
 
         catalog_id = 1
         cache_key = '{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
@@ -143,7 +143,7 @@ class GetCourseCatalogUtilTests(CourseCatalogMockMixin, TestCase):
         in case of same API request.
         """
         self.mock_access_token_response()
-        self.mock_catalog_api(catalog_name_list, self.site_configuration.discovery_api_url)
+        self.mock_discovery_api(catalog_name_list, self.site_configuration.discovery_api_url)
 
         self._assert_get_course_catalogs(catalog_name_list)
 
@@ -162,7 +162,7 @@ class GetCourseCatalogUtilTests(CourseCatalogMockMixin, TestCase):
         """
         self.mock_access_token_response()
         catalog_name_list = ['Catalog 1', 'Catalog 2', 'Catalog 3']
-        self.mock_course_discovery_api_for_paginated_catalogs(
+        self.mock_discovery_api_for_paginated_catalogs(
             catalog_name_list, self.site_configuration.discovery_api_url
         )
 
@@ -178,7 +178,7 @@ class GetCourseCatalogUtilTests(CourseCatalogMockMixin, TestCase):
         """
         exception = ConnectionError
         self.mock_access_token_response()
-        self.mock_catalog_api_failure(exception, self.site_configuration.discovery_api_url)
+        self.mock_discovery_api_failure(exception, self.site_configuration.discovery_api_url)
 
         with self.assertRaises(exception):
             get_course_catalogs(self.request.site)

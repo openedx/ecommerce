@@ -6,13 +6,13 @@ from django.test import RequestFactory
 from oscar.apps.partner import availability
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy, Selector
 from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-class DefaultStrategyTests(CourseCatalogTestMixin, TestCase):
+class DefaultStrategyTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(DefaultStrategyTests, self).setUp()
         self.strategy = DefaultStrategy()
