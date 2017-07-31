@@ -8,7 +8,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_basket
@@ -18,7 +18,7 @@ Partner = get_model('partner', 'Partner')
 
 
 @ddt.ddt
-class PaymentProcessorTestCaseMixin(RefundTestMixin, CourseCatalogTestMixin, PaymentEventsMixin):
+class PaymentProcessorTestCaseMixin(RefundTestMixin, DiscoveryTestMixin, PaymentEventsMixin):
     """ Mixin for payment processor tests. """
 
     # Subclasses should set this value. It will be used to instantiate the processor in setUp.

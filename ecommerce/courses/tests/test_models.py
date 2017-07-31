@@ -11,7 +11,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.testcases import TestCase
 
@@ -21,7 +21,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
-class CourseTests(CourseCatalogTestMixin, TestCase):
+class CourseTests(DiscoveryTestMixin, TestCase):
     def test_unicode(self):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'

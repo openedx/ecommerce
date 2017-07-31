@@ -16,7 +16,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -26,7 +26,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 @ddt.ddt
-class LMSPublisherTests(CourseCatalogTestMixin, TestCase):
+class LMSPublisherTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(LMSPublisherTests, self).setUp()
 

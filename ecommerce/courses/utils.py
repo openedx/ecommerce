@@ -23,7 +23,7 @@ def mode_for_seat(product):
 
 
 def get_course_info_from_catalog(site, course_key):
-    """ Get course information from catalog service and cache """
+    """ Get course information from Discovery Service and cache """
     api = site.siteconfiguration.discovery_api_client
     partner_short_code = site.siteconfiguration.partner.short_code
     cache_key = 'courses_api_detail_{}{}'.format(course_key, partner_short_code)
@@ -37,14 +37,14 @@ def get_course_info_from_catalog(site, course_key):
 
 def get_course_catalogs(site, resource_id=None):
     """
-    Get details related to course catalogs from Catalog Service.
+    Get details related to course catalogs from Discovery Service.
 
     Arguments:
         site (Site): Site object containing Site Configuration data
         resource_id (int or str): Identifies a specific resource to be retrieved
 
     Returns:
-        dict: Course catalogs received from Course Catalog API
+        dict: Course catalogs received from Discovery API
 
     Raises:
         ConnectionError: requests exception "ConnectionError"

@@ -21,7 +21,7 @@ Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
-class CourseCatalogTestMixin(object):
+class DiscoveryTestMixin(object):
     """
     Mixin for all tests involving the course catalog or course seats.
 
@@ -30,7 +30,7 @@ class CourseCatalogTestMixin(object):
     """
 
     def setUp(self):
-        super(CourseCatalogTestMixin, self).setUp()
+        super(DiscoveryTestMixin, self).setUp()
 
         # Force the creation of a seat ProductClass
         self.seat_product_class  # pylint: disable=pointless-statement

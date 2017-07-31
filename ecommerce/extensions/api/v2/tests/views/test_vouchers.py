@@ -17,11 +17,11 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test.factories import ConditionalOfferFactory, VoucherFactory, prepare_voucher
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -36,7 +36,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 
 @ddt.ddt
-class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     """ Tests for the VoucherViewSet view set. """
     path = reverse('api:v2:vouchers-list')
 
@@ -122,7 +122,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
                 new_range.add_product(seat)
                 products.append(seat)
 
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             self.site_configuration.discovery_api_url, query='*:*', course_run_info=course_run_info
         )
         voucher, __ = prepare_voucher(_range=new_range)
@@ -226,7 +226,7 @@ class VoucherViewSetTests(CourseCatalogMockMixin, CourseCatalogTestMixin, LmsApi
 
 @ddt.ddt
 @httpretty.activate
-class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin,
+class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryTestMixin, LmsApiMockMixin,
                                      TestCase):
     """ Tests for the VoucherViewSet offers endpoint. """
 
@@ -257,7 +257,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         """ Verify the endpoint returns offers data when a single product is in voucher range. """
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             course, discovery_api_url=self.site_configuration.discovery_api_url
         )
         new_range = RangeFactory(products=[seat, ])
@@ -308,7 +308,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         """ Verify the endpoint returns offers data for single product range. """
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
@@ -338,7 +338,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         """
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
@@ -354,7 +354,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         """ Verify the endpoint returns offers data for single product range. """
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
@@ -374,7 +374,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             course, discovery_api_url=self.site_configuration.discovery_api_url
         )
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
@@ -403,7 +403,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         """ Verify that the course offers data is returned for a multiple courses voucher. """
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
@@ -445,10 +445,10 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             query=catalog_query, course_run=course, discovery_api_url=self.site_configuration.discovery_api_url
         )
-        self.mock_fetch_course_catalog(
+        self.mock_catalog_detail_endpoint(
             catalog_id=catalog_id, expected_query=catalog_query,
             discovery_api_url=self.site_configuration.discovery_api_url
         )
@@ -561,11 +561,11 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_fetch_course_catalog(
+        self.mock_catalog_detail_endpoint(
             catalog_id=catalog_id, expected_query=catalog_query,
             discovery_api_url=self.site_configuration.discovery_api_url
         )
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             discovery_api_url=self.site_configuration.discovery_api_url, query=catalog_query, course_run=course
         )
 
@@ -598,7 +598,7 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
 
     def test_get_offers_for_course_catalog_voucher_api_error(self):
         """
-        Verify that offers api endpoint returns proper message if course catalog api returns error.
+        Verify that offers api endpoint returns proper message if Discovery Service API returns error.
         """
         catalog_id = 1
         catalog_query = '*:*'
@@ -611,11 +611,11 @@ class VoucherViewOffersEndpointTests(CourseCatalogMockMixin, CouponMixin, Course
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
-        self.mock_fetch_course_catalog(
+        self.mock_catalog_detail_endpoint(
             catalog_id=catalog_id, expected_query=catalog_query,
             discovery_api_url=self.site_configuration.discovery_api_url, expected_status=status.HTTP_404_NOT_FOUND
         )
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             discovery_api_url=self.site_configuration.discovery_api_url, query=catalog_query, course_run=course
         )
 

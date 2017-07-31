@@ -14,7 +14,7 @@ from testfixtures import LogCapture
 
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TransactionTestCase
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ LOGGER_NAME = 'ecommerce.courses.management.commands.publish_to_lms'
 
 
 @ddt.ddt
-class PublishCoursesToLMSTests(CourseCatalogTestMixin, TransactionTestCase):
+class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
     """Tests the course publish command."""
 
     tmp_file_path = os.path.join(tempfile.gettempdir(), "tmp-testfile.txt")

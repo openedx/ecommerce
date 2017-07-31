@@ -12,7 +12,7 @@ from requests.exceptions import ConnectionError
 
 from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 from ecommerce.core.tests import toggle_switch
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
@@ -32,7 +32,7 @@ def _make_site_config(payment_processors_str, site_id=1):
 
 
 @ddt.ddt
-class UserTests(CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     TEST_CONTEXT = {'foo': 'bar', 'baz': None}
 
     def test_access_token(self):

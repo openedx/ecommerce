@@ -486,7 +486,7 @@ def create_vouchers(
         catalog_query (str): ElasticSearch query used by dynamic coupons. Defaults to None.
         code (str): Code associated with vouchers. Defaults to None.
         coupon (Coupon): Coupon entity associated with vouchers.
-        course_catalog (int): Course catalog id from Catalog Service. Defaults to None.
+        course_catalog (int): Course catalog id from Discovery Service. Defaults to None.
         course_seat_types (str): Comma-separated list of course seat types.
         email_domains (str): List of email domains to restrict coupons. Defaults to None.
         end_datetime (datetime): End date for voucher offer.

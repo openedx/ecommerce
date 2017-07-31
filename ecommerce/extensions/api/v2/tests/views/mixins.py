@@ -2,13 +2,13 @@ from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CatalogMixin(CourseCatalogTestMixin):
+class CatalogMixin(DiscoveryTestMixin):
     """Provide methods for Catalog test cases."""
 
     def setUp(self):

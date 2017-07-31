@@ -18,10 +18,10 @@ from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
 
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.constants import BENEFIT_MAP
@@ -50,7 +50,7 @@ COUPONS_LINK = reverse('api:v2:coupons-list')
 
 @httpretty.activate
 @ddt.ddt
-class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
+class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(CouponViewSetTest, self).setUp()
         self.user = self.create_user(is_staff=True)
@@ -304,7 +304,7 @@ class CouponViewSetTest(CouponMixin, CourseCatalogTestMixin, TestCase):
 
 
 @ddt.ddt
-class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, ThrottlingMixin,
+class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, ThrottlingMixin,
                                   TestCase):
     """Test the coupon order creation functionality."""
 
@@ -781,7 +781,7 @@ class CouponViewSetFunctionalTest(CouponMixin, CourseCatalogTestMixin, CourseCat
         self.data.pop('stock_record_ids')
         course, __ = self.create_course_and_seat(course_id='dynamic/catalog/coupon')
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             self.site_configuration.discovery_api_url, query=catalog_query, course_run=course
         )
 

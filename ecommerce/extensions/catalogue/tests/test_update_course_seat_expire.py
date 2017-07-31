@@ -16,7 +16,7 @@ from testfixtures import LogCapture
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Product
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ JSON = 'application/json'
 
 
 @ddt.ddt
-class UpdateSeatExpireDateTests(CourseCatalogTestMixin, TestCase):
+class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
     """Tests the update course seat expire command ."""
 
     def setUp(self):

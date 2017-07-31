@@ -194,7 +194,7 @@ class BasketSummaryView(BasketView):
             course_start = self._deserialize_date(course.get('start'))
             course_end = self._deserialize_date(course.get('end'))
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.exception('Failed to retrieve data from Catalog Service for course [%s].', course_key)
+            logger.exception('Failed to retrieve data from Discovery Service for course [%s].', course_key)
 
         return {
             'product_title': course_name,

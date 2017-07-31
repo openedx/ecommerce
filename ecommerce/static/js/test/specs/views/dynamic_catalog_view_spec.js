@@ -58,7 +58,7 @@ define([
                 });
             });
 
-            it('should call Course Catalog API if previewCatalog was called and create a datatable', function() {
+            it('should call Discovery Service API if previewCatalog was called and create a datatable', function() {
                 var args,
                     calls,
                     e = $.Event('click');
@@ -110,7 +110,7 @@ define([
                 expect(args.success).toEqual(view.onSuccess);
             });
 
-            it('should fill datatable on successful AJAX call to Course Catalog API', function() {
+            it('should fill datatable on successful AJAX call to Discovery Service API', function() {
                 var APIData = {
                     next: 'test.link',
                     seats: [{

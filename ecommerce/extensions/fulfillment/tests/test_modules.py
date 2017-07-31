@@ -20,7 +20,7 @@ from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import (CouponFulfillmentModule, EnrollmentCodeFulfillmentModule,
                                                       EnrollmentFulfillmentModule)
 from ecommerce.extensions.fulfillment.status import LINE
@@ -46,7 +46,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(ProgramTestMixin, CourseCatalogTestMixin, FulfillmentTestMixin, TestCase):
+class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, FulfillmentTestMixin, TestCase):
     """Test course seat fulfillment."""
 
     course_id = 'edX/DemoX/Demo_Course'
@@ -472,7 +472,7 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
             CouponFulfillmentModule().revoke_line(line)
 
 
-class EnrollmentCodeFulfillmentModuleTests(CourseCatalogTestMixin, TestCase):
+class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
     """ Test Enrollment code fulfillment. """
     QUANTITY = 5
 

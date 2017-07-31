@@ -5,7 +5,7 @@ from oscar.test import factories
 
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
@@ -16,7 +16,7 @@ Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CouponReportCSVViewTest(CouponMixin, CourseCatalogTestMixin, LmsApiMockMixin, TestCase):
+class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     """Unit tests for getting coupon report."""
 
     def setUp(self):

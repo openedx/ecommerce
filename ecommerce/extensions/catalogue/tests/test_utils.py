@@ -8,7 +8,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.catalogue.utils import create_coupon_product, generate_sku, get_or_create_catalog
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
@@ -22,7 +22,7 @@ Voucher = get_model('voucher', 'Voucher')
 COURSE_ID = 'sku/test_course/course'
 
 
-class UtilsTests(CourseCatalogTestMixin, TestCase):
+class UtilsTests(DiscoveryTestMixin, TestCase):
     course_id = 'sku/test_course/course'
 
     def setUp(self):
@@ -85,7 +85,7 @@ class UtilsTests(CourseCatalogTestMixin, TestCase):
         self.assertEqual(Catalog.objects.count(), 2)
 
 
-class CouponUtilsTests(CouponMixin, CourseCatalogTestMixin, TestCase):
+class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
         self.course = CourseFactory(id=COURSE_ID, name='Test Course', site=self.site)

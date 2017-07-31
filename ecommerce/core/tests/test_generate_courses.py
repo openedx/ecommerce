@@ -6,12 +6,12 @@ from django.core.management import CommandError, call_command
 from django.test import override_settings
 
 from ecommerce.courses.models import Course
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-class GenerateCoursesTests(CourseCatalogTestMixin, TestCase):
+class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
 
     default_verified_price = 100
     default_professional_price = 1000

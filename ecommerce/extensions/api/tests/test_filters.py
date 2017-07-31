@@ -2,13 +2,13 @@ from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.filters import ProductFilter
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 
 
-class ProductFilterTests(CourseCatalogTestMixin, TestCase):
+class ProductFilterTests(DiscoveryTestMixin, TestCase):
     """ Tests for ProductFilter. """
 
     def setUp(self):

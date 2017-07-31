@@ -101,7 +101,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
         try:
             results = get_course_catalogs(site=request.site)
         except:  # pylint: disable=bare-except
-            logger.exception('Failed to retrieve course catalogs data from the Course Discovery API.')
+            logger.exception('Failed to retrieve course catalogs data from the Discovery Service API.')
             results = []
 
         # Create catalogs list with sorting by name

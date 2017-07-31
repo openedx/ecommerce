@@ -21,7 +21,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.management.commands.migrate_course import MigratedCourse
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.catalogue.utils import generate_sku
 from ecommerce.tests.testcases import TestCase
 
@@ -38,7 +38,7 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class CourseMigrationTestMixin(CourseCatalogTestMixin):
+class CourseMigrationTestMixin(DiscoveryTestMixin):
     course_id = 'aaa/bbb/ccc'
     course_name = 'A Tést Côurse'
 

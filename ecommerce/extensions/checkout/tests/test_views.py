@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
-from ecommerce.coupons.tests.mixins import CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
@@ -133,7 +133,7 @@ class CheckoutErrorViewTests(TestCase):
 
 
 @ddt.ddt
-class ReceiptResponseViewTests(CourseCatalogMockMixin, LmsApiMockMixin, RefundTestMixin, TestCase):
+class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMixin, TestCase):
     """
     Tests for the receipt view.
     """

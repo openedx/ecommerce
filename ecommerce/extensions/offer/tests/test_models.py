@@ -13,8 +13,8 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -24,7 +24,7 @@ Range = get_model('offer', 'Range')
 
 @ddt.ddt
 @httpretty.activate
-class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, TestCase):
+class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
         super(RangeTests, self).setUp()
 
@@ -106,7 +106,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         """
         course, seat = self.create_course_and_seat()
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_contains_api(
+        self.mock_course_runs_contains_endpoint(
             query='key:*', course_run_ids=[course.id], discovery_api_url=self.site_configuration.discovery_api_url
         )
         request = RequestFactory()
@@ -136,7 +136,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         """
         course, seat = self.create_course_and_seat()
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_contains_api(
+        self.mock_course_runs_contains_endpoint(
             query='key:*', course_run_ids=[course.id], discovery_api_url=self.site_configuration.discovery_api_url
         )
 
@@ -156,7 +156,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         catalog_query = 'key:*'
         course, seat = self.create_course_and_seat()
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_contains_api(
+        self.mock_course_runs_contains_endpoint(
             query=catalog_query, course_run_ids=[course.id],
             discovery_api_url=self.site_configuration.discovery_api_url
         )
@@ -165,7 +165,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.assertFalse(false_response)
 
         course_catalog_id = 1
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_catalog_contains_endpoint(
             discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog_id,
             course_run_ids=[course.id]
         )
@@ -185,7 +185,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         """
         Verify that the method "contains_product" raises exception if the
         method "catalog_contains_product" is unable to get the catalog from
-        catalog service for a course catalog Range.
+        Discovery Service for a course catalog Range.
         """
         __, seat = self.create_course_and_seat()
         course_catalog_id = 1
@@ -195,11 +195,11 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.save()
 
         self.mock_access_token_response()
-        self.mock_catalog_api_failure(error, self.site_configuration.discovery_api_url, course_catalog_id)
+        self.mock_discovery_api_failure(error, self.site_configuration.discovery_api_url, course_catalog_id)
         with self.assertRaises(Exception) as error:
             self.range.contains_product(seat)
 
-        expected_exception_message = 'Unable to connect to Course Catalog service for catalog contains endpoint.'
+        expected_exception_message = 'Unable to connect to Discovery Service for catalog contains endpoint.'
         self.assertEqual(error.exception.message, expected_exception_message)
         # Verify that there only one call for the course discovery API for
         # checking if course exists in course runs against the course catalog.
@@ -224,7 +224,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.save()
 
         self.mock_access_token_response()
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_catalog_contains_endpoint(
             discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog,
             course_run_ids=[course.id]
         )
@@ -254,7 +254,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.range.save()
 
         self.mock_access_token_response()
-        self.mock_course_discovery_api_for_catalog_contains(
+        self.mock_catalog_contains_endpoint(
             discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog,
             course_run_ids=[course.id]
         )
@@ -273,7 +273,7 @@ class RangeTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, Te
         self.assertFalse(seat in self.range.all_products())
 
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_course_runs_api(
+        self.mock_course_runs_endpoint(
             self.site_configuration.discovery_api_url, query='key:*', course_run=course
         )
         self.range.catalog_query = 'key:*'

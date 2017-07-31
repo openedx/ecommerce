@@ -4,7 +4,7 @@ import ddt
 from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.utils import add_currency
 from ecommerce.extensions.offer.utils import _remove_exponent_and_trailing_zeros, format_benefit_value
 from ecommerce.extensions.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
@@ -14,7 +14,7 @@ Benefit = get_model('offer', 'Benefit')
 
 
 @ddt.ddt
-class UtilTests(CourseCatalogTestMixin, TestCase):
+class UtilTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
         super(UtilTests, self).setUp()

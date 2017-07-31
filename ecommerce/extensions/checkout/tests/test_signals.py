@@ -13,7 +13,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
@@ -30,7 +30,7 @@ LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 Product = get_model('catalogue', 'Product')
 
 
-class SignalTests(CourseCatalogTestMixin, CouponMixin, TestCase):
+class SignalTests(DiscoveryTestMixin, CouponMixin, TestCase):
     def setUp(self):
         super(SignalTests, self).setUp()
         self.user = self.create_user()

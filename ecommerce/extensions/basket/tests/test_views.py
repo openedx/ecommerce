@@ -26,11 +26,11 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.coupons.tests.mixins import CouponMixin, CourseCatalogMockMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.utils import get_basket_switch_data
-from ecommerce.extensions.catalogue.tests.mixins import CourseCatalogTestMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
@@ -61,7 +61,7 @@ COUPON_CODE = 'COUPONTEST'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
+class BasketSingleItemViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
     """ BasketSingleItemView view tests. """
     path = reverse('basket:single-item')
 
@@ -132,7 +132,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
         url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=self.course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
         response = self.client.get(url)
         expected_url = self.get_full_url(reverse('basket:summary'))
         self.assertRedirects(response, expected_url, status_code=303)
@@ -156,7 +156,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
         """
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=self.course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
         url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,
                                                     code=COUPON_CODE)
         response = self.client.get(url)
@@ -208,7 +208,7 @@ class BasketSingleItemViewTests(CouponMixin, CourseCatalogTestMixin, CourseCatal
 
 
 @ddt.ddt
-class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, TestCase):
+class BasketMultipleItemsViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
     """ BasketMultipleItemsView view tests. """
     path = reverse('basket:add-multi')
 
@@ -347,7 +347,7 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixi
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
         url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=self.course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
         response = self.client.get(url)
         expected_url = self.get_full_url(reverse('basket:summary'))
         self.assertRedirects(response, expected_url, status_code=303)
@@ -355,7 +355,7 @@ class BasketMultipleItemsViewTests(CourseCatalogTestMixin, CourseCatalogMockMixi
 
 @httpretty.activate
 @ddt.ddt
-class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
+class BasketSummaryViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -423,7 +423,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
             l.check(
                 (
                     logger_name, 'ERROR',
-                    u'Failed to retrieve data from Catalog Service for course [{}].'.format(self.course.id)
+                    u'Failed to retrieve data from Discovery Service for course [{}].'.format(self.course.id)
                 )
             )
 
@@ -444,7 +444,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         """Verify the correct seat type attribute is retrieved."""
         course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         self.create_basket_and_add_product(enrollment_code)
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -457,7 +457,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         no_ec_course = CourseFactory()
         seat_without_ec = no_ec_course.create_or_update_seat('verified', False, 10, self.partner)
         self.create_basket_and_add_product(seat_without_ec)
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=no_ec_course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=no_ec_course)
 
         response = self.client.get(self.path)
         self.assertFalse(response.context['switch_link_text'])
@@ -466,7 +466,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         ec_course, seat_with_ec, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         Basket.objects.all().delete()
         self.create_basket_and_add_product(seat_with_ec)
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=ec_course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=ec_course)
 
         response = self.client.get(self.path)
         enrollment_code_stockrecord = StockRecord.objects.get(product=enrollment_code)
@@ -499,7 +499,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         self.create_and_apply_benefit_to_basket(basket, seat, benefit_type, benefit_value)
 
         self.assertEqual(basket.lines.count(), 1)
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
@@ -546,7 +546,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
 
     def test_line_item_discount_data(self):
         """ Verify that line item has correct discount data. """
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=self.course)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
         self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, 50)
@@ -566,7 +566,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         basket = self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
         self.assertEqual(basket.lines.count(), 1)
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
@@ -594,7 +594,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         seat = self.create_seat(self.course)
         self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             self.course, self.site_configuration.discovery_api_url, course_info
         )
         response = self.client.get(self.path)
@@ -691,7 +691,7 @@ class BasketSummaryViewTests(CourseCatalogTestMixin, CourseCatalogMockMixin, Lms
         seat = self.create_seat(self.course)
         self.mock_access_token_response()
         self.create_basket_and_add_product(seat)
-        self.mock_dynamic_catalog_single_course_runs_api(
+        self.mock_course_run_detail_endpoint(
             self.course,
             self.site_configuration.discovery_api_url,
             {
