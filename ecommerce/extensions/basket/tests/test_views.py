@@ -236,6 +236,14 @@ class BasketMultipleItemsViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsAp
         self.assertEqual(basket.status, Basket.OPEN)
         self.assertEqual(basket.lines.count(), len(products))
 
+    def test_basket_with_utm_params(self):
+        """ Verify the basket includes utm params after redirect. """
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        url = '{root}?{qs}&utm_source=test'.format(root=self.path, qs=qs)
+        response = self.client.get(url)
+        self.assertEqual(response.url, '/basket/?utm_source=test')
+
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
         response = self.client.get(self.path)
