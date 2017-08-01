@@ -25,7 +25,7 @@ class UserDetailView(CoreUserDetailView):
         """Retrieve the enrollments for the User being viewed."""
         username = self.object.username
         try:
-            url = '{}?user={}'.format(get_lms_enrollment_api_url(), username)
+            url = '{}?user={}'.format(get_lms_enrollment_api_url('enrollment'), username)
             timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
 
             headers = {
