@@ -88,9 +88,7 @@ class BasketSingleItemView(View):
         except AlreadyPlacedOrderException:
             msg = _('You have already purchased {course} seat.').format(course=product.course.name)
             return render(request, 'edx/error.html', {'error': msg})
-        url = reverse('basket:summary')
-        url = add_utm_params_to_url(url, self.request.GET.items()) \
-            if waffle.flag_is_active(self.request, 'add-utm-params') else url
+        url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
         return HttpResponseRedirect(url, status=303)
 
 
@@ -132,9 +130,7 @@ class BasketMultipleItemsView(View):
             prepare_basket(request, products, voucher)
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-        url = reverse('basket:summary')
-        url = add_utm_params_to_url(url, self.request.GET.items()) \
-            if waffle.flag_is_active(self.request, 'add-utm-params') else url
+        url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
         return HttpResponseRedirect(url, status=303)
 
 
