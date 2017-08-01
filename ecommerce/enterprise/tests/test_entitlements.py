@@ -19,7 +19,6 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.tests.testcases import TestCase
 
-COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1/'
 Catalog = get_model('catalogue', 'Catalog')
 StockRecord = get_model('partner', 'StockRecord')
 

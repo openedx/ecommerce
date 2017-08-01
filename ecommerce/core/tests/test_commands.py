@@ -184,7 +184,25 @@ class CreateOrUpdateSiteCommandTests(TestCase):
          '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource'],
         ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
          '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
-         '--segment-key=abc']
+         '--segment-key=abc'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
+         '--client-id=1'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
+         '--client-id=1', '--client-secret=secret'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
+         '--client-id=1', '--client-secret=secret', '--from-email=test@example.fake']
     )
     def test_missing_arguments(self, command_args):
         """ Verify CommandError is raised when required arguments are missing """

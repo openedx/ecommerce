@@ -3,7 +3,6 @@ import hashlib
 import logging
 from urlparse import urljoin
 
-import waffle
 from analytics import Client as SegmentClient
 from dateutil.parser import parse
 from django.conf import settings
@@ -174,7 +173,8 @@ class SiteConfiguration(models.Model):
     )
     discovery_api_url = models.URLField(
         verbose_name=_('Discovery API URL'),
-        blank=True,
+        null=False,
+        blank=False,
     )
     enable_apple_pay = models.BooleanField(
         # Translators: Do not translate "Apple Pay"
@@ -387,10 +387,7 @@ class SiteConfiguration(models.Model):
             EdxRestApiClient: The client to access the Discovery service.
         """
 
-        # TODO Once the change is verified remove the switch and COURSE_CATALOG_API_URL from settings.
-        if waffle.switch_is_active('use_multi_tenant_discovery_api_urls') and self.discovery_api_url:
-            return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
-        return EdxRestApiClient(settings.COURSE_CATALOG_API_URL, jwt=self.access_token)
+        return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
 
     @cached_property
     def embargo_api_client(self):
