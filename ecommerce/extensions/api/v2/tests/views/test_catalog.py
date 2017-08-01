@@ -96,12 +96,16 @@ class CatalogViewSetTest(CatalogMixin, CourseCatalogMockMixin, ApiMockMixin, Tes
     def test_preview_success(self):
         """ Verify the endpoint returns a list of catalogs from the Catalog API. """
         self.mock_access_token_response()
-        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url)
+        seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.mock_dynamic_catalog_course_runs_api(self.site_configuration.discovery_api_url, course_run=self.course)
 
         url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        # TODO Test the actual data
+        self.assertEqual(
+            json.loads(response.content)['seats'][0],
+            ProductSerializer(seat, context={'request': response.wsgi_request}).data
+        )
 
     @ddt.data(
         '',
