@@ -128,8 +128,7 @@ class Command(BaseCommand):
                             action='store',
                             dest='discovery_api_url',
                             type=str,
-                            required=False,
-                            default='',
+                            required=True,
                             help='URL for Discovery service API calls.')
 
     def handle(self, *args, **options):
