@@ -22,7 +22,7 @@ class ConvertCourseTest(CourseCatalogTestMixin, TestCase):
     @ddt.unpack
     def test_convert_course(self, initial_cert_type, direction, new_cert_type):
         """Verify that an honor course can be converted to audit correctly."""
-        course = CourseFactory()
+        course = CourseFactory(site=self.site)
         seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0, self.partner)
         stock_record = StockRecord.objects.get(product=seat_to_convert)
         order_line = OrderLineFactory(stockrecord=stock_record, product=seat_to_convert)
