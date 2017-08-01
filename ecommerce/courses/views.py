@@ -132,8 +132,6 @@ class ConvertCourseView(View):
         return super(ConvertCourseView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *_args, **_kwargs):
-        # TODO If this is not immediately deleted after we convert courses, make sure this is updated to support
-        # multi-tenancy.
         course_ids = request.GET.get('course_ids')
         commit = request.GET.get('commit', False)
         commit = commit in ('1', 'true')

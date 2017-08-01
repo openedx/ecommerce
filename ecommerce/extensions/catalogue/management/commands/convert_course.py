@@ -64,7 +64,7 @@ class Command(BaseCommand):
         for course_id in course_ids:
             try:
                 with transaction.atomic():
-                    course = Course.objects.get(id=course_id)
+                    course = Course.objects.get(id=course_id, site=site)
                     conversion(course)
                     if self.options.get('commit', False):
                         course.publish_to_lms()
