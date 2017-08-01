@@ -87,65 +87,26 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
 
         self.assertDictContainsSubset(expected_return, response)
 
-    @ddt.data(
-        (True, True),
-        (False, False),
-    )
-    @ddt.unpack
-    def test_ecu_needs_consent_no_link(self, ec_consent_enabled, expected_consent_requirement):
-        """
-        Test that when there's no EnterpriseCustomerUser, the consent requirement comes down
-        to whether the EnterpriseCustomer wants consent.
-        """
+    @httpretty.activate
+    def test_ecu_needs_consent(self):
+        opts = {
+            'ec_uuid': 'fake-uuid',
+            'course_id': 'course-v1:real+course+id',
+            'username': 'johnsmith',
+        }
+        kw = {
+            'enterprise_customer_uuid': 'fake-uuid',
+            'course_id': 'course-v1:real+course+id',
+            'username': 'johnsmith',
+            'site': self.site
+        }
         self.mock_access_token_response()
-        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
-        enterprise_customer_uuid = TEST_ENTERPRISE_CUSTOMER_UUID
-        self.mock_specific_enterprise_customer_api(enterprise_customer_uuid, consent_enabled=ec_consent_enabled)
-
-        consent_needed = enterprise_customer_user_needs_consent(
-            self.site,
-            TEST_ENTERPRISE_CUSTOMER_UUID,
-            'course-v1:edX+DemoX+Demo_Course',
-            'admin'
-        )
-        self.assertEqual(consent_needed, expected_consent_requirement)
-
-    @ddt.data(
-        (True, False, True, True, False),
-        (False, True, True, True, False),
-        (False, False, True, True, True),
-        (False, False, True, False, True),
-        (False, False, False, True, False),
-        (False, False, False, False, False),
-    )
-    @ddt.unpack
-    def test_ecu_needs_consent_link_exists(
-            self,
-            account_consent_provided,
-            course_consent_provided,
-            consent_enabled,
-            results_present,
-            expected_consent_requirement
-    ):
-        self.mock_access_token_response()
-        enterprise_customer_uuid = TEST_ENTERPRISE_CUSTOMER_UUID
-        self.mock_enterprise_learner_api(
-            enterprise_customer_uuid=enterprise_customer_uuid,
-            consent_provided=account_consent_provided,
-            consent_enabled=consent_enabled,
-        )
-        self.mock_enterprise_course_enrollment_api(
-            consent_granted=course_consent_provided,
-            results_present=results_present,
-        )
-
-        consent_needed = enterprise_customer_user_needs_consent(
-            self.site,
-            TEST_ENTERPRISE_CUSTOMER_UUID,
-            'course-v1:edX+DemoX+Demo_Course',
-            'admin'
-        )
-        self.assertEqual(consent_needed, expected_consent_requirement)
+        self.mock_consent_get(**opts)
+        self.assertEqual(enterprise_customer_user_needs_consent(**kw), False)
+        self.mock_consent_missing(**opts)
+        self.assertEqual(enterprise_customer_user_needs_consent(**kw), True)
+        self.mock_consent_not_required(**opts)
+        self.assertEqual(enterprise_customer_user_needs_consent(**kw), False)
 
     def test_get_enterprise_customer_uuid(self):
         """
