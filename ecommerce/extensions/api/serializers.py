@@ -180,6 +180,7 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
     product_class = serializers.SerializerMethodField()
     is_available_to_buy = serializers.SerializerMethodField()
     stockrecords = StockRecordSerializer(many=True, read_only=True)
+    expires = serializers.SerializerMethodField()
 
     def get_attribute_values(self, product):
         request = self.context.get('request')
@@ -197,6 +198,11 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
     def get_is_available_to_buy(self, product):
         info = self._get_info(product)
         return info.availability.is_available_to_buy
+
+    def get_expires(self, product):
+        if product.expires:
+            return product.expires.strftime(ISO_8601_FORMAT)
+        return None
 
     class Meta(object):
         model = Product
