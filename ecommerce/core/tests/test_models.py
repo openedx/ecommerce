@@ -341,3 +341,15 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], 'https://fake.domain.com/api/v1/')
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
+
+    @httpretty.activate
+    def test_enrollment_api_client(self):
+        """ Verify the property an Enrollment API client."""
+        token = self.mock_access_token_response()
+        client = self.site.siteconfiguration.enrollment_api_client
+        client_store = client._store  # pylint: disable=protected-access
+        client_auth = client_store['session'].auth
+
+        self.assertEqual(client_store['base_url'], self.site_configuration.enrollment_api_url)
+        self.assertIsInstance(client_auth, SuppliedJwtAuth)
+        self.assertEqual(client_auth.token, token)

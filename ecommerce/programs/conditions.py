@@ -1,10 +1,11 @@
+from __future__ import unicode_literals
+
 import logging
 import operator
 
-from oscar.apps.offer import utils
+import requests
+from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
-
-from requests import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.programs.api import ProgramsApiClient
@@ -53,21 +54,37 @@ class ProgramCourseRunSeatsCondition(Condition):
         return program_course_run_skus
 
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
+        """
+        Determines if a user is eligible for a program offer based on products in their basket
+        and their existing course enrollments.
+
+        Args:
+            basket : contains information on line items for order, associated siteconfiguration
+                        for retrieving program details, and associated user for retrieving enrollments
+        Returns:
+            bool
+        """
+
         if basket.is_empty:
             return False
 
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
-
         try:
             program = self.get_program(basket.site.siteconfiguration)
-        except (HttpNotFoundError, SlumberBaseException, Timeout):
+        except (HttpNotFoundError, SlumberBaseException, requests.Timeout):
             return False
 
         applicable_seat_types = program['applicable_seat_types']
+        enrollments = basket.site.siteconfiguration.enrollment_api_client.enrollment.get(user=basket.owner.username)
 
         for course in program['courses']:
-            # If the basket has no SKUs, but we still have courses over which to iterate,
-            # the basket cannot meet the condition that all courses be represented.
+            # If the user is already enrolled in a course, we do not need to check their basket for it
+            if any(course['key'] in enrollment['course_details']['course_id'] and
+                   enrollment['mode'] in applicable_seat_types for enrollment in enrollments):
+                continue
+
+            # If the  basket has no SKUs left, but we still have courses over which
+            # to iterate, the user cannot meet the condition that all courses be represented.
             if not basket_skus:
                 return False
 
@@ -76,9 +93,9 @@ class ProgramCourseRunSeatsCondition(Condition):
             for course_run in course['course_runs']:
                 skus.update(set([seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types]))
 
-            # The lack of a difference in the set of SKUs in the basket and the course indicates
-            # that there is no intersection. Therefore, the basket contains no SKUs for the current
-            # course. It follows that the program condition is not met.
+            # The lack of a difference in the set of SKUs in the basket and the course indicates that
+            # that there is no intersection. Therefore, the basket contains no SKUs for the current course.
+            # Because the user is also not enrolled in the course, it follows that the program condition is not met.
             diff = basket_skus.difference(skus)
             if diff == basket_skus:
                 return False
@@ -107,7 +124,7 @@ class ProgramCourseRunSeatsCondition(Condition):
             if not self.can_apply_condition(line):
                 continue
 
-            price = utils.unit_price(offer, line)
+            price = oscar_utils.unit_price(offer, line)
             if not price:
                 continue
             line_tuples.append((price, line))

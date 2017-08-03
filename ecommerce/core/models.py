@@ -423,6 +423,10 @@ class SiteConfiguration(models.Model):
     def credit_api_client(self):
         return EdxRestApiClient(self.build_lms_url('/api/credit/v1/'), jwt=self.access_token)
 
+    @cached_property
+    def enrollment_api_client(self):
+        return EdxRestApiClient(self.build_lms_url('/api/enrollment/v1/'), jwt=self.access_token, append_slash=False)
+
 
 class User(AbstractUser):
     """Custom user model for use with OIDC."""
