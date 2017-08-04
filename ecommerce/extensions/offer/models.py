@@ -35,6 +35,9 @@ class Benefit(AbstractBenefit):
 class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
+    site = models.ForeignKey(
+        'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None
+    )
 
     def save(self, *args, **kwargs):
         self.clean()

@@ -91,6 +91,7 @@ class ProgramOfferForm(forms.ModelForm):
         self.instance.status = ConditionalOffer.OPEN
         self.instance.offer_type = ConditionalOffer.SITE
         self.instance.max_basket_applications = 1
+        self.instance.site = site
 
         if commit:
             benefit = getattr(self.instance, 'benefit', Benefit())

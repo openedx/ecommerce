@@ -448,3 +448,13 @@ class ConditionalOfferTests(TestCase):
         """Verify creating ConditionalOffer with invalid max global applications value raises validation error."""
         with self.assertRaises(ValidationError):
             factories.ConditionalOfferFactory(max_global_applications=max_uses)
+
+    def test_creating_offer_with_site(self):
+        """Verify creating ConditionalOffer with site specified"""
+        offer = factories.ConditionalOfferFactory(site=self.site)
+        self.assertEqual(offer.site, self.site)
+
+    def test_creating_offer_with_null_site(self):
+        """Verify creating ConditionalOffer with no site specified"""
+        offer = factories.ConditionalOfferFactory()
+        self.assertEqual(offer.site, None)
