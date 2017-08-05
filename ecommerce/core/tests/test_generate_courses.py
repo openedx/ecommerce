@@ -3,7 +3,6 @@ import ddt
 import httpretty
 import mock
 from django.core.management import CommandError, call_command
-from django.test import override_settings
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -13,122 +12,172 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
 
-    default_verified_price = 100
-    default_professional_price = 1000
-
-    def test_invalid_env(self):
-        """
-        Test that running the command in a non-development environment will raise the appropriate command error
-        """
-        msg = "Command should only be run in development environments"
-        with self.assertRaisesRegexp(CommandError, msg):
-            arg = 'arg'
-            call_command("generate_courses", arg)
-
-    @override_settings(DEBUG=True)
     def test_invalid_json(self):
         """
         Test that providing an invalid JSON object will raise the appropriate command error
         """
-        msg = "Invalid JSON object"
-        with self.assertRaisesRegexp(CommandError, msg):
+        with self.assertRaisesRegexp(CommandError, "Invalid JSON object"):
             arg = 'invalid_json'
             call_command("generate_courses", arg)
 
-    @override_settings(DEBUG=True)
-    def test_missing_courses_field(self):
+    def test_missing_course_list(self):
         """
         Test that missing the courses key will raise the appropriate command error
         """
-        msg = "JSON object is missing courses field"
-        with self.assertRaisesRegexp(CommandError, msg):
+        with self.assertRaisesRegexp(CommandError, "JSON object is missing courses list"):
             arg = ('{}')
             call_command("generate_courses", arg)
 
-    @override_settings(DEBUG=True)
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
-    @ddt.data("organization", "number", "run", "fields", "seats")
+    @ddt.data("organization", "number", "run", "partner", "fields", "enrollment")
     def test_missing_course_setting(self, setting, mock_logger):
         """
         Test that missing settings in course JSON will result in the appropriate log messages
         """
-        msg = "Course json is missing the following fields: " + str([setting])
         settings = {"courses": [{
-            "store": "split",
             "organization": "test-course-generator",
             "number": "1",
             "run": "1",
+            "partner": str(self.partner.short_code),
             "fields": {"display_name": "test-course"},
-            "seats": []
+            "enrollment": {}
         }]}
         del settings["courses"][0][setting]
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call(msg)
+        mock_logger.warning.assert_any_call("Course json is missing " + setting)
 
-    @override_settings(DEBUG=True)
+    @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
+    def test_invalid_partner(self, mock_logger):
+        """
+        Test that supplying an invalid partner in course JSON will result in the appropriate log messages
+        """
+        invalid_partner = "invalid_partner"
+        settings = {"courses": [{
+            "organization": "test-course-generator",
+            "number": "1",
+            "run": "1",
+            "partner": invalid_partner,
+            "fields": {"display_name": "test-course"},
+            "enrollment": {
+                "audit": False,
+                "honor": False,
+                "verified": False,
+                "professional_education": False,
+                "no_id_verification": False,
+                "credit": False,
+                "credit_provider": None
+            }
+        }]}
+        arg = json.dumps(settings)
+        call_command("generate_courses", arg)
+        mock_logger.warning.assert_any_call(invalid_partner + " partner does not exist")
+
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
     def test_missing_course_name(self, mock_logger):
         """
         Test that missing course name in fields json will result in the appropriate log messages
         """
-        msg = "Fields json is missing display_name"
         settings = {"courses": [{
-            "store": "split",
             "organization": "test-course-generator",
             "number": "1",
             "run": "1",
+            "partner": str(self.partner.short_code),
             "fields": {},
-            "seats": []
+            "enrollment": {}
         }]}
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call(msg)
+        mock_logger.warning.assert_any_call("Fields json is missing display_name")
 
-    @override_settings(DEBUG=True)
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
-    def test_invalid_seat_type(self, mock_logger):
+    def test_invalid_enrollment_setting(self, mock_logger):
         """
-        Test that an invalid seat type in seat JSON will result in the appropriate log messages
+        Test that an invalid setting in enrollment JSON will result in the appropriate log messages
         """
-        valid_seat_types = ["audit", "verified", "honor", "professional"]
-        msg = "Seat type must be one of %s" % (valid_seat_types)
         settings = {"courses": [{
-            "store": "split",
             "organization": "test-course-generator",
             "number": "1",
             "run": "1",
+            "partner": str(self.partner.short_code),
             "fields": {"display_name": "test-course"},
-            "seats": [{"seat_type": "invalid_seat_type"}]
+            "enrollment": {
+                "invalid_setting": "invalid_value",
+                "audit": False,
+                "honor": False,
+                "verified": False,
+                "professional_education": False,
+                "no_id_verification": False,
+                "credit": False,
+                "credit_provider": None
+            }
         }]}
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call(msg)
+        mock_logger.info.assert_any_call("invalid_setting is not a recognized enrollment setting")
 
-    @override_settings(DEBUG=True)
+    @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
+    @ddt.data("audit", "honor", "verified", "professional_education", "no_id_verification")
+    def test_missing_enrollment_setting(self, enrollment_setting, mock_logger):
+        """
+        Test that missing setting in enrollment JSON will result in the appropriate log messages
+        """
+        settings = {"courses": [{
+            "organization": "test-course-generator",
+            "number": "1",
+            "run": "1",
+            "partner": str(self.partner.short_code),
+            "fields": {"display_name": "test-course"},
+            "enrollment": {
+                "audit": False,
+                "honor": False,
+                "verified": False,
+                "professional_education": False,
+                "no_id_verification": False,
+                "credit": False,
+                "credit_provider": None
+            }
+        }]}
+        del settings["courses"][0]["enrollment"][enrollment_setting]
+        arg = json.dumps(settings)
+        call_command("generate_courses", arg)
+        mock_logger.warning.assert_any_call("Enrollment json is missing " + enrollment_setting)
+
     @httpretty.activate
-    @ddt.data("audit", "honor", "verified", "professional")
-    def test_create_seat(self, seat_type):
+    @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
+    @ddt.data("audit", "honor", "verified", "professional_education", "credit")
+    def test_create_seat(self, seat_type, mock_logger):
         """
         The command should create the demo course with a seat,
         and publish that data to the LMS.
         """
         if seat_type == "verified":
-            price = self.default_verified_price
-        elif seat_type == "professional":
-            price = self.default_professional_price
+            price = 100
+        elif seat_type == "professional_education":
+            price = 1000
+        elif seat_type == "credit":
+            price = 2000
         else:
             price = 0
 
         self.mock_access_token_response()
         settings = {"courses": [{
-            "store": "split",
             "organization": "test-course-generator",
             "number": "1",
             "run": "1",
             "fields": {"display_name": "test-course"},
-            "seats": [{"seat_type": seat_type}]
+            "partner": str(self.partner.short_code),
+            "enrollment": {
+                "audit": False,
+                "honor": False,
+                "verified": False,
+                "professional_education": False,
+                "no_id_verification": False,
+                "credit": False,
+                "credit_provider": None,
+            }
         }]}
+        settings["courses"][0]["enrollment"][seat_type] = True
         arg = json.dumps(settings)
         with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
             call_command('generate_courses', arg)
@@ -138,3 +187,4 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         seats = course.seat_products
         seat = seats[0]
         self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, price)
+        mock_logger.info.assert_any_call(seat_type + " has been set to True")
