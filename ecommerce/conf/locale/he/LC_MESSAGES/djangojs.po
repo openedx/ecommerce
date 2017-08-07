@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-07-18 11:14-0400\n"
-"PO-Revision-Date: 2017-07-17 23:00+0000\n"
+"PO-Revision-Date: 2017-08-03 16:02+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Hebrew (http://www.transifex.com/open-edx/edx-platform/language/he/)\n"
 "MIME-Version: 1.0\n"
@@ -173,39 +173,39 @@ msgstr "הבעיה אירעה בזמן היציאה. צור קשר עם התמי
 
 #: ecommerce/static/js/pages/basket_page.js:96
 msgid "This field is required"
-msgstr ""
+msgstr "זהו שדה חובה"
 
 #: ecommerce/static/js/pages/basket_page.js:131
 msgid "Invalid card number"
-msgstr ""
+msgstr "מספר הכרטיס אינו חוקי"
 
 #: ecommerce/static/js/pages/basket_page.js:133
 msgid "Unsupported card type"
-msgstr ""
+msgstr "סוג הכרטיס לא נתמך"
 
 #: ecommerce/static/js/pages/basket_page.js:135
 msgid "Invalid security number"
-msgstr ""
+msgstr "מספר האבטחה אינו חוקי"
 
 #: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid month"
-msgstr ""
+msgstr "חודש לא חוקי"
 
 #: ecommerce/static/js/pages/basket_page.js:142
 msgid "Invalid year"
-msgstr ""
+msgstr "שנה לא חוקית"
 
 #: ecommerce/static/js/pages/basket_page.js:144
 msgid "Card expired"
-msgstr ""
+msgstr "פג תוקף הכרטיס"
 
 #: ecommerce/static/js/pages/basket_page.js:363
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:364
 msgid "State/Province (required)"
-msgstr ""
+msgstr "מדינה/מחוז (נדרש)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 msgid "Create New Coupon"
