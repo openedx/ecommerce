@@ -233,8 +233,8 @@ for the following settings by using environment variables.
 
  * - Variable
    - Description
- * - ACCESS_TOKEN
-   - The OAuth2 access token used to authenticate requests.
+ * - DISCOVERY_API_URL_ROOT
+   - The URL root for the Course catalog service.
  * - ECOMMERCE_URL_ROOT
    - The URL root for the E-Commerce service.
  * - LMS_URL_ROOT
@@ -245,6 +245,12 @@ for the following settings by using environment variables.
    - The email address used to sign in to the LMS.
  * - LMS_PASSWORD
    - The password used to sign in to the LMS.
+ * - OAUTH_ACCESS_TOKEN_URL
+   - The URL for getting the OAuth access token.
+ * - OAUTH_CLIENT_ID
+   - OAuth2 client ID for the ecommerce application (see the LMS OAuth2 settings).
+ * - OAUTH_CLIENT_SECRET
+   - OAuth2 client secret for the ecommerce application (see the LMS OAuth2 settings).
 
 If you test PayPal integration, you must also specify values for the following
 settings by using environment variables.
@@ -265,28 +271,34 @@ settings by using environment variables.
 Run Acceptance Tests
 ********************
 
-Run all acceptance tests by executing ``make accept``. To run a specific test,
+Run all acceptance tests by executing ``make e2e``. To run a specific test,
 execute the following command.
 
 .. code-block:: bash
 
-    $ nosetests -v <path/to/the/test/module>
+    $ pytest <path/to/the/test/module>
 
 The acceptance tests rely on the :ref:`environment variables that you have
 configured <Configure Acceptance Tests>`. For example, when you run the
-acceptance tests against local instances of E-Commerce and the LMS, you might
+acceptance tests against local Vagrant instances of E-Commerce and the LMS, you might
 run the following command, replacing values between angle brackets (<>) with
 your own values.
 
 .. code-block:: bash
 
-    $ ECOMMERCE_URL_ROOT="http://localhost:8002" LMS_URL_ROOT="http://127.0.0.1:8000" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="False" LMS_AUTO_AUTH="True" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" ENABLE_CYBERSOURCE_TESTS="False" VERIFIED_COURSE_ID="<course ID>" make accept
+    $ ECOMMERCE_URL_ROOT="http://localhost:8002" LMS_URL_ROOT="http://localhost:8000" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" OAUTH_ACCESS_TOKEN_URL="http://localhost:8000/oauth2/access_token" OAUTH_CLIENT_ID="ecommerce-key" OAUTH_CLIENT_SECRET="ecommerce-secret" LMS_HTTPS="False" LMS_AUTO_AUTH="True" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" ENABLE_CYBERSOURCE_TESTS="False" VERIFIED_COURSE_ID="<course ID>" DISCOVERY_API_URL_ROOT='http://10.0.2.2:8008/api/v1/' make e2e
+
+In case your local instances of E-Commerce and the LMS are powered by docker, you might run the following command.
+
+.. code-block:: bash
+
+    $ ECOMMERCE_URL_ROOT="http://localhost:18130" LMS_URL_ROOT="http://localhost:18000" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" OAUTH_ACCESS_TOKEN_URL="http://localhost:18000/oauth2/access_token" OAUTH_CLIENT_ID="ecommerce-key" OAUTH_CLIENT_SECRET="ecommerce-secret" LMS_HTTPS="False" LMS_AUTO_AUTH="True" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" ENABLE_CYBERSOURCE_TESTS="False" VERIFIED_COURSE_ID="<course ID>" DISCOVERY_API_URL_ROOT='http://localhost:18381/api/v1/' make e2e
 
 When you run the acceptance tests against a production-like staging
 environment, you might run the following command.
 
 .. code-block:: bash
 
-    $ ECOMMERCE_URL_ROOT="https://ecommerce.stage.edx.org" LMS_URL_ROOT="https://courses.stage.edx.org" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" ACCESS_TOKEN="<access token>" LMS_HTTPS="True" LMS_AUTO_AUTH="False" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" BASIC_AUTH_USERNAME="<username>" BASIC_AUTH_PASSWORD="<password>" HONOR_COURSE_ID="<course ID>" VERIFIED_COURSE_ID="<course ID>" make accept
+    $ ECOMMERCE_URL_ROOT="https://ecommerce.stage.edx.org" LMS_URL_ROOT="https://courses.stage.edx.org" LMS_USERNAME="<username>" LMS_EMAIL="<email address>" LMS_PASSWORD="<password>" OAUTH_ACCESS_TOKEN_URL="https://courses.stage.edx.org/oauth2/access_token" OAUTH_CLIENT_ID="<oauth_ecommerce_client_id>" OAUTH_CLIENT_SECRET="<oauth_ecommerce_client_secret>" LMS_HTTPS="True" LMS_AUTO_AUTH="False" PAYPAL_EMAIL="<email address>" PAYPAL_PASSWORD="<password>" BASIC_AUTH_USERNAME="<username>" BASIC_AUTH_PASSWORD="<password>" HONOR_COURSE_ID="<course ID>" VERIFIED_COURSE_ID="<course ID>" DISCOVERY_API_URL_ROOT='https://stage-edx-discovery.edx.org/api/v1/' make e2e
 
 .. include:: links/links.rst
