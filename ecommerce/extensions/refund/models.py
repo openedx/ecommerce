@@ -128,13 +128,16 @@ class Refund(StatusMixin, TimeStampedModel):
 
             status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
             for line in unrefunded_lines:
-                RefundLine.objects.create(
-                    refund=refund,
-                    order_line=line,
-                    line_credit_excl_tax=line.line_price_excl_tax,
-                    quantity=line.quantity,
-                    status=status
-                )
+                # LEARNER-1184 Disabling refund line creation for enrollment code, Because
+                # it causes Multiple Refunds errors.
+                if not line.product.is_enrollment_code_product:
+                    RefundLine.objects.create(
+                        refund=refund,
+                        order_line=line,
+                        line_credit_excl_tax=line.line_price_excl_tax,
+                        quantity=line.quantity,
+                        status=status
+                    )
 
             if total_credit_excl_tax == 0:
                 refund.approve(notify_purchaser=False)

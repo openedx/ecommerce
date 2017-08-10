@@ -8,13 +8,19 @@ import mock
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from oscar.test.newfactories import UserFactory
+from oscar.test.newfactories import BasketFactory, UserFactory
 from testfixtures import LogCapture
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import (
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_SWITCH,
+    SEAT_PRODUCT_CLASS_NAME
+)
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
@@ -26,6 +32,7 @@ from ecommerce.tests.testcases import TestCase
 
 PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
+Product = get_model('catalogue', 'Product')
 Refund = get_model('refund', 'Refund')
 Source = get_model('payment', 'Source')
 
@@ -149,6 +156,31 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
                 self.assert_refund_creation_logged(l, refund, order)
             else:
                 l.check()
+
+    def test_create_with_lines_for_enrollment_code_order_line(self):
+        """
+        Refund.create_with_lines should not create RefundLines for enrollment
+        code order line
+        """
+        course = CourseFactory()
+        user = UserFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        self.site.siteconfiguration.enable_enrollment_codes = True
+        self.site.siteconfiguration.save()
+        course.create_or_update_seat("verified", True, 10, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+
+        basket = BasketFactory(owner=user, site=self.site)
+        basket.add_product(enrollment_code, 1)
+        order = create_order(basket=basket, user=user)
+        order.status = ORDER.COMPLETE
+        line = order.lines.first()
+
+        with LogCapture(LOGGER_NAME) as l:
+            refund = Refund.create_with_lines(order, [line])
+            self.assertEqual(isinstance(refund, Refund), True)
+            self.assert_refund_creation_logged(l, refund, order)
+            l.check()
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule.revoke_line')
