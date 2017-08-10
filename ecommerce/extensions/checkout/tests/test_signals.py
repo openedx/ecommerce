@@ -13,24 +13,26 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
+from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
-
-LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
-
 Product = get_model('catalogue', 'Product')
 
+BUNDLE = 'bundle_identifier'
+LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 
-class SignalTests(DiscoveryTestMixin, CouponMixin, TestCase):
+
+class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
     def setUp(self):
         super(SignalTests, self).setUp()
         self.user = self.create_user()
@@ -54,6 +56,12 @@ class SignalTests(DiscoveryTestMixin, CouponMixin, TestCase):
         basket.add_product(seat, 1)
         order = create_order(basket=basket, user=self.user)
         return order
+
+    def mock_get_program_data(self, isFull):
+        data = {'name': 'test_program', 'courses': [{}]}
+        if isFull:
+            data['courses'].append({})
+        return data
 
     @httpretty.activate
     def test_post_checkout_callback(self):
@@ -122,9 +130,9 @@ class SignalTests(DiscoveryTestMixin, CouponMixin, TestCase):
                 )
             )
 
-    def _generate_event_properties(self, order, voucher=None):
+    def _generate_event_properties(self, order, voucher=None, bundle_id=None, fullBundle=False):
         coupon = voucher.code if voucher else None
-        return {
+        properties = {
             'orderId': order.number,
             'total': str(order.total_excl_tax),
             'currency': order.currency,
@@ -141,6 +149,24 @@ class SignalTests(DiscoveryTestMixin, CouponMixin, TestCase):
                 } for line in order.lines.all()
             ],
         }
+        if bundle_id:
+            program = self.mock_get_program_data(fullBundle)
+            if len(order.lines.all()) < len(program['courses']):
+                variant = 'partial'
+            else:
+                variant = 'full'
+
+            bundle_product = {
+                'id': bundle_id,
+                'price': '0',
+                'quantity': str(len(order.lines.all())),
+                'category': 'bundle',
+                'variant': variant,
+                'name': program['name']
+            }
+            properties['products'].append(bundle_product)
+
+        return properties
 
     def test_track_completed_order(self):
         """ An event should be sent to Segment. """
@@ -151,11 +177,36 @@ class SignalTests(DiscoveryTestMixin, CouponMixin, TestCase):
             properties = self._generate_event_properties(order)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
-            # We should be able to fire events even if the product is not releated to a course.
+            # We should be able to fire events even if the product is not related to a course.
             mock_track.reset_mock()
             order = create_order()
             track_completed_order(None, order)
             properties = self._generate_event_properties(order)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+    @mock.patch('ecommerce.extensions.checkout.signals.track_segment_event')
+    def test_track_bundle_order(self, mock_track):
+        """ If the order is a bundle purchase, we should track the associated bundle in the properties """
+        order = self.prepare_order('verified')
+        BasketAttribute.objects.update_or_create(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
+            value_text='test_bundle'
+        )
+
+        # Tracks a full bundle order
+        with mock.patch('ecommerce.extensions.checkout.signals.get_program',
+                        mock.Mock(return_value=self.mock_get_program_data(True))):
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order, bundle_id='test_bundle', fullBundle=True)
+            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+
+        # Tracks a partial bundle order
+        with mock.patch('ecommerce.extensions.checkout.signals.get_program',
+                        mock.Mock(return_value=self.mock_get_program_data(False))):
+            mock_track.reset_mock()
+            track_completed_order(None, order)
+            properties = self._generate_event_properties(order, bundle_id='test_bundle')
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
     def test_track_completed_discounted_order_with_voucher(self):

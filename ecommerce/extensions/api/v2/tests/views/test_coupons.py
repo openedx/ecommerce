@@ -90,6 +90,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
         request.data = self.coupon_data
         request.site = self.site
         request.COOKIES = {}
+        request.GET = {}
         return request
 
     def test_create(self):

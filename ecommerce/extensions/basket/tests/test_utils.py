@@ -25,6 +25,9 @@ from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Benefit = get_model('offer', 'Benefit')
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BUNDLE = 'bundle_identifier'
 Product = get_model('catalogue', 'Product')
 
 
@@ -358,6 +361,20 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
             basket = prepare_basket(self.request, [enrollment_code])
             self.assertIsNotNone(basket)
+
+    def test_prepare_basket_with_bundle(self):
+        """
+        Test prepare_basket updates or creates a basket attribute for the associated bundle
+        """
+        product = ProductFactory()
+        request = self.request
+        basket = prepare_basket(request, [product])
+        with self.assertRaises(BasketAttribute.DoesNotExist):
+            BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE)
+        request.GET = {'bundle': 'test_bundle'}
+        basket = prepare_basket(request, [product])
+        bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
+        self.assertEqual(bundle_id, 'test_bundle')
 
 
 class BasketUtilsTransactionTests(TransactionTestCase):
