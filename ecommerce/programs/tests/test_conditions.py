@@ -31,19 +31,6 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         self.assertEqual(condition.name, expected)
 
     @httpretty.activate
-    def test_get_program(self):
-        """
-        The method should return data from the Discovery Service API.
-        Data should be cached for subsequent calls.
-        """
-        data = self.mock_program_detail_endpoint(self.condition.program_uuid, self.site_configuration.discovery_api_url)
-        self.assertEqual(self.condition.get_program(self.site.siteconfiguration), data)
-
-        # The program data should be cached
-        httpretty.disable()
-        self.assertEqual(self.condition.get_program(self.site.siteconfiguration), data)
-
-    @httpretty.activate
     def test_is_satisfied_no_enrollments(self):
         """ The method should return True if the basket contains one course run seat corresponding to each
         course in the program. """
@@ -136,7 +123,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         # Verify the user enrollments are cached
         basket.site.siteconfiguration.enable_partial_program = True
         httpretty.disable()
-        with mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition.get_program',
+        with mock.patch('ecommerce.programs.conditions.get_program',
                         return_value=program):
             self.assertTrue(self.condition.is_satisfied(offer, basket))
 
@@ -147,7 +134,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         basket.add_product(self.test_product)
 
-        with mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition.get_program',
+        with mock.patch('ecommerce.programs.conditions.get_program',
                         side_effect=value):
             self.assertFalse(self.condition.is_satisfied(offer, basket))
 
