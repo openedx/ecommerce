@@ -25,6 +25,7 @@ OSCAR_APPS = [
     'ecommerce.extensions.checkout',
     'ecommerce.extensions.customer',
     'ecommerce.extensions.dashboard',
+    'ecommerce.extensions.dashboard.offers',
     'ecommerce.extensions.dashboard.orders',
     'ecommerce.extensions.dashboard.users',
     'ecommerce.extensions.offer',
