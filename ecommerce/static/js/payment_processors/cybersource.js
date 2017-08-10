@@ -159,9 +159,16 @@ define([
                 return promise;
             }
 
-            // Return an empty promise for callers expecting a promise.
-            // eslint-disable-next-line no-undef
-            return Promise.resolve();
+            // Return an empty promise for callers expecting a promise (e.g. tests). If Promise is not supported the
+            // browser (e.g. Internet Explorer), return nothing.
+            /* istanbul ignore next */
+            if (typeof Promise !== 'undefined') {
+                // eslint-disable-next-line no-undef
+                return Promise.resolve();
+            }
+
+            /* istanbul ignore next */
+            return null;
         },
 
         onApplePayButtonClicked: function(event) {
