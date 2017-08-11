@@ -18,13 +18,15 @@ from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
 
+from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.test.factories import (PercentageDiscountBenefitWithoutRangeFactory, ProgramOfferFactory,
-                                                 prepare_voucher)
+from ecommerce.extensions.test.factories import (PercentageDiscountBenefitWithoutRangeFactory,
+                                                 ProgramCourseRunSeatsConditionFactory,
+                                                 ProgramOfferFactory, prepare_voucher)
 from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.mixins import BasketCreationMixin, ThrottlingMixin
@@ -435,6 +437,116 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    def test_basket_calculate_by_priviledged_user_no_username(self):
+        """That a priviledge user passing no username gets a response"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
+    def test_basket_calculate_by_priviledged_user_own_username(self):
+        """Verify that priviledged user passing their own username gets a response about themself"""
+        # should return pricing about own data
+        response = self.client.get(self.url + '&username={username}'.format(username=self.user.username))
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
+    def test_basket_calculate_by_priviledged_user_other_username(self):
+        """Verify that a priviledged user passing a valid username gets a response about the other user"""
+        self.site_configuration.enable_partial_program = True
+        self.site_configuration.save()
+        offer = ProgramOfferFactory(
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
+            condition=ProgramCourseRunSeatsConditionFactory()
+        )
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        differentuser = self.create_user(username='differentuser', is_staff=False)
+
+        products = []
+        for course in program['courses']:
+            course_run = Course.objects.get(id=course['course_runs'][0]['key'])
+            for seat in course_run.seat_products:
+                if seat.attr.certificate_type == 'verified':
+                    products.append(seat)
+
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products[1:]]}, True)
+        path = reverse('api:v2:baskets:calculate')
+        url = '{root}?{qs}'.format(root=path, qs=qs) + '&username={username}'.format(username=differentuser.username)
+        enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
+        self.mock_enrollment_api(differentuser.username, enrollment)
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+                                                 for product in products[1:]),
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'USD'
+        }
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
+    def test_basket_calculate_by_priviledged_user_invalid_username(self, mocked_logger):
+        """Verify that a priviledged user passing an invalid username gets a response but about themselves
+            and an error is logged about a non existant user """
+        self.site_configuration.enable_partial_program = True
+        self.site_configuration.save()
+        offer = ProgramOfferFactory(
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
+            condition=ProgramCourseRunSeatsConditionFactory()
+        )
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        differentuser = self.create_user(username='differentuser', is_staff=False)
+
+        products = []
+        for course in program['courses']:
+            course_run = Course.objects.get(id=course['course_runs'][0]['key'])
+            for seat in course_run.seat_products:
+                if seat.attr.certificate_type == 'verified':
+                    products.append(seat)
+
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products[1:]]}, True)
+        path = reverse('api:v2:baskets:calculate')
+        url = '{root}?{qs}'.format(root=path, qs=qs) + '&username=invalidusername'
+        enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
+        self.mock_enrollment_api(differentuser.username, enrollment)
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+                                                 for product in products[1:]),
+            'total_incl_tax': Decimal('300.00'),
+            'currency': 'USD'
+        }
+
+        with self.assertRaises(Exception):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(mocked_logger.called)
+            self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    def test_basket_calculate_username_by_unpriviledged_user_own_username(self):
+        """Verify that an unpriviledged user passing their own username gets a valid response"""
+        unpriviledgeduser = self.create_user(is_staff=False)
+        self.request.user = unpriviledgeduser
+        self.client.login(username=unpriviledgeduser.username, password=self.password)
+        response = self.client.get(self.url + '&username={username}'.format(username=unpriviledgeduser.username))
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
+    def test_basket_calculate_by_unpriviledged_user_other_username(self):
+        """Verify that an unpriviledged user passing a different username is forbidden"""
+        unpriviledgeduser = self.create_user(is_staff=False)
+        differentuser = self.create_user(username='ImDifferentYeahImDifferent', is_staff=False)
+        self.request.user = unpriviledgeduser
+        self.client.login(username=unpriviledgeduser.username, password=self.password)
+        response = self.client.get(self.url + '&username={username}'.format(username=differentuser.username))
+        self.assertEqual(response.status_code, 403)
 
     @mock.patch('ecommerce.extensions.basket.models.Basket.add_product', mock.Mock(side_effect=Exception))
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
