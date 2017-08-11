@@ -353,8 +353,6 @@ class BasketCalculateView(generics.GenericAPIView):
                     'currency': basket.currency
                 }
         """
-        #from nose.tools import set_trace; 
-        #set_trace()
         partner = get_partner_for_site(request)
         skus = request.GET.getlist('sku')
         if not skus:
@@ -399,13 +397,10 @@ class BasketCalculateView(generics.GenericAPIView):
                 if voucher:
                     basket.vouchers.add(voucher)
 
-                logger.info('enable partial: %s', request.site.siteconfiguration.enable_partial_program)
-                logger.info('site config: %s', request.site.siteconfiguration)
                 # Calculate any discounts on the basket.
                 Applicator().apply(basket, user=user, request=request)
 
                 discounts = []
-                logger.info('discounts: %s', discounts)
                 if basket.offer_discounts:
                     discounts = basket.offer_discounts
                 if basket.voucher_discounts:
