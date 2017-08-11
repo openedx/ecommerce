@@ -250,6 +250,9 @@ PROGRAM_CACHE_TIMEOUT = 3600  # Value is in seconds.
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
+
+# Enrollment API settings used for fetching information from LMS
+ENROLLMENT_API_CACHE_TIMEOUT = 3600  # Value is in seconds.
 # END URL CONFIGURATION
 
 VOUCHER_CACHE_TIMEOUT = 10  # Value is in seconds.

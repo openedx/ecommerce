@@ -21,7 +21,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramCourseRunSeatsConditionTests, self).setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
-        self.test_product = ProductFactory()
+        self.test_product = ProductFactory(categories=[])
         self.site.siteconfiguration.enable_partial_program = True
 
     def test_name(self):
@@ -133,6 +133,13 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         basket.site.siteconfiguration.enable_partial_program = False
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
+        # Verify the user enrollments are cached
+        basket.site.siteconfiguration.enable_partial_program = True
+        httpretty.disable()
+        with mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition.get_program',
+                        return_value=program):
+            self.assertTrue(self.condition.is_satisfied(offer, basket))
+
     @ddt.data(HttpNotFoundError, SlumberBaseException, Timeout)
     def test_is_satisfied_with_exception(self, value):
         """ The method should return False if there is an exception when trying to get program details. """
@@ -143,3 +150,13 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         with mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition.get_program',
                         side_effect=value):
             self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    def test_is_satisfied_free_basket(self):
+        """ Ensure the basket returns False if the basket total is zero. """
+        offer = factories.ProgramOfferFactory(condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        basket.flush()
+        test_product = factories.ProductFactory(stockrecords__price_excl_tax=0,
+                                                stockrecords__partner__short_code='McKenzieBruderWelter')
+        basket.add_product(test_product)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
