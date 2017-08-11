@@ -155,8 +155,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         """ Ensure the basket returns False if the basket total is zero. """
         offer = factories.ProgramOfferFactory(condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
-        basket.flush()
         test_product = factories.ProductFactory(stockrecords__price_excl_tax=0,
-                                                stockrecords__partner__short_code='McKenzieBruderWelter')
+                                                stockrecords__partner__short_code='test')
         basket.add_product(test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))

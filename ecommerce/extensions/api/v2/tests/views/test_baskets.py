@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import datetime
 import json
 import urllib
+import logging
 from collections import namedtuple
 from decimal import Decimal
 
@@ -18,6 +19,8 @@ from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
 
+from ecommerce.courses.models import Course
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
@@ -42,6 +45,8 @@ Voucher = get_model('voucher', 'Voucher')
 
 LOGGER_NAME = 'ecommerce.extensions.api.v2.views.baskets'
 
+
+logger = logging.getLogger(__name__)
 
 @ddt.ddt
 @override_settings(
@@ -435,6 +440,95 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    def test_basket_calculate_by_priviledged_user_no_username(self):
+        """That a priviledge user passing no username gets a response"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
+    def test_basket_calculate_by_priviledged_user_own_username(self):
+        """Verify that priviledged user passing their own username gets a response about themself"""
+        # should return pricing about own data
+        response = self.client.get(self.url + '&username={username}'.format(username=self.user.username))
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
+    def test_basket_calculate_by_priviledged_user_other_username(self):
+        """Verify that a priviledged user passing a valid username gets a response about the other user"""
+        self.site.siteconfiguration.enable_partial_program = True
+        self.request.site.siteconfiguration.enable_partial_program = True
+        #self.client.site.siteconfiguration.enable_partial_program = True
+        #from nose.tools import set_trace; 
+
+        offer = ProgramOfferFactory(benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100))
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        differentuser = self.create_user(username='differentuser', is_staff=False)
+
+        products = []
+        for course in program['courses']:
+            course_run = Course.objects.get(id=course['course_runs'][0]['key'])
+            for seat in course_run.seat_products:
+                if(seat.attr.certificate_type == 'verified'):   
+                    products.append(seat)
+                    logger.info('added seat')
+                    logger.info(seat) 
+
+        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products[1:]]}, True)
+        path = reverse('api:v2:baskets:calculate')
+        url = '{root}?{qs}'.format(root=path, qs=qs) + '&username={username}'.format(username=differentuser.username)
+        logger.info('url is: ' + url)
+
+        enrollment = [{'mode': 'verified', 'course_details' : {'course_id': program['courses'][0]['course_runs'][0]['key']}}]
+        logger.info('enrolling in course run id: %s',program['courses'][0]['course_runs'][0]['key'])
+
+        self.mock_enrollment_api(differentuser.username, enrollment)
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax for product in products[1:]), # - Price of course diff user is enrolled in.
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'USD'
+        }
+        logger.info('site config out of call is: %s', self.request.site.siteconfiguration.enable_partial_program)
+        #set_trace()
+        response = self.client.get(url)
+        logger.info('response.data: ')
+        logger.info(response.data)
+        logger.info('expected: ')
+        logger.info(expected)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+    
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
+    def test_basket_calculate_by_priviledged_user_invalid_username(self, mocked_logger):
+        """Verify that a priviledged user passing an invalid username gets a response but about themselves"""
+        #should return pricing about own data
+        with self.assertRaises(Exception):
+            response = self.client.get(self.url + '&username=invalidusername')
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(mocked_logger.called)
+
+    @httpretty.activate
+    def test_basket_calculate_username_by_unpriviledged_user_own_username(self):
+        """Verify that an unpriviledged user passing their own username gets a response about their pricing"""
+        unpriviledgeduser = self.create_user(is_staff=False)
+        self.request.user = unpriviledgeduser
+        self.client.login(username=unpriviledgeduser.username, password=self.password)
+        response = self.client.get(self.url + '&username={username}'.format(username=unpriviledgeduser.username))
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
+    def test_basket_calculate_by_unpriviledged_user_other_username(self):
+        """Verify that an unpriviledged user passing a different username is forbidden"""
+        unpriviledgeduser = self.create_user(is_staff=False)
+        differentuser = self.create_user(username='ImDifferentYeahImDifferent', is_staff=False)
+        self.request.user = unpriviledgeduser
+        self.client.login(username=unpriviledgeduser.username, password=self.password)
+        response = self.client.get(self.url + '&username={username}'.format(username=differentuser.username))
+        self.assertEqual(response.status_code, 403)
 
     @mock.patch('ecommerce.extensions.basket.models.Basket.add_product', mock.Mock(side_effect=Exception))
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')

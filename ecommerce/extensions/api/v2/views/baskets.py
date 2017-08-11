@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 import logging
 import warnings
 
+from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from edx_rest_framework_extensions.permissions import IsSuperuser
@@ -32,6 +33,7 @@ Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
+User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
 
@@ -342,6 +344,7 @@ class BasketCalculateView(generics.GenericAPIView):
         Arguments:
             sku (string): A list of sku(s) to calculate
             code (string): Optional voucher code to apply to the basket.
+            username (string): Optional username of a user for which to caclulate the basket.
 
         Returns:
             JSON: {
@@ -350,6 +353,8 @@ class BasketCalculateView(generics.GenericAPIView):
                     'currency': basket.currency
                 }
         """
+        #from nose.tools import set_trace; 
+        #set_trace()
         partner = get_partner_for_site(request)
         skus = request.GET.getlist('sku')
         if not skus:
@@ -369,12 +374,24 @@ class BasketCalculateView(generics.GenericAPIView):
         if not voucher and len(products) == 1:
             voucher = get_entitlement_voucher(request, products[0])
 
+        username = request.GET.get('username', default='')
+        user = request.user
+        # If a username is passed in, validate that the user is priviledged or the same as username.
+        if username:
+            if user.is_staff or (user.username.lower() == username.lower()):
+                try:
+                    user = User.objects.get(username=username)
+                except User.DoesNotExist:
+                    logger.debug('Request username: [%s] does not exist', username)
+            else:
+                return HttpResponseForbidden('Users can only access their own pricing details')
+
         # We wrap this in an atomic operation so we never commit this to the db.
         # This is to avoid merging this temporary basket with a real user basket.
         try:
             with transaction.atomic():
-                basket = Basket(owner=request.user, site=request.site)
-                basket.strategy = Selector().strategy(user=request.user)
+                basket = Basket(owner=user, site=request.site)
+                basket.strategy = Selector().strategy(user=user)
 
                 for product in products:
                     basket.add_product(product, 1)
@@ -382,11 +399,13 @@ class BasketCalculateView(generics.GenericAPIView):
                 if voucher:
                     basket.vouchers.add(voucher)
 
+                logger.info('enable partial: %s', request.site.siteconfiguration.enable_partial_program)
+                logger.info('site config: %s', request.site.siteconfiguration)
                 # Calculate any discounts on the basket.
-                Applicator().apply(basket, user=request.user, request=request)
+                Applicator().apply(basket, user=user, request=request)
 
                 discounts = []
-
+                logger.info('discounts: %s', discounts)
                 if basket.offer_discounts:
                     discounts = basket.offer_discounts
                 if basket.voucher_discounts:
