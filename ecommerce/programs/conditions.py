@@ -4,10 +4,13 @@ import logging
 import operator
 
 import requests
+from django.conf import settings
+from django.core.cache import cache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
+from ecommerce.core.utils import get_cache_key
 from ecommerce.programs.api import ProgramsApiClient
 
 Condition = get_model('offer', 'Condition')
@@ -68,6 +71,9 @@ class ProgramCourseRunSeatsCondition(Condition):
         if basket.is_empty:
             return False
 
+        if basket.total_incl_tax == 0:
+            return False
+
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
             program = self.get_program(basket.site.siteconfiguration)
@@ -75,8 +81,20 @@ class ProgramCourseRunSeatsCondition(Condition):
             return False
 
         applicable_seat_types = program['applicable_seat_types']
+
         if basket.site.siteconfiguration.enable_partial_program:
-            enrollments = basket.site.siteconfiguration.enrollment_api_client.enrollment.get(user=basket.owner.username)
+            api_resource = 'enrollments'
+            cache_key = get_cache_key(
+                site_domain=basket.site.domain,
+                resource=api_resource,
+                username=basket.owner.username,
+            )
+            enrollments = cache.get(cache_key)
+            if not enrollments:
+                api = basket.site.siteconfiguration.enrollment_api_client
+                user = basket.owner.username
+                enrollments = api.enrollment.get(user=user)
+                cache.set(cache_key, enrollments, settings.ENROLLMENT_API_CACHE_TIMEOUT)
         else:
             enrollments = []
 
