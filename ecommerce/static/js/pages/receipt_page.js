@@ -1,7 +1,3 @@
-/**
- * Basket page scripts.
- **/
-
 define([
     'jquery'
 ],
