@@ -159,7 +159,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         httpretty.register_uri(
             httpretty.POST,
-            get_lms_enrollment_api_url(),
+            get_lms_enrollment_api_url('enrollment'),
             status=200,
             body='{}',
             content_type='application/json'

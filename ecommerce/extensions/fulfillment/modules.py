@@ -108,7 +108,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     """
 
     def _post_to_enrollment_api(self, data, user):
-        enrollment_api_url = get_lms_enrollment_api_url()
+        enrollment_api_url = get_lms_enrollment_api_url('enrollment')
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
         headers = {
             'Content-Type': 'application/json',
