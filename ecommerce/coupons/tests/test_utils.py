@@ -18,6 +18,7 @@ class CouponAppViewTests(TestCase):
 
         self.user = self.create_user(email='test@tester.fake')
         self.request.user = self.user
+        self.request.GET = {}
 
     @ddt.data(
         (['verIfiEd', 'profeSSional'], 'verified,professional'),

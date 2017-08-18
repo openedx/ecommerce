@@ -402,6 +402,7 @@ class CouponMixin(object):
         request.site = self.site
         request.user = factories.UserFactory()
         request.COOKIES = {}
+        request.GET = {}
 
         self.basket = prepare_basket(request, [coupon])
 

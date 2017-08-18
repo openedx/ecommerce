@@ -7,8 +7,8 @@ from django.views.generic import CreateView, ListView, UpdateView
 from oscar.core.loading import get_model
 
 from ecommerce.core.views import StaffOnlyMixin
-from ecommerce.programs.api import ProgramsApiClient
 from ecommerce.programs.forms import ProgramOfferForm
+from ecommerce.programs.utils import get_program
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -22,20 +22,6 @@ class ProgramOfferViewMixin(StaffOnlyMixin):
         context = super(ProgramOfferViewMixin, self).get_context_data(**kwargs)
         context['admin'] = 'program_offers'
         return context
-
-    def get_program_details(self, program_uuid):
-        site = self.request.site
-        details = {
-            'title': '(unknown)',
-            'uuid': program_uuid,
-        }
-        try:
-            programs_api_client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
-            details = programs_api_client.get_program(program_uuid)
-        except:  # pylint: disable=bare-except
-            logger.exception('Failed to retrieve program [%s] from the Programs API!', program_uuid)
-
-        return details
 
     def get_queryset(self):
         return super(ProgramOfferViewMixin, self).get_queryset().filter(
@@ -80,7 +66,8 @@ class ProgramOfferUpdateView(ProgramOfferProcessFormViewMixin, UpdateView):
         context = super(ProgramOfferUpdateView, self).get_context_data(**kwargs)
         context.update({
             'editing': True,
-            'program': self.get_program_details(self.object.condition.program_uuid),
+            'program': get_program(self.object.condition.program_uuid,
+                                   self.request.site.siteconfiguration),
         })
         return context
 
@@ -94,7 +81,7 @@ class ProgramOfferListView(ProgramOfferViewMixin, ListView):
         # TODO: In the future, we should optimize our API calls, pulling the program data in as few calls as possible.
         offers = []
         for offer in context['object_list']:
-            offer.program = self.get_program_details(offer.condition.program_uuid)
+            offer.program = get_program(offer.condition.program_uuid, self.request.site.siteconfiguration)
             offers.append(offer)
 
         return context

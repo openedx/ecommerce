@@ -11,7 +11,7 @@ from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.programs.api import ProgramsApiClient
+from ecommerce.programs.utils import get_program
 
 Condition = get_model('offer', 'Condition')
 logger = logging.getLogger(__name__)
@@ -26,27 +26,10 @@ class ProgramCourseRunSeatsCondition(Condition):
     def name(self):
         return 'Basket contains a seat for every course in program {}'.format(self.program_uuid)
 
-    def get_program(self, site_configuration):
-        """
-        Returns details for the program associated with this condition.
-
-        Data is retrieved from the Discovery Service, and cached for ``settings.PROGRAM_CACHE_TIMEOUT`` seconds.
-
-        Args:
-            site_configuration (SiteConfiguration): Configuration containing the requisite parameters
-             to connect to the Discovery Service.
-
-        Returns:
-            dict
-        """
-        program_uuid = str(self.program_uuid)
-        client = ProgramsApiClient(site_configuration.discovery_api_client, site_configuration.site.domain)
-        return client.get_program(program_uuid)
-
     def get_applicable_skus(self, site_configuration):
         """ SKUs to which this condition applies. """
         program_course_run_skus = set()
-        program = self.get_program(site_configuration)
+        program = get_program(self.program_uuid, site_configuration)
         applicable_seat_types = program['applicable_seat_types']
 
         for course in program['courses']:
@@ -76,7 +59,7 @@ class ProgramCourseRunSeatsCondition(Condition):
 
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
-            program = self.get_program(basket.site.siteconfiguration)
+            program = get_program(self.program_uuid, basket.site.siteconfiguration)
         except (HttpNotFoundError, SlumberBaseException, requests.Timeout):
             return False
 

@@ -18,6 +18,9 @@ from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BUNDLE = 'bundle_identifier'
 StockRecord = get_model('partner', 'StockRecord')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
@@ -59,6 +62,14 @@ def prepare_basket(request, products, voucher=None):
     basket.save()
     basket_addition = get_class('basket.signals', 'basket_addition')
     already_purchased_products = []
+    bundle = request.GET.get('bundle')
+
+    if bundle:
+        BasketAttribute.objects.update_or_create(
+            basket=basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
+            value_text=bundle
+        )
 
     if request.site.siteconfiguration.enable_embargo_check:
         if not embargo_check(request.user, request.site, products):

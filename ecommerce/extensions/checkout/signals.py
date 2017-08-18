@@ -2,13 +2,17 @@ import logging
 
 import waffle
 from django.dispatch import receiver
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.notifications.notifications import send_notification
+from ecommerce.programs.utils import get_program
 
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BUNDLE = 'bundle_identifier'
 logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
@@ -29,6 +33,10 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
     voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
     coupon = voucher.voucher_code if voucher else None
+    try:
+        bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text
+    except BasketAttribute.DoesNotExist:
+        bundle_id = None
 
     properties = {
         'orderId': order.number,
@@ -51,6 +59,26 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             } for line in order.lines.all()
         ],
     }
+
+    try:
+        bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text
+        program = get_program(bundle_id, order.basket.site.siteconfiguration)
+        if len(order.lines.all()) < len(program['courses']):
+            variant = 'partial'
+        else:
+            variant = 'full'
+        bundle_product = {
+            'id': bundle_id,
+            'price': '0',
+            'quantity': str(len(order.lines.all())),
+            'category': 'bundle',
+            'variant': variant,
+            'name': program['name']
+        }
+        properties['products'].append(bundle_product)
+    except BasketAttribute.DoesNotExist:
+        logger.info('There is no program or bundle associated with order number %s', order.number)
+
     track_segment_event(order.site, order.user, 'Order Completed', properties)
 
 
