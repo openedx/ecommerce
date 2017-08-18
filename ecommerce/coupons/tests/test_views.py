@@ -465,14 +465,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             catalog=catalog
         )
         self.request.user = self.user
-        self.mock_consent_response(
-            self.user.username,
-            course_id,
-            ENTERPRISE_CUSTOMER,
-            granted=consent_provided,
-            required=(consent_enabled and not consent_provided),
-            exists=(not consent_provided),
-        )
+        self.mock_enterprise_learner_api(consent_enabled=consent_enabled, consent_provided=consent_provided)
+        self.mock_enterprise_course_enrollment_api(results_present=False)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(uuid=ENTERPRISE_CUSTOMER, consent_enabled=consent_enabled)
