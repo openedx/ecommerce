@@ -21,7 +21,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramCourseRunSeatsConditionTests, self).setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
-        self.test_product = ProductFactory(categories=[])
+        self.test_product = ProductFactory(stockrecords__price_excl_tax=10)
         self.site.siteconfiguration.enable_partial_program = True
 
     def test_name(self):
@@ -145,4 +145,12 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         test_product = factories.ProductFactory(stockrecords__price_excl_tax=0,
                                                 stockrecords__partner__short_code='test')
         basket.add_product(test_product)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    def test_is_satisfied_program_retrieval_failure(self):
+        """ The method should return False if no program is retrieved """
+        offer = factories.ProgramOfferFactory(condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        basket.add_product(self.test_product)
+        self.condition.program_uuid = None
         self.assertFalse(self.condition.is_satisfied(offer, basket))

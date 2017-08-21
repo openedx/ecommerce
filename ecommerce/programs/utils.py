@@ -1,4 +1,11 @@
+import logging
+
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import HttpNotFoundError, SlumberBaseException
+
 from ecommerce.programs.api import ProgramsApiClient
+
+log = logging.getLogger(__name__)
 
 
 def get_program(program_uuid, siteconfiguration):
@@ -15,6 +22,17 @@ def get_program(program_uuid, siteconfiguration):
 
     Returns:
         dict
+        None if not found or another error occurs
     """
-    client = ProgramsApiClient(siteconfiguration.discovery_api_client, siteconfiguration.site.domain)
-    return client.get_program(str(program_uuid))
+    response = None
+    try:
+        client = ProgramsApiClient(siteconfiguration.discovery_api_client, siteconfiguration.site.domain)
+        response = client.get_program(str(program_uuid))
+    except HttpNotFoundError:
+        msg = 'No program data found for {}'.format(program_uuid)
+        log.debug(msg)
+    except (ConnectionError, SlumberBaseException, Timeout):
+        msg = 'Failed to retrieve program details for {}'.format(program_uuid)
+        log.debug(msg)
+
+    return response

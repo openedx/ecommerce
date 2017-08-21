@@ -30,12 +30,14 @@ class ProgramCourseRunSeatsCondition(Condition):
         """ SKUs to which this condition applies. """
         program_course_run_skus = set()
         program = get_program(self.program_uuid, site_configuration)
-        applicable_seat_types = program['applicable_seat_types']
+        if program:
+            applicable_seat_types = program['applicable_seat_types']
 
-        for course in program['courses']:
-            for course_run in course['course_runs']:
-                program_course_run_skus.update(
-                    set([seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types]))
+            for course in program['courses']:
+                for course_run in course['course_runs']:
+                    program_course_run_skus.update(
+                        set([seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types])
+                    )
 
         return program_course_run_skus
 
@@ -63,7 +65,10 @@ class ProgramCourseRunSeatsCondition(Condition):
         except (HttpNotFoundError, SlumberBaseException, requests.Timeout):
             return False
 
-        applicable_seat_types = program['applicable_seat_types']
+        if program:
+            applicable_seat_types = program['applicable_seat_types']
+        else:
+            return False
 
         if basket.site.siteconfiguration.enable_partial_program:
             api_resource = 'enrollments'
