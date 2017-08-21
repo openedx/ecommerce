@@ -63,7 +63,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     try:
         bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text
         program = get_program(bundle_id, order.basket.site.siteconfiguration)
-        if len(order.lines.all()) < len(program['courses']):
+        if len(order.lines.all()) < len(program.get('courses')):
             variant = 'partial'
         else:
             variant = 'full'
@@ -73,7 +73,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             'quantity': str(len(order.lines.all())),
             'category': 'bundle',
             'variant': variant,
-            'name': program['name']
+            'name': program.get('name')
         }
         properties['products'].append(bundle_product)
     except BasketAttribute.DoesNotExist:
