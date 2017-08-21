@@ -7,6 +7,10 @@ Install and Start the E-Commerce Service
 To install and start the edX E-Commerce service, you must complete the
 following steps.
 
+.. contents::
+   :depth: 1
+   :local:
+
 .. note::
  These steps assume that you are running Open edX `devstack`_. If you prefer to
  run the E-Commerce service locally on your computer instead of on the virtual

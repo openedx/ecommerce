@@ -4,7 +4,19 @@
 Creating Products Overview
 ###########################
 
-.. include:: ../products_desc.txt
+The edX platform offers several types of products. You create these products in
+E-Commerce web pages.
+
+* Course seats represent an enrollment track. Each course seat has an
+  associated set of attributes, such as price and certificate availability. The
+  edX code uses course seats to determine how a given enrollment should be
+  handled. For more information, see :ref:`Create Course Seats`.
+
+* Coupons allow users to offer learners a discount, either percentage or fixed
+  amount, off a course enrollment. For more information, see :ref:`Create and
+  Manage Coupons`.
+
+* Enrollment codes allow users to purchase bulk enrollments for a course.
 
 ******************************
 Prepare to Create a Product
