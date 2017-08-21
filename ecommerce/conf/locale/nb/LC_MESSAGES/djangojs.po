@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-07-18 11:14-0400\n"
-"PO-Revision-Date: 2017-07-17 23:00+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"PO-Revision-Date: 2017-08-18 07:20+0000\n"
+"Last-Translator: Frode Arntsen <frode.arntsen@bibsys.no>\n"
 "Language-Team: Norwegian Bokmål (http://www.transifex.com/open-edx/edx-platform/language/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,11 +33,11 @@ msgstr "Denne verdien må være en dato."
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "Det må velges minst en type kursdeltagelse"
 
 #: ecommerce/static/js/models/coupon_model.js:82
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
-msgstr ""
+msgstr "Dette feltet må være tomt eller inneholde 1-16 alfanumeriske tegn."
 
 #: ecommerce/static/js/models/coupon_model.js:86
 msgid "A valid course ID is required"
@@ -54,11 +54,11 @@ msgstr "Må skje etter startdato"
 
 #: ecommerce/static/js/models/coupon_model.js:154
 msgid "Max uses for multi-use coupons must be higher than 2."
-msgstr ""
+msgstr "Maksimum bruk av flerbrukskuponger må være høyere enn 2."
 
 #: ecommerce/static/js/models/coupon_model.js:166
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "En gyldig Program UUID er nødvendig."
 
 #: ecommerce/static/js/models/coupon_model.js:190
 msgid "Must occur before end date"
@@ -66,7 +66,7 @@ msgstr "Må skje før sluttdato"
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr ""
+msgstr "Du må velge en kurstype."
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
@@ -78,7 +78,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
-msgstr ""
+msgstr "Produktvalidering feilet."
 
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
@@ -150,7 +150,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "Ingen kursbevis"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
@@ -166,55 +166,55 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:29
 msgid "Problem occurred during checkout. Please contact support"
-msgstr ""
+msgstr "Det oppstod et problem ved utsjekk, vennligst kontakt brukerstøtte."
 
 #: ecommerce/static/js/pages/basket_page.js:96
 msgid "This field is required"
-msgstr ""
+msgstr "Dette feltet er nødvendig"
 
 #: ecommerce/static/js/pages/basket_page.js:131
 msgid "Invalid card number"
-msgstr ""
+msgstr "Ugyldig kortnummer"
 
 #: ecommerce/static/js/pages/basket_page.js:133
 msgid "Unsupported card type"
-msgstr ""
+msgstr "Korttypen støttes ikke"
 
 #: ecommerce/static/js/pages/basket_page.js:135
 msgid "Invalid security number"
-msgstr ""
+msgstr "Ugyldig security nummer"
 
 #: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid month"
-msgstr ""
+msgstr "Ugyldig måned"
 
 #: ecommerce/static/js/pages/basket_page.js:142
 msgid "Invalid year"
-msgstr ""
+msgstr "Ugyldig år"
 
 #: ecommerce/static/js/pages/basket_page.js:144
 msgid "Card expired"
-msgstr ""
+msgstr "Kort utløpt"
 
 #: ecommerce/static/js/pages/basket_page.js:363
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:364
 msgid "State/Province (required)"
-msgstr ""
+msgstr "Fylke/kommune (påkrevet)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 msgid "Create New Coupon"
-msgstr ""
+msgstr "Opprett ny kupong"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
 msgid "View Coupon"
-msgstr ""
+msgstr "Se kupong"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
 msgid "Edit Coupon"
-msgstr ""
+msgstr "Rediger kupong"
 
 #: ecommerce/static/js/pages/coupon_list_page.js:12
 msgid "Coupon Codes"
@@ -222,7 +222,7 @@ msgstr "Kupongkoder"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "Opprett nytt kurs"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
@@ -230,7 +230,7 @@ msgstr "Se kurset"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "Rediger kurs"
 
 #: ecommerce/static/js/pages/course_list_page.js:12
 msgid "Courses"
@@ -238,7 +238,7 @@ msgstr "Kurs"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
-msgstr ""
+msgstr "Løs inn"
 
 #: ecommerce/static/js/pages/receipt_page.js:25
 msgid ""
@@ -265,7 +265,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_detail_view.js:107
 #: ecommerce/static/js/views/coupon_form_view.js:60
 msgid "Can be used once by one customer"
-msgstr ""
+msgstr "Kan benyttes en gang av en kunde"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:109
 #: ecommerce/static/js/views/coupon_form_view.js:68
@@ -275,7 +275,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_detail_view.js:111
 #: ecommerce/static/js/views/coupon_form_view.js:64
 msgid "Can be used once by multiple customers"
-msgstr ""
+msgstr "Kan benyttes en gang av mange kunder"
 
 #: ecommerce/static/js/views/coupon_form_view.js:49
 msgid "Enrollment Code"
@@ -283,7 +283,7 @@ msgstr "Påmeldingskode"
 
 #: ecommerce/static/js/views/coupon_form_view.js:53
 msgid "Discount Code"
-msgstr ""
+msgstr "Rabattkode"
 
 #: ecommerce/static/js/views/coupon_form_view.js:768
 msgid "Save Changes"
@@ -291,12 +291,12 @@ msgstr "Lagre endringer"
 
 #: ecommerce/static/js/views/coupon_form_view.js:783
 msgid "Create Coupon"
-msgstr ""
+msgstr "Opprett kupong"
 
 #: ecommerce/static/js/views/coupon_list_view.js:47
 #: ecommerce/static/js/views/course_list_view.js:37
 msgid "Search..."
-msgstr ""
+msgstr "Søk..."
 
 #: ecommerce/static/js/views/coupon_list_view.js:57
 #: ecommerce/static/js/views/course_list_view.js:47
@@ -330,7 +330,7 @@ msgstr "Navn"
 
 #: ecommerce/static/js/views/coupon_list_view.js:81
 msgid "Created"
-msgstr ""
+msgstr "Opprettet"
 
 #: ecommerce/static/js/views/coupon_list_view.js:85
 msgid "Custom Code"
@@ -346,11 +346,11 @@ msgstr "Kategori"
 
 #: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Coupon Report"
-msgstr ""
+msgstr "Kupongrapport"
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
-msgstr ""
+msgstr "Gratis (Audit)"
 
 #: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
@@ -411,12 +411,12 @@ msgstr ""
 
 #: ecommerce/static/js/views/form_view.js:69
 msgid "A course with the specified ID already exists."
-msgstr ""
+msgstr "Et kurs med den spesifiserte IDen eksisterer allerede."
 
 #: ecommerce/static/js/views/form_view.js:79
 #: ecommerce/static/js/views/form_view.js:172
 msgid "Error!"
-msgstr ""
+msgstr "Feil!"
 
 #: ecommerce/static/js/views/form_view.js:125
 msgid "Saving..."
@@ -424,11 +424,11 @@ msgstr "Lagrer..."
 
 #: ecommerce/static/js/views/form_view.js:134
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "Vennligst fullfør alle påkrevde felter."
 
 #: ecommerce/static/js/views/form_view.js:159
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "En feil oppstod mens data ble lagret."
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
@@ -448,11 +448,11 @@ msgstr ""
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
-msgstr ""
+msgstr "Velg"
 
 #: ecommerce/static/js/views/provider_selection_view.js:34
 msgid "Selected"
-msgstr ""
+msgstr "Valgt"
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
 msgid "Order %(order_number)s has been fulfilled."
