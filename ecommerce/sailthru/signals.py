@@ -51,8 +51,12 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
     #  If multi product orders become common it may be worthwhile to pass an array of
     #  orders to the worker in one call to save overhead, however, that would be difficult
     #  because of the fact that there are different templates for free enroll versus paid enroll
-    for line in order.lines.all():
-
+    lines = order.lines.all()
+    # We are not sending multi product orders to sailthru for now, because
+    # the abandoned cart email does not yet support baskets with multiple products
+    if len(lines) > 1:
+        return
+    for line in lines:
         # get product
         product = line.product
         sku = line.partner_sku
@@ -72,7 +76,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
 
 @receiver(basket_addition)
 @silence_exceptions("Failed to call Sailthru upon basket addition.")
-def process_basket_addition(sender, product=None, user=None, request=None, basket=None,
+def process_basket_addition(sender, product=None, user=None, request=None, basket=None, is_multi_product_basket=None,
                             **kwargs):  # pylint: disable=unused-argument
     """Tell Sailthru when payment started.
 
@@ -108,7 +112,7 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
         # an item has been added to the shopping cart so that an abandoned cart message can be sent
         # later if the purchase is not completed.  Abandoned cart support is only for purchases, not
         # for free enrolls
-        if price:
+        if price and not is_multi_product_basket:
             update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_seat(product),
                                            unit_cost=price, course_id=course_id, currency=currency,
                                            site_code=site_configuration.partner.short_code, message_id=message_id)

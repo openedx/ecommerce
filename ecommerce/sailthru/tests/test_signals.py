@@ -82,6 +82,29 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
         self.assertFalse(mock_log_error.called)
 
     @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
+    @patch('ecommerce.sailthru.signals.logger.error')
+    def test_stop_sailthru_update_on_multi_product_baskets(self, mock_log_error, mock_update_course_enrollment):
+        """ Verify Sailthru is not contacted for multi-product baskets. """
+        # Create multi-product basket
+        seat = self.course.create_or_update_seat('verified', False, 100, self.partner, None)
+        other_course = CourseFactory(site=self.site)
+        other_seat = other_course.create_or_update_seat('verified', False, 100, self.partner, None)
+        basket = BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(seat)
+        basket.add_product(other_seat)
+        multi_product_order = create_order(number=2, basket=basket, user=self.user, site=self.site)
+
+        # This method takes an argument to determine whether that product is part of a multi-product basket
+        process_basket_addition(None, request=self.request, user=self.user, product=seat, is_multi_product_basket=True)
+        self.assertFalse(mock_update_course_enrollment.called)
+        self.assertFalse(mock_log_error.called)
+
+        # This method looks at the number of lines in the order to determine if the basket has multiple products
+        process_checkout_complete(None, order=multi_product_order, request=None)
+        self.assertFalse(mock_update_course_enrollment.called)
+        self.assertFalse(mock_log_error.called)
+
+    @patch('ecommerce_worker.sailthru.v1.tasks.update_course_enrollment.delay')
     def test_process_checkout_complete(self, mock_update_course_enrollment):
         """ Verify the post_checkout receiver is called, and contacts Sailthru. """
 

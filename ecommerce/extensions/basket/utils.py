@@ -85,13 +85,14 @@ def prepare_basket(request, products, voucher=None):
             )
             return basket
 
+    is_multi_product_basket = True if len(products) > 1 else False
     for product in products:
         if product.is_enrollment_code_product or \
                 not UserAlreadyPlacedOrder.user_already_placed_order(request.user, product):
             basket.add_product(product, 1)
             # Call signal handler to notify listeners that something has been added to the basket
             basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request,
-                                 basket=basket)
+                                 basket=basket, is_multi_product_basket=is_multi_product_basket)
         else:
             already_purchased_products.append(product)
             logger.warning(

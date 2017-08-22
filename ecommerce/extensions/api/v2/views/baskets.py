@@ -149,6 +149,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
             requested_products = request.data.get('products')
             if requested_products:
+                is_multi_product_basket = True if len(requested_products) > 1 else False
                 for requested_product in requested_products:
                     # Ensure the requested products exist
                     sku = requested_product.get('sku')
@@ -182,8 +183,8 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
                     # Call signal handler to notify listeners that something has been added to the basket
                     basket_addition = get_class('basket.signals', 'basket_addition')
-                    basket_addition.send(sender=basket_addition, product=product, user=request.user,
-                                         request=request, basket=basket)
+                    basket_addition.send(sender=basket_addition, product=product, user=request.user, request=request,
+                                         basket=basket, is_multi_product_basket=is_multi_product_basket)
             else:
                 # If no products were included in the request, we cannot checkout.
                 return self._report_bad_request(
