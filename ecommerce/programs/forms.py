@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django import forms
 from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
@@ -82,7 +83,7 @@ class ProgramOfferForm(forms.ModelForm):
 
         client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
         program = client.get_program(program_uuid)
-        offer_name = _('Discount for the {program_title} {program_type} Program'.format(
+        offer_name = _(u'Discount for the {program_title} {program_type} Program'.format(
             program_title=program['title'],
             program_type=program['type']
         ))

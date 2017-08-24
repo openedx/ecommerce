@@ -10,7 +10,7 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 
 
 class ProgramTestMixin(DiscoveryTestMixin):
-    def mock_program_detail_endpoint(self, program_uuid, discovery_api_url, empty=False):
+    def mock_program_detail_endpoint(self, program_uuid, discovery_api_url, empty=False, title='Test Program'):
         """ Mocks the program detail endpoint on the Catalog API.
         Args:
             program_uuid (uuid): UUID of the mocked program.
@@ -42,7 +42,7 @@ class ProgramTestMixin(DiscoveryTestMixin):
             program_uuid = str(program_uuid)
             data = {
                 'uuid': program_uuid,
-                'title': 'Test Program',
+                'title': title,
                 'type': 'MicroMockers',
                 'courses': courses,
                 'applicable_seat_types': [

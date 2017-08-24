@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import uuid
 
 import httpretty
@@ -24,9 +25,10 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         data.update(**kwargs)
         return data
 
-    def assert_program_offer_conditions(self, offer, program_uuid, expected_benefit_value, expected_benefit_type):
+    def assert_program_offer_conditions(self, offer, program_uuid, expected_benefit_value, expected_benefit_type,
+                                        expected_name):
         """ Assert the given offer's parameters match the expected values. """
-        self.assertEqual(str(offer.name), 'Discount for the Test Program MicroMockers Program')
+        self.assertEqual(str(offer.name), expected_name)
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
@@ -79,7 +81,21 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
-        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])
+        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
+                                             'Discount for the Test Program MicroMockers Program')
+
+    @httpretty.activate
+    def test_save_create_special_char_title(self):
+        """ When the title is international, A new ConditionalOffer, Benefit, and Condition should still be created."""
+        data = self.generate_data()
+        self.mock_program_detail_endpoint(data['program_uuid'],
+                                          self.site_configuration.discovery_api_url,
+                                          title=u'Sp\xe1nish Program')
+        form = ProgramOfferForm(request=self.request, data=data)
+        form.is_valid()
+        offer = form.save()
+        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
+                                             'Discount for the Spánish Program MicroMockers Program')
 
     @httpretty.activate
     def test_save_edit(self):
@@ -92,7 +108,8 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form.save()
 
         offer.refresh_from_db()
-        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])
+        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
+                                             'Discount for the Test Program MicroMockers Program')
 
     @httpretty.activate
     def test_save_without_commit(self):
@@ -114,7 +131,8 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         form = ProgramOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
-        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'])
+        self.assert_program_offer_conditions(offer, data['program_uuid'], data['benefit_value'], data['benefit_type'],
+                                             'Discount for the Test Program MicroMockers Program')
 
     def test_create_when_conditional_offer_with_uuid_exists(self):
         """
