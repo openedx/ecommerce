@@ -68,7 +68,7 @@ def prepare_basket(request, products, voucher=None):
         BasketAttribute.objects.update_or_create(
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            value_text=bundle
+            defaults={'value_text': bundle}
         )
 
     if request.site.siteconfiguration.enable_embargo_check:
