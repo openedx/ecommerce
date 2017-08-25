@@ -147,7 +147,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 pass
 
             if enterprise_customer_uuid is not None:
-                data['enterprise_course_consent'] = True
+                data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
                 break
 
         # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
