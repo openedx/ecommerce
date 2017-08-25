@@ -70,6 +70,8 @@ def prepare_basket(request, products, voucher=None):
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
             defaults={'value_text': bundle}
         )
+    else:
+        BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()
 
     if request.site.siteconfiguration.enable_embargo_check:
         if not embargo_check(request.user, request.site, products):

@@ -376,6 +376,28 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
         bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
         self.assertEqual(bundle_id, 'test_bundle')
 
+    def test_prepare_basket_attribute_delete(self):
+        """
+        Test prepare_basket removes the bundle attribute for a basket when a user is purchasing a single course
+        """
+        product = ProductFactory(categories=[], stockrecords__partner__short_code='second')
+        request = self.request
+        request.GET = {'bundle': 'test_bundle'}
+        basket = prepare_basket(request, [product])
+
+        # Verify that the bundle attribute exists for the basket when bundle is added to basket
+        bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
+        self.assertEqual(bundle_id, 'test_bundle')
+
+        # Verify that the attribute is deleted when a non-bundle product is added to the basket
+        request.GET = {}
+        prepare_basket(request, [product])
+        with self.assertRaises(BasketAttribute.DoesNotExist):
+            BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE)
+
+        # Verify that no exception is raised when no basket attribute exists fitting the delete statement parameters
+        prepare_basket(request, [product])
+
 
 class BasketUtilsTransactionTests(TransactionTestCase):
     def setUp(self):
@@ -383,6 +405,7 @@ class BasketUtilsTransactionTests(TransactionTestCase):
         self.request.user = self.create_user()
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
         toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
+        BasketAttributeType.objects.get_or_create(name=BUNDLE)
 
     def _setup_request_cookie(self):
         utm_campaign = 'test-campaign'
