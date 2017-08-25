@@ -409,6 +409,10 @@ class SiteConfiguration(models.Model):
         return EdxRestApiClient(self.enterprise_api_url, jwt=self.access_token)
 
     @cached_property
+    def consent_api_client(self):
+        return EdxRestApiClient(self.build_lms_url('/consent/api/v1/'), jwt=self.access_token, append_slash=False)
+
+    @cached_property
     def user_api_client(self):
         """
         Returns the API client to access the user API endpoint on LMS.
