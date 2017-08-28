@@ -413,7 +413,13 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
             if voucher.usage == Voucher.SINGLE_USE:
                 message = _("Coupon code '{code}' has already been redeemed.").format(code=code)
             messages.error(self.request, message)
+            return
 
+        # Do not allow single course run coupons used on bundles.
+        if self.request.basket.num_lines > 1 and not voucher.offers.first().condition.program_uuid:
+            messages.error(
+                self.request,
+                _("Coupon code '{code}' is not valid for this basket.").format(code=code))
             return
 
         # Reset any site offers that are applied so that only one offer is active.
