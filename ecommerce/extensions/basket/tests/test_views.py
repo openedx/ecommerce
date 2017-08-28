@@ -814,6 +814,16 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         self.assert_form_valid_message("Coupon code '{code}' has already been redeemed.".format(code=COUPON_CODE))
 
+    def test_voucher_not_valid_for_bundle(self):
+        """ Verify correct error message is returned when voucher is used against a bundle. """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
+        new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
+        self.basket.add_product(product)
+        self.basket.add_product(new_product)
+        self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
+
     def test_form_valid_without_basket_id(self):
         """ Verify the view redirects to the basket summary view if the basket has no ID.  """
         self.request.basket = Basket()
