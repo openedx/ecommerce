@@ -73,7 +73,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             'quantity': str(len(order.lines.all())),
             'category': 'bundle',
             'variant': variant,
-            'name': program.get('name')
+            'name': program.get('title')
         }
         properties['products'].append(bundle_product)
     except BasketAttribute.DoesNotExist:
