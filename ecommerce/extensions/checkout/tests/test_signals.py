@@ -58,7 +58,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         return order
 
     def mock_get_program_data(self, isFull):
-        data = {'name': 'test_program', 'courses': [{}]}
+        data = {'title': 'test_program', 'courses': [{}]}
         if isFull:
             data['courses'].append({})
         return data
@@ -162,7 +162,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 'quantity': str(len(order.lines.all())),
                 'category': 'bundle',
                 'variant': variant,
-                'name': program['name']
+                'name': program['title']
             }
             properties['products'].append(bundle_product)
 
