@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-07-18 11:14-0400\n"
-"PO-Revision-Date: 2017-08-25 16:43+0000\n"
+"PO-Revision-Date: 2017-09-02 13:51+0000\n"
 "Last-Translator: Kyoto University <edxkyotoux@gmail.com>\n"
 "Language-Team: Japanese (Japan) (http://www.transifex.com/open-edx/edx-platform/language/ja_JP/)\n"
 "MIME-Version: 1.0\n"
@@ -22,36 +22,36 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:33
 msgid "This field is required."
-msgstr ""
+msgstr "この欄は必須です。"
 
 #: ecommerce/static/js/models/coupon_model.js:34
 msgid "This value must be a number."
-msgstr ""
+msgstr "この欄は数字を入力してください。"
 
 #: ecommerce/static/js/models/coupon_model.js:35
 msgid "This value must be a date."
-msgstr ""
+msgstr "この欄は日付を入力してください。"
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "製品認証エラー。"
 
 #: ecommerce/static/js/models/coupon_model.js:82
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
-msgstr ""
+msgstr "この欄は空欄またはアルファベットと数字を組み合わせた1-16文字を入力してください。"
 
 #: ecommerce/static/js/models/coupon_model.js:86
 msgid "A valid course ID is required"
-msgstr ""
+msgstr "正しい講座IDが必要です"
 
 #: ecommerce/static/js/models/coupon_model.js:106
 #, javascript-format
 msgid "Email domain {%s} is invalid."
-msgstr ""
+msgstr "メールドメイン {%s} は無効です。"
 
 #: ecommerce/static/js/models/coupon_model.js:124
 msgid "Must occur after start date"
-msgstr ""
+msgstr "開始日以降でなければなりません"
 
 #: ecommerce/static/js/models/coupon_model.js:154
 msgid "Max uses for multi-use coupons must be higher than 2."
@@ -59,15 +59,15 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:166
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "正しいプログラムUIDが必要です。"
 
 #: ecommerce/static/js/models/coupon_model.js:190
 msgid "Must occur before end date"
-msgstr ""
+msgstr "終了日前でなければなりません"
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr ""
+msgstr "講座タイプを選択してください。"
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
@@ -75,29 +75,29 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "認証の締切日はアップグレードの締切日以降でなければなりません。"
 
 #: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
-msgstr ""
+msgstr "一度に１名のみお使い頂けます"
 
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "講座ID"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "講座名"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:72
 msgid "Course Type"
-msgstr ""
+msgstr "講座タイプ"
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "認証の締切"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -113,12 +113,12 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "アップグレードの締切日は認証の締切日前でなければなりません。"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified"
-msgstr ""
+msgstr "認証付き"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:71
@@ -135,15 +135,15 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "聴講"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "認証付き修了証"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Professional Certificate"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
@@ -151,7 +151,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "修了証なし"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
@@ -167,75 +167,75 @@ msgstr ""
 
 #: ecommerce/static/js/pages/basket_page.js:29
 msgid "Problem occurred during checkout. Please contact support"
-msgstr ""
+msgstr "チェックアウトの際に問題が発生しました。サポートにお問い合わせください"
 
 #: ecommerce/static/js/pages/basket_page.js:96
 msgid "This field is required"
-msgstr ""
+msgstr "この欄は必須です"
 
 #: ecommerce/static/js/pages/basket_page.js:131
 msgid "Invalid card number"
-msgstr ""
+msgstr "無効なカード番号"
 
 #: ecommerce/static/js/pages/basket_page.js:133
 msgid "Unsupported card type"
-msgstr ""
+msgstr "サポート対象外のカードタイプ"
 
 #: ecommerce/static/js/pages/basket_page.js:135
 msgid "Invalid security number"
-msgstr ""
+msgstr "無効なセキュリティ番号"
 
 #: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid month"
-msgstr ""
+msgstr "無効な月"
 
 #: ecommerce/static/js/pages/basket_page.js:142
 msgid "Invalid year"
-msgstr ""
+msgstr "無効な年"
 
 #: ecommerce/static/js/pages/basket_page.js:144
 msgid "Card expired"
-msgstr ""
+msgstr "期限切れのカード"
 
 #: ecommerce/static/js/pages/basket_page.js:363
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:364
 msgid "State/Province (required)"
-msgstr ""
+msgstr "州/県 (必須)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 msgid "Create New Coupon"
-msgstr ""
+msgstr "新しいクーポンを作成"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
 msgid "View Coupon"
-msgstr ""
+msgstr "クーポンを見る"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
 msgid "Edit Coupon"
-msgstr ""
+msgstr "クーポンを編集"
 
 #: ecommerce/static/js/pages/coupon_list_page.js:12
 msgid "Coupon Codes"
-msgstr ""
+msgstr "クーポンコード"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "新規講座を作成"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "講座画面へ"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "講座を編集"
 
 #: ecommerce/static/js/pages/course_list_page.js:12
 msgid "Courses"
-msgstr ""
+msgstr "講座"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
@@ -245,19 +245,19 @@ msgstr ""
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
-msgstr ""
+msgstr "注意！このページで戻るボタンを押すと再度課金されてしまうかもしれません。"
 
 #. Translators: Do not translate "Apple Pay".
 #: ecommerce/static/js/payment_processors/cybersource.js:211
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "このたびApple Payは利用できません。別の支払方法でお願いします。"
 
 #: ecommerce/static/js/payment_processors/cybersource.js:242
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "支払手続き中にエラーが発生しました。まだ課金はされていません。もう一度お試しいただくか、別の支払方法を選択してください。"
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
@@ -266,64 +266,64 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_detail_view.js:107
 #: ecommerce/static/js/views/coupon_form_view.js:60
 msgid "Can be used once by one customer"
-msgstr ""
+msgstr "一度に１名のみお使い頂けます"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:109
 #: ecommerce/static/js/views/coupon_form_view.js:68
 msgid "Can be used multiple times by multiple customers"
-msgstr ""
+msgstr "複数の人に複数回お使いいただけます"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:111
 #: ecommerce/static/js/views/coupon_form_view.js:64
 msgid "Can be used once by multiple customers"
-msgstr ""
+msgstr "複数の人に1回お使いいただけます"
 
 #: ecommerce/static/js/views/coupon_form_view.js:49
 msgid "Enrollment Code"
-msgstr ""
+msgstr "受講登録コード"
 
 #: ecommerce/static/js/views/coupon_form_view.js:53
 msgid "Discount Code"
-msgstr ""
+msgstr "割引コード"
 
 #: ecommerce/static/js/views/coupon_form_view.js:768
 msgid "Save Changes"
-msgstr ""
+msgstr "変更を保存"
 
 #: ecommerce/static/js/views/coupon_form_view.js:783
 msgid "Create Coupon"
-msgstr ""
+msgstr "クーポンを作成"
 
 #: ecommerce/static/js/views/coupon_list_view.js:47
 #: ecommerce/static/js/views/course_list_view.js:37
 msgid "Search..."
-msgstr ""
+msgstr "検索…"
 
 #: ecommerce/static/js/views/coupon_list_view.js:57
 #: ecommerce/static/js/views/course_list_view.js:47
 msgid "Next"
-msgstr ""
+msgstr "次へ"
 
 #: ecommerce/static/js/views/coupon_list_view.js:58
 #: ecommerce/static/js/views/course_list_view.js:48
 msgid "Previous"
-msgstr ""
+msgstr "前へ"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: ecommerce/static/js/views/coupon_list_view.js:62
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
-msgstr ""
+msgstr "_TOTAL_クーポンのうち_START_ ～ _END_のクーポンを表示中"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:65
 msgid "(filtered from _MAX_ total coupons)"
-msgstr ""
+msgstr "(全_MAX_枚のクーポンからフィルタリング)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:68
 msgid "Display _MENU_ coupons"
-msgstr ""
+msgstr "_MENU_クーポンを表示"
 
 #: ecommerce/static/js/views/coupon_list_view.js:74
 msgid "Name"
@@ -331,11 +331,11 @@ msgstr "名前"
 
 #: ecommerce/static/js/views/coupon_list_view.js:81
 msgid "Created"
-msgstr ""
+msgstr "作成済"
 
 #: ecommerce/static/js/views/coupon_list_view.js:85
 msgid "Custom Code"
-msgstr ""
+msgstr "カスタム・コード"
 
 #: ecommerce/static/js/views/coupon_list_view.js:89
 msgid "Client"
@@ -347,15 +347,15 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Coupon Report"
-msgstr ""
+msgstr "クーポン報告"
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
-msgstr ""
+msgstr "無料(聴講)"
 
 #: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
-msgstr ""
+msgstr "無料聴講。修了証なし。"
 
 #: ecommerce/static/js/views/course_form_view.js:61
 msgid ""
@@ -364,7 +364,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:65
 msgid "Professional Education"
-msgstr ""
+msgstr "専門家教育"
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid ""
@@ -382,25 +382,25 @@ msgstr ""
 #. them.
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "_TOTAL_講座のうち_START_ ～ _END_ の期間の講座を表示"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:55
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(全_MAX_講座からフィルタリング)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:58
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "_MENU_講座を表示"
 
 #: ecommerce/static/js/views/course_list_view.js:64
 msgid "Course"
-msgstr ""
+msgstr "講座"
 
 #: ecommerce/static/js/views/course_list_view.js:79
 msgid "Last Edited"
-msgstr ""
+msgstr "最終編集"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
@@ -412,48 +412,48 @@ msgstr ""
 
 #: ecommerce/static/js/views/form_view.js:69
 msgid "A course with the specified ID already exists."
-msgstr ""
+msgstr "ご指定のIDの講座は既にあります。"
 
 #: ecommerce/static/js/views/form_view.js:79
 #: ecommerce/static/js/views/form_view.js:172
 msgid "Error!"
-msgstr ""
+msgstr "エラー！"
 
 #: ecommerce/static/js/views/form_view.js:125
 msgid "Saving..."
-msgstr ""
+msgstr "保存中..."
 
 #: ecommerce/static/js/views/form_view.js:134
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "必須項目をすべて入力してください。"
 
 #: ecommerce/static/js/views/form_view.js:159
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "データ保存中にエラーが発生しました。"
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
-msgstr ""
+msgstr "省略"
 
 #: ecommerce/static/js/views/offer_view.js:205
 msgid "Load the records for page "
-msgstr ""
+msgstr "ページのレコードを読込"
 
 #: ecommerce/static/js/views/offer_view.js:212
 msgid "Load the records for the next page"
-msgstr ""
+msgstr "次のページのレコードを読込"
 
 #: ecommerce/static/js/views/offer_view.js:220
 msgid "Load the records for the previous page"
-msgstr ""
+msgstr "前のページのレコードを読込"
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
-msgstr ""
+msgstr "選択"
 
 #: ecommerce/static/js/views/provider_selection_view.js:34
 msgid "Selected"
-msgstr ""
+msgstr "選択済"
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
 msgid "Order %(order_number)s has been fulfilled."
@@ -465,7 +465,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:24
 msgid "Refund #%(refund_id)s has been processed."
-msgstr ""
+msgstr "#%(refund_id)s の返金は手続き中です。"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
@@ -475,4 +475,4 @@ msgstr "エラー"
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
-msgstr ""
+msgstr " #%(refund_id)sの返金手続失敗：エラー %(error)s。もう一度お試しいただくか、E-コマース開発チームにお問い合わせください。"
